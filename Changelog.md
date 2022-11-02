@@ -4,6 +4,7 @@
 **Credit:**
 All mods / mod ideas used linked below:
 - Interest group support changes: https://steamcommunity.com/workshop/filedetails/?id=2881590888
+- Korea population changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2879833819
 ---
 <br/>
 
@@ -14,6 +15,9 @@ All mods / mod ideas used linked below:
 <br/>
 
 ## Political
+#### Government Types
+- Republic is one government type
+- Government names similar to vic2
 #### Laws
 - Separated executive structure from governance principles
 - Professional army gives 10% attack and defence, and no ability to conscript
@@ -51,7 +55,8 @@ All mods / mod ideas used linked below:
 - Austria starts with serfdom
 #### Americas
 #### India
-#### China
+#### East Asia
+- Korea population increased to historical numbers
 #### West Africa
 #### East Africa
 
