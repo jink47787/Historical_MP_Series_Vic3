@@ -50,6 +50,7 @@ All mods / mod ideas used linked below:
 
 ## Military
 #### Battle Sizes
+- Predictable sizes (no RnG), scale lineraly with tech and consideration for outnumbering enemy
 
 ## Flava
 #### Europe
