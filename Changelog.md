@@ -3,7 +3,7 @@
 
 **Credit:**
 All mods / mod ideas used linked below:
-- x
+- Interest group support changes: https://steamcommunity.com/workshop/filedetails/?id=2881590888
 ---
 <br/>
 
@@ -17,8 +17,14 @@ All mods / mod ideas used linked below:
 #### Laws
 - Separated executive structure from governance principles
 - Professional army gives 10% attack and defence, and no ability to conscript
+- Limited conscription law added
+- Slavery increases landowner political power more
+#### Interest Groups
+- More dynamic attraction to various interest groups dependent on laws passed and places of employment, literacy etc.
+- Military leaders give less clout
 #### Ideologies
-- Cultural Chauvinism ideology created and applied to armed forces, rural folk, industrialists & 
+- Cultural Chauvinism ideology created and applied to armed forces, rural folk, industrialists & landowners
+- Liberal disapproves of professional and strongly diapproves of mass conscription
 #### Bureaucracy
 - No base bureaucracy generation
 - No base state taxation capacity
@@ -42,6 +48,7 @@ All mods / mod ideas used linked below:
 
 ## Flava
 #### Europe
+- Austria starts with serfdom
 #### Americas
 #### India
 #### China
