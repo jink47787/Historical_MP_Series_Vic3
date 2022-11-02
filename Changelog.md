@@ -4,11 +4,12 @@
 **Credit:**
 All mods / mod ideas used linked below:
 - Interest group support changes: https://steamcommunity.com/workshop/filedetails/?id=2881590888
+- Battle size adjustments: https://steamcommunity.com/sharedfiles/filedetails/?id=2880945323
 - Korea population changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2879833819
 ---
 <br/>
 
-**Any problems or changes to suggest can talk to lead dev: Townes**
+**Any problems or changes to suggest can talk to lead devs: Townes, Gracchus or Dr**
 
 <br/>
 ---
