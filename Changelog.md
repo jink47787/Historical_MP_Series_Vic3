@@ -7,6 +7,7 @@ All mods / mod ideas used linked below:
 - Battle size adjustments: https://steamcommunity.com/sharedfiles/filedetails/?id=2880945323
 - Korea population changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2879833819
 - Explosives Industry: https://steamcommunity.com/sharedfiles/filedetails/?id=2881606688
+- Console access: https://steamcommunity.com/sharedfiles/filedetails/?id=2879839709
 ---
 <br/>
 
