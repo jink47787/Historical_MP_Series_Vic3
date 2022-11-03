@@ -48,7 +48,9 @@ All mods / mod ideas used linked below:
 #### Industries
 - Improved economies of scale
 - Qualifications now matter and have significant game impact
--Separated out industries with multiple inputs
+- Separated out artilery from small arms and explosives from fertilizer
+- Increased scale of economies of scale
+- Generally made the game more difficult
 #### Infrastructure
 - No base state infrastructure
 
