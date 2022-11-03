@@ -29,6 +29,8 @@ All mods / mod ideas used linked below:
 - Limited conscription law added
 - Slavery increases landowner political power more
 - Command economy gives 75% bureaucrats contribution to the investment pool
+#### Institutions
+- Break even point for private schools and healthcare is now 30 wealth
 #### Interest Groups
 - More dynamic attraction to various interest groups dependent on laws passed and places of employment, literacy etc.
 - Military leaders give less clout
