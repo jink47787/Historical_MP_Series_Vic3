@@ -6,6 +6,7 @@ All mods / mod ideas used linked below:
 - Interest group support changes: https://steamcommunity.com/workshop/filedetails/?id=2881590888
 - Battle size adjustments: https://steamcommunity.com/sharedfiles/filedetails/?id=2880945323
 - Korea population changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2879833819
+- Explosives Industry: https://steamcommunity.com/sharedfiles/filedetails/?id=2881606688
 ---
 <br/>
 
@@ -45,6 +46,9 @@ All mods / mod ideas used linked below:
 
 ## Economic
 #### Industries
+- Improved economies of scale
+- Qualifications now matter and have significant game impact
+-Separated out industries with multiple inputs
 #### Infrastructure
 - No base state infrastructure
 
