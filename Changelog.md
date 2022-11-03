@@ -8,6 +8,8 @@ All mods / mod ideas used linked below:
 - Korea population changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2879833819
 - Explosives Industry: https://steamcommunity.com/sharedfiles/filedetails/?id=2881606688
 - Console access: https://steamcommunity.com/sharedfiles/filedetails/?id=2879839709
+- Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239, https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
+- Government run investment pools: https://steamcommunity.com/sharedfiles/filedetails/?id=2880313694
 ---
 <br/>
 
@@ -26,6 +28,7 @@ All mods / mod ideas used linked below:
 - Professional army gives 10% attack and defence, and no ability to conscript
 - Limited conscription law added
 - Slavery increases landowner political power more
+- Command economy gives 75% bureaucrats contribution to the investment pool
 #### Interest Groups
 - More dynamic attraction to various interest groups dependent on laws passed and places of employment, literacy etc.
 - Military leaders give less clout
@@ -73,7 +76,7 @@ All mods / mod ideas used linked below:
 #### Resources
 
 ## UI
-
+- NGF, SGF, GER, KUK country colours more like vic2
 
 ## AI
 
