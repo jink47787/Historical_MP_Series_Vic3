@@ -25,6 +25,8 @@ All mods / mod ideas used linked below:
 - Government names similar to vic2
 #### Laws
 - Separated executive structure from governance principles
+- New cameralism & voting system laws
+- New tax laws
 - Professional army gives 10% attack and defence, and no ability to conscript
 - Limited conscription law added
 - Slavery increases landowner political power more
@@ -38,17 +40,17 @@ All mods / mod ideas used linked below:
 - Cultural Chauvinism ideology created and applied to armed forces, rural folk, industrialists & landowners
 - Liberal disapproves of professional and strongly diapproves of mass conscription
 #### Bureaucracy
-- No base bureaucracy generation
-- No base state taxation capacity
+- Slightly reduced base state taxation capacity
 #### CBs
 
 ## Population
 #### Migration
 #### Assimilation
+- Minimum no. assimilating increased to 1000 to help performance late-game
 
 ## Tech
 #### Innovation
-- No base innovation generation or usage
+- Reduced base innovation generation or usage
 
 ## Economic
 #### Industries
@@ -58,7 +60,7 @@ All mods / mod ideas used linked below:
 - Increased scale of economies of scale
 - Generally made the game more difficult
 #### Infrastructure
-- No base state infrastructure
+- Halved base state infrastructure
 
 ## Military
 #### Battle Sizes
@@ -79,6 +81,7 @@ All mods / mod ideas used linked below:
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
+- No shortcut for space
 
 ## AI
 
