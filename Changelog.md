@@ -82,6 +82,7 @@ All mods / mod ideas used linked below:
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
 - No shortcut for space
+- More decimals shown
 
 ## AI
 
