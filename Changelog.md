@@ -10,6 +10,7 @@ All mods / mod ideas used linked below:
 - Console access: https://steamcommunity.com/sharedfiles/filedetails/?id=2879839709
 - Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239, https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
 - Government run investment pools: https://steamcommunity.com/sharedfiles/filedetails/?id=2880313694
+- Improved building GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2882526375
 ---
 <br/>
 
@@ -39,6 +40,8 @@ All mods / mod ideas used linked below:
 #### Ideologies
 - Cultural Chauvinism ideology created and applied to armed forces, rural folk, industrialists & landowners
 - Liberal disapproves of professional and strongly diapproves of mass conscription
+#### Traits
+- Halved the effects of all IG traits
 #### Bureaucracy
 - Slightly reduced base state taxation capacity
 #### CBs
