@@ -60,6 +60,8 @@ All mods / mod ideas used linked below:
 - Improved economies of scale
 - Qualifications now matter and have significant game impact
 - Separated out artilery from small arms and explosives from fertilizer
+- Laissez faire subsidizes cash crops
+- Agrarianism now has a small amount of capitalist contribution
 - Increased scale of economies of scale
 - Generally made the game more difficult
 #### Infrastructure
@@ -67,13 +69,15 @@ All mods / mod ideas used linked below:
 
 ## Military
 #### Battle Sizes
-- Predictable sizes (no RnG), scale lineraly with tech and consideration for outnumbering enemy
+- Predictable sizes (no RnG), scale linearly with tech and consideration for outnumbering enemy
 
 ## Flava
 #### Europe
 - Austria starts with serfdom
 #### Americas
 #### India
+- Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
+- Doctrine of Lapse can be used every 2 years instead of 5
 #### East Asia
 - Korea population increased to historical numbers
 #### West Africa
@@ -88,6 +92,12 @@ All mods / mod ideas used linked below:
 - More decimals shown
 
 ## AI
+- Built in support for Anbeeld's AI mod
+- AI will use new tax laws and buildings correctly
+
+## Stability/Bug Fixes
+- Fixed various base game errors
+- Removed a base game tooltip that caused a stack overflow
 
 ## MP Support
 #### Financial Grants
