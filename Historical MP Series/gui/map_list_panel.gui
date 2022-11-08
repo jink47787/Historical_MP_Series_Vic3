@@ -708,14 +708,6 @@ types map_list_panel_types {
 	type build_building_map_list_panel = map_list_panel {
 		name = "build_building_map_list_panel"
 
-		blockoverride "sidepanel_size_mod" {
-			using = sidepanel_construction_mod
-		}
-		
-		blockoverride "failed_options_size_mod" {
-			addcolumn = 650
-		}
-
 		blockoverride "headers" {
 			sort_button = {
 				align = center|nobaseline
@@ -755,21 +747,14 @@ types map_list_panel_types {
 				align = center|nobaseline
 				text = "BUILDING_MAP_LIST_PANEL_PEASANTS_HEADER"
 				tooltip = "BUILDING_MAP_LIST_PANEL_PEASANTS_HEADER_TOOLTIP"
-				size = { 85 20 }
+				size = { 80 20 }
 				onclick = "[MapListPanel.Sort('peasants')]"
 			}
 
 			sort_button = {
 				align = center|nobaseline
-				text = "BUILDING_MAP_LIST_PANEL_UNEMPLOYED_HEADER"
-				tooltip = "BUILDING_MAP_LIST_PANEL_UNEMPLOYED_HEADER_TOOLTIP"
-				size = { 85 20 }
-			}
-
-			sort_button = {
-				align = center|nobaseline
 				tooltip = "BUILDING_PROFITABILITY_HEADER_TOOLTIP"
-				size = { 90 20 }
+				size = { 75 20 }
 				onclick = "[MapListPanel.Sort('profitability')]"
 				button = {
 					texture = "gfx/interface/buttons/sort_button_icons/sort_icon_profitability.dds"
@@ -783,13 +768,25 @@ types map_list_panel_types {
 				align = center|nobaseline
 				text = "BUILDING_MAP_LIST_PANEL_PROFIT_IMPACT_HEADER"
 				tooltip = "BUILDING_MAP_LIST_PANEL_PROFIT_IMPACT_TOOLTIP"
-				size = { 100 20 }
+				size = { 80 20 }
 				onclick = "[MapListPanel.Sort('profit_impact')]"
 			}
+			
+			sort_button = {
+				align = center|nobaseline
+				#text = "Cur. Inf. Bl." # "BUILDING_MAP_LIST_PANEL_INFRASTRUCTURE_BALANCE_HEADER"
+				tooltip = "Current Infrastructure Balance" # "BUILDING_MAP_LIST_PANEL_INFRASTRUCTURE_BALANCE_TOOLTIP"
+				size = { 40 20 }
+				onclick = "[MapListPanel.Sort('state_infrastructure_balance')]" #not possible - 11/8/22
+				button = {
+					texture = "gfx/interface/buttons/sort_button_icons/infrastructure.dds"
+					size = { 25 25 }
+					parentanchor = center
+					alwaystransparent = yes
+				}
+			}
 		}
-		blockoverride "button_size_mod" {
-			size = { 650 40 }
-		}
+
 		blockoverride "values" {
 			textbox = {
 				margin = { 5 0 }
@@ -816,7 +813,7 @@ types map_list_panel_types {
 
 			textbox = {
 				margin = { 5 0 }
-				size = { 85 25 }
+				size = { 80 25 }
 				align = right|nobaseline
 				text = "[MapListOption.GetBuildingData.GetState.GetNumSubsistenceWorkingAdults|Dv]"
 				parentanchor = vcenter
@@ -825,53 +822,39 @@ types map_list_panel_types {
 
 			textbox = {
 				margin = { 5 0 }
-				size = { 85 25 }
+				margin_right = 10
+				size = { 75 25 }
 				align = right|nobaseline
-				text = "[MapListOption.GetBuildingData.GetState.GetNumUnemployedWorkingAdults|Dv]"
+				datacontext = "[MapListOption.GetBuildingData.GetBuilding]"
+				text = "#v @money![Building.GetBuildingType.GetExpansionProductivityImpact(Building.Self, Building.GetState)|+]#!"
+				tooltip = "[Building.GetBuildingType.GetExpansionProductivityImpactDesc(Building.Self, Building.GetState)]"
 				parentanchor = vcenter
 				elide = right
-			}
-
-			widget = {
-				size = { 90 25 }
-				parentanchor = vcenter
-				textbox = {
-					datacontext = "[MapListOption.GetBuildingData.GetBuilding]"
-					visible = "[And(GreaterThan_int32(Building.GetExpansionLevel,'(int32)0'), Not(MapListBuildingPanel.GetBuildingType.IsGovernmentFunded))]"
-					using = competitiveness_building_type_tooltip_with_graph
-					using = tooltip_above
-					margin = { 5 0 }
-					size = { 90 25 }
-					align = right|nobaseline
-					text = "[Building.GetProfitabilityInType] ([Building.GetProfitabilityCompareIconInType])"
-					parentanchor = vcenter
-					elide = right
-				}
-				textbox = {
-					datacontext = "[MapListOption.GetBuildingData.GetBuilding]"
-					visible = "[Not(And(GreaterThan_int32(Building.GetExpansionLevel,'(int32)0'), Not(MapListBuildingPanel.GetBuildingType.IsGovernmentFunded)))]"
-					margin = { 5 0 }
-					size = { 90 25 }
-					align = right|nobaseline
-					text = "NOT_AVAILABLE"
-					alpha = "[TransparentIfTrue(Not(And(GreaterThan_int32(Building.GetExpansionLevel,'(int32)0'), Not(MapListBuildingPanel.GetBuildingType.IsGovernmentFunded))))]"
-					parentanchor = vcenter
-					elide = right
-				}
 			}
 
 			textbox = {
 				margin = { 5 0 }
 				margin_right = 10
-				size = { 100 25 }
+				size = { 80 25 }
 				align = right|nobaseline
 				datacontext = "[MapListOption.GetBuildingData.GetBuilding]"
 				text = "#v [Building.GetBuildingType.GetExpansionRevenueImpact(Building.Self, Building.GetState)|K+=]#!"
 				tooltip = "[Building.GetBuildingType.GetExpansionRevenueImpactDesc(Building.Self, Building.GetState)]"
 				parentanchor = vcenter
-				elide = right
+				elide = left
 			}
-
+			
+			textbox = {
+				margin = { 5 0 }
+				size = { 40 25 }
+				align = right|nobaseline
+				datacontext = "[MapListOption.GetBuildingData.GetState]"
+				text = "[State.GetInfrastructureBalance|0+=]"
+				tooltip = "STATE_INFRASTRUCTURE_DESC"
+				parentanchor = vcenter
+				elide = left
+				fontsize_min = 12
+			}
 		}
 	}
 
