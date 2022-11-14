@@ -92,7 +92,6 @@ All mods / mod ideas used linked below:
 - More decimals shown
 
 ## AI
-- Built in support for Anbeeld's AI mod
 - AI will use new tax laws and buildings correctly
 
 ## Stability/Bug Fixes
