@@ -32,6 +32,7 @@ All mods / mod ideas used linked below:
 - Limited conscription law added
 - Slavery increases landowner political power more
 - Command economy gives 75% bureaucrats contribution to the investment pool
+- Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
 #### Institutions
 - Break even point for private schools and healthcare is now 30 wealth
 #### Interest Groups
@@ -85,6 +86,7 @@ All mods / mod ideas used linked below:
 
 ## Map
 #### Resources
+- More oil in various places
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
