@@ -11,6 +11,8 @@ All mods / mod ideas used linked below:
 - Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239, https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
 - Government run investment pools: https://steamcommunity.com/sharedfiles/filedetails/?id=2880313694
 - Improved building GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2882526375
+- Western Clothes adoption: https://steamcommunity.com/sharedfiles/filedetails/?id=2882557699
+- Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
 ---
 <br/>
 
