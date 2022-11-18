@@ -11,6 +11,8 @@ All mods / mod ideas used linked below:
 - Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239, https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
 - Government run investment pools: https://steamcommunity.com/sharedfiles/filedetails/?id=2880313694
 - Improved building GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2882526375
+- Western Clothes adoption: https://steamcommunity.com/sharedfiles/filedetails/?id=2882557699
+- Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
 ---
 <br/>
 
@@ -32,6 +34,7 @@ All mods / mod ideas used linked below:
 - Limited conscription law added
 - Slavery increases landowner political power more
 - Command economy gives 75% bureaucrats contribution to the investment pool
+- Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
 #### Institutions
 - Break even point for private schools and healthcare is now 30 wealth
 #### Interest Groups
@@ -85,6 +88,7 @@ All mods / mod ideas used linked below:
 
 ## Map
 #### Resources
+- More oil in various places
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
@@ -92,7 +96,6 @@ All mods / mod ideas used linked below:
 - More decimals shown
 
 ## AI
-- Built in support for Anbeeld's AI mod
 - AI will use new tax laws and buildings correctly
 
 ## Stability/Bug Fixes
