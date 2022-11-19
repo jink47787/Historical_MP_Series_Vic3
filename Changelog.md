@@ -13,6 +13,7 @@ All mods / mod ideas used linked below:
 - Improved building GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2882526375
 - Western Clothes adoption: https://steamcommunity.com/sharedfiles/filedetails/?id=2882557699
 - Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
+- Improved Battle UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2886497091
 ---
 <br/>
 
@@ -40,6 +41,7 @@ All mods / mod ideas used linked below:
 #### Interest Groups
 - More dynamic attraction to various interest groups dependent on laws passed and places of employment, literacy etc.
 - Military leaders give less clout
+- Penalty from IG losing a civil war doubled to 20 years
 #### Ideologies
 - Cultural Chauvinism ideology created and applied to armed forces, rural folk, industrialists & landowners
 - Liberal disapproves of professional and strongly diapproves of mass conscription
@@ -73,6 +75,8 @@ All mods / mod ideas used linked below:
 ## Military
 #### Battle Sizes
 - Predictable sizes (no RnG), scale linearly with tech and consideration for outnumbering enemy
+#### General Traits
+- Nerfed the larger offense & defence skill traits by around half
 
 ## Flava
 #### Europe
