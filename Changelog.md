@@ -14,6 +14,7 @@ All mods / mod ideas used linked below:
 - Western Clothes adoption: https://steamcommunity.com/sharedfiles/filedetails/?id=2882557699
 - Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
 - Improved Battle UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2886497091
+- Visual Methods UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2889290359
 ---
 <br/>
 
