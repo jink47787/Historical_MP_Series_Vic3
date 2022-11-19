@@ -13,6 +13,7 @@ All mods / mod ideas used linked below:
 - Improved building GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2882526375
 - Western Clothes adoption: https://steamcommunity.com/sharedfiles/filedetails/?id=2882557699
 - Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
+- Visual Methods UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2889290359&searchtext=visual+methods
 ---
 <br/>
 
