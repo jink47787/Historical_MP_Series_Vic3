@@ -16,6 +16,13 @@ All mods / mod ideas used linked below:
 - Improved Battle UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2886497091
 - Visual Methods UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2889290359
 - Cristo Shortcuts: https://steamcommunity.com/sharedfiles/filedetails/?id=2880952719
+- Ally recognition: https://steamcommunity.com/sharedfiles/filedetails/?id=2881810342&searchtext=recognition
+- Better State Outliner: https://steamcommunity.com/sharedfiles/filedetails/?id=2882193032 
+- Construction Queue with States: https://steamcommunity.com/sharedfiles/filedetails/?id=2881774859
+- Dense Market Details: https://steamcommunity.com/sharedfiles/filedetails/?id=2881762225
+- Dense Trade Routes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881996099
+- Complete Pop Lists: https://steamcommunity.com/sharedfiles/filedetails/?id=2880832253
+- Improved Building Grid: https://steamcommunity.com/sharedfiles/filedetails/?id=2883323135
 ---
 <br/>
 
@@ -40,7 +47,8 @@ All mods / mod ideas used linked below:
 - Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
 - Cannot reform while enacting laws (prevents exploit)
 #### Institutions
-- Break even point for private schools and healthcare is now 30 wealth
+- Break even point for healthcare is now 30 wealth
+- All education is dependent to varying degrees on SoL
 #### Interest Groups
 - More dynamic attraction to various interest groups dependent on laws passed and places of employment, literacy etc.
 - Military leaders give less clout
@@ -62,6 +70,8 @@ All mods / mod ideas used linked below:
 ## Tech
 #### Innovation
 - Reduced base innovation generation or usage
+- Reduced literacy from SoL
+- Universities gives less research, but now give Education Access
 
 ## Economic
 #### Industries
@@ -70,8 +80,11 @@ All mods / mod ideas used linked below:
 - Separated out artilery from small arms and explosives from fertilizer
 - Laissez faire subsidizes cash crops
 - Agrarianism now has a small amount of capitalist contribution
+- Interventionism and LF switched interest bonus
 - Increased scale of economies of scale
 - Generally made the game more difficult
+- Added oil and rebalanced some resources
+- Improved various oil PMs
 #### Infrastructure
 - Halved base state infrastructure
 
@@ -85,11 +98,15 @@ All mods / mod ideas used linked below:
 #### Europe
 - Austria starts with serfdom
 #### Americas
+- Expeditions now automatically succeed
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 - Doctrine of Lapse can be used every 2 years instead of 5
+#### West Asia
+- Tanzimat reforms rebalanced for higher difficulty
 #### East Asia
 - Korea population increased to historical numbers
+- Sumatra population increased by tenfold
 #### West Africa
 #### East Africa
 
