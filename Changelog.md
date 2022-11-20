@@ -38,6 +38,7 @@ All mods / mod ideas used linked below:
 - Slavery increases landowner political power more
 - Command economy gives 75% bureaucrats contribution to the investment pool
 - Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
+- Cannot reform while enacting laws (prevents exploit)
 #### Institutions
 - Break even point for private schools and healthcare is now 30 wealth
 #### Interest Groups
