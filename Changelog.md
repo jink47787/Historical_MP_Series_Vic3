@@ -15,6 +15,7 @@ All mods / mod ideas used linked below:
 - Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
 - Improved Battle UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2886497091
 - Visual Methods UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2889290359
+- Cristo Shortcuts: https://steamcommunity.com/sharedfiles/filedetails/?id=2880952719
 ---
 <br/>
 
