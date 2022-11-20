@@ -39,6 +39,7 @@ All mods / mod ideas used linked below:
 - Command economy gives 75% bureaucrats contribution to the investment pool
 - Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
 - Cannot reform while enacting laws (prevents exploit)
+- Cannot keep angry parties in power (prevents exploit)
 #### Institutions
 - Break even point for private schools and healthcare is now 30 wealth
 #### Interest Groups
