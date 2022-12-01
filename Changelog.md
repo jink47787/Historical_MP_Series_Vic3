@@ -65,6 +65,8 @@ All mods / mod ideas used linked below:
 
 ## Population
 #### Migration
+- Greatly nerfed almost all effects for migration multipliers
+- Trade centre and market capital modifiers removed completely
 #### Assimilation
 - Minimum no. assimilating increased to 1000 to help performance late-game
 
