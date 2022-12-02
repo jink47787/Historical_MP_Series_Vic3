@@ -47,6 +47,7 @@ All mods / mod ideas used linked below:
 - Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
 - Cannot reform while enacting laws (prevents exploit)
 - Cannot keep angry parties in power (prevents exploit)
+- Private & Public schools now allowed on any religion law
 #### Institutions
 - Break even point for healthcare is now 30 wealth
 - All education is dependent to varying degrees on SoL
@@ -65,6 +66,8 @@ All mods / mod ideas used linked below:
 
 ## Population
 #### Migration
+- Greatly nerfed almost all effects for migration multipliers
+- Trade centre and market capital modifiers removed completely
 #### Assimilation
 - Minimum no. assimilating increased to 1000 to help performance late-game
 
@@ -90,6 +93,8 @@ All mods / mod ideas used linked below:
 - Halved base state infrastructure
 
 ## Military
+#### PMs
+- Mass mob does not limit the available PMs
 #### Battle Sizes
 - Predictable sizes (no RnG), scale linearly with tech and consideration for outnumbering enemy
 #### General Traits
