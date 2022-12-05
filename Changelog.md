@@ -3,12 +3,10 @@
 
 **Credit:**
 All mods / mod ideas used linked below:
-- Interest group support changes: https://steamcommunity.com/workshop/filedetails/?id=2881590888
 - Battle size adjustments: https://steamcommunity.com/sharedfiles/filedetails/?id=2880945323
-- Korea population changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2879833819
 - Explosives Industry: https://steamcommunity.com/sharedfiles/filedetails/?id=2881606688
 - Console access: https://steamcommunity.com/sharedfiles/filedetails/?id=2879839709
-- Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239, https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
+- Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
 - Government run investment pools: https://steamcommunity.com/sharedfiles/filedetails/?id=2880313694
 - Improved building GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2882526375
 - Western Clothes adoption: https://steamcommunity.com/sharedfiles/filedetails/?id=2882557699
@@ -103,15 +101,11 @@ All mods / mod ideas used linked below:
 ## Flava
 #### Europe
 - Austria starts with serfdom
-#### Americas
-- Expeditions now automatically succeed
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
-- Doctrine of Lapse can be used every 2 years instead of 5
 #### West Asia
 - Tanzimat reforms rebalanced for higher difficulty
 #### East Asia
-- Korea population increased to historical numbers
 - Sumatra population increased by tenfold
 #### West Africa
 #### East Africa
