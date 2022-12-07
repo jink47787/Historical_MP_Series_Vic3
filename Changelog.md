@@ -21,6 +21,8 @@ All mods / mod ideas used linked below:
 - Dense Trade Routes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881996099
 - Complete Pop Lists: https://steamcommunity.com/sharedfiles/filedetails/?id=2880832253
 - Improved Building Grid: https://steamcommunity.com/sharedfiles/filedetails/?id=2883323135
+- Extra Topbar GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2888391145
+- Guaranteed Independence: https://steamcommunity.com/sharedfiles/filedetails/?id=2895380761
 ---
 <br/>
 
@@ -74,6 +76,8 @@ All mods / mod ideas used linked below:
 - Reduced base innovation generation or usage
 - Reduced literacy from SoL
 - Universities gives less research, but now give Education Access
+#### Production
+- Percentage multiplier on tax capacity for bureau PM techs
 
 ## Economic
 #### Industries
@@ -89,6 +93,9 @@ All mods / mod ideas used linked below:
 - Improved various oil PMs
 #### Infrastructure
 - Halved base state infrastructure
+
+## Diplomacy
+- Guarantee independence diplomatic pact added
 
 ## Military
 #### PMs
