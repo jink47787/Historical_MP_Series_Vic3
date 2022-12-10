@@ -100,6 +100,7 @@ All mods / mod ideas used linked below:
 ## Military
 #### PMs
 - Mass mob does not limit the available PMs
+- Siege artillery has the same kill rate as shrapnel
 #### Battle Sizes
 - Predictable sizes (no RnG), scale linearly with tech and consideration for outnumbering enemy
 #### General Traits
