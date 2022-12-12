@@ -39,7 +39,7 @@ All mods / mod ideas used linked below:
 #### Laws
 - Separated executive structure from governance principles
 - New cameralism & voting system laws
-- New tax laws
+- New tax laws that effect the scaling power of tax buttons
 - Professional army gives 10% attack and defence, and no ability to conscript
 - Limited conscription law added
 - Slavery increases landowner political power more
