@@ -39,14 +39,12 @@ All mods / mod ideas used linked below:
 #### Laws
 - Separated executive structure from governance principles
 - New cameralism & voting system laws
-- New tax laws that effect the scaling power of tax buttons
+- New tax laws that affect the scaling power of tax buttons
 - Professional army gives 10% attack and defence, and no ability to conscript
 - Limited conscription law added
 - Slavery increases landowner political power more
 - Command economy gives 75% bureaucrats contribution to the investment pool
 - Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
-- Cannot reform while enacting laws (prevents exploit)
-- Cannot keep angry parties in power (prevents exploit)
 - Private & Public schools now allowed on any religion law
 - Corporation taxes penalize construction efficiency
 
@@ -76,9 +74,9 @@ All mods / mod ideas used linked below:
 ## Tech
 #### Innovation
 - Reduced base innovation generation or usage
-- Reduced literacy from SoL
+- Reduced education from SoL
 - Universities gives less research, but now give Education Access
-- Literacy renamed to Education Level to be more realistic
+- Renamed literacy to Education Level to more accurately reflect what it is
 #### Production
 - Percentage multiplier on tax capacity for bureau PM techs
 ## Economic
@@ -133,18 +131,9 @@ All mods / mod ideas used linked below:
 - More oil in various places
 
 ## UI
-- NGF, SGF, GER, KUK country colours more like Vic2
-- No shortcut for space
+- NGF, SGF, GER, KUK country colours more like vic2
 - More decimals shown
-
-## AI
-- AI will use new tax laws and buildings correctly
 
 ## Stability/Bug Fixes
 - Fixed various base game errors
 - Removed a base game tooltip that caused a stack overflow
-
-## MP Support
-#### Financial Grants
-#### Infamy Transfers
-#### State Transfer
