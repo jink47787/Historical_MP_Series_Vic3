@@ -48,6 +48,8 @@ All mods / mod ideas used linked below:
 - Cannot reform while enacting laws (prevents exploit)
 - Cannot keep angry parties in power (prevents exploit)
 - Private & Public schools now allowed on any religion law
+- Corporation taxes penalize construction efficiency
+
 #### Institutions
 - Break even point for healthcare is now 30 wealth
 - All education is dependent to varying degrees on SoL
@@ -76,21 +78,25 @@ All mods / mod ideas used linked below:
 - Reduced base innovation generation or usage
 - Reduced literacy from SoL
 - Universities gives less research, but now give Education Access
+- Literacy renamed to Education Level to be more realistic
 #### Production
 - Percentage multiplier on tax capacity for bureau PM techs
-
 ## Economic
 #### Industries
 - Improved economies of scale
-- Qualifications now matter and have significant game impact
+- Qualifications now matter!
+	- Machinists start at 30%
+	- Engineers start at 60%
+	- Discriminated cultures have a far harder time becoming qualified
 - Separated out artilery from small arms and explosives from fertilizer
 - Laissez faire subsidizes cash crops
 - Agrarianism now has a small amount of capitalist contribution
 - Interventionism and LF switched interest bonus
 - Increased scale of economies of scale
-- Generally made the game more difficult
 - Added oil and rebalanced some resources
 - Improved various oil PMs
+- Changed machinist and engineer requirement for urban PMs
+
 #### Infrastructure
 - Halved base state infrastructure
 
@@ -109,6 +115,7 @@ All mods / mod ideas used linked below:
 ## Flava
 #### Europe
 - Austria starts with serfdom
+- French historical pop nerf
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 #### West Asia
@@ -117,13 +124,16 @@ All mods / mod ideas used linked below:
 - Sumatra population increased by tenfold
 #### West Africa
 #### East Africa
+#### The Americas
+- Added Black Belt to represent Cretaceous soil
+- Argentina, Chile, and Paraguay get intial boost to colonization so they can take southern cone 
 
 ## Map
 #### Resources
 - More oil in various places
 
 ## UI
-- NGF, SGF, GER, KUK country colours more like vic2
+- NGF, SGF, GER, KUK country colours more like Vic2
 - No shortcut for space
 - More decimals shown
 
