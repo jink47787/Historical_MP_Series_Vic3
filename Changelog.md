@@ -59,6 +59,7 @@ All mods / mod ideas used linked below:
 #### Ideologies
 - Cultural Chauvinism ideology created and applied to armed forces, rural folk, industrialists & landowners
 - Liberal disapproves of professional and strongly diapproves of mass conscription
+- added unique ideologies to the US
 #### Traits
 - Halved the effects of all IG traits
 #### Bureaucracy
