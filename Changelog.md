@@ -23,6 +23,7 @@ All mods / mod ideas used linked below:
 - Improved Building Grid: https://steamcommunity.com/sharedfiles/filedetails/?id=2883323135
 - Extra Topbar GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2888391145
 - Guaranteed Independence: https://steamcommunity.com/sharedfiles/filedetails/?id=2895380761
+- Confirm Shortcut: https://steamcommunity.com/sharedfiles/filedetails/?id=2900498971
 ---
 <br/>
 
