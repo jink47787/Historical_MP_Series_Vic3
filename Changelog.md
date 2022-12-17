@@ -23,6 +23,8 @@ All mods / mod ideas used linked below:
 - Improved Building Grid: https://steamcommunity.com/sharedfiles/filedetails/?id=2883323135
 - Extra Topbar GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2888391145
 - Guaranteed Independence: https://steamcommunity.com/sharedfiles/filedetails/?id=2895380761
+- Confirm Shortcut: https://steamcommunity.com/sharedfiles/filedetails/?id=2900498971
+- Better Interest Group Attraction: https://steamcommunity.com/sharedfiles/filedetails/?id=2881590888
 ---
 <br/>
 
@@ -39,15 +41,15 @@ All mods / mod ideas used linked below:
 #### Laws
 - Separated executive structure from governance principles
 - New cameralism & voting system laws
-- New tax laws
+- New tax laws that affect the scaling power of tax buttons
 - Professional army gives 10% attack and defence, and no ability to conscript
 - Limited conscription law added
 - Slavery increases landowner political power more
 - Command economy gives 75% bureaucrats contribution to the investment pool
 - Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
-- Cannot reform while enacting laws (prevents exploit)
-- Cannot keep angry parties in power (prevents exploit)
 - Private & Public schools now allowed on any religion law
+- Corporation taxes penalize construction efficiency
+
 #### Institutions
 - Break even point for healthcare is now 30 wealth
 - All education is dependent to varying degrees on SoL
@@ -58,6 +60,7 @@ All mods / mod ideas used linked below:
 #### Ideologies
 - Cultural Chauvinism ideology created and applied to armed forces, rural folk, industrialists & landowners
 - Liberal disapproves of professional and strongly diapproves of mass conscription
+- added unique ideologies to the US
 #### Traits
 - Halved the effects of all IG traits
 #### Bureaucracy
@@ -74,23 +77,28 @@ All mods / mod ideas used linked below:
 ## Tech
 #### Innovation
 - Reduced base innovation generation or usage
-- Reduced literacy from SoL
+- Reduced education from SoL
 - Universities gives less research, but now give Education Access
+- Renamed literacy to Education Level to more accurately reflect what it is
 #### Production
 - Percentage multiplier on tax capacity for bureau PM techs
-
 ## Economic
+- Pops are more likely to consume oil and cars when they are widely available
 #### Industries
 - Improved economies of scale
-- Qualifications now matter and have significant game impact
+- Qualifications now matter!
+	- Machinists start at 30%
+	- Engineers start at 60%
+	- Discriminated cultures have a far harder time becoming qualified
 - Separated out artilery from small arms and explosives from fertilizer
 - Laissez faire subsidizes cash crops
 - Agrarianism now has a small amount of capitalist contribution
 - Interventionism and LF switched interest bonus
 - Increased scale of economies of scale
-- Generally made the game more difficult
 - Added oil and rebalanced some resources
 - Improved various oil PMs
+- Changed machinist and engineer requirement for urban PMs
+
 #### Infrastructure
 - Halved base state infrastructure
 
@@ -100,6 +108,7 @@ All mods / mod ideas used linked below:
 ## Military
 #### PMs
 - Mass mob does not limit the available PMs
+- Siege artillery has the same kill rate as shrapnel
 #### Battle Sizes
 - Predictable sizes (no RnG), scale linearly with tech and consideration for outnumbering enemy
 #### General Traits
@@ -108,6 +117,7 @@ All mods / mod ideas used linked below:
 ## Flava
 #### Europe
 - Austria starts with serfdom
+- French historical pop nerf
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 #### West Asia
@@ -116,6 +126,9 @@ All mods / mod ideas used linked below:
 - Sumatra population increased by tenfold
 #### West Africa
 #### East Africa
+#### The Americas
+- Added Black Belt to represent Cretaceous soil
+- Argentina, Chile, and Paraguay get intial boost to colonization so they can take southern cone 
 
 ## Map
 #### Resources
@@ -123,17 +136,8 @@ All mods / mod ideas used linked below:
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
-- No shortcut for space
 - More decimals shown
-
-## AI
-- AI will use new tax laws and buildings correctly
 
 ## Stability/Bug Fixes
 - Fixed various base game errors
 - Removed a base game tooltip that caused a stack overflow
-
-## MP Support
-#### Financial Grants
-#### Infamy Transfers
-#### State Transfer
