@@ -90,6 +90,7 @@ All mods / mod ideas used linked below:
 	- Machinists start at 30%
 	- Engineers start at 60%
 	- Discriminated cultures have a far harder time becoming qualified
+- Added Vineyards
 - Separated out artilery from small arms and explosives from fertilizer
 - Laissez faire subsidizes cash crops
 - Agrarianism now has a small amount of capitalist contribution
@@ -117,7 +118,7 @@ All mods / mod ideas used linked below:
 ## Flava
 #### Europe
 - Austria starts with serfdom
-- French historical pop nerf
+- French historical pop nerf (there is no mortality multiplier, that is why there are two birth rate modifiers)
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 #### West Asia
