@@ -127,6 +127,7 @@ All mods / mod ideas used linked below:
 - Tanzimat reforms rebalanced for higher difficulty
 #### East Asia
 - Sumatra population increased by tenfold
+- Unify China CB has max infamy decay (prevents using other infamy CBs whilst active)
 #### West Africa
 #### East Africa
 #### The Americas
