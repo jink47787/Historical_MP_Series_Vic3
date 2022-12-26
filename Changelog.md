@@ -25,6 +25,7 @@ All mods / mod ideas used linked below:
 - Guaranteed Independence: https://steamcommunity.com/sharedfiles/filedetails/?id=2895380761
 - Confirm Shortcut: https://steamcommunity.com/sharedfiles/filedetails/?id=2900498971
 - Better Interest Group Attraction: https://steamcommunity.com/sharedfiles/filedetails/?id=2881590888
+- Hydropower Plants: https://steamcommunity.com/sharedfiles/filedetails/?id=2893414529
 ---
 <br/>
 
@@ -99,6 +100,7 @@ All mods / mod ideas used linked below:
 - Added oil and rebalanced some resources
 - Improved various oil PMs
 - Changed machinist and engineer requirement for urban PMs
+- Thermal and Hydro Power Plants split
 
 #### Infrastructure
 - Halved base state infrastructure
@@ -134,6 +136,8 @@ All mods / mod ideas used linked below:
 ## Map
 #### Resources
 - More oil in various places
+#### State Modifiers
+- Added areas that can easily do hydro power
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
