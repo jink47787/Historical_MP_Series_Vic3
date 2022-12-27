@@ -12,7 +12,6 @@ All mods / mod ideas used linked below:
 - Western Clothes adoption: https://steamcommunity.com/sharedfiles/filedetails/?id=2882557699
 - Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
 - Improved Battle UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2886497091
-- Visual Methods UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2889290359
 - Cristo Shortcuts: https://steamcommunity.com/sharedfiles/filedetails/?id=2880952719
 - Ally recognition: https://steamcommunity.com/sharedfiles/filedetails/?id=2881810342&searchtext=recognition
 - Better State Outliner: https://steamcommunity.com/sharedfiles/filedetails/?id=2882193032 
