@@ -108,6 +108,7 @@ All mods / mod ideas used linked below:
 
 ## Diplomacy
 - Guarantee independence diplomatic pact added
+- North America Strategic Region Rework
 
 ## Military
 #### PMs
