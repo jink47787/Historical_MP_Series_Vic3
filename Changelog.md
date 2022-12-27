@@ -26,6 +26,7 @@ All mods / mod ideas used linked below:
 - Confirm Shortcut: https://steamcommunity.com/sharedfiles/filedetails/?id=2900498971
 - Better Interest Group Attraction: https://steamcommunity.com/sharedfiles/filedetails/?id=2881590888
 - Hydropower Plants: https://steamcommunity.com/sharedfiles/filedetails/?id=2893414529
+- Diplo Acceptance Shown: https://steamcommunity.com/sharedfiles/filedetails/?id=2886453657
 ---
 <br/>
 
