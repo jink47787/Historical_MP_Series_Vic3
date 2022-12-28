@@ -121,6 +121,7 @@ All mods / mod ideas used linked below:
 #### Europe
 - Austria starts with serfdom
 - French historical pop nerf (there is no mortality multiplier, that is why there are two birth rate modifiers)
+- French Language School added
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 #### West Asia
