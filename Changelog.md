@@ -6,7 +6,7 @@ All mods / mod ideas used linked below:
 - Battle size adjustments: https://steamcommunity.com/sharedfiles/filedetails/?id=2880945323
 - Explosives Industry: https://steamcommunity.com/sharedfiles/filedetails/?id=2881606688
 - Console access: https://steamcommunity.com/sharedfiles/filedetails/?id=2879839709
-- Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
+- Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239, https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
 - Government run investment pools: https://steamcommunity.com/sharedfiles/filedetails/?id=2880313694
 - Improved building GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2882526375
 - Western Clothes adoption: https://steamcommunity.com/sharedfiles/filedetails/?id=2882557699
