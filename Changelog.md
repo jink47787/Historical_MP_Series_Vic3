@@ -84,6 +84,8 @@ All mods / mod ideas used linked below:
 - Percentage multiplier on tax capacity for bureau PM techs
 ## Economic
 - Pops are more likely to consume oil and cars when they are widely available
+#### Society
+- Quinine shifted to era 4, malaria prevention to era 5
 #### Industries
 - Improved economies of scale
 - Qualifications now matter!
