@@ -1,0 +1,138 @@
+namespace = wine_blight_evt
+
+#Event for succeeding countries
+
+wine_blight_evt.1 = {
+	type = country_event
+
+	title = wine_blight_evt.1.t
+	desc = wine_blight_evt.1.d
+	flavor = wine_blight_evt.1.f
+	
+	event_image = {
+		video = gfx/event_pictures/southamerica_aristocrats.bk2
+	}
+	
+	trigger = {
+		AND = {
+			game_date > 1855.1.1
+			game_date < 1865.1.1
+		}
+		NOT = { has_global_variable = wine_blight_happened }
+		any_scope_state = {
+			OR  = {
+				region = sr:region_iberia
+				region = sr:region_france
+				region = sr:region_occitania
+				region = sr:region_italy
+				region = sr:region_rhine
+				region = sr:region_south_germany
+			}
+		}
+		#or = {
+		#	has_active_production_method = default_building_wine_plantation
+		#}
+	}
+	
+	#Affect the initial nation
+	
+	immediate = {
+		set_global_variable = wine_blight_happened
+		every_country = {
+			limit = {
+				is_country_alive = yes
+				any_scope_state = {
+					region = {
+						OR = {
+							region = sr:region_iberia
+							region = sr:region_france
+							region = sr:region_occitania
+							region = sr:region_italy
+							region = sr:region_rhine
+							region = sr:region_south_germany
+						}
+					}
+				}
+				any_neighboring_state = {
+					owner = ROOT
+				}
+			}
+			set_variable = potential_wine_blight
+		}
+		set_variable = wine_blight
+	}
+	
+	
+	#Idea - Ways to effect blight?
+	option = {
+		name = wine_blight_evt.1.a
+		any_scope_state = {
+			limit = {
+				or = {
+					has_active_building = building_wine_plantation
+					any_scope_building = {
+						or = {
+							has_active_production_method = pm_vineyards
+						}
+					}
+				}
+			}
+		}
+		add_modifier = {
+			name = wine_blight
+		}
+		add_journal_entry = {
+			type = je_wine_blight
+		}
+	}
+}
+
+
+#Event for following countries
+
+wine_blight_evt.2 = {
+	type = country_event
+	
+	Title = wine_blight_evt.2.t
+	desc = wine_blight_evt.2.d
+	flavor = wine_blight_evt.2.f
+	
+	event_image = {
+		video = gfx/event_pictures/southamerica_aristocrats.bk2
+	}
+	
+	#Random chance of spreading each month
+	trigger = {
+		AND = {
+			game_date > 1855.1.1
+			game_date < 1870.1.1
+		}
+		has_variable = potential_wine_blight
+		#has_active_building = building_wine_plantation
+	}
+	
+	immediate = {
+		set_variable = wine_blight
+	}
+	
+	option = {
+		name = wine_blight_evt.2.a
+		any_scope_state = {
+			limit = {
+				or = {
+					has_active_building = building_wine_plantation
+					any_scope_building = {
+						has_active_production_method = pm_vineyards
+					}
+				}
+			}
+		}
+		add_modifier = {
+			name = wine_blight
+		}
+		
+		add_journal_entry = {
+			type = je_wine_blight
+		}
+	}	
+}
