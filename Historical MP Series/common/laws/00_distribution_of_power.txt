@@ -138,6 +138,88 @@ law_elder_council = {
 	}
 }
 
+law_clerical_voting = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/clerical_voting.dds"
+	
+	progressiveness = -25
+
+	unlocking_technologies = {
+		democracy
+	}
+
+	is_visible = {
+		has_law = law_type:law_theocracy
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				has_law = law_type:law_no_legislature
+			}
+			activate_law = law_type:law_unicameralism
+		}
+		if = {
+			limit = {
+				has_law = law_type:law_no_voting
+			}
+			activate_law = law_type:law_plurality
+		}
+		scripted_effect_parties_emergence = yes
+	}
+
+	disallowing_laws = {
+		law_chiefdom
+		law_monarchy
+		law_republic
+	}
+
+	modifier = {
+		country_legitimacy_govt_total_votes_add = 40
+		country_legitimacy_govt_total_clout_add = 100
+		country_legitimacy_govt_size_add = 1
+		country_legitimacy_ideological_incoherence_mult = -0.1
+		country_aristocrats_voting_power_add = 25
+		country_clergymen_voting_power_add = 50
+		country_authority_add = 100
+	}
+	
+	possible_political_movements = {
+		law_oligarchy
+		law_autocracy 
+	}
+	
+	pop_support = {
+		value = 0
+
+		add = {
+			desc = "POP_LITERACY" 
+			
+			if = {
+				limit = { 
+					OR = {
+						NOT = { strata = rich }
+						wealth < 30
+					}					
+					owner = { 
+						NOR = {
+							has_law = law_type:law_wealth_voting
+							has_law = law_type:law_census_voting
+							has_law = law_type:law_universal_suffrage
+							has_law = law_type:law_anarchy
+						}	
+					}
+				}
+				add = {
+					value = literacy_rate
+					divide = 4
+				}
+			}
+		}			
+	}
+}
+
 law_landed_voting = {
 	group = lawgroup_distribution_of_power
 	
@@ -147,6 +229,10 @@ law_landed_voting = {
 
 	unlocking_technologies = {
 		democracy
+	}
+
+	is_visible = {
+		NOT = { has_law = law_type:law_theocracy }
 	}
 	
 	on_activate = {

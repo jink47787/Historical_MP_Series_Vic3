@@ -49,7 +49,7 @@ All mods / mod ideas used linked below:
 - Multiculturalism similar to Cultural Exclusion + double the pool of qualifications
 - Private & Public schools now allowed on any religion law
 - Corporation taxes penalize construction efficiency
-
+- Clerical Voting replaces Landed Voting for theocracies
 #### Institutions
 - Break even point for healthcare is now 30 wealth
 - All education is dependent to varying degrees on SoL
