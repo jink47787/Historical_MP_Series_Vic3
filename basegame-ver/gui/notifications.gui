@@ -69,7 +69,7 @@ types notifications {
 					item = {
 						widget = {
 							flowcontainer = {
-								datacontext = "[FeedMessageItem.GetNotification]"
+								datacontext = "[FeedMessageItem.GetPlayerMessageItem]"
 								alwaystransparent = no
 								resizeparent = yes
 								direction = vertical
@@ -136,12 +136,14 @@ types notifications {
 									state = {
 										name = _mouse_hierarchy_enter
 										on_start = "[PdxGuiWidget.FindChild('button_dismiss_all').TriggerAnimation('hover_enter')]"
+										on_start = "[PdxGuiWidget.FindChild('button_message_settings').TriggerAnimation('hover_enter')]"
 										on_start = "[SetCanOpenRightClickContextMenu( '(bool)no' )]"
 									}
 
 									state = {
 										name = _mouse_hierarchy_leave
 										on_start = "[PdxGuiWidget.FindChild('button_dismiss_all').TriggerAnimation('hover_leave')]"
+										on_start = "[PdxGuiWidget.FindChild('button_message_settings').TriggerAnimation('hover_leave')]"
 										on_start = "[SetCanOpenRightClickContextMenu( '(bool)yes' )]"
 									}
 
@@ -157,14 +159,14 @@ types notifications {
 
 										icon = {
 											size = { 28 28 }
-											texture = "[Notification.GetTexture]"
-											tooltip = "[Notification.GetToolTip]"
+											texture = "[PlayerMessageItem.GetTexture]"
+											tooltip = "[PlayerMessageItem.GetTooltip]"
 										}
 
 										text_single = {
 											name = "title"
 											layoutpolicy_horizontal = expanding
-											text = "[Notification.GetName]"
+											text = "[PlayerMessageItem.GetName]"
 											align = nobaseline
 											max_width = 300
 											fontsize_min = 14
@@ -192,8 +194,9 @@ types notifications {
 
 												text_single = {
 													name = "date"
-													text = "[Notification.GetDate]"
-													align = nobaseline
+													text = "[PlayerMessageItem.GetDate]"
+													align = hcenter|nobaseline
+													minimumsize = { 52 -1 }
 												}
 											}
 
@@ -203,7 +206,7 @@ types notifications {
 												button_clear = {
 													name = "button_dismiss_all"
 													widgetanchor = right
-													position = { 0 -3 }
+													position = { 0 -2 }
 													alpha = 0
 
 													state = {
@@ -226,6 +229,32 @@ types notifications {
 													using = notification_dismiss_button_sound
 													using = tooltip_se
 													tooltip = "MESSAGE_CLEAR_ALL_TOOLTIP"
+												}
+
+												button_settings = {
+													name = "button_message_settings"
+													widgetanchor = right
+													position = { -26 -1 }
+													alpha = 0
+
+													state = {
+														name = hover_enter
+														alpha = 1
+														duration = 0.05
+														using = Animation_Curve_Default														
+													}
+
+													state = {
+														name = hover_leave
+														alpha = 0
+														duration = 0.2
+														using = Animation_Curve_Default
+													}
+
+													size = { 24 24 }
+													onclick = "[ToggleMessageSettings]"
+													using = tooltip_se
+													tooltip = "MESSAGE_SETTINGS"
 												}
 											}
 										}
@@ -350,7 +379,7 @@ types notifications {
 
 												margin = { 15 5 }
 
-												text = "[Notification.GetDescription]"
+												text = "[PlayerMessageItem.GetDescription]"
 											}
 										}
 									}
@@ -367,7 +396,7 @@ types notifications {
 	type notifications_toasts = widget {
 		name = "toast_container_widget"
 		visible = "[ToastMessageHandler.HasMessage]"
-		datacontext = "[ToastMessageHandler.GetNotification]"
+		datacontext = "[ToastMessageHandler.GetMessageItem]"
 		allow_outside = yes
 		force_data_properties_update = yes
 		
@@ -382,7 +411,7 @@ types notifications {
 			on_start = "[PdxGuiWidget.AccessChild('toast_icon').TriggerAnimation('show')]"
 			on_start = "[PdxGuiWidget.AccessChild('toast_icon2').TriggerAnimation('show')]"
 		
-			# start_sound doesn't seem to work with [Notification.GetOnCreatedSoundEvent] here, triggered from code instead
+			# start_sound doesn't seem to work with [PlayerMessageItem.GetOnCreatedSoundEvent] here, triggered from code instead
 		}
 		
 		state = {
@@ -461,7 +490,7 @@ types notifications {
 			size = { 100% 100% }
 			parentanchor = center
 			alwaystransparent = yes
-			tooltip = "[Notification.GetToolTip]"
+			tooltip = "[PlayerMessageItem.GetTooltip]"
 
 			button = {
 				size = { 100% 100% }
@@ -498,7 +527,7 @@ types notifications {
 				margin = { 5 5 }
 				align = center|nobaseline
 
-				text = "[Notification.GetName]"
+				text = "[PlayerMessageItem.GetName]"
 				using = fontsize_large
 
 				background = {
@@ -527,7 +556,7 @@ types notifications {
 				margin = { 5 5 }
 				align = center|nobaseline
 
-				text = "[Notification.GetDescription]"
+				text = "[PlayerMessageItem.GetDescription]"
 
 				alwaystransparent = yes
 			}
@@ -559,6 +588,7 @@ types notifications {
 			parentanchor = top|right
 			onclick = "[ToastMessageHandler.DismissMessage]"
 			tooltip = "DISMISS"
+			shortcut = "close_window"
 		}
 	}
 }

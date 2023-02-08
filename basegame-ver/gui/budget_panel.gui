@@ -60,17 +60,20 @@ types budget
 				{
 					text = "BUDGET_TAB_OVERVIEW"
 				}
+				blockoverride "first_button_tooltip" {
+					tooltip = "BUDGET_TAB_OVERVIEW"
+				}
 				blockoverride "first_button_click"
 				{
-					onclick = "[InformationPanel.SelectTab('overview')]"
+					onclick = "[InformationPanel.SelectTab('default')]"
 				}
 				blockoverride "first_button_visibility"
 				{
-					visible = "[InformationPanel.IsTabSelected('overview')]"
+					visible = "[InformationPanel.IsTabSelected('default')]"
 				}
 				blockoverride "first_button_visibility_checked"
 				{
-					visible = "[Not( InformationPanel.IsTabSelected('overview') )]"
+					visible = "[Not( InformationPanel.IsTabSelected('default') )]"
 				}
 				blockoverride "first_button_selected"
 				{
@@ -83,6 +86,9 @@ types budget
 				blockoverride "second_button"
 				{
 					text = "STATES"
+				}
+				blockoverride "second_button_tooltip" {
+					tooltip = "STATES"
 				}
 				blockoverride "second_button_click"
 				{
@@ -107,6 +113,9 @@ types budget
 				blockoverride "third_button"
 				{
 					text = "BUDGET_TAB_ASSETS"
+				}
+				blockoverride "third_button_tooltip" {
+					tooltip = "BUDGET_TAB_ASSETS"
 				}
 				blockoverride "third_button_click"
 				{
@@ -136,7 +145,7 @@ types budget
 		{
 			### overview
 			flowcontainer = {
-				visible = "[InformationPanel.IsTabSelected('overview')]"
+				visible = "[InformationPanel.IsTabSelected('default')]"
 				using = default_content_fade
 				using = default_list_position
 				direction = vertical
@@ -287,7 +296,7 @@ types budget
 							button_icon_plus = {
 								name = "tutorial_highlight_add_consumption_tax"
 								size = { 35 35 }
-								onclick = "[BudgetPanel.ToggleAddConsumptionTaxMenu(PdxGuiWidget.Self)]"
+								onclick = "[BudgetPanel.ToggleAddConsumptionTaxMenu(PdxGuiWidget.AccessSelf)]"
 								enabled = "[BudgetPanel.CanTaxGoods]"
 								tooltip = "[SelectLocalization( BudgetPanel.CanTaxGoods, 'TAX_GOODS', 'NO_GOODS_TO_TAX' )]"
 							}
@@ -331,6 +340,19 @@ types budget
 								alpha = "[TransparentIfZero(GetPlayer.PredictMinting)]"
 							}
 						}
+						
+						tax_exp_frame = {
+
+							blockoverride "text" {
+								text = "DIVIDENDS_FROM_GOVERNMENT_SHARES"
+							}
+
+							blockoverride "text_2" {
+								text = "@money![GetPlayer.PredictGovernmentShareDividends|D+=]"
+								using = government_share_dividends_tooltip_with_graph
+								alpha = "[TransparentIfZero(GetPlayer.PredictGovernmentShareDividends)]"
+							}
+						}						
 
 						tax_exp_frame = {
 
@@ -823,6 +845,19 @@ types budget
 								alpha = "[TransparentIfZero(GetPlayer.GetSubsidiesExpenses)]"
 							}
 						}
+						
+						tax_exp_frame = {
+
+							blockoverride "text" {
+								text = "LOSSES_FROM_GOVERNMENT_SHARES"
+							}
+
+							blockoverride "text_2" {
+								text = "@money![GetPlayer.PredictGovernmentShareLosses|D-]"
+								using = government_share_losses_tooltip_with_graph
+								alpha = "[TransparentIfZero(GetPlayer.PredictGovernmentShareLosses)]"
+							}
+						}						
 
 						tax_exp_frame = {
 
@@ -1018,7 +1053,7 @@ types budget
 
 				default_header = {
 					blockoverride "text" {
-						text = "POOLS"
+						text = "[concept_gold_reserves]"
 					}
 				}
 
@@ -1026,42 +1061,6 @@ types budget
 					spacing = 10
 					direction = vertical
 					using = default_list_position
-
-					widget = {
-						name = "tutorial_highilight_principal_bar"
-						size = { @panel_width_minus_10 45 }
-						parentanchor = hcenter
-						tooltip = "CREDIT_PROGRESS"
-						visible = "[GreaterThanOrEqualTo_CFixedPoint( GetPlayer.GetCreditRatio, '(CFixedPoint)0' )]"
-
-						bad_progressbar_horizontal = {
-							parentanchor = vcenter
-							name = "credit_progressbar"
-							size = { 100% 100% }
-							blockoverride "values" {
-								value = "[FixedPointToFloat(GetPlayer.GetCreditRatio)]"
-								min = 0  
-								max = 1
-							}
-						}
-						textbox = {
-							text = "PRINCIPAL"
-							autoresize = yes
-							align = nobaseline
-							parentanchor = vcenter
-							margin_left = 20
-							using = fontsize_large
-						}
-
-						textbox = {
-							using = fontsize_large
-							autoresize = yes
-							text = "#variable @money![GetPlayer.GetPrincipal|K]#!"
-							parentanchor = right|vcenter
-							align = right|nobaseline
-							margin_right = 20
-						}
-					}
 					
 					widget = {
 						size = { @panel_width_minus_10 45 }
@@ -1098,32 +1097,38 @@ types budget
 							margin_right = 20
 						}
 					}
+				}
+				
+				default_header = {
+					blockoverride "text" {
+						text = "[concept_investment_pool]"
+					}
+				}					
+				
+				widget = {
+					size = { @panel_width 60 }
+					parentanchor = hcenter
+					
+					background = {
+						using = entry_bg
+					}
 
-					widget = {
-						size = { @panel_width 60 }
-						parentanchor = hcenter
-						
-						background = {
-							using = entry_bg
-						}
-
-						textbox = {
-							using = fontsize_large
-							autoresize = yes
-							text = "[concept_investment_pool]:"
-							align = left|nobaseline
-							parentanchor = vcenter
-							margin_left = 20
-						}
-						textbox = {
-							using = fontsize_large
-							autoresize = yes
-							text = "#v @money![GetPlayer.GetInvestmentPool|D+]#!"
-							parentanchor = right|vcenter
-							align = right|nobaseline
-							margin_right = 20
-							using = investment_pool_tooltip_with_graph
-						}
+					textbox = {
+						using = fontsize_large
+						autoresize = yes
+						text = "[concept_investment_pool]:"
+						align = left|nobaseline
+						parentanchor = vcenter
+						margin_left = 20
+					}
+					textbox = {
+						using = fontsize_large
+						autoresize = yes
+						text = "#v @money![GetPlayer.GetInvestmentPool|D+]#! ([GetPlayer.GetInvestmentPoolChange|=+D])"
+						parentanchor = right|vcenter
+						align = right|nobaseline
+						margin_right = 20
+						using = investment_pool_tooltip_with_graph
 					}
 				}
 				
@@ -1167,6 +1172,42 @@ types budget
 						parentanchor = vcenter
 					}
 				}
+				
+				widget = {
+					name = "tutorial_highilight_principal_bar"
+					size = { @panel_width_minus_10 45 }
+					parentanchor = hcenter
+					tooltip = "CREDIT_PROGRESS"
+					visible = "[GreaterThanOrEqualTo_CFixedPoint( GetPlayer.GetCreditRatio, '(CFixedPoint)0' )]"
+
+					bad_progressbar_horizontal = {
+						parentanchor = vcenter
+						name = "credit_progressbar"
+						size = { 100% 100% }
+						blockoverride "values" {
+							value = "[FixedPointToFloat(GetPlayer.GetCreditRatio)]"
+							min = 0  
+							max = 1
+						}
+					}
+					textbox = {
+						text = "PRINCIPAL"
+						autoresize = yes
+						align = nobaseline
+						parentanchor = vcenter
+						margin_left = 20
+						using = fontsize_large
+					}
+
+					textbox = {
+						using = fontsize_large
+						autoresize = yes
+						text = "#variable @money![GetPlayer.GetPrincipal|K]#!"
+						parentanchor = right|vcenter
+						align = right|nobaseline
+						margin_right = 20
+					}
+				}				
 
 				widget = {
 					name = "tutorial_highlight_credit_limit_bar"
@@ -1392,13 +1433,13 @@ types budget
 		
 		### prio import
 		set_level_bar_item = {
-			tooltip = "[SelectLocalization(Goods.GetMarket.GetOwner.IsPlayer, GetPlayer.GetGoodsTariffDescImportPriority(Goods.Self), 'NOT_PLAYER_MARKET_PRIORITY')]"
+			tooltip = "[SelectLocalization(Goods.GetMarket.IsSame(GetPlayer.GetCapital.GetMarket), GetPlayer.GetGoodsTariffDescImportPriority(Goods.Self), 'NOT_PLAYER_MARKET_PRIORITY')]"
 			
 			blockoverride "button_texture" {
 				texture = "gfx/interface/icons/trade_icons/import_focused.dds"
 			}
 			blockoverride "click" {
-				enabled = "[And(IsValid( GetPlayer.SetGoodsTariffImportPriority(Goods.Self) ), Goods.GetMarket.GetOwner.IsPlayer)]"
+				enabled = "[And(IsValid( GetPlayer.SetGoodsTariffImportPriority(Goods.Self) ), Goods.GetMarket.IsSame(GetPlayer.GetCapital.GetMarket))]"
 				onclick = "[Execute( GetPlayer.SetGoodsTariffImportPriority(Goods.Self) )]"
 			}
 			blockoverride "setvisible" {
@@ -1411,13 +1452,13 @@ types budget
 		
 		### no prio
 		set_level_bar_item = {
-			tooltip = "[SelectLocalization(Goods.GetMarket.GetOwner.IsPlayer, GetPlayer.GetGoodsTariffDescNoPriority(Goods.Self), 'NOT_PLAYER_MARKET_PRIORITY')]"
+			tooltip = "[SelectLocalization(Goods.GetMarket.IsSame(GetPlayer.GetCapital.GetMarket), GetPlayer.GetGoodsTariffDescNoPriority(Goods.Self), 'NOT_PLAYER_MARKET_PRIORITY')]"
 			
 			blockoverride "button_texture" {
 				texture = "gfx/interface/icons/trade_icons/unfocused.dds"
 			}
 			blockoverride "click" {
-				enabled = "[And(IsValid( GetPlayer.SetGoodsTariffNoPriority(Goods.Self) ), Goods.GetMarket.GetOwner.IsPlayer)]"
+				enabled = "[And(IsValid( GetPlayer.SetGoodsTariffNoPriority(Goods.Self) ), Goods.GetMarket.IsSame(GetPlayer.GetCapital.GetMarket))]"
 				onclick = "[Execute( GetPlayer.SetGoodsTariffNoPriority(Goods.Self) )]"
 			}
 			blockoverride "setvisible" {
@@ -1430,13 +1471,13 @@ types budget
 		
 		### prio export
 		set_level_bar_item = {
-			tooltip = "[SelectLocalization(Goods.GetMarket.GetOwner.IsPlayer, GetPlayer.GetGoodsTariffDescExportPriority(Goods.Self), 'NOT_PLAYER_MARKET_PRIORITY')]"
+			tooltip = "[SelectLocalization(Goods.GetMarket.IsSame(GetPlayer.GetCapital.GetMarket), GetPlayer.GetGoodsTariffDescExportPriority(Goods.Self), 'NOT_PLAYER_MARKET_PRIORITY')]"
 			
 			blockoverride "button_texture" {
 				texture = "gfx/interface/icons/trade_icons/export_focused.dds"
 			}
 			blockoverride "click" {
-				enabled = "[And(IsValid( GetPlayer.SetGoodsTariffExportPriority(Goods.Self) ), Goods.GetMarket.GetOwner.IsPlayer)]"
+				enabled = "[And(IsValid( GetPlayer.SetGoodsTariffExportPriority(Goods.Self) ), Goods.GetMarket.IsSame(GetPlayer.GetCapital.GetMarket))]"
 				onclick = "[Execute( GetPlayer.SetGoodsTariffExportPriority(Goods.Self) )]"
 			}
 			blockoverride "setvisible" {

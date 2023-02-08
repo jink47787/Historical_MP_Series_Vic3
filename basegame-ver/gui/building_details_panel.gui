@@ -41,14 +41,17 @@ types building_panels
 				blockoverride "first_button" {
 					text = "BUILDING_DETAILS_PANEL_INFORMATION_TAB"
 				}
+				blockoverride "first_button_tooltip" {
+					tooltip = "BUILDING_DETAILS_PANEL_INFORMATION_TAB"
+				}
 				blockoverride "first_button_click" {
-					onclick = "[InformationPanel.SelectTab('overview')]"
+					onclick = "[InformationPanel.SelectTab('default')]"
 				}
 				blockoverride "first_button_visibility" {
-					visible = "[InformationPanel.IsTabSelected('overview')]"
+					visible = "[InformationPanel.IsTabSelected('default')]"
 				}
 				blockoverride "first_button_visibility_checked" {
-					visible = "[Not( InformationPanel.IsTabSelected('overview') )]"
+					visible = "[Not( InformationPanel.IsTabSelected('default') )]"
 				}
 				blockoverride "first_button_selected" {
 					text = "BUILDING_DETAILS_PANEL_INFORMATION_TAB_SELECTED"
@@ -60,6 +63,9 @@ types building_panels
 				# Workforce
 				blockoverride "second_button" {
 					text = "WORKFORCE"
+				}
+				blockoverride "second_button_tooltip" {
+					tooltip = "WORKFORCE"
 				}
 				blockoverride "second_button_click" {
 					onclick = "[InformationPanel.SelectTab('workforce')]"
@@ -80,6 +86,9 @@ types building_panels
 				# Modifiers
 				blockoverride "third_button" {
 					text = "BUILDING_DETAILS_PANEL_MODIFIERS_TAB"
+				}
+				blockoverride "third_button_tooltip" {
+					tooltip = "BUILDING_DETAILS_PANEL_MODIFIERS_TAB"
 				}
 				blockoverride "third_button_click" {
 					onclick = "[InformationPanel.SelectTab('modifiers')]"
@@ -102,7 +111,7 @@ types building_panels
 				parentanchor = hcenter
 
 				building_details_panel_overview_content = {
-					visible = "[InformationPanel.IsTabSelected('overview')]"
+					visible = "[InformationPanel.IsTabSelected('default')]"
 					using = default_content_fade
 				}
 
@@ -742,7 +751,7 @@ types building_panels
 									using = expand_button_bg_no_fade
 									size = { 75 75 }
 									enabled = "[Building.IsOwner( GetPlayer.Self )]"
-									onclick = "[RightClickMenuManager.ToggleSwitchProductionMethodMenu(Building.AccessSelf, ProductionMethodGroup.AccessSelf, PdxGuiWidget.Self)]"
+									onclick = "[RightClickMenuManager.ToggleSwitchProductionMethodMenu(Building.AccessSelf, ProductionMethodGroup.AccessSelf, PdxGuiWidget.AccessSelf)]"
 								}
 
 								icon = {
@@ -908,7 +917,7 @@ types building_panels
 									using = expand_button_bg_no_fade
 									enabled = "[Building.IsOwner( GetPlayer.Self )]"
 									size = { 100% 100% }
-									onclick = "[RightClickMenuManager.ToggleSwitchProductionMethodMenu(Building.AccessSelf, ProductionMethodGroup.AccessSelf, PdxGuiWidget.Self)]"
+									onclick = "[RightClickMenuManager.ToggleSwitchProductionMethodMenu(Building.AccessSelf, ProductionMethodGroup.AccessSelf, PdxGuiWidget.AccessSelf)]"
 								}
 
 								icon = {
@@ -979,47 +988,25 @@ types building_panels
 				}
 			}
 
-			widget = { size = { 10 10 }}
-
 			dynamicgridbox = {
 				datamodel = "[Building.AccessPlayerTradeRoutes]"
-				ignoreinvisible = yes
-
+				parentanchor = hcenter
+				
 				item = {
-					datacontext = "[Building.GetState.GetMarket]"
-					trade_route_button_building = {
-						blockoverride "left_flag" {
-							datacontext = "[TradeRoute.GetExportingMarket.GetOwner]"
-						}
-
-						blockoverride "right_flag" {
-							datacontext = "[TradeRoute.GetImportingMarket.GetOwner]"
-						}
-						blockoverride "arrow_texture" {
-							texture = "gfx/interface/icons/trade_icons/arrow_inbound.dds"
-							size = { 30 30 }
-						}
+					trade_route_list_item = {
+						datacontext = "[Building.GetState.GetOwner]"
+						datacontext = "[Building.GetState.GetMarket]"
 					}
 				}
 			}
 			dynamicgridbox = {
 				datamodel = "[Building.AccessNonPlayerTradeRoutes]"
-				ignoreinvisible = yes
-
+				parentanchor = hcenter
+				
 				item = {
-					datacontext = "[Building.GetState.GetMarket]"
-					trade_route_button_building = {
-						blockoverride "left_flag" {
-							datacontext = "[TradeRoute.GetExportingMarket.GetOwner]"
-						}
-
-						blockoverride "right_flag" {
-							datacontext = "[TradeRoute.GetImportingMarket.GetOwner]"
-						}
-						blockoverride "arrow_texture" {
-							texture = "gfx/interface/icons/trade_icons/arrow_inbound.dds"
-							size = { 30 30 }
-						}
+					trade_route_list_item = {
+						datacontext = "[Building.GetState.GetOwner]"
+						datacontext = "[Building.GetState.GetMarket]"						
 					}
 				}
 			}
@@ -1180,7 +1167,7 @@ types building_panels
 					### wages
 					building_process_entry = {
 						blockoverride "visible" {
-							visible = "[GreaterThan_CFixedPoint(Building.GetLastWagesExpenses, '(CFixedPoint)0')]" #comment away until we fix PRCAL-9647
+							visible = "[GreaterThan_CFixedPoint(Building.GetLastWagesExpenses, '(CFixedPoint)0')]"
 						}
 						blockoverride "text" {
 							text = "WAGES"
@@ -1345,7 +1332,28 @@ types building_panels
 						datamodel = "[Building.GetProducedModifiers.GetEntries]"
 						visible = "[Not(IsDataModelEmpty(Building.GetProducedModifiers.GetEntries))]"
 						item = {
-							widget = {
+							flowcontainer = {
+								spacing = 5
+								maximumsize = { 250 -1 }
+								minimumsize = { 250 -1 }
+								margin = { 10 8 }
+								
+								icon = {
+									size = { 25 25 }
+									visible = "[And(Building.CanBeAffectedByInputShortage(ModifierEntry.Self),And(Building.HasAnyInputShortage,GreaterThan_CFixedPoint(Building.GetInputShortagePenalty, '(CFixedPoint)0')))]"
+									texture = "gfx/interface/icons/generic_icons/goods_shortage.dds"
+									tooltip = "GOODS_OUTPUT_PENALTY_TOOLTIP"
+									parentanchor = vcenter
+								}
+
+								icon = {
+									size = { 25 25 }
+									visible = "[And(Building.CanBeAffectedByInputShortage(ModifierEntry.Self),And(Not(Building.HasAnyInputShortage),GreaterThan_CFixedPoint(Building.GetInputShortagePenalty, '(CFixedPoint)0')))]"
+									texture = "gfx/interface/icons/generic_icons/goods_shortage.dds"
+									tooltip = "GOODS_OUTPUT_PENALTY_LINGERING_TOOLTIP"
+									parentanchor = vcenter
+								}
+
 								background = {
 									using = entry_bg_simple
 								}
@@ -1355,39 +1363,9 @@ types building_panels
 									tooltip = "BUILDING_DETAILS_PRODUCED_MODIFIER_TOOLTIP"
 									autoresize = yes
 									multiline = yes
-									resizeparent = yes
-									maximumsize = { 250 -1 }
-									minimumsize = { 250 -1 }
 									align = left|nobaseline
-									margin = { 10 16 }
-								}
-
-								textbox = {
-									block "text_right" {}
-									autoresize = yes
-									multiline = yes
-									maximumsize = { 250 -1 }
-									minimumsize = { 250 -1 }
-									align = right|nobaseline
-									margin = { 10 16 }
-								}
-
-								icon = {
-									size = { 25 25 }
-									visible = "[And(Building.CanBeAffectedByInputShortage(ModifierEntry.Self),And(Building.HasAnyInputShortage,GreaterThan_CFixedPoint(Building.GetInputShortagePenalty, '(CFixedPoint)0')))]"
-									texture = "gfx/interface/icons/generic_icons/goods_shortage.dds"
-									tooltip = "GOODS_OUTPUT_PENALTY_TOOLTIP"
-									position = { -8 -10 }
-									parentanchor = left|vcenter
-								}
-
-								icon = {
-									size = { 25 25 }
-									visible = "[And(Building.CanBeAffectedByInputShortage(ModifierEntry.Self),And(Not(Building.HasAnyInputShortage),GreaterThan_CFixedPoint(Building.GetInputShortagePenalty, '(CFixedPoint)0')))]"
-									texture = "gfx/interface/icons/generic_icons/goods_shortage.dds"
-									tooltip = "GOODS_OUTPUT_PENALTY_LINGERING_TOOLTIP"
-									position = { -8 -10 }
-									parentanchor = left|vcenter
+									parentanchor = vcenter
+									maximumsize = { 220 -1 }
 								}
 							}
 						}
