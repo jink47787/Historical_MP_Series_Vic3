@@ -65,7 +65,6 @@ All mods / mod ideas used linked below:
 - Halved the effects of all IG traits
 #### Bureaucracy
 - Slightly reduced base state taxation capacity
-#### CBs
 
 ## Population
 #### Migration
@@ -107,9 +106,11 @@ All mods / mod ideas used linked below:
 - Halved base state infrastructure
 
 ## Diplomacy
-- Cut Down can be done by any non-decentralized power & will remove all conquests
-- Guarantee independence diplomatic pact added
 - North America Strategic Region Rework
+#### Actions & Relations
+- Guarantee independence diplomatic pact added
+#### CBs
+- Cut Down can be done by any non-decentralized power & will remove all conquests from past 30 years
 
 ## Military
 #### PMs
