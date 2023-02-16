@@ -122,6 +122,8 @@ All mods / mod ideas used linked below:
 - Nerfed the larger offense & defence skill traits by around half
 
 ## Flava
+#### General JEs
+- Corn laws market lib landowner leader event gone
 #### Europe
 - Austria starts with serfdom
 - French historical pop nerf (there is no mortality multiplier, that is why there are two birth rate modifiers)
