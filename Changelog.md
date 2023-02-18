@@ -25,7 +25,6 @@ All mods / mod ideas used linked below:
 - Confirm Shortcut: https://steamcommunity.com/sharedfiles/filedetails/?id=2900498971
 - Better Interest Group Attraction: https://steamcommunity.com/sharedfiles/filedetails/?id=2881590888
 - Diplo Acceptance Shown: https://steamcommunity.com/sharedfiles/filedetails/?id=2886453657
-- Separation of Military and Civilian Shipyard (Used for icons) https://steamcommunity.com/sharedfiles/filedetails/?id=2888925505
 ---
 <br/>
 
@@ -33,7 +32,7 @@ All mods / mod ideas used linked below:
 
 <br/>
 ---
-<br/>~~~~~~
+<br/>
 
 ## Political
 #### Government Types
@@ -92,13 +91,13 @@ All mods / mod ideas used linked below:
 	- Machinists start at 30%
 	- Engineers start at 60%
 	- Discriminated cultures have a far harder time becoming qualified
-- Added Vineyards and an associated event
-- Separated artilery from small arms, explosives from fertilizer, military ships from civilian ships
+- Added Vineyards
+- Separated out artilery from small arms and explosives from fertilizer
 - Laissez faire subsidizes cash crops
 - Agrarianism now has a small amount of capitalist contribution
 - Interventionism and LF switched interest bonus
 - Increased scale of economies of scale
-- Rebalanced oil and other resources
+- Added oil and rebalanced some resources
 - Improved various oil PMs
 - Changed machinist and engineer requirement for urban PMs
 - DC and AC PMs added to power plants
