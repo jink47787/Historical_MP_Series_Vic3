@@ -1,11 +1,21 @@
 ﻿je_dual_monarchy = {
 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
 
+	immediate = {
+		set_variable = {
+			name = kuk_progress_var
+			value = 0
+		}
+	}
+
 	complete = {
 		NOT = { has_law = law_type:law_autocracy }
 		NOT = { has_law = law_type:law_oligarchy }
 		NOT = { has_law = law_type:law_independent_executive }
 		has_law = law_type:law_right_of_assembly
+		NOT = { has_law = law_type:law_secret_police }
+		NOT = { has_law = law_type:law_outlawed_dissent }
+		NOT = { has_law = law_type:law_militarized_police }
 	}
 
 	on_complete = {
@@ -14,22 +24,97 @@
 		}
 	}
 
-	#fail = {
-	#	cu:hungarian = {
-	#		culture_secession_progress = {
-	#			target = ROOT
-	#			value > 0.5
-	#		}
-	#	}
-	#}
+	fail = {
+		scope:journal_entry = {
+			is_goal_complete = yes
+		}
+	}
 	
-	timeout = 4380
+	on_monthly_pulse = {
+		effect = {
+			change_variable = {
+				name = kuk_progress_var
+				add = 1
+			}
+			if = {
+				limit = {
+					c:AUS = { radical_fraction = { value >= 0.02 } }
+				}
+				change_variable = {
+					name = kuk_progress_var
+					add = 0.25
+				}
+			}
+			if = {
+				limit = {
+					c:AUS = { radical_fraction = { value >= 0.04 } }
+				}
+				change_variable = {
+					name = kuk_progress_var
+					add = 0.25
+				}
+			}
+			if = {
+				limit = {
+					c:AUS = { radical_fraction = { value >= 0.08 } }
+				}
+				change_variable = {
+					name = kuk_progress_var
+					add = 0.25
+				}
+			}
+			if = {
+				limit = {
+					c:AUS = { radical_fraction = { value >= 0.1 } }
+				}
+				change_variable = {
+					name = kuk_progress_var
+					add = 0.25
+				}
+			}
+			if = {
+				limit = {
+					has_law = law_type:law_secret_police
+				}
+				change_variable = {
+					name = kuk_progress_var
+					add = -0.25
+				}
+			}
+			if = {
+				limit = {
+					has_law = law_type:law_outlawed_dissent
+				}
+				change_variable = {
+					name = kuk_progress_var
+					add = -0.25
+				}
+			}
+			if = {
+				limit = {
+					has_law = law_type:law_militarized_police
+				}
+				change_variable = {
+					name = kuk_progress_var
+					add = -0.25
+				}
+			}
+		}
+	}
 	
-	on_timeout = {
+	on_fail = {
 		trigger_event = { 
 			id = aus_flavor_evt.1
 		}
 		set_variable = dual_monarchy_fail
+	}
+	
+	current_value = {
+		value = root.var:kuk_progress_var
+	}
+	
+	goal_add_value = {
+		value = 180
 	}
 
 	invalid = {
@@ -45,6 +130,7 @@
 		}
 	}
 
+	progressbar = yes
 	weight = 100
 	should_be_pinned_by_default = yes
 }
