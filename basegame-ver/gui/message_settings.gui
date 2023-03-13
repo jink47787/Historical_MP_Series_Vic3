@@ -27,11 +27,39 @@ types message_settings {
 				margin_left = 14
 				margin_right = 14
 
+				flowcontainer = {
+					parentanchor = hcenter
+					spacing = 7
+					margin_bottom = 5
+					textbox = {
+						text = "MESSAGE_SETTINGS_SORT_NOTIFICATION_TYPE"
+						autoresize = yes
+						minimumsize = { 290 -1 }
+						maximumsize = { 290 -1 }
+						align = nobaseline
+					}
+					textbox = {
+						text = "MESSAGE_SETTINGS_SORT_APPEARANCE"
+						autoresize = yes
+						minimumsize = { 290 -1 }
+						maximumsize = { 290 -1 }
+						align = nobaseline
+					}
+					textbox = {
+						text = "MESSAGE_SETTINGS_SORT_PAUSE"
+						autoresize = yes
+						minimumsize = { 60 -1 }
+						maximumsize = { 60 -1 }
+						align = hcenter|nobaseline
+					}									
+				}
+
 				scrollarea = {
 					using = default_list_position
 					layoutpolicy_vertical = preferred
 					layoutpolicy_horizontal = preferred
-					size = { 684 600 }
+					maximumsize = { 684 600 }
+					minimumsize = { 684 150 }
 
 					scrollbarpolicy_horizontal = always_off
 					
@@ -42,7 +70,8 @@ types message_settings {
 					scrollwidget = {
 						container = {
 							parentanchor = hcenter
-							
+							resizeparent = yes
+								
 							flowcontainer = {
 								parentanchor = hcenter
 								direction = vertical
@@ -52,16 +81,50 @@ types message_settings {
 								item = {
 									notification_type_list_item = {}
 								}
-							}
-						}
+							}								
+						}					
 					}
-				}				
+				}
+				
+				flowcontainer = {
+					visible = "[MessageSettingsWindow.HasSingleShownItem]"
+					parentanchor = hcenter
+					spacing = 10
+					margin_top = 10
+					
+					button_primary = {
+						onclick = "[MessageSettingsWindow.RemoveSingleShownItem]"
+						size = { 660 40 }
+						text = "SHOW_ALL_MESSAGE_SETTINGS"
+					}	
+				}
+
+				flowcontainer = {
+					parentanchor = hcenter
+					spacing = 10
+					margin_top = 10
+					
+					button = {
+						onclick = "[MessageSettingsWindow.ResetSettings]"
+						size = { 310 40 }
+						text = "RESET_TO_DEFAULT"
+						using = default_button
+					}
+					
+					button = {
+						onclick = "[ToggleMessageSettings]"
+						size = { 310 40 }
+						text = "CLOSE_LABEL"
+						using = default_button
+					}					
+				}
 			}
 		}
 	}
 
 	type notification_type_list_item = widget {
 		size = { 660 44 }
+		visible = "[MessageSettingsWindow.ShouldBeShown(MessageSettingsItem.GetTag)]"
 
 		background = { 
 			using = entry_bg_simple
@@ -100,7 +163,24 @@ types message_settings {
 
 					blockoverride "dropdown_active_item_properties"
 					{
-						text = [MessageSettingsItem.GetCurrentOption.GetName]
+						text_single = {
+							parentanchor = vcenter
+							position = { 10 0 }
+							autoresize = yes
+							align = nobaseline
+							default_format = "#clickable"
+							text = "[MessageSettingsItem.GetCurrentOption.GetNameWithConcept]"
+						}
+								
+						text_single = {
+							parentanchor = right|vcenter
+							position = { -30 0 }
+							autoresize = yes
+							align = right|nobaseline
+							default_format = "#title"
+							text = "MESSAGE_SETTINGS_DEFAULT"
+							visible = "[MessageSettingsItem.GetCurrentOption.IsDefault]"
+						}
 					}
 
 					blockoverride "dropdown_item_properties"
@@ -117,7 +197,17 @@ types message_settings {
 									align = nobaseline
 									margin_left = 10
 									default_format = "#clickable"
-									text = [NotificationOptionItem.GetName]
+									text = "[NotificationOptionItem.GetNameWithConcept]"
+								}
+
+								expand = {}
+								
+								text_single = {
+									layoutpolicy_horizontal = expanding
+									align = right|nobaseline
+									default_format = "#title"
+									text = "MESSAGE_SETTINGS_DEFAULT"
+									visible = "[NotificationOptionItem.IsDefault]"
 								}
 							}
 						}

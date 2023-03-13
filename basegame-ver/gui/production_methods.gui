@@ -354,7 +354,7 @@ types production_methods
 					}
 
 					text_single = {
-						text = "CONSTRUCTION_CURRENT_PAGE"
+						text = "CONSTRUCTION_CURRENT_PAGE_PRIVATE"
 						parentanchor = vcenter
 						align = nobaseline
 					}
@@ -497,7 +497,7 @@ types production_methods
 		widget = {
 			size = { @panel_width_plus_14 95 }
 
-			highlight_tutorial_ui = {
+			highlight_tutorial = {
 	   			visible = "[BuildingType.IsBeingTutorialHighlighted]"
 	    	}
 
@@ -508,7 +508,7 @@ types production_methods
 				size = { 440 38 }
 				
 				blockoverride "left_text" {
-					text = "#v [BuildingType.GetNameNoFormatting]#!"
+					raw_text = "#v [BuildingType.GetNameNoFormatting]#!"
 				}
 				blockoverride "right_text" {
 					section_header_right_text = {
@@ -535,7 +535,6 @@ types production_methods
 			container = {
 				position = { 135 0 }
 				parentanchor = bottom
-				name = "tutorial_highlight_production_methods"
 				
 				fixedgridbox = {
 					datamodel = "[ProductionMethodsPanelEntry.AccessBuildingType.AccessProductionMethodGroups]"
@@ -586,7 +585,7 @@ types production_methods
 
 							### nr available
 							textbox = {
-								text = "#bold [ProductionMethodGroup.GetNumAvailableOptionsForBuildingType(ProductionMethodsPanelEntry.AccessBuildingType)]#!"
+								raw_text = "#bold [ProductionMethodGroup.GetNumAvailableOptionsForBuildingType(ProductionMethodsPanelEntry.AccessBuildingType)]#!"
 								parentanchor = top|right
 								position = { -5 0 }
 								autoresize = yes
@@ -607,8 +606,13 @@ types production_methods
 			}
 			
 			### building icon
-			icon = {
+			button = {
 				texture = "[BuildingType.GetTexture]"
+				onrightclick = "[RightClickMenuManager.ShowForBuildingType(BuildingType.AccessSelf)]"
+				effectname = "NoHighlight"
+				distribute_visual_state = no
+				inherit_visual_state = no
+
 				size = { 100 100 }
 				position = { 7 0 }
 				parentanchor = left|vcenter
@@ -704,7 +708,7 @@ types production_methods
 					icon = {
 						using = rotate_glow_blue
 						size = { 130% 130% }
-						visible = "[ProductionMethodsPanelEntry.HasAllAutoExpand]"
+						visible = "[And(ProductionMethodsPanelEntry.HasAllAutoExpand, ProductionMethodsPanelEntry.GetBuildingType.CanBeAutoExpanded)]"
 						alwaystransparent = yes
 						parentanchor = center
 						using = default_fade_in_out
@@ -712,7 +716,7 @@ types production_methods
 					
 					button_icon_round_action = {
 						size = { 100% 100% }
-						visible = "[ProductionMethodsPanelEntry.HasAllAutoExpand]"
+						visible = "[And(ProductionMethodsPanelEntry.HasAllAutoExpand, ProductionMethodsPanelEntry.GetBuildingType.CanBeAutoExpanded)]"
 						enabled = "[IsValid( ProductionMethodsPanelEntry.ToggleAllAutoExpand )]"
 						onclick = "[Execute( ProductionMethodsPanelEntry.ToggleAllAutoExpand )]"					
 						tooltip = "AUTO_EXPAND_ALL_YES"
@@ -726,7 +730,7 @@ types production_methods
 					}
 					button_icon_round_action = {
 						size = { 100% 100% }
-						visible = "[ProductionMethodsPanelEntry.HasAllNoAutoExpand]"
+						visible = "[And(ProductionMethodsPanelEntry.HasAllNoAutoExpand, ProductionMethodsPanelEntry.GetBuildingType.CanBeAutoExpanded)]"
 						enabled = "[IsValid( ProductionMethodsPanelEntry.ToggleAllAutoExpand )]"
 						onclick = "[Execute( ProductionMethodsPanelEntry.ToggleAllAutoExpand )]"
 						tooltip = "AUTO_EXPAND_ALL_NO"
@@ -807,22 +811,51 @@ types production_methods
 						
 						textbox = {
 							position = { 15 0 }
-							text = "#v [Building.GetState.GetName]#!"
+							raw_text = "#v [Building.GetState.GetName]#!"
 							size = { 305 30 }
 							align = left|nobaseline
 							elide = right
 							parentanchor = left|vcenter
 						}
-						
-						### PROFITABLE
-						textbox = {
-							widgetid = "[Concatenate('productivity_value', Building.GetIDString)]"
-							visible = "[And(Not(Building.IsGovernmentFunded), Not(Building.IsSubsistenceBuilding))]"
-							position = { -10 0 }
-							text = "#tooltippable #tooltip:[Building.GetTooltipTag],TOOLTIP_BUILDING_PRODUCTIVITY,GraphTooltipTypeProfitability #v @money![Building.GetAverageAnnualEarningsPerEmployeeFormatted|1+]#!#!#!"
-							autoresize = yes
-							align = nobaseline
+
+						flowcontainer = {
 							parentanchor = right|vcenter
+							position = { -10 0 }
+							spacing = 5
+
+							icon = {
+								visible = "[And(Not(Building.IsSubsistenceBuilding), Building.HasFailedHires)]"
+								size = { 28 28 }
+								texture = "gfx/interface/icons/generic_icons/employment_not_full.dds"
+								parentanchor = vcenter
+								tooltip = "NOT_FULLY_EMPLOYED"
+							}
+
+							icon = {
+								visible = "[And(And(And(Not(Building.IsGovernmentFunded), Not(GreaterThan_CFixedPoint(Building.GetAverageAnnualEarningsPerEmployee, '(CFixedPoint)0'))) , Not(Building.IsSubsidized)), EqualTo_CFixedPoint(Building.GetCurrentCashReserves, '(CFixedPoint)0'))]"
+								size = { 28 28 }
+								texture = "gfx/interface/icons/generic_icons/employment_not_full.dds"
+								parentanchor = vcenter
+								tooltip = "NOT_HIRING"
+							}
+
+							icon = {
+								visible = "[And(And(And(And(Not(Building.IsSubsistenceBuilding), Not(Building.HasFailedHires)), Building.IsActive), LessThan_int32(Building.GetNoOfEmployed, Building.GetEmployeeCap)), GreaterThan_CFixedPoint(Building.GetAverageAnnualEarningsPerEmployee, '(CFixedPoint)0'))]"
+								size = { 28 28 }
+								parentanchor = vcenter
+								texture = "gfx/interface/icons/generic_icons/employment_not_full_hiring.dds"
+								tooltip = "TOOLTIP_BUILDING_HIRING"
+							}
+							
+							### PROFITABLE
+							textbox = {
+								widgetid = "[Concatenate('productivity_value', Building.GetIDString)]"
+								visible = "[And(Not(Building.IsGovernmentFunded), Not(Building.IsSubsistenceBuilding))]"
+								raw_text = "#tooltippable #tooltip:[Building.GetTooltipTag],TOOLTIP_BUILDING_PRODUCTIVITY,GraphTooltipTypeProfitability #v @money![Building.GetAverageAnnualEarningsPerEmployeeFormatted|1+]#!#!#!"
+								autoresize = yes
+								align = nobaseline
+								parentanchor = vcenter
+							}
 						}
 					}
 					
@@ -869,7 +902,7 @@ types production_methods
 
 								### nr available
 								textbox = {
-									text = "#P #bold [ProductionMethodGroup.GetNumAvailableOptions(Building.AccessSelf)]#!#!"
+									raw_text = "#P #bold [ProductionMethodGroup.GetNumAvailableOptions(Building.AccessSelf)]#!#!"
 									parentanchor = top|right
 									position = { -5 0 }
 									autoresize = yes
@@ -899,7 +932,7 @@ types production_methods
 							size = { 80 35 }
 							
 							textbox = {
-								text = "#N @money!#bold -[Building.GetSubsidies|D]#!"
+								raw_text = "#N @money!#bold -[Building.GetSubsidies|D]#!"
 								tooltip = "[Building.GetSubsidiesDesc]"
 								autoresize = yes
 								position = { 0 0 }

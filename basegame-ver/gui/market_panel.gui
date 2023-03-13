@@ -34,7 +34,7 @@ types market_panel
 		
 		blockoverride "window_header_name"
 		{
-			text = "#BOLD [Market.GetOwner.GetFlagTextIcon] [Market.GetName]#!"
+			raw_text = "#BOLD [Market.GetOwner.GetFlagTextIcon] [Market.GetName]#!"
 		}
 		
 		blockoverride "fixed_top"
@@ -271,81 +271,102 @@ types market_panel
 
 						flowcontainer = {
 							spacing = 5
-							button = {
-								using = default_button_action
-								size = { 132 40 }
-								raw_text = "None"
-								onclick = "[GetVariableSystem.Clear( 'trade_route_grouping' )]"
 
-								icon = {
-									name = "selected_bg"
-									size = { 100% 100% }
-									using = highlighted_square_selection
-									using = shimmer_fade_in
-									visible = "[Not(GetVariableSystem.Exists( 'trade_route_grouping' ))]"	
+							filter_button = {
+								visible = "[GetVariableSystem.Exists( 'trade_route_grouping' )]"
+								size = { 132 40 }
+
+								blockoverride "text" {
+									text = "NONE"
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Clear( 'trade_route_grouping' )]"
 								}
 							}
 
-							button = {
-								using = default_button_action
+							filter_button_selected = {
+								visible = "[Not(GetVariableSystem.Exists( 'trade_route_grouping' ))]"
 								size = { 132 40 }
-								raw_text = "BY_GOODS"
-								onclick = "[GetVariableSystem.Set( 'trade_route_grouping', 'goods' )]"
 
-								icon = {
-									name = "selected_bg"
-									size = { 100% 100% }
-									using = highlighted_square_selection
-									using = shimmer_fade_in
-									visible = "[GetVariableSystem.HasValue( 'trade_route_grouping', 'goods' )]"	
+								blockoverride "text" {
+									text = "NONE"
 								}
 							}
 
-							button = {
-								using = default_button_action
+							filter_button = {
+								visible = "[Not(GetVariableSystem.HasValue( 'trade_route_grouping', 'goods' ))]"
 								size = { 132 40 }
-								raw_text = "BY_COUNTRY"
-								onclick = "[GetVariableSystem.Set( 'trade_route_grouping', 'country' )]"
 
-								icon = {
-									name = "selected_bg"
-									size = { 100% 100% }
-									using = highlighted_square_selection
-									using = shimmer_fade_in
-									visible = "[GetVariableSystem.HasValue( 'trade_route_grouping', 'country' )]"	
+								blockoverride "text" {
+									text = "BY_GOODS"
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Set( 'trade_route_grouping', 'goods' )]"
+								}
+							}
+
+							filter_button_selected = {
+								visible = "[GetVariableSystem.HasValue( 'trade_route_grouping', 'goods' )]"
+								size = { 132 40 }
+
+								blockoverride "text" {
+									text = "BY_GOODS"
+								}
+							}
+
+							filter_button = {
+								visible = "[Not(GetVariableSystem.HasValue( 'trade_route_grouping', 'country' ))]"
+								size = { 132 40 }
+
+								blockoverride "text" {
+									text = "BY_COUNTRY"
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Set( 'trade_route_grouping', 'country' )]"
+								}
+							}
+
+							filter_button_selected = {
+								visible = "[GetVariableSystem.HasValue( 'trade_route_grouping', 'country' )]"
+								size = { 132 40 }
+
+								blockoverride "text" {
+									text = "BY_COUNTRY"
 								}
 							}
 						}
 
 						flowcontainer = {
 							spacing = 5
-							button = {
-								using = default_button_action
-								size = { 200 40 }
-								text = "ALL"
-								onclick = "[Market.ToggleOnlyShowPlayerTradeRoutes]"
 
-								icon = {
-									name = "selected_bg"
-									size = { 100% 100% }
-									using = highlighted_square_selection
-									using = shimmer_fade_in
-									visible = "[Not(Market.GetOnlyShowPlayerTradeRoutes)]"
+							### ALL - NOT SELECTED
+							filter_button = {
+								visible = "[Market.GetOnlyShowPlayerTradeRoutes]"
+							}
+
+							### ALL - SELECTED
+							filter_button_selected = {
+								visible = "[Not(Market.GetOnlyShowPlayerTradeRoutes)]"
+							}
+
+							### ONLY YOURS - NOT SELECTED
+							filter_button = {
+								visible = "[Not(Market.GetOnlyShowPlayerTradeRoutes)]"
+
+								blockoverride "text" {
+									text = "ONLY_YOURS"
 								}
 							}
 
-							button = {
-								using = default_button_action
-								size = { 200 40 }
-								text = "ONLY_YOURS"
-								onclick = "[Market.ToggleOnlyShowPlayerTradeRoutes]"
+							### ONLY YOURS - SELECTED
+							filter_button_selected = {
+								visible = "[Market.GetOnlyShowPlayerTradeRoutes]"
 
-								icon = {
-									name = "selected_bg"
-									size = { 100% 100% }
-									using = highlighted_square_selection
-									using = shimmer_fade_in
-									visible = "[Market.GetOnlyShowPlayerTradeRoutes]"
+								blockoverride "text" {
+									text = "ONLY_YOURS"
 								}
 							}
 						}
@@ -557,6 +578,20 @@ types market_panel
 					}
 				}
 				
+				textbox = {
+					parentanchor = hcenter
+					minimumsize = { 450 -1 }
+					autoresize = yes
+					multiline = yes
+					margin = { 0 10 }
+					align = center|nobaseline
+					text = "[Market.GetModifier.GetFullEntryDescFor('market_land_trade_capacity_add')]"
+					
+					background = {
+						using = entry_bg
+					}
+				}
+
 				textbox = {
 					parentanchor = hcenter
 					minimumsize = { 450 -1 }
@@ -790,7 +825,7 @@ types market_panel
 			textbox = {
 				align = right|nobaseline
 				visible = "[Not(GreaterThan_CFixedPoint(Goods.GetMarketSellOrders, '(CFixedPoint)0'))]"
-				text = "-"
+				raw_text = "-"
 				alpha = 0.5
 				size = { 105 40 }
 				margin_right = 10
@@ -811,7 +846,7 @@ types market_panel
 			textbox = {
 				align = right|nobaseline
 				visible = "[Not(GreaterThan_CFixedPoint(Goods.GetMarketBuyOrders, '(CFixedPoint)0'))]"
-				text = "-"
+				raw_text = "-"
 				alpha = 0.5
 				size = { 100 40 }
 				margin_right = 10
@@ -884,7 +919,7 @@ types market_panel
 				
 				textbox = {
 					align = right|nobaseline
-					text = "@money![Goods.GetMarketPrice|0v] [Goods.GetCompareIconAgainstBasePriceNoFormatting( Goods.GetMarketPrice )]"
+					raw_text = "@money![Goods.GetMarketPrice|0v] [Goods.GetCompareIconAgainstBasePriceNoFormatting( Goods.GetMarketPrice )]"
 					size = { 110 40 }
 					margin_right = 10
 					parentanchor = vcenter
@@ -946,6 +981,50 @@ types market_panel
 					}
 				}
 			}
+		}
+	}
+
+	type filter_button = button {
+		using = default_button
+
+		block "size" {
+			size = { 200 40 }
+		}
+
+		block "onclick" {
+			onclick = "[Market.ToggleOnlyShowPlayerTradeRoutes]"
+		}
+
+		block "text" {
+			text = "ALL"
+		}
+	}
+
+	type filter_button_selected = widget {
+
+		block "size" {
+			size = { 200 40 }
+		}
+		
+		background = {
+			using = paper_bg
+		}
+
+		textbox = {
+			parentanchor = center
+			align = nobaseline
+			autoresize = yes
+
+			block "text" {
+				text = "ALL"
+			}
+		}
+
+		icon = {
+			name = "selected_bg"
+			size = { 100% 100% }
+			using = highlighted_square_selection
+			using = shimmer_fade_in
 		}
 	}
 }

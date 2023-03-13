@@ -62,7 +62,7 @@ types topbar_components
 				}
 				textbox = {
 					parentanchor = vcenter
-					text = "#variable [Country.GetGDP|1*]#!"
+					raw_text = "#variable [Country.GetGDP|1*]#!"
 					autoresize = yes
 					align = left|nobaseline
 				}
@@ -72,7 +72,7 @@ types topbar_components
 				minimumsize = { 90 30 }
 				maximumsize = { 90 30 }
 				spacing = 2
-				tooltip = "LITERACY_TOOLTIP"
+				using = literacy_tooltip_with_graph
 				using = tooltip_below
 				onmousehierarchyenter = "[SelectMapModeByKey('mm_literacy')]"
 				onmousehierarchyleave = "[UnforceMapMode]"
@@ -85,7 +85,7 @@ types topbar_components
 				}
 				textbox = {
 					parentanchor = vcenter
-					text = "#variable [Country.GetIncorporatedLiteracyRate|%1]#!"
+					raw_text = "#variable [Country.GetIncorporatedLiteracyRate|%1]#!"
 					autoresize = yes
 					align = left|nobaseline
 				}
@@ -133,7 +133,7 @@ types topbar_components
 				}
 				textbox = {
 					parentanchor = vcenter
-					text = "#variable [Country.GetTotalPopulation|D]#!"
+					raw_text = "#variable [Country.GetTotalPopulation|D]#!"
 					autoresize = yes
 					align = left|nobaseline
 				}
@@ -156,7 +156,7 @@ types topbar_components
 				}
 				textbox = {
 					parentanchor = vcenter
-					text = "#variable [Country.GetNumRadicals|D]#!"
+					raw_text = "#variable [Country.GetNumRadicals|D]#!"
 					autoresize = yes
 					align = left|nobaseline
 				}
@@ -179,7 +179,7 @@ types topbar_components
 				}
 				textbox = {
 					parentanchor = vcenter
-					text = "#variable [Country.GetNumLoyalists|D]#!"
+					raw_text = "#variable [Country.GetNumLoyalists|D]#!"
 					autoresize = yes
 					align = left|nobaseline
 				}
@@ -319,7 +319,7 @@ types topbar_components
 									textbox = {
 										position = { 35 -3 }
 										name = capital_value
-										text = "#bold [GetPlayer.GetPowerDelta('bureaucracy')|D=+]#!"
+										raw_text = "#bold [GetPlayer.GetPowerDelta('bureaucracy')|D=+]#!"
 										align = center|nobaseline
 										using = fontsize_large
 										autoresize = yes
@@ -361,7 +361,7 @@ types topbar_components
 									textbox = {
 										position = { 35 -3 }
 										name = capital_value
-										text = "#bold [GetPlayer.GetPowerDelta('authority')|=+D]#!"
+										raw_text = "#bold [GetPlayer.GetPowerDelta('authority')|=+D]#!"
 										align = left|nobaseline
 										using = fontsize_large
 										autoresize = yes
@@ -403,7 +403,7 @@ types topbar_components
 									textbox = {
 										position = { 35 -3 }
 										name = capital_value
-										text = "#bold [GetPlayer.GetPowerDelta('influence')|=+D]#!"
+										raw_text = "#bold [GetPlayer.GetPowerDelta('influence')|=+D]#!"
 										align = left|nobaseline
 										using = fontsize_large
 										autoresize = yes
@@ -430,7 +430,7 @@ types topbar_components
 									name = "tutorial_highlight_convoys"
 									using = glow_button
 									size = { 100 40 }
-									tooltip = "NUM_CONVOYS_TOOLTIP_EXTENDED"
+									tooltip = "CONVOY_TOPBAR_TOOLTIP"
 									using = tooltip_below
 									onclick = "[InformationPanelBar.OpenMarketPanelTab(AccessPlayer.AccessFirstMarket, 'trade_routes')]"
 									enabled = "[GetMetaPlayer.GetPlayedOrObservedCountry.IsValid]"
@@ -452,39 +452,23 @@ types topbar_components
 									textbox = {
 										position = { 35 -3 }
 										name = capital_value
-										text = "#bold [GetPlayer.GetNumAvailableConvoys|=+D]#!"
+										raw_text = "#bold [GetPlayer.GetNumAvailableConvoys|=+D]#!"
 										align = left|nobaseline
 										using = fontsize_large
 										autoresize = yes
 										parentanchor = vcenter
 									}
 									
-									widget = {
-										size = { 60 12 }
-										position = { 40 0 }
+									double_direction_progressbar = {
+										size = { 60 6 }
+										position = { 40 -3 }
 										parentanchor = bottom
 										
-										green_progressbar_horizontal = {
-											visible = "[GreaterThanOrEqualTo_CFixedPoint(GetPlayer.GetSupplyNetworkStrength, '(CFixedPoint)1')]"
-											parentanchor = vcenter
-											name = "gold_progressbar"
-											size = { 60 6 }
-											blockoverride "values" {
-												value = "[FixedPointToFloat(GetPlayer.GetSupplyNetworkStrength )]"
-												min = 0  
-												max = 1
-											}
+										blockoverride "value_left" {
+											value = "[Negate_float(FixedPointToFloat(GetPlayer.GetDeficitConvoyRatioForProgressBar))]"
 										}
-
-										bad_progressbar_horizontal = {
-											visible = "[LessThan_CFixedPoint(GetPlayer.GetSupplyNetworkStrength, '(CFixedPoint)1')]"
-											parentanchor = vcenter
-											size = { 60 6 }
-											blockoverride "values" {
-												value = "[FixedPointToFloat(GetPlayer.GetSupplyNetworkStrength )]"
-												min = 0  
-												max = 1
-											}
+										blockoverride "value_right" {
+											value = "[FixedPointToFloat(GetPlayer.GetExcessConvoyRatioForProgressBar)]"
 										}
 									}
 								}	

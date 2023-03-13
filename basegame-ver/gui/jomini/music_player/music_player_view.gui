@@ -120,7 +120,7 @@ types music_player_types
 										name = "music_player_volume_value"
 										align = left|nobaseline
 										parentanchor = vcenter
-										text = "#v [MusicPlayer.GetVolumeString]#!"
+										raw_text = "#v [MusicPlayer.GetVolumeString]#!"
 										autoresize = yes
 									}
 								}
@@ -181,7 +181,7 @@ types music_player_types
 										name = "music_player_density_value"
 										align = left|nobaseline
 										parentanchor = vcenter
-										text = "#v [MusicPlayer.GetMusicDensityString]#!"
+										raw_text = "#v [MusicPlayer.GetMusicDensityString]#!"
 										autoresize = yes
 									}
 								}
@@ -234,7 +234,7 @@ types music_player_types
 						textbox = {
 							name = "track_name"
 							autoresize = yes
-							text = "#v [MusicPlayer.GetPlayingTrackName]#!"
+							raw_text = "#v [MusicPlayer.GetPlayingTrackName]#!"
 							align = left|nobaseline
 							parentanchor = vcenter
 							elide = right
@@ -338,23 +338,32 @@ types music_player_types
 			size = { 320 180 }
 			parentanchor = right
 
-			### This is the default category button. If you want to have a texture/background image, you need to make a new button like the ones below with blockeroverrides and make sure to add the Not('you category name') into this big visible statement for the default button
+			### This is the default category button. If you want to have a texture/background image, you need to make a new button like the ones below with blockeroverrides and make sure to add the Not('your category name') into this big visible statement for the default button
 			music_category_button = {
-				visible = "[And(Not(ObjectsEqual('Victoria 3 Soundtrack', MusicPlayer.GetCategoryName( MusicPlayerCategory.Self ))), Not(ObjectsEqual('Victoria 2 Soundtrack', MusicPlayer.GetCategoryName( MusicPlayerCategory.Self ))))]"
+				visible = "[And( And( Not(ObjectsEqual('Victoria_3_Soundtrack', MusicPlayer.GetCategoryNameLocKey( MusicPlayerCategory.Self ))), Not(ObjectsEqual('Victoria_3_Preorder', MusicPlayer.GetCategoryNameLocKey( MusicPlayerCategory.Self )))), Not(ObjectsEqual('Melodies_for_the_Masses', MusicPlayer.GetCategoryNameLocKey( MusicPlayerCategory.Self ))))]"
 			}
 
 			### VICTORIA 3 SOUNDTRACK
 			music_category_button = {
-				visible = "[ObjectsEqual('Victoria 3 Soundtrack', MusicPlayer.GetCategoryName( MusicPlayerCategory.Self ))]"
+				visible = "[ObjectsEqual('Victoria_3_Soundtrack', MusicPlayer.GetCategoryNameLocKey( MusicPlayerCategory.Self ))]"
 
 				blockoverride "button_texture" {
 					texture = "gfx/interface/illustrations/music_player/victoria_3_soundtrack.dds"
 				}
 			}
 
+			### MELODIES FOR THE MASSES
+			music_category_button = {
+				visible = "[ObjectsEqual('Melodies_for_the_Masses', MusicPlayer.GetCategoryNameLocKey( MusicPlayerCategory.Self ))]"
+
+				blockoverride "button_texture" {
+					texture = "gfx/interface/illustrations/music_player/melodies_for_the_masses.dds"
+				}
+			}
+
 			### VICTORIA 2 SOUNDTRACK
 			music_category_button = {
-				visible = "[ObjectsEqual('Victoria 2 Soundtrack', MusicPlayer.GetCategoryName( MusicPlayerCategory.Self ))]"
+				visible = "[ObjectsEqual('Victoria_3_Preorder', MusicPlayer.GetCategoryNameLocKey( MusicPlayerCategory.Self ))]"
 
 				blockoverride "button_texture" {
 					texture = "gfx/interface/illustrations/music_player/victoria_2_soundtrack.dds"
@@ -393,7 +402,7 @@ types music_player_types
 				parentanchor = vcenter
 				position = { 10 0 }
 				name = "category_checkbox"
-				checked = "[ObjectsEqual('Enabled', MusicPlayer.GetCategoryEnabledText( MusicPlayerCategory.Self ))]"
+				checked = "[MusicPlayerCategory.IsEnabled]"
 				onclick = "[MusicPlayer.OnToggleCategoryEnabled( MusicPlayerCategory.AccessSelf )]"
 				using = tooltip_above
 			}
@@ -406,7 +415,7 @@ types music_player_types
 		using = check_button_sound
 		tooltip = "MUSIC_PLAYER_SELECT_CATEGORY"
 		using = tooltip_above
-		alpha = "[TransparentIfFalse(ObjectsEqual('Enabled', MusicPlayer.GetCategoryEnabledText( MusicPlayerCategory.Self )))]"
+		alpha = "[TransparentIfFalse( MusicPlayerCategory.IsEnabled )]"
 
 		block "button_texture" {
 			using = default_button
@@ -447,7 +456,7 @@ types music_player_types
 			button_checkbox = {
 				size = { 30 30 }
 				name = "track_checkbox"
-				checked = "[ObjectsEqual('Enabled', MusicPlayer.GetTrackEnabledText( MusicTrack.Self ))]"
+				checked = "[MusicTrack.IsEnabled]"
 				using = check_button_sound
 				onclick = "[MusicPlayer.OnToggleTrackEnabled( MusicTrack.AccessSelf )]"
 				tooltip = "MUSIC_PLAYER_ENABLE_TRACK"
@@ -461,7 +470,7 @@ types music_player_types
 				size = { 0 35 }
 				tooltip = "MUSIC_PLAYER_PLAY_TRACK"
 				onclick = "[MusicPlayer.OnSelectAndPlayTrack( MusicTrack.Self )]"
-				alpha = "[TransparentIfFalse(ObjectsEqual('Enabled', MusicPlayer.GetTrackEnabledText( MusicTrack.Self )))]"
+				alpha = "[TransparentIfFalse( MusicTrack.IsEnabled )]"
 
 				textbox = {
 					visible = "[ObjectsEqual(MusicPlayer.GetTrackName( MusicTrack.Self ), MusicPlayer.GetPlayingTrackName)]"
