@@ -1,0 +1,230 @@
+message_settings_window = {}
+
+types message_settings {
+	type message_settings_window = default_popup {
+		name = "message_settings_window"
+		parentanchor = center
+
+		blockoverride "window_header_name" {
+			text = MESSAGE_SETTINGS
+		}
+
+		blockoverride "header_close_button_visibility" {
+			visible = yes
+		}
+
+		blockoverride "header_close_button" {
+			onclick = "[ToggleMessageSettings]"
+		}
+
+		blockoverride "content" {
+			flowcontainer = {
+				direction = vertical
+				resizeparent = yes
+				minimumsize = { 700 300 }
+				margin_top = 90
+				margin_bottom = 30
+				margin_left = 14
+				margin_right = 14
+
+				flowcontainer = {
+					parentanchor = hcenter
+					spacing = 7
+					margin_bottom = 5
+					textbox = {
+						text = "MESSAGE_SETTINGS_SORT_NOTIFICATION_TYPE"
+						autoresize = yes
+						minimumsize = { 290 -1 }
+						maximumsize = { 290 -1 }
+						align = nobaseline
+					}
+					textbox = {
+						text = "MESSAGE_SETTINGS_SORT_APPEARANCE"
+						autoresize = yes
+						minimumsize = { 290 -1 }
+						maximumsize = { 290 -1 }
+						align = nobaseline
+					}
+					textbox = {
+						text = "MESSAGE_SETTINGS_SORT_PAUSE"
+						autoresize = yes
+						minimumsize = { 60 -1 }
+						maximumsize = { 60 -1 }
+						align = hcenter|nobaseline
+					}									
+				}
+
+				scrollarea = {
+					using = default_list_position
+					layoutpolicy_vertical = preferred
+					layoutpolicy_horizontal = preferred
+					maximumsize = { 684 600 }
+					minimumsize = { 684 150 }
+
+					scrollbarpolicy_horizontal = always_off
+					
+					scrollbar_vertical = {
+						using = vertical_scrollbar		
+					}
+
+					scrollwidget = {
+						container = {
+							parentanchor = hcenter
+							resizeparent = yes
+								
+							flowcontainer = {
+								parentanchor = hcenter
+								direction = vertical
+								spacing = 4
+								datamodel = "[MessageSettingsWindow.GetSettingsItems]"
+								
+								item = {
+									notification_type_list_item = {}
+								}
+							}								
+						}					
+					}
+				}
+				
+				flowcontainer = {
+					visible = "[MessageSettingsWindow.HasSingleShownItem]"
+					parentanchor = hcenter
+					spacing = 10
+					margin_top = 10
+					
+					button_primary = {
+						onclick = "[MessageSettingsWindow.RemoveSingleShownItem]"
+						size = { 660 40 }
+						text = "SHOW_ALL_MESSAGE_SETTINGS"
+					}	
+				}
+
+				flowcontainer = {
+					parentanchor = hcenter
+					spacing = 10
+					margin_top = 10
+					
+					button = {
+						onclick = "[MessageSettingsWindow.ResetSettings]"
+						size = { 310 40 }
+						text = "RESET_TO_DEFAULT"
+						using = default_button
+					}
+					
+					button = {
+						onclick = "[ToggleMessageSettings]"
+						size = { 310 40 }
+						text = "CLOSE_LABEL"
+						using = default_button
+					}					
+				}
+			}
+		}
+	}
+
+	type notification_type_list_item = widget {
+		size = { 660 44 }
+		visible = "[MessageSettingsWindow.ShouldBeShown(MessageSettingsItem.GetTag)]"
+
+		background = { 
+			using = entry_bg_simple
+		}
+
+		hbox = {
+			textbox = {
+				text = "[MessageSettingsItem.GetName]"
+				align = nobaseline
+				layoutpolicy_vertical = preferred
+				layoutpolicy_horizontal = preferred
+				maximumsize = { 290 -1 }
+				margin_left = 10
+			}
+
+			widget = {
+				size = { 290 44 }
+
+				dropdown_menu_standard = {
+					parentanchor = vcenter
+					blockoverride "dropdown_properties"
+					{
+						datamodel = [MessageSettingsItem.GetValidOptions]
+						onselectionchanged = [MessageSettingsItem.OnSelectOption]
+					}
+
+					blockoverride "dropdown_size"
+					{
+						size = { 290 32 }
+					}
+
+					blockoverride "dropdown_list_maxsize"
+					{
+						size = { 290 600 }
+					}
+
+					blockoverride "dropdown_active_item_properties"
+					{
+						text_single = {
+							parentanchor = vcenter
+							position = { 10 0 }
+							autoresize = yes
+							align = nobaseline
+							default_format = "#clickable"
+							text = "[MessageSettingsItem.GetCurrentOption.GetNameWithConcept]"
+						}
+								
+						text_single = {
+							parentanchor = right|vcenter
+							position = { -30 0 }
+							autoresize = yes
+							align = right|nobaseline
+							default_format = "#title"
+							text = "MESSAGE_SETTINGS_DEFAULT"
+							visible = "[MessageSettingsItem.GetCurrentOption.IsDefault]"
+						}
+					}
+
+					blockoverride "dropdown_item_properties"
+					{
+						widget = {
+							size = { 100% 100% }
+
+							hbox = {
+								layoutpolicy_horizontal = expanding
+								margin_right = 10
+
+								text_single = {
+									layoutpolicy_horizontal = expanding
+									align = nobaseline
+									margin_left = 10
+									default_format = "#clickable"
+									text = "[NotificationOptionItem.GetNameWithConcept]"
+								}
+
+								expand = {}
+								
+								text_single = {
+									layoutpolicy_horizontal = expanding
+									align = right|nobaseline
+									default_format = "#title"
+									text = "MESSAGE_SETTINGS_DEFAULT"
+									visible = "[NotificationOptionItem.IsDefault]"
+								}
+							}
+						}
+					}
+				}
+			}
+
+			widget = {
+				size = { 60 44 }
+				checkbutton = {
+					using = check_button
+					size = { 24 24 }
+					parentanchor = center
+					onclick = "[MessageSettingsItem.ToggleAutoPause]"
+					checked = "[MessageSettingsItem.HasAutoPause]"
+				}
+			}
+		}
+	}
+}
