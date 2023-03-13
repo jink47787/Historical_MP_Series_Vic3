@@ -23,9 +23,9 @@ types construction_queue {
 			}
 			blockoverride "text2" {
 				block "text" {
-					visible = "[Country.HasConstructionQueued]"
-					text = "QUEUE_CONSTRUCTION_POINTS_SUMMARY"
-					tooltip = "QUEUE_CONSTRUCTION_POINTS_SUMMARY_TOOLTIP"
+					visible = "[And(Country.HasConstructionQueued, Not(Country.IsConstructionPaused))]"
+					text = "TOTAL_TIME_CONSTRUCTION"
+					tooltip = "TOTAL_TIME_CONSTRUCTION_TOOLTIP"
 				}
 			}
 		}		
@@ -46,26 +46,27 @@ types construction_queue {
 
 		widget = {
 			parentanchor = hcenter
+			visible = "[ProductionMethodsPanel.CanHavePrivateConstructions]"
 			size = { @panel_width 50 }	
 
-			container = {
-				visible = "[Country.ShouldShowPrivateConstructionQueue]"
+			button = {
+				using = default_button
 				parentanchor = vcenter
-				button = {
-					using = default_button
-					size = { 300 40 }
-					text = "SHOW_PRIVATE_CONSTRUCTIONS"
-					visible = "[Not(ProductionMethodsPanel.IsShowingPrivateConstructions)]"
-					onclick = "[ProductionMethodsPanel.ShowPrivateConstructions]"
-				}	
+				position = { 0 0 }
+				size = { 300 40 }
+				text = "SHOW_PRIVATE_CONSTRUCTIONS"
+				visible = "[Not(ProductionMethodsPanel.IsShowingPrivateConstructions)]"
+				onclick = "[ProductionMethodsPanel.ShowPrivateConstructions]"
+			}	
 
-				button = {
-					using = default_button
-					size = { 300 40 }
-					text = "SHOW_GOVERNMENT_CONSTRUCTIONS"
-					visible = "[Not(ProductionMethodsPanel.IsShowingGovernmentConstructions)]"
-					onclick = "[ProductionMethodsPanel.ShowGovernmentConstructions]"
-				}
+			button = {
+				using = default_button
+				parentanchor = vcenter
+				position = { 0 0 }
+				size = { 300 40 }
+				text = "SHOW_GOVERNMENT_CONSTRUCTIONS"
+				visible = "[Not(ProductionMethodsPanel.IsShowingGovernmentConstructions)]"
+				onclick = "[ProductionMethodsPanel.ShowGovernmentConstructions]"
 			}
 
 
@@ -78,8 +79,7 @@ types construction_queue {
 				tooltip = "[Country.PauseConstructionTooltip]"
 				onclick = "[Execute( Country.PauseConstruction )]"
 				enabled = "[And(IsValid( Country.PauseConstruction ), Country.HasConstructionQueued)]"
-				input_action = "toggle_construction_queue_pause"
-				visible = "[And(ProductionMethodsPanel.IsShowingGovernmentConstructions,Not(Country.IsConstructionPaused))]"
+				visible = "[Not(Country.IsConstructionPaused)]"
 			}
 
 			button = {
@@ -91,8 +91,7 @@ types construction_queue {
 				tooltip = "[Country.ResumeConstructionTooltip]"
 				onclick = "[Execute( Country.ResumeConstruction )]"
 				enabled = "[IsValid( Country.ResumeConstruction )]"
-				input_action = "toggle_construction_queue_pause"
-				visible = "[And(ProductionMethodsPanel.IsShowingGovernmentConstructions,Country.IsConstructionPaused)]"
+				visible = "[Country.IsConstructionPaused]"
 			}					
 		}			
 		
@@ -103,11 +102,7 @@ types construction_queue {
 			parentanchor = hcenter
 
 			item = {
-				construction_queue_item = {
-					blockoverride "queue_progessbar_and_name_size" {
-						size = { 490 25 }
-					}
-				}
+				construction_queue_item = {}
 			}
 		}				
 
@@ -155,11 +150,7 @@ types construction_queue {
 			
 			### NAME + PROGRESS
 			widget = {
-
-				block "queue_progessbar_and_name_size" {
-					size = { 380 25 }
-				}
-
+				size = { 380 25 }
 				parentanchor = vcenter
 
 				background = {
@@ -178,14 +169,34 @@ types construction_queue {
 					tooltip = "[ConstructionQueueElement.GetTooltip]"
 					size = { 100% 100% }
 
-					construction_queue_item_texts = {
-						visible = "[GreaterThanOrEqualTo_CFixedPoint(ConstructionQueueElement.GetBuilding.GetState.GetConstructionEfficiency, '(CFixedPoint)0'))]"
+					textbox = {
+						visible = "[GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0')]"
+						parentanchor = left|vcenter
+						align = right|nobaseline
+						position = { 310 0 }
+						text = "CONSTRUCTION_QUEUE_ELEMENT_ALLOCATION"
 					}
-					construction_queue_item_texts = {
-						visible = "[LessThan_CFixedPoint(ConstructionQueueElement.GetBuilding.GetState.GetConstructionEfficiency, '(CFixedPoint)0'))]"
-						blockoverride "default_format" {
-							default_format = "#n"
-						}
+
+					textbox = {
+						visible = "[Not(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0'))]"
+						parentanchor = left|vcenter
+						align = right|nobaseline
+						position = { 255 0 }
+						max_width = 70
+						autoresize = yes
+						elide = right
+						fontsize_min = 12
+						text = "QUEUED"
+						alpha = "[TransparentIfFalse(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0'))]"
+					}
+
+					textbox = {
+						position = { -7 0 }
+						text = "#v [ConstructionQueueElement.GetWeeksLeft]#!w"
+						parentanchor = right|vcenter
+						autoresize = yes
+						align = right|nobaseline
+						alpha = "[TransparentIfFalse(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0'))]"
 					}
 				}
 				
@@ -219,8 +230,8 @@ types construction_queue {
 					align = right|nobaseline
 					parentanchor = vcenter|right
 					visible = "[Not(ConstructionQueueElement.IsValidConstruction)]"
-					raw_text = "@red_cross!"
-					tooltip = "[ConstructionQueueElement.GetTooltip]"
+					text = "@red_cross!"
+					tooltip = "[ConstructionQueueElement.GetInvalidTooltip]"
 				}
 			}
 			
@@ -228,7 +239,6 @@ types construction_queue {
 			
 			### BUTTONS
 			button_icon_round_action = {
-				visible = "[Not(ConstructionQueueElement.IsPrivatelyFundedConstruction)]"
 				size = { 30 30 }
 				blockoverride "icon" {
 					texture = "gfx/interface/icons/generic_icons/up_up.dds"
@@ -247,7 +257,6 @@ types construction_queue {
 			}
 
 			button_icon_round_action = {
-				visible = "[Not(ConstructionQueueElement.IsPrivatelyFundedConstruction)]"
 				size = { 30 30 }
 				blockoverride "icon" {
 					texture = "gfx/interface/icons/generic_icons/down_down.dds"
@@ -266,7 +275,6 @@ types construction_queue {
 			}
 
 			button_icon_cancel = {
-				visible = "[Not(ConstructionQueueElement.IsPrivatelyFundedConstruction)]"
 				size = { 30 30 }
 				parentanchor = vcenter
 				tooltip = "CANCEL_CONSTRUCTION"
@@ -274,45 +282,6 @@ types construction_queue {
 				onclick = "[Execute( ConstructionQueueElement.CancelConstruction )]"
 			}							
 		}	
-	}
-}
-
-types construction_queue {
-	type construction_queue_item_texts = widget {
-		size = { 100% 100% }
-		textbox = {
-			visible = "[GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0')]"
-			parentanchor = left|vcenter
-			align = right|nobaseline
-			position = { 310 0 }
-			text = "CONSTRUCTION_QUEUE_ELEMENT_ALLOCATION"
-			block "default_format" {}
-		}
-
-		textbox = {
-			visible = "[Not(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0'))]"
-			parentanchor = left|vcenter
-			align = right|nobaseline
-			position = { 255 0 }
-			max_width = 70
-			autoresize = yes
-			elide = right
-			fontsize_min = 12
-			text = "QUEUED"
-			alpha = "[TransparentIfFalse(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0'))]"
-			block "default_format" {}
-		}
-
-		textbox = {
-			position = { -7 0 }
-			visible = "[ConstructionQueueElement.IsCurrentlyUnderConstruction]"
-			raw_text = "#b [ConstructionQueueElement.GetWeeksLeft]#!w"
-			parentanchor = right|vcenter
-			autoresize = yes
-			align = right|nobaseline
-			alpha = "[TransparentIfFalse(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0'))]"
-			block "default_format" {}
-		}
 	}
 }
 
