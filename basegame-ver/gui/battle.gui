@@ -42,17 +42,14 @@ types battle_panel_types
 				blockoverride "first_button" {
 					text = "OVERVIEW"
 				}
-				blockoverride "first_button_tooltip" {
-					tooltip = "OVERVIEW"
-				}
 				blockoverride "first_button_click" {
-					onclick = "[InformationPanel.SelectTab('default')]"
+					onclick = "[InformationPanel.SelectTab('overview')]"
 				}
 				blockoverride "first_button_visibility" {
-					visible = "[InformationPanel.IsTabSelected('default')]"
+					visible = "[InformationPanel.IsTabSelected('overview')]"
 				}
 				blockoverride "first_button_visibility_checked" {
-					visible = "[Not( InformationPanel.IsTabSelected('default') )]"
+					visible = "[Not( InformationPanel.IsTabSelected('overview') )]"
 				}
 				blockoverride "first_button_selected" {
 					text = "OVERVIEW"
@@ -61,9 +58,6 @@ types battle_panel_types
 				# Details
 				blockoverride "second_button" {
 					text = "DETAILS"
-				}
-				blockoverride "second_button_tooltip" {
-					tooltip = "DETAILS"
 				}
 				blockoverride "second_button_click" {
 					onclick = "[InformationPanel.SelectTab('details')]"
@@ -86,7 +80,7 @@ types battle_panel_types
 				parentanchor = hcenter
 
 				battle_panel_overview_content = {
-					visible = "[InformationPanel.IsTabSelected('default')]"
+					visible = "[InformationPanel.IsTabSelected('overview')]"
 					using = default_content_fade
 				}
 				
@@ -231,67 +225,23 @@ types battle_panel_types
 				}
 				
 				# icons
-				flowcontainer = {
-					parentanchor = bottom
-					position = { 0 -45 }
-					tooltip = "BATTLE_CONDITION_ATTACKER_TOOLTIP"
+				icon = {
 					visible = "[And(Battle.GetAttackerCondition.IsValid,Not(Battle.HasEnded))]"
+					parentanchor = bottom
+					position = { 10 -50 }
 					datacontext = "[Battle.GetAttackerCondition]"
-					margin_right = 10
-
-					background = {
-						using = fade_right_simple
-						margin_bottom = 50
-						margin_top = 8
-						margin_left = 14
-						margin_right = 40
-					}
-				
-					icon = {
-						size = { 44 44 }
-						texture = "[BattleCondition.GetTexture]"
-					}
-
-					textbox = {
-						text = "[BattleCondition.GetName]"
-						minimumsize = { 120 -1 }
-						autoresize = yes
-						parentanchor = vcenter
-						align = nobaseline
-						margin_left = 10
-						default_format = "#tooltippable_name"		
-					}
+					size = { 50 50 }
+					texture = "[BattleCondition.GetTexture]"
+					tooltip = "BATTLE_CONDITION_TOOLTIP"
 				}
-				flowcontainer = {
+				icon = {
 					visible = "[And(Battle.GetDefenderCondition.IsValid,Not(Battle.HasEnded))]"
 					parentanchor = bottom|right
-					position = { 0 -45 }
+					position = { -10 -50 }
 					datacontext = "[Battle.GetDefenderCondition]"
-					tooltip = "BATTLE_CONDITION_DEFENDER_TOOLTIP"
-					margin_left = 10
-
-					background = {
-						using = fade_left_simple
-						margin_bottom = 50
-						margin_top = 8
-						margin_left = 40
-						margin_right = 12
-					}
-					
-					textbox = {
-						text = "[BattleCondition.GetName]"
-						minimumsize = { 120 -1 }
-						autoresize = yes
-						parentanchor = vcenter
-						align = right|nobaseline
-						margin_right = 10
-						default_format = "#tooltippable_name"		
-					}
-
-					icon = {
-						size = { 44 44 }
-						texture = "[BattleCondition.GetTexture]"
-					}
+					size = { 50 50 }
+					texture = "[BattleCondition.GetTexture]"
+					tooltip = "BATTLE_CONDITION_TOOLTIP"
 				}
 				
 				# date + terrain
@@ -508,11 +458,14 @@ types battle_panel_types
 					blockoverride "manpower" {
 						text = "[Battle.CalcCurrentDefenderManpower|*1]"
 					}
-					blockoverride "current_tooltip" {
+					blockoverride "manpower_tooltip" {
 						tooltip = "[Battle.GetDefenderBattalionBreakdown]"
 					}					
 					blockoverride "battalions_or_warships" {
 						text = "[Battle.GetCurrentDefenderUnits]"
+					}
+					blockoverride "current_battalions_tooltip" {
+						tooltip = "[Battle.GetDefenderBattalionBreakdown]"
 					}
 					blockoverride "start_of_battle_manpower" {
 						text = "[Battle.GetStartingDefenderManpower|*1]"
@@ -554,13 +507,10 @@ types battle_panel_types
 						tooltip = "BATTLE_DEFENDER_ENDING_MORALE_TOOLTIP"
 					}
 					blockoverride "dead" {
-						text = "[Battle.GetDefenderTotalDead|D]"
+						text = "[Battle.GetDefenderTotalDead]"
 					}
 					blockoverride "wounded" {
-						text = "[Battle.GetDefenderTotalWounded|D]"
-					}
-					blockoverride "demoralized" {
-						text = "[Battle.GetDefenderTotalDemoralized|D]"
+						text = "[Battle.GetDefenderTotalWounded]"
 					}
 					blockoverride "dead_tooltip" {
 						tooltip = "DEAD_TOOLTIP_DEFENDER"
@@ -568,9 +518,6 @@ types battle_panel_types
 					blockoverride "wounded_tooltip" {
 						tooltip = "WOUNDED_TOOLTIP_DEFENDER"
 					}
-					blockoverride "demoralized_tooltip" {
-                        tooltip = "DEMORALIZED_TOOLTIP_DEFENDER"
-                    }
 					blockoverride "mirror_unit_image" {
 						mirror = horizontal
 					}
@@ -606,7 +553,6 @@ types battle_panel_types
 		maximumsize = { @panel_width_plus_14_half -1 }
 		direction = vertical
 		spacing = 5
-		margin_top = 5
 		
 		background = {
 			block "side_background" {
@@ -761,10 +707,6 @@ types battle_panel_types
 					layoutpolicy_vertical = expanding
 					spacing = 5
 
-					block "current_tooltip" {
-						tooltip = "[Battle.GetAttackerBattalionBreakdown]"
-					}
-
 					textbox = {
 						layoutpolicy_horizontal = expanding
 						size = { 0 20 }
@@ -780,6 +722,10 @@ types battle_panel_types
 						}
 						using = fontsize_large
 						default_format = "#variable"
+
+						block "manpower_tooltip" {
+							tooltip = "[Battle.GetAttackerBattalionBreakdown]"
+						}
 					}
 
 					icon = {
@@ -795,6 +741,10 @@ types battle_panel_types
 						}
 						using = fontsize_large
 						default_format = "#variable"
+
+						block "current_battalions_tooltip" {
+							tooltip = "[Battle.GetAttackerBattalionBreakdown]"
+						}
 					}
 
 					icon = {
@@ -965,7 +915,7 @@ types battle_panel_types
 					align = nobaseline
 					autoresize = yes
 					block "dead" {
-						text = "[Battle.GetAttackerTotalDead|D]"
+						text = "[Battle.GetAttackerTotalDead]"
 					}
 				}
 				icon = {
@@ -995,7 +945,7 @@ types battle_panel_types
 					align = nobaseline
 					autoresize = yes
 					block "wounded" {
-						text = "[Battle.GetAttackerTotalWounded|D]"
+						text = "[Battle.GetAttackerTotalWounded]"
 					}
 				}
 				icon = {
@@ -1004,37 +954,6 @@ types battle_panel_types
 				}
 			}
 		}
-
-		# demoralized
-        widget = {
-            size = { @battle_side_width 24 }
-            parentanchor = hcenter
-            block "demoralized_tooltip" {
-                tooltip = "DEMORALIZED_TOOLTIP_ATTACKER"
-            }
-
-            hbox = {
-                spacing = 5
-
-                textbox = {
-                    layoutpolicy_horizontal = expanding
-                    size = { 0 20 }
-                    align = left|nobaseline
-                    text = "[concept_morale_demoralized]"
-                }
-                textbox = {
-                    align = nobaseline
-                    autoresize = yes
-                    block "demoralized" {
-                        text = "[Battle.GetAttackerTotalDemoralized|D]"
-                    }
-                }
-                icon = {
-                    texture = "gfx/interface/icons/military_icons/manpower.dds"
-                    size = { 20 20 }
-                }
-            }
-        }
 		
 		widget = { size = { 5 5 }}
 		
