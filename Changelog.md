@@ -82,8 +82,11 @@ All mods / mod ideas used linked below:
 - Renamed literacy to Education Level to more accurately reflect what it is
 #### Production
 - Percentage multiplier on tax capacity for bureau PM techs
+
 ## Economic
 - Pops are more likely to consume oil and cars when they are widely available
+#### Goods
+- Hardwood created into its own building and resource potential
 #### Society
 - Quinine shifted to era 4, malaria prevention to era 5
 #### Industries
