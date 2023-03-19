@@ -25,7 +25,8 @@ All mods / mod ideas used linked below:
 - Confirm Shortcut: https://steamcommunity.com/sharedfiles/filedetails/?id=2900498971
 - Better Interest Group Attraction: https://steamcommunity.com/sharedfiles/filedetails/?id=2881590888
 - Diplo Acceptance Shown: https://steamcommunity.com/sharedfiles/filedetails/?id=2886453657
-- Separation of Military and Civilian Shipyard (Used for icons) https://steamcommunity.com/sharedfiles/filedetails/?id=2888925505
+- Separation of Military and Civilian Shipyard (Used for icons): https://steamcommunity.com/sharedfiles/filedetails/?id=2888925505
+- State Transfer Tool: https://steamcommunity.com/sharedfiles/filedetails/?id=2880446671
 ---
 <br/>
 
