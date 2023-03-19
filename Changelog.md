@@ -40,6 +40,7 @@ All mods / mod ideas used linked below:
 #### Government Types
 - Republic is one government type
 - Government names similar to vic2
+- Authority is now locked to authoritarianism and is required for more authoritarian policies (higher taxes, more military)
 #### Laws
 - Separated executive structure from governance principles
 - New cameralism & voting system laws
@@ -52,6 +53,7 @@ All mods / mod ideas used linked below:
 - Corporation taxes penalize construction efficiency
 - Clerical Voting replaces Landed Voting for theocracies
 - Cannot manually change cultural laws until an era 5 tech
+- Added in debt laws
 #### Institutions
 - Break even point for healthcare is now 30 wealth
 - All education is dependent to varying degrees on SoL
@@ -87,7 +89,7 @@ All mods / mod ideas used linked below:
 ## Economic
 - Pops are more likely to consume oil and cars when they are widely available
 #### Goods
-- Hardwood created into its own building and resource potential
+- Hardwood and wine made into its own resource
 #### Society
 - Quinine shifted to era 4, malaria prevention to era 5
 #### Industries
@@ -133,6 +135,7 @@ All mods / mod ideas used linked below:
 - Austria starts with serfdom
 - French historical pop nerf (there is no mortality multiplier, that is why there are two birth rate modifiers)
 - French Language School added
+- There is a potato blight and a later wine blight that dramatically change early game 
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 #### West Asia
