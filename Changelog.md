@@ -27,6 +27,8 @@ All mods / mod ideas used linked below:
 - Diplo Acceptance Shown: https://steamcommunity.com/sharedfiles/filedetails/?id=2886453657
 - Separation of Military and Civilian Shipyard (Used for icons): https://steamcommunity.com/sharedfiles/filedetails/?id=2888925505
 - State Transfer Tool: https://steamcommunity.com/sharedfiles/filedetails/?id=2880446671
+- Production Tab Employment: https://steamcommunity.com/sharedfiles/filedetails/?id=2882193032
+- Building Employment In State Overview: https://steamcommunity.com/sharedfiles/filedetails/?id=2883572964
 ---
 <br/>
 
