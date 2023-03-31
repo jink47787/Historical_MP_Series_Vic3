@@ -48,7 +48,6 @@ All mods / mod ideas used linked below:
 - Professional army gives 10% attack and defence, and no ability to conscript
 - Limited conscription law added
 - Slavery increases landowner political power more
-- Command economy gives 75% bureaucrats contribution to the investment pool
 - Private & Public schools now allowed on any religion law
 - Corporation taxes penalize construction efficiency
 - Clerical Voting replaces Landed Voting for theocracies
