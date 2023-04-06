@@ -139,6 +139,8 @@ All mods / mod ideas used linked below:
 - French historical pop nerf (there is no mortality multiplier, that is why there are two birth rate modifiers)
 - French Language School added
 - There is a potato blight and a later wine blight that dramatically change early game 
+- A crown in the gutter event chain to let Germany form early
+- Increased the difficulty of forming Germany
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 #### West Asia

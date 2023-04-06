@@ -7,10 +7,6 @@
 
 gutter_crown.1 = {
 
-	#has_unification_candidate - Check if there is at least one unification candidate for country tag
-	#has_country_unification_candidate = GER
-	#Supported Scopes: none
-
 	popup = yes
 
 	type = country_event
@@ -31,25 +27,20 @@ gutter_crown.1 = {
 	duration = 3	
 	
 	#Revolution in some state in Germany, Germany does not exist, event has not fired, Prussia must have Nationalism tech, Prussia must own Silesia, Prussia must have radicals
-	trigger = {
+	
+	trigger = {	
 		exists = c:PRU
 		c:PRU = ROOT
-		c:PRU = {
-			radical_fraction = {
-				value >=0.1
-				}
-		}
-		has_global_variable = potato_blight_happened
-		owns_entire_state_region = STATE_SILESIA
-		has_technology_researched = nationalism
-		NOT = { has_global_variable = gutter_crown }
 		NOT = {
-			OR = {
-				exists = c:NGF
-				exists = c:GER
-				exists = c:SGF
+			any_diplomatic_play = {
+				any_scope_play_involved = {
+					THIS = ROOT
+				}
 			}
 		}
+		has_global_variable = gutter_crown
+		NOT = { has_global_variable = gutter_crown_refused }
+		NOT = { has_variable = gutter_crown_accepted }
 	}
 	
 	
@@ -59,75 +50,29 @@ gutter_crown.1 = {
 	}
 	
 	
-	#Stay authoritarian (move to auth laws?), reduce radicals for 20 years decaying, no diplo play
-	option = {
-		name = gutter_crown.1.a	
-		
-		
-		custom_tooltip = {
-			text = gutter_crown.1.a.t
-			every_scope_state = {
-				limit = {
-					OR = {
-						region = sr:region_rhine
-						region = sr:region_south_germany
-						region = sr:region_north_germany
-						region = sr:region_poland
-					}
-				}
-				add_modifier = {
-					name = distraught_liberals
-					months = 120
-					is_decaying = yes
-				}
-			}
-		}
-		add_modifier = {
-			name = divine_monarchy
-			months = 180
-			is_decaying = yes
-		}
-		every_interest_group = {
-			limit = {
-				OR = {
-					has_ideology = ideology_meritocratic
-					has_ideology = ideology_liberal
-					has_ideology = ideology_populist
-				}
-			}
-			add_modifier = {
-				name = chastened_liberals
-				months = 120
-				is_decaying = yes
-			}
-		}
-		ig:ig_landowners = {
-			add_modifier = {
-				name = happy_junkers
-				months = 120
-				is_decaying = yes
-			}
-		}
-		ig:ig_armed_forces = {
-			add_modifier = {
-				name = happy_junkers
-				is_decaying = yes
-				months = 120
-			}	
-		}
-		ai_chance = {
-			base = 75
-		}
-		default_option = yes
-	}	
-
+	
 	# Get liberal laws, unpiss off IGs, start unification diplo play, reduce relations with all GPs in Europe, trigger event 2 for Austria
 	option = {
 	
 		name = gutter_crown.1.b
-		
+		set_variable = gutter_crown_accepted
+		# Option is only available while at peace and not in a Diplo Play
+		trigger = {
+			NOT = {
+				any_diplomatic_play = {
+					any_scope_play_involved = {
+						THIS = ROOT
+					}
+				}
+			}
+		}
+		add_modifier = {
+			name = liberal_germany
+			months = 240
+			is_decaying = yes
+		}
 		custom_tooltip = {
-			test = gutter_crown.1.b.t
+			text = gutter_crown.1.b.t
 			if = {
 				limit = {
 					c:AUS = {
@@ -151,50 +96,51 @@ gutter_crown.1 = {
 			c:AUS = {
 				trigger_event = {
 					id = gutter_crown.2
-					days = 0
+					days = 7
 					popup = yes
 				}
 			}
 		}
 
 		
-		#Fix this tooltip
 		custom_tooltip = gutter_crown.1.b.tt
-		
-		ig:ig_landowners = {
-			add_modifier = {
-				name = mad_junkers
-				is_decaying = yes
-				months = 120
-			}
-		} 
-		ig:ig_armed_forces = {
-			add_modifier = {
-				name = mad_junkers
-				is_decaying = yes
-				months = 120
-			}	
-		}
-		activate_law = law_type:law_parliamentary_system
-		activate_law = law_type:law_universal_suffrage
-		activate_law = law_type:law_right_of_assembly
-		activate_law = law_type:law_elected_bureaucrats
-		if = {
-			limit  = {
-				has_law = law_type:law_militarized_police
-				}
-			activate_law = law_type:law_dedicated_police_force
-		}
-		if = {
-			limit = {
-				has_law = law_type:law_secret_police
-			}
-			activate_law = law_type:law_national_guard
-		}
 		ai_chance = {
 			base = 25
 		}
 		default_option = yes
+	}
+	
+	option = {
+		name = gutter_crown.1.c	
+		#Option to delay gutter crown until you are at peace
+		
+		trigger = {
+			any_diplomatic_play = {
+				any_scope_play_involved = {
+					THIS = ROOT
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = gutter_crown.1.e
+		trigger = {
+			NOT = {
+				any_diplomatic_play = {
+					any_scope_play_involved = {
+						THIS = ROOT
+					}
+				}
+			}
+		}
+		add_modifier = {
+			name = liberal_germany
+			months = 240
+			is_decaying = yes
+		}
+		set_global_variable = gutter_crown_refused
+		custom_tooltip = gutter_crown.1.e.t
 	}
 }
 
@@ -228,28 +174,30 @@ gutter_crown.2 = {
 		
 		set_global_variable = unification_war
 		
-
+		# This option should only happen if Austria has not already been beaten in a leadership war
 		
+		trigger = {
+			IF = {
+				limit = {
+					has_technology_researched = nationalism
+				}
+				is_unification_candidate = GER
+			}
+		}	
 		c:PRU = {
-			create_diplomatic_play = {
-				name = gutter_crown_war
-				target_country = c:AUS				
-				type = unification
+			create_diplomatic_play = { 
+				target_country = c:AUS
+				type = dp_humiliation
+				
+				#add_war_goal = { - This doesn't work
+				#	holder = c:PRU
+				#	type = unification_leadership
+				#	target_country = c:AUS
+				#}
 			}
 		}
 
 		custom_tooltip = gutter_crown.2.a.t
-		
-		# Germans will like this
-		#every_scope_pop = {
-		#	limit = {
-		#		culture_accepted = yes
-		#	}
-		#	add_modifier = {
-		#		name = pleased_nationalists
-		#	}
-		#}
-		# Non Germans will dislike this
 		ai_chance = {
 			base = 75
 		}
@@ -262,8 +210,7 @@ gutter_crown.2 = {
 	option = {
 		name = gutter_crown.2.b	
 		
-		custom_tooltip = gutter_crown.2.b.t
-		
+		remove_modifier = german_confederation_leader
 		#Give every AI German subject an event that annexes them into Prussia
 		custom_tooltip = {
 			text = gutter_crown.2.b.t
@@ -274,11 +221,6 @@ gutter_crown.2 = {
 					popup = yes
 				}
 			}
-		
-			# Reverse the opinion effects of the other decision
-		
-			
-		
 		
 			every_country = {
 				limit = {
@@ -365,6 +307,8 @@ gutter_crown.3 = {
 	}
 }
 
+# Liberal Unification of Germany!
+
 gutter_crown.4 = {
 
 	type = country_event
@@ -391,11 +335,30 @@ gutter_crown.4 = {
 		
 	
 	option = {
-		# "I should go delete my extra barracks before any revolt begins..."
 		name = gutter_crown.4.a
 		
 		change_tag = GER
 		add_primary_culture = cu:south_german
+		give_claims_on_germany = yes		
+		
+		s:STATE_BOHEMIA = {
+			add_claim = c:GER
+		}
+		s:STATE_MORAVIA = {
+			add_claim = c:GER
+		}
+		s:STATE_AUSTRIA = {
+			add_claim = c:GER
+		}
+		s:STATE_STYRIA = {
+			add_claim = c:GER
+		}
+		s:STATE_TYROL = {
+			add_claim = c:GER
+		}
+		s:STATE_SOUTH_TYROL = {
+			add_claim = c:GER
+		}
 	}
 }
 
@@ -423,9 +386,10 @@ gutter_crown.5 = {
 		exists = c:PRU
 		c:PRU = ROOT
 		is_at_war = no
+		has_global_variable = unification_war
 		not = {
 			any_diplomatic_play = {
-				is_war = yes
+				is_war = no
 				any_scope_play_involved = {
 					THIS = ROOT
 				}
@@ -433,7 +397,7 @@ gutter_crown.5 = {
 		}
 		has_global_variable = unification_war
 		c:AUS = {
-			NOT = { is_unification_candidate = GER }
+			has_modifier = country_humiliated
 		}
 	}
 	
@@ -476,5 +440,175 @@ gutter_crown.5 = {
 			}
 		}
 	}
-	
 }
+
+#Event for if you reject the gutter crown
+
+gutter_crown.6 = {	
+
+	type = country_event
+	placement = ROOT
+	
+	title = gutter_crown.6.t
+	desc = gutter_crown.6.d
+	flavor = gutter_crown.6.f
+	
+	event_image = {
+		video = "gfx/event_pictures/europenorthamerica_london_center.bk2"
+	}
+	
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/europenorthamerica/london_center"
+	
+	
+	#War has been fought and won with Austria
+	trigger = {
+		# Triggered by journal entry
+	}
+
+	# Stay authoritarian (move to auth laws?), reduce radicals for 20 years decaying, no diplo play
+	option = {
+		# Rename this loc	
+		name = gutter_crown.1.a	
+		
+		set_global_variable = gutter_crown_refused
+		
+		custom_tooltip = {
+			text = gutter_crown.1.a.t
+			every_scope_state = {
+				limit = {
+					OR = {
+						region = sr:region_rhine
+						region = sr:region_south_germany
+						region = sr:region_north_germany
+						region = sr:region_poland
+					}
+				}
+				add_modifier = {
+					name = distraught_liberals
+					months = 120
+					is_decaying = yes
+				}
+			}
+		}
+		add_modifier = {
+			name = divine_monarchy
+			months = 180
+			is_decaying = yes
+		}
+		every_interest_group = {
+			limit = {
+				OR = {
+					has_ideology = ideology_meritocratic
+					has_ideology = ideology_liberal
+					has_ideology = ideology_populist
+				}
+			}
+			add_modifier = {
+				name = chastened_liberals
+				months = 120
+				is_decaying = yes
+			}
+		}
+		ig:ig_landowners = {
+			add_modifier = {
+				name = happy_junkers
+				months = 120
+				is_decaying = yes
+			}
+		}
+		ig:ig_armed_forces = {
+			add_modifier = {
+				name = happy_junkers
+				is_decaying = yes
+				months = 120
+			}	
+		}
+		default_option = yes
+	}	
+}
+
+# Event for Prussian Defeat
+gutter_crown.7 = {
+
+	type = country_event
+	placement = ROOT
+	title = gutter_crown.7.t
+	desc = gutter_crown.7.d
+	flavor = gutter_crown.4.f
+	
+	duration = 3
+	
+	event_image = {
+		video = "gfx/event_pictures/europenorthamerica_before_the_battle.bk2"
+	}
+	
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/europenorthamerica/before_the_battle"
+	
+	trigger = {
+		exists = c:PRU
+		c:PRU = ROOT
+		is_at_war = no
+		has_global_variable = unification_war
+		not = {
+			any_diplomatic_play = {
+				is_war = no
+				any_scope_play_involved = {
+					THIS = ROOT
+				}
+			}
+		}
+		has_global_variable = unification_war
+		c:AUS = {
+			NOT = { has_modifier = country_humiliated }
+		}
+	}
+	
+	immediate = {
+		remove_global_variable = unification_war
+	}
+	
+	option = {
+		name = gutter_crown.7.a
+	}
+}
+
+# Remove German confederation leader from Austria
+gutter_crown.8 = {
+
+	type = country_event
+	placement = ROOT
+	title = gutter_crown.8.t
+	desc = gutter_crown.8.d
+	flavor = gutter_crown.8.f
+	
+	duration = 3
+	
+	event_image = {
+		video = "gfx/event_pictures/europenorthamerica_capitalists_meeting.bk2"
+	}
+	
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/europenorthamerica/capitalists_meeting"		
+	
+	
+	trigger = {
+		# Either Germany must exist or Austria must not be a unification candidiate 
+		has_modifier = german_confederation_leader
+		has_technology_researched = nationalism
+		game_date > 1.1.1849
+		OR = {
+			exists = c:GER
+			c:AUS = {
+				NOT = { is_unification_candidate = GER }
+			}
+		}
+	}
+	
+	option = {
+		name = gutter_crown.8.a
+		remove_modifier = german_confederation_leader
+	}
+}
+
