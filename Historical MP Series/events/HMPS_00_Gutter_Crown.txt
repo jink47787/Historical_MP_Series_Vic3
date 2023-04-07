@@ -39,15 +39,13 @@ gutter_crown.1 = {
 			}
 		}
 		has_global_variable = gutter_crown
+		NOT = { has_truce_with = c:AUS }
 		NOT = { has_global_variable = gutter_crown_refused }
 		NOT = { has_variable = gutter_crown_accepted }
 	}
 	
 	
 	# Reduce radicals in all AI small German states permanently
-	immediate = {
-		set_global_variable = gutter_crown
-	}
 	
 	
 	
@@ -68,7 +66,7 @@ gutter_crown.1 = {
 		}
 		add_modifier = {
 			name = liberal_germany
-			months = 240
+			months = 120
 			is_decaying = yes
 		}
 		custom_tooltip = {
@@ -386,8 +384,8 @@ gutter_crown.5 = {
 		exists = c:PRU
 		c:PRU = ROOT
 		is_at_war = no
-		has_global_variable = unification_war
-		not = {
+		NOT = { has_global_variable = gutter_crown_refused } 
+		NOT = {
 			any_diplomatic_play = {
 				is_war = no
 				any_scope_play_involved = {
@@ -395,14 +393,30 @@ gutter_crown.5 = {
 				}
 			}
 		}
-		has_global_variable = unification_war
-		c:AUS = {
-			has_modifier = country_humiliated
+		# EIther Austria has been humiliated and this variable exists, or Germany has the Liberal Germany modifier and Austria is not a unificaiton leader
+		OR = {
+			AND = {
+				has_global_variable = unification_war
+				c:AUS = {
+					has_modifier = country_humiliated
+				}
+			}
+			AND = {
+				has_modifier = liberal_germany
+				c:AUS = {
+					NOT = { is_unification_candidate = GER }
+				}
+			}
 		}
 	}
 	
 	immediate = {
-		remove_global_variable = unification_war
+		if = {
+			limit = {
+				has_global_variable = unification_war
+			}
+			remove_global_variable = unification_war
+		}
 	}
 		
 	option = {
@@ -535,7 +549,7 @@ gutter_crown.7 = {
 	placement = ROOT
 	title = gutter_crown.7.t
 	desc = gutter_crown.7.d
-	flavor = gutter_crown.4.f
+	flavor = gutter_crown.7.f
 	
 	duration = 3
 	
@@ -612,3 +626,90 @@ gutter_crown.8 = {
 	}
 }
 
+#Prussia loses liberal Germany if they turn back into a monarchy
+gutter_crown.9 = {
+
+	type = country_event
+	placement = ROOT
+	title = gutter_crown.9.t
+	desc = gutter_crown.9.d
+	flavor = gutter_crown.4.f
+	
+	duration = 3
+	
+	event_image = {
+		video = "gfx/event_pictures/europenorthamerica_capitalists_meeting.bk2"
+	}
+	
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/europenorthamerica/capitalists_meeting"		
+	
+	trigger = {
+		has_modifier = liberal_germany
+		NOT = { has_law = law_type:law_republic }
+		NOT = { has_global_variable = gutter_crown_refused }
+	}
+	
+	option = {
+		name = gutter_crown.9.a
+		remove_modifier = liberal_germany
+
+		set_global_variable = gutter_crown_refused
+		
+		custom_tooltip = {
+			text = gutter_crown.1.a.t
+			every_scope_state = {
+				limit = {
+					OR = {
+						region = sr:region_rhine
+						region = sr:region_south_germany
+						region = sr:region_north_germany
+						region = sr:region_poland
+					}
+				}
+				add_modifier = {
+					name = distraught_liberals
+					months = 120
+					is_decaying = yes
+				}
+			}
+		}
+		add_modifier = {
+			name = divine_monarchy
+			months = 60
+			is_decaying = yes
+		}
+		every_interest_group = {
+			limit = {
+				OR = {
+					has_ideology = ideology_meritocratic
+					has_ideology = ideology_liberal
+					has_ideology = ideology_populist
+				}
+			}
+			add_modifier = {
+				name = chastened_liberals
+				months = 120
+				is_decaying = yes
+			}
+		}
+		ig:ig_landowners = {
+			add_modifier = {
+				name = happy_junkers
+				months = 120
+				is_decaying = yes
+				multiplier = 0.5
+			}
+		}
+		ig:ig_armed_forces = {
+			add_modifier = {
+				name = happy_junkers
+				is_decaying = yes
+				months = 120
+				multiplier = 0.5
+			}	
+		}
+		default_option = yes
+	}
+	
+}
