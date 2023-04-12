@@ -31,6 +31,7 @@ All mods / mod ideas used linked below:
 - Building Employment In State Overview: https://steamcommunity.com/sharedfiles/filedetails/?id=2883572964
 - State Traits Building & Production Overview: https://steamcommunity.com/sharedfiles/filedetails/?id=2951560430
 - Retain Homelands on Releasing: https://steamcommunity.com/sharedfiles/filedetails/?id=2934872102
+- Army Command Limits: https://steamcommunity.com/sharedfiles/filedetails/?id=2951960564
 ---
 <br/>
 
