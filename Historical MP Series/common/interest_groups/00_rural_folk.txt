@@ -1,27 +1,30 @@
 ﻿ig_rural_folk = {
 	color = hsv{ 0.32 0.45 0.47 }
-	texture = "gfx/interface/icons/ig_icons/rural_folk.dds"	
+	texture = "gfx/interface/icons/ig_icons/rural_folk.dds"
+	layer = "revolution_dynamic_rural_folk"
+	index = 6
+
 	ideologies = {
 		ideology_agrarian
 		ideology_particularist
 		ideology_isolationist
 		ideology_cultural_chauvinism
 	}
-	
+
 	enable = {
 		always = yes
 	}
-	
+
 	traits = {
 		ig_trait_farmers_markets
 		ig_trait_honest_work
 		ig_trait_old_ways
-	}	
-	
+	}
+
 	on_enable = {}
-	on_disable = {}	
+	on_disable = {}
 	on_character_ig_membership = {}
-	
+
 	pop_potential = {
 		NOR = {
 			is_pop_type = aristocrats
@@ -39,7 +42,7 @@
 			pop_employment_building_group = bg_oil_extraction	
 		}
 	}
-	
+
 	pop_weight = {
 		value = 0
 		
@@ -56,7 +59,6 @@
 				value = 50
 			}
 		}	
-
 		add = {
 			desc = "RESOURCE_POP"
 			if = {
@@ -73,8 +75,6 @@
 				value = 50
 			}
 		}
-
-
 		add = {
 			desc = "SMALL_URBAN_CENTER"
 			if = {
@@ -89,7 +89,6 @@
 				value = 50
 			}
 		}	
-
 		add = {
 			desc = "NO_URBAN_CENTER"
 			if = {
@@ -105,7 +104,6 @@
 				value = 100
 			}
 		}
-
 		add = {
 			desc = "POP_FARMERS"
 			if = {
@@ -115,7 +113,6 @@
 				value = 200
 			}
 		}	
-
 		add = {
 			desc = "POP_PEASANTS"
 			if = {
@@ -125,7 +122,6 @@
 				value = 200
 			}
 		}	
-
 		add = {
 			desc = "POP_CLERGYMEN"
 			if = {
@@ -135,7 +131,6 @@
 				value = 50
 			}
 		}
-
 		add = {
 			desc = "POP_LABORERS"
 			if = {
@@ -145,7 +140,6 @@
 				value = 50
 			}
 		}
-
 		add = {
 			desc = "law_land_based_taxation"
 			if = {
@@ -157,7 +151,6 @@
 				value = 10
 			}
 		}	
-
 		add = {
 			desc = "law_serfdom"
 			if = {
@@ -169,7 +162,6 @@
 				value = 20
 			}
 		}
-
 		add = {
 			desc = "law_command_economy"
 			if = {
@@ -208,47 +200,119 @@
 			}
 		}	
 	}
-	
+
 	monarch_weight = {
-		value = 0.25
-	}	
-	
+		value = 0.25 # this is just inherently unlikely
+		# Monarch is not likely to adopt a marginal IG
+		if = {
+			limit = {
+				is_marginal = yes
+			}
+			multiply = {
+				value = 0.1
+			}
+		}
+		# Monarch is more likely to adopt a Powerful IG
+		if = {
+			limit = {
+				is_powerful = yes
+			}
+			multiply = {
+				value = 2
+			}
+		}
+		# More likely with Homesteading
+		if = {
+			limit = {
+				owner = {
+					has_law = law_type:law_homesteading
+				}
+			}
+			multiply = {
+				value = 2
+			}
+		}
+		# Impossible with Serfdom
+		if = {
+			limit = {
+				owner = {
+					has_law = law_type:law_serfdom
+				}
+			}
+			multiply = {
+				value = 0
+			}
+		}
+	}
+
+	agitator_weight = {
+		# Agitators more likely to come from populist IG's rather than elitist
+		value = 1.0
+		# Agitators will never be part of a marginalized IG
+		if = {
+			limit = {
+				owner.ig:ig_rural_folk = {
+					is_marginal = yes
+				}
+			}
+			multiply = {
+				value = 0
+			}
+		}
+	}
+
 	commander_weight = {
 		value = 1.0
-	}	
-	
+	}
+
 	noble_chance = {
 		value = 0.2
 	}
-	
-	female_commander_chance = {	
+
+	female_commander_chance = {
 		value = 0.0
 	}
-	
+
 	female_politician_chance = {
 		value = 0.0
 
 		if = {
 			limit = {
 				owner = {
-					has_law = law_type:law_women_own_property
+					has_law = law_type:law_womens_suffrage
 				}
-				
+
 			}
 			add = {
-				value = 0.05
+				value = 0.025
 			}
 		}
+	}
 
+	female_agitator_chance = {
+		value = 0.025
+		
+		if = {
+			limit = {
+				owner = {
+					has_law = law_type:law_women_own_property
+				}
+
+			}
+			add = {
+				value = 0.025
+			}
+		}	
+		
 		if = {
 			limit = {
 				owner = {
 					has_law = law_type:law_women_in_the_workplace
 				}
-				
+
 			}
 			add = {
-				value = 0.05
+				value = 0.025
 			}
 		}
 
@@ -257,14 +321,14 @@
 				owner = {
 					has_law = law_type:law_womens_suffrage
 				}
-				
+
 			}
 			add = {
-				value = 0.05
+				value = 0.025
 			}
-		}
+		}		
 	}
-	
+
 	# The chance that a commander belonging to this IG takes over leadership when it changes
 	# scope:character is the most popular commander in the IG
 	commander_leader_chance = {

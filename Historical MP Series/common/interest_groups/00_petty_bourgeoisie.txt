@@ -1,7 +1,9 @@
 ﻿ig_petty_bourgeoisie = {
 	color = hsv{ 0.65 0.54 0.52 }
 	texture = "gfx/interface/icons/ig_icons/petty_bourgeoisie.dds"
-	
+	layer = "revolution_dynamic_petty_bourgeoisie"
+	index = 5
+
 	ideologies = {
 		ideology_reactionary
 		ideology_meritocratic
@@ -11,28 +13,33 @@
 	enable = {
 		always = yes
 	}
-	
+
 	traits = {
 		ig_trait_treasury_bonds
 		ig_trait_middle_managers
 		ig_trait_xenophobia
-	}	
-	
+	}
+
 	on_enable = {}
-	on_disable = {}	
+	on_disable = {}
 	on_character_ig_membership = {}
-	
+
 	pop_potential = {
 		pop_has_primary_culture = yes
 		NOR = {
 			is_pop_type = aristocrats
 			is_pop_type = capitalists
 		}
+		OR = {
+			pop_employment_building_group = bg_manufacturing
+			pop_employment_building_group = bg_service
+			pop_employment_building_group = bg_urban_facilities
+			pop_employment_building_group = bg_government
+		}
 	}
 
 	pop_weight = {
 		value = 50
-
 		add = {
 			desc = "RURAL_POP"
 			if = {
@@ -66,7 +73,6 @@
 				value = 75
 			}
 		}
-
 		add = {
 			desc = "POP_BUREAUCRATS"
 			if = {
@@ -76,7 +82,6 @@
 				value = 50
 			}
 		}
-
 		add = {
 			desc = "POP_ENGINEERS"
 			if = {
@@ -86,7 +91,6 @@
 				value = 25
 			}
 		}
-
 		add = {
 			desc = "law_cultural_exclusion" #they took our jobs!
 			if = {
@@ -106,8 +110,7 @@
 				}
 				value = 10
 			}
-		}	
-
+		}		
 		add = {
 			desc = "law_multicultural" #de terk er jerbs!
 			if = {
@@ -128,7 +131,6 @@
 				value = 20
 			}
 		}
-
 		add = {
 			desc = "SOL_25_30"
 			if = {
@@ -139,7 +141,6 @@
 				value = 10
 			}
 		}
-
 		add = {
 			desc = "SOL_30_35"
 			if = {
@@ -150,7 +151,6 @@
 				value = 20
 			}
 		}	
-
 		add = {
 			desc = "SOL_35_40"
 			if = {
@@ -161,7 +161,6 @@
 				value = 30
 			}
 		}
-
 		add = {
 			desc = "SOL_40_45"
 			if = {
@@ -172,7 +171,6 @@
 				value = 40
 			}
 		}
-
 		add = {
 			desc = "SOL_45_50"
 			if = {
@@ -183,7 +181,6 @@
 				value = 50
 			}
 		}
-
 		add = {
 			desc = "SOL_50_100"
 			if = {
@@ -193,7 +190,6 @@
 				value = 75
 			}
 		}
-
 		add = {
 			desc = "law_national_guard"
 			if = {
@@ -205,7 +201,6 @@
 				value = 10
 			}
 		}
-
 		add = {
 			desc = "law_no_police"
 			if = {
@@ -217,7 +212,6 @@
 				value = 10
 			}
 		}
-
 		add = {
 			desc = "law_no_migration_controls"
 			if = {
@@ -229,7 +223,6 @@
 				value = 10
 			}
 		}
-
 		multiply = {
 			desc = "LEADER_POPULARITY"
 			scope:interest_group = {
@@ -241,7 +234,6 @@
 				}
 			}
 		}		
-
 		multiply = {
 			desc = "decentralized_power"	
 			value = 1.0
@@ -272,45 +264,117 @@
 	}
 
 	monarch_weight = {
-		value = 0.25
-	}	
-	
+		value = 1
+		# Monarch is not likely to adopt a marginal IG
+		if = {
+			limit = {
+				is_marginal = yes
+			}
+			multiply = {
+				value = 0.1
+			}
+		}
+		# Monarch is more likely to adopt a Powerful IG
+		if = {
+			limit = {
+				is_powerful = yes
+			}
+			multiply = {
+				value = 2
+			}
+		}
+		# More likely with Elected Bureaucrats
+		if = {
+			limit = {
+				owner = {
+					has_law = law_type:law_elected_bureaucrats
+				}
+			}
+			multiply = {
+				value = 1.5
+			}
+		}
+		# More likely with ethnostate
+		if = {
+			limit = {
+				owner = {
+					has_law = law_type:law_ethnostate
+				}
+			}
+			multiply = {
+				value = 2
+			}
+		}
+	}
+
+	agitator_weight = {
+		# Agitators more likely to come from populist IG's rather than elitist
+		value = 1.0
+		# Agitators will never be part of a marginalized IG
+		if = {
+			limit = {
+				owner.ig:ig_petty_bourgeoisie = {
+					is_marginal = yes
+				}
+			}
+			multiply = {
+				value = 0
+			}
+		}
+	}
+
 	commander_weight = {
 		value = 1.0
-	}	
-	
+	}
+
 	noble_chance = {
 		value = 0.1
 	}
-	
-	female_commander_chance = {	
+
+	female_commander_chance = {
 		value = 0.0
 	}
-	
+
 	female_politician_chance = {
 		value = 0.0
 
 		if = {
 			limit = {
 				owner = {
-					has_law = law_type:law_women_own_property
+					has_law = law_type:law_womens_suffrage
 				}
-				
+
 			}
 			add = {
-				value = 0.1
+				value = 0.025
 			}
 		}
+	}
 
+	female_agitator_chance = {
+		value = 0.025
+		
+		if = {
+			limit = {
+				owner = {
+					has_law = law_type:law_women_own_property
+				}
+
+			}
+			add = {
+				value = 0.025
+			}
+		}	
+		
 		if = {
 			limit = {
 				owner = {
 					has_law = law_type:law_women_in_the_workplace
 				}
-				
+
 			}
 			add = {
-				value = 0.1
+				value = 0.025
 			}
 		}
 
@@ -319,14 +383,14 @@
 				owner = {
 					has_law = law_type:law_womens_suffrage
 				}
-				
+
 			}
 			add = {
-				value = 0.1
+				value = 0.025
 			}
-		}
+		}		
 	}
-	
+
 	# The chance that a commander belonging to this IG takes over leadership when it changes
 	# scope:character is the most popular commander in the IG
 	commander_leader_chance = {
