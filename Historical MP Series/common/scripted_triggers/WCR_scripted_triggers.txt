@@ -1,0 +1,278 @@
+﻿# Check if country, character, or pop is considered westernized
+WCR_is_westernized_trigger = {
+    WCR_westernization_allowed_by_rules_trigger = yes
+    OR = {
+        WCR_st_is_part_west_pop_westernized_trigger       = yes
+        WCR_st_is_part_west_character_westernized_trigger = yes
+        scope:pop ?= {
+            OR = {
+                owner ?= {
+                    WCR_st_is_country_westernized = yes
+                }
+                home_country ?= {
+                    WCR_st_is_country_westernized = yes
+                }
+            }
+        }
+        scope:character ?= {
+            OR = {
+                owner ?= {
+                    WCR_st_is_country_westernized = yes
+                }
+                home_country ?= {
+                    WCR_st_is_country_westernized = yes
+                }
+            }
+        }
+        scope:country ?= {
+            WCR_st_is_country_westernized = yes
+        }
+    }
+}
+
+# Check if country, character, or pop is considered westernized, but EXCLUDING those that begin westernized at game start
+# Exception: pops from unwesternized countries living in countries that are westernized at game start will westernize
+WCR_has_completed_westernization_trigger = {
+    WCR_westernization_allowed_by_rules_trigger = yes
+    OR = {
+        WCR_st_is_part_west_pop_westernized_trigger       = yes
+        WCR_st_is_part_west_character_westernized_trigger = yes
+        scope:pop ?= {
+            OR = {
+                # Current country completed westernization
+                owner ?= {
+                    has_variable = WCR_westernized_nation
+                    THIS.var:WCR_westernized_nation = yes
+                }
+                
+                # Home country is westernized (possibly doesnt do anything?)
+                home_country ?= {
+                    has_variable = WCR_westernized_nation
+                    THIS.var:WCR_westernized_nation = yes
+                }
+                
+                # Unwesternized immigrant inside a westernized country
+                AND = {
+                    has_game_rule = WCR_westernize_immigrants_yes # Controllable by game rule
+                    pop_has_primary_culture = no # If they dont have a primary culture, consider them a migrant
+                    culture = { # We do the migrant check so we can avoid messing with native clothes for countries like Hawaii
+                        NOT = { # Ignore Europeans because they're westernized already anyway
+                            has_discrimination_trait = european_heritage
+                        }
+                    }
+                    owner ?= { # Westernized country check
+                        WCR_st_is_country_westernized = yes
+                    }
+                }
+            }
+        }
+        scope:character ?= {
+            OR = {
+                owner ?= {
+                    has_variable = WCR_westernized_nation
+                    THIS.var:WCR_westernized_nation = yes
+                }
+                home_country ?= {
+                    has_variable = WCR_westernized_nation
+                    THIS.var:WCR_westernized_nation = yes
+                }
+            }
+        }
+        scope:country ?= {
+            has_variable = WCR_westernized_nation
+            THIS.var:WCR_westernized_nation = yes
+        }
+    }
+}
+
+# Check if member of the army
+# This trigger excludes rulers (including them in it revealed to be more of a pain than a convenience)
+WCR_army_clothes_trigger = {
+    OR = {
+        scope:pop ?= {
+            OR = {
+                # Pop works in army building
+                workplace ?= {
+                    OR = {
+                        is_building_type = building_barracks
+                        is_building_type = building_conscription_center
+                    }
+                }
+                
+                # Military pop that got fired (fallback)
+                AND = {
+                    NOT = {
+                        exists = workplace
+                    }
+                    OR = {
+                        is_pop_type = soldiers
+                        is_pop_type = officers
+                    }
+                }
+            }
+        }
+        AND = {
+            OR = {
+                # Armed Forces IG leader who isn't a general or admiral
+                AND = {
+                    armed_forces_clothes_trigger = yes
+                    politician_clothes_trigger = yes
+                    scope:character ?= {
+                        NOT = {
+                            has_role = admiral
+                        }
+                    }
+                }
+                
+                # Generals
+                scope:character ?= {
+                    has_role = general
+                }
+            }
+            
+            # Exclude rulers
+            scope:character ?= {
+                is_ruler = no
+            }
+        }
+    }
+}
+
+# Check if member of the navy
+WCR_navy_clothes_trigger = {
+    OR = {
+        scope:pop ?= {
+            always = yes
+            workplace ?= {
+                is_building_type = building_naval_base
+            }
+        }
+        scope:character ?= {
+            has_role = admiral
+        }
+    }
+}
+
+# Used to control if westernization decision can be taken
+WCR_can_start_westernizing_trigger = {
+    OR = {
+        # Option A: Be a subject of a westernized nation
+        AND = {
+            is_subject = yes
+            trigger_if = {
+                limit = {
+                    is_subject = yes
+                }
+                custom_tooltip = {
+                    text = WCR_tt_overlord_westernized_sub
+                    overlord = {
+                        WCR_st_is_country_westernized = yes
+                    }
+                }
+            }
+            trigger_else = {
+                custom_tooltip = {
+                    text = WCR_tt_overlord_westernized_ind
+                    #overlord = {
+                    #    WCR_st_is_country_westernized = yes
+                    #}
+                    always = no # If there's no overlord then who exactly do we need to check this against? lol
+                }
+            }
+        }
+        
+        # Option B: Progressives have sufficient clout
+        AND = {
+            # Traditionalists cannot be powerful
+            AND = {
+                ig:ig_landowners = {
+                    is_powerful = no
+                }
+                ig:ig_devout = {
+                    is_powerful = no
+                }
+                ig:ig_rural_folk = {
+                    is_powerful = no
+                }
+                ig:ig_petty_bourgeoisie = {
+                    is_powerful = no
+                }
+            }
+            
+            # Most progressives must be influential
+            OR = {
+                calc_true_if = {
+                    amount >= 3
+                    ig:ig_intelligentsia = {
+                        is_marginal = no
+                    }
+                    ig:ig_industrialists = {
+                        is_marginal = no
+                    }
+                    ig:ig_armed_forces = {
+                        is_marginal = no
+                    }
+                    ig:ig_trade_unions = {
+                        is_marginal = no
+                    }
+                }
+                calc_true_if = {
+                    amount >= 3
+                    ig:ig_landowners = {
+                        is_marginal = yes
+                    }
+                    ig:ig_devout = {
+                        is_marginal = yes
+                    }
+                    ig:ig_rural_folk = {
+                        is_marginal = yes
+                    }
+                    ig:ig_petty_bourgeoisie = {
+                        is_marginal = yes
+                    }
+                }
+            }
+            
+            # Progressives must have ruler support or at least 1 powerful IG
+            OR = {
+                custom_tooltip = {
+                    text  = WCR_tt_ruler_support
+                    ruler = {
+                        interest_group = {
+                            OR = {
+                                is_interest_group_type = ig_intelligentsia
+                                is_interest_group_type = ig_industrialists
+                                is_interest_group_type = ig_armed_forces
+                                is_interest_group_type = ig_trade_unions
+                            }
+                        }
+                    }
+                }
+                ig:ig_intelligentsia = {
+                    is_powerful = yes
+                }
+                ig:ig_industrialists = {
+                    is_powerful = yes
+                }
+                ig:ig_armed_forces = {
+                    is_powerful = yes
+                }
+                ig:ig_trade_unions = {
+                    is_powerful = yes
+                }
+            }
+        }
+    }
+}
+
+# AWC legacy westernization requirements
+WCR_snori_can_westernize_trigger = {
+    is_subject = no
+    is_at_war = no
+    ig:ig_landowners = {
+        is_powerful = no
+    }
+    ig:ig_intelligentsia = {
+        is_in_government = yes
+    }
+}
