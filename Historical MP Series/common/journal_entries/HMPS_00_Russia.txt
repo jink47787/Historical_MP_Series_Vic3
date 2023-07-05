@@ -1,5 +1,63 @@
 ﻿je_alexander_ii_reforms = {
 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+	
+	is_shown_when_inactive = {
+		exists = c:RUS
+		THIS = c:RUS
+		hidden_trigger = {
+			NOT = { has_variable = alexander_reforms_var }
+		}
+    }
+	
+    possible = {
+		OR = {
+			game_date >= 1855.01.01
+			has_law = law_type:law_republic
+			ruler = {
+				has_ideology = ideology:ideology_market_liberal
+			}
+		}
+    }
+	
+	immediate = {
+		set_variable = alexander_reforms_var
+		if = {
+			limit = {
+				game_date >= 1855.01.01
+				ruler = {
+					NOT = { has_ideology = ideology:ideology_market_liberal }
+				}
+				heir = {
+					has_ideology = ideology:ideology_market_liberal
+				}
+			}
+			ruler = {
+				kill_character = yes
+			}
+		}
+		set_variable = {
+			name = russia_shithole_var
+			value = 0
+		}
+		add_journal_entry = {
+			type = era_of_peace
+		}
+		add_journal_entry = {
+			type = abolishment_of_serfdom
+		}
+		add_journal_entry = {
+			type = loris_melikovs_constitution
+		}
+		add_journal_entry = {
+			type = je_bulgaria_liberated
+		}
+		add_journal_entry = {
+			type = je_serbia_liberated
+		}
+		add_journal_entry = {
+			type = je_albania_liberated
+		}
+	}
 
 	complete = {
 		scope:journal_entry = {
@@ -21,8 +79,10 @@
 		#AlexanderAssasinated omw to start a revolution aristocrats get more power
 		add_modifier = {
 			name = the_bear_coma
-			months = long_modifier_time
+			months = very_long_modifier_time
+			is_decaying = yes
 		}
+		set_variable = russia_reform_complete
 	}
 
 	current_value = {
@@ -57,7 +117,7 @@ abolishment_of_serfdom = {
 		}
 	}
 
-	invalid = {
+	fail = {
 		custom_tooltip = {
 			text = finished_russia_reform_complete
 			has_variable = russia_reform_complete
@@ -74,19 +134,21 @@ era_of_peace = {
 	
 
 	complete = {
-		is_at_war = no
-		literacy_rate > 0.35
+		literacy_rate > 0.40
 	}
 
 	on_complete = {
-		change_variable = {
-			name = russia_shithole_var
-			add = 1
+		custom_tooltip = {
+			text = je_russia_reform_advance
+			change_variable = {
+				name = russia_shithole_var
+				add = 1
+			}
+			set_variable = era_of_peace
 		}
 	}
-	timeout = 5475
 	
-	invalid = {
+	fail = {
 		custom_tooltip = {
 			text = finished_russia_reform_complete
 			has_variable = russia_reform_complete
@@ -96,8 +158,6 @@ era_of_peace = {
 	transferable = no
 
 	weight = 5000
-	
-	progressbar = yes
 }
 
 loris_melikovs_constitution = {
@@ -120,7 +180,7 @@ loris_melikovs_constitution = {
 		}
 	}
 
-	invalid = {
+	fail = {
 		custom_tooltip = {
 			text = finished_russia_reform_complete
 			has_variable = russia_reform_complete
@@ -136,7 +196,7 @@ je_bulgaria_liberated = {
 
 	complete = {
 		custom_tooltip = {
-            text = "Bulgaria is liberated and either: allied; in a defensive pact; or in a customs union with Russia"
+            text = "Bulgaria (Bulgaria & Northern Thrace states) is liberated and either: allied; in a defensive pact; or in a customs union with Russia"
 			c:BUL = {
 				OR = {
 					owns_entire_state_region = STATE_BULGARIA
@@ -162,12 +222,9 @@ je_bulgaria_liberated = {
 			set_variable = completed_bulgaria_je
 			#custom_tooltip = sickman_bulgaria_rus
 		}
-		add_journal_entry = {
-			type = je_serbia_liberated
-		}
 	}
 
-	invalid = {
+	fail = {
 		custom_tooltip = {
 			text = finished_russia_reform_complete
 			has_variable = russia_reform_complete
@@ -184,7 +241,7 @@ je_serbia_liberated = {
 
 	complete = {
 		custom_tooltip = {
-            text = "Serbia (North & South) is liberated and either: allied; in a defensive pact; or in a customs union with Russia"
+            text = "Serbia (North & South states) is liberated and either: allied; in a defensive pact; or in a customs union with Russia"
 			c:SER = {
 				owns_entire_state_region = STATE_NORTHERN_SERBIA
 				owns_entire_state_region = STATE_SOUTHERN_SERBIA
@@ -208,12 +265,9 @@ je_serbia_liberated = {
 			set_variable = completed_serbia_je
 			#custom_tooltip = sickman_serbia_rus
 		}
-		add_journal_entry = {
-			type = je_albania_liberated
-		}
 	}
 
-	invalid = {
+	fail = {
 		custom_tooltip = {
 			text = finished_russia_reform_complete
 			has_variable = russia_reform_complete
@@ -230,7 +284,7 @@ je_albania_liberated = {
 
 	complete = {
 		custom_tooltip = {
-            text = "Albania is liberated and either: allied; in a defensive pact; or in a customs union with Russia"
+            text = "Albania (Albania state) is liberated and either: allied; in a defensive pact; or in a customs union with Russia"
 			c:ALB = {
 				owns_entire_state_region = STATE_ALBANIA
 				OR = {
@@ -255,7 +309,7 @@ je_albania_liberated = {
 		#custom_tooltip = sickman_albania_rus
 	}
 
-	invalid = {
+	fail = {
 		custom_tooltip = {
 			text = finished_russia_reform_complete
 			has_variable = russia_reform_complete
@@ -284,18 +338,50 @@ je_decambrist_sympathizers = {
 		has_law = law_type:law_secret_police
 		has_law = law_type:law_militarized_police
 		has_law = law_type:law_outlawed_dissent
+		NOT = {
+			any_interest_group = {
+				NOT = { has_ideology = ideology:ideology_liberal }
+				is_marginal = no
+				leader = {
+					OR = {
+						has_ideology = ideology:ideology_radical
+						has_ideology = ideology:ideology_reformer
+						has_ideology = ideology:ideology_republican
+					}
+				}
+			}
+		}
+		NOT = {
+			any_scope_character = { 
+				OR = {
+					has_role = general
+					has_role = admiral
+					has_role = agitator
+				}
+				OR = {
+					has_ideology = ideology:ideology_radical
+					has_ideology = ideology:ideology_reformer
+					has_ideology = ideology:ideology_republican
+				}
+			}
+		}
 	}
 
 	on_complete = {
 		custom_tooltip = {
 			text = "The Liberals fail again!"
 		}
+		add_modifier = {
+			name = decembrist_suppression_success
+			months = long_modifier_time
+			is_decaying = yes
+		}
 	}
 
 	fail = {
 		OR = {
-		NOT = { has_law = law_type:law_monarchy }
-		NOT = { has_law = law_type:law_autocracy }
+			NOT = { has_law = law_type:law_monarchy }
+			NOT = { has_law = law_type:law_autocracy }
 		}
 	}
 	
@@ -303,6 +389,11 @@ je_decambrist_sympathizers = {
 		add_radicals = {
 			value = very_large_radicals
 			culture = cu:russian
+		}
+		add_modifier = {
+			name = decembrist_suppression_failure
+			months = long_modifier_time
+			is_decaying = yes
 		}
 	}
 	
@@ -328,6 +419,11 @@ je_decambrist_sympathizers = {
 		add_radicals = {
 			value = very_large_radicals
 			culture = cu:russian
+		}
+		add_modifier = {
+			name = decembrist_suppression_failure
+			months = long_modifier_time
+			is_decaying = yes
 		}
 	}
 	
