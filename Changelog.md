@@ -33,6 +33,8 @@ All mods / mod ideas used linked below:
 - Retain Homelands on Releasing: https://steamcommunity.com/sharedfiles/filedetails/?id=2934872102
 - Army Command Limits: https://steamcommunity.com/sharedfiles/filedetails/?id=2951960564
 - Forts & Engineers: https://steamcommunity.com/sharedfiles/filedetails/?id=3005432154
+- Useful Malaria Icons: https://steamcommunity.com/sharedfiles/filedetails/?id=3005297540
+- Cold Water Ports: https://steamcommunity.com/sharedfiles/filedetails/?id=2997299912
 ---
 <br/>
 
