@@ -18,6 +18,12 @@ types message_settings {
 		}
 
 		blockoverride "content" {
+			state = {
+                name = _show
+                on_start = "[GetVariableSystem.SetIf( 'message_settings_notification_types', 'true', Not( GetVariableSystem.Exists( 'message_settings_interesting_countries' ) ) )]"
+                on_start = "[MessageSettingsWindow.SortInterestingCountryItemsIfNeeded]" # only sort when opening the tab (avoids items jumping around when changing settings)
+            }
+
 			flowcontainer = {
 				direction = vertical
 				resizeparent = yes
@@ -27,97 +33,207 @@ types message_settings {
 				margin_left = 14
 				margin_right = 14
 
-				flowcontainer = {
-					parentanchor = hcenter
-					spacing = 7
-					margin_bottom = 5
-					textbox = {
-						text = "MESSAGE_SETTINGS_SORT_NOTIFICATION_TYPE"
-						autoresize = yes
-						minimumsize = { 290 -1 }
-						maximumsize = { 290 -1 }
-						align = nobaseline
-					}
-					textbox = {
-						text = "MESSAGE_SETTINGS_SORT_APPEARANCE"
-						autoresize = yes
-						minimumsize = { 290 -1 }
-						maximumsize = { 290 -1 }
-						align = nobaseline
-					}
-					textbox = {
-						text = "MESSAGE_SETTINGS_SORT_PAUSE"
-						autoresize = yes
-						minimumsize = { 60 -1 }
-						maximumsize = { 60 -1 }
-						align = hcenter|nobaseline
-					}									
-				}
+# todo PRCAL-26835
+#                widget = {
+#                    size = { 700 44 }
+#
+#                    tab_buttons = {
+#                        blockoverride "first_button" {
+#                            text = "MESSAGE_SETTINGS_NOTIFICATION_TYPES"
+#                        }
+#                        blockoverride "first_button_tooltip" {
+#                            tooltip = "MESSAGE_SETTINGS_NOTIFICATION_TYPES"
+#                        }
+#                        blockoverride "first_button_click" {
+#                            onclick = "[GetVariableSystem.Set('message_settings_notification_types', 'true')]"
+#                            onclick = "[GetVariableSystem.Set('message_settings_interesting_countries', 'false')]"
+#                        }
+#                        blockoverride "first_button_visibility" {
+#                            visible = "[GetVariableSystem.HasValue('message_settings_notification_types', 'true')]"
+#                        }
+#                        blockoverride "first_button_visibility_checked" {
+#                            visible = "[Not( GetVariableSystem.HasValue('message_settings_notification_types', 'true') )]"
+#                        }
+#                        blockoverride "first_button_selected" {
+#                            text = "MESSAGE_SETTINGS_NOTIFICATION_TYPES"
+#                        }
+#
+#                        blockoverride "second_button" {
+#                            text = "MESSAGE_SETTINGS_DIPLOMATICALLY_INTERESTING"
+#                        }
+#                        blockoverride "second_button_tooltip" {
+#                            tooltip = "MESSAGE_SETTINGS_DIPLOMATICALLY_INTERESTING"
+#                        }
+#                        blockoverride "second_button_click" {
+#                            onclick = "[GetVariableSystem.Set('message_settings_notification_types', 'false')]"
+#                            onclick = "[GetVariableSystem.Set('message_settings_interesting_countries', 'true')]"
+#                        }
+#                        blockoverride "second_button_visibility" {
+#                            visible = "[GetVariableSystem.HasValue('message_settings_interesting_countries', 'true')]"
+#                        }
+#                        blockoverride "second_button_visibility_checked" {
+#                            visible = "[Not( GetVariableSystem.HasValue('message_settings_interesting_countries', 'true') )]"
+#                        }
+#                        blockoverride "second_button_selected" {
+#                            text = "MESSAGE_SETTINGS_DIPLOMATICALLY_INTERESTING"
+#                        }
+#                    }
+#                }
 
-				scrollarea = {
-					using = default_list_position
-					layoutpolicy_vertical = preferred
-					layoutpolicy_horizontal = preferred
-					maximumsize = { 684 600 }
-					minimumsize = { 684 150 }
+                flowcontainer = {
+                    direction = vertical
+                    parentanchor = hcenter
+                    visible = "[GetVariableSystem.HasValue('message_settings_notification_types', 'true')]"
+                    flowcontainer = {
+                        parentanchor = hcenter
+                        spacing = 7
+                        margin_bottom = 5
+                        margin_top = 10
+                        textbox = {
+                            text = "MESSAGE_SETTINGS_SORT_NOTIFICATION_TYPE"
+                            autoresize = yes
+                            minimumsize = { 290 -1 }
+                            maximumsize = { 290 -1 }
+                            align = nobaseline
+                        }
+                        textbox = {
+                            text = "MESSAGE_SETTINGS_SORT_APPEARANCE"
+                            autoresize = yes
+                            minimumsize = { 290 -1 }
+                            maximumsize = { 290 -1 }
+                            align = nobaseline
+                        }
+                        textbox = {
+                            text = "MESSAGE_SETTINGS_SORT_PAUSE"
+                            autoresize = yes
+                            minimumsize = { 60 -1 }
+                            maximumsize = { 60 -1 }
+                            align = hcenter|nobaseline
+                        }
+                    }
 
-					scrollbarpolicy_horizontal = always_off
-					
-					scrollbar_vertical = {
-						using = vertical_scrollbar		
-					}
+                    scrollarea = {
+                        using = default_list_position
+                        layoutpolicy_vertical = preferred
+                        layoutpolicy_horizontal = preferred
+                        maximumsize = { 684 600 }
+                        minimumsize = { 684 150 }
 
-					scrollwidget = {
-						container = {
-							parentanchor = hcenter
-							resizeparent = yes
-								
-							flowcontainer = {
-								parentanchor = hcenter
-								direction = vertical
-								spacing = 4
-								datamodel = "[MessageSettingsWindow.GetSettingsItems]"
-								
-								item = {
-									notification_type_list_item = {}
-								}
-							}								
-						}					
-					}
-				}
-				
-				flowcontainer = {
-					visible = "[MessageSettingsWindow.HasSingleShownItem]"
-					parentanchor = hcenter
-					spacing = 10
-					margin_top = 10
-					
-					button_primary = {
-						onclick = "[MessageSettingsWindow.RemoveSingleShownItem]"
-						size = { 660 40 }
-						text = "SHOW_ALL_MESSAGE_SETTINGS"
-					}	
-				}
+                        scrollbarpolicy_horizontal = always_off
 
-				flowcontainer = {
-					parentanchor = hcenter
-					spacing = 10
-					margin_top = 10
-					
-					button = {
-						onclick = "[MessageSettingsWindow.ResetSettings]"
-						size = { 310 40 }
-						text = "RESET_TO_DEFAULT"
-						using = default_button
-					}
-					
-					button = {
-						onclick = "[ToggleMessageSettings]"
-						size = { 310 40 }
-						text = "CLOSE_LABEL"
-						using = default_button
-					}					
-				}
+                        scrollbar_vertical = {
+                            using = vertical_scrollbar
+                        }
+
+                        scrollwidget = {
+                            container = {
+                                parentanchor = hcenter
+                                resizeparent = yes
+
+                                flowcontainer = {
+                                    parentanchor = hcenter
+                                    direction = vertical
+                                    spacing = 4
+                                    datamodel = "[MessageSettingsWindow.GetSettingsItems]"
+
+                                    item = {
+                                        notification_type_list_item = {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    flowcontainer = {
+                        visible = "[MessageSettingsWindow.HasSingleShownItem]"
+                        parentanchor = hcenter
+                        spacing = 10
+                        margin_top = 10
+
+                        button_primary = {
+                            onclick = "[MessageSettingsWindow.RemoveSingleShownItem]"
+                            size = { 660 40 }
+                            text = "SHOW_ALL_MESSAGE_SETTINGS"
+                        }
+                    }
+
+                    flowcontainer = {
+                        parentanchor = hcenter
+                        spacing = 10
+                        margin_top = 10
+
+                        button = {
+                            onclick = "[MessageSettingsWindow.ResetSettings]"
+                            size = { 310 40 }
+                            text = "RESET_TO_DEFAULT"
+                            using = default_button
+                        }
+
+                        button = {
+                            onclick = "[ToggleMessageSettings]"
+                            size = { 310 40 }
+                            text = "CLOSE_LABEL"
+                            using = default_button
+                        }
+                    }
+                }
+                flowcontainer = {
+                    direction = vertical
+                    parentanchor = hcenter
+                    visible = "[GetVariableSystem.HasValue('message_settings_interesting_countries', 'true')]"
+                    flowcontainer = {
+                        parentanchor = hcenter
+                        spacing = 7
+                        margin_bottom = 5
+                        margin_top = 10
+                        textbox = {
+                            text = "COUNTRY"
+                            autoresize = yes
+                            minimumsize = { 290 -1 }
+                            maximumsize = { 290 -1 }
+                            align = nobaseline
+                        }
+                        textbox = {
+                            text = "SETTINGS"
+                            autoresize = yes
+                            minimumsize = { 350 -1 }
+                            maximumsize = { 350 -1 }
+                            align = nobaseline
+                        }
+                    }
+
+                    scrollarea = {
+                        using = default_list_position
+                        layoutpolicy_vertical = preferred
+                        layoutpolicy_horizontal = preferred
+                        maximumsize = { 684 600 }
+                        minimumsize = { 684 150 }
+
+                        scrollbarpolicy_horizontal = always_off
+
+                        scrollbar_vertical = {
+                            using = vertical_scrollbar
+                        }
+
+                        scrollwidget = {
+                            container = {
+                                parentanchor = hcenter
+                                resizeparent = yes
+
+                                flowcontainer = {
+                                    parentanchor = hcenter
+                                    direction = vertical
+                                    spacing = 4
+                                    datamodel = "[MessageSettingsWindow.GetInterestingCountryItems]"
+
+                                    item = {
+                                        diplomatically_interesting_country_list_item = {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 			}
 		}
 	}
@@ -138,6 +254,8 @@ types message_settings {
 				layoutpolicy_horizontal = preferred
 				maximumsize = { 290 -1 }
 				margin_left = 10
+				fontsize_min = 14
+				elide = right
 			}
 
 			widget = {
@@ -227,4 +345,107 @@ types message_settings {
 			}
 		}
 	}
+
+    type diplomatically_interesting_country_list_item = widget {
+        size = { 660 44 }
+
+        background = {
+            using = entry_bg_simple
+        }
+
+        hbox = {
+
+            small_flag = {
+                datacontext = "[InterestingCountryItem.GetCountry]"
+            }
+            textbox = {
+                datacontext = "[InterestingCountryItem.GetCountry]"
+                text = "[Country.GetNameNoFormatting]"
+                align = nobaseline
+                layoutpolicy_vertical = preferred
+                layoutpolicy_horizontal = preferred
+                maximumsize = { 290 -1 }
+                margin_left = 10
+            }
+
+            widget = {
+                size = { 290 44 }
+
+                dropdown_menu_standard = {
+                    parentanchor = vcenter
+                    blockoverride "dropdown_properties"
+                    {
+                        datamodel = [GetInterestingCountrySettings]
+                        onselectionchanged = [InterestingCountryItem.OnSelectOption]
+                        onselectionchanged = [MessageSettingsWindow.OnChangeInterestingCountrySettings]
+                    }
+
+                    blockoverride "dropdown_size"
+                    {
+                        size = { 290 32 }
+                    }
+
+                    blockoverride "dropdown_list_maxsize"
+                    {
+                        size = { 290 600 }
+                    }
+
+                    blockoverride "dropdown_active_item_properties"
+                    {
+                        datacontext = "[InterestingCountryItem.GetSetting]"
+
+                        text_single = {
+                            parentanchor = vcenter
+                            position = { 10 0 }
+                            autoresize = yes
+                            align = nobaseline
+                            default_format = "#clickable"
+                            text = "[InterestingCountrySetting.GetName]"
+                        }
+
+                        text_single = {
+                            parentanchor = right|vcenter
+                            position = { -30 0 }
+                            autoresize = yes
+                            align = right|nobaseline
+                            default_format = "#title"
+                            visible = "[Not( StringIsEmpty( InterestingCountrySetting.GetIsActiveDesc( InterestingCountryItem.GetCountry ) ) )]"
+                            text = "[InterestingCountrySetting.GetIsActiveDesc( InterestingCountryItem.GetCountry )]"
+                        }
+                    }
+
+                    blockoverride "dropdown_item_properties"
+                    {
+                        widget = {
+                            size = { 100% 100% }
+
+                            hbox = {
+                                layoutpolicy_horizontal = expanding
+                                margin_right = 10
+
+                                text_single = {
+                                    layoutpolicy_horizontal = expanding
+                                    align = nobaseline
+                                    margin_left = 10
+                                    default_format = "#clickable"
+                                    text = "[InterestingCountrySetting.GetName]"
+                                }
+
+                                expand = {}
+
+                                text_single = {
+                                    layoutpolicy_horizontal = expanding
+                                    align = right|nobaseline
+                                    default_format = "#title"
+                                    visible = "[Not( StringIsEmpty( InterestingCountrySetting.GetIsActiveDesc( InterestingCountryItem.GetCountry ) ) )]"
+                                    text = "[InterestingCountrySetting.GetIsActiveDesc( InterestingCountryItem.GetCountry )]"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 }

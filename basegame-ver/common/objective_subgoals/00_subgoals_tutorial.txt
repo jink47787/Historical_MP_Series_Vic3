@@ -1120,7 +1120,7 @@ sg_increase_relations = {
 	}
 
 	trigger = {
-		trigger_if = {
+		OR = {
 			any_country = {
 				capital.region = {
 					any_scope_interest_marker = {
@@ -1131,9 +1131,6 @@ sg_increase_relations = {
 				country_rank >= rank_value:major_power
 				relations:root < relations_threshold:amicable
 			}
-		}
-
-		trigger_else_if = {
 			any_country = {
 				has_attitude = {
 					who = ROOT
@@ -1142,9 +1139,6 @@ sg_increase_relations = {
 				country_rank >= rank_value:major_power
 				relations:root < relations_threshold:amicable
 			}
-		}
-
-		trigger_else_if = {
 			any_country = {
 				country_rank >= rank_value:major_power
 				relations:root < relations_threshold:amicable
@@ -1154,6 +1148,18 @@ sg_increase_relations = {
 	
 	on_start = {
 		if = {
+			limit = {
+				any_country = {
+					capital.region = {
+						any_scope_interest_marker = {
+							owner = root
+						}
+					}
+					NOT = { this = ROOT }
+					country_rank >= rank_value:major_power
+					relations:root < relations_threshold:amicable
+				}
+			}
 			random_country = {
 				limit = {
 					capital.region = {
@@ -1170,6 +1176,16 @@ sg_increase_relations = {
 		}
 
 		else_if = {
+			limit = {
+				any_country = {
+					has_attitude = { 
+						who = ROOT
+						attitude >= cautious
+					}
+					country_rank >= rank_value:major_power
+					relations:root < relations_threshold:amicable
+				}
+			}
 			random_country = {
 				limit = {
 					has_attitude = { 
@@ -1184,6 +1200,12 @@ sg_increase_relations = {
 		}
 
 		else_if = {
+			limit = {
+				any_country = {
+					country_rank >= rank_value:major_power
+					relations:root < relations_threshold:amicable
+				}
+			}
 			random_country = {
 				limit = {
 					country_rank >= rank_value:major_power
@@ -1206,7 +1228,7 @@ sg_improve_rank = {
 	category = sgcat_tutorial
 	
 	unlocking_subgoals_all = {
-		sg_increase_relations
+		sg_make_peace
 	}
 
 	trigger = {
@@ -1654,22 +1676,6 @@ sg_make_peace = {
 	}
 }
 
-# Reach end date
-sg_reach_end_date = {
-	category = sgcat_tutorial
-	
-	unlocking_subgoals_all = {
-		sg_make_peace
-	}
-
-	on_start = {
-		add_journal_entry = {
-			type = je_tutorial_reach_end_date
-			objective_subgoal = sg_reach_end_date
-		}
-	}
-}
-
 # Research Technology
 sg_research_technology = {
 	category = sgcat_tutorial
@@ -1698,16 +1704,119 @@ sg_declare_an_interest = {
 		sg_increase_relations
 	}
 
-	trigger = {	
-		has_decreasing_interests = NO
-		num_declared_interests < max_num_declared_interests
-	}
-	
 	on_start = {
+		if = {
+			limit = {
+				any_rival_country = {
+					ROOT = {
+						NOT = { has_interest_marker_in_region = prev.capital.region }
+					}
+					capital.region = {
+						can_have_declared_interest_here = ROOT
+					}
+				}
+			}
+			random_rival_country = {
+				limit = {
+					ROOT = {
+						NOT = { has_interest_marker_in_region = prev.capital.region }
+					}
+					capital.region = {
+						can_have_declared_interest_here = ROOT
+					}
+				}
+				save_scope_as = tut_declare_interest_country
+			}
+		}
+
+		else_if = {
+			limit = {
+				any_country = {
+					NOT = { this = ROOT }
+					ROOT = {
+						NOT = { has_interest_marker_in_region = prev.capital.region }
+					}
+					country_rank >= rank_value:major_power
+					relations:root < relations_threshold:amicable
+					capital.region = {
+						can_have_declared_interest_here = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					NOT = { this = ROOT }
+					ROOT = {
+						NOT = { has_interest_marker_in_region = prev.capital.region }
+					}
+					country_rank >= rank_value:major_power
+					relations:root < relations_threshold:amicable
+					capital.region = {
+						can_have_declared_interest_here = ROOT
+					}
+				}
+				save_scope_as = tut_declare_interest_country
+			}
+		}
+
+		else_if = {
+			limit = {
+				any_country = {
+					NOT = { this = ROOT }
+					ROOT = {
+						NOT = { has_interest_marker_in_region = prev.capital.region }
+					}
+					relations:root < relations_threshold:amicable
+					capital.region = {
+						can_have_declared_interest_here = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					NOT = { this = ROOT }
+					ROOT = {
+						NOT = { has_interest_marker_in_region = prev.capital.region }
+					}
+					country_rank >= rank_value:major_power
+					capital.region = {
+						can_have_declared_interest_here = ROOT
+					}
+				}
+				save_scope_as = tut_declare_interest_country
+			}
+		}
+
+		else_if = {
+			limit = {
+				any_country = {
+					NOT = { this = ROOT }
+					ROOT = {
+						NOT = { has_interest_marker_in_region = prev.capital.region }
+					}
+					capital.region = {
+						can_have_declared_interest_here = ROOT
+					}
+				}
+			}
+			random_country = {
+				limit = {
+					NOT = { this = ROOT }
+					ROOT = {
+						NOT = { has_interest_marker_in_region = prev.capital.region }
+					}
+					capital.region = {
+						can_have_declared_interest_here = ROOT
+					}
+				}
+				save_scope_as = tut_declare_interest_country
+			}
+		}
+
 		add_journal_entry = {
 			type = je_tutorial_declare_an_interest
 			objective_subgoal = sg_declare_an_interest
-			target = scope:tut_declare_interest
+			target = scope:tut_declare_interest_country
 		}
 	}
 }

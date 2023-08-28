@@ -168,7 +168,7 @@ input_context={
 	input_action = {
 		name = "open_decisions"
 		text = "SETTING_INPUT_ACTION_OPEN_DECISIONS"
-		scancode = 69	# F12
+		scancode = 68	# F11
 	}
 
 	input_action = {
