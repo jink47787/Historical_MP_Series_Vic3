@@ -442,13 +442,15 @@ coup.2 = {
 			}
 			else_if = {
 				limit = {
-					ruler.interest_group = {
+					ruler.interest_group ?= {
 						NOT = {
 							is_same_interest_group_type = scope:coup_ig
 						}
 					}
-					heir.interest_group = {
-						is_same_interest_group_type = scope:coup_ig
+					heir ?= {
+						THIS.interest_group = {
+							is_same_interest_group_type = scope:coup_ig
+						}
 					}
 				}
 				ruler = {
@@ -458,10 +460,10 @@ coup.2 = {
 			}
 			else = {
 				hidden_effect = {
-					heir = {
+					heir ?= {
 						kill_character = yes
 					}
-					ruler = {
+					ruler ?= {
 						kill_character = yes
 					}
 				}
@@ -696,6 +698,12 @@ coup.2 = {
 			}
 		}
 		generate_french_monarch = yes
+		if = {
+			limit = {
+				has_variable = fra_divided_monarchists_freeze
+			}
+			remove_variable = fra_divided_monarchists_freeze
+		}
 		add_journal_entry = {
 			type = je_divided_monarchists
 		}
@@ -919,7 +927,7 @@ coup.3 = {
 			}
 		}
 		add_radicals = {
-			value = very_large_radicals
+			value = medium_radicals
 			interest_group = scope:coup_ig
 		}
 	}
@@ -931,7 +939,7 @@ coup.3 = {
 			any_interest_group = {
 				is_marginal = no
 				law_stance = {
-					law = scope:coup_desired_law
+					law = scope:coup_desired_law.type
 					value < neutral
 				}
 			}
@@ -940,7 +948,7 @@ coup.3 = {
 			limit = {
 				is_marginal = no
 				law_stance = {
-					law = scope:coup_desired_law
+					law = scope:coup_desired_law.type
 					value < neutral
 				}
 			}
@@ -948,7 +956,7 @@ coup.3 = {
 				name = coup_prevented
 				months = long_modifier_time
 				is_decaying = yes
-				# +2 approval
+				multiplier = -5 # -10 approval
 			}
 		}
 		scope:coup_ig = {
@@ -975,7 +983,7 @@ coup.3 = {
 				name = coup_prevented
 				months = long_modifier_time
 				is_decaying = yes
-				multiplier = -2 # -4 approval
+				multiplier = -4 # -8 approval
 			}
 			set_variable = { name = coup_guilty days = 3650 }
 		}
@@ -1045,7 +1053,7 @@ coup.4 = {
 			scope:coup_ig = {
 				is_powerful = no
 				law_stance = {
-					law = scope:coup_desired_law
+					law = scope:coup_desired_law.type
 					value >= approve
 				}
 			}
@@ -1081,7 +1089,7 @@ coup.4 = {
 				NOT = { THIS = scope:coup_ig }
 				is_marginal = no
 				law_stance = {
-					law = scope:coup_desired_law
+					law = scope:coup_desired_law.type
 					value < approve
 				}
 			}
@@ -1158,7 +1166,7 @@ coup.5 = {
 			limit = {
 				is_marginal = no
 				law_stance = {
-					law = scope:coup_desired_law
+					law = scope:coup_desired_law.type
 					value < approve
 				}
 			}
@@ -1182,7 +1190,7 @@ coup.5 = {
 			limit = {
 				is_marginal = no
 				law_stance = {
-					law = scope:coup_desired_law
+					law = scope:coup_desired_law.type
 					value < approve
 				}
 			}
@@ -1260,7 +1268,7 @@ coup_pulse_events.1 = {
 
 	cancellation_trigger = {
 		scope:accused_general = {
-			exists = no
+			is_character_alive = no
 		}
 	}
 
@@ -1283,7 +1291,9 @@ coup_pulse_events.1 = {
 		if = {
 			limit = {
 				scope:accused_general = {
-					is_same_interest_group_type = scope:coup_ig
+					interest_group = {
+						is_same_interest_group_type = scope:coup_ig
+					}
 				}
 			}
 			change_variable = {
@@ -1295,9 +1305,8 @@ coup_pulse_events.1 = {
 		else_if = {
 			limit = {
 				scope:accused_general = {
-					law_stance = {
-						law = scope:coup_desired_law
-						value < neutral
+					interest_group = {
+						is_same_interest_group_type = scope:coup_ig
 					}
 				}
 			}
@@ -1594,7 +1603,7 @@ coup_pulse_events.4 = {
 				}
 				add_modifier = {
 					name = modifier_wary_investors_building
-					months = 12Work
+					months = 12
 				}
 			}
 			random_scope_building = {
@@ -1905,6 +1914,15 @@ coup_pulse_events.8 = {
 			NOT = {
 				this = root
 			}
+			NOT = {
+				has_variable = coup_sponsor
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		scope:coup_sponsor_country = {
+			has_variable = coup_sponsor
 		}
 	}
 
@@ -1921,6 +1939,9 @@ coup_pulse_events.8 = {
 				}
 				NOT = {
 					this = root
+				}
+				NOT = {
+					has_variable = coup_sponsor
 				}
 			}
 			save_scope_as = coup_sponsor_country
