@@ -165,11 +165,11 @@ input_context={
 		scancode = 67	# F10
 	}
 
-	input_action = {
-		name = "open_decisions"
-		text = "SETTING_INPUT_ACTION_OPEN_DECISIONS"
-		scancode = 69	# F12
-	}
+	#input_action = {	#steam screenshot shortcut
+	#	name = "open_decisions"
+	#	text = "SETTING_INPUT_ACTION_OPEN_DECISIONS"
+	#	scancode = 69	# F12
+	#}
 
 	input_action = {
 		name = "map_list"
