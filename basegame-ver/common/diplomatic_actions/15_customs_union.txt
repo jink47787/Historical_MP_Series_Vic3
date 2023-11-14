@@ -1,7 +1,7 @@
 ﻿customs_union = {
 	requires_approval = yes
 	can_use_obligations = yes
-
+	
 	unlocking_technologies = {
 		international_trade
 	}
@@ -50,7 +50,7 @@
 				}
 				market = {
 					any_scope_country = {
-						is_adjacent = scope:target_country
+						is_adjacent_to_country = scope:target_country
 					}
 				}
 			}
@@ -77,7 +77,9 @@
 		has_junior_participant = yes
 		recipient_pays_maintenance = no
 		is_customs_union = yes
-		
+		can_be_used_in_sway_offers = yes
+		sway_maneuvers_cost = 10
+
 		relations_progress_per_day = 1  # At 100, +1 relations
 		relations_improvement_max = 80		
 		
@@ -170,7 +172,7 @@
 					NOR = {
 						scope:actor.market = {
 							any_scope_country = {
-								is_adjacent = root
+								is_adjacent_to_country = root
 							}
 						}
 						scope:actor = {
@@ -198,13 +200,13 @@
 				desc = "DIPLOMATIC_ACCEPTANCE_SENIOR_PART"
 				value = 20
 			}
-
+			
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_GDP"
 				value = "scope:actor.ai_gdp_comparison(root)"
 				min = -10
 				max = 10
-			}
+			}			
 		
 			if = {
 				limit = {
@@ -355,7 +357,7 @@
 					NOR = {
 						scope:actor.market = {
 							any_scope_country = {
-								is_adjacent = root
+								is_adjacent_to_country = root
 							}
 						}
 						scope:actor = {
@@ -376,6 +378,21 @@
 				min = -20
 				max = 20
 			}
+					
+			if = {
+				limit = {
+					gdp >= 2000000
+				}
+				
+				subtract = {
+					desc = "DIPLOMATIC_ACCEPTANCE_HIGH_GDP"
+					value = gdp
+					subtract = 1000000
+					divide = 1000000
+					min = 1
+					max = 100
+				}
+			}			
 			
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_MUTUAL_TRADE_ROUTES"
@@ -552,7 +569,23 @@
 					}
 					value = -50
 				}
-			}	 
+			}	
+			
+			if = {
+				limit = {
+					scope:target_country = {
+						c:CHI ?= THIS
+						OR = {
+							country_rank >= rank_value:unrecognized_major_power
+							country_rank >= rank_value:great_power
+						}
+					}
+				}
+				add = {
+					desc = "DIPLOMATIC_ACCEPTANCE_IS_CHINA"
+					value = -1000
+				}
+			}
 		}
 		
 		will_break = { 
@@ -656,7 +689,7 @@ join_customs_union = {
 				}
 				market = {
 					any_scope_country = {
-						is_adjacent = scope:target_country
+						is_adjacent_to_country = scope:target_country
 					}
 				}
 			}
@@ -670,7 +703,7 @@ join_customs_union = {
 			limit = {
 				has_diplomatic_pact = {
 					who = scope:target_country
-					type = trade_agreement
+		 			type = trade_agreement
 				}			
 			}
 			remove_diplomatic_pact = {
@@ -749,7 +782,7 @@ change_customs_union = {
 				}
 				market = {
 					any_scope_country = {
-						is_adjacent = scope:target_country
+						is_adjacent_to_country = scope:target_country
 					}
 				}
 			}

@@ -18,8 +18,9 @@ grant_command_to_ruler = {
 
 	potential = {
 		is_ruler = yes
-		NOT = {
+		NOR = {
 			has_role = general
+			has_role = admiral
 		}
 		owner = scope:actor
 	}
@@ -148,6 +149,11 @@ grant_leadership_to_agitator = {
 	possible = {
 		interest_group = {
 			is_in_government = yes
+		}
+		character_is_discriminated = no	
+		OR = {
+			is_female = no
+			scope:actor = { has_law = law_type:law_womens_suffrage }
 		}
 	}
 
@@ -404,6 +410,7 @@ exile_character = {
 
 	potential = {
 		is_in_exile_pool = no
+		is_in_void = no
 		is_ruler = no
 		is_heir = no
 		# Cannot exile pure commanders, we have the retire interaction for that
@@ -440,6 +447,43 @@ exile_character = {
 		}
 		owner = {
 			save_scope_as = exiling_country_scope
+		}
+		if = {
+			limit = {
+				owner = { has_journal_entry = je_caudillo }
+				interest_group = {
+					is_interest_group_type = ig_armed_forces
+				}
+			}
+			if = {
+				limit = {
+					interest_group = {
+						leader = {
+							this = ROOT
+						}
+					}
+				}
+				owner = {
+					custom_tooltip = {
+						text = lose_large_caudillo_points
+						change_variable = {
+							name = caudillo_var
+							add = -200
+						}
+					}
+				}
+			}
+			else = {
+				owner = {
+					custom_tooltip = {
+						text = lose_caudillo_points
+						change_variable = {
+							name = caudillo_var
+							add = -100
+						}
+					}
+				}
+			}
 		}
 		if = {
 			limit = {
@@ -644,48 +688,6 @@ exile_character = {
 	}
 }
 
-demobilize_general = {
-	clicksound = "event:/SFX/DLC/1.3_ip1/UI/exile_character"
-
-	potential = {
-		has_role = general
-		is_mobilized = yes
-	}
-
-	show_requirements = yes
-
-	possible = {
-		custom_tooltip = {
-			text = demobilize_general_tt
-			var:num_months_mobilized >= num_months_before_permit_demobilization
-		}
-		commander_is_available = yes
-	}
-
-	effect = {
-		owner = {
-			add_modifier = {
-				name = early_demobilization
-				multiplier = {	# round down to 100s
-					value = root.mobilization_cost
-					divide = 100
-					round = yes
-					multiply = 100
-				}
-				months = num_months_mobilization_cost_after_early_demobilization
-				is_decaying = yes
-			}
-		}
-		demobilize = yes
-	}
-	
-	show_confirmation_box = yes
-	
-	ai_chance = {
-		value = 0
-	}
-}
-
 invite_exile = {
 	# icon = ""
 	clicksound = "event:/SFX/DLC/1.3_ip1/UI/character_invite"
@@ -879,8 +881,6 @@ retire_commander = {
 				is_decaying = yes
 			}
 		}
-
-		custom_tooltip = TROOP_ALLOCATION_CHANGES_RETIRE
 	}
 
 	show_confirmation_box = yes
@@ -1042,5 +1042,118 @@ return_to_home_country = {
 
 	ai_chance = {
 		value = -50
+	}
+}
+
+foster_national_agitation = {
+	potential = {
+		is_in_exile_pool = no
+		has_role = agitator
+		owner = scope:actor
+		owner = {
+			any_primary_culture = {
+				this = root.culture
+			}
+			has_technology_researched = nationalism
+		}
+	}
+
+	show_requirements = yes
+
+	possible = {
+		root.culture = {
+			save_temporary_scope_as = agitator_culture
+		}
+		this.interest_group = {
+			is_in_government = yes
+		}
+		any_state = {
+			this.state_region = {
+				is_homeland = root.culture
+			}
+			custom_tooltip = {
+				text = is_rival_of_owner_tt
+				OR = {
+					owner = {
+						has_diplomatic_pact = {
+							who = root.owner
+							type = rivalry
+						}
+					}
+					root.owner = {
+						has_diplomatic_pact = {
+							who = prev.owner
+							type = rivalry
+						}
+					}
+				}
+			}
+			custom_tooltip = {
+				text = not_homeland_of_states_tt
+				owner = {
+					NOR = {
+						this = root.owner
+						any_primary_culture = {
+							this = root.culture
+						}
+					}
+				}
+			}
+		}
+	}
+
+	effect = {
+		root.culture = {
+			save_scope_as = agitation_culture
+		}
+		root.owner = {
+			save_scope_as = agitation_sponsor
+		}
+		random_state = {
+			limit = {
+				state_region = {
+					is_homeland = root.culture
+				}
+				OR = {
+					owner = {
+						has_diplomatic_pact = {
+							who = root.owner
+							type = rivalry
+						}
+					}
+					root.owner = {
+						has_diplomatic_pact = {
+							who = prev.owner
+							type = rivalry
+						}
+					}
+				}
+				owner = {
+					NOR = {
+						this = root.owner
+						any_primary_culture = {
+							this = root.culture
+						}
+					}
+				}
+			}
+			save_scope_as = agitation_state
+			add_radicals_in_state = {
+				culture = root.culture
+				value = large_radicals
+			}
+			owner = {
+				post_notification = nationalism_national_agitation_occurred
+				change_relations = {
+					country = root.owner value = -10
+				}
+			}
+		}
+	}
+
+	cooldown = { months = short_modifier_time }
+
+	ai_chance = {
+		value = 100
 	}
 }

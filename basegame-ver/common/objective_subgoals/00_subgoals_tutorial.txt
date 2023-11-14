@@ -149,7 +149,7 @@ sg_change_production_method = {
 				AND = {	
 					can_activate_production_method = {
 						building_type = building_rice_farm	
-						production_method = pm_fig_orchards
+						production_method = pm_fig_orchards_building_rice_farm
 					}
 				}
 				AND = {
@@ -250,7 +250,7 @@ sg_change_production_method = {
 				scope:tutorial_state_target = {
 					can_activate_production_method = {
 						building_type = building_rice_farm	
-						production_method = pm_fig_orchards
+						production_method = pm_fig_orchards_building_rice_farm
 					}					
 				}
 			}
@@ -371,7 +371,7 @@ sg_change_production_method = {
 				any_scope_state = {
 					can_activate_production_method = {
 						building_type = building_rice_farm	
-						production_method = pm_fig_orchards 
+						production_method = pm_fig_orchards_building_rice_farm 
 					}					
 				}
 			}
@@ -380,7 +380,7 @@ sg_change_production_method = {
 				limit = {
 					can_activate_production_method = {
 						building_type = building_rice_farm	
-						production_method = pm_fig_orchards 
+						production_method = pm_fig_orchards_building_rice_farm 
 					}						
 				}
 				
@@ -1295,7 +1295,7 @@ sg_expand_military = {
 	category = sgcat_tutorial
 	
 	unlocking_subgoals_any = {
-		sg_declare_an_interest
+		sg_create_formation
 	}
 	
 	on_start = {
@@ -1331,11 +1331,10 @@ sg_mobilize_army = {
 	category = sgcat_tutorial
 	
 	unlocking_subgoals_any = {
-		sg_recruit_promote_commander
+		sg_start_diplomatic_play
 	}
 
 	trigger = {
-		is_at_war = yes
 		any_scope_character = {
 			has_role = general
 			is_mobilized = no
@@ -1358,19 +1357,18 @@ sg_send_general_to_front = {
 		sg_mobilize_army
 	}
 
-	trigger = {	
-		is_at_war = yes
-		any_scope_character = {
-			has_role = general
+	trigger = {
+		any_military_formation = {
+			is_army = yes
 			is_mobilized = yes
-			is_on_front = NO
+			is_on_front = no
 		}
 	}
 	
 	on_start = {
-		random_scope_character = { 
+		random_military_formation = {
 			limit = {
-				has_role = general
+				is_army = yes
 				is_mobilized = yes
 				is_on_front = no
 			}
@@ -1393,19 +1391,18 @@ sg_convoy_raiding = {
 		sg_recruit_promote_commander
 	}
 
-	trigger = {	
-		is_at_war = yes
+	trigger = {
 		any_scope_character = {
-			has_role = admiral
-			NOT = { has_commander_order = raid_convoys }
+			has_role = general
+			NOT = { has_commander_order = defend }
 		}
 	}
 	
 	on_start = {
 		random_scope_character = { 
 			limit = {
-				has_role = admiral
-				NOT = { has_commander_order = raid_convoys }
+				has_role = general
+				NOT = { has_commander_order = defend }
 			}
 			save_scope_as = tut_convoy_raiding
 		}
@@ -1818,5 +1815,50 @@ sg_declare_an_interest = {
 			objective_subgoal = sg_declare_an_interest
 			target = scope:tut_declare_interest_country
 		}
+	}
+}
+
+# Create Formation
+sg_create_formation = {
+	category = sgcat_tutorial
+	is_repeatable = no
+
+	unlocking_subgoals_all = {
+		sg_declare_an_interest
+	}
+
+	trigger = {
+	}
+	
+	on_start = {
+		add_journal_entry = {
+			type = je_tutorial_create_formation
+			objective_subgoal = sg_create_formation
+		}
+		set_variable = {
+				name = formation_tutorial_ongoing
+		}
+	}
+}
+
+
+# Establish Company
+sg_establish_company = {
+	category = sgcat_tutorial
+	is_repeatable = no
+
+	unlocking_subgoals_all = {
+		sg_expand_productive_building
+	}
+
+	trigger = {
+		can_establish_company = YES
+	}
+	
+	on_start = {
+		add_journal_entry = {
+			type = je_tutorial_establish_company
+			objective_subgoal = sg_establish_company
+		}	
 	}
 }

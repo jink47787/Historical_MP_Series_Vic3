@@ -1,0 +1,218 @@
+﻿je_caudillo = {
+	icon = "gfx/interface/icons/ig_icons/armed_forces.dds"
+
+	group = je_group_internal_affairs
+
+	# see also: exiling an armed forces character depletes the progress bar
+
+	scripted_button = caudillo_decree_button
+
+	immediate = {
+		save_scope_as = caudillo_country_scope
+	}
+
+	complete = {
+		ig:ig_armed_forces = {
+			is_in_government = no
+		}
+		custom_tooltip = {
+			text = caudillo_complete
+			root.var:caudillo_var <= 0
+		}
+	}
+
+	on_complete = {
+		trigger_event = { id = caudillo.2 popup = yes }
+		show_as_tooltip = {
+			ig:ig_armed_forces = {
+				remove_ideology = ideology_caudillismo
+			}
+			remove_modifier = age_of_caudillos_modifier
+		}
+	}
+
+	fail = {
+		ig:ig_armed_forces = {
+			is_in_government = yes
+		}
+		custom_tooltip = {
+			text = je_caudillo_goal_tt
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+		}
+	}
+
+	on_fail = {
+		trigger_event = { id = caudillo.3 popup = yes }
+		show_as_tooltip = {
+			add_modifier = {
+				name = age_of_caudillos_modifier
+				multiplier = 2
+			}
+		}
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					ig:ig_armed_forces = {
+						is_powerful = yes
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = 1
+				}
+			}
+			if = {
+				limit = {
+					ig:ig_armed_forces = {
+						is_in_government = yes
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = 1
+				}
+			}
+			if = {
+				limit = {
+					OR = {
+						has_law = law_type:law_autocracy
+						has_law = law_type:law_technocracy
+						has_law = law_type:law_oligarchy
+						has_law = law_type:law_single_party_state
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = 1
+				}
+			}
+			if = {
+				limit = {
+					ig:ig_armed_forces = {
+						is_marginal = yes
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = -1
+				}
+			}
+			if = {
+				limit = {
+					ig:ig_armed_forces = {
+						is_in_government = no
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = -1
+				}
+			}
+			if = {
+				limit = {
+					any_scope_character = {
+						OR = {
+							has_role = general
+							has_role = admiral
+						}
+						popularity >= 50 # Loved
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = 1
+				}
+			}
+			if = {
+				limit = {
+					any_scope_character = {
+						has_role = politician
+						NOT = { has_role = general }
+						popularity >= 50 # Loved
+						interest_group = {
+							is_powerful = yes
+							AND = {
+								law_stance = {
+									law = law_type:law_autocracy
+									value <= neutral
+								}
+								law_stance = {
+									law = law_type:law_technocracy
+									value >= neutral
+								}
+								law_stance = {
+									law = law_type:law_oligarchy
+									value >= neutral
+								}
+								law_stance = {
+									law = law_type:law_single_party_state
+									value >= neutral
+								}
+							}
+						}
+					}
+					NOT = {
+						any_scope_character = {
+							has_role = general
+							popularity >= 50 # Loved
+						}
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = -1
+				}
+			}
+			if = {
+				limit = {
+					any_scope_character = {
+						is_ruler = yes
+						has_ideology = ideology:ideology_authoritarian
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = 1
+				}
+			}
+			if = {
+				limit = {
+					OR = {
+						has_law = law_type:law_census_voting
+						has_law = law_type:law_universal_suffrage
+					}
+				}
+				change_variable = {
+					name = caudillo_var
+					add = -1
+				}
+			}
+		}
+		random_events = {
+			# Pulse events affect the progress bar
+			120 = 0 
+			10 = caudillo.4
+		}
+	}
+
+	current_value = {
+		value = root.var:caudillo_var
+	}
+
+	goal_add_value = {
+		add = 1200
+	}
+
+	progressbar = yes
+
+	weight = 100
+
+	can_revolution_inherit = yes
+	transferable = yes
+	should_be_pinned_by_default = yes
+}

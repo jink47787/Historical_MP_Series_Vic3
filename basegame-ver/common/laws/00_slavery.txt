@@ -67,6 +67,10 @@ law_slavery_banned = {
 			}
 		}
 	}
+
+	on_impose = { 
+			
+	} 
 	
 	revolution_state_weight = {
 		value = 1
@@ -98,14 +102,41 @@ law_slavery_banned = {
 		}	
 	}
 
-	ai_enact_weight_modifier = { #Petitions
+	ai_enact_weight_modifier = {
 		value = 0
-		
+		# Brazilian AI is less likely to pursue slavery banned if there are no abolitionists in power.
+		if = {
+			limit = { 
+				c:BRZ ?= this
+				has_law = law_type:law_slave_trade
+				NOR = {
+					any_interest_group = {
+						is_in_government = yes
+						leader = {
+							has_ideology = ideology:ideology_abolitionist
+						}
+					}
+					ruler = { has_ideology = ideology:ideology_abolitionist }
+					heir = { has_ideology = ideology:ideology_abolitionist }
+				}
+				scope:law = law_type:law_slavery_banned
+			}
+			add = -100
+		}
+		#Petitions
 		if = {
 			limit = { 
 				has_journal_entry = je_government_petition
 				has_variable = desired_law_var
                 scope:law = var:desired_law_var
+			}
+			add = 750
+		}
+
+		# This was funny while it lasted.
+		if = {
+			limit = { 
+				has_law = law_type:law_council_republic
 			}
 			add = 750
 		}
@@ -168,6 +199,10 @@ law_debt_slavery = {
 			}
 		}
 	}
+
+	on_impose = { 
+			
+	} 
 	
 	possible_political_movements = {
 		law_slavery_banned
@@ -284,6 +319,10 @@ law_slave_trade = {
 			}
 		}
 	}
+
+	on_impose = { 
+			
+	} 
 	
 	ai_will_do = {
 		exists = ruler
@@ -384,27 +423,9 @@ law_legacy_slavery = {
 		law_slavery_banned
 	}
 
-	pop_support = {
-		value = 0
-		add = {
-			desc = "POP_ACADEMICS"
-			if = {
-				limit = {
-					is_pop_type = academics
-				}
-				value = 0.1
-			}
-		}
-		add = {
-			desc = "POP_CLERGYMEN"
-			if = {
-				limit = {
-					is_pop_type = clergymen
-				}
-				value = 0.05
-			}
-		}
-	}
+	on_impose = { 
+			
+	} 
 	
 	pop_support = {
 		value = 0
@@ -425,6 +446,18 @@ law_legacy_slavery = {
 				}
 				value = 0.05
 			}
+		}
+		# Brazilian pops are more likely to pursue legacy slavery if the Aberdeen Act is being enforced
+		if = {
+			desc = "aberdeen_act_pop_support"
+			limit = {
+				c:BRZ ?= owner
+				owner = { 
+					has_law = law_type:law_slave_trade 
+					has_modifier = aberdeen_act_enforced_brz
+				}
+			}
+			value = 0.1
 		}
 	}
 
@@ -458,10 +491,38 @@ law_legacy_slavery = {
 		   }
 		}
 	}
-
-	ai_enact_weight_modifier = { #Petitions
+	ai_enact_weight_modifier = {
 		value = 0
-		
+		#Brazilian AI is more likely to pursue legacy slavery if there are no abolitionists in power.
+		if = {
+			limit = { 
+				c:BRZ ?= this
+				has_law = law_type:law_slave_trade
+				NOR = {
+					any_interest_group = {
+						is_in_government = yes
+						leader = {
+							has_ideology = ideology:ideology_abolitionist
+						}
+					}
+					ruler = { has_ideology = ideology:ideology_abolitionist }
+					heir = { has_ideology = ideology:ideology_abolitionist }
+				}
+				scope:law = law_type:law_legacy_slavery
+			}
+			add = 50
+		}
+		# Brazilian AI is more likely to pursue legacy slavery if the Aberdeen Act is being enforced
+		if = {
+			limit = { 
+				c:BRZ ?= this
+				has_law = law_type:law_slave_trade
+				has_modifier = aberdeen_act_enforced_brz
+				scope:law = law_type:law_legacy_slavery
+			}
+			add = 50
+		}
+		#Petitions
 		if = {
 			limit = { 
 				has_journal_entry = je_government_petition
@@ -470,5 +531,4 @@ law_legacy_slavery = {
 			}
 			add = 750
 		}
-	}
 }

@@ -1,3 +1,5 @@
+version=1
+
 input_context={
 	name="common"
 
@@ -186,67 +188,100 @@ input_context={
 	input_action = {
 		name = "open_outliner"
 		text = "SETTING_INPUT_ACTION_OPEN_OUTLINER"
-		scancode = 225+58		# shift+F1"
+		binding = {	# shift+F1"
+			scancode = 58
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_1"
 		text = "SETTING_INPUT_ACTION_TAB_1"
-		scancode = 225+30		# shift+1"
+		binding = {	# shift+1"
+			scancode = 30
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_2"
 		text = "SETTING_INPUT_ACTION_TAB_2"
-		scancode = 225+31		# shift+2"
+		binding = {	# shift+2"
+			scancode = 31
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_3"
 		text = "SETTING_INPUT_ACTION_TAB_3"
-		scancode = 225+32		# shift+3"
+		binding = {	# shift+3"
+			scancode = 32
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_4"
 		text = "SETTING_INPUT_ACTION_TAB_4"
-		scancode = 225+33		# shift+4"
+		binding = {	# shift+4"
+			scancode = 33
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_5"
 		text = "SETTING_INPUT_ACTION_TAB_5"
-		scancode = 225+34		# shift+5"
+		binding = {	# shift+5"
+			scancode = 34
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "production_lens"
 		text = "SETTING_INPUT_ACTION_PRODUCTION_LENS"
-		scancode = 226+30		# alt+1"
+		binding = {	# alt+1"
+			scancode = 30
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "political_lens"
 		text = "SETTING_INPUT_ACTION_POLITICAL_LENS"
-		scancode = 226+31		# alt+2"
+		binding = {	# alt+2"
+			scancode = 31
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "diplomatic_lens"
 		text = "SETTING_INPUT_ACTION_DIPLOMATIC_LENS"
-		scancode = 226+32		# alt+3"
+		binding = {	# alt+3"
+			scancode = 32
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "military_lens"
 		text = "SETTING_INPUT_ACTION_MILITARY_LENS"
-		scancode = 226+33		# alt+4"
+		binding = {	# alt+4"
+			scancode = 33
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "trade_lens"
 		text = "SETTING_INPUT_ACTION_TRADE_LENS"
-		scancode = 226+34		# alt+5"
+		binding = {	# alt+5"
+			scancode = 34
+			modifier = shift
+		}
 	}
 
 	input_action = {
@@ -270,7 +305,10 @@ input_context={
 	input_action = {
 		name = "toggle_construction_queue_pause"
 		text = "SETTING_INPUT_ACTION_TOGGLE_CONSTRUCTION_QUEUE_PAUSE"
-		scancode = 228+5 		# ctrl+B
+		binding = {	# ctrl+B
+			scancode = 5
+			modifier = shift
+		}
 	}
 
 	input_action = {

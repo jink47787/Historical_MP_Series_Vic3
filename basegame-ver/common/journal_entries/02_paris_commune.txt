@@ -1,6 +1,8 @@
 ﻿je_the_paris_commune_display = {
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
+	group = je_group_historical_content
+
 	is_shown_when_inactive = {
 		has_dlc_feature = voice_of_the_people_content
 		NOT = { has_global_variable = paris_commune_happened }
@@ -72,6 +74,8 @@
 
 je_the_paris_commune_france = {
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	group = je_group_historical_content
 	
 	can_revolution_inherit = no
 
@@ -79,12 +83,22 @@ je_the_paris_commune_france = {
 	scripted_button = je_the_paris_commune_france_button_b
 
 	immediate = {
+		add_modifier = {
+			name = fra_paris_commune_drain
+			multiplier = money_amount_multiplier_more_large
+		}
+
 		c:FRA = {
 			save_scope_as = france_scope
 		}
 		c:PRC = {
 			save_scope_as = commune_scope
 		}
+		set_global_variable = {
+			name = paris_commune_drift_final_var
+			value = 0
+		}
+		set_variable = { name = PRC_money_transfer value = money_amount_multiplier_very_large }
 	}
 
 	complete = {
@@ -96,6 +110,9 @@ je_the_paris_commune_france = {
 
 	on_complete = {
 		trigger_event = { id = paris_commune.2 popup = yes }
+		hidden_effect = {
+			remove_modifier = fra_paris_commune_drain
+		}
 	}
 
 	fail = {
@@ -107,6 +124,9 @@ je_the_paris_commune_france = {
 
 	on_fail = {
 		trigger_event = { id = paris_commune.3 popup = yes }
+		hidden_effect = {
+			remove_modifier = fra_paris_commune_drain
+		}
 	}
 
 	invalid = {
@@ -124,15 +144,61 @@ je_the_paris_commune_france = {
 		}	
 	}
 
+	on_invalid = {
+		hidden_effect = {
+			remove_modifier = fra_paris_commune_drain
+		}
+	}
+
 	on_timeout = {
 		trigger_event = { id = paris_commune.2 popup = yes }
+		hidden_effect = {
+			remove_modifier = fra_paris_commune_drain
+		}
+	}
+
+	modifiers_while_active = {
+		
+	}
+
+	on_weekly_pulse = {
+		effect = {
+			paris_commune_update_tick = yes
+		}
 	}
 
 	on_monthly_pulse = {
-		effect = {
+		effect = {			
+			paris_commune_update_tick = yes
 			change_global_variable = {
 				name = paris_commune_progress_var
-				add = global_var:paris_commune_progress_drift
+				add = global_var:paris_commune_drift_final_var
+			}
+			if = { #Adversarial system - if you side with France, the automated adversary fires Commune events, if not, it fires Versailles events.
+				limit = {
+					has_variable = paris_commune_fra_perspective
+				}
+				random_list = {
+					50 = {
+						paris_commune_automated_opposition_paris = yes
+					}
+					50 = {
+
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = paris_commune_prc_perspective
+				}
+				random_list = {
+					50 = {
+						paris_commune_automated_opposition_versailles = yes
+					}
+					50 = {
+
+					}
+				}
 			}
 		}
 		random_events = {
@@ -174,6 +240,8 @@ je_the_paris_commune_france = {
 
 je_the_paris_commune_communards = {
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	group = je_group_historical_content
 	
 	can_revolution_inherit = no
 
@@ -183,6 +251,10 @@ je_the_paris_commune_communards = {
 		}
 		c:PRC = {
 			save_scope_as = commune_scope
+		}
+		add_modifier = {
+			name = fra_paris_commune_drain_proceeds
+			multiplier = c:FRA.var:PRC_money_transfer
 		}
 	}
 
@@ -202,6 +274,7 @@ je_the_paris_commune_communards = {
 		show_as_tooltip = {
 			trigger_event = { id = paris_commune.3 popup = yes }
 		}
+		remove_modifier = fra_paris_commune_drain_proceeds
 	}
 
 	fail = {
@@ -215,6 +288,7 @@ je_the_paris_commune_communards = {
 		show_as_tooltip = {
 			trigger_event = { id = paris_commune.2 popup = yes }
 		}
+		remove_modifier = fra_paris_commune_drain_proceeds
 	}
 
 	invalid = {
@@ -236,6 +310,11 @@ je_the_paris_commune_communards = {
 		show_as_tooltip = {
 			trigger_event = { id = paris_commune.2 popup = yes }
 		}
+		remove_modifier = fra_paris_commune_drain_proceeds
+	}
+
+	on_invalid = {
+		remove_modifier = fra_paris_commune_drain_proceeds
 	}
 
 	should_be_pinned_by_default = yes

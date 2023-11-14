@@ -11,7 +11,7 @@
 
 types panel_military {
 	type tab_army = top_illu {
-		size = { @panel_width_plus_20 220 }
+		size = { @panel_width_plus_20 180 }
 
 		background = {
 			block "illu" {
@@ -19,94 +19,86 @@ types panel_military {
 			}
 			using = top_illu_properties
 		}
-		
-		hbox = {
-			visible = "[InformationPanel.IsTabSelected('army')]"
-			margin = { 15 15 }
-			margin_top = 10
+
+		vbox = {
 			parentanchor = hcenter
+			margin_top = 10
+			margin_bottom = 20
+		
+			hbox = {
+				visible = "[InformationPanel.IsTabSelected('army')]"
+				layoutpolicy_horizontal = expanding
+				margin = { 10 15 }
 
-			# Battalions
-			military_panel_unit_info = {
+				# Battalions
+				military_panel_unit_info = {}
+			}
 
-				### Mobilize button
+			### Mobilize button
+			widget = {
+				size = { 500 50 }
+				visible = "[And(IsValid( Country.MobilizeAllArmies ), Country.IsCommittedInDiplomaticPlay)]"
+
 				button = {
-					enabled = "[IsValid( Country.MobilizeAllGenerals )]"
+					enabled = "[IsValid( Country.MobilizeAllArmies )]"
+
+					parentanchor = right|vcenter
 					using = default_button
 					using = diplomatic_play_mobilize_button_sound
-					size = { 240 50 }
+					size = { 470 50 }
 					using = fontsize_large
-					onclick = "[PopupManager.ToggleMobilizeAllGenerals]"
-					tooltip = "[GetDesc( Country.MobilizeAllGenerals )]"
+
+					onclick = "[PopupManager.AskConfirmation( Country.MobilizeAllArmies )]"
+					tooltip = "MOBILIZE_ALL_MILITARY_FORMATIONS_BUTTON_TOOLTIP"
 
 					textbox = {
-						text = "MOBILIZE_ALL_GENERALS"
+						text = "MOBILIZE_ALL_MILITARY_FORMATIONS"
 						align = center|nobaseline
 						parentanchor = center
-						margin_left = 55
-						size = { 220 30 }
+						margin_right = 30
+						size = { 470 30 }
 						fontsize_min = 12
 						elide = right
+						using = fontsize_large
 					}
-					mobilization_icon_big = {
-						parentanchor = left|vcenter
-						position = { 4 0 }
-					}
+				}
+
+				icon_with_background_big = {
+					parentanchor = left|vcenter
 				}
 			}
 
-			# Conscripts
-			military_panel_unit_info = {
+			### Demobilize button
+			widget = {
+				size = { 500 50 }
+				visible = "[And(Not(IsValid( Country.MobilizeAllArmies )), Country.IsCommittedInDiplomaticPlay)]"
 
-				blockoverride "header" {
-					text = "CONSCRIPTS"
-				}
-
-				blockoverride "current_unit_count" {
-					text = "PANEL_MILITARY_ARMY_CURRENT_CONSCRIPTS"
-					tooltip = "PANEL_MILITARY_ARMY_CURRENT_CONSCRIPTS_TOOLTIP"
-				}
-
-				blockoverride "with_general" {
-					text = "[Country.GetConscriptedBattalionsWithGeneralsRaw]"
-				}
-				blockoverride "with_general_hbox" {
-					tooltip = "MOBILIZED_CONSCRIPTS_WITH_GENERAL_TOOLTIP"
-					alpha = "[TransparentIfZero_int32(Country.GetConscriptedBattalionsWithGeneralsRaw)]"
-				}
-
-				blockoverride "in_garrison" {
-					text = "[Country.GetConscriptedBattalionsInGarrisonRaw]"
-				}
-
-				blockoverride "in_garrison_hbox" {
-					tooltip = "MOBILIZED_CONSCRIPTS_IN_GARRISON_TOOLTIP"
-					alpha = "[TransparentIfZero_int32(Country.GetConscriptedBattalionsInGarrisonRaw)]"
-				}
-
-				### Activate Conscripts
 				button = {
-					enabled = "[IsValid( Country.ActivateConscriptionCenters )]"
-					using = default_button_action
-					size = { 240 50 }
+					enabled = "[IsValid( Country.DemobilizeAllArmies )]"
+
+					parentanchor = right|vcenter
+					using = default_button
+					using = diplomatic_play_mobilize_button_sound
+					size = { 470 50 }
 					using = fontsize_large
-					onclick = "[GetLensToolbar.ActivateOption('activate_conscription_centers_lens_option')]"
-					tooltip = "[GetDesc( Country.ActivateConscriptionCenters )]"
+
+					onclick = "[PopupManager.AskConfirmation( Country.DemobilizeAllArmies )]"
+					tooltip = "DEMOBILIZE_ALL_MILITARY_FORMATIONS_BUTTON_TOOLTIP"
 
 					textbox = {
-						text = "MILITARY_PANEL_ACTIVATE_CONSCRIPTS"
+						text = "DEMOBILIZE_ALL_MILITARY_FORMATIONS"
 						align = center|nobaseline
 						parentanchor = center
-						margin_left = 55
-						size = { 220 30 }
+						margin_right = 30
+						size = { 470 30 }
 						fontsize_min = 12
 						elide = right
+						using = fontsize_large
 					}
+				}
 
-					conscription_icon_big = {
-						parentanchor = left|vcenter
-						position = { 4 0 }
-					}
+				icon_with_background_big = {
+					parentanchor = left|vcenter
 				}
 			}
 		}
@@ -137,87 +129,44 @@ types panel_military {
 
 	type military_panel_unit_info = vbox {
 		layoutpolicy_vertical = expanding
+		tooltip = "PANEL_MILITARY_ARMY_OVERVIEW_TOOLTIP"
 
 		textbox = {
 			autoresize = yes
 			margin_bottom = 10
 			default_format = "#title"
 			block "header" {
-				text = "REGULARS"
+				text = "REGULARS_AND_CONSCRIPTS"
 			}
 		}
 
-		### ARMY / FORCELIMIT
-		textbox = {
-			block "current_unit_count" {
-				text = "PANEL_MILITARY_ARMY_CURRENT_REGULARS"
-				tooltip = "PANEL_MILITARY_ARMY_CURRENT_REGULARS_TOOLTIP"
+		hbox = {
+			spacing = 30
+
+			### ARMY / FORCELIMIT
+			textbox = {
+				block "current_unit_count" {
+					raw_text = "@battalions![Country.GetRegularBattalions|v]"
+				}
+				autoresize = yes
+				align = left|nobaseline
+				using = fontsize_mega
 			}
-			autoresize = yes
-			align = left|nobaseline
-			using = fontsize_mega
+
+			### ARMY / FORCELIMIT
+			textbox = {
+				block "current_unit_count" {
+					raw_text = "@conscripts!#v [Country.GetConscriptedBattalions]"
+				}
+				autoresize = yes
+				align = left|nobaseline
+				using = fontsize_mega
+			}
 		}
 
 		widget = {
 			layoutpolicy_vertical = expanding
 			layoutpolicy_horizontal = expanding
-		}
-		
-		### With general
-		hbox = {
-			margin = { 2 0 }
-			block "with_general_hbox" {
-				tooltip = "MOBILIZED_REGULARS_WITH_GENERAL_TOOLTIP"
-				alpha = "[TransparentIfZero_int32(Country.GetRegularBattalionsWithGeneralsRaw)]"
-			}
-
-			layoutpolicy_horizontal = expanding
-
-			textbox = {
-				layoutpolicy_horizontal = expanding
-				autoresize = yes
-				text = "WITH_GENERALS"
-				align = left|nobaseline
-			}	
-			textbox = {
-				layoutpolicy_horizontal = expanding
-				autoresize = yes
-				default_format = "#v"
-
-				block "with_general" {
-					text = "[Country.GetRegularBattalionsWithGeneralsRaw]"
-				}
-				align = right|nobaseline
-			}
-		}
-		
-		### In garrison
-		hbox = {
-			margin = { 2 0 }
-			margin_bottom = 5
-
-			block "in_garrison_hbox" {
-				tooltip = "MOBILIZED_REGULARS_IN_GARRISON_TOOLTIP"
-				alpha = "[TransparentIfZero_int32(Country.GetRegularBattalionsInGarrisonRaw)]"
-			}
-			layoutpolicy_horizontal = expanding
-
-			textbox = {
-				layoutpolicy_horizontal = expanding
-				autoresize = yes
-				text = "IN_GARRISON"
-				align = left|nobaseline
-			}	
-			textbox = {
-				layoutpolicy_horizontal = expanding
-				autoresize = yes
-				default_format = "#v"
-
-				block "in_garrison" {
-					text = "[Country.GetRegularBattalionsInGarrisonRaw]"
-				}
-				align = right|nobaseline
-			}
 		}
 
 		widget = {
@@ -232,15 +181,13 @@ types panel_military {
 		spacing = 5
 
 		### ARMY / FORCELIMIT
-		flowcontainer = {
-			textbox = {
-				text = "PANEL_MILITARY_NAVY_CURRENT_FLOTILLAS"
-				tooltip = "PANEL_MILITARY_NAVY_CURRENT_FLOTILLAS_TOOLTIP"
-				autoresize = yes
-				align = left|nobaseline
-				parentanchor = vcenter
-				using = fontsize_mega
-			}
+		textbox = {
+			text = "PANEL_MILITARY_NAVY_CURRENT_FLOTILLAS"
+			tooltip = "PANEL_MILITARY_NAVY_CURRENT_FLOTILLAS_TOOLTIP"
+			autoresize = yes
+			align = left|nobaseline
+			parentanchor = hcenter
+			using = fontsize_mega
 		}
 
 		textbox = {
@@ -271,7 +218,7 @@ types panel_military {
 		}
 	}
 	
-	type mobilization_icon_big = widget {
+	type icon_with_background_big = widget {
 		size = { 60 60 }
 		
 		icon = {
@@ -282,8 +229,15 @@ types panel_military {
 		icon = {
 			parentanchor = center
 			framesize = { 120 120 }
-			size = { 100% 100% }
-			texture = "gfx/interface/icons/generic_icons/mobilize_icon.dds"
+
+			block "icon_size" {
+				size = { 100% 100% }
+			}
+
+			block "texture" {
+				texture = "gfx/interface/icons/generic_icons/mobilize_icon.dds"
+			}
+
 			block "frame" {
 				frame = 0
 			}
@@ -442,7 +396,7 @@ types panel_military {
 			}
 		}
 		
-		mobilization_icon_big = {
+		icon_with_background_big = {
 			parentanchor = vcenter
 		}
 	}
@@ -450,100 +404,28 @@ types panel_military {
 	type military_panel_army_content = flowcontainer {
 		direction = vertical
 
-		tab_army = {}
+		tab_army = {
+			visible = "[Country.IsCommittedInDiplomaticPlay]"
+		}
+
+		tab_army = {
+			visible = "[Not(Country.IsCommittedInDiplomaticPlay)]"
+			size = { @panel_width_plus_20 120 }
+		}
 
 		default_header_2texts = {
 			using = default_list_position
 			
 			blockoverride "text1" {
-				text = "GENERALS_HEADER_COUNT"
-			}
-			blockoverride "text2" {
-				text = "MOBILIZED_BATTALIONS_HEADER_COUNT"
-				tooltip = "MOBILIZED_BATTALIONS_HEADER_TOOLTIP"
+				text = "MILITARY_FORMATIONS_ARMY_HEADER"
 			}
 		}
 
 		widget = { size = { 1 10 }}
 
-		commander_list = {}
+		military_formation_list = {}
 
 		widget = { size = { 1 10 }}
-
-		hq_list = {
-			blockoverride "empty_state" {
-				empty_state = {
-
-					blockoverride "visible" {
-						visible = "[IsDataModelEmpty(Hq.GetBuildingsWithUnitsInReserve)]"
-					}
-					
-					blockoverride "text" {
-						text = "NO_BATTALIONS_IN_HQ"
-					}
-				}
-			}
-		}
-
-		widget = { size = { 1 10 }}
-
-	}
-
-	type military_panel_garrison_content = flowcontainer {
-		direction = vertical
-
-		top_illu = {
-			size = { @panel_width_plus_20 150 }
-			background = {
-				block "illu" {
-					texture = "gfx/interface/illustrations/top_illus/top_illu_army.dds"
-				}
-				using = top_illu_properties
-			}
-	
-			flowcontainer = {
-				direction = vertical
-				parentanchor = center
-				margin = { 0 10 }
-				tooltip = "MILITARY_PANEL_POTENTIAL_GARRISON_TOOLTIP"
-
-				### Garrison / potential garrison
-				flowcontainer = {
-					parentanchor = hcenter
-
-					textbox = {
-						text = "MILITARY_PANEL_CURRENT_GARRISON"
-						autoresize = yes
-						align = left|nobaseline
-						parentanchor = vcenter
-						using = fontsize_mega
-					}
-					textbox = {
-						raw_text = " /"
-						autoresize = yes
-						align = left|nobaseline
-						parentanchor = bottom
-						using = fontsize_mega
-					}
-					textbox = {
-						text = "MILITARY_PANEL_POTENTIAL_GARRISON"
-						autoresize = yes
-						align = left|nobaseline
-						parentanchor = vcenter
-						using = fontsize_large
-						margin_top = 10
-					}
-				}
-				
-				textbox = {
-					text = "MILITARY_PANEL_GARRISON_TOTAL_DEFENSES"
-					parentanchor = hcenter
-					autoresize = yes
-				}
-			}
-		}
-
-		hq_garrison_tab_list = {}
 	}
 
 	type military_panel_navy_content = flowcontainer {
@@ -567,50 +449,15 @@ types panel_military {
 			using = default_list_position
 			
 			blockoverride "text1" {
-				text = ADMIRALS_HEADER_COUNT
-			}
-			blockoverride "text2" {
-				text = ACTIVE_FLOTILLAS_HEADER_COUNT
+				text = "MILITARY_FORMATIONS_FLEET_HEADER"
 			}
 		}
 
 		widget = { size = { 1 10 }}
-		
 
-
-		commander_list = {
+		military_formation_list = {
 			blockoverride "datamodel" {
-				datamodel = "[Country.AccessAdmirals]"
-			}
-		}
-
-		widget = { size = { 1 10 }}
-
-		hq_list = {
-			blockoverride "datamodel_hq_entries" {
-				datamodel = "[PanelMilitary.GetNavalHQEntries]"
-			}
-
-			blockoverride "recruit_new_onclick" {
-				onclick = "[Hq.ZoomToHQ]"
-				onclick = "[PanelMilitary.OnClickRecruitAdmirals]"
-			}
-
-			blockoverride "recruit_text" {
-				text = "RECRUIT_ADMIRAL_BUTTON"
-			}
-
-			blockoverride "empty_state" {
-				empty_state = {
-
-					blockoverride "visible" {
-						visible = "[IsDataModelEmpty(Hq.GetBuildingsWithUnitsInReserve)]"
-					}
-
-					blockoverride "text" {
-						text = "NO_FLOTILLAS_IN_HQ"
-					}
-				}
+				datamodel = "[Country.GetMilitaryFormationsFleet]"
 			}
 		}
 
@@ -664,44 +511,24 @@ types panel_military {
 				blockoverride "first_button_selected" {
 					text = "MILITARY_PANEL_TAB_ARMY_SELECTED"
 				}
-
-				# Garrisons
-				blockoverride "second_button" {
-					text = "MILITARY_PANEL_TAB_GARRISON"
-				}
-				blockoverride "second_button_tooltip" {
-					tooltip = "MILITARY_PANEL_TAB_GARRISON"
-				}
-				blockoverride "second_button_click" {
-					onclick = "[InformationPanel.SelectTab('garrison')]"
-				}
-				blockoverride "second_button_visibility" {
-					visible = "[InformationPanel.IsTabSelected('garrison')]"
-				}
-				blockoverride "second_button_visibility_checked" {
-					visible = "[Not( InformationPanel.IsTabSelected('garrison') )]"
-				}
-				blockoverride "second_button_selected" {
-					text = "MILITARY_PANEL_TAB_GARRISON_SELECTED"
-				}
 				
 				# Navy
-				blockoverride "third_button" {
+				blockoverride "second_button" {
 					text = "MILITARY_PANEL_TAB_NAVY"
 				}
-				blockoverride "third_button_tooltip" {
+				blockoverride "second_button_tooltip" {
 					tooltip = "MILITARY_PANEL_TAB_NAVY"
 				}
-				blockoverride "third_button_click" {
+				blockoverride "second_button_click" {
 					onclick = "[InformationPanel.SelectTab('navy')]"
 				}
-				blockoverride "third_button_visibility" {
+				blockoverride "second_button_visibility" {
 					visible = "[InformationPanel.IsTabSelected('navy')]"
 				}
-				blockoverride "third_button_visibility_checked" {
+				blockoverride "second_button_visibility_checked" {
 					visible = "[Not( InformationPanel.IsTabSelected('navy') )]"
 				}
-				blockoverride "third_button_selected" {
+				blockoverride "second_button_selected" {
 					text = "MILITARY_PANEL_TAB_NAVY_SELECTED"
 				}
 			}
@@ -717,11 +544,6 @@ types panel_military {
 					using = default_fade_in_out
 				}
 
-				military_panel_garrison_content = {
-					visible = "[InformationPanel.IsTabSelected('garrison')]"
-					using = default_fade_in_out
-				}
-
 				military_panel_navy_content = {
 					visible = "[InformationPanel.IsTabSelected('navy')]"
 					using = default_fade_in_out
@@ -732,21 +554,31 @@ types panel_military {
 		}
 
 		blockoverride "fixed_bottom" {
-			fixed_bottom_spacer = {
-				visible = "[Not(InformationPanel.IsTabSelected('garrison'))]"
-			}
+			fixed_bottom_spacer = {}
 				
-			widget = {
-				size = { @panel_width 50 }
-				visible = "[Not(InformationPanel.IsTabSelected('garrison'))]"
+			flowcontainer = {
+				direction = vertical
+				spacing = 5
 
-				# Recruit button
+				divider_clean = {
+					size = { @panel_width_plus_14 4 }
+				}
+
+				background = {
+					using = dark_area
+				}
+
+				widget = {
+					size = { 5 5 }
+				}
+
+				### CREATE FORMATIONS
 				button = {
 					using = default_button_map_interaction
-					parentanchor = center
+					parentanchor = hcenter
 					size = { 520 50 }
 					using = fontsize_large
-					onclick = "[PanelMilitary.OnClickRecruitGenerals]"
+					onclick = "[PanelMilitary.OnClickRecruitArmyFormation]"
 					enabled = yes
 					visible = "[InformationPanel.IsTabSelected('army')]"
 					using = default_content_fade
@@ -764,7 +596,7 @@ types panel_military {
 							parentanchor = vcenter
 							autoresize = yes
 							align = center|nobaseline
-							text = "RECRUIT_CHARACTER_GENERAL"
+							text = "CREATE_ARMY_FORMATION"
 						}
 
 					}
@@ -772,10 +604,10 @@ types panel_military {
 				
 				button = {
 					using = default_button_map_interaction
-					parentanchor = center
+					parentanchor = hcenter
 					size = { 520 50 }
 					using = fontsize_large
-					onclick = "[PanelMilitary.OnClickRecruitAdmirals]"
+					onclick = "[PanelMilitary.OnClickRecruitFleetFormation]"
 					enabled = yes
 					visible = "[InformationPanel.IsTabSelected('navy')]"
 					using = default_content_fade
@@ -793,7 +625,7 @@ types panel_military {
 							parentanchor = vcenter
 							autoresize = yes
 							align = center|nobaseline
-							text = "RECRUIT_CHARACTER_ADMIRAL"
+							text = "CREATE_FLEET_FORMATION"
 						}
 
 					}
