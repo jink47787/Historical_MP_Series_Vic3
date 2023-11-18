@@ -24,9 +24,41 @@
 
 	on_enable = {
 		ig:ig_intelligentsia = {
-			set_ig_trait = ig_trait:ig_trait_social_criticism
-			set_ig_trait = ig_trait:ig_trait_avant_garde
-			set_ig_trait = ig_trait:ig_trait_propagandists
+			if = {
+				limit = {
+					owner = { c:CHI ?= this }
+				}
+				set_ig_trait = ig_trait:ig_trait_social_criticism
+				set_ig_trait = ig_trait:ig_trait_avant_garde
+				set_ig_trait = ig_trait:ig_trait_restoration
+			}
+			else_if = {
+				limit = {
+					owner = { 
+						OR = { 
+							c:TUR ?= this
+							c:RUS ?= this
+						}
+					}
+				}
+				set_ig_trait = ig_trait:ig_trait_crisis_of_identity
+				set_ig_trait = ig_trait:ig_trait_avant_garde
+				set_ig_trait = ig_trait:ig_trait_propagandists
+			}
+			else_if = {
+				limit = {
+					has_dlc_feature = voice_of_the_people_content
+					owner = { c:FRA ?= this }
+				}
+				set_ig_trait = ig_trait:ig_trait_social_criticism
+				set_ig_trait = ig_trait:ig_trait_avant_garde
+				set_ig_trait = ig_trait:ig_trait_les_beaux_arts
+			}
+			else = {
+				set_ig_trait = ig_trait:ig_trait_social_criticism
+				set_ig_trait = ig_trait:ig_trait_avant_garde
+				set_ig_trait = ig_trait:ig_trait_propagandists
+			}
 		}
 		
 		# Papal Intellegentsia
@@ -50,14 +82,28 @@
 		# Literati
 		else_if = {
 			limit = {
-				OR = {
-					c:CHI ?= this
-					c:TPG ?= this
+				any_primary_culture = {
+					has_discrimination_trait = han_chinese
 				}
 			}
 			ig:ig_intelligentsia = { 
 				set_interest_group_name = ig_literati
 				remove_ideology = ideology_anti_clerical
+			}
+		}
+		# Brazilian Intelligentsia
+		else_if = {
+			limit = {
+				has_dlc_feature = rp1_content
+				c:BRZ ?= THIS
+			}
+			ig:ig_intelligentsia = { 
+				set_ig_trait = ig_trait:ig_trait_brasilidade
+				set_ig_trait = ig_trait:ig_trait_bachareis
+				set_ig_trait = ig_trait:ig_trait_social_criticism
+
+				remove_ideology = ideology_republican
+				add_ideology = ideology_constitutionalist
 			}
 		}
 		
@@ -76,292 +122,131 @@
 			}
 		}
 	}
-
 	on_disable = {}
 	on_character_ig_membership = {}
 
 	pop_potential = {
 		literacy_rate > 0.25
-		NOT = { is_pop_type = peasants }
+		OR = {
+			is_pop_type = academics
+			is_pop_type = aristocrats
+			is_pop_type = bureaucrats
+			is_pop_type = capitalists
+			is_pop_type = clergymen
+			is_pop_type = clerks
+			is_pop_type = engineers
+		}
 	}
 
 	pop_weight = {
 		value = 0
-		
-		add = {
-			desc = "ACADEMIC_EMPLOYMENT"
-			if = {
-				limit = {
-					OR = {
-						pop_employment_building = building_university
-						pop_employment_building = building_arts_academy
-					}
-				}
-				value = 100
-			}
-		}
+
 		add = {
 			desc = "POP_ACADEMICS"
 			if = {
-				limit = { 
+				limit = {
 					is_pop_type = academics
 				}
-				value = 200
+				value = 250
 			}
-		}	
-		
-		add = {
-			desc = "POP_CLERKS"
-			if = {
-				limit = { 
-					is_pop_type = clerks
-				}
-				value = 75
-			}
-		}		
-		
+		}
+
 		add = {
 			desc = "POP_BUREAUCRATS"
 			if = {
-				limit = { 
+				limit = {
 					is_pop_type = bureaucrats
+				}
+				value = 150
+			}
+		}
+
+		add = {
+			desc = "POP_CLERKS"
+			if = {
+				limit = {
+					is_pop_type = clerks
+				}
+				value = 50
+			}
+		}
+
+		add = {
+			desc = "POP_ARISTOCRATS"
+			if = {
+				limit = {
+					is_pop_type = aristocrats
+				}
+				if = {
+					limit = {
+						owner = {
+							has_law = law_type:law_hereditary_bureaucrats
+						}
+					}
+					value = 75
+				}
+				else = {
+					value = 25
+				}
+			}
+		}
+		
+		add = {
+			desc = "ADMINISTRATION_ROLE"
+			if = {
+				limit = {
+					OR = {
+						is_pop_type = aristocrats
+						is_pop_type = clergymen
+						is_pop_type = capitalists
+					}
+					OR = {
+						pop_employment_building_group = bg_service
+						pop_employment_building_group = bg_arts
+						pop_employment_building_group = bg_government
+					}
 				}
 				value = 100
 			}
 		}
-		add = {
-			desc = "POP_ENGINEERS"
-			if = {
-				limit = { 
-					is_pop_type = engineers
-				}
-				value = 50
-			}
-		}
 		
-		add = {
-			desc = "POP_CAPITALISTS"
-			if = {
-				limit = { 
-					is_pop_type = capitalists
-				}
-				value = 50
+		if = {
+			limit = {
+				literacy_rate >= 0.50
 			}
-		}				
-		
-		add = {
-			desc = "POP_ARISTOCRATS"
-			if = {
-				limit = { 
-					is_pop_type = aristocrats
-				}
-				value = 50
-			}
-		}		
-		
-		add = {
-			desc = "LITERACY_50_60"
-			
-			if = {
-				limit = { 
-					literacy_rate >= 0.50
-					literacy_rate < 0.60
-				}
-				add = 5
-			}
-		}		
-		add = {
-			desc = "LITERACY_60_70"
-			
-			if = {
-				limit = { 
-					literacy_rate >= 0.60
-					literacy_rate < 0.70
-				}
-				add = 10
-			}
-		}
-		add = {
-			desc = "LITERACY_70_80"
-			
-			if = {
-				limit = { 
-					literacy_rate >= 0.70
-					literacy_rate < 0.80
-				}
-				add = 15
-			}
-		}		
-		add = {
-			desc = "LITERACY_80_90"
-			
-			if = {
-				limit = { 
-					literacy_rate >= 0.80
-					literacy_rate < 0.90
-				}
-				add = 20
-			}
-		}		
-		add = {
-			desc = "LITERACY_90_100"
-			
-			if = {
-				limit = { 
-					literacy_rate >= 0.90
-				}
-				add = 25
-			}
-		}	
-		add = {
-			desc = "law_autocracy"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_autocracy
-					}
-				}
-				value = 20
-			}
-		}
-		add = {
-			desc = "law_oligarchy"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_oligarchy
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_anarchy"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_anarchy
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_outlawed_dissent"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_outlawed_dissent
-					}
-				}
-				value = 20
-			}
-		}
-		add = {
-			desc = "law_censorship"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_censorship
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_state_religion"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_state_religion
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_no_schools"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_no_schools
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_debt_slavery"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_debt_slavery
-					}
-				}
-				value = 20
-			}
-		}
-		add = {
-			desc = "law_slave_trade"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_slave_trade
-					}
-				}
-				value = 20
-			}
-		}
-		add = {
-			desc = "law_legacy_slavery"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_legacy_slavery
-					}
-				}
-				value = 10
-			}
-		}
-		multiply = {
-			desc = "concept_literacy"
-			value = 1.0
-			
-			if = {
-				limit = { 
-					literacy_rate < 0.5
-				}
+			add = {
+				desc = "POP_LITERACY"
 				value = literacy_rate
-				multiply = 2
+				multiply = 20
 			}
 		}
-		
+
 		multiply = {
 			desc = "LEADER_POPULARITY"
 			scope:interest_group = {
 				leader ?= {
 					value = popularity
-					multiply = 0.005
+					multiply = 0.0025
 					add = 1
+					max = 1.25
 					min = 0.75
 				}
 			}
-		}	
-		
+		}
+
 		multiply = {
-			desc = "decentralized_power"	
+			desc = "decentralized_power"
 			value = 1.0
-			
+
 			if = {
-				limit = { 
+				limit = {
 					owner = {
 						is_country_type = decentralized
 					}
 				}
 				value = 0.0
-			}		
+			}
 		}
-		
 		if = {
 			limit = {
 				scope:interest_group = {
@@ -373,6 +258,33 @@
 				value = 1
 				add = scope:interest_group.modifier:interest_group_in_government_attraction_mult
 				min = 0
+			}
+		}
+		
+		if = {
+			limit = {
+				scope:interest_group = {
+					is_in_government = yes
+				}
+			}
+			multiply = { # Multiplied by 1.25x max
+				desc = "POP_LOYALISTS"
+				value = pop_loyalist_fraction
+				divide = 4
+				add = 1
+			}
+		}
+		if = {
+			limit = {
+				scope:interest_group = {
+					is_in_government = no
+				}
+			}
+			multiply = { # Multiplied by 1.25x max
+				desc = "POP_RADICALS"
+				value = pop_radical_fraction
+				divide = 4
+				add = 1
 			}
 		}
 	}

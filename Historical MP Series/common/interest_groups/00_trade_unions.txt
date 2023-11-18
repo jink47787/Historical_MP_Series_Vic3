@@ -22,12 +22,33 @@
 		ig_trait_industrial_organizers
 		ig_trait_work_to_rule
 	}
-
+	
 	on_enable = {
 		ig:ig_trade_unions = {
-			set_ig_trait = ig_trait:ig_trait_work_to_rule
-			set_ig_trait = ig_trait:ig_trait_industrial_organizers
-			set_ig_trait = ig_trait:ig_trait_solidarity
+			if = {
+				limit = {
+					has_dlc_feature = voice_of_the_people_content
+					owner = { c:FRA ?= this }
+				}
+				set_ig_trait = ig_trait:ig_trait_work_to_rule
+				set_ig_trait = ig_trait:ig_trait_industrial_organizers
+				set_ig_trait = ig_trait:ig_trait_bourse_du_travail
+			}
+			else = {
+				set_ig_trait = ig_trait:ig_trait_work_to_rule
+				set_ig_trait = ig_trait:ig_trait_industrial_organizers
+				set_ig_trait = ig_trait:ig_trait_solidarity
+			}
+		}
+		
+		### Socialism
+		if = {
+			limit = {
+				has_technology_researched = socialism
+			}
+			ig:ig_trade_unions = {
+				add_ideology = ideology_socialist
+			}
 		}
 	}
 
@@ -41,34 +62,38 @@
 			is_pop_type = shopkeepers
 			is_pop_type = officers
 		}
-		NOR = {
-			pop_employment_building_group = bg_agriculture
-			pop_employment_building_group = bg_ranching
-			pop_employment_building_group = bg_plantations
+		OR = {
+			AND = {
+				custom_tooltip = {
+					text = owner_has_modern_agriculture_tt
+					owner = {
+						OR = {
+							has_law = law_type:law_commercialized_agriculture
+							has_law = law_type:law_collectivized_agriculture
+						}
+					}
+				}
+				strata = poor
+				NOR = {
+					pop_employment_building_group = bg_subsistence_agriculture
+					pop_employment_building_group = bg_subsistence_ranching
+				}
+			}
+			NOR = {
+				pop_employment_building_group = bg_agriculture
+				pop_employment_building_group = bg_ranching
+				pop_employment_building_group = bg_plantations
+			}
 		}
 	}
 
 	pop_weight = {
 		value = 0
-		
-		add = {
-			desc = "VANGUARDISTS"
-			if = {
-				limit = { 
-					is_pop_type = bureaucrats
-					owner = {
-						has_law = law_type:law_vanguardism
-						has_law = law_type:law_command_economy
-					}
-				}
-				value = 500
-			}
-		}
-		
+
 		add = {
 			desc = "URBAN_POP"
 			if = {
-				limit = { 
+				limit = {
 					NOR = {
 						pop_employment_building_group = bg_agriculture
 						pop_employment_building_group = bg_ranching
@@ -76,208 +101,89 @@
 					}
 				}
 				value = 50
+				if = {
+					limit = {
+						strata = middle
+					}
+					divide = 2
+				}
 			}
 		}
-		add = {
-			desc = "CONSCRIPTED"
-			if = {
-				limit = {
-						pop_employment_building = building_conscription_center
-				}
-				value = 100
-			}
-		}			
-	
+
 		add = {
 			desc = "POP_MACHINISTS"
 			if = {
-				limit = { 
+				limit = {
 					is_pop_type = machinists
 				}
 				value = 100
 			}
-		}	
+		}
+
 		add = {
 			desc = "POP_LABORERS"
 			if = {
-				limit = { 
+				limit = {
 					is_pop_type = laborers
 				}
 				value = 50
 			}
-		}			
-		
-		add = {
-			desc = "SOL_0_5"
-			if = {
-				limit = {
-					standard_of_living >= 0
-					standard_of_living < 5
-				}
-				value = 50
-			}
 		}
-		add = {
-			desc = "SOL_5_10"
-			if = {
-				limit = {
-					standard_of_living >= 5
-					standard_of_living < 10
-				}
-				value = 40
-			}
-		}
-		add = {
-			desc = "SOL_10_15"
-			if = {
-				limit = {
-					standard_of_living >= 10
-					standard_of_living < 15
-				}
-				value = 30
-			}
-		}
-		add = {
-			desc = "SOL_15_20"
-			if = {
-				limit = {
-					standard_of_living >= 15
-					standard_of_living < 20
-				}
-				value = 20
-			}
-		}
-		add = {
-			desc = "SOL_20_25"
-			if = {
-				limit = {
-					standard_of_living >= 20
-					standard_of_living < 25
-				}
-				value = 10
-			}
-		}
-		
-		add = {
-			desc = "law_no_health_system"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_no_health_system
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_serfdom"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_serfdom
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_no_workers_rights"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_no_workers_rights
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_child_labor_allowed"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_child_labor_allowed
-					}
-				}
-				value = 10
-			}
-		}
-		add = {
-			desc = "law_no_social_security"
-			if = {
-				limit = {
-					owner = {
-						has_law = law_type:law_no_social_security
-					}
-				}
-				value = 10
-			}
-		}
-		
+
 		multiply = {
 			desc = "LEADER_POPULARITY"
 			scope:interest_group = {
 				leader ?= {
 					value = popularity
-					multiply = 0.005
+					multiply = 0.0025
 					add = 1
+					max = 1.25
 					min = 0.75
 				}
 			}
-		}	
+		}
+
 		multiply = {
-			desc = "NO_LABOR_MOVEMENT"	
+			desc = "NO_LABOR_MOVEMENT"
 			value = 1.0
-			
+
 			if = {
-				limit = { 
+				limit = {
 					owner = {
 						NOT = { has_technology_researched = labor_movement }
 					}
 				}
 				value = 0.5
-			}		
-		}		
+			}
+		}
+
 		multiply = {
-			desc = "NO_EGALITARIANISM"	
+			desc = "NO_EGALITARIANISM"
 			value = 1.0
-			
+
 			if = {
-				limit = { 
+				limit = {
 					owner = {
 						NOT = { has_technology_researched = egalitarianism }
 					}
 				}
 				value = 0.5
-			}		
+			}
 		}
+
 		multiply = {
-			desc = "NO_SOCIALISM"	
+			desc = "decentralized_power"
 			value = 1.0
-			
+
 			if = {
-				limit = { 
-					owner = {
-						NOT = { has_technology_researched = socialism }
-					}
-				}
-				value = 0.75
-			}		
-		}
-		multiply = {
-			desc = "decentralized_power"	
-			value = 1.0
-			
-			if = {
-				limit = { 
+				limit = {
 					owner = {
 						is_country_type = decentralized
 					}
 				}
 				value = 0.0
-			}		
-		}	
-		
+			}
+		}
 		if = {
 			limit = {
 				scope:interest_group = {
@@ -291,8 +197,34 @@
 				min = 0
 			}
 		}
+		
+		if = {
+			limit = {
+				scope:interest_group = {
+					is_in_government = yes
+				}
+			}
+			multiply = { # Multiplied by 1.25x max
+				desc = "POP_LOYALISTS"
+				value = pop_loyalist_fraction
+				divide = 4
+				add = 1
+			}
+		}
+		if = {
+			limit = {
+				scope:interest_group = {
+					is_in_government = no
+				}
+			}
+			multiply = { # Multiplied by 1.25x max
+				desc = "POP_RADICALS"
+				value = pop_radical_fraction
+				divide = 4
+				add = 1
+			}
+		}
 	}
-
 
 	monarch_weight = {
 		value = 0.1 # this is just inherently unlikely
