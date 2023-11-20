@@ -285,14 +285,13 @@ types state_panel_types {
 		### URBAN BUILDINGS
 		flowcontainer = {
 			parentanchor = hcenter
-			minimumsize = { @panel_width -1 }
 			direction = vertical
 			visible = "[Not(GetVariableSystem.Exists('buildings_list'))]"
 			using = default_content_fade
 			spacing = 10
 			margin_top = 10
 			
-			improved_building_grid_header_building_item = {
+			header_building_item = {
 				datacontext = "[StatesPanel.AccessBuilding('building_urban_center')]"
 				tooltipwidget = {
 					FancyTooltip_Building = {}
@@ -313,20 +312,20 @@ types state_panel_types {
 					flipdirection = yes
 
 					item = {
-						improved_building_grid_building_item = {
+						building_item = {
 						}
 					}
 				}
 
 				widget = {
-					size = { 135 220 }
+					size = { 135 180 }
 					visible = "[State.GetCountry.IsLocalPlayer]"
 					enabled = "[GreaterThan_int32( StatesPanel.AccessState.GetNumConstructableUrbanBuildings,'(int32)0')]"
 					position = "[StatesPanel.CalcBuildUrbanBuildingsButtonPosition]"
 					
 					button_icon_plus_square = {
 						enabled = "[Not(IsDataModelEmpty(StatesPanel.AccessState.AccessPotentialUrbanBuildings))]"
-						size = { 135 220 }
+						size = { 135 170 }
 						tooltip = "BUILD_URBAN_BUILDING"
 						onclick = "[StatesPanel.ToggleBuildUrbanBuildingsMenu(PdxGuiWidget.AccessSelf)]"
 
@@ -414,12 +413,12 @@ types state_panel_types {
 			fixedgridbox = {
 				datamodel = "[State.AccessCappedRuralBuildings]"
 				addcolumn = 135
-				addrow = 225
+				addrow = 180
 				datamodel_wrap = 4
 				flipdirection = yes
 
 				item = {
-					improved_building_grid_building_item = {
+					building_item = {
 					}
 				}
 			}
@@ -457,7 +456,7 @@ types state_panel_types {
 			spacing = 10
 			
 			### UNUSED ARABLE LAND
-			improved_building_grid_header_building_item = {
+			header_building_item = {
 				tooltipwidget = {
 					FancyTooltip_Building = {}
 				}
@@ -471,12 +470,12 @@ types state_panel_types {
 			fixedgridbox = {
 				datamodel = "[State.AccessUncappedRuralBuildings]"
 				addcolumn = 135
-				addrow = 225
+				addrow = 180
 				datamodel_wrap = 4
 				flipdirection = yes
 
 				item = {
-					improved_building_grid_building_item = {
+					building_item = {
 					}
 				}
 			}
@@ -523,12 +522,12 @@ types state_panel_types {
 					fixedgridbox = {
 						datamodel = "[State.AccessDevelopmentBuildings]"
 						addcolumn = 135
-						addrow = 225
+						addrow = 180
 						datamodel_wrap = 4
 						flipdirection = yes
 
 						item = {
-							improved_building_grid_building_item = {
+							building_item = {
 							}
 						}
 					}
@@ -808,98 +807,74 @@ types state_buildings
 					layoutpolicy_horizontal = expanding
 					layoutpolicy_vertical = expanding
 
-					vbox = {
-						layoutpolicy_horizontal = expanding
-						layoutpolicy_vertical = expanding
-						margin = { 0 2 }
-						widget = {
-							size = { 40 8 }
-							alpha = "[TransparentIfFalse(Building.IsActive)]"
-							visible = "[And(GreaterThan_int32(Building.GetEmployeeCap, '(CFixedPoint)0'), Building.IsActive)]"
-							tooltip = "TOOLTIP_BUILDING_EMPLOYMENT"
-							default_progressbar_horizontal = {
-								size = { 100% 100% }
-								alpha = "[TransparentIfFalse(Building.IsActive)]"
-								visible = "[And(GreaterThan_int32(Building.GetEmployeeCap, '(CFixedPoint)0'), Building.IsActive)]"
-								blockoverride "glow_size" {
-									size = { 40 100% }
-								}
-								blockoverride "values" {
-									min = 0
-									max = "[Building.GetEmployeeCap]"
-									value = "[Building.GetNoOfEmployed]"
-								}
-							}
-						}
-						widget = {
-							size = { 40 8 }
+					widget = {
+						size = { 40 10 }
+						alpha = "[TransparentIfFalse(Building.IsActive)]"
+						visible = "[And(GreaterThan_CFixedPoint(Building.GetMaxCashReserves, '(CFixedPoint)0'), Building.IsActive)]"
+						using = cash_reserves_tooltip_with_graph
+
+						gold_progressbar_horizontal = {
+							size = { 100% 100% }
 							alpha = "[TransparentIfFalse(Building.IsActive)]"
 							visible = "[And(GreaterThan_CFixedPoint(Building.GetMaxCashReserves, '(CFixedPoint)0'), Building.IsActive)]"
-							using = cash_reserves_tooltip_with_graph
-	
-							gold_progressbar_horizontal = {
-								size = { 100% 100% }
-								alpha = "[TransparentIfFalse(Building.IsActive)]"
-								visible = "[And(GreaterThan_CFixedPoint(Building.GetMaxCashReserves, '(CFixedPoint)0'), Building.IsActive)]"
-	
-								blockoverride "glow_size" {
-									size = { 40 100% }
-								}
-	
-								blockoverride "values" {
-									min = 0
-									max = "[FixedPointToFloat(Building.GetMaxCashReserves)]"
-									value = "[FixedPointToFloat(Building.GetCurrentCashReserves)]"
-								}
+
+							blockoverride "glow_size" {
+								size = { 40 100% }
 							}
-	
-							changed_value_decreased_progressbar_horizontal = {
-								size = { 100% 100% }
-								visible = "[GreaterThan_CFixedPoint(GetPrevTrendValue(Building.GetCashReservesTrend), GetTrendValue(Building.GetCashReservesTrend))]"
-	
-								blockoverride "second_progressbar" {}
-	
-								blockoverride "values" {
-									min = 0
-									max = "[FixedPointToFloat(Building.GetMaxCashReserves)]"
-									value = "[FixedPointToFloat(Building.GetCurrentCashReserves)]"
-								}
-								blockoverride "glow_size" {
-									size = { 40 100% }
-								}
-								blockoverride "arrow_texture_density" {
-									texture_density = 13 #use to match height of progressbar
-								}
-							}
-	
-							changed_value_increased_progressbar_horizontal = {
-								size = { 100% 100% }
-								visible = "[GreaterThan_CFixedPoint(GetTrendValue(Building.GetCashReservesTrend), GetPrevTrendValue(Building.GetCashReservesTrend))]"
-	
-								blockoverride "second_progressbar" {}
-	
-								blockoverride "values" {
-									min = 0
-									max = "[FixedPointToFloat(Building.GetMaxCashReserves)]"
-									value = "[FixedPointToFloat(Building.GetCurrentCashReserves)]"
-								}
-								blockoverride "glow_size" {
-									size = { 40 100% }
-								}
-								blockoverride "arrow_texture_density" {
-									texture_density = 13 #use to match height of progressbar
-								}
-							}
-	
-							progressbar_highlight = {
-								visible = "[GreaterThanOrEqualTo_CFixedPoint(Building.GetCurrentCashReserves, Building.GetMaxCashReserves)]"
+
+							blockoverride "values" {
+								min = 0
+								max = "[FixedPointToFloat(Building.GetMaxCashReserves)]"
+								value = "[FixedPointToFloat(Building.GetCurrentCashReserves)]"
 							}
 						}
-	
-						widget = {
-							visible = "[Not(And(GreaterThan_CFixedPoint(Building.GetMaxCashReserves, '(CFixedPoint)0'), Building.IsActive))]"
-							size = { 40 10 }
+
+						changed_value_decreased_progressbar_horizontal = {
+							size = { 100% 100% }
+							visible = "[GreaterThan_CFixedPoint(GetPrevTrendValue(Building.GetCashReservesTrend), GetTrendValue(Building.GetCashReservesTrend))]"
+
+							blockoverride "second_progressbar" {}
+
+							blockoverride "values" {
+								min = 0
+								max = "[FixedPointToFloat(Building.GetMaxCashReserves)]"
+								value = "[FixedPointToFloat(Building.GetCurrentCashReserves)]"
+							}
+							blockoverride "glow_size" {
+								size = { 40 100% }
+							}
+							blockoverride "arrow_texture_density" {
+								texture_density = 13 #use to match height of progressbar
+							}
 						}
+
+						changed_value_increased_progressbar_horizontal = {
+							size = { 100% 100% }
+							visible = "[GreaterThan_CFixedPoint(GetTrendValue(Building.GetCashReservesTrend), GetPrevTrendValue(Building.GetCashReservesTrend))]"
+
+							blockoverride "second_progressbar" {}
+
+							blockoverride "values" {
+								min = 0
+								max = "[FixedPointToFloat(Building.GetMaxCashReserves)]"
+								value = "[FixedPointToFloat(Building.GetCurrentCashReserves)]"
+							}
+							blockoverride "glow_size" {
+								size = { 40 100% }
+							}
+							blockoverride "arrow_texture_density" {
+								texture_density = 13 #use to match height of progressbar
+							}
+						}
+
+						progressbar_highlight = {
+							visible = "[GreaterThanOrEqualTo_CFixedPoint(Building.GetCurrentCashReserves, Building.GetMaxCashReserves)]"
+						}
+					}
+
+					widget = {
+						visible = "[Not(And(GreaterThan_CFixedPoint(Building.GetMaxCashReserves, '(CFixedPoint)0'), Building.IsActive))]"
+						size = { 40 10 }
 					}
 				}
 
