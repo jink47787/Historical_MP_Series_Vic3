@@ -810,21 +810,38 @@ types production_methods
 						}
 						
 						textbox = {
-							position = { 15 0 }
+							icon = {
+								visible = "[And(Building.GetState.IsUnincorporated, Not(Building.GetState.IsIncorporating))]"
+								parentanchor = vcenter
+								position = { -19 0 }
+								size = { 16 16 }
+								texture = "gfx/interface/icons/state_status_icons/unincorporated_state.dds"
+							}
+							icon = {
+								visible = "[Not(And(Building.GetState.IsUnincorporated, Not(Building.GetState.IsIncorporating)))]"
+								parentanchor = vcenter
+								position = { -19 0 }
+								size = { 16 16 }
+								texture = "gfx/interface/icons/state_status_icons/incorporated_state.dds"
+							}
+							position = { 26 0 }
 							raw_text = "#v [Building.GetState.GetName]#!"
-							size = { 305 30 }
+							#size = { 305 30 }
+							size = { 185 30 }
 							align = left|nobaseline
 							elide = right
 							parentanchor = left|vcenter
 						}
-						
+
+					#new: state traits
 						widget = {
-							position = { 200 5 }
-							size = { 90 30 }
-							align = center|nobaseline
+							position = { 205 0 }
+							size = { 80 30 }
+							parentanchor = left|vcenter
 							flowcontainer = {
+								spacing = 1
 								direction = horizontal
-								parentanchor = left|vcenter
+								parentanchor = vcenter
 								datacontext = "[Building.GetState.GetStateRegion]"
 								datamodel = "[StateRegion.AccessTraits]"
 								item = {
@@ -841,26 +858,67 @@ types production_methods
 								}
 							}
 						}
+						
+					#new: infra
+#						textbox = {
+#							position = { 270 0 }
+#							size = { 50 30 }
+#							align = left|nobaseline
+#							#elide = right
+#							parentanchor = left|vcenter
+#
+##							button = {
+##								texture = "gfx/interface/icons/state_status_icons/state_infrastructure.dds"
+##								size = { 25 25 }
+##								parentanchor = center
+##								alwaystransparent = yes
+##							}
+#
+#							raw_text = "#v [Building.GetState.GetInfrastructureBalance|0+=]#!"
+#							tooltip = "STATE_INFRASTRUCTURE_DESC"
+#						}
 
+					#new: jobseekers
 						flowcontainer = {
 							parentanchor = left|vcenter
-							position = { 300 0 }
-							spacing = 5
-							
-							# % employed
+							position = { 285 0 }
+
 							textbox = {
-								widgetid = "[Concatenate('productivity_value', Building.GetIDString)]"
-								visible = "[Not(Building.IsSubsistenceBuilding)]"
-								raw_text = "[Building.GetEmploymentPercentage|0%] staffed"
+								#text = "XOR_PM_AVAILABLE_LABOR"
+								raw_text = "#tooltippable #tooltip:[Building.GetState.GetTooltipTag],STATE_AVAILABLE_LABOR_TOOLTIP #v @unemployed_icon!@peasants![Add_int64( Building.GetState.GetNumUnemployedWorkingAdults, Building.GetState.GetNumSubsistenceWorkingAdults )|Dv]#!#!#!"
 								autoresize = yes
 								align = nobaseline
-								parentanchor = left|vcenter
+								parentanchor = vcenter
 							}
 						}
-						
+
+					#new: infra
 						flowcontainer = {
+
 							parentanchor = left|vcenter
-							position = { 400 0 }
+							position = { 380 0 }
+
+							icon = {
+								parentanchor = vcenter
+								position = { 0 0 }
+								size = { 25 25 }
+								texture = "gfx/interface/icons/state_status_icons/state_infrastructure.dds"
+							}
+
+							textbox = {
+								# would be the correct/better tooltip but has z-fighting (flickering) issues for whatever reason)
+								#raw_text = "#tooltippable #tooltip:[Building.GetState.GetTooltipTag],STATE_INFRASTRUCTURE_DESC #v [Building.GetState.GetInfrastructureBalance|0+=]#!#!#!"
+								# this is a bad "it's just infrastructure" tooltip but at least it works
+								raw_text = "#tooltippable #tooltip:[Building.GetState.GetTooltipTag],BUILDING_MAP_LIST_PANEL_INFRASTRUCTURE_HEADER_TOOLTIP #v [Building.GetState.GetInfrastructureBalance|0+=]#!#!#!"
+								autoresize = yes
+								align = nobaseline
+								parentanchor = vcenter
+							}
+						}
+
+						flowcontainer = {
+							parentanchor = right|vcenter
+							position = { -10 0 }
 							spacing = 5
 
 							icon = {
@@ -886,12 +944,6 @@ types production_methods
 								texture = "gfx/interface/icons/generic_icons/employment_not_full_hiring.dds"
 								tooltip = "TOOLTIP_BUILDING_HIRING"
 							}
-						}
-						
-						flowcontainer = {
-							parentanchor = right|vcenter
-							position = { -10 0 }
-							spacing = 5
 							
 							### PROFITABLE
 							textbox = {
@@ -900,7 +952,7 @@ types production_methods
 								raw_text = "#tooltippable #tooltip:[Building.GetTooltipTag],TOOLTIP_BUILDING_PRODUCTIVITY,GraphTooltipTypeProfitability #v @money![Building.GetAverageAnnualEarningsPerEmployeeFormatted|1+]#!#!#!"
 								autoresize = yes
 								align = nobaseline
-								parentanchor = left|vcenter
+								parentanchor = vcenter
 							}
 						}
 					}
