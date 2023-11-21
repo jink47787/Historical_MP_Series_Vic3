@@ -115,10 +115,9 @@ types market_panel
 				}
 			}
 
-			fixedgridbox = {
+			flowcontainer = {
+				direction = vertical
 				datamodel = "[Market.AccessAllTradeRoutes]"
-				addrow = 50
-				addcolumn = 540
 
 				item = {
 					trade_route_list_item = {}
@@ -158,7 +157,7 @@ types market_panel
 		datacontext = "[MarketGoods.GetMarket]"
 		direction = vertical
 		parentanchor = hcenter
-		margin_top = 10	
+		margin_top = 5	
 
 		flowcontainer = {
 			maximumsize = { @panel_width 100 }
@@ -166,8 +165,8 @@ types market_panel
 			
 			### Goods icon
 			button_icon_round_big = {
-				size = { 80 80 }
-				
+				size = { 40 40 } # was { 80 80 }
+
 				blockoverride "icon" {
 					texture = "[Goods.GetTexture]"
 				}
@@ -202,77 +201,73 @@ types market_panel
 					}
 
 					blockoverride "layout" {
-						size = { 450 40 }
+						size = { 500 40 } # was { 450 40 }
 					}
-
 					using = market_price_tooltip_with_graph
-
-					blockoverride "left_text" {
-						text = "GOODS_NAME_WITH_TRADE_ROUTES"
-						fontsize_min = 12
-						elide = right
-					}
-
-					blockoverride "right_text" {
-						section_header_right_text = {
-							raw_text = "@money![Goods.GetMarketPrice|0v] [Goods.GetCompareIconAgainstBasePrice( Goods.GetMarketPrice )] (#v [Goods.GetPercentageDeltaAgainstBasePrice(Goods.GetMarketPrice)|%0=-]#!)"
-						}
-					}
-				}
-
-				flowcontainer = {
-					spacing = 5
-					
-					widget = {
-						size = { 150 50 }
-						tooltip = "TRADED_GOODS_IMPORTED_TOOLTIP"
-
-						hbox = {
-							alpha = "[TransparentIfTrue(EqualTo_CFixedPoint(MarketGoods.GetImportAmount, '(CFixedPoint)0'))]"
-							layoutpolicy_horizontal = expanding
-							margin_left = 10
-							
-							icon = {
-								texture = "gfx/interface/icons/lens_toolbar_icons/trade_route_import_lens_option.dds"
-								size = { 35 35 }
-							}
-							textbox = {
-								layoutpolicy_horizontal = expanding
-								margin = { 10 0 }
-								using = fontsize_large
-								elide = right
-								fontsize_min = 12
-								text = "TRADED_GOODS_IMPORTED_AND_NUMBER_OF_IMPORT_ROUTES"
-							}
-						}
-					}
-
-					widget = {
-						size = { 150 50 }
-						tooltip = "TRADED_GOODS_EXPORTED_TOOLTIP"
-
-						hbox = {
-							alpha = "[TransparentIfTrue(EqualTo_CFixedPoint(MarketGoods.GetExportAmount, '(CFixedPoint)0'))]"
-							layoutpolicy_horizontal = expanding
-							margin_left = 10
-							
-							icon = {
-								texture = "gfx/interface/icons/lens_toolbar_icons/trade_route_export_lens_option.dds"
-								size = { 35 35 }
-							}
-							textbox = {
-								layoutpolicy_horizontal = expanding
-								margin = { 10 0 }
-								using = fontsize_large
-								elide = right
-								fontsize_min = 12
-								text = "TRADED_GOODS_EXPORTED_AND_NUMBER_OF_EXPORT_ROUTES"
-							}
-						}
-					}
-
-					set_level_bar_market_tariffs = {
+					hbox = {
+						ignoreinvisible = no
+						spacing = 5
+						margin_left = 25
 						parentanchor = vcenter
+						textbox = {
+							size = { 115 50 }
+							text = "@money![Goods.GetMarketPrice|0v] [Goods.GetCompareIconAgainstBasePrice( Goods.GetMarketPrice )] (#v [Goods.GetPercentageDeltaAgainstBasePrice(Goods.GetMarketPrice)|%0=-]#!)"					
+						}
+						widget = {				
+							size = { 200 50 }
+							widget = {
+								parentanchor = left
+								size = { 100 50 } # was { 150 50 }
+								tooltip = "TRADED_GOODS_IMPORTED_TOOLTIP"
+								hbox = {
+									alpha = "[TransparentIfTrue(EqualTo_CFixedPoint(MarketGoods.GetImportAmount, '(CFixedPoint)0'))]"
+									layoutpolicy_horizontal = expanding
+									#visible = "[GreaterThan_int32(MarketGoods.GetNumImportTradeRoutes, '(int32)0')]"
+									margin_left = 0 # was 10
+									
+									icon = {
+										texture = "gfx/interface/icons/lens_toolbar_icons/trade_route_import_lens_option.dds"
+										size = { 20 20 } # was { 35 35 }
+									}
+									textbox = {
+										elide = right
+										layoutpolicy_horizontal = expanding
+										margin = { 10 0 }
+										using = fontsize_large
+										fontsize_min = 12
+										text = "TRADED_GOODS_IMPORTED_AND_NUMBER_OF_IMPORT_ROUTES"
+									}
+								}
+							}
+							widget = {
+								parentanchor = right
+								size = { 100 50 } # was { 150 50 }
+								tooltip = "TRADED_GOODS_EXPORTED_TOOLTIP"
+								hbox = {
+									alpha = "[TransparentIfTrue(EqualTo_CFixedPoint(MarketGoods.GetExportAmount, '(CFixedPoint)0'))]"
+									layoutpolicy_horizontal = expanding
+									#visible = "[GreaterThan_int32(MarketGoods.GetNumExportTradeRoutes, '(int32)0')]"
+									margin_left = 0 # was 10
+									
+									icon = {
+										texture = "gfx/interface/icons/lens_toolbar_icons/trade_route_export_lens_option.dds"
+										size = { 20 20 } # was { 35 35 }
+									}
+									textbox = {
+										elide = right
+										layoutpolicy_horizontal = expanding
+										margin = { 10 0 }
+										#visible = "[NotEqualTo_CFixedPoint(MarketGoods.GetExportAmount, '(CFixedPoint)0')]"
+										using = fontsize_large
+										fontsize_min = 12
+										text = "TRADED_GOODS_EXPORTED_AND_NUMBER_OF_EXPORT_ROUTES"
+									}
+								}
+							}
+						}
+						set_level_bar_market_tariffs = {
+							margin_left = -5
+						}
 					}
 				}
 			}
@@ -309,14 +304,9 @@ types market_panel
 					margin_bottom = 5
 				}
 
-				fixedgridbox  = {
-					datamodel = "[MarketGoods.AccessPlayerTradeRoutes]"
-					addrow = 50
-					addcolumn = 540
-
-					item = {
-						trade_route_list_item = {}
-					}
+				datamodel = "[MarketGoods.AccessPlayerTradeRoutes]"
+				item = {
+					trade_route_list_item = {}
 				}
 			}
 
@@ -346,14 +336,9 @@ types market_panel
 					margin_bottom = 5
 				}
 
-				fixedgridbox = {
-					datamodel = "[MarketGoods.AccessOthersTradeRoutes]"
-					addrow = 50
-					addcolumn = 540				
-
-					item = {
-						trade_route_list_item = {}
-					}
+				datamodel = "[MarketGoods.AccessOthersTradeRoutes]"
+				item = {
+					trade_route_list_item = {}
 				}
 			}
 		}
@@ -380,20 +365,13 @@ types market_panel
 					}
 				}
 
-				fixedgridbox = {
-					datamodel = "[MarketGoods.AccessPlayerTradeRoutes]"
-					addrow = 50
-					addcolumn = 540
-					
-					item = {
-						trade_route_list_item = {}
-					}
+				datamodel = "[MarketGoods.AccessPlayerTradeRoutes]"
+				item = {
+					trade_route_list_item = {}
 				}
 			}
-
 		}
-		divider_decorative = {}
-			
+
 	}
 
 	type trade_routes_grouped_by_country_summary = flowcontainer {
@@ -551,12 +529,12 @@ types market_panel
 			parentanchor = hcenter
 			direction = vertical
 
-			fixedgridbox = {
+			flowcontainer = {
+				direction = vertical
 				parentanchor = hcenter
+				margin_top = 5
 				max_width = 540
 				min_width = 540
-				addrow = 50
-				addcolumn = 540
 				visible = "[GetVariableSystem.Exists( Concatenate( 'trade_route_group_country_', Country.GetIDString ))]"
 
 				background = {
@@ -604,7 +582,7 @@ types market_panel
 				layoutpolicy_horizontal = preferred
 				layoutpolicy_vertical = preferred
 				size = { 60 30 }
-				using = goods_list_item_trade
+				using = goods_list_item
 			}
 
 			textbox = {

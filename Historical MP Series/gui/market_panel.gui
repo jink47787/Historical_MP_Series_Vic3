@@ -124,47 +124,28 @@ types market_panel
 				visible = "[InformationPanel.IsTabSelected('default')]"
 				direction = vertical
 
-				section_header_button = {					
-					blockoverride "left_text" {
+				default_header_2texts_clean = {					
+					blockoverride "text1" {
 						text = "FILTERS"
-						fontsize_min = 12
-						elide = right
 					}
 
-					blockoverride "right_text" {
-						section_header_right_text = {
-							text = "CURRENT_GOODS_FILTERS"
+					blockoverride "text2" {
+						text = "CURRENT_GOODS_FILTERS"
+					}
+
+					flowcontainer = {
+						margin_bottom = 0
+						margin_top = -3
+
+						using = default_list_position
+						direction = vertical
+						minimumsize = { @panel_width_plus_14 -1 }
+
+						### LIST
+
+						goods_filters = {
+							parentanchor = hcenter
 						}
-					}
-
-					blockoverride "onclick" {
-						onclick = "[GetVariableSystem.Toggle( 'market_filters' )]"
-					}
-					
-					blockoverride "onclick_showmore" {
-						visible = "[Not(GetVariableSystem.Exists( 'market_filters' ))]"
-					}
-
-					blockoverride "onclick_showless" {
-						visible = "[GetVariableSystem.Exists( 'market_filters' )]"
-					}
-				}
-				flowcontainer = {
-					visible = "[GetVariableSystem.Exists( 'market_filters' )]"
-					margin_bottom = 10
-					margin_top = 5
-
-					using = default_list_position
-					direction = vertical
-					minimumsize = { @panel_width_plus_14 -1 }
-					background = {
-						using = dark_area
-					}
-
-					### LIST
-
-					goods_filters = {
-						parentanchor = hcenter
 					}
 				}
 			}
@@ -495,6 +476,7 @@ types market_panel
 		blockoverride "goto_properties" {
 			onclick = "[Market.AccessMarketCapital.ZoomToCapital]"
 			tooltip = "ZOOM_TO_MARKET_CAPITAL"
+			enabled = "[Not( Market.AccessMarketCapital.IsZoomingToCapital )]"
 		}
 	}
 
@@ -504,12 +486,55 @@ types market_panel
 		flowcontainer = {
 			direction = vertical
 			using = default_list_position
-			margin_bottom = 20
+			margin_bottom = 10
+
+			flowcontainer = {
+				direction = vertical
+				visible = "[Not(IsDataModelEmpty(Market.AccessLocalGoods( MarketPanel.GetFilters )))]"
+				
+				default_header_2texts_clean = {
+					parentanchor = hcenter
+					blockoverride "text1" {
+						text = "LOCAL_GOODS"
+					}
+					blockoverride "right" {		
+
+						dynamicgridbox = {			
+							position = { -12 0 }
+							align = right|nobaseline
+							parentanchor = right|vcenter		
+							flipdirection = yes
+							datamodel_wrap = 10
+							datamodel = "[Market.AccessLocalGoods( MarketPanel.GetFilters )]"
+							
+							item = {
+								container = {
+									tooltipwidget = {
+										FancyTooltip_Goods = {}
+									}	
+						
+									button_icon_round = {
+										size = { 40 40 }
+										using = select_button_sound
+										onclick = "[InformationPanelBar.OpenGoodsLocalPricesPanel(Goods.Self)]"
+										onrightclick = "[RightClickMenuManager.ShowForGoods(Goods.AccessSelf)]"
+									}
+									
+									icon = {
+										size = { 40 40 }
+										texture = "[Goods.GetTexture]"
+									}								
+								}
+							}
+						}			
+					}
+				}	
+			}
 
 			flowcontainer = {
 				using = default_list_position
 				margin = { 0 0 }
-				margin_top = 0
+				margin_top = 3
 				
 				sort_button = {
 					size = { 105 20 }
@@ -571,53 +596,13 @@ types market_panel
 					name = "tutorial_highlight_market_details_panel_all_goods"
 					direction = vertical
 					datamodel = "[Market.AccessMarketGoods( MarketPanel.GetFilters )]"
-					spacing = 2
+					spacing = 0
 					parentanchor = hcenter
 					
 					item = {
 						goods_entry_button = {}
 					}
 				}
-				
-				flowcontainer = {
-					direction = vertical
-					visible = "[Not(IsDataModelEmpty(Market.AccessLocalGoods( MarketPanel.GetFilters )))]"
-					
-					default_header_2texts = {
-						parentanchor = hcenter
-						blockoverride "text1" {
-							text = "LOCAL_GOODS"
-						}
-					}	
-
-					widget = { size = { 5 5 } }		
-					
-					dynamicgridbox = {
-						flipdirection = yes
-						datamodel_wrap = 10
-						datamodel = "[Market.AccessLocalGoods( MarketPanel.GetFilters )]"
-						
-						item = {
-							container = {
-								tooltipwidget = {
-									FancyTooltip_Goods = {}
-								}	
-					
-								button_icon_round = {
-									size = { 50 50 }
-									using = select_button_sound
-									onclick = "[InformationPanelBar.OpenGoodsLocalPricesPanel(Goods.Self)]"
-									onrightclick = "[RightClickMenuManager.ShowForGoods(Goods.AccessSelf)]"
-								}
-								
-								icon = {
-									size = { 50 50 }
-									texture = "[Goods.GetTexture]"
-								}								
-							}
-						}
-					}							
-				}					
 				
 				textbox = {
 					parentanchor = hcenter
@@ -660,11 +645,11 @@ types market_panel
 		
 		### STAPLE FILTER
 		widget = {
-			size = { 75 75 }
+			size = { 50 50 }
 			
 			icon = {
 				texture = "gfx/interface/backgrounds/round_frame_dec.dds"
-				size = { 75 75 }
+				size = { 50 50 }
 				block "staple_icon_selected" {
 					visible = "[MarketPanel.IsSelected('staple')]"
 				}
@@ -701,11 +686,11 @@ types market_panel
 		}
 		### INDUSTRIAL FILTER
 		widget = {
-			size = { 75 75 }
+			size = { 50 50 }
 			
 			icon = {
 				texture = "gfx/interface/backgrounds/round_frame_dec.dds"
-				size = { 75 75 }
+				size = { 50 50 }
 				block "industrial_icon_selected" {
 					visible = "[MarketPanel.IsSelected('industrial')]"
 				}
@@ -742,11 +727,11 @@ types market_panel
 		}
 		### LUXURY FILTER
 		widget = {
-			size = { 75 75 }
+			size = { 50 50 }
 			
 			icon = {
 				texture = "gfx/interface/backgrounds/round_frame_dec.dds"
-				size = { 75 75 }
+				size = { 50 50 }
 				block "luxury_icon_selected" {
 					visible = "[MarketPanel.IsSelected('luxury')]"
 				}
@@ -784,11 +769,11 @@ types market_panel
 		}
 		### MILITARY FILTER
 		widget = {
-			size = { 75 75 }
+			size = { 50 50 }
 			
 			icon = {
 				texture = "gfx/interface/backgrounds/round_frame_dec.dds"
-				size = { 75 75 }
+				size = { 50 50 }
 				block "military_icon_selected" {
 					visible = "[MarketPanel.IsSelected('military')]"
 				}
@@ -827,7 +812,7 @@ types market_panel
 	}
 	
 	type goods_filter_button = button_icon_round_big {
-		size = { 59 59 }
+		size = { 40 40 }
 		parentanchor = center
 		using = tooltip_above
 			
@@ -835,7 +820,7 @@ types market_panel
 			block "icon" {}
 		}
 		blockoverride "icon_size" {
-			size = { 48 48 }
+			size = { 40 40 }
 		}
 	}
 	
@@ -846,15 +831,25 @@ types market_panel
 		using = select_button_sound
 		onrightclick = "[RightClickMenuManager.ShowForGoods(Goods.AccessSelf)]"
 
+
 		block "tooltip" {
 		}
 
 		flowcontainer = {
 			parentanchor = left|vcenter
 			widgetanchor = left|vcenter
-			
+
 			using = goods_list_item
 			
+			textbox = {
+				align = left|nobaseline
+				text = "[Goods.GetName]"
+				fontsize_min = 14
+				size = { 60 -1 }
+				elide = right
+				parentanchor = vcenter
+			}
+
 			textbox = {
 				align = right|nobaseline
 				visible = "[GreaterThan_CFixedPoint(Goods.GetMarketSellOrders, '(CFixedPoint)0')]"
@@ -1077,7 +1072,7 @@ types market_panel
 
 template goods_list_item {
 	widget = {
-		size = { 105 35 }
+		size = { 45 35 }
 		block "goods_list_item_datacontext" {}
 		parentanchor = vcenter
 
@@ -1101,55 +1096,6 @@ template goods_list_item {
 			icon = {
 				texture = "[Goods.GetTexture]"
 				size = { 38 38 }
-				parentanchor = center
-			}
-			icon = {
-				size = { 25 25 }
-				visible = "[Goods.HasGoodsShortage]"
-				texture = "gfx/interface/icons/generic_icons/goods_shortage.dds"
-				tooltip = "GOODS_SHORTAGE_TOOLTIP"
-				parentanchor = bottom
-			}
-			textbox = {
-				position = { 45 0 }
-				align = left|nobaseline
-				text = "[Goods.GetName]"
-				autoresize = yes
-				fontsize_min = 14
-				maximumsize = { 60 -1 }
-				elide = right
-				parentanchor = vcenter
-			}
-		}
-	}
-}
-
-template goods_list_item_trade {
-	widget = {
-		size = { 55 55 }
-		block "goods_list_item_datacontext" {}
-		parentanchor = vcenter
-
-		tooltipwidget = {
-			FancyTooltip_Goods = {}
-		}
-		
-		icon = {
-			texture = "gfx/interface/market_view/trade_good_list_bg.dds"
-			position = { 25 0 }
-			size = { 190 46 }
-			parentanchor = vcenter
-			color = "[Goods.GetCategoryColor]"
-		}
-
-		icon = {
-			texture = "gfx/interface/market_view/trade_good_icon_bg.dds"
-			size = { 55 55 }
-			color = "[Goods.GetCategoryColor]"
-			
-			icon = {
-				texture = "[Goods.GetTexture]"
-				size = { 40 40 }
 				parentanchor = center
 			}
 			icon = {
