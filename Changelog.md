@@ -3,35 +3,18 @@
 
 **Credit:**
 All mods / mod ideas used linked below:
-- Battle size adjustments: https://steamcommunity.com/sharedfiles/filedetails/?id=2880945323
-- Explosives Industry: https://steamcommunity.com/sharedfiles/filedetails/?id=2881606688
-- Console access: https://steamcommunity.com/sharedfiles/filedetails/?id=2879839709
 - Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239, https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
-- Government run investment pools: https://steamcommunity.com/sharedfiles/filedetails/?id=2880313694
-- Improved building GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2882526375
 - Westernisation & Clothes: https://steamcommunity.com/sharedfiles/filedetails/?id=2981574864
 - Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
-- Improved Battle UI: https://steamcommunity.com/sharedfiles/filedetails/?id=2886497091
-- Cristo Shortcuts: https://steamcommunity.com/sharedfiles/filedetails/?id=2880952719
 - Ally recognition: https://steamcommunity.com/sharedfiles/filedetails/?id=2881810342&searchtext=recognition
-- Better State Outliner: https://steamcommunity.com/sharedfiles/filedetails/?id=2882193032 
-- Construction Queue with States: https://steamcommunity.com/sharedfiles/filedetails/?id=2881774859
 - Dense Market Details: https://steamcommunity.com/sharedfiles/filedetails/?id=2881762225
 - Dense Trade Routes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881996099
 - Complete Pop Lists: https://steamcommunity.com/sharedfiles/filedetails/?id=2880832253
 - Improved Building Grid: https://steamcommunity.com/sharedfiles/filedetails/?id=2883323135
 - Extra Topbar GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2888391145
 - Guaranteed Independence: https://steamcommunity.com/sharedfiles/filedetails/?id=2895380761
-- Confirm Shortcut: https://steamcommunity.com/sharedfiles/filedetails/?id=2900498971
-- Better Interest Group Attraction: https://steamcommunity.com/sharedfiles/filedetails/?id=2881590888
-- Diplo Acceptance Shown: https://steamcommunity.com/sharedfiles/filedetails/?id=2886453657
-- Separation of Military and Civilian Shipyard (Used for icons): https://steamcommunity.com/sharedfiles/filedetails/?id=2888925505
-- State Transfer Tool: https://steamcommunity.com/sharedfiles/filedetails/?id=2880446671
-- Production Tab Employment: https://steamcommunity.com/sharedfiles/filedetails/?id=2882193032
-- Building Employment In State Overview: https://steamcommunity.com/sharedfiles/filedetails/?id=2883572964
 - State Traits Building & Production Overview: https://steamcommunity.com/sharedfiles/filedetails/?id=2951560430
 - Retain Homelands on Releasing: https://steamcommunity.com/sharedfiles/filedetails/?id=2934872102
-- Army Command Limits: https://steamcommunity.com/sharedfiles/filedetails/?id=2951960564
 - Useful Malaria Icons: https://steamcommunity.com/sharedfiles/filedetails/?id=3005297540
 - Cold Water Ports: https://steamcommunity.com/sharedfiles/filedetails/?id=2997299912
 ---
