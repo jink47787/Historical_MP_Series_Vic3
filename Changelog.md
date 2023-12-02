@@ -12,7 +12,6 @@ All mods / mod ideas used linked below:
 - Complete Pop Lists: https://steamcommunity.com/sharedfiles/filedetails/?id=2880832253
 - Improved Building Grid: https://steamcommunity.com/sharedfiles/filedetails/?id=2883323135
 - Extra Topbar GUI: https://steamcommunity.com/sharedfiles/filedetails/?id=2888391145
-- Guaranteed Independence: https://steamcommunity.com/sharedfiles/filedetails/?id=2895380761
 - State Traits Building & Production Overview: https://steamcommunity.com/sharedfiles/filedetails/?id=2951560430
 - Retain Homelands on Releasing: https://steamcommunity.com/sharedfiles/filedetails/?id=2934872102
 - Useful Malaria Icons: https://steamcommunity.com/sharedfiles/filedetails/?id=3005297540
