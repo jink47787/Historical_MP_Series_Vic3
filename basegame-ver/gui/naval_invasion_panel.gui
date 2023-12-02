@@ -119,8 +119,46 @@ types naval_invasion_types
 				size = { @panel_width_plus_14 4 }
 			}
 
+			background = {
+				using = dark_area
+			}
+
 			naval_invasion_panel_fail_condition_footer = {
 				visible = yes
+			}
+
+			widget = {
+				size = { 5 5 }
+			}
+	
+			### CANCEL NAVAL INVASION
+			button = {
+				visible = "[NavalInvasion.GetInvaderCountry.IsLocalPlayer]"
+				using = default_button_action
+				size = { 520 50 }
+				using = fontsize_large
+				onclick = "[PopupManager.AskConfirmationWithSound(NavalInvasion.Cancel, 'event:/SFX/UI/Military/formation_actions_cancel_naval_invasion')]"
+				enabled = "[IsValid(NavalInvasion.Cancel)]"
+				using = default_content_fade
+				tooltip = "CANCEL_NAVAL_INVASION_TOOLTIP"
+
+				flowcontainer = {
+					parentanchor = center
+					spacing = 10
+
+					icon = {
+						size = { 30 30 }
+						texture = "gfx/interface/icons/generic_icons/red_cross.dds"
+						parentanchor = vcenter
+					}
+					
+					textbox = {
+						parentanchor = vcenter
+						autoresize = yes
+						align = center|nobaseline
+						text = "CANCEL_NAVAL_INVASION"
+					}
+				}
 			}
         }
     }
@@ -134,7 +172,7 @@ types naval_invasion_types
 
 		flowcontainer = {
 			direction = vertical
-			parentanchor = hcenter
+			parentanchor = hcenter	
 
 			default_header = {
 				parentanchor = hcenter
@@ -161,7 +199,7 @@ types naval_invasion_types
 						using = fade_top_illus
 						parentanchor = hcenter
 					}
-				}
+				}				
 
 				flowcontainer = {
 					direction = vertical
@@ -213,7 +251,7 @@ types naval_invasion_types
 						}
 
 						textbox = {
-							visible = "[Not(NavalInvasion.HasEnded)]"
+							visible = "[Not(NavalInvasion.IsStalledDueToAdmiralOrders)]"
 							margin = { 10 10 }
 							parentanchor = center
 							position = { 0 20 }
@@ -227,6 +265,23 @@ types naval_invasion_types
 								using = dark_area
 							}
 						}
+
+						textbox = {
+							visible = "[NavalInvasion.IsStalledDueToAdmiralOrders]"
+							margin = { 10 10 }
+							parentanchor = center
+							position = { 0 20 }
+							autoresize = yes
+							align = nobaseline
+							using = fontsize_xl
+							default_format = "#n"
+							text = "NAVAL_INVASION_STALLED_DUE_TO_ORDERS"
+							tooltip = "NAVAL_INVASION_STALLED_DUE_TO_ORDERS_TOOLTIP"
+
+							background = {
+								using = dark_area
+							}
+						}							
 					}
 
 					flowcontainer = {
@@ -240,7 +295,7 @@ types naval_invasion_types
 							section_header_button = {
 								parentanchor = hcenter
 								size = { 260 38 }
-								# tooltip = "NAVAL_INVASION_INVADING_FLEETS_TOOLTIP" # todo PRCAL-29752
+								tooltip = "NAVAL_INVASION_INVADING_FLEETS_TOOLTIP"
 								
 								blockoverride "onclick" {
 									onclick = "[GetVariableSystem.Toggle( 'naval_invasion_fleets' )]"
@@ -294,7 +349,7 @@ types naval_invasion_types
 							section_header_button = {
 								parentanchor = hcenter
 								size = { 260 38 }
-								# tooltip = "NAVAL_INVASION_DEFENDING_FLEETS_TOOLTIP" # todo PRCAL-29752
+								tooltip = "NAVAL_INVASION_DEFENDING_FLEETS_TOOLTIP"
 								
 								blockoverride "onclick" {
 									onclick = "[GetVariableSystem.Toggle( 'naval_invasion_fleets' )]"
@@ -588,7 +643,7 @@ types naval_invasion_types
 								section_header_button = {
 									parentanchor = hcenter
 									size = { 260 38 }
-									# tooltip = "NAVAL_INVASION_INVADING_ARMIES_TOOLTIP" # todo PRCAL-29752
+									tooltip = "NAVAL_INVASION_INVADING_ARMIES_TOOLTIP"
 									
 									blockoverride "onclick" {
 										onclick = "[GetVariableSystem.Toggle( 'naval_invasion_armies' )]"
@@ -646,7 +701,7 @@ types naval_invasion_types
 									section_header_button = {
 										parentanchor = hcenter
 										size = { 260 38 }
-										# tooltip = "NAVAL_INVASION_DEFENDING_ARMIES_TOOLTIP" # todo PRCAL-29752
+										tooltip = "NAVAL_INVASION_DEFENDING_ARMIES_TOOLTIP"
 										
 										blockoverride "onclick" {
 											onclick = "[GetVariableSystem.Toggle( 'naval_invasion_armies' )]"
@@ -753,6 +808,128 @@ types naval_invasion_types
 			}
 		}
     }
+
+    type naval_invasion_list_item = button {
+    	parentanchor = hcenter
+		using = default_button
+		size = { @panel_width 55 }
+		onclick = "[InformationPanelBar.OpenNavalInvasionPanelTab(NavalInvasion.AccessSelf, 'default')]"
+		onmousehierarchyenter = "[AccessHighlightManager.HighlightNavalInvasion(NavalInvasion.Self)]"
+		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+		alwaystransparent = no
+		tooltip = "NAVAL_INVASION_MARKER_TOOLTIP"
+
+		icon = {
+			using = highlighted_square_selection
+
+			block "highlight_visibility" {
+				visible = "[NavalInvasion.IsBeingHighlighted]"
+			}
+		}
+			
+		small_flag_no_interact = {
+			datacontext = "[NavalInvasion.GetInvaderCountry]"
+			parentanchor = left|vcenter
+			position = { 10 0 }
+		}
+		
+		flowcontainer = {
+			parentanchor = center
+			spacing = 15
+
+			textbox = {
+				visible = "[Not(NavalInvasion.IsStalledDueToAdmiralOrders)]"
+				parentanchor = vcenter
+				minimumsize = { 150 -1 }
+				maximumsize = { 150 -1 }
+				autoresize = yes
+				align = nobaseline
+				elide = right
+				fontsize_min = 12
+				text = "NAVAL_INVASION_SEA_REGION_STATUS"
+				tooltip = "NAVAL_INVASION_SEA_REGION_STATUS_TOOLTIP"
+			}
+
+			textbox = {
+				visible = "[NavalInvasion.IsStalledDueToAdmiralOrders]"
+				parentanchor = vcenter
+				minimumsize = { 150 -1 }
+				maximumsize = { 150 -1 }
+				autoresize = yes
+				align = nobaseline
+				default_format = "#n"
+				elide = right
+				fontsize_min = 12
+				text = "NAVAL_INVASION_STALLED_DUE_TO_ORDERS"
+				tooltip = "NAVAL_INVASION_STALLED_DUE_TO_ORDERS_TOOLTIP"
+
+				background = {
+					using = dark_area
+				}
+			}
+			
+			icon = {
+				size = { 50 50 }
+				texture = "gfx/interface/map_markers/naval_invasion_marker.dds"
+				parentanchor = vcenter
+				alwaystransparent = yes
+
+				round_progress_bad = {
+					size = { 65% 65% }
+					parentanchor = center
+				}
+
+				icon = {
+					size = { 60% 60% }
+					texture = "gfx/interface/backgrounds/round_button_bg.dds"
+					parentanchor = center
+
+					icon = {
+						size = { 91% 91% }
+						texture = "gfx/interface/icons/formation_order_icons/naval_invasion.dds"
+						parentanchor = center
+					}
+
+				}
+			}
+
+			flowcontainer = {
+				parentanchor = vcenter
+				direction = vertical
+
+				textbox = {
+					minimumsize = { 150 -1 }
+					maximumsize = { 150 -1 }
+					autoresize = yes
+					align = nobaseline
+					elide = right
+				 	fontsize_min = 12
+					text = "NAVAL_INVASION_LANDING_PROGRESS_BAR_TOOLTIP"
+				}
+
+				widget = {
+					size = { 60 12 }
+
+					default_progressbar_horizontal = {
+						parentanchor = vcenter
+						size = { 150 6 }
+
+						blockoverride "values" {
+							value = "[FixedPointToFloat(NavalInvasion.GetLandingProgress)]"
+							min = 0
+							max = 1
+						}
+					}
+				}
+			}	
+		}
+			
+		small_flag_no_interact = {
+			datacontext = "[NavalInvasion.GetInvadedCountry]"
+			parentanchor = right|vcenter
+			position = { -10 0 }
+		}
+	}
 
     type naval_invasion_concluded = flowcontainer {
         using = default_list_position
@@ -1061,13 +1238,21 @@ types naval_invasion_types
 		spacing = 5
 		using = default_fade_in_out
 
-		background = {
-			using = dark_area
-		}
-
 		widget = {
 			size = { 5 5 }
-		}
+		}	
+
+		textbox = {
+			visible = "[And(NavalInvasion.IsOnInvaderSide(GetPlayer.Self),Not(StringIsEmpty(NavalInvasion.GetStatus)))]"
+			parentanchor = hcenter
+			maximumsize = { @panel_width_minus_30 -1 }
+			autoresize = yes
+			multiline = yes
+			fontsize_min = 14
+			elide = right
+			align = nobaseline
+			text = "[NavalInvasion.GetStatus]"				
+		}	
 
 		textbox = {
             visible = "[Not(NavalInvasion.HasEnded)]"
