@@ -1,0 +1,217 @@
+﻿je_heavenly_kingdom_main = {
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+	
+	group = je_group_historical_content
+
+	is_shown_when_inactive = {
+		exists = c:CHI
+		THIS = c:CHI
+		hidden_trigger = {
+			NOT = { has_global_variable = taiping_je_happened }
+		}
+	}
+
+	possible = {
+		has_technology_researched = romanticism
+		any_scope_state = {
+			any_neighbouring_state = {
+				is_treaty_port = yes
+				custom_tooltip = {
+					text = religion_christian_trait_tt
+					owner = {
+						religion = {
+							has_discrimination_trait = christian
+						}
+					}
+				}
+			}
+			is_capital = no
+		}
+		hidden_trigger = {
+			NOT = { has_global_variable = taiping_je_happened }
+		}
+	}
+
+	immediate = {
+		set_global_variable = taiping_je_happened
+		random_scope_state = {
+			limit = {
+				any_neighbouring_state = {
+					is_treaty_port = yes
+					owner = {
+						religion = {
+							has_discrimination_trait = christian
+						}
+					}
+				}
+				NOT = { is_capital = yes }
+			}
+			add_modifier = {
+				name = god_worshippers
+				months = long_modifier_time
+			}
+		}
+		trigger_event = {
+			id = heavenly.2
+		}
+	}
+
+	on_monthly_pulse = {
+		random_events = {
+			4 = 0
+			1 = heavenly.3
+		}
+	}
+
+	complete = {
+		OR = {
+			AND = {
+				has_law = law_type:law_total_separation
+				literacy_rate > 0.4
+			}
+			NOT = {
+				any_scope_state = {
+					has_modifier = god_worshippers
+				}
+			}
+		}
+	}
+	
+	on_complete = {
+		ig:ig_intelligentsia = { 
+			add_ideology = ideology_anti_clerical
+		}
+	}
+
+	fail = {
+		any_scope_state = {
+			has_modifier = god_worshippers
+			any_scope_pop = {
+				has_pop_religion = protestant
+				religion_accepted = no
+			}
+			count >= 12
+		}
+	}
+
+	on_fail = {
+		trigger_event = {
+			id = heavenly.4
+		}
+		ig:ig_intelligentsia = { 
+			add_ideology = ideology_anti_clerical
+		}
+	}
+
+	weight = 10000
+	should_be_pinned_by_default = yes
+}
+
+je_taiping = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+	
+	group = je_group_historical_content
+
+	complete = {
+		custom_tooltip = {
+			text = taiping_destroyed
+			hidden_trigger = {
+				NOT = {
+					exists = c:TPG
+				}
+			}
+		}
+	}
+
+	immediate = {
+		c:TPG = {
+			save_scope_as = taiping_scope
+		}
+	}
+
+	on_complete = {
+		trigger_event = { id = heavenly.5 days = 0 }
+		hidden_effect = {
+			remove_modifier = taiping_taiping_rebellion
+		}
+	}
+
+	fail = {
+		exists = c:TPG
+		has_truce_with = c:TPG
+	}
+
+	on_fail = {
+		hidden_effect = {
+			remove_modifier = taiping_taiping_rebellion
+			c:TPG = {
+				remove_modifier = taiping_taiping_rebellion
+			}
+		}
+	}
+
+	weight = 1000
+	should_be_pinned_by_default = yes
+
+	transferable = no
+}
+
+je_taiping_revolution = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+	
+	group = je_group_historical_content
+
+	complete = {
+		OR = {
+			custom_tooltip = {
+				text = china_destroyed
+				hidden_trigger = {
+					NOT = {
+						exists = c:CHI
+					}
+				}
+			}
+			AND = {
+				exists = c:CHI
+				has_truce_with = c:CHI		
+			}
+		}
+		
+	}
+
+	immediate = {
+		c:CHI = {
+			save_scope_as = china_scope
+		}
+	}
+
+	on_complete = {
+		trigger_event = { id = heavenly.6 days = 0 }
+		custom_tooltip = {
+			text = rebellion_effects_remove
+			remove_modifier = taiping_taiping_rebellion
+			every_interest_group = {
+				limit = {
+					has_modifier = taiping_taiping_revolution
+				}
+				remove_modifier = taiping_taiping_revolution
+			}
+		}
+		add_modifier = {
+			name = taiping_tech
+			months = 240
+			is_decaying = yes
+		}
+	}
+
+	fail = {
+		NOT = {
+			exists = c:TPG
+		}
+	}
+
+	weight = 1000
+	should_be_pinned_by_default = yes
+
+	transferable = no
+}

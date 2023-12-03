@@ -1,0 +1,91 @@
+﻿je_constitutional_crisis = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+	
+	group = je_group_historical_content
+	
+	is_shown_when_inactive = {
+		exists = c:PRU
+		THIS = c:PRU
+	}
+	
+	immediate = {
+		set_variable = {
+			name = pru_parliment_crisis_var
+			value = 0
+		}
+		add_modifier = {
+			name = constitutional_crisis
+		}
+	}
+	possible = {
+		NOT = { has_law = law_type:law_professional_army }
+		NOT = { has_law = law_type:law_no_legislature }
+	}
+	
+	complete = {
+		scope:journal_entry = {
+			is_goal_complete = yes
+		}
+		NOT = { has_law = law_type:law_professional_army }
+	}
+	
+	fail = {
+		has_law = law_type:law_professional_army
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					NOT = { has_law = law_type:law_professional_army }
+				}
+				change_variable = {
+					name = pru_parliment_crisis_var
+					add = 1
+				}
+			}
+		}
+	}
+	
+	on_complete = {
+		remove_modifier = constitutional_crisis
+		add_modifier = {
+			name = junker_victory
+			months = 240
+			is_decaying = yes
+		}
+	}
+	
+	on_fail = {
+		remove_modifier = constitutional_crisis
+		ig:ig_landowners = {
+			add_modifier = {
+				name = mad_junkers
+				months = 72 
+				is_decaying = yes
+			}
+		}
+		ig:ig_armed_forces = {
+			add_modifier = {
+				name = mad_junkers
+				months = 72
+				is_decaying = yes
+			}
+		}
+	}
+
+	current_value = {
+		value = root.var:pru_parliment_crisis_var
+	}
+
+	goal_add_value = {
+		value = 60
+	}
+
+	progressbar = yes
+
+	can_revolution_inherit = yes
+
+	weight = 5000
+	should_be_pinned_by_default = yes
+}
