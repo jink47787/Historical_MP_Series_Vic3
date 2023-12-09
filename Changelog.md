@@ -16,6 +16,7 @@ All mods / mod ideas used linked below:
 - Retain Homelands on Releasing: https://steamcommunity.com/sharedfiles/filedetails/?id=2934872102
 - Useful Malaria Icons: https://steamcommunity.com/sharedfiles/filedetails/?id=3005297540
 - Cold Water Ports: https://steamcommunity.com/sharedfiles/filedetails/?id=2997299912
+- Historically Accurate Randomize Farming Yields: https://steamcommunity.com/sharedfiles/filedetails/?id=3073886807
 ---
 <br/>
 
@@ -44,8 +45,9 @@ All mods / mod ideas used linked below:
 - Cannot manually change cultural laws until an era 5 tech
 - Added in debt laws
 #### Institutions
-- Break even point for healthcare is now 30 wealth
 - All education is dependent to varying degrees on SoL
+- New institutions for mobilization laws
+- Polluition is separated from healthcare
 #### Interest Groups
 - More dynamic attraction to various interest groups dependent on laws passed and places of employment, literacy etc.
 - Military leaders give less clout
@@ -55,7 +57,7 @@ All mods / mod ideas used linked below:
 - Liberal disapproves of professional and strongly diapproves of mass conscription
 - added unique ideologies to the US
 #### Traits
-- Halved the effects of all IG traits
+- Reduced the effects of all IG traits, increased thresholds for bonuses. 
 #### Bureaucracy
 - Slightly reduced base state taxation capacity
 
@@ -70,7 +72,7 @@ All mods / mod ideas used linked below:
 #### Innovation
 - Reduced base innovation generation or usage
 - Reduced education from SoL
-- Universities gives less research, but now give Education Access
+- Universities now consume more inputs and have greater outputs as well as giving Education Access
 - Renamed literacy to Education Level to more accurately reflect what it is
 #### Production
 - Percentage multiplier on tax capacity for bureau PM techs
@@ -78,7 +80,8 @@ All mods / mod ideas used linked below:
 ## Economic
 - Pops are more likely to consume oil and cars when they are widely available
 #### Goods
-- Hardwood and wine made into its own resource
+- Hardwood made into its own resource
+- Added canals
 #### Society
 - Quinine shifted to era 4, malaria prevention to era 5
 #### Industries
@@ -87,7 +90,6 @@ All mods / mod ideas used linked below:
 	- Machinists start at 30%
 	- Engineers start at 60%
 	- Discriminated cultures have a far harder time becoming qualified
-- Added Vineyards and an associated event
 - Separated artilery from small arms, explosives from fertilizer, military ships from civilian ships
 - Laissez faire subsidizes cash crops
 - Agrarianism now has a small amount of capitalist contribution
