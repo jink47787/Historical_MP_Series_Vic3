@@ -33,7 +33,7 @@ widget = {
 		}
 		#convoy raiding
 		icon = {
-			visible = "[SeaNodeMarker.HasAnyShippingLaneDamaged( GetPlayer )]"
+			visible = "[SeaNodeMarker.CountryIsBeingConvoyRaided( GetPlayer )]"
 			size = { 180% 180% }
 			texture = "gfx/interface/map_markers/convoy_raiding_highlight.dds"
 			alwaystransparent = yes
@@ -1224,19 +1224,11 @@ button = {
 
 		icon = {
 			parentanchor = vcenter
-			visible = "[And(Building.ShouldShowAsUnableToHire,Not(Building.HasFailedHires))]"
-			size = { 25 25 }
-			texture = "gfx/interface/icons/generic_icons/employment_not_full.dds"
-			tooltip = "NOT_HIRING"
-		}
-		
-		icon = {
-			parentanchor = vcenter
-			visible = "[And(Building.ShouldShowAsUnableToHire,Building.HasFailedHires)]"
+			visible = "[Building.HasFailedHires]"
 			size = { 25 25 }
 			texture = "gfx/interface/icons/generic_icons/employment_not_full.dds"
 			tooltip = "NOT_FULLY_EMPLOYED"
-		}		
+		}
 	}
 }
 
@@ -2480,16 +2472,13 @@ container = {
 container = {
 	name = "hq_marker"
 	layer = layer_map_markers
-	datacontext = "[HQMarker.GetHQ]"
-	datacontext = "[Hq.GetCountry]"
-	onmousehierarchyenter = "[AccessHighlightManager.HighlightHQ(Hq.Self)]"
+	onmousehierarchyenter = "[AccessHighlightManager.HighlightHQ(HQMarker.GetEitherHQ.Self)]"
 	onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
 	parentanchor = bottom|hcenter
 	using = clickthrough_blocker
 
 	container = {
-		# Naval HQ markers are not shown by default. Only when you have a fleet selected should it actually show up
-		visible = "[And(Or(GetMetaPlayer.IsPlayedOrObservedCountry(Country.Self), Hq.IsBeingHighlighted), Or(Not(Hq.IsNavalHQ),And(Hq.IsNavalHQ, GetSelectedMilitaryFormation.IsFleet)))]"
+		visible = "[Or(And(Or(HQMarker.HasLandHQ, HQMarker.HasNavalHQ), GetMetaPlayer.IsPlayedOrObservedCountry(HQMarker.GetCountry.Self)), HQMarker.GetEitherHQ.IsBeingHighlighted)]"
 		
 		using = small_nib
 		blockoverride "nib_visibility" {
@@ -2497,22 +2486,24 @@ container = {
 		}
 
 		button = {
-			visible = "[GetMetaPlayer.IsPlayedOrObservedCountry(Country.Self)]"
+			visible = "[GetMetaPlayer.IsPlayedOrObservedCountry(HQMarker.GetCountry.Self)]"
+			datacontext = "[HQMarker.GetEitherHQ]"
 			tooltip = "HQ_MAP_MARKER_TOOLTIP"
 			size = { 100% 100% }
 			onclick = "[InformationPanelBar.OpenMilitaryPanelTab('army')]"
 		}
 
 		button = {
-			visible = "[Not(GetMetaPlayer.IsPlayedOrObservedCountry(Country.Self))]"
+			visible = "[Not(GetMetaPlayer.IsPlayedOrObservedCountry(HQMarker.GetCountry.Self))]"
+			datacontext = "[HQMarker.GetEitherHQ]"
 			tooltip = "HQ_MAP_MARKER_TOOLTIP"
 			size = { 100% 100% }
-			onclick = "[InformationPanelBar.OpenCountryPanelTab(Country.Self, 'default')]"
+			onclick = "[InformationPanelBar.OpenCountryPanelTab(HQMarker.GetCountry.Self, 'default')]"
 		}
 
 		background = {
 			using = colored_panel_dark
-			color = "[Country.GetMilitaryInterfaceColor]"
+			color = "[HQMarker.GetCountry.GetMilitaryInterfaceColor]"
 			alpha = 0.8
 		}
 
@@ -2520,10 +2511,10 @@ container = {
 			direction = vertical
 
 			container = {
-				visible = "[GetMetaPlayer.IsPlayedOrObservedCountry(Country.Self))]"
+				visible = "[GetMetaPlayer.IsPlayedOrObservedCountry(HQMarker.GetCountry.Self))]"
 				
 				textbox = {
-					text = "[Hq.GetNameNoFlagNoConcept]"
+					text = "[HQMarker.GetEitherHQ.GetNameNoFlagNoConcept]"
 					autoresize = yes
 					align = hcenter|nobaseline
 					alwaystransparent = yes
@@ -2534,7 +2525,7 @@ container = {
 				}
 				
 				textbox = {
-					text = "[Hq.GetName]"
+					text = "[HQMarker.GetName]"
 					visible = "[IsZoomLevelNear]"
 					autoresize = yes
 					align = hcenter|nobaseline
@@ -2546,17 +2537,18 @@ container = {
 			}
 
 			tiny_flag = {
-				visible = "[Not(GetMetaPlayer.IsPlayedOrObservedCountry(Country.Self)))]"
+				datacontext = "[HQMarker.GetCountry]"
+				visible = "[Not(GetMetaPlayer.IsPlayedOrObservedCountry(HQMarker.GetCountry.Self)))]"
 
 				blockoverride "tooltip" {
-					tooltip = "[Hq.GetName]"
+					tooltip = "[HQMarker.GetName]"
 				}
 			}
 
 		}
 
 		icon = {
-			visible = "[Hq.IsBeingHighlighted]"
+			visible = "[HQMarker.GetEitherHQ.IsBeingHighlighted]"
 			using = highlighted_square_selection
 		}
 	}
@@ -2781,7 +2773,7 @@ container = {
 				parentanchor = center
 
 				icon = {
-					size = { 91% 91% }
+					size = { 90% 90% }
 					texture = "gfx/interface/icons/formation_order_icons/naval_invasion.dds"
 					parentanchor = center
 				}

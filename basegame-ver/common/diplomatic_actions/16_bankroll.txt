@@ -42,9 +42,7 @@
 		
 		weekly_effect = {
 			if = {
-				limit = { 
-					NOT = { scope:diplomatic_pact ?= { is_forced_pact = yes } }
-				}		
+				limit = { scope:diplomatic_pact ?= { is_forced_pact = no } }		
 				custom_tooltip = {
 					text = bankroll_weekly_obligation_effect
 					if = {
@@ -102,7 +100,6 @@
 		max_influence_spending_fraction = 0.20
 		
 		# This is only used for determining the value of a bankroll in sways, so it follows different logic from normal action acceptance
-		# The format here is as if scope:actor was asking if root wants a bankroll
 		accept_score = {
 			value = 0
 
@@ -115,21 +112,21 @@
 				desc = "DIPLOMATIC_ACCEPTANCE_RANK"
 	
 				if = {
-					limit = { scope:actor = { country_rank < root.country_rank } }
-					value = -5
+					limit = { scope:actor = { country_rank > root.country_rank } }
+					value = 5
 				}
 				
 				if = {
-					limit = { scope:actor = { country_rank > root.country_rank } }
-					value = 5
+					limit = { scope:actor = { country_rank < root.country_rank } }
+					value = -5
 				}				
-			}		
+			}				
 			
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_GDP"
 				value = "scope:actor.ai_gdp_comparison(root)"
-				max = 20
-				min = -20
+				min = -10
+				max = 10
 			}
 			
 			if = {
@@ -155,64 +152,39 @@
 		}		
 	
 		# This is only used for determining the value of a bankroll in sways, so it follows different logic from normal action acceptance
-		# The format here is as if scope:actor was asking for a bankroll from root
 		junior_accept_score = {
 			value = 0
 
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_BASE"
 				value = -10
-			}			
-			
-			add = {
-				desc = "DIPLOMATIC_ACCEPTANCE_RANK"
-	
-				if = {
-					limit = { scope:actor = { country_rank > root.country_rank } }
-					value = -5
-				}
-				
-				if = {
-					limit = { scope:actor = { country_rank < root.country_rank } }
-					value = 5
-				}				
-			}				
-
-			subtract = {
-				value = 10
-				multiply = scope:actor.num_income_transfer_pacts
-			}
-
-			subtract = {
-				value = 10
-				multiply = num_income_transfer_pacts
-			}				
+			}		
 			
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_GDP"
 				value = "scope:actor.ai_gdp_comparison(root)"
-				add = 2
+				add = 1
 				multiply = -10
 				min = -100
 				max = 0
 			}
 			
 			if = {
-				limit = { scaled_debt >= 0.05 }
+				limit = { ROOT.scaled_debt >= 0.05 }
 				
 				subtract = {
 					desc = "DIPLOMATIC_ACCEPTANCE_DEBT"
-					value = scaled_debt
+					value = ROOT.scaled_debt
 					multiply = 100	
 					min = 1
 				}					
 			}
 			else_if = {
-				limit = { scaled_gold_reserves >= 0.05 }
+				limit = { ROOT.scaled_gold_reserves >= 0.05 }
 				
 				add = {
 					desc = "DIPLOMATIC_ACCEPTANCE_GOLD_RESERVES"				
-					value = scaled_gold_reserves
+					value = ROOT.scaled_gold_reserves
 					multiply = 25
 					min = 1
 				}						

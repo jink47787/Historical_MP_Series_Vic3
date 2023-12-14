@@ -33,12 +33,12 @@ default_popup = {
 						spacing = 10
 
 						button_icon_round_big_action = {
-							visible = "[TransferFormationPopup.HasLeftFormation]"
+							visible = "[TransferFormationPopup.HasSourceFormation]"
 							parentanchor = vcenter
 							size = { 40 40 }
 							tooltip = "REMOVE_SOURCE_FORMATION"
 							using = tooltip_above
-							onclick = "[TransferFormationPopup.DeselectLeftFormation]"
+							onclick = "[TransferFormationPopup.DeselectSourceFormation]"
 							
 							blockoverride "icon" {
 								texture = "gfx/interface/icons/generic_icons/red_cross.dds"
@@ -51,8 +51,8 @@ default_popup = {
 
 						# LEFT SIDE - SELECTED ORIGIN FORMATION
 						military_formation_right_click_item = {
-							visible = "[TransferFormationPopup.HasLeftFormation]"
-							datacontext = "[TransferFormationPopup.GetLeftFormation]"
+							visible = "[TransferFormationPopup.HasSourceFormation]"
+							datacontext = "[TransferFormationPopup.GetSourceFormation]"
 							size = { 320 80 }
 
 							blockoverride "default_button_template" {
@@ -64,8 +64,8 @@ default_popup = {
 							}
 						
 							blockoverride "onclick" {
-								onclick = "[TransferFormationPopup.SelectLeftFormation]"
-								onrightclick = "[TransferFormationPopup.DeselectLeftFormation]"
+								onclick = "[TransferFormationPopup.SelectSourceFormation]"
+								onrightclick = "[TransferFormationPopup.DeselectSourceFormation]"
 							}
 						}
 
@@ -81,8 +81,8 @@ default_popup = {
 						#	text = "CREATE_NEW_ARMY"
 						#
 						#	blockoverride "onclick" {
-						#		onclick = "[TransferFormationPopup.SelectLeftFormation]"
-						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectLeftFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
+						#		onclick = "[TransferFormationPopup.SelectSourceFormation]"
+						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectSourceFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
 						#	}
 						#}
 
@@ -98,8 +98,8 @@ default_popup = {
 						#	text = "CREATE_NEW_ARMY"
 						#
 						#	blockoverride "onclick" {
-						#		onclick = "[TransferFormationPopup.SelectLeftFormation]"
-						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectLeftFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
+						#		onclick = "[TransferFormationPopup.SelectSourceFormation]"
+						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectSourceFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
 						#	}
 						#}
 
@@ -115,8 +115,8 @@ default_popup = {
 						#	text = "CREATE_NEW_FLEET"
 						#
 						#	blockoverride "onclick" {
-						#		onclick = "[TransferFormationPopup.SelectLeftFormation]"
-						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectLeftFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
+						#		onclick = "[TransferFormationPopup.SelectSourceFormation]"
+						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectSourceFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
 						#	}
 						#}
 
@@ -125,10 +125,10 @@ default_popup = {
 							using = default_button
 							using = fontsize_large
 							using = default_content_fade
-							visible = "[Not(TransferFormationPopup.HasLeftFormation)]"
+							visible = "[Not(TransferFormationPopup.HasSourceFormation)]"
 							size = { 320 80 }
 							tooltip = "SELECT_MILITARY_FORMATION_TO_SEND_FROM"
-							onclick = "[TransferFormationPopup.SelectLeftFormation]"
+							onclick = "[TransferFormationPopup.SelectSourceFormation]"
 
 							icon = {
 								size = { 40 40 }
@@ -139,7 +139,9 @@ default_popup = {
 
 						### LEFT SIDE - EXPECTED UNIT NUMBERS FOR FORMATION IF TRANSFER IS CONFIRMED
 						widget = {
-							visible = "[TransferFormationPopup.CanReset]"
+							# todo: PRCAL-30807 make this visible
+							#visible = "[TransferFormationPopup.HasAnyChangeBeenMade]" # todo PRCAL-30807: Add a way to check if any changes has been made
+							visible = no
 							size = { 150 80 }
 
 							background = {
@@ -149,7 +151,6 @@ default_popup = {
 							flowcontainer = {
 								direction = vertical
 								parentanchor = center
-								spacing = 10
 
 								flowcontainer = {
 									spacing = 5
@@ -174,27 +175,17 @@ default_popup = {
 
 									### CHANGES TO NUMBER OF UNITS
 									textbox = {
+										# todo: PRCAL-30807 make this visible and actually provide the necessary data to the loc key.
+										# This should show "X / Y" where Y is the command limit of the formation, and X is the total number of units the formation would have after the transfer
+										visible = no
+
 										parentanchor = vcenter
 										autoresize = yes
 										align = center|nobaseline
 										using = fontsize_large
 										using = look_at_me_text_animation
-
-										datacontext = "[TransferFormationPopup.GetLeftStagedFormation]"
 										text = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_UNITS"
 									}
-								}
-
-								textbox = {
-									visible = "[And( TransferFormationPopup.HasLeftFormation, And(IsDataModelEmpty(TransferFormationPopup.GetLeftCommanders), EqualTo_int32(TransferFormationPopup.GetLeftStagedFormation.GetNumCombatUnitsIfTransferred, '(int32)0')))]"
-									parentanchor = hcenter
-									align = nobaseline
-									autoresize = yes
-									using = fontsize_large
-									max_width = 140
-									elide = right
-									fontsize_min = 14
-									text = "TRANSFER_FORMATION_WILL_DISBAND"
 								}
 							}
 						}
@@ -213,7 +204,7 @@ default_popup = {
 							minimumsize = { -1 100 }
 
 							blockoverride "visible" {
-								visible = "[Not(TransferFormationPopup.HasLeftFormation)]"
+								visible = "[Not(TransferFormationPopup.HasSourceFormation)]"
 							}
 
 							blockoverride "text" {
@@ -232,9 +223,8 @@ default_popup = {
 								flowcontainer = {
 									margin = { 5 0 }
 
-									transfer_formation_commander_left_side = {
-										datacontext = "[StagedCommanderTransfer.GetCommander]"
-									}
+									datacontext = "[StagedCommanderTransfer.GetCommander]"
+									transfer_formation_commander_left_side = {}
 								}
 							}
 						}
@@ -246,7 +236,7 @@ default_popup = {
 							minimumsize = { -1 100 }
 
 							blockoverride "visible" {
-								visible = "[And(TransferFormationPopup.HasLeftFormation, IsDataModelEmpty(TransferFormationPopup.GetLeftCommanders))]"
+								visible = "[And(TransferFormationPopup.HasSourceFormation, IsDataModelEmpty(TransferFormationPopup.GetLeftCommanders))]"
 							}
 
 							blockoverride "text" {
@@ -280,7 +270,7 @@ default_popup = {
 									unit_type_selection_with_arrow_button = {
 										visible = "[Or(GreaterThan_int32(StagedUnitTypeTransfer.GetNumRegulars, '(int32)0'), GreaterThan_int32(StagedUnitTypeTransfer.GetNumConscripts, '(int32)0'))]"
 
-										datacontext = "[TransferFormationPopup.GetLeftFormation]"
+										datacontext = "[TransferFormationPopup.GetSourceFormation]"
 										datacontext = "[StagedUnitTypeTransfer.GetUnitType]"
 
 										blockoverride "right_side_arrow_buttons" {}
@@ -295,7 +285,7 @@ default_popup = {
 							minimumsize = { -1 100 }
 
 							blockoverride "visible" {
-								visible = "[And(TransferFormationPopup.HasLeftFormation, IsDataModelEmpty(TransferFormationPopup.GetLeftUnitTypes))]"
+								visible = "[And(TransferFormationPopup.HasSourceFormation, IsDataModelEmpty(TransferFormationPopup.GetLeftUnitTypes))]"
 							}
 
 							blockoverride "text" {
@@ -309,7 +299,7 @@ default_popup = {
 							minimumsize = { -1 100 }
 
 							blockoverride "visible" {
-								visible = "[Not(TransferFormationPopup.HasLeftFormation)]"
+								visible = "[Not(TransferFormationPopup.HasSourceFormation)]"
 							}
 
 							blockoverride "text" {
@@ -333,7 +323,9 @@ default_popup = {
 
 						### RIGHT SIDE - EXPECTED UNIT NUMBERS FOR FORMATION IF TRANSFER IS CONFIRMED
 						widget = {
-							visible = "[TransferFormationPopup.CanReset]"
+							# todo: PRCAL-30807 make this visible
+							#visible = "[TransferFormationPopup.HasAnyChangeBeenMade]" # todo PRCAL-30807: Add a way to check if any changes has been made
+							visible = no
 
 							size = { 150 80 }
 
@@ -344,7 +336,6 @@ default_popup = {
 							flowcontainer = {
 								direction = vertical
 								parentanchor = center
-								spacing = 10
 
 								flowcontainer = {
 									spacing = 5
@@ -369,35 +360,25 @@ default_popup = {
 
 									### CHANGES TO NUMBER OF UNITS
 									textbox = {
+										# todo: PRCAL-30807 make this visible and actually provide the necessary data to the loc key.
+										# This should show "X / Y" where Y is the command limit of the formation, and X is the total number of units the formation would have after the transfer
+										visible = no
+
 										parentanchor = vcenter
 										autoresize = yes
 										align = center|nobaseline
 										using = fontsize_large
 										using = look_at_me_text_animation
-
-										datacontext = "[TransferFormationPopup.GetRightStagedFormation]"
 										text = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_UNITS"
 									}
-								}
-
-								textbox = {
-									visible = "[And(TransferFormationPopup.HasRightFormation, And(IsDataModelEmpty(TransferFormationPopup.GetRightCommanders), EqualTo_int32(TransferFormationPopup.GetRightStagedFormation.GetNumCombatUnitsIfTransferred, '(int32)0')))]"
-									parentanchor = hcenter
-									align = nobaseline
-									autoresize = yes
-									using = fontsize_large
-									max_width = 140
-									elide = right
-									fontsize_min = 14
-									text = "TRANSFER_FORMATION_WILL_DISBAND"
 								}
 							}
 						}
 
 						# RIGHT SIDE - SELECTED DESTINATION FORMATION
 						military_formation_right_click_item = {
-							visible = "[TransferFormationPopup.HasRightFormation]"
-							datacontext = "[TransferFormationPopup.GetRightFormation]"
+							visible = "[TransferFormationPopup.HasTargetFormation]"
+							datacontext = "[TransferFormationPopup.GetTargetFormation]"
 							size = { 320 80 }
 
 							blockoverride "default_button_template" {
@@ -409,8 +390,8 @@ default_popup = {
 							}
 						
 							blockoverride "onclick" {
-								onclick = "[TransferFormationPopup.SelectRightFormation]"
-								#onrightclick = "[TransferFormationPopup.DeselectRightFormation]"
+								onclick = "[TransferFormationPopup.SelectTargetFormation]"
+								#onrightclick = "[TransferFormationPopup.DeselectTargetFormation]"
 							}
 						}
 
@@ -426,8 +407,8 @@ default_popup = {
 						#	text = "CREATE_NEW_ARMY"
 						#
 						#	blockoverride "onclick" {
-						#		onclick = "[TransferFormationPopup.SelectLeftFormation]"
-						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectRightFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
+						#		onclick = "[TransferFormationPopup.SelectSourceFormation]"
+						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectTargetFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
 						#	}
 						#}
 
@@ -443,20 +424,20 @@ default_popup = {
 						#	text = "CREATE_NEW_FLEET"
 						#
 						#	blockoverride "onclick" {
-						#		onclick = "[TransferFormationPopup.SelectLeftFormation]"
-						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectRightFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
+						#		onclick = "[TransferFormationPopup.SelectSourceFormation]"
+						#		#onrightclick = "[PopupManager.AskConfirmation(TransferFormationPopup.DeselectTargetFormation)]" # todo PRCAL-30807: Make this function be able to have a confirmation popup
 						#	}
 						#}
 
 						# RIGHT SIDE - SELECT DESTINATION ARMY (+) BUTTON
 						button = {
-							visible = "[Not(TransferFormationPopup.HasRightFormation)]"
+							visible = "[Not(TransferFormationPopup.HasTargetFormation)]"
 							using = default_button
 							using = fontsize_large
 							using = default_content_fade
 							size = { 320 80 }
 							tooltip = "SELECT_MILITARY_FORMATION_TO_SEND_TO"
-							onclick = "[TransferFormationPopup.SelectRightFormation]"
+							onclick = "[TransferFormationPopup.SelectTargetFormation]"
 
 							icon = {
 								size = { 40 40 }
@@ -466,12 +447,12 @@ default_popup = {
 						}
 
 						button_icon_round_big_action = {
-							visible = "[TransferFormationPopup.HasRightFormation]"
+							visible = "[TransferFormationPopup.HasTargetFormation]"
 							parentanchor = vcenter
 							size = { 40 40 }
 							tooltip = "REMOVE_TARGET_FORMATION"
 							using = tooltip_above
-							onclick = "[TransferFormationPopup.DeselectRightFormation]"
+							onclick = "[TransferFormationPopup.DeselectTargetFormation]"
 							
 							blockoverride "icon" {
 								texture = "gfx/interface/icons/generic_icons/red_cross.dds"
@@ -496,7 +477,7 @@ default_popup = {
 							minimumsize = { -1 100 }
 
 							blockoverride "visible" {
-								visible = "[Not(TransferFormationPopup.HasRightFormation)]"
+								visible = "[Not(TransferFormationPopup.HasTargetFormation)]"
 							}
 
 							blockoverride "text" {
@@ -512,10 +493,7 @@ default_popup = {
 							flipdirection = yes
 
 							item = {
-								
-								transfer_formation_commander_right_side = {
-									datacontext = "[StagedCommanderTransfer.GetCommander]"
-								}
+								transfer_formation_commander_right_side = {}
 							}
 						}
 
@@ -526,7 +504,7 @@ default_popup = {
 							minimumsize = { -1 100 }
 
 							blockoverride "visible" {
-								visible = "[And(TransferFormationPopup.HasRightFormation, IsDataModelEmpty(TransferFormationPopup.GetRightCommanders))]"
+								visible = "[And(TransferFormationPopup.HasTargetFormation, IsDataModelEmpty(TransferFormationPopup.GetRightCommanders))]"
 							}
 
 							blockoverride "text" {
@@ -560,7 +538,7 @@ default_popup = {
 									unit_type_selection_with_arrow_button = {
 										visible = "[Or(GreaterThan_int32(StagedUnitTypeTransfer.GetNumRegulars, '(int32)0'), GreaterThan_int32(StagedUnitTypeTransfer.GetNumConscripts, '(int32)0'))]"
 
-										datacontext = "[TransferFormationPopup.GetRightFormation]"
+										datacontext = "[TransferFormationPopup.GetTargetFormation]"
 										datacontext = "[StagedUnitTypeTransfer.GetUnitType]"
 
 										blockoverride "left_side_arrow_buttons" {}
@@ -575,7 +553,7 @@ default_popup = {
 							minimumsize = { -1 100 }
 
 							blockoverride "visible" {
-								visible = "[And(TransferFormationPopup.HasRightFormation, IsDataModelEmpty(TransferFormationPopup.GetRightUnitTypes))]"
+								visible = "[And(TransferFormationPopup.HasTargetFormation, IsDataModelEmpty(TransferFormationPopup.GetRightUnitTypes))]"
 							}
 
 							blockoverride "text" {
@@ -589,7 +567,7 @@ default_popup = {
 							minimumsize = { -1 100 }
 
 							blockoverride "visible" {
-								visible = "[Not(TransferFormationPopup.HasRightFormation)]"
+								visible = "[Not(TransferFormationPopup.HasTargetFormation)]"
 							}
 
 							blockoverride "text" {
@@ -622,7 +600,7 @@ default_popup = {
 					parentanchor = hcenter
 					autoresize = yes
 					align = nobaseline
-					text = "[TransferFormationPopup.GetTravelTimeDesc]"
+					text = "TRANSFER_FORMATION_TRAVEL_TIME_LABEL"
 				}
 
 				flowcontainer = {
@@ -686,10 +664,10 @@ default_popup = {
 							onclick = "[PopupManager.AskConfirmation(TransferFormationPopup.Confirm)]"
 							onclick = "[PopupManager.HideTransferFormation]"
 
-							tooltip = "TRANSFER_FORMATION_POPUP_CONFIRM_TOOLTIP"
+							tooltip = "[TransferFormationPopup.GetConfirmDesc]" # todo PRCAL-30807: Update the tooltip to now describe everything more in a both-ways manor.
 							using = tooltip_above
 							input_action = "confirm"
-							text = "TRANSFER_CONFIRM"
+							text = "CONFIRM"
 						}
 
 						# confirm button if we do not need to show confirmation - ARMIES
@@ -706,10 +684,10 @@ default_popup = {
 							onclick = "[Execute(TransferFormationPopup.Confirm)]"
 							onclick = "[PopupManager.HideTransferFormation]"
 
-							tooltip = "TRANSFER_FORMATION_POPUP_CONFIRM_TOOLTIP"
+							tooltip = "[TransferFormationPopup.GetConfirmDesc]" # todo PRCAL-30807: Update the tooltip to now describe everything more in a both-ways manor.
 							using = tooltip_above
 							input_action = "confirm"
-							text = "TRANSFER_CONFIRM"
+							text = "CONFIRM"
 						}
 					}
 
@@ -731,10 +709,10 @@ default_popup = {
 							onclick = "[PopupManager.AskConfirmation(TransferFormationPopup.Confirm)]"
 							onclick = "[PopupManager.HideTransferFormation]"
 
-							tooltip = "TRANSFER_FORMATION_POPUP_CONFIRM_TOOLTIP"
+							tooltip = "[TransferFormationPopup.GetConfirmDesc]" # todo PRCAL-30807: Update the tooltip to now describe everything more in a both-ways manor.
 							using = tooltip_above
 							input_action = "confirm"
-							text = "TRANSFER_CONFIRM"
+							text = "CONFIRM"
 						}
 
 						# confirm button if we do not need to show confirmation - FLEETS
@@ -751,10 +729,10 @@ default_popup = {
 							onclick = "[Execute(TransferFormationPopup.Confirm)]"
 							onclick = "[PopupManager.HideTransferFormation]"
 
-							tooltip = "TRANSFER_FORMATION_POPUP_CONFIRM_TOOLTIP"
+							tooltip = "[TransferFormationPopup.GetConfirmDesc]" # todo PRCAL-30807: Update the tooltip to now describe everything more in a both-ways manor.
 							using = tooltip_above
 							input_action = "confirm"
-							text = "TRANSFER_CONFIRM"
+							text = "CONFIRM"
 						}
 					}
 				}
@@ -811,8 +789,8 @@ types transfer_formation_types
 			position = { -10 0 }
 			size = { 35 60 }
 			onclick = "[TransferFormationPopup.MoveCommander(StagedCommanderTransfer.AccessSelf)]"
-			enabled = "[TransferFormationPopup.CanMoveCommander(StagedCommanderTransfer.AccessSelf))]"
-			tooltip = "TRANSFER_FORMATION_MOVE_COMMANDER_TOOLTIP" # todo PRCAL-30807: Make sure to add any reasons why in the tooltip below
+			#enabled = "[TranferFormationPopup.CanMoveCommander(Character.AccessSelf)]" # todo PRCAL-30807: Can be moved. Also make sure to add any reasons why in the tooltip below
+			tooltip = "TRANSFER_FORMATION_MOVE_COMMANDER_TOOLTIP"
 			using = tooltip_above
 			
 			blockoverride "icon_size" {
@@ -867,8 +845,8 @@ types transfer_formation_types
 			position = { 10 0 }
 			size = { 35 60 }
 			onclick = "[TransferFormationPopup.MoveCommander(StagedCommanderTransfer.AccessSelf)]"
-            enabled = "[TransferFormationPopup.CanMoveCommander(StagedCommanderTransfer.AccessSelf))]"
-			tooltip = "TRANSFER_FORMATION_MOVE_COMMANDER_TOOLTIP" # todo PRCAL-30807: Can be moved. Make sure to add any reasons why in the tooltip.
+			#enabled = "[TranferFormationPopup.CanMoveCommander(Character.AccessSelf)]" # todo PRCAL-30807: Can be moved. Also make sure to add any reasons why in the tooltip below
+			tooltip = "TRANSFER_FORMATION_MOVE_COMMANDER_TOOLTIP"
 			using = tooltip_above
 			
 			blockoverride "icon_size" {

@@ -434,12 +434,6 @@ types battle_panel_types
 				}
 			}
 			
-			### NAVAL INVASIONS
-			naval_invasion_list_item = {
-				visible = "[Battle.HasNavalInvasion]"
-				datacontext = "[Battle.GetNavalInvasion]"
-			}
-
 			### THE 2 SIDES
 			container = {
 				minimumsize = { @panel_width_plus_14 -1 }
@@ -514,7 +508,7 @@ types battle_panel_types
 					}
 
 					blockoverride "military_formation_datacontext" {
-						datacontext = "[Battle.GetDefenderFormation]"
+						datacontext = "[Battle.GetDefenderCommander.GetMilitaryFormation]"
 					}
 
 					# START OF BATTLE
@@ -577,6 +571,7 @@ types battle_panel_types
 						tooltip = "BATTLE_DEFENDER_ENDING_MORALE_TOOLTIP"
 					}
 
+
 					blockoverride "dead" {
 						text = "[Battle.GetDefenderTotalDead|D]"
 					}
@@ -595,22 +590,23 @@ types battle_panel_types
 					blockoverride "demoralized_tooltip" {
                         tooltip = "DEMORALIZED_TOOLTIP_DEFENDER"
                     }
+
 					blockoverride "mirror_unit_image" {
 						mirror = horizontal
 					}
-
-					# FORMATIONS LIST OF UNITS
+					blockoverride "datamodel_combat_units_entries" {
+						#datamodel = "[Battle.GetDefenderUnitTypes]" # todo PRCAL-30926 - Implement the datamodel for present Unit Types for the defender side
+						datamodel = "[Battle.AccessCommandedDefenderBuildingEntries]"
+					}
+					blockoverride "unit_list_visible_not" {
+						#visible = "[Not(IsDataModelEmpty(Battle.GetDefenderUnitTypes))]" # todo PRCAL-30926 - Implement the datamodel for present Unit Types for the defender side
+						visible = "[Not(IsDataModelEmpty(Battle.AccessCommandedDefenderBuildingEntries))]"
+					}
 					blockoverride "unit_list_header_tooltip" {
-						tooltip = "BATTLE_MODIFIER_TOOLTIP_DEFENDER"
+						tooltip = "BATTLE_MODIFIER_TOOLTIP_DEFENDER" # todo PRCAL-30926 - Change this tooltp to work for the unit types context instead
 					}
 					blockoverride "formation_datacontext" {
 						datacontext = "[Battle.GetDefenderCommander.GetMilitaryFormation]"
-					}
-					blockoverride "borrowed_units_visibility" {
-						visible = "[Not(IsDataModelEmpty(Battle.GetDefenderBorrowedFormations))]"
-					}
-					blockoverride "formation_header" {
-						text = "BATTLE_DEFENDING_FORMATION_HEADER"
 					}
 				}
 			}
@@ -789,7 +785,7 @@ types battle_panel_types
 				}
 
 				block "military_formation_datacontext" {
-					datacontext = "[Battle.GetAttackerFormation]"
+					datacontext = "[Battle.GetAttackerCommander.GetMilitaryFormation]"
 				}
 
 				button_icon_round = {
@@ -1187,294 +1183,40 @@ types battle_panel_types
 		
 		# armies / navies
 		flowcontainer = {
-			visible = "[Not(Battle.HasEnded)]"
+			#visible = "[Not(Battle.HasEnded)]"  # todo PRCAL-30926 - Add this back in again (the datamodels might not be valid any longer after the battle is over)
+			visible = no # todo PRCAL-30926 - Remove this visible state
 			direction = vertical
 			spacing = 5
 			
 			# under command
 			default_header = {
 				blockoverride "text" {
-					block "formation_header" {
-						text = "BATTLE_ATTACKING_FORMATION_HEADER"
-					}
-				}
-
-				blockoverride "size" {
-					size = { @panel_width_plus_14_half 38 }
-				}
-
-				block "unit_list_header_tooltip" {
-					tooltip = "BATTLE_MODIFIER_TOOLTIP_ATTACKER"
-				}
-			}
-
-			flowcontainer = {
-				minimumsize = { @panel_width_plus_14_half -1 }
-				maximumsize = { @panel_width_plus_14_half -1 }
-				direction = vertical
-				spacing = 10
-
-				block "military_formation_datacontext" {
-					datacontext = "[Battle.GetAttackerCommander.GetMilitaryFormation]"
-				}
-
-				battle_formation_item = {}
-			}
-
-			# under command
-			default_header = {
-				block "borrowed_units_visibility" {
-					visible = no
-				}
-
-				blockoverride "text" {
-					text = "BATTLE_BORROWED_UNITS_HEADER"
+					raw_text = "#todo Add loc key here#!"
 				}
 				blockoverride "size" {
 					size = { @panel_width_plus_14_half 38 }
 				}
 
 				block "unit_list_header_tooltip" {
-					tooltip = "BATTLE_BORROWED_TOOLTIP"
+					tooltip = "BATTLE_MODIFIER_TOOLTIP_ATTACKER" # todo PRCAL-30926 - Change this tooltip to get the data in the context of unit types instead
 				}
 			}
-
-			flowcontainer = {
-				minimumsize = { @panel_width_plus_14_half -1 }
-				maximumsize = { @panel_width_plus_14_half -1 }
-				direction = vertical
-				spacing = 10
-
-				block "borrowed_units_visibility" {
-					visible = no
+			
+			combat_unit_group = {
+				block "unit_list_visible_not" {
+					#visible = "[Not(IsDataModelEmpty(Battle.GetAttackerUnitTypes))]" # todo PRCAL-30926 - Implement the datamodel for present Unit Types for the attacker side
+					visible = "[Not(IsDataModelEmpty(Battle.AccessCommandedAttackerBuildingEntries))]" 
 				}
-
-				datamodel = "[Battle.GetDefenderBorrowedFormations]"
-
-				item = {
-					battle_formation_item = {}
-				}
+			    block "datamodel_combat_units_entries" {
+					#datamodel = "[Battle.GetAttackerUnitTypes]" # todo PRCAL-30926 - Implement the datamodel for present Unit Types for the attacker side
+					datamodel = "[Battle.AccessCommandedAttackerBuildingEntries]"
+                }
 			}
 		}
 	}
-
-	type battle_formation_item = flowcontainer {
-		minimumsize = { @panel_width_plus_14_half -1 }
-		maximumsize = { @panel_width_plus_14_half -1 }
-		direction = vertical
-		margin_bottom = 5
-
-		using = entry_bg_fancy
-
-		widget = {
-			size = { @panel_width_plus_14_half 110 }
-
-			# Name and info header
-			container = {
-				minimumsize = { @panel_width_plus_14_half 35 }
-
-				background = {
-					using = fade_right_entry_fancy_header_colored
-					color = "[MilitaryFormation.GetCountry.GetMapColor]"
-				}
-				
-				flowcontainer = {
-					position = { 12 0 }
-					parentanchor = vcenter
-					spacing = 5
-
-					tiny_flag = {
-						datacontext = "[MilitaryFormation.GetCountry]"
-						parentanchor = vcenter
-					}
-
-					textbox = {
-						maximumsize = { 200 -1 }
-						parentanchor = vcenter
-						multiline = yes
-						autoresize = yes
-						text = "[MilitaryFormation.GetName]"
-						align = nobaseline
-						elide = right
-						margin_left = 5
-					}
-
-					button_icon_goto = {
-						size = { 26 26 }
-						tooltip = "GO_TO_BUTTON_MILITARY_FORMATION"
-						onclick = "[InformationPanelBar.OpenMilitaryFormationPanelTab( MilitaryFormation.AccessSelf, 'default' )]"
-					}
-				}
-
-				# Zoom-to button
-				widget = {
-					position = { -6 0 }
-					parentanchor = right|vcenter
-					size = { 26 26 }
-
-					button_icon_zoom = {
-						size = { 100% 100% }
-						block "goto_properties" {
-							onclick = "[MilitaryFormation.ZoomToMapMarkerPosition]"
-							tooltip = "ZOOM_TO_MILITARY_FORMATION"
-							enabled = "[Not( MilitaryFormation.IsZoomingToMapMarkerPosition )]"
-						}
-					}
-				}
-			}
-
-			flowcontainer = {
-				parentanchor = bottom|hcenter
-				position = { 0 -10 }
-				spacing = 30
-
-				button_icon_round = {
-					parentanchor = vcenter
-					tooltip = "GO_TO_BUTTON_MILITARY_FORMATION"
-
-					blockoverride "size" {
-						size = { 60 60 }
-					}
-					blockoverride "icon_size" {
-						size = { 75% 75% }
-					}
-
-					block "onclick" {
-						onclick = "[InformationPanelBar.OpenMilitaryFormationPanelTab( MilitaryFormation.AccessSelf, 'default' )]"
-						onrightclick = "[RightClickMenuManager.ShowForMilitaryFormation(MilitaryFormation.AccessSelf)]"
-					}
-
-					blockoverride "icon" {
-						texture = "[MilitaryFormation.GetFlag]"
-						color = "[MilitaryFormation.GetFlagColor]"
-					}
-				}
-
-				flowcontainer = {
-					parentanchor = vcenter
-					spacing = 10
-
-					datacontext = "[Battle.GetBattleUnitFormation( MilitaryFormation.Self )]"
-
-					flowcontainer = {
-						parentanchor = vcenter
-						spacing = 5
-
-						icon = {
-							visible = "[MilitaryFormation.IsArmy]"
-							size = { 23 23 }
-							texture = "gfx/interface/icons/generic_icons/battalions.dds"
-							parentanchor = vcenter
-						}
-
-						icon = {
-							visible = "[MilitaryFormation.IsFleet]"
-							size = { 23 23 }
-							texture = "gfx/interface/icons/generic_icons/flotillas.dds"
-							parentanchor = vcenter
-						}
-						
-						textbox = {
-							raw_text = "[BattleMilitaryFormation.GetTotalUnitsFromFormation]"
-							using = transparent_if_unmobilized_in_conflict
-							autoresize = yes
-							align = nobaseline
-							parentanchor = vcenter
-							margin_right = 5
-						}
-					}
-
-					flowcontainer = {
-						visible = "[NotEqualTo_int64(BattleMilitaryFormation.GetCurrentManpowerFromFormation, BattleMilitaryFormation.GetMaxManpowerFromFormation)]" 
-						parentanchor = vcenter
-						manpower_bar = {
-							size = { 6 30 }
-							parentanchor = vcenter
-							
-							blockoverride "manpower_tooltip" {
-								tooltip = "BATTLE_MILITARY_FORMATION_TOOLTIP"
-							}
-
-							blockoverride "manpower_values" {
-								max = "[BattleMilitaryFormation.GetMaxManpowerFromFormation]"
-								value = "[BattleMilitaryFormation.GetCurrentManpowerFromFormation]"
-							}
-						}
-						margin_right = 5
-					}
-
-					flowcontainer = {
-						parentanchor = vcenter
-						direction = vertical
-
-						textbox = {
-							raw_text = "@unit_offense! [BattleMilitaryFormation.GetAverageOffense|0v]"
-							tooltip = "BATTLE_MILITARY_FORMATION_OFFENSE_TOOLTIP"
-							autoresize = yes
-							align = nobaseline
-							using = fontsize_small
-							minimumsize = { 40 -1 }
-							margin_right = 3
-						}
-
-						textbox = {
-							raw_text = "@unit_defense! [BattleMilitaryFormation.GetAverageDefense|0v]"
-							tooltip = "BATTLE_MILITARY_FORMATION_DEFENSE_TOOLTIP"
-							autoresize = yes
-							align = nobaseline
-							using = fontsize_small
-							minimumsize = { 40 -1 }
-							margin_right = 3
-						}
-					}
-
-					morale_bar = {
-						visible = "[LessThan_CFixedPoint(BattleMilitaryFormation.GetCurrentMorale, '(CFixedPoint)1')]"
-						
-						size = { 6 30 }
-						parentanchor = vcenter
-						tooltip = "BATTLE_MILITARY_FORMATION_MORALE_TOOLTIP"
-						
-						blockoverride "morale_value" {
-							value = "[FixedPointToFloat( BattleMilitaryFormation.GetCurrentMorale )]"
-						}
-						blockoverride "morale_color" {
-							color = "[GetMoraleColorVec( BattleMilitaryFormation.GetCurrentMorale )]"
-						}
-					}
-				}
-			}
-		}
-
-		section_header_button = {
-			size = { @panel_width_plus_14_half 38 }
-			
-			blockoverride "left_text" {
-				text = "COMBAT_UNIT_TYPES_CONCEPT"
-			}
-
-			blockoverride "onclick" {
-				onclick = "[GetVariableSystem.Toggle(Concatenate('battle_formation_item_', MilitaryFormation.GetIDString))]"
-			}
-			
-			blockoverride "onclick_showmore" {
-				visible = "[Not(GetVariableSystem.Exists(Concatenate('battle_formation_item_', MilitaryFormation.GetIDString)))]"
-			}
-
-			blockoverride "onclick_showless" {
-				visible = "[GetVariableSystem.Exists(Concatenate('battle_formation_item_', MilitaryFormation.GetIDString))]"
-			}
-		}
-
-		combat_unit_type = {
-			visible = "[GetVariableSystem.Exists(Concatenate('battle_formation_item_', MilitaryFormation.GetIDString))]"
-			datamodel = "[Battle.GetBattleUnitTypeList( MilitaryFormation.Self )]"
-		}
-	}
-
 	
 	### COMBAT UNIT GROUPS
-	type combat_unit_type = flowcontainer {
+	type combat_unit_group = flowcontainer {
 		direction = vertical
 		spacing = 5
 		margin_bottom = 10
@@ -1485,8 +1227,14 @@ types battle_panel_types
 				minimumsize = { @panel_width_plus_14_half -1 }
 				maximumsize = { @panel_width_plus_14_half -1 }
 
-				datacontext = "[BattleUnitType.GetCombatUnitType]"
-				datacontext = "[CombatUnitType.GetGroup]"
+				block "formation_datacontext" {
+					datacontext = "[Battle.GetAttackerCommander.GetMilitaryFormation]"
+				}
+
+				#datacontext = "[CombatUnitType.GetGroup]" # todo PRCAL-30926 - Add this datacontext
+
+				datacontext = "[BattleBuildingEntry]" # todo PRCAL-30926 - Remove this datacontext
+				datacontext = "[BattleBuildingEntry.GetBuilding]" # todo PRCAL-30926 - Remove this datacontext
 				
 				# image
 				widget = {
@@ -1496,14 +1244,16 @@ types battle_panel_types
 					icon = {
 						parentanchor = center
 						using = frame_small_mask
-						texture = "[CombatUnitType.GetTextureForCulture( MilitaryFormation.GetPrimaryCultureForGroup( CombatUnitGroup.Self ).Self )]"
+						texture = "gfx/unit_illustrations/artillery_african_cannon.dds"
+						#texture = "[CombatUnitType.GetTextureForCulture( MilitaryFormation.GetPrimaryCultureForGroup( CombatUnitGroup.Self ).Self )]" # todo PRCAL-30926 - Uncomment this
 						size = { 255 255 }
 						block "mirror_unit_image" {}
 					}
 					
 					widget = {
 						size = { 255 255 }
-						visible = "[EqualTo_CFixedPoint(BattleUnitType.GetAverageMorale, '(CFixedPoint)0')]"
+						#visible = "[EqualTo_CFixedPoint(CombatUnitType.GetAverageMorale, '(CFixedPoint)0')]" # todo PRCAL-30926 - Add a way to get the average morale for this Unit Type
+						visible = "[EqualTo_CFixedPoint(BattleBuildingEntry.GetAverageMorale, '(CFixedPoint)0')]" # todo PRCAL-30926 - Remove this visible state
 						
 						background = {
 							using = dark_area
@@ -1528,7 +1278,8 @@ types battle_panel_types
 					size = { @panel_width_plus_14_half 38 }
 					
 					blockoverride "left_text" {
-						text = "[CombatUnitType.GetName]"
+						#text = "[CombatUnitType.GetName]" # todo PRCAL-30926 - Add this name
+						raw_text = "#todo Unit Type Name#!"
 					}
 
 					blockoverride "right_text" {
@@ -1537,7 +1288,8 @@ types battle_panel_types
 						
 						flowcontainer = {
 							textbox = {
-								visible = "[And( MilitaryFormation.IsArmy, GreaterThan_int32( BattleUnitType.GetNumberOfRegularUnits, '(int32)0') )]"
+								visible = no
+								#visible = "[MilitaryFormation.IsArmy]" # todo PRCAL-30926 - Add this textbox back in again
 								parentanchor = hcenter
 								autoresize = yes
 								align = nobaseline|hcenter
@@ -1545,12 +1297,13 @@ types battle_panel_types
 								fontsize_min = 12
 								max_width = 100
 								elide = right
-								raw_text = "@battalions![BattleUnitType.GetNumberOfRegularUnits|v]"
-								tooltip = "BATTLE_UNIT_TYPE_REGULARS_TOOLTIP"
+								text = "MILITARY_FORMATION_NUMBER_OF_BATTALIONS"
+								tooltip = "UNIT_TYPE_REGULAR_BATTALIONS_TOOLTIP_FOR_GUI"
 							}
 
 							textbox = {
-								visible = "[And( MilitaryFormation.IsArmy, GreaterThan_int32( BattleUnitType.GetNumberOfConscriptUnits, '(int32)0') )]"
+								visible = no
+								#visible = "[MilitaryFormation.IsArmy]" # todo PRCAL-30926 - Add this textbox back in again
 								parentanchor = hcenter
 								autoresize = yes
 								align = nobaseline|hcenter
@@ -1558,12 +1311,13 @@ types battle_panel_types
 								fontsize_min = 12
 								max_width = 100
 								elide = right
-								raw_text = "@conscripts![BattleUnitType.GetNumberOfConscriptUnits|v]"
-								tooltip = "BATTLE_UNIT_TYPE_CONSCRIPT_TOOLTIP"
+								text = "MILITARY_FORMATION_NUMBER_OF_CONSCRIPTS"
+								tooltip = "UNIT_TYPE_CONSCRIPT_BATTALIONS_TOOLTIP_FOR_GUI"
 							}
 
 							textbox = {
-								visible = "[And( MilitaryFormation.IsFleet, GreaterThan_int32( BattleUnitType.GetNumberOfRegularUnits, '(int32)0') )]"
+								visible = no
+								#visible = "[MilitaryFormation.IsFleet]" # todo PRCAL-30926 - Add this textbox back in again
 								parentanchor = hcenter
 								autoresize = yes
 								align = nobaseline|hcenter
@@ -1571,54 +1325,61 @@ types battle_panel_types
 								fontsize_min = 12
 								max_width = 100
 								elide = right
-								raw_text = "@flotillas![BattleUnitType.GetNumberOfRegularUnits|v]"
-								tooltip = "BATTLE_UNIT_TYPE_WARSHIPS_TOOLTIP"
+								text = "MILITARY_FORMATION_NUMBER_OF_FLOTILLAS"
+								tooltip = "UNIT_TYPE_FLOTILLAS_TOOLTIP_FOR_GUI_ON_MILITARY_PANEL"
 							}
-
-							widget = { size = { 5 5 } }
-
-							white_progressbar_vertical = {
-								size = { 8 22 }
-								tooltip = "BATTLE_UNIT_TYPE_AVERAGE_MORALE"
-								
-								blockoverride "values" {
-									min = 0
-									max = 1
-									block "combat_group_morale" {
-										value = "[FixedPointToFloat( BattleUnitType.GetAverageMorale )]"
-									}
+						}
+						
+						white_progressbar_vertical = {
+							size = { 8 22 }
+							tooltip = "BATTLE_BATTALION_GROUP_AVERAGE_MORALE"
+							
+							blockoverride "values" {
+								min = 0
+								max = 1
+								block "combat_group_morale" {
+									#value = "[FixedPointToFloat( CombatUnitType.GetAverageMorale )]" # todo PRCAL-30926 - Add this morale value
+									value = "[FixedPointToFloat( BattleBuildingEntry.GetAverageMorale )]" # todo PRCAL-30926 - Remove this morale value
 								}
-								blockoverride "color" {
-									block "combat_group_morale_color" { 
-										color = "[GetMoraleColorVec( BattleUnitType.GetAverageMorale )]"
-									}
+							}
+							blockoverride "color" {
+								block "combat_group_morale_color" { 
+									#color = "[GetMoraleColorVec( BattleBuildingEntry.GetAverageMorale )]" # todo PRCAL-30926 - Add this morale color
+									color = "[GetMoraleColorVec( BattleBuildingEntry.GetAverageMorale )]" # todo PRCAL-30926 - Remove this morale color
 								}
 							}
 						}
 					}
 
 					blockoverride "onclick" {
-						onclick = "[GetVariableSystem.Toggle(Concatenate('battle_formation_item_', BattleUnitType.GetIDString( Battle.Self, MilitaryFormation.Self ) ))]"
+						#onclick = "[CombatUnitType.ToggleExpand]" # todo PRCAL-30926 - Add this onclick
+						onclick = "[BattleBuildingEntry.ToggleExpand]" # todo PRCAL-30926 - Remove this onclick
 					}
 					
 					blockoverride "onclick_showmore" {
-						visible = "[Not(GetVariableSystem.Exists(Concatenate('battle_formation_item_', BattleUnitType.GetIDString( Battle.Self, MilitaryFormation.Self ) )))]"
+						#visible = "[Not(CombatUnitType.IsExpanded)]" # todo PRCAL-30926 - Add this visible state
+						visible = "[Not(BattleBuildingEntry.IsExpanded)]" # todo PRCAL-30926 - Remove this visible state
 					}
 
 					blockoverride "onclick_showless" {
-						visible = "[GetVariableSystem.Exists(Concatenate('battle_formation_item_', BattleUnitType.GetIDString( Battle.Self, MilitaryFormation.Self )))]"
+						#visible = "[CombatUnitType.IsExpanded]" # todo PRCAL-30926 - Add this visible state
+						visible = "[BattleBuildingEntry.IsExpanded]" # todo PRCAL-30926 - Remove this visible state
 					}
 				}
 
 				flowcontainer = {
-					visible = "[GetVariableSystem.Exists(Concatenate('battle_formation_item_', BattleUnitType.GetIDString( Battle.Self, MilitaryFormation.Self )))]"
 					minimumsize = { @panel_width_half -1 }
 					maximumsize = { @panel_width_half -1 }
 					direction = vertical
 					parentanchor = hcenter 
 					margin = { 0 5 }
 					spacing = 4
-					datamodel = "[BattleUnitType.GetUnits]"
+
+					#visible = "[CombatUnitType.IsExpanded]" # todo PRCAL-30926 - Add this visible state
+					visible = "[BattleBuildingEntry.IsExpanded]" # todo PRCAL-30926 - Remove this visible state
+
+					#datamodel = "[CombatUnitType.GetUnits]" # todo PRCAL-30926 - Add this datamodel for this unit types units
+					datamodel = "[BattleBuildingEntry.GetUnits]" # todo PRCAL-30926 - Remove this datamodel
 					
 					item = {
 						combat_unit_entry = {
