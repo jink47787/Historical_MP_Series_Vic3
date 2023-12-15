@@ -1,4 +1,4 @@
-﻿headgear = {
+﻿headgear = { #Brought over because this references bolt action rifles
 	usage = game
 	selection_behavior = weighted_random
 	fallback = no_headgear
@@ -20,6 +20,7 @@
                     OR = {
                         has_role = agitator
                         has_template = fra_delescluze_character_template # Never ever give Louis Delescluze a hat, any hat. His forehead is too powerful.
+                        has_template = BRZ_getulio_vargas_character_template # Vargas is forbidden from wearing hats.
                     }
                     is_historical = yes
                     NOR = {
@@ -49,7 +50,15 @@
                 add = 100
                 european_clothes_trigger = yes
                 slavic_clothes_trigger = no
-                south_american_clothes_character_trigger = no
+                NAND = {
+                    south_american_clothes_character_trigger = yes
+                    scope:character ?= {
+                        NOR = {
+                            culture = cu:sulista
+                            culture = cu:paulista
+                        }
+                    }
+                }
                 agitator_character_trigger = yes
             }
         }
@@ -69,10 +78,60 @@
             modifier = {
                 add = 100
                 south_american_clothes_character_trigger = yes
+                scope:character ?= {
+                    NOR = {
+                        culture = cu:brazilian
+                        culture = cu:sulista
+                        culture = cu:amazonic
+                        culture = cu:paulista
+                        culture = cu:nordestino
+                        culture = cu:afro_brazilian
+                    }
+                }
                 OR = {
                     agitator_character_trigger = yes
                     scope:character ?= {
                         has_trait = bandit
+                    }
+                }
+            }
+        }
+    }
+
+    brazilian_agitator_headgear = {
+        dna_modifiers = {
+            accessory = {
+                mode = add
+                gene = headgear
+                template = male_headgear_gaucho_
+                range = { 0 1 } # For the randomness to work correctly
+            }
+        }
+        weight = {
+            base = 0
+            modifier = {
+                add = 90000
+                OR = {
+                    scope:character ?= {
+                        has_template = BRZ_virgulino_ferreira
+                    }
+                    scope:character ?= {
+                        AND = {
+                            exists = cu:nordestino
+                            culture = cu:nordestino
+                        }
+                        OR = {
+                            has_role = agitator
+                            AND = { # Monarchs don't get to wear this hat, but republican rulers can
+                                NAND = {
+                                    is_ruler = yes
+                                    home_country ?= {
+                                        has_law = law_type:law_monarchy
+                                    }
+                                }
+                                has_trait = bandit
+                            }
+                        }
                     }
                 }
             }
@@ -136,9 +195,21 @@
         weight = {
             base = 0
             modifier = {
-                add = 100
+                add = 2000
                 japanese_clothes_trigger = yes
-                agitator_character_trigger = yes
+                OR = {
+                    agitator_character_trigger = yes
+                    AND = {
+                        politician_clothes_trigger = yes
+                        armed_forces_clothes_trigger = yes
+                        scope:character ?= {
+                            owner = {
+                                has_variable = meiji_restoration_complete
+                            }
+                            has_ideology = ideology:ideology_traditionalist
+                        }
+                    }
+                }
             }
         }
     }
@@ -380,6 +451,7 @@
                 american_clothes_trigger = no
                 british_empire_clothes_trigger = no
                 french_empire_clothes_trigger = no
+                russian_empire_clothes_trigger = no
                 german_clothes_trigger = no
                 NOT = {
                     scope:character ?= {
@@ -606,14 +678,112 @@
                 mode = add
                 gene = headgear
                 template = french_military_headgear
-                range = { 0 1 } # For the randomness to work correctly
+                range = { 0 1 }
             }
         }
         weight = {
             base = 0
             modifier = {
                 add = 100
-                french_empire_clothes_trigger = yes
+                OR = {
+                    AND = {
+                        french_empire_clothes_trigger = yes
+                        OR = {
+                            scope:character = {
+                                has_role = general
+                            }
+                            AND = {
+                                politician_clothes_trigger = yes
+                                armed_forces_clothes_trigger = yes
+                            }
+                        }
+                        agitator_character_trigger = no
+                    }
+                    AND = {
+                        scope:pop ?= {
+                            culture = {
+                                has_discrimination_trait = european_heritage
+                            }
+                            owner = {
+                                c:FRA ?= this
+                            }
+                        }
+                        OR = {
+                            soldier_clothes_pop_trigger = yes
+                            officers_clothes_pop_trigger = yes
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    japanese_meiji_military_headgear = {
+        dna_modifiers = {
+            accessory = {
+                mode = add
+                gene = headgear
+                template = european_military_02_colors
+                range = { 0 1 }
+            }
+        }
+        weight = {
+            base = 0
+            modifier = {
+                add = 1200
+                OR = {
+                    AND = {
+                        scope:character ?= {
+                            culture = cu:japanese
+                            owner = {
+                                has_variable = meiji_restoration_complete
+                            }
+                        }
+                        OR = {
+                            scope:character = {
+                                has_role = general
+                            }
+                            AND = {
+                                politician_clothes_trigger = yes
+                                armed_forces_clothes_trigger = yes
+                                scope:character ?= {
+                                    NOT = { has_ideology = ideology:ideology_traditionalist }
+                                }
+                            }
+                        }
+                        agitator_character_trigger = no
+                    }
+                    AND = {
+                        scope:pop ?= {
+                            culture = cu:japanese
+                            owner = {
+                                has_variable = meiji_restoration_complete
+                            }
+                        }
+                        OR = {
+                            soldier_clothes_pop_trigger = yes
+                            officers_clothes_pop_trigger = yes
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    russian_military_headgear = {
+        dna_modifiers = {
+            accessory = {
+                mode = add
+                gene = headgear
+                template = russian_military_headgear
+                range = { 0 1 }
+            }
+        }
+        weight = {
+            base = 0
+            modifier = {
+                add = 100
+                russian_empire_clothes_trigger = yes
                 OR = {
                     scope:character = {
                         has_role = general
@@ -628,13 +798,163 @@
         }
     }
 
+    korean_empire_military_headgear = {
+        dna_modifiers = {
+            accessory = {
+                mode = add
+                gene = headgear
+                template = korean_empire_military_headgear
+                range = { 0 1 }
+            }
+        }
+        weight = {
+            base = 0
+            modifier = {
+                add = 1200
+                OR = {
+                    AND = {
+                        scope:character ?= {
+                            culture = cu:korean
+                            owner = {
+                                has_variable = KOR_korean_empire_declared
+                            }
+                        }
+                        OR = {
+                            scope:character = {
+                                has_role = general
+                            }
+                            AND = {
+                                politician_clothes_trigger = yes
+                                armed_forces_clothes_trigger = yes
+                                scope:character ?= {
+                                    NOT = { has_ideology = ideology:ideology_traditionalist }
+                                }
+                            }
+                        }
+                        agitator_character_trigger = no
+                    }
+                    AND = {
+                        scope:pop ?= {
+                            culture = cu:korean
+                            owner = {
+                                has_variable = KOR_korean_empire_declared
+                            }
+                        }
+                        OR = {
+                            soldier_clothes_pop_trigger = yes
+                            officers_clothes_pop_trigger = yes
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    brazilian_military_headgear = {
+        dna_modifiers = {
+            accessory = {
+                mode = add
+                gene = headgear
+                template = brazilian_military_headgear
+                accessory = male_headgear_european_military_02_blue
+            }
+        }
+        weight = {
+            base = 0
+            modifier = {
+                add = 1000
+                scope:character ?= {
+                    exists = c:BRZ
+                    home_country = {
+                        OR = {
+                            AND = {
+                                c:BRZ = this
+                                is_subject = no # preventing uniform conflicts if BRZ becomes a subject of another country with puppet uniforms
+                            }
+                            is_subject_of = c:BRZ
+                        }       
+                    }
+                    OR = {
+                        has_role = general
+                        AND = {
+                            has_role = politician
+                            is_ruler = no
+                            is_interest_group_type = ig_armed_forces
+                        }
+                    }
+                    agitator_character_trigger = no
+                }                
+            }
+        }
+    }
+
+    brazilian_officers_headgear = {
+        dna_modifiers = {
+            accessory = {
+                mode = add
+                gene = headgear
+                template = brazilian_military_headgear
+                range = { 0 0.66 }
+            }
+        }
+        weight = {
+            base = 0
+            modifier = {
+                add = 100
+                scope:pop ?= {
+                    exists = c:BRZ
+                    home_country = {
+                        OR = {
+                            AND = {
+                                c:BRZ = this
+                                is_subject = no # preventing uniform conflicts if BRZ becomes a subject of another country with puppet uniforms
+                            }
+                            is_subject_of = c:BRZ
+                        }       
+                    }
+                    is_pop_type = officers
+                }                
+            }
+        }
+    }
+
+    brazilian_soldiers_headgear = {
+        dna_modifiers = {
+            accessory = {
+                mode = add
+                gene = headgear
+                template = brazilian_military_headgear
+                range = { 0.34 1 }
+            }
+        }
+        weight = {
+            base = 0
+            modifier = {
+                add = 100
+                scope:pop ?= {
+                    exists = c:BRZ
+                    home_country = {
+                        OR = {
+                            AND = {
+                                c:BRZ = this
+                                is_subject = no # preventing uniform conflicts if BRZ becomes a subject of another country with puppet uniforms
+                            }
+                            is_subject_of = c:BRZ
+                        }       
+                    }
+                    is_pop_type = soldiers
+                }                
+            }
+        }
+    }
+
     garibaldi_military_headgear = {
         dna_modifiers = {
             accessory = {
                 mode = add
                 gene = headgear
                 template = french_military_headgear
-                range = { 0.4 0.6 } # Only selecting the red kepi with gold embroidery
+                accessory = male_headgear_european_military_02_red # Only selecting the red kepi with gold embroidery
             }
         }
         weight = {
@@ -847,6 +1167,38 @@
                     arabic_fez_trigger = yes
                 }
             }
+            modifier = {
+                add = 90000
+                OR = {
+                    scope:character ?= {
+                        exists = owner
+                        exists = c:TUR
+                        owner = {
+                            c:TUR = this
+                        }
+                        OR = {
+                            AND = {
+                                has_role = general
+                                is_ruler = no
+                            }
+                            monarchy_clothes_trigger = yes
+                            AND = {
+                                armed_forces_clothes_trigger = yes
+                                politician_clothes_trigger = yes
+                            }
+                        }
+                        is_female = no
+                    }
+                    scope:pop ?= {
+                        exists = owner
+                        exists = c:TUR
+                        owner = {
+                            c:TUR = this
+                        }
+                        is_pop_type = officers
+                    }
+                }
+            }
         }
     }
     african_headgear = {
@@ -994,7 +1346,19 @@
             modifier = {
                 add = 100
                 japanese_clothes_pop_trigger = yes
-                poor_clothes_pop_trigger = yes   
+                scope:pop ?= {
+                    OR = {
+                        is_pop_type = farmers
+                        is_pop_type = peasants
+                        is_pop_type = laborers
+                        AND = {
+                            is_pop_type = machinists
+                            owner = {
+                                NOT = { has_variable = meiji_restoration_complete }
+                            }
+                        }
+                    }
+                }   
             }
         }
     }
@@ -1210,6 +1574,167 @@
             }
         }
     }
+
+    slavik_kokoshnik_headgear = {
+        dna_modifiers = {
+           accessory = {
+               mode = add
+               gene = headgear
+               template = female_headgear_slavic_kokoshnik
+               range = { 0 1 }
+            }
+        }
+
+        weight = {
+            base = 0
+            modifier = {
+                add = 11000
+                has_cosmetic_dlc = "Dawn of Wonder"
+                OR = {
+                    AND = {
+                        scope:character ?= {
+                            culture = {
+                                has_discrimination_trait = east_slavic
+                            }
+                            is_female = yes
+                            OR = {
+                                has_variable = getting_married
+                                has_modifier = marriage_popularity
+                            }
+                        }
+                    }
+                    AND = {
+                        upper_clothes_pop_trigger = yes
+                        scope:pop ?= { # Wear this clothing either during Midsummer or during a Royal Wedding
+                            culture = {
+                                has_discrimination_trait = east_slavic
+                            }
+                            OR = {
+                                scope:pop ?= {
+                                    month = 5 # June. The trigger for months is on a 0-11 scale.
+                                }
+                                owner = {
+                                    OR = {
+                                        has_modifier = royal_marriage
+                                        any_scope_character = {
+                                            OR = {
+                                                is_ruler = yes
+                                                is_heir = yes
+                                            }
+                                            has_modifier = marriage_popularity
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    midsummer_headgear = {
+        dna_modifiers = {
+           accessory = {
+               mode = add
+               gene = headgear
+               template = female_headgear_slavic_midsummer
+               range = { 0 1 }
+            }
+        }
+
+        weight = {
+            base = 0
+            modifier = {
+                add = 2000
+                has_cosmetic_dlc = "Dawn of Wonder"
+                OR = {
+                    AND = {
+                        slavic_clothes_pop_trigger = yes
+                        middle_clothes_pop_trigger = yes
+                    }
+                    AND = {
+                        nordic_clothes_pop_trigger = yes
+                        OR = {
+                            middle_clothes_pop_trigger = yes
+                            upper_clothes_pop_trigger = yes
+                        }
+                    }
+                }
+                scope:pop ?= {
+                    month = 5 # June. The trigger for months is on a 0-11 scale.
+                }
+            }
+        }
+    }
+
+    pierrot_headgear = {
+        dna_modifiers = {
+           accessory = {
+               mode = add
+               gene = headgear
+               template = male_headgear_carnaval_pierrot
+               range = { 0 1 }
+            }
+        }
+
+        weight = {
+            base = 0
+            modifier = {
+                add = 2000
+                has_cosmetic_dlc = "Dawn of Wonder"
+                OR = {
+                    european_clothes_pop_trigger = yes
+                    south_american_clothes_pop_trigger = yes
+                }
+
+                OR = {
+                    middle_clothes_pop_trigger = yes
+                    upper_clothes_pop_trigger = yes
+                }
+
+                scope:pop ?= {
+                    religion = rel:catholic
+                    month = 1 # Carnival is /usually/ in February
+                }
+            }
+        }
+    }
+
+    brazilian_bahiana_headgear = {
+        dna_modifiers = {
+           accessory = {
+               mode = add
+               gene = headgear
+               template = brazil_bahiana_headgear
+               range = { 0 1 }
+            }
+        }
+        weight = {
+            base = 0
+            modifier = {
+                add = 2000
+
+                OR = {
+                    scope:character ?= {
+                        culture = cu:afro_brazilian
+                        is_ruler = no
+                        is_interest_group_type = ig_rural_folk
+                    }
+                    scope:pop ?= {
+                        culture = cu:afro_brazilian
+                        OR = {
+                            is_pop_type = farmers
+                            is_pop_type = peasants
+                            is_pop_type = laborers
+                            is_pop_type = machinists
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     #academic_clothes = {
     #    dna_modifiers = {
     #        accessory = {
@@ -1227,391 +1752,4 @@
     #        }
     #    }
     #}
-    
-    ## WCR - Fixes ##
-    
-    WCR_academic_clothes = { # this was such a simple fix; idk why they didnt just do it
-        dna_modifiers = {    # better open a half-point story up on the agile board :kekw:
-            accessory = {
-                mode = add
-                gene = headgear         # according to the PE, it's in headgear, not in props
-                template = academic_cap # and it's called academic_cap, not academic_cap_01
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 200
-                academics_clothes_pop_trigger = yes
-                WCR_is_westernized_trigger    = yes # want to include Europe & co. too in this case
-            }
-            modifier = {   # Nondisruptive (for Europeans) way to apply it to nations that finished westernization
-                add = 1900 # (i.e. Europe gets the normal weight & Asia, etc. get 2100 to match other WCR definitions
-                academics_clothes_pop_trigger = yes
-                WCR_has_completed_westernization_trigger = yes
-            }
-        }
-    }
-    
-    ## WCR - Additions ##
-    
-    WCR_european_agitator_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = european_headgear_agitators
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2000
-                WCR_has_completed_westernization_trigger = yes
-                agitator_character_trigger = yes
-            }
-        }
-    }
-    
-    WCR_european_royal_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = european_royal_headgear
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2000
-                WCR_has_completed_westernization_trigger = yes
-                monarchy_clothes_trigger = yes
-            }
-            modifier = { # Try to guarantee queen's crown
-                add = 100
-                WCR_has_completed_westernization_trigger = yes
-                monarchy_clothes_trigger = yes
-                scope:character ?= {
-                    is_female = yes
-                }
-            }
-        }
-    }
-    
-    WCR_european_common_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = european_common_headgear
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2000
-                WCR_has_completed_westernization_trigger = yes
-                politician_clothes_trigger = yes
-                armed_forces_clothes_trigger = no
-                monarchy_clothes_trigger = no
-                scope:character ?= {
-                    age > 12
-                }
-            }
-        }
-    }
-    
-    WCR_european_capitalist_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = european_tophat
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2000
-                WCR_has_completed_westernization_trigger = yes
-                upper_clothes_pop_trigger = yes
-            }
-        }
-    }
-    
-    WCR_european_bowler_hat = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = european_bowlerhat
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2000
-                WCR_has_completed_westernization_trigger = yes
-                middle_clothes_pop_trigger = yes
-           }
-        }
-    }
-    
-    WCR_european_flat_cap = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = european_flatcap
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 100 # 2000 # Leave at 100 so laborers have flatcaps or their culturally-relevant hats
-                WCR_has_completed_westernization_trigger = yes
-                poor_clothes_pop_trigger = yes
-                peasants_clothes_pop_trigger = no
-            }
-            modifier = {
-                add = 1900
-                WCR_has_completed_westernization_trigger = yes
-                OR = { # But always give westernized machinists the flat cap
-                    machinists_clothes_pop_trigger = yes
-                    AND = { # and guarantee flat cap if fully westernize poor pops game rule is set
-                        poor_clothes_pop_trigger = yes
-                        peasants_clothes_pop_trigger = no
-                        has_game_rule = WCR_westernize_poor_pop_clothing_yes
-                    }
-                }
-            }
-        }
-    }
-    
-    WCR_european_peasants_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = european_strawhat
-                range = { 0 1 } # For the randomness to work correctly
-           
-            } 
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 100 # 2000 # Leave at 100 for same reason as flat cap
-                WCR_has_completed_westernization_trigger = yes
-                peasants_clothes_pop_trigger = yes
-            }
-            modifier = {
-                add = 1900 # Guarantee straw hat if fully westernize poor pops game rule is set
-                WCR_has_completed_westernization_trigger = yes
-                peasants_clothes_pop_trigger = yes
-                has_game_rule = WCR_westernize_poor_pop_clothing_yes
-            }
-        }
-    }
-    
-    WCR_european_military_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = german_military_headgear # peaked caps only # european_military_headgear
-                range = { 0 0.5 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2100
-                agitator_character_trigger = no
-                soldier_clothes_pop_trigger = no
-                WCR_has_completed_westernization_trigger = yes
-                WCR_army_clothes_trigger = yes
-                WCR_army_has_no_influence_trigger = yes
-            }
-            modifier = { # Monarchy commanders in chief
-                add = 2100
-                monarchy_clothes_trigger = yes
-                WCR_has_completed_westernization_trigger = yes
-                WCR_ruler_has_no_influence_trigger = yes
-                scope:character ?= {
-                    is_ruler = yes
-                    has_role = general
-                }
-            }
-        }
-    }
-    
-    WCR_european_admiral_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = european_admiral_headgear
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2100
-                agitator_character_trigger = no
-                soldier_clothes_pop_trigger = no
-                WCR_has_completed_westernization_trigger = yes
-                WCR_navy_clothes_trigger = yes
-                # WCR_navy_has_no_influence_trigger = yes # Hat is same for all flavors
-            }
-            modifier = { # Republic commanders in chief
-                add = 2100
-                republic_clothes_trigger = yes
-                WCR_has_completed_westernization_trigger = yes
-                # WCR_ruler_has_no_influence_trigger = yes # Hat is same for all flavors
-                scope:character ?= {
-                    is_ruler = yes
-                    has_role = general
-                }
-            }
-        }
-    }
-    
-    WCR_american_military_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = american_military_headgear
-                range = { 0 0.6 } # 0.6 is upper limit for not having cowboy hats
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2100
-                agitator_character_trigger = no
-                soldier_clothes_pop_trigger = no
-                WCR_has_completed_westernization_trigger = yes
-                WCR_army_clothes_trigger = yes
-                WCR_army_has_american_influence_trigger = yes
-            }
-            modifier = {
-                add = 2100
-                monarchy_clothes_trigger = yes
-                WCR_has_completed_westernization_trigger = yes
-                WCR_ruler_has_american_influence_trigger = yes
-                scope:character ?= {
-                    is_ruler = yes
-                    has_role = general
-                }
-            }
-        }
-    }
-    
-    WCR_british_military_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = british_military_headgear
-                range = { 0 0.5 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2100
-                agitator_character_trigger = no
-                soldier_clothes_pop_trigger = no
-                WCR_has_completed_westernization_trigger = yes
-                WCR_army_clothes_trigger = yes
-                WCR_army_has_british_influence_trigger = yes
-            }
-            modifier = {
-                add = 2100
-                monarchy_clothes_trigger = yes
-                WCR_has_completed_westernization_trigger = yes
-                WCR_ruler_has_british_influence_trigger = yes
-                scope:character ?= {
-                    is_ruler = yes
-                    has_role = general
-                }
-            }
-        }
-    }
-    
-    WCR_french_military_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = french_military_headgear
-                range = { 0 0.5 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2100
-                agitator_character_trigger = no
-                soldier_clothes_pop_trigger = no
-                WCR_has_completed_westernization_trigger = yes
-                WCR_army_clothes_trigger = yes
-                WCR_army_has_french_influence_trigger = yes
-            }
-            modifier = {
-                add = 2100
-                monarchy_clothes_trigger = yes
-                WCR_has_completed_westernization_trigger = yes
-                WCR_ruler_has_french_influence_trigger = yes
-                scope:character ?= {
-                    is_ruler = yes
-                    has_role = general
-                }
-            }
-        }
-    }
-    
-    WCR_german_military_headgear = {
-        dna_modifiers = {
-            accessory = {
-                mode = add
-                gene = headgear
-                template = german_military_headgear
-                range = { 0 1 } # For the randomness to work correctly
-            }
-        }
-        weight = {
-            base = 0
-            modifier = {
-                add = 2100
-                agitator_character_trigger = no
-                soldier_clothes_pop_trigger = no
-                WCR_has_completed_westernization_trigger = yes
-                WCR_army_clothes_trigger = yes
-                WCR_army_has_german_influence_trigger = yes
-            }
-            modifier = {
-                add = 2100
-                monarchy_clothes_trigger = yes
-                WCR_has_completed_westernization_trigger = yes
-                WCR_ruler_has_german_influence_trigger = yes
-                scope:character ?= {
-                    is_ruler = yes
-                    has_role = general
-                }
-            }
-        }
-    }
-    
 }
