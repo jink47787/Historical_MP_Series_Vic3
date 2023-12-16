@@ -140,7 +140,7 @@ All mods / mod ideas used linked below:
 - Subjects have 0 interests
 - Subjects have permanent minor malus
 #### CBs
-- Cut Down can be done by any non-decentralized power & will remove all conquests from past 20 years
+- Cut Down can be done by any non-decentralized power & will remove all conquests from past 15 years rather than 10
 
 ## Military
 - Merged rifling, repeaters, and bolt-action rifles into other techs of the same era
