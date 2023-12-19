@@ -227,3 +227,4 @@ All mods / mod ideas used linked below:
 - Reduced rate of both radical and loyalist gain
 - Canal companies no long require occupancy or incorporation
 - Added straits to Hokkaido
+- Adjusted populating the Americas JE
