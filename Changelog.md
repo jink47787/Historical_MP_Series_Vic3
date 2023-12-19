@@ -226,3 +226,4 @@ All mods / mod ideas used linked below:
 - Sepoy war does not give infamy
 - Reduced rate of both radical and loyalist gain
 - Canal companies no long require occupancy or incorporation
+- Added straits to Hokkaido
