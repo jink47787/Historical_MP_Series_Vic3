@@ -1,4 +1,130 @@
-﻿je_heavenly_kingdom_main = {
+﻿je_chinese_missions = {
+	icon = "gfx/interface/icons/religion_icons/protestant.dds"
+
+	group = je_group_historical_content
+
+	scripted_button = CHI_deport_missionaries_button
+
+	is_shown_when_inactive = {
+		exists = c:CHI
+		THIS = c:CHI
+	}
+
+	possible = {
+		OR = {
+			custom_tooltip = {
+				text = lost_opium_wars_tt
+				has_variable = lost_opium_wars
+			}
+			NOT = {
+				has_law = law_type:law_closed_borders
+			}
+		}
+		any_neighbouring_state = {
+			is_treaty_port = yes
+			custom_tooltip = {
+				text = owner_is_christian_tt
+				owner = {
+					religion = {
+						has_discrimination_trait = christian
+					}
+				}
+			}
+		}
+		NOT = {
+			has_law = law_type:law_isolationism
+		}
+	}
+
+	immediate = {
+		custom_tooltip = {
+			text = missionary_activities_begin_tt
+			trigger_event = {
+				id = heavenly.1
+			}
+		}
+		every_scope_state = {
+			limit = {
+				any_neighbouring_state = {
+					is_treaty_port = yes
+					owner = {
+						religion = {
+							has_discrimination_trait = christian
+						}
+					}
+				}
+			}
+			set_variable = open_to_missionaries_state
+		}
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					has_law = law_type:law_no_migration_controls
+					any_scope_state = {
+						NOT = {
+							has_variable = open_to_missionaries_state
+						}
+					}
+				}
+				every_scope_state = {
+					limit = {
+						NOT = {
+							has_variable = open_to_missionaries_state
+						}
+					}
+					set_variable = open_to_missionaries_state
+				}
+			}
+			else = {
+				every_scope_state = {
+					limit = {
+						any_neighbouring_state = {
+							is_treaty_port = yes
+							owner = {
+								religion = {
+									has_discrimination_trait = christian
+								}
+							}
+						}
+						NOT = {
+							has_variable = open_to_missionaries_state
+						}
+					}
+					set_variable = open_to_missionaries_state
+				}
+			}
+		}
+		random_events = {
+			500 = 0
+			10 = CHI_missionaries.1
+			10 = CHI_missionaries.2
+			10 = CHI_missionaries.3
+			10 = CHI_missionaries.4
+			10 = CHI_missionaries.5
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = missionary_ban_tt
+			has_variable = CHI_deported_missionaries
+		}
+		OR = {
+			is_country_type = recognized
+			has_law = law_type:law_state_atheism
+			has_law = law_type:law_isolationism
+			has_law = law_type:law_closed_borders
+		}
+	}
+
+	weight = 10000
+	should_be_pinned_by_default = yes
+}
+
+je_heavenly_kingdom_main = {
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 	
 	group = je_group_historical_content
@@ -13,6 +139,17 @@
 
 	possible = {
 		has_technology_researched = romanticism
+		custom_tooltip = {
+			text = missionaries_enough_time_tt
+			OR = {
+				AND = {
+					has_variable = missionary_works_counter
+					var:missionary_works_counter >= 5
+					game_date >= 1846
+				}
+				game_date >= 1856
+			}
+		}
 		any_scope_state = {
 			any_neighbouring_state = {
 				is_treaty_port = yes
