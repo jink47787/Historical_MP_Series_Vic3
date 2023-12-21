@@ -195,6 +195,8 @@ All mods / mod ideas used linked below:
 - Egypt has nominal subject penalty at game start so it can still join a custom union if desired
 - Added Equatoria flavor to ensure Egypt can claim entire state within a reasonable time period
 - East Africa has severe Malaria to prevent early colonization
+#### Central Africa
+- New Congo Event Chain during the Scramble that allows GPs to vote on the recipient of the Congo. This does not now but will spawn the Free State in the future when having colonial subjects is good. 
 #### The Americas
 - Reworked Reconstruction in the US - accepting either Dixie or AA will depend on how loyal they are at end of JE
 - The US has an isolationism Journal Entry to limit US expansionism
