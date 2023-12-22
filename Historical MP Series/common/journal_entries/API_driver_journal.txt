@@ -1,0 +1,307 @@
+﻿API_je_main = {
+    # root = the owner of the Journal Entry (country scope)
+    # scope:journal_entry = this Journal Entry (journalentry scope)
+    # scope:target = target value, with which this Journal Entry was added using `add_journal_entry` effect
+
+    icon = "gfx/interface/icons/event_icons/event_industry.dds"
+    
+    is_shown_when_inactive = {
+        is_ai = yes
+        OR = {
+            AND = {
+                has_global_variable = API_main_holder
+                OR = {
+                    this = global_var:API_main_holder
+                    global_var:API_main_holder = {
+                        OR = {
+                            is_country_alive = no
+                            OR = {
+                                is_ai = no
+                                NOT = { # Human players eligible only if they conquered all the AIs
+                                    any_country = {
+                                        is_ai = yes
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            NOT = {
+                has_global_variable = API_main_holder
+            }
+        }
+    }
+    
+    possible = {
+        always = yes
+    }
+    
+    immediate = {
+        if = {
+            limit = {
+                OR = {
+                    NOT = {
+                        has_global_variable = API_main_holder
+                    }
+                    global_var:API_main_holder = {
+                        OR = {
+                            is_country_alive = no
+                            OR = {
+                                is_ai = no
+                                NOT = {
+                                    any_country = {
+                                        is_ai = yes
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            set_global_variable = {
+                name  = API_main_holder
+                value = this
+            }
+        }
+    }
+    
+    invalid = {
+        OR = {
+            is_ai = no
+            AND = {
+                has_global_variable = API_main_holder
+                this != global_var:API_main_holder
+            }
+        }
+    }
+    
+    on_weekly_pulse = {
+        effect = {
+            every_country = {
+                set_variable = {
+                    name  = API_character_bolster_qty
+                    value = 0
+                }
+                set_variable = {
+                    name  = API_character_suppress_qty
+                    value = 0
+                }
+                
+                every_scope_character = {
+                    limit = {
+                        OR = {
+                            has_variable = API_character_bolstered
+                            has_variable = API_character_suppressed
+                        }
+                    }
+                    
+                    # Update popularity value
+                    if = {
+                        limit = {
+                            NOT = {
+                                has_variable = API_character_career_modifier
+                            }
+                        }
+                        set_variable = {
+                            name  = API_character_career_modifier
+                            value = 0
+                        }
+                    }
+                    if = {
+                        limit = {
+                            has_variable = API_character_bolstered
+                        }
+                        change_variable = {
+                            name = API_character_career_modifier
+                            add  = 0.25
+                        }
+                    }
+                    else = {
+                        change_variable = {
+                            name     = API_character_career_modifier
+                            subtract = 0.25
+                        }
+                    }
+                    
+                    # Auto-stop
+                    if = {
+                        limit = {
+                            var:API_character_career_modifier >= 100
+                        }
+                        set_variable = {
+                            name  = API_character_career_modifier
+                            value = 100
+                        }
+                        remove_variable = API_character_bolstered
+                    }
+                    else_if = {
+                        limit = {
+                            var:API_character_career_modifier <= -100
+                        }
+                        set_variable = {
+                            name  = API_character_career_modifier
+                            value = -100
+                        }
+                        remove_variable = API_character_suppressed
+                    }
+                    
+                    # Clear & update modifier
+                    if = {
+                        limit = {
+                            has_modifier = API_bolstered_career
+                        }
+                        remove_modifier = API_bolstered_career
+                    }
+                    if = {
+                        limit = {
+                            has_modifier = API_suppressed_career
+                        }
+                        remove_modifier = API_suppressed_career
+                    }
+                    prev = { # Necessary for some weird reason... the most bizarre Clausewitz magic I've had to so far
+                        set_local_variable = { # Vic3 Modding Coop: https://discord.com/channels/827163966551621662/827163966828183557/1165442007368466452
+                            name  = career_modifier
+                            value = prev.var:API_character_career_modifier
+                        }
+                    }
+                    if = {
+                        limit = {
+                            var:API_character_career_modifier > 0
+                        }
+                        add_modifier = {
+                            name       = API_bolstered_career
+                            multiplier = local_var:career_modifier
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            var:API_character_career_modifier < 0
+                        }
+                        add_modifier = {
+                            name       = API_suppressed_career
+                            multiplier = local_var:career_modifier
+                        }
+                    }
+                    
+                    # Update character bolster & suppress qty counters - done last to account for auto-stops
+                    if = {
+                        limit = {
+                            has_variable = API_character_bolstered
+                        }
+                        prev = {
+                            change_variable = {
+                                name = API_character_bolster_qty
+                                add  = 1
+                            }
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            has_variable = API_character_suppressed
+                        }
+                        prev = {
+                            change_variable = {
+                                name = API_character_suppress_qty
+                                add  = 1
+                            }
+                        }
+                    }
+                }
+                
+                # Update bolstering & suppressing cost modifiers
+                if = {
+                    limit = {
+                        has_modifier = API_bolstering_career
+                    }
+                    remove_modifier = API_bolstering_career
+                }
+                if = {
+                    limit = {
+                        has_modifier = API_suppressing_career
+                    }
+                    remove_modifier = API_suppressing_career
+                }
+                
+                set_local_variable = { # Same bizarre Clausewitz magic
+                    name  = bolster_qty
+                    value = var:API_character_bolster_qty
+                }
+                set_local_variable = {
+                    name  = suppress_qty
+                    value = var:API_character_suppress_qty
+                }
+                if = {
+                    limit = {
+                        var:API_character_bolster_qty > 0 
+                    }
+                    add_modifier = {
+                        name = API_bolstering_career
+                        multiplier = local_var:bolster_qty
+                    }
+                }
+                if = {
+                    limit = {
+                        var:API_character_suppress_qty > 0
+                    }
+                    add_modifier = {
+                        name = API_suppressing_career
+                        multiplier = local_var:suppress_qty
+                    }
+                }
+                
+                API_update_authority_use = yes
+            }
+            every_character_in_exile_pool = {
+                limit = {
+                    OR = {
+                        has_variable = API_character_bolstered
+                        has_variable = API_character_suppressed
+                    }
+                }
+                if = {
+                    limit = {
+                        has_variable = API_character_bolstered
+                    }
+                    remove_variable = API_character_bolstered
+                }
+                if = {
+                    limit = {
+                        has_variable = API_character_suppressed
+                    }
+                    remove_variable = API_character_suppressed
+                }
+            }
+            every_character_in_void = {
+                limit = {
+                    OR = {
+                        has_variable = API_character_bolstered
+                        has_variable = API_character_suppressed
+                    }
+                }
+                if = {
+                    limit = {
+                        has_variable = API_character_bolstered
+                    }
+                    remove_variable = API_character_bolstered
+                }
+                if = {
+                    limit = {
+                        has_variable = API_character_suppressed
+                    }
+                    remove_variable = API_character_suppressed
+                }
+            }
+        }
+    }
+    
+    weight = 0
+
+    transferable = no
+    
+    can_revolution_inherit = no
+
+    can_deactivate = yes
+    
+    should_be_pinned_by_default = no
+}
