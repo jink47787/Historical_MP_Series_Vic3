@@ -18,6 +18,7 @@ All mods / mod ideas used linked below:
 - Cold Water Ports: https://steamcommunity.com/sharedfiles/filedetails/?id=2997299912
 - Historically Accurate Randomize Farming Yields: https://steamcommunity.com/sharedfiles/filedetails/?id=3073886807
 - Forts & Engineers: https://steamcommunity.com/sharedfiles/filedetails/?id=3005432154
+- Authority for Political Interactions: https://steamcommunity.com/sharedfiles/filedetails/?id=3045555636
 ---
 <br/>
 
