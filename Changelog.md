@@ -96,6 +96,7 @@ All mods / mod ideas used linked below:
 - Agriculture goods now vary in states depending on year, this applies to a small extent on mines as well (Inspired by HARF mod)
 - Gold fields don't use infrastructure
 - Added era 1 company 
+- Added new State Capitalism law
 #### Goods
 - Hardwood made into its own resource
 - Added canals
