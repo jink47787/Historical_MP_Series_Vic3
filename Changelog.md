@@ -97,6 +97,7 @@ All mods / mod ideas used linked below:
 - Gold fields don't use infrastructure
 - Added era 1 company 
 - Added new State Capitalism law
+- MAPI readjusted to be harder to get and more spread out around techs
 #### Goods
 - Hardwood made into its own resource
 - Added canals
