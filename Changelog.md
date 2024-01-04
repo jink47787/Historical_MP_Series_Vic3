@@ -178,6 +178,7 @@ All mods / mod ideas used linked below:
 - Early game Netherlands journal entry for Belgium
 - Russia has flavor with reformist Czar as well as decisions to annex AI Chinese land
 - Scandinavia only requires Nationalism instead of Pan-Nat
+- Italy formation adjusted to prevent exploit formation and slow it down
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 - New India breakup event
