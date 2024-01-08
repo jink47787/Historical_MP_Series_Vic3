@@ -38,6 +38,12 @@ bic_breakup.1 = {
 			save_scope_as = scottish_culture
 		}
 		set_variable = bic_collapse_var
+		every_country = {
+			limit = {
+				has_variable = india_overlord
+			}
+			save_scope_as = india_overlord_scope
+		}
 	}
 
 	option = {
@@ -51,7 +57,8 @@ bic_breakup.1 = {
 				limit = {
 					OR = {
 						is_subject_of = ROOT
-						is_subject_of = c:GBR
+						is_subject_of = scope:india_overlord_scope
+						
 					}
 					any_primary_culture = {
 						has_discrimination_trait = south_asian_heritage
@@ -348,7 +355,13 @@ bic_breakup.1 = {
 		}
 		custom_tooltip = {
 			text = bic_fracture_2_tt
-			c:GBR = { annex = c:BIC }
+			scope:india_overlord_scope = { annex = c:BIC }
+		}
+		every_country = {
+			limit = {
+				has_variable = india_overlord
+			}
+			remove_variable = india_overlord
 		}
 	}
 
@@ -368,7 +381,7 @@ bic_breakup.1 = {
 				limit = {
 					OR = {
 						is_subject_of = ROOT
-						is_subject_of = c:GBR
+						is_subject_of = scope:india_overlord_scope
 					}
 					any_primary_culture = {
 						has_discrimination_trait = south_asian_heritage
@@ -424,4 +437,199 @@ bic_breakup.1 = {
 	#		value = very_large_radicals
 	#	}
 	#}
+}
+
+#Option to keep or release India
+bic_breakup.2 = {
+
+	type = country_event
+	placement = root
+	
+	title = bic_breakup.2.t
+	desc = bic_breakup.2.d
+	flavor = bic_breakup.2.f
+	
+	event_image = {
+		video = "asia_sepoy_mutiny"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+	
+	duration = 3
+	
+	popup = yes
+
+	trigger = {
+		is_at_war = no
+		c:BIC = {
+			is_subject_of = ROOT
+		}
+		NOT = { has_variable = india_overlord }
+	}
+	
+	#Calculate funds given to Britain by India
+	immediate = {
+		every_country = {
+			limit = {
+				has_variable = india_overlord
+			}
+			save_scope_as = india_overlord_scope
+		}
+		every_country = {
+			limit = {
+				any_primary_culture = {
+					has_discrimination_trait = south_asian_heritage
+				}
+				is_subject_of = scope:india_overlord_scope
+			}
+			set_variable = {
+				name = indian_puppet
+			}
+		}
+		set_global_variable = {
+			name = india_income
+			value = 0
+		}
+		every_country = {
+			limit = {
+				has_variable = indian_puppet
+			}
+			change_global_variable = {
+				name = india_income
+				add = this.income
+			}
+		}
+		c:BIC = {
+			change_global_variable = {
+				name = india_income
+				add = this.income
+			}
+		}
+		change_global_variable = {
+			name = india_income
+			multiply = 0.4
+		}
+		every_country = {
+			limit = {
+				has_variable = india_overlord
+			}
+			remove_variable = india_overlord
+		}
+		set_variable = {
+			name = india_overlord
+		}
+	}
+	
+	#Release India
+	option = {
+		name = bic_breakup.2.a
+		hidden_effect = {
+			every_country = {
+				limit = {
+					has_variable = indian_puppet
+				}
+				save_scope_as = this_indian_puppet
+				remove_diplomatic_pact = {
+					country = THIS
+					type = puppet
+				}
+				ROOT = {
+					create_diplomatic_pact = {
+						country = scope:this_indian_puppet
+						type = puppet
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_diplomatic_pact = {
+					who = c:BIC
+					type = puppet
+				}
+			}
+			remove_diplomatic_pact = {
+				country = c:BIC
+				type = puppet
+			}
+			
+		}
+		if = {
+			limit = {
+				has_diplomatic_pact = {
+					who = c:BIC
+					type = dominion
+				}
+			}
+			remove_diplomatic_pact = {
+				country = c:BIC
+				type = dominion
+			}
+		}
+		change_infamy = -60
+	}
+	
+	#Keep India
+	option = {
+		name = bic_breakup.2.b
+		add_modifier = {
+			name = india_regime_change
+			multiplier = global_var:india_income
+			months = 120
+			is_decaying = yes
+		}
+		if = {
+			limit = {
+				any_country = {
+					is_subject_of = scope:india_overlord_scope
+					any_primary_culture = {
+						has_discrimination_trait = south_asian_heritage
+					}
+				}
+			}
+			custom_tooltip = {
+				text = bic_breakup.2.b.t
+				every_country = {
+					limit = {
+						has_variable = indian_puppet
+					}
+					save_scope_as = this_indian_puppet
+					remove_diplomatic_pact = {
+						country = THIS
+						type = puppet
+					}
+					ROOT = {
+						create_diplomatic_pact = {
+							country = scope:this_indian_puppet
+							type = puppet
+						}
+					}
+				}
+			}
+		}
+		change_global_variable = {
+			name = india_income
+			multiply = 0
+		}
+	}
+}
+
+#clean up event
+
+bic_breakup.3 = {
+	type = country_event
+	hidden = yes
+	
+	trigger = {
+		has_modifier = india_regime_change
+		c:BIC = {
+			NOT = { is_subject_of = ROOT }
+		}
+	}
+	
+	immediate = {
+		remove_modifier = india_regime_change
+	}
 }

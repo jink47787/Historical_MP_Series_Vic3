@@ -11,11 +11,22 @@
 	}
 
 	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
+		custom_tooltip = {
+			text = china_recognized_tt
+			has_global_variable = china_warlord_explosion_recognized
 		}
 		custom_tooltip = {
-			text = warlord_china_criteria
+			text = china_abolished_monarchy_tt
+			has_variable = china_warlord_abolished_monarchy
+		}
+	}
+
+	fail = {
+		custom_tooltip = {
+			text = je_china_failure_tt
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
 		}
 		custom_tooltip = {
 			text = no_diplomatic_play_active_tt
@@ -29,26 +40,8 @@
 		}
 	}
 
-	fail = {
-		custom_tooltip = {
-			text = china_recognized_tt
-			has_global_variable = china_warlord_explosion_recognized
-		}
-		custom_tooltip = {
-			text = china_abolished_monarchy_tt
-			has_variable = china_warlord_abolished_monarchy
-		}
-	}
-
 	on_complete = {
-		set_global_variable = {
-			name = china_warlord_explosion
-			value = 0
-		}
-		trigger_event = { id = warlord_china_events.100 }
-	}
-	
-	on_fail = {
+		trigger_event = { id = warlord_china_events.200 }
 		custom_tooltip = {
 			text = china_no_warlords_tt
 			remove_modifier = chinese_political_instability
@@ -59,13 +52,35 @@
 				is_decaying = yes
 				years = 20
 			}
-			add_modifier = {
-				name = chinese_economic_stagnation
-				multiplier = 1
-				is_decaying = yes
-				years = 20
+		}
+		if = {
+			limit = {
+				cu:han = {
+					has_cultural_obsession = opium
+				}
+			}
+			cu:han = {
+				remove_cultural_obsession = opium
 			}
 		}
+		if = {
+			limit = {
+				cu:manchu = {
+					has_cultural_obsession = opium
+				}
+			}
+			cu:manchu = {
+				remove_cultural_obsession = opium
+			}
+		}
+	}
+	
+	on_fail = {
+		set_global_variable = {
+			name = china_warlord_explosion
+			value = 0
+		}
+		trigger_event = { id = warlord_china_events.100 }
 	}
 	
 	invalid = {
@@ -92,11 +107,7 @@
 					NOT = { has_global_variable = china_warlord_explosion_subject }
 					is_subject = yes
 				}
-				post_notification = warlord_china_explosion_point_add
-				change_global_variable = {
-					name = china_warlord_explosion
-					add = 1
-				}
+				chi_add_1_fracture = yes
 				set_global_variable = china_warlord_explosion_subject
 			}
 			if = {
@@ -104,11 +115,7 @@
 					NOT = { has_global_variable = china_warlord_explosion_default }
 					in_default = yes
 				}
-				post_notification = warlord_china_explosion_point_add
-				change_global_variable = {
-					name = china_warlord_explosion
-					add = 1
-				}
+				chi_add_1_fracture = yes
 				set_global_variable = china_warlord_explosion_default
 			}
 			if = {
@@ -119,11 +126,7 @@
 					country_rank != rank_value:unrecognized_regional_power
 				}
 				set_global_variable = china_warlord_explosion_recognized
-				post_notification = warlord_china_explosion_point_remove
-				change_global_variable = {
-					name = china_warlord_explosion
-					subtract = 1
-				}
+				chi_remove_1_fracture = yes
 			}
 			if = {
 				limit = {
@@ -162,11 +165,7 @@
 					GDP >= 500000000
 				}
 				set_global_variable = china_warlord_explosion_economic_growth
-				post_notification = warlord_china_explosion_point_remove
-				change_global_variable = {
-					name = china_warlord_explosion
-					subtract = 1
-				}
+				chi_remove_1_fracture = yes
 			}
 			if = {
 				limit = {
@@ -174,24 +173,29 @@
 					literacy_rate >= 0.40
 				}
 				set_global_variable = china_warlord_explosion_education_advancement
-				post_notification = warlord_china_explosion_point_remove
-				change_global_variable = {
-					name = china_warlord_explosion
-					subtract = 1
+				chi_remove_1_fracture = yes
+			}
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_warlord_explosion_sol }
+					average_sol >= 12
 				}
+				set_global_variable = china_warlord_explosion_sol
+				chi_remove_1_fracture = yes
 			}
 		}
 	}
 	
 	on_yearly_pulse = {
 		effect = {
+			### Fracture Gain
 			if = {
 				limit = {
 					NOT = { has_law = law_type:law_autocracy }
 				}
 				change_global_variable = {
 					name = china_warlord_explosion
-					add = 0.0125
+					add = 0.01
 				}
 			}
 			if = {
@@ -200,7 +204,7 @@
 				}
 				change_global_variable = {
 					name = china_warlord_explosion
-					add = 0.0125
+					add = 0.01
 				}
 			}			
 			if = {
@@ -209,7 +213,7 @@
 				}
 				change_global_variable = {
 					name = china_warlord_explosion
-					add = 0.0125
+					add = 0.01
 				}
 			}			
 			if = {
@@ -218,7 +222,36 @@
 				}
 				change_global_variable = {
 					name = china_warlord_explosion
-					add = 0.0125
+					add = 0.01
+				}
+			}
+			
+			### Fracture Reduction
+			if = {
+				limit = {
+					GDP >= 400000000
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = -0.01
+				}
+			}
+			if = {
+				limit = {
+					literacy_rate >= 0.30
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = -0.01
+				}
+			}
+			if = {
+				limit = {
+					average_sol >= 10
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = -0.01
 				}
 			}
 		}
