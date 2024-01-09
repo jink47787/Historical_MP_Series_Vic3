@@ -140,6 +140,7 @@ All mods / mod ideas used linked below:
 - Infamy is more punishing, especially as you get more and more
 - Open Market is now much more punishing on the recipient to prevent cheesing
 - Removed regime change and ban slavery due to being cheese
+- Can now request grants (obligation optional)
 #### Actions & Relations
 - Added mod to not release homelands on nation release
 - Major powers cannot enter customs unions
