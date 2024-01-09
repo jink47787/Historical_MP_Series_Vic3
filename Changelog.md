@@ -182,7 +182,7 @@ All mods / mod ideas used linked below:
 - Early game Netherlands journal entry for Belgium
 - Russia has flavor with reformist Czar as well as decisions to annex AI Chinese land
 - Scandinavia only requires Nationalism instead of Pan-Nat
-- Italy formation adjusted to prevent exploit formation and slow it down
+- Italy formation adjusted to prevent exploit formation and make it more fun for MP (happens a bit sooner than IRL). San Marco also happens alongside the Hungarian Revolt. 
 #### India
 - Doctrine of Lapse decision can now annex your future puppets (Sindh, Sikh, Bhutan, etc) as well as your starting puppets
 - New India breakup event
