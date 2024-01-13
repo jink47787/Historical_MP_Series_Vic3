@@ -81,6 +81,7 @@ All mods / mod ideas used linked below:
 #### Migration
 - Currently uses vanilla migration, will likely be adjusted for 1.5 in the future
 - Trade centre and market capital modifiers removed completely
+- Seccession now only occurs if turmoil is above 70%
 #### Assimilation
 - Minimum no. assimilating increased to 1000 to help performance late-game
 
