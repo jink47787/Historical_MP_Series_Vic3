@@ -197,7 +197,7 @@ All mods / mod ideas used linked below:
 - Unify China CB has max infamy decay (prevents using other infamy CBs whilst active)
 - Complete China rework to increase difficulty and make nation possible for MP without it becoming a superpower
 - Redid China collapse event
-- Japan buff to make it more viable for MP
+- Japan buff to make it more viable for MP (basically added ~10 years worth of iron and tools buildings)
 - Afghanistan has panhandle in order for it to effectively serve as a buffer state
 #### Africa
 - Egypt has nominal subject penalty at game start so it can still join a custom union if desired
