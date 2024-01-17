@@ -143,7 +143,7 @@ All mods / mod ideas used linked below:
 - Removed regime change and ban slavery due to being cheese
 - Can now request grants (obligation optional)
 #### Actions & Relations
-- Added GM actions (Change infamy, change money)
+- Added GM actions (Change infamy, change money, add university)
 - Added mod to not release homelands on nation release
 - Major powers cannot enter customs unions
 - Subjects have 0 interests
