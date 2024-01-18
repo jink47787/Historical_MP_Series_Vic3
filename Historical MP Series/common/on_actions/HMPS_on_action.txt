@@ -125,3 +125,99 @@ HMPS_revolution_boost = {
 	}
 }
 
+#China dominion creation
+#One should be for if you don't have any other china states, the other should be to add china states to a dominion, the other should be for if you have a chinese puppet
+
+HMPS_China_Puppet = {
+	effect = {
+		ROOT = {
+			if = {
+				limit = {
+					is_subject = no
+					any_primary_culture = {
+						OR = {
+							has_discrimination_trait = sinosphere
+							has_discrimination_trait = han_chinese
+						}
+					}
+					any_scope_state = {
+						has_variable = china_state_foreign_owned
+					}
+				}
+				every_scope_state = {
+					limit = {
+						has_variable = china_state_foreign_owned
+					}
+					remove_variable = china_state_foreign_owned
+				}
+			}
+			if = {
+				limit = {
+					is_subject = no
+					NOT = {
+						any_primary_culture = {
+							OR = {
+								has_discrimination_trait = sinosphere
+								has_discrimination_trait = han_chinese
+							}
+						}
+					}
+					any_scope_state = {
+						OR = {
+							region = sr:region_north_china
+							region = sr:region_south_china
+						}
+						NOT = { has_variable = china_state_foreign_owned }
+						state_population > 3500000
+					}
+					#code to check if you already have a chinese dominion and puppet
+				}
+				every_scope_state = {
+					limit = {
+						OR = {
+							region = sr:region_north_china
+							region = sr:region_south_china
+						}
+						state_population >= 3500000
+						NOT = { has_variable = china_state_foreign_owned }
+					}
+					set_variable = chinese_state_to_cede
+				}
+				random_scope_state = {
+					limit = {
+						has_variable = chinese_state_to_cede
+					}
+					save_scope_as = china_puppet_capital_scope
+				}
+				create_dynamic_country = {
+					origin = root
+					country_type = colonial
+					tier = principality
+					capital = scope:china_puppet_capital_scope
+					cede_state_trigger = {
+						has_variable = chinese_state_to_cede
+					}
+					on_created = {
+						set_variable = china_subject_var
+						every_scope_state = {
+							remove_variable = chinese_state_to_cede
+							set_variable = china_state_foreign_owned
+						}
+						add_primary_culture = cu:han
+						activate_law = law_type:law_industry_banned
+						activate_law = law_type:law_republic
+						activate_law = law_type:law_total_separation
+					}
+				}
+				create_diplomatic_pact = {
+					country = scope:china_puppet_capital_scope.owner
+					type = dominion
+				}
+				create_truce = {
+					country = scope:china_puppet_capital_scope.owner
+					months = 60
+				}
+			}
+		}
+	}
+}
