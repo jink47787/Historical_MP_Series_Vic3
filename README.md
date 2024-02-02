@@ -3,7 +3,6 @@
 ## Reasons to play the mod:
 -
 
-Test
 ---
 
 **Bugs reports or suggestions?**<br/>
