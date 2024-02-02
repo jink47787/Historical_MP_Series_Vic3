@@ -1,0 +1,196 @@
+﻿namespace = wine_blight_evt
+
+#Event for succeeding countries
+
+wine_blight_evt.1 = {
+	type = country_event
+	placement = root
+	title = wine_blight_evt.1.t
+	desc = wine_blight_evt.1.d
+	flavor = wine_blight_evt.1.f
+	
+	duration = 3
+	
+	event_image = {
+		video = "southamerica_aristocrats"
+	}
+	
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	
+	trigger = {
+		AND = {
+			game_date > 1853.1.1
+			game_date < 1861.6.1
+		}
+		NOT = { has_global_variable = wine_blight_happened }
+		any_scope_state = {	
+			OR  = {
+				region = sr:region_iberia
+				region = sr:region_france
+				region = sr:region_occitania
+				region = sr:region_italy
+				region = sr:region_rhine
+				region = sr:region_south_germany
+			}
+		}
+	}
+	
+	#Affect the initial nation
+	
+	immediate = {
+		set_global_variable = wine_blight_happened
+		every_country = {
+			limit = {
+				is_country_alive = yes
+				any_scope_state = {
+					OR = {
+						region = sr:region_iberia
+						region = sr:region_france
+						region = sr:region_occitania
+						region = sr:region_italy
+						region = sr:region_rhine
+						region = sr:region_south_germany
+					}
+				}
+			}
+			set_variable = potential_wine_blight
+
+		}
+		set_variable = wine_blight
+	}
+	
+	
+	#Idea - Ways to effect blight?
+	option = {
+		name = wine_blight_evt.1.a
+		custom_tooltip = {
+			text = wine_blight_evt.1.a.t
+			every_scope_state = {
+				limit = {
+					has_active_building = building_vineyard_plantation
+				}
+				add_modifier = {
+					name = wine_blight
+				}
+			}
+		}
+		add_journal_entry = {
+			type = je_wine_blight
+		}
+	}
+}
+
+
+#Event for following countries
+
+wine_blight_evt.2 = {
+	type = country_event
+	placement = root
+	Title = wine_blight_evt.2.t
+	desc = wine_blight_evt.2.d
+	flavor = wine_blight_evt.2.f
+	
+	duration = 3
+	
+	event_image = {
+		video = "southamerica_aristocrats"
+	}
+	
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	
+	#Random chance of spreading each month
+	trigger = {
+		AND = {
+			game_date > 1850.1.1
+			game_date < 1870.1.1
+		}
+		has_variable = potential_wine_blight
+		NOT = { has_variable = wine_blight }
+		NOT = { has_global_variable = wine_blight_solution_found }
+		#has_active_building = building_vineyard_plantation
+	}
+	
+	immediate = {
+		set_variable = wine_blight
+		remove_variable = potential_wine_blight
+	}
+	
+	option = {
+		name = wine_blight_evt.2.a
+		custom_tooltip = {
+			text = wine_blight_evt.1.a.t
+			every_scope_state = {
+				limit = {
+					has_active_building = building_vineyard_plantation
+				}
+				add_modifier = {
+					name = wine_blight
+				}
+			}
+		}
+		add_journal_entry = {
+			type = je_wine_blight
+		}
+	}	
+}
+
+
+#Ends Wine Blight
+
+wine_blight_evt.3 = {
+	type = country_event
+	placement = root
+	Title = wine_blight_evt.3.t
+	desc = wine_blight_evt.3.d
+	flavor = wine_blight_evt.3.f
+
+	duration = 3
+	
+	event_image = {
+		video = "europenorthamerica_russian_serfs"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	
+	trigger = {
+		# Triggered by event
+	}
+	
+	option = {
+		name = wine_blight_evt.3.a
+		custom_tooltip = {
+			text = wine_blight_evt.3.a.t
+			every_scope_state = {
+				limit = {
+					has_modifier = wine_blight
+				}
+				remove_modifier = wine_blight
+			}
+		}
+	}
+}
+#Make events that increase research progress quickly	
+
+#Clean up event
+wine_blight_evt.4 = {
+	type = country_event
+	hidden = yes
+	
+	trigger = {
+		AND = {
+			NOT = { has_journal_entry = je_wine_blight }
+			any_scope_state = {
+				has_modifier = wine_blight
+			}
+		}
+	}
+	
+	immediate = {
+		every_scope_state = {
+			limit = {
+				has_modifier = wine_blight
+			}
+			remove_modifier = wine_blight
+		}
+	}
+}
