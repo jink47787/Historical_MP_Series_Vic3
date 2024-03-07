@@ -100,12 +100,6 @@ input_context={
 		scancode = 7	# D
 		scancode = 79	# Arrow Right
 	}
-
-	input_action = {
-		name = "location_finder"
-		text = "SETTING_INPUT_ACTION_LOCATION_FINDER"
-		scancode = 9	# F
-	}
 	
 	input_action = {
 		name = "open_politics"
@@ -174,24 +168,15 @@ input_context={
 	}
 
 	input_action = {
-		name = "map_list"
-		text = "SETTING_INPUT_ACTION_MAP_LIST"
-		scancode = 20	# Q
+		name = "location_finder"
+		text = "SETTING_INPUT_ACTION_LOCATION_FINDER"
+		scancode = 9	# F
 	}
 
 	input_action = {
-		name = "back"
-		text = "SETTING_INPUT_ACTION_BACK"
-		mouse_button = MOUSE_X1	# mb4
-	}
-	
-	input_action = {
-		name = "open_outliner"
-		text = "SETTING_INPUT_ACTION_OPEN_OUTLINER"
-		binding = {	# shift+F1"
-			scancode = 58
-			modifier = shift
-		}
+		name = "map_list"
+		text = "SETTING_INPUT_ACTION_MAP_LIST"
+		scancode = 20	# Q
 	}
 
 	input_action = {
@@ -244,7 +229,7 @@ input_context={
 		text = "SETTING_INPUT_ACTION_PRODUCTION_LENS"
 		binding = {	# alt+1"
 			scancode = 30
-			modifier = shift
+			modifier = alt
 		}
 	}
 
@@ -253,7 +238,7 @@ input_context={
 		text = "SETTING_INPUT_ACTION_POLITICAL_LENS"
 		binding = {	# alt+2"
 			scancode = 31
-			modifier = shift
+			modifier = alt
 		}
 	}
 
@@ -262,7 +247,7 @@ input_context={
 		text = "SETTING_INPUT_ACTION_DIPLOMATIC_LENS"
 		binding = {	# alt+3"
 			scancode = 32
-			modifier = shift
+			modifier = alt
 		}
 	}
 
@@ -271,7 +256,7 @@ input_context={
 		text = "SETTING_INPUT_ACTION_MILITARY_LENS"
 		binding = {	# alt+4"
 			scancode = 33
-			modifier = shift
+			modifier = alt
 		}
 	}
 
@@ -280,8 +265,83 @@ input_context={
 		text = "SETTING_INPUT_ACTION_TRADE_LENS"
 		binding = {	# alt+5"
 			scancode = 34
-			modifier = shift
+			modifier = alt
 		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_pinned"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_PINNED"
+		binding = {
+			scancode = 30
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_economy"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_ECONOMY"
+		binding = {
+			scancode = 31
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_politics"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_POLITICS"
+		binding = {
+			scancode = 32
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_diplomacy"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_DIPLOMACY"
+		binding = {
+			scancode = 33
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_military"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_MILITARY"
+		binding = {
+			scancode = 34
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_all"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_ALL"
+		binding = {
+			scancode = 35
+			modifier = ctrl
+		}
+	}
+
+	input_action = {
+		name = "construction_queue"
+		text = "SETTING_INPUT_ACTION_CONSTRUCTION_QUEUE"
+		scancode = 5 			# B
+	}
+
+	input_action = {
+		name = "toggle_construction_queue_pause"
+		text = "SETTING_INPUT_ACTION_TOGGLE_CONSTRUCTION_QUEUE_PAUSE"
+		binding = {	# ctrl+B
+			scancode = 5
+			modifier = ctrl
+		}
+	}
+
+	input_action = {
+		name = "back"
+		text = "SETTING_INPUT_ACTION_BACK"
+		mouse_button = MOUSE_X1	# mb4
 	}
 
 	input_action = {
@@ -297,24 +357,25 @@ input_context={
 	}
 
 	input_action = {
-		name = "construction_queue"
-		text = "SETTING_INPUT_ACTION_CONSTRUCTION_QUEUE"
-		scancode = 5 			# B
-	}
-
-	input_action = {
-		name = "toggle_construction_queue_pause"
-		text = "SETTING_INPUT_ACTION_TOGGLE_CONSTRUCTION_QUEUE_PAUSE"
-		binding = {	# ctrl+B
-			scancode = 5
-			modifier = shift
-		}
-	}
-
-	input_action = {
 		name = "go_to_details"
 		text = "SETTING_INPUT_ACTION_GO_TO_DETAILS"
 		scancode = 10 			# G
+	}
+
+	input_action = { 
+		name = "toggle_pin"
+		text = "SETTING_INPUT_ACTION_TOGGLE_PIN"
+		binding = {
+			scancode = 27	# X
+		}
+	}
+
+	input_action = { 
+		name = "zoom_to"
+		text = "SETTING_INPUT_ACTION_ZOOM_TO"
+		binding = {
+			scancode = 29 	# Z
+		}
 	}
 
 	input_action = {

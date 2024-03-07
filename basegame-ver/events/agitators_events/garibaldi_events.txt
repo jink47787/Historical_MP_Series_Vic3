@@ -42,7 +42,7 @@ garibaldi_events.1 = {
 			}
 		}
 		OR = {
-			AND = { # You're a nation fighting the good cause (defensive war)
+			AND = { # You're a nation fighting the good cause (defensive war OR democratically-inclined revolution/secession)
 				OR = {
 					has_law = law_type:law_anarchy
 					has_law = law_type:law_universal_suffrage
@@ -50,16 +50,48 @@ garibaldi_events.1 = {
 					has_law = law_type:law_wealth_voting
 					has_law = law_type:law_landed_voting
 				}
-				any_diplomatic_play = {
-					is_war = yes
-					target = root
-					initiator = {
+				OR = {
+					AND = {	
 						OR = {
-							has_law = law_type:law_autocracy
-							has_law = law_type:law_oligarchy
-							has_law = law_type:law_single_party_state
-						}
-					}
+							is_revolutionary = yes
+							is_secessionist = yes
+						}				
+						any_diplomatic_play = {
+							is_war = yes
+							initiator = root
+							target = {
+								OR = {
+									has_law = law_type:law_autocracy
+									has_law = law_type:law_oligarchy
+									has_law = law_type:law_single_party_state
+								}
+							}
+						}							
+					}	
+					AND = {
+						any_diplomatic_play = {
+							is_war = yes
+							target = root
+							initiator = {
+								is_secessionist = no
+								# Garibaldi should only care to get involved defensively against significant revolutions
+								OR = {
+									is_revolutionary = no
+									country_rank >= rank_value:major_power
+								}
+								# Garibaldi shouldn't be in the business of defending big powers against small ones
+								OR = {
+									is_revolutionary = yes
+									country_rank >= root.country_rank
+								}													
+								OR = {
+									has_law = law_type:law_autocracy
+									has_law = law_type:law_oligarchy
+									has_law = law_type:law_single_party_state
+								}
+							}
+						}					
+					}			
 				}
 			}
 			AND = { # You're fighting for Italy
@@ -89,6 +121,15 @@ garibaldi_events.1 = {
 								}
 							}
 						}
+						AND = {
+							initiator = {
+								any_primary_culture = {
+									has_discrimination_trait = italophone
+								}
+								this = root
+								is_secessionist = yes
+							}
+						}						
 						AND = {
 							target = {
 								any_primary_culture = {
@@ -1140,7 +1181,7 @@ garibaldi_events.4 = {
 			}
 		}
 		scope:garibaldi_peasants_state_scope = {
-			add_radicals = {
+			add_radicals_in_state = {
 				pop_type = farmers
 				value = small_radicals
 			}

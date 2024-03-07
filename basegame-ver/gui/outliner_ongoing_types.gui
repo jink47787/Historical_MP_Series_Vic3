@@ -109,7 +109,21 @@ types ongoing_outliner_items {
 	}
 
 	### DIPLO PLAYS ITEM
-	type diplomatic_play_item = widget {
+	type diplomatic_play_item = container {
+		visible = "[DiplomaticPlay.IsPinnedInOutliner]"
+		diplomatic_play_item_impl = {
+			visible = "[Not(DiplomaticPlay.IsCommittedParticipant(GetPlayer))]"
+		}
+		diplomatic_play_item_impl = {
+			visible = "[DiplomaticPlay.IsCommittedParticipant(GetPlayer)]"
+
+			blockoverride "diplo_play_button_style" {
+				using = default_button_primary
+			}
+		}
+	}
+
+	type diplomatic_play_item_impl = widget {
 		name = "diplo_play_item"
 		size = { 350 62 }
 		tooltip = "DIPLOMATIC_PLAY_OUTLINER_TOOLTIP"
@@ -117,15 +131,21 @@ types ongoing_outliner_items {
 		button = {
 			size = { 100% 55 }
 			parentanchor = center
-			using = default_button
-			onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+
+			block "diplo_play_button_style" {
+				using = default_button
+			}
 			
+			onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+			onrightclick = "[RightClickMenuManager.ShowForDiplomaticPlay(DiplomaticPlay.AccessSelf)]"
+
 			button = {
 				texture = "gfx/interface/outliner/diplo_play_dec_outliner.dds"
 				size = { 121 57 }
 				parentanchor = hcenter
 				position = { 0 -7 }
 				alwaystransparent = yes
+				visible = "[DiplomaticPlay.IsCommittedParticipant(GetPlayer)]"
 			}
 		}
 
@@ -176,10 +196,10 @@ types ongoing_outliner_items {
 		
 		### left side
 		flowcontainer = {
-			datacontext = "[DiplomaticPlay.GetInitiator]"
+			datacontext = "[DiplomaticPlay.AccessInitiator]"
 			parentanchor = vcenter|left
-			position = { 10 0 }
-			spacing = 5
+			position = { 12 0 }
+			spacing = 7
 			
 			tiny_flag_no_interact = {
 				parentanchor = vcenter
@@ -189,9 +209,10 @@ types ongoing_outliner_items {
 				direction = vertical
 				
 				flowcontainer = {
-					#tooltip = "DIPLO_PLAY_COUNTRY_BATTALIONS_BREAKDOWN"
+					tooltip = "DIPLO_PLAY_TOTAL_MOBILIZED_BATTALIONS_BREAKDOWN"
 					margin_top = 2
 					parentanchor = left
+					spacing = 2
 
 					icon = {
 						size = { 20 20 }
@@ -220,9 +241,9 @@ types ongoing_outliner_items {
 				}
 				
 				flowcontainer = {
-					#tooltip = "DIPLO_PLAY_COUNTRY_FLOTILLAS_BREAKDOWN"
-					parentanchor = left
-
+					tooltip = "DIPLO_PLAY_TOTAL_FLOTILLAS_BREAKDOWN"
+					spacing = 2
+					
 					icon = {
 						size = { 20 20 }
 						texture = "gfx/interface/icons/generic_icons/flotillas.dds"
@@ -231,7 +252,7 @@ types ongoing_outliner_items {
 
 					textbox = {
 						autoresize = yes
-						raw_text = "#variable [Country.GetWarships]#!"
+						text = "[DiplomaticPlay.GetTotalNumWarshipsForSide( Country.Self )|v]"
 						align = nobaseline
 					}
 				}
@@ -240,18 +261,19 @@ types ongoing_outliner_items {
 		
 		### right side
 		flowcontainer = {
-			datacontext = "[DiplomaticPlay.GetTarget]"
+			datacontext = "[DiplomaticPlay.AccessTarget]"
 			parentanchor = vcenter|right
-			position = { -10 0 }
-			spacing = 5
+			position = { -12 0 }
+			spacing = 7
 			
 			flowcontainer = {
 				direction = vertical
 				
 				flowcontainer = {
-					#tooltip = "DIPLO_PLAY_COUNTRY_BATTALIONS_BREAKDOWN"
+					tooltip = "DIPLO_PLAY_TOTAL_MOBILIZED_BATTALIONS_BREAKDOWN"
 					parentanchor = right
 					margin_top = 2
+					spacing = 2
 
 					textbox = {
 						autoresize = yes
@@ -280,12 +302,13 @@ types ongoing_outliner_items {
 				}
 				
 				flowcontainer = {
-					#tooltip = "DIPLO_PLAY_COUNTRY_FLOTILLAS_BREAKDOWN"
+					tooltip = "DIPLO_PLAY_TOTAL_FLOTILLAS_BREAKDOWN"
 					parentanchor = right
+					spacing = 2
 
 					textbox = {
 						autoresize = yes
-						raw_text = "#variable [Country.GetWarships]#!"
+						text = "[DiplomaticPlay.GetTotalNumWarshipsForSide( Country.Self )|v]"
 						align = nobaseline
 					}
 
@@ -311,6 +334,8 @@ types ongoing_outliner_items {
 		datacontext = "[Outliner.AccessCategory('diplo_plays')]"
 		datamodel = "[OutlinerEntry.AccessSubEntries]"
 		visible = "[OutlinerEntry.IsShown]"
+		spacing = 3
+		margin_top = 3
 
 		item = {
 			diplomatic_play_item = {
@@ -427,14 +452,30 @@ types ongoing_outliner_items {
 					texture = "gfx/interface/backgrounds/round_button_bg.dds"
 					
 					round_progress_default = {
-						size = { 48 48 }
+						visible = "[Not(LessThan_int32(GetPlayer.GetGovernmentLegitimacy, '(int32)25'))]"
+						size = { 80% 80% }
+						parentanchor = center
 						datacontext = "[GetPlayer.GetLawBeingEnacted]"
 						value = "[FixedPointToFloat(GetPlayer.GetLawEnactmentProgress)]"
+					}
+
+					round_progress_bad = {
+						visible = "[LessThan_int32(GetPlayer.GetGovernmentLegitimacy, '(int32)25')]"
+						size = { 80% 80% }
 						parentanchor = center
+						datacontext = "[GetPlayer.GetLawBeingEnacted]"
+						value = "[FixedPointToFloat(GetPlayer.GetLawEnactmentProgress)]"
 					}
 					
 					law_icon = {
-						size = { 45 45 }
+						alpha = "[TransparentIfTrue(LessThan_int32(GetPlayer.GetGovernmentLegitimacy, '(int32)25'))]"
+						size = { 38 38 }
+						parentanchor = center
+					}
+
+					paused_icon_bad = {
+						visible = "[LessThan_int32(GetPlayer.GetGovernmentLegitimacy, '(int32)25')]"
+						#size = { 28 28 }
 						parentanchor = center
 					}
 				}
@@ -1290,6 +1331,10 @@ types ongoing_outliner_items {
 					text = "NUMBER_OF_NON_PLAYER_OBJECTIVE_JOURNAL_ENTRIES_SHORT"
 					autoresize = yes
 					align = left|nobaseline
+					elide = right
+					fontsize_min = 14
+					minimumsize = { 180 -1 }
+					maximumsize = { 180 -1 }
 				}
 
 				textbox = {
@@ -1712,6 +1757,7 @@ types ongoing_outliner_items {
 	### NON-REVOLUTIONARY POLITICAL MOVEMENT ITEM
 	type outliner_non_revolutionary_political_movement_item = flowcontainer {
 		direction = vertical
+		visible = "[PoliticalMovement.IsPinnedInOutliner]"
 
 		onmousehierarchyenter = "[AccessHighlightManager.HighlightPoliticalMovement(PoliticalMovement.Self)]"
 		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
@@ -1726,6 +1772,7 @@ types ongoing_outliner_items {
 			button = {
 				size = { 100% 90 }
 				onclick = "[InformationPanelBar.OpenPoliticalMovementPanel(PoliticalMovement.AccessSelf)]"
+				onrightclick = "[RightClickMenuManager.ShowForPoliticalMovement(PoliticalMovement.AccessSelf)]"
 				using = default_button
 				parentanchor = bottom
 
