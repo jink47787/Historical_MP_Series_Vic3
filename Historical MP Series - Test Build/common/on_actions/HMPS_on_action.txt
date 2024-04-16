@@ -1,4 +1,4 @@
-small_nation_inno_fix = {
+﻿HMPS_small_nation_inno_fix = {
 	effect = {
 		#small nation innovation fix
 		if = {
@@ -70,7 +70,7 @@ small_nation_inno_fix = {
 }
 
 
-check_for_gm = {
+HMPS_Check_for_GM = {
 	effect = {
 		if = {
 			limit = {
@@ -90,7 +90,7 @@ check_for_gm = {
 	}
 }
 
-ai_modifiers = {
+HMPS_ai_modifiers = {
 	effect = {
 		if = {
 			limit = {
@@ -111,7 +111,7 @@ HMPS_revolution_boost = {
 		if = {
 			limit = {
 				is_player = yes
-				scope_target = {
+				scope:target = {
 					is_player = no
 				}
 			}
@@ -222,7 +222,7 @@ HMPS_China_Puppet = {
 	}
 }
 
-france_pop_growth = {
+HMPS_France_Pop_Growth = {
 	effect = {
 		if = {
 			limit = {
@@ -295,6 +295,600 @@ decentralized_pop_fix = {
 				add_modifier = {
 					name = decentralized_sol
 				}
+			}
+		}
+	}
+}
+
+HMPS_China_Ports_Fracture = {
+	effect = {
+		if = {
+			limit = {
+				has_journal_entry = je_warlord_china
+			}
+			every_state = {
+				limit = {
+					state_region = {
+						OR = {
+							is_homeland = cu:han
+							is_homeland = cu:manchu
+						}
+					}
+					ROOT ?= owner
+					is_split_state = yes
+					NOT = { has_modifier = chinese_treaty_port }
+				}
+				add_modifier = {
+					name = chinese_treaty_port
+				}
+				owner = {
+					change_global_variable = {
+						name = china_warlord_explosion
+						add = 0.2
+					}
+				}
+			}
+			every_state = {
+				limit = {
+					is_split_state = no
+					ROOT ?= owner
+					has_modifier = chinese_treaty_port
+				}
+				remove_modifier = chinese_treaty_port
+				owner = {
+					change_global_variable = {
+						name = china_warlord_explosion
+						add = -0.1
+					}
+				}
+			}
+		}
+	}
+}
+
+HMPS_Subject_Penalty = {
+	effect = {
+		if = {
+			limit = {
+				is_subject_type = subject_type_protectorate
+				NOT = { has_modifier = subject_political_penalty }
+			}
+			add_modifier = {
+				name = subject_political_penalty
+				months = -1
+			}
+		}
+		if = {
+			limit = {
+				NOT = { is_subject_type = subject_type_protectorate }
+			}
+			remove_modifier = subject_political_penalty
+		}
+	}
+}
+
+HMPS_Coastal_Capital = {
+	effect = {
+		if = {
+			limit = {
+				NOT = { has_modifier = coastal_capital }
+				any_scope_state = {
+					is_capital = yes
+					is_coastal = yes
+				}
+			}
+			add_modifier = {
+				name = coastal_capital
+				months = -1
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = coastal_capital
+				any_scope_state = {
+					is_capital = yes
+					is_coastal = no
+				}
+			}
+			remove_modifier = coastal_capital
+		}
+		if = {
+			limit = {
+				NOT = { has_modifier = near_coastal_capital }
+				any_scope_state = {
+					is_capital = yes
+					OR = {
+						state_region = s:STATE_NANJING
+						state_region = s:STATE_ILE_DE_FRANCE
+						state_region = s:STATE_BRANDENBURG
+						state_region = s:STATE_AUSTRIA
+						state_region = s:STATE_TRANSDANUBIA
+					}
+				}
+			}
+			add_modifier = {
+				name = near_coastal_capital
+				months = -1
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = near_coastal_capital
+				any_scope_state = {
+					is_capital = yes
+					NOT = { state_region = s:STATE_NANJING }
+					NOT = { state_region = s:STATE_ILE_DE_FRANCE }
+					NOT = { state_region = s:STATE_BRANDENBURG }
+					NOT = { state_region = s:STATE_AUSTRIA }
+					NOT = { state_region = s:STATE_TRANSDANUBIA }
+				}
+			}
+			remove_modifier = near_coastal_capital
+		}
+	}
+}
+
+HMPS_Slave_State_Migration = {
+	effect = {
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_slavery_banned
+				}
+			}
+			every_scope_state = {
+				limit = {
+					is_slave_state = yes
+					NOT = {	
+						has_modifier = slave_state_migration_debuff
+					}
+				}
+				add_modifier = {
+					name = slave_state_migration_debuff
+				}
+			}
+			every_scope_state = {
+				limit = {
+					is_slave_state = no
+				}
+				remove_modifier = slave_state_migration_debuff
+			}
+		}
+	}
+}
+
+HMPS_Remove_Political_Movements = {
+	effect = {
+		every_political_movement = {
+			limit = {
+				OR = {
+					political_movement_support > 5
+					political_movement_radicalism > 0
+				}
+				NOT = { is_political_movement_type = movement_to_preserve }
+				OR = {
+					desired_law = law_type:law_peasant_levies
+					desired_law = law_type:law_national_militia
+					desired_law = law_type:law_professional_army
+					desired_law = law_type:law_mass_conscription
+					
+					desired_law = law_type:law_traditionalism
+					
+					desired_law = law_type:law_no_poll_taxes
+					desired_law = law_type:law_land_based_taxation
+					desired_law = law_type:law_per_capita_based_taxation
+							
+					desired_law = law_type:law_no_income_taxes
+					desired_law = law_type:law_low_income_tax
+					desired_law = law_type:law_moderate_income_tax
+					desired_law = law_type:law_high_income_tax
+					
+					desired_law = law_type:law_no_corporation_taxes
+					desired_law = law_type:law_low_corporation_tax
+					desired_law = law_type:law_moderate_corporation_tax
+					desired_law = law_type:law_high_corporation_tax
+					
+					desired_law = law_type:law_no_consumption_taxes
+					desired_law = law_type:law_low_consumption_tax
+					desired_law = law_type:law_moderate_consumption_tax
+					desired_law = law_type:law_high_consumption_tax
+				}
+			}
+			add_modifier = {
+				name = revolution_disbanded
+				months = normal_modifier_time
+			}
+		}
+	}
+}
+
+HMPS_Disable_Subject_Revolts = {
+	effect = {
+		#disable ai subject revolts
+		if = {
+			limit = {
+				is_subject = yes
+				is_player = no
+				is_immune_to_revolutions = no
+			}
+			set_immune_to_revolutions = yes
+		}
+		#disable player subjects/non subjects from being immune to revs
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						is_subject = yes
+						is_player = yes
+					}
+					is_subject = no
+				}
+				is_immune_to_revolutions = yes
+			}
+			set_immune_to_revolutions = no
+		}
+	}
+}
+
+HMPS_Institution_Modifier = {
+	effect = {
+		every_scope_state = {
+			remove_modifier = colonial_institution_resettlement
+			remove_modifier = colonial_institution_exploitation
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 1
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 2
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+					multiplier = 2
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 3
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+					multiplier = 3
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 4
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+					multiplier = 4
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 5
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+					multiplier = 5
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 1
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 2
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+					multiplier = 2
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 3
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+					multiplier = 3
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 4
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+					multiplier = 4
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 5
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+					multiplier = 5
+				}
+			}
+		}
+	}
+}
+
+
+HMPS_China = {
+	effect = {
+		every_country = {
+			limit = {
+				is_subject = no
+				has_law = law_type:law_industry_banned
+			}
+			activate_law = law_type:law_traditionalism
+		}
+		if = {
+			limit = {
+				NOT = { has_modifier = chinese_political_instability }
+				exists = c:CHI
+				THIS = c:CHI
+				has_journal_entry = je_warlord_china
+			}
+			c:CHI = {
+				add_modifier = {
+					name = chinese_political_instability
+					is_decaying = no
+					years = -1
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = { has_modifier = chinese_political_instability }
+				exists = c:TPG
+				this = c:TPG
+				has_journal_entry = je_warlord_china
+			}
+			c:TPG = {
+				add_modifier = {
+					name = chinese_political_instability
+					is_decaying = no
+					years = -1
+				}
+			}
+		}
+		
+		if = {
+			limit = {
+				exists = c:CHI
+				THIS = c:CHI
+				has_global_variable = lost_opium_wars
+				NOT = { has_modifier = chinese_opium_addiction }
+				game_date <= 1846.01.01
+			}
+			c:CHI = {
+				add_modifier = {
+					name = chinese_opium_addiction
+					months = 480
+					is_decaying = yes
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = c:CHI
+				THIS = c:CHI
+				has_global_variable = lost_opium_wars
+				NOT = { has_modifier = chinese_opium_addiction }
+				game_date > 1846.01.01
+				game_date <= 1856.01.01
+			}
+			c:CHI = {
+				add_modifier = {
+					name = chinese_opium_addiction
+					months = 360
+					is_decaying = yes
+					multiplier = 0.75
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = c:CHI
+				THIS = c:CHI
+				has_global_variable = lost_opium_wars
+				NOT = { has_modifier = chinese_opium_addiction }
+				game_date > 1856.01.01
+				game_date <= 1866.01.01
+			}
+			c:CHI = {
+				add_modifier = {
+					name = chinese_opium_addiction
+					months = 240
+					is_decaying = yes
+					multiplier = 0.5
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = c:CHI
+				THIS = c:CHI
+				has_global_variable = lost_opium_wars
+				NOT = { has_modifier = chinese_opium_addiction }
+				game_date > 1866.01.01
+				game_date <= 1876.01.01
+			}
+			c:CHI = {
+				add_modifier = {
+					name = chinese_opium_addiction
+					months = 120
+					is_decaying = yes
+					multiplier = 0.25
+				}
+			}
+		}
+		
+		if = {
+			limit = {
+				NOT = { has_modifier = china_ai_help }
+				exists = c:CHI
+				THIS = c:CHI
+				is_player = no
+			}
+			c:CHI = {
+				add_modifier = {
+					name = china_ai_help
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = china_ai_help
+				exists = c:CHI
+				THIS = c:CHI
+				is_player = yes
+			}
+			c:CHI = { remove_modifier = china_ai_help }
+		}
+	}
+}
+
+HMPS_Border_Fixes = {
+	effect = {
+		if = {
+			limit = {
+				NOT = { has_global_variable = russia_ottoman_border_fix }
+			}
+			s:STATE_DOBRUDJA.region_state:RUS = {
+				set_state_owner = c:TUR
+			}
+			s:STATE_KARS.region_state:RUS = {
+				set_state_owner = c:TUR
+			}
+			set_global_variable = russia_ottoman_border_fix
+		}
+		if = {
+			limit = {
+				NOT = { has_global_variable = cuba_annexed }
+			}
+			s:STATE_CUBA.region_state:CUB = {
+				set_state_owner = c:SPA
+			}
+			set_global_variable = cuba_annexed
+		}
+		if = {
+			limit = {
+				NOT = { has_global_variable = ionian_annexed }
+			}
+			s:STATE_IONIAN_ISLANDS.region_state:ION = {
+				set_state_owner = c:GBR
+			}
+			set_global_variable = ionian_annexed
+		}
+	}
+}
+
+HMPS_Recognition = {
+	effect = {
+		if = {
+			limit = {
+				any_country = {
+					has_variable = recognition_initiator
+					is_country_type = recognized
+				}
+				any_country = {
+					has_variable = recognition_target
+					is_diplomatic_play_committed_participant = no
+				}
+			}
+			every_country = {
+				limit = {
+					has_variable = recognition_target
+					is_diplomatic_play_committed_participant = no
+				}
+				add_modifier = {
+					name = forced_recognisation_modifier
+					months = long_modifier_time
+					is_decaying = yes
+				}
+				remove_variable = recognition_target
+			}
+			every_country = {
+				limit = {
+					has_variable = recognition_initiator
+				}
+				remove_variable = recognition_initiator
 			}
 		}
 	}

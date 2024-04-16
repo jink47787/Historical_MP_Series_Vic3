@@ -416,3 +416,185 @@ acw_je_events.4 = {
 		}
 	}
 }
+
+# ACW startup
+acw_je_events.5 = {
+	type = country_event
+	event_image = {
+		video = "europenorthamerica_capitalists_meeting"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	title = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_variable = csa_will_spawn_var
+				}
+				desc = acw_je_events.1.t1
+			}
+			triggered_desc = {
+				trigger = {
+					always = yes
+				}
+				desc = acw_je_events.1.t2
+			}
+		}
+	}
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_variable = csa_will_spawn_var
+				}
+				desc = acw_je_events.1.d1
+			}
+			triggered_desc = {
+				trigger = {
+					always = yes
+				}
+				desc = acw_je_events.1.d2
+			}
+		}
+	}
+	flavor = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_variable = csa_will_spawn_var
+				}
+				desc = acw_je_events.1.f1
+			}
+			triggered_desc = {
+				trigger = {
+					always = yes
+				}
+				desc = acw_je_events.1.f2
+			}
+		}
+	}
+
+	duration = 3
+
+	trigger = {
+		# triggered by je_acw_countdown completion
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				has_variable = csa_will_spawn_var
+			}
+			random_scope_state = {
+				limit = {
+					is_slave_state = yes
+				}
+				save_scope_as = csa_capital
+			}
+			create_country = {
+				tag = CSA
+				origin = this
+				state = scope:csa_capital
+				save_scope_as = csa_scope
+				on_created = {
+					# Re-enslave pops if the ACW happens after slavery has been abolished
+					if = {
+						limit = {
+							c:USA = {
+								has_variable = slavery_recently_abolished
+							}						
+						}
+						
+						every_scope_state = {
+							enslave_discriminated_farm_workers = yes
+						}					
+					}
+				}
+			}
+			every_scope_state = {
+				limit = {
+					is_slave_state = yes 
+				}
+				set_state_owner = c:CSA
+				set_state_type = incorporated
+				state_region = {
+					add_claim = root
+				}
+			}
+		}
+		set_global_variable = {
+			name = american_civil_war
+			value = yes
+		}
+		c:CSA = {
+			set_capital = STATE_VIRGINIA
+			
+			create_diplomatic_play = {
+				type = dp_revolution
+				target_state = c:USA.capital
+				#annex_as_civil_war = yes
+			}
+		}
+		random_diplomatic_play = {
+			limit = {
+				AND = {
+					any_scope_play_involved = { this = c:CSA }
+					any_scope_play_involved = { this = c:USA }
+				}
+			}
+			remove_war_goal = {
+				who = initiator
+				war_goal = annex_country
+			}
+			add_war_goal = {
+				holder = initiator
+				type = revoke_all_claims
+				target_country = target				
+				primary_demand = yes
+			}			
+		}
+		
+		if = {
+			limit = { exists = c:CSA }
+			add_journal_entry = {
+				type = je_acw_war
+				target = scope:csa_scope
+			}
+			remove_modifier = missouri_compromise
+			remove_primary_culture = cu:dixie
+			c:CSA = {
+				set_variable = acw_slave_nation_var
+			}
+		}
+		else_if = {
+			limit = { exists = c:FSA }
+			add_journal_entry = {
+				type = je_acw_war
+				target = scope:fsa_scope
+			}
+			set_variable = acw_slave_nation_var
+		}
+		set_variable = union_side_acw
+	}
+
+	option = {
+		name = acw_je_events.1.a
+		default_option = yes
+	}
+	option = {
+		name = acw_je_events.1.b
+		trigger = { is_player = yes }
+
+		if = {
+			limit = { exists = c:CSA }
+			play_as = c:CSA
+		}
+		else_if = {
+			limit = { exists = c:FSA }
+			play_as = c:FSA
+		}
+	}
+}
