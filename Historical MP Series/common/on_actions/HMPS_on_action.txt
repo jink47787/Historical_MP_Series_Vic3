@@ -74,6 +74,7 @@ HMPS_Check_for_GM = {
 	effect = {
 		if = {
 			limit = {
+				has_global_variable = player_gm
 				any_country = {
 					has_modifier = game_master
 					is_player = no
@@ -83,8 +84,8 @@ HMPS_Check_for_GM = {
 				limit = {
 					has_modifier = game_master
 				}
-			remove_modifier = game_master
-			remove_global_variable = player_gm
+				remove_modifier = game_master
+				remove_global_variable = player_gm
 			}
 		}
 	}
@@ -372,10 +373,7 @@ HMPS_Coastal_Capital = {
 		if = {
 			limit = {
 				NOT = { has_modifier = coastal_capital }
-				any_scope_state = {
-					is_capital = yes
-					is_coastal = yes
-				}
+				capital = { is_coastal = yes }
 			}
 			add_modifier = {
 				name = coastal_capital
@@ -384,19 +382,8 @@ HMPS_Coastal_Capital = {
 		}
 		if = {
 			limit = {
-				has_modifier = coastal_capital
-				any_scope_state = {
-					is_capital = yes
-					is_coastal = no
-				}
-			}
-			remove_modifier = coastal_capital
-		}
-		if = {
-			limit = {
 				NOT = { has_modifier = near_coastal_capital }
-				any_scope_state = {
-					is_capital = yes
+				capital = {
 					OR = {
 						state_region = s:STATE_NANJING
 						state_region = s:STATE_ILE_DE_FRANCE
@@ -413,14 +400,24 @@ HMPS_Coastal_Capital = {
 		}
 		if = {
 			limit = {
+				has_modifier = coastal_capital
+				capital = {
+					is_coastal = no
+				}
+			}
+			remove_modifier = coastal_capital
+		}
+		if = {
+			limit = {
 				has_modifier = near_coastal_capital
-				any_scope_state = {
-					is_capital = yes
-					NOT = { state_region = s:STATE_NANJING }
-					NOT = { state_region = s:STATE_ILE_DE_FRANCE }
-					NOT = { state_region = s:STATE_BRANDENBURG }
-					NOT = { state_region = s:STATE_AUSTRIA }
-					NOT = { state_region = s:STATE_TRANSDANUBIA }
+				capital = {
+					NOR = {
+						state_region = s:STATE_NANJING
+						state_region = s:STATE_ILE_DE_FRANCE
+						state_region = s:STATE_BRANDENBURG
+						state_region = s:STATE_AUSTRIA
+						state_region = s:STATE_TRANSDANUBIA
+					}
 				}
 			}
 			remove_modifier = near_coastal_capital
@@ -428,31 +425,26 @@ HMPS_Coastal_Capital = {
 	}
 }
 
+#moved to monthly_pulse_state
 HMPS_Slave_State_Migration = {
 	effect = {
 		if = {
 			limit = {
-				NOT = {
-					has_law = law_type:law_slavery_banned
+				is_slave_state = yes
+				NOT = {	
+					has_modifier = slave_state_migration_debuff
 				}
 			}
-			every_scope_state = {
-				limit = {
-					is_slave_state = yes
-					NOT = {	
-						has_modifier = slave_state_migration_debuff
-					}
-				}
-				add_modifier = {
-					name = slave_state_migration_debuff
-				}
+			add_modifier = {
+				name = slave_state_migration_debuff
 			}
-			every_scope_state = {
-				limit = {
-					is_slave_state = no
-				}
-				remove_modifier = slave_state_migration_debuff
+		}
+		else_if = {
+			limit = {
+				is_slave_state = no
+				has_modifier = slave_state_migration_debuff
 			}
+			remove_modifier = slave_state_migration_debuff
 		}
 	}
 }
@@ -461,6 +453,7 @@ HMPS_Remove_Political_Movements = {
 	effect = {
 		every_political_movement = {
 			limit = {
+				NOT = { has_modifier = revolution_disbanded }
 				OR = {
 					political_movement_support > 5
 					political_movement_radicalism > 0
@@ -496,7 +489,7 @@ HMPS_Remove_Political_Movements = {
 			}
 			add_modifier = {
 				name = revolution_disbanded
-				months = normal_modifier_time
+				months = -1
 			}
 		}
 	}
