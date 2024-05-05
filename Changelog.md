@@ -4,7 +4,6 @@
 **Credit:**
 All mods / mod ideas used linked below:
 - Country colour changes: https://steamcommunity.com/sharedfiles/filedetails/?id=2881165239, https://steamcommunity.com/sharedfiles/filedetails/?id=2881470170
-- Westernisation & Clothes: https://steamcommunity.com/sharedfiles/filedetails/?id=2981574864
 - Synth Oil & Rubber: https://steamcommunity.com/sharedfiles/filedetails/?id=2880155469
 - Ally recognition: https://steamcommunity.com/sharedfiles/filedetails/?id=2881810342&searchtext=recognition
 - Dense Market Details: https://steamcommunity.com/sharedfiles/filedetails/?id=2881762225
@@ -20,7 +19,8 @@ All mods / mod ideas used linked below:
 - Forts & Engineers: https://steamcommunity.com/sharedfiles/filedetails/?id=3005432154
 - Authority for Political Interactions: https://steamcommunity.com/sharedfiles/filedetails/?id=3045555636
 - Historically Accurate Randomize Farming Yields: https://steamcommunity.com/workshop/filedetails/?id=3073886807
-- War Is Politics: https://steamcommunity.com/sharedfiles/filedetails/?id=3124519140&searchtext=	
+- War Is Politics: https://steamcommunity.com/sharedfiles/filedetails/?id=3124519140&searchtext=
+Thanks to Gelre for his UI, Performance & Flava work.
 ---
 <br/>
 
