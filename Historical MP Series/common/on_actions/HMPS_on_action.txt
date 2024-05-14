@@ -81,6 +81,52 @@ HMPS_remove_bad_unis = {
 	}
 }
 
+HMPS_rev_handling = {
+	effect = {
+		#disable revolts for ai with <= 3 states
+		#disable revolts for ai subjects
+		if = {
+			limit = {
+				is_player = no
+				is_immune_to_revolutions = no
+				OR = {
+					AND = {
+						any_scope_state = {
+							count = all
+							add_to_temporary_list = state_amount
+						}
+						list_size = { name = state_amount value <= 3 }
+					}
+					is_subject = yes
+				}
+			}
+			set_immune_to_revolutions = yes
+			#add_modifier = {
+			#	name = dev_test_modifier
+			#}
+		}
+		#disable player subjects/non subjects from being immune to revs
+		#disable large ai/small players from being immune to revs
+		if = {
+			limit = {
+				is_immune_to_revolutions = yes
+				OR = {
+					is_player = yes
+					AND = {
+						is_subject = no
+						any_scope_state = {
+							count = all
+							add_to_temporary_list = state_amount_2
+						}
+						list_size = { name = state_amount_2 value > 3 }
+					}
+				}
+			}
+			set_immune_to_revolutions = no
+		}
+	}
+}
+
 
 HMPS_Check_for_GM = {
 	effect = {
@@ -503,34 +549,6 @@ HMPS_Remove_Political_Movements = {
 				name = revolution_disbanded
 				months = -1
 			}
-		}
-	}
-}
-
-HMPS_Disable_Subject_Revolts = {
-	effect = {
-		#disable ai subject revolts
-		if = {
-			limit = {
-				is_subject = yes
-				is_player = no
-				is_immune_to_revolutions = no
-			}
-			set_immune_to_revolutions = yes
-		}
-		#disable player subjects/non subjects from being immune to revs
-		if = {
-			limit = {
-				OR = {
-					AND = {
-						is_subject = yes
-						is_player = yes
-					}
-					is_subject = no
-				}
-				is_immune_to_revolutions = yes
-			}
-			set_immune_to_revolutions = no
 		}
 	}
 }
