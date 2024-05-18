@@ -1,0 +1,189 @@
+﻿# ## add_building_level
+# Adds the specified number of levels to a building
+# add_building_level = {
+#	 BUILDING = <exact building key> !!!DOES NOT SUPPORT SAVED SCOPES!!!
+#	 WANTED_INCREASE = <positive integer> !!!DOES NOT SUPPORT VARS!!!
+# }
+# example:
+# add_building_level = {
+#	 BUILDING = building_university
+#	 WANTED_INCREASE = 5
+# }
+# Note: If the building specified does not exist, a building will be created at the specified level
+# 
+# supported scopes: state
+
+add_building_level = {
+	if = {
+		limit = {
+			any_scope_building = {
+				is_building_type = $BUILDING$
+			}
+		}
+		set_local_variable = {
+			name = wanted_b_lvl
+			value = {
+				add = b:$BUILDING$.level
+				add = $WANTED_INCREASE$
+			}
+		}
+		
+		set_local_variable = {
+			name = init_free_arable
+			value = this.free_arable_land
+		}
+		
+		#temp increase subsistence building employment by 100000%
+		#prevents code from unemploying all subsistence workers
+		add_modifier = {
+			name = dev_test_modifier
+			months = -1
+		}
+		
+		while = {
+			limit = {
+				free_arable_land > local_var:wanted_b_lvl
+			}
+			state_region = {
+				add_arable_land = -1
+			}
+		}
+		
+		while = {
+			limit = {
+				free_arable_land < local_var:wanted_b_lvl
+			}
+			state_region = {
+				add_arable_land = 1
+			}
+		}
+		
+		create_building = {
+			building = $BUILDING$
+			level = arable_land
+		}
+		
+		while = {
+			limit = {
+				free_arable_land < local_var:init_free_arable
+			}
+			state_region = {
+				add_arable_land = 1
+			}
+		}
+		
+		while = {
+			limit = {
+				free_arable_land > local_var:init_free_arable
+			}
+			state_region = {
+				add_arable_land = -1
+			}
+		}
+		
+		remove_modifier = dev_test_modifier
+	}
+	else = {
+		create_building = {
+			building = $BUILDING$
+			level = $WANTED_INCREASE$
+		}
+	}
+}
+
+# DOES NOT WORK!!!! PDX IS DUMMY THICC!!!! GRRR!!!
+# ## subtract_building_level
+# Subtracts the specified number of levels from a building
+# subtract_building_level = {
+#	 BUILDING = <exact building key> !!!DOES NOT SUPPORT SAVED SCOPES!!!
+#	 WANTED_DECREASE = <positive integer> !!!DOES NOT SUPPORT VARS!!!
+# }
+# example:
+# subtract_building_level = {
+#	 BUILDING = building_university
+#	 WANTED_DECREASE = 5
+# }
+# Note: If the building specified does not exist, nothing will happen
+# 
+# supported scopes: state
+
+#subtract_building_level = {
+#	if = {
+#		limit = {
+#			any_scope_building = {
+#				is_building_type = $BUILDING$
+#			}
+#		}
+#		
+#		set_global_variable = {
+#			name = wanted_b_lvl
+#			value = {
+#				add = b:$BUILDING$.level
+#				subtract = $WANTED_DECREASE$
+#			}
+#		}
+#		
+#		if = {
+#			limit = {
+#				NOT = { global_var:wanted_b_lvl > 0 }
+#			}
+#			remove_building = $BUILDING$
+#		}
+#		else = {
+#			set_local_variable = {
+#				name = init_free_arable
+#				value = this.free_arable_land
+#			}
+#			
+#			#temp increase subsistence building employment by 100000%
+#			#prevents code from unemploying all subsistence workers
+#			add_modifier = {
+#				name = dev_test_modifier
+#				months = -1
+#			}
+#			
+#			while = {
+#				limit = {
+#					free_arable_land > global_var:wanted_b_lvl
+#				}
+#				state_region = {
+#					add_arable_land = -1
+#				}
+#			}
+#			
+#			while = {
+#				limit = {
+#					free_arable_land < global_var:wanted_b_lvl
+#				}
+#				state_region = {
+#					add_arable_land = 1
+#				}
+#			}
+#			
+#			create_building = {
+#				building = $BUILDING$
+#				level = arable_land
+#			}
+#			
+#			while = {
+#				limit = {
+#					free_arable_land < local_var:init_free_arable
+#				}
+#				state_region = {
+#					add_arable_land = 1
+#				}
+#			}
+#			
+#			while = {
+#				limit = {
+#					free_arable_land > local_var:init_free_arable
+#				}
+#				state_region = {
+#					add_arable_land = -1
+#				}
+#			}
+#			
+#			remove_modifier = dev_test_modifier
+#		}
+#	}
+#}
