@@ -240,6 +240,16 @@ heavenly.3 = {
 						has_variable = cult_center
 					}
 					NOT = { is_capital = yes }
+					OR = {
+						state_region = s:STATE_JIANGSU
+						state_region = s:STATE_NORTHERN_ANHUI
+						state_region = s:STATE_SOUTHERN_ANHUI
+						state_region = s:STATE_ZHEJIANG
+						state_region = s:STATE_JIANGXI
+						state_region = s:STATE_WESTERN_HUBEI
+						state_region = s:STATE_EASTERN_HUBEI
+						state_region = s:STATE_SUZHOU
+					}
 				}
 			}
 			save_scope_as = cult_center
@@ -251,6 +261,15 @@ heavenly.3 = {
 						has_variable = cult_center
 					}
 					NOT = { is_capital = yes }
+					OR = {
+						state_region = s:STATE_JIANGSU
+						state_region = s:STATE_NORTHERN_ANHUI
+						state_region = s:STATE_SOUTHERN_ANHUI
+						state_region = s:STATE_ZHEJIANG
+						state_region = s:STATE_JIANGXI
+						state_region = s:STATE_WESTERN_HUBEI
+						state_region = s:STATE_SUZHOU
+					}
 				}
 				save_scope_as = cult_growth_state
 				set_variable = {
@@ -318,11 +337,7 @@ heavenly.4 = {
 		}
 		random_scope_state = {
 			limit = {
-				has_variable = cult_center
-				any_scope_pop = {
-					has_pop_religion = protestant
-					religion_accepted = no
-				}
+				state_region = s:STATE_NANJING
 			}
 			save_scope_as = heavenly_kingdom_spawn
 		}
@@ -331,19 +346,6 @@ heavenly.4 = {
 			origin = this
 			state = scope:heavenly_kingdom_spawn
 			on_created = {
-				if = {
-					limit = {
-						NOT = {
-							has_ruling_interest_group = ig_devout
-						}
-					}
-					ig:ig_devout = {
-						leader = {
-							set_ideology = ideology:ideology_theocrat
-						}
-						add_ruling_interest_group = yes
-					}
-				}
 				if = {
 					limit = {
 						NOT = {
@@ -385,6 +387,20 @@ heavenly.4 = {
 						name = taiping_god_worshippers
 						months = very_long_modifier_time
 						is_decaying = yes
+					}
+					add_ruling_interest_group = yes
+					set_ig_bolstering = yes
+				}
+				
+				create_taiping_characters = yes
+				
+				if = {
+					limit = {
+						has_ruling_interest_group = ig_landowners
+					}
+					ig:ig_landowners = {
+						remove_ruling_interest_group = yes
+						set_ig_suppression = yes
 					}
 				}
 				
@@ -454,48 +470,95 @@ heavenly.4 = {
 				}
 			}
 		}
-		if = {
-			limit = {
-				any_scope_state = {
-					has_variable = cult_center
-				}
-			}
-			every_scope_state = {
-				limit = {
-					has_variable = cult_center
-				}
-				set_state_owner = c:TPG
-				set_state_type = incorporated
-			}
-			#every_scope_state = {
-			#	limit = {
-			#		is_capital = no
-			#		NOT = { has_variable = cult_center }
-			#		any_neighbouring_state = {
-			#			has_variable = cult_center
-			#		}
-			#		turmoil > 0.1
-			#	}
-			#	set_state_owner = c:TPG
-			#	set_state_type = incorporated
-			#}
-		}
+		assign_taiping_states = yes
 		c:TPG = {
 			save_scope_as = heavenly_kingdom_scope
 			add_journal_entry = {
 				type = je_taiping_revolution
 			}
-			every_scope_state = {
-				state_region = {
-					add_claim = ROOT
-				}
+		}
+		
+		### Creating Concurrent Rebellions
+		
+		# Nian 1853
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_HENAN
 			}
-			if = {
-				limit = {
-					owns_entire_state_region = STATE_NANJING
-				}
-				set_capital = STATE_NANJING
+			save_scope_as = nian_spawn
+		}
+		trigger_event = {
+			id = heavenly_concurrent.1
+			months = 24
+		}
+		
+		# Miao 1854
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_GUIZHOU
 			}
+			save_scope_as = miao_spawn
+		}
+		trigger_event = {
+			id = heavenly_concurrent.2
+			months = 36
+		}
+		
+		# Panthay 1855
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_YUNNAN
+			}
+			save_scope_as = panthay_spawn
+		}
+		trigger_event = {
+			id = heavenly_concurrent.3
+			months = 48
+		}
+		
+		# Red Turban / Dacheng 1855
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_GUANGXI
+			}
+			save_scope_as = dacheng_spawn
+		}
+		trigger_event = {
+			id = heavenly_concurrent.4
+			months = 54
+		}
+		
+		# Dungan Revolt 1862
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_TIANSHAN
+			}
+			save_scope_as = dungan_spawn
+		}
+		trigger_event = {
+			id = heavenly_concurrent.5
+			months = 84
+		}
+		
+		# Random & Ahistorical Red Turban Rebellion 1853.5
+		random_scope_state = {
+			limit = {
+				state_region = { is_homeland = cu:han }
+				NOT = {
+					OR = {
+						state_region = s:STATE_HENAN
+						state_region = s:STATE_GUIZHOU
+						state_region = s:STATE_YUNNAN
+						state_region = s:STATE_GUANGXI
+					}
+				}
+				is_capital = no
+			}
+			save_scope_as = red_turban_spawn
+		}
+		trigger_event = {
+			id = heavenly_concurrent.6
+			months = 30
 		}
 	}
 
@@ -586,7 +649,7 @@ heavenly.5 = {
 				}
 			}
 			convert_population = {
-				target = rel:mahayana value = 0.1
+				target = rel:mahayana value = 0.85
 			}
 		}
 		create_incident = {
@@ -608,9 +671,6 @@ heavenly.5 = {
 	}
 	option = { # mercy and pardons
 		name = heavenly.5.b
-		add_loyalists = {
-			value = 0.05
-		}
 		every_country = {
 			limit = {
 				country_rank >= rank_value:great_power

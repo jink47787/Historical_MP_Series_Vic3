@@ -1,0 +1,133 @@
+qing_accept_han = {
+	name = "qing_accept_han"
+	desc = "qing_accept_han_desc"
+
+	visible = { always = yes }
+
+	possible = {
+		cu:han = {
+			culture_is_discriminated_in = ROOT
+		}
+		any_scope_war = {
+		    has_war_support = {
+		        target = ROOT
+		        value < 25
+		    }
+		}
+	}
+
+	effect = {
+		activate_law = law_type:law_language_discrimination
+		add_modifier = {
+			name = han_power_increase
+			is_decaying = no
+			years = -1
+		}
+		set_global_variable = qing_accepted_han
+	}
+}
+
+qing_increase_recruitment = {
+	name = "qing_increase_recruitment"
+	desc = "qing_increase_recruitment_desc"
+
+	visible = { always = yes }
+
+	possible = {
+		any_scope_war = {
+		    has_war_support = {
+		        target = ROOT
+		        value < 75
+		    }
+		}
+	}
+
+	effect = {
+		hidden_effect = { remove_modifier = qing_delegate_levies }
+		add_modifier = {
+			name = qing_delegate_levies
+			is_decaying = yes
+			years = 40
+			multiplier = global_var:qing_delegate_levies_multiplier
+		}
+		every_interest_group = {
+			limit = {
+				OR = {
+					is_interest_group_type = ig_landowners
+					is_interest_group_type = ig_armed_forces
+				}
+			}
+			hidden_effect = { remove_modifier = qing_provincial_political_power_increase }
+			add_modifier = {
+				name = qing_provincial_political_power_increase
+				is_decaying = yes
+				years = 40
+				multiplier = global_var:qing_delegate_levies_multiplier
+			}
+		}
+		change_global_variable = {
+			name = qing_delegate_levies_multiplier
+			add = 1
+		}
+		random_scope_war = {
+			limit = {
+				has_war_support = {
+					target = ROOT
+					value < 75
+				}
+			}
+			save_scope_as = player_war
+		}
+		scope:player_war = {
+			add_war_war_support = {
+				target = ROOT
+				value = 25
+			}
+		}
+	}
+}
+
+taiping_reconstruct_society = {
+	name = "taiping_reconstruct_society"
+	desc = "taiping_reconstruct_society_desc"
+
+	visible = { always = yes }
+
+	possible = {
+		NOT = { has_modifier = anti_bandit_edict }
+	}
+
+	effect = {
+		add_modifier = {
+			name = anti_bandit_edict
+			years = 5
+		}
+	}
+}
+
+taiping_reconstruct_state = {
+	name = "taiping_reconstruct_state"
+	desc = "taiping_reconstruct_state_desc"
+
+	visible = { always = yes }
+
+	possible = {
+		any_scope_state = {
+			NOT = { has_modifier = state_anti_bandit_edict }
+			has_decree = decree_violent_suppression
+		}
+	}
+
+	effect = {
+		random_scope_state = {
+			limit = {
+				has_decree = decree_violent_suppression
+				NOT = { has_modifier = state_anti_bandit_edict }
+			}
+			add_modifier = {
+				name = state_anti_bandit_edict
+				years = 5
+			}
+		}
+	}
+}
