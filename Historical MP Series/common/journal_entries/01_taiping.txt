@@ -171,17 +171,9 @@ je_heavenly_kingdom_main = {
 
 	immediate = {
 		set_global_variable = taiping_je_happened
-		random_scope_state = {
+		every_scope_state = {
 			limit = {
-				any_neighbouring_state = {
-					is_treaty_port = yes
-					owner = {
-						religion = {
-							has_discrimination_trait = christian
-						}
-					}
-				}
-				NOT = { is_capital = yes }
+				state_region = s:STATE_NANJING
 			}
 			add_modifier = {
 				name = god_worshippers
@@ -227,7 +219,7 @@ je_heavenly_kingdom_main = {
 				has_pop_religion = protestant
 				religion_accepted = no
 			}
-			count >= 12
+			count >= 9
 		}
 	}
 
@@ -249,6 +241,13 @@ je_taiping = {
 	
 	group = je_group_historical_content
 
+	scripted_button = qing_accept_han
+	scripted_button = qing_increase_recruitment
+	
+	modifiers_while_active = {
+		modifier_taiping_occupation
+	}
+
 	complete = {
 		custom_tooltip = {
 			text = taiping_destroyed
@@ -264,6 +263,10 @@ je_taiping = {
 		c:TPG = {
 			save_scope_as = taiping_scope
 		}
+		set_global_variable = {
+			name = qing_delegate_levies_multiplier
+			value = 1
+		}
 	}
 
 	on_complete = {
@@ -271,14 +274,8 @@ je_taiping = {
 		hidden_effect = {
 			remove_modifier = taiping_taiping_rebellion
 		}
-		custom_tooltip = {
-			text = han_devastation_tt
-			every_state_region = {
-				limit = {
-					is_homeland = cu:han
-				}
-				add_devastation = 75
-			}
+		add_journal_entry = {
+			type = je_taiping_reconstruction
 		}
 	}
 
@@ -306,6 +303,10 @@ je_taiping_revolution = {
 	icon = "gfx/interface/icons/event_icons/event_military.dds"
 	
 	group = je_group_historical_content
+	
+	modifiers_while_active = {
+		modifier_taiping_occupation
+	}
 
 	complete = {
 		OR = {
@@ -344,14 +345,8 @@ je_taiping_revolution = {
 			months = 240
 			is_decaying = yes
 		}
-		custom_tooltip = {
-			text = han_devastation_tt
-			every_state_region = {
-				limit = {
-					is_homeland = cu:han
-				}
-				add_devastation = 75
-			}
+		add_journal_entry = {
+			type = je_taiping_reconstruction
 		}
 	}
 
@@ -365,4 +360,102 @@ je_taiping_revolution = {
 	should_be_pinned_by_default = yes
 
 	transferable = no
+}
+
+je_taiping_reconstruction = {
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	group = je_group_historical_content
+
+	scripted_button = taiping_reconstruct_society
+	scripted_button = taiping_reconstruct_state
+	
+	modifiers_while_active = {
+		modifier_taiping_reconstruction
+	}
+	
+	immediate = {
+		set_global_variable = {
+			name = post_taiping_reconstruction
+			value = 0
+		}
+		every_scope_state = {
+			limit = {
+				has_variable = taiping_rebellion_state
+			}
+			state_region = {
+				add_devastation = 50
+			}
+		}
+	}
+
+	complete = {
+		scope:journal_entry = {
+			is_goal_complete = yes
+		}
+	}
+	
+	on_monthly_pulse = {
+		effect = {
+			### Reconstuction Progress
+			every_scope_state = {
+				limit = {
+					turmoil < 0.25
+					state_region = { is_homeland = cu:han }
+				}
+				change_global_variable = {
+					name = post_taiping_reconstruction
+					add = 0.2
+				}
+			}
+			
+			### Reconstuction Retreat
+			every_scope_state = {
+				limit = {
+					turmoil > 0.25
+					state_region = { is_homeland = cu:han }
+				}
+				change_global_variable = {
+					name = post_taiping_reconstruction
+					add = -0.1
+				}
+			}
+			every_scope_state = {
+				limit = {
+					turmoil > 0.50
+					state_region = { is_homeland = cu:han }
+				}
+				change_global_variable = {
+					name = post_taiping_reconstruction
+					add = -0.1
+				}
+			}
+			
+			### Preventing -ve value
+			if = {
+				limit = {
+					global_var:post_taiping_reconstruction < 0
+				}
+				set_global_variable = {
+					name = post_taiping_reconstruction
+					value = 0
+				}
+			}
+		}
+	}
+	
+	current_value = {
+		value = global_var:post_taiping_reconstruction
+	}
+
+	goal_add_value = {
+		value = 100
+	}
+	
+	progressbar = yes
+
+	weight = 10000
+	should_be_pinned_by_default = yes
+	
+	can_revolution_inherit = yes
 }
