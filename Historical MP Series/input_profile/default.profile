@@ -165,11 +165,11 @@ input_context={
 		scancode = 67	# F10
 	}
 
-	input_action = {
-		name = "open_decisions"
-		text = "SETTING_INPUT_ACTION_OPEN_DECISIONS"
-		scancode = 68	# F11
-	}
+	#input_action = {
+	#	name = "open_decisions"
+	#	text = "SETTING_INPUT_ACTION_OPEN_DECISIONS"
+	#	scancode = 68	# F11
+	#}
 
 	input_action = {
 		name = "map_list"
