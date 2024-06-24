@@ -1,4 +1,7 @@
 ﻿embargo = {
+	groups= {
+		general
+	}
 	requires_approval = no
 	should_notify_third_parties = yes
 
@@ -6,31 +9,63 @@
 		international_trade
 	}
 	
-	potential = {
+	selectable = {
 		NOT = { is_country_type = decentralized }
+		is_revolutionary = no
+	}
+	
+	potential = {
 		scope:target_country = {
 			NOT = { is_country_type = decentralized }
-		}	
-		is_revolutionary = no
-		scope:target_country = {
 			is_revolutionary = no
-		}			
+		}
 	}
 	
 	possible = {
 		# Might have these despite low relations due to a forced pact
 		NOT = { has_diplomatic_pact = { who = scope:target_country type = trade_agreement } }	
+
+		# You cannot embargo somebody who has secured foreign investment rights in your country
+		NOT = { has_diplomatic_pact = { who = scope:target_country type = foreign_investment_rights } }
+
+		# You cannot embargo somebody with whom you have foreign investment agreements
+		NOT = { has_diplomatic_pact = { who = scope:target_country type = foreign_investment_agreement } }
+
+		# Might be disallowed by power bloc
+		NOT = {
+			custom_tooltip = {
+				text = "power_bloc_disallow_embargo_bool"
+				is_in_same_power_bloc = scope:target_country
+				power_bloc ?= {
+					modifier:power_bloc_disallow_embargo_bool = yes
+				}
+			}
+		}
 	}
 
-	accept_effect = {}
+	accept_effect = {
+		add_lobby_appeasement_from_diplomacy_unidirectional = { 
+			FIRST = root
+			SECOND = scope:target_country 
+			PRO_AMOUNT = -2
+			ANTI_AMOUNT = 2
+			FACTOR = appeasement_embargo_declared
+		}			
+	}
 	
 	pact = {
 		cost = 100
+		forced_duration = 12
 	
+		is_hostile = yes
 		is_embargo = yes		
 		is_two_sided_pact = no
 		
 		relations_progress_per_day = -1 # At -100, -1 relations
+
+		first_modifier = {
+			country_pact_leverage_generation_mult = -0.5
+		}
 		
 		requirement_to_maintain = {
 			trigger = {
@@ -64,12 +99,8 @@
 			trigger = {
 				custom_tooltip = {
 					text = "DIPLOMATIC_PACT_REQUIREMENT_NO_SUBJECT_RELATION"
-					NAND = {
-						is_non_customs_union_subject = yes
+					NOT = {
 						is_subject_of = scope:target_country
-					}						
-					NAND = {
-						scope:target_country = { is_non_customs_union_subject = yes }
 						scope:target_country = { is_subject_of = root }
 					}				
 				}
@@ -118,16 +149,68 @@
 			trigger = {
 				NOT = { scope:target_country = { has_treaty_port_in_country = root } }
 			}
+		}
+
+		requirement_to_maintain = {
+			trigger = {
+				NOT = { 
+					scope:target_country = { 
+						has_diplomatic_pact = {
+							who = root
+							type = foreign_investment_rights
+						}
+					} 
+				}
+			}
+		}
+
+		requirement_to_maintain = {
+			trigger = {
+				NOT = { 
+					scope:target_country = { 
+						has_diplomatic_pact = {
+							who = root
+							type = foreign_investment_agreement
+						}
+					} 
+				}
+			}
 		}			
 		
-		manual_break_effect = {}
+		manual_break_effect = {
+			add_lobby_appeasement_from_diplomacy_unidirectional = { 
+				FIRST = root
+				SECOND = scope:target_country 
+				PRO_AMOUNT = 2
+				ANTI_AMOUNT = -2
+				FACTOR = appeasement_embargo_ended
+			}		
+		}
 		
-		auto_break_effect = {}
+		
+		auto_break_effect = {
+			add_lobby_appeasement_from_diplomacy_unidirectional = { 
+				FIRST = root
+				SECOND = scope:target_country 
+				PRO_AMOUNT = 2
+				ANTI_AMOUNT = -2
+				FACTOR = appeasement_embargo_ended
+			}			
+		}
 	}
 	
 	ai = {
 		check_acceptance_for_will_break = no
 		max_influence_spending_fraction = 0.2
+		
+		evaluation_chance = {
+			value = 0.1
+			
+			add = {
+				value = country_rank
+				multiply = 0.05
+			}			
+		}	
 	
 		propose_score = {
 			value = 10

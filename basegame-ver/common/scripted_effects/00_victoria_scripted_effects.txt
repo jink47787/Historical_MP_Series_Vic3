@@ -475,7 +475,7 @@ adopt_random_antigovernment_ideology = {
 			100 = {
 				trigger = {
 					owner = {
-						has_technology_researched = socialism
+						has_technology_researched = political_agitation
 						NOT = {
 							ruler = {
 								has_ideology = ideology:ideology_vanguardist	
@@ -2361,6 +2361,7 @@ enact_preferred_governance_principle_new = {
 }
 
 exile_character_with_martyrdom = {
+	save_scope_as = martyred_exile_scope
 	if = {
 		limit = {
 			NOT = {
@@ -2368,6 +2369,44 @@ exile_character_with_martyrdom = {
 			}
 		}
 		add_modifier = modifier_political_martyr
+	}
+	if = {
+		limit = {
+			owner = {
+				NOT = {
+					any_primary_culture = {
+						this = scope:martyred_exile_scope.culture
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				any_country = {
+					NOT = {
+						this = scope:martyred_exile_scope.owner
+					}
+					any_primary_culture = {
+						this = scope:martyred_exile_scope.culture
+					}
+				}
+			}
+			ordered_country = {
+				limit = {
+					NOT = {
+						this = scope:martyred_exile_scope.owner
+					}
+					any_primary_culture = {
+						this = scope:martyred_exile_scope.culture
+					}
+				}
+				order_by = country_rank
+				create_diplomatic_catalyst = {
+					type = catalyst_exiled_culture_member
+					target = scope:martyred_exile_scope.owner
+				}
+			}
+		}
 	}
 	clean_up_exile_character_roles = yes
 	exile_character = yes
@@ -2378,39 +2417,25 @@ exile_character_with_martyrdom = {
 # Refer to comments here and in 02_french_monarchism to get an idea as to how this works.
 fra_set_divided_monarchist_variables = {
 	#Bonapartist Variables
-	set_variable = { name = bonapartist_progress value = 10 } #Master progress variable. This is incremented by the other variables, and corresponds to the progress bar if the Bonapartists are in the lead.
-	set_variable = { name = bonapartist_progress_from_characters value = 0 } #Progress-from-character component. This updates with the combined popularities of every Bonapartist character later on, and is used to calculate bonapartist_progress_next.
-	set_variable = { name = bonapartist_progress_from_igs value = 0 } #Progress-from-IG component. This updates with the combined clout of every Bonapartist IG later on, and is used to calculate bonapartist_progress_next.
-	set_variable = { name = bonapartist_progress_from_military value = 0 } #Progress-from-military-building component. This updates with the sum of military building levels in France later on, and is used to calculate bonapartist_progress_next.
-	set_variable = { name = bonapartist_progress_from_legitimacy value = 0 } #Progress-from-legitimacy component. This updates with the current government legitimacy, and is also used to calculate bonapartist_progress_next.
-	set_variable = { name = bonapartist_progress_from_effects value = 0 } #Final element in bonapartist_progress_next. This is defined by various effects, and is based solely on scripted effects. This is how designers can manually grant ticking bonuses or maluses to this mechanic.
-	set_variable = { name = bonapartist_progress_next value = 0 } #This variable is an incrementor - it is calculated by the previous five variables on a weekly basis, and is added to bonapartist_progress on the monthly. This is used in localisation to tell the player what the current rate of change for bonapartist_progress is.
+	set_variable = { name = bonapartist_progress_from_characters value = 0 } #Progress-from-character component. This updates with the combined popularities of every Bonapartist character later on, and is used to calculate monthly progress in the progress bar.
+	set_variable = { name = bonapartist_progress_from_igs value = 0 } #Progress-from-IG component. This updates with the combined clout of every Bonapartist IG later on, and is used to calculate monthly progress in the progress bar.
+	set_variable = { name = bonapartist_progress_from_military value = 0 } #Progress-from-military-building component. This updates with the sum of military building levels in France later on, and is used to calculate monthly progress in the progress bar.
+	set_variable = { name = bonapartist_progress_from_legitimacy value = 0 } #Progress-from-legitimacy component. This updates with the current government legitimacy, and is also used to calculate monthly progress in the progress bar.
+	set_variable = { name = bonapartist_progress_from_effects value = 0 } #Final element in the progress bar. This is defined by various effects, and is based solely on scripted effects. This is how designers can manually grant ticking bonuses or maluses to this mechanic.
 	
 	#Orleanist Variables
-	if = {
-		limit = {
-			game_date < 1836.2.1 #Why? Because ruler scope doesn't exist the first time this script is executed.
-		}
-		set_variable = { name = orleanist_progress value = 25 } #This is done because the Orleanists have an advantage the first time the script is executed, but do not necessarily have that advantage if the JE is activated elsewhere.
-	}
-	else = {
-		set_variable = { name = orleanist_progress value = 10 }
-	}
 	set_variable = { name = orleanist_progress_from_characters value = 0 } 
 	set_variable = { name = orleanist_progress_from_igs value = 0 }
 	set_variable = { name = orleanist_progress_from_factories value = 0 } #These variables use the same scheme as the Bonapartist ones, with the exception that Orleanists derive from the sum of light/heavy industry building levels in France.
 	set_variable = { name = orleanist_progress_from_legitimacy value = 0 }
 	set_variable = { name = orleanist_progress_from_effects value = 0 }
-	set_variable = { name = orleanist_progress_next value = 0 }
 
 	#Legitimist Variables
-	set_variable = { name = legitimist_progress value = 10 }
 	set_variable = { name = legitimist_progress_from_characters value = 0 }
 	set_variable = { name = legitimist_progress_from_igs value = 0 }
 	set_variable = { name = legitimist_progress_from_farms value = 0 } #These variables use the same scheme as the Bonapartist ones, with the exception that Legitimists derive from the sum of agricultural building levels in France.
 	set_variable = { name = legitimist_progress_from_legitimacy value = 0 }
 	set_variable = { name = legitimist_progress_from_effects value = 0 }
-	set_variable = { name = legitimist_progress_next value = 0 }
 
 	set_variable = { name = ig_weight value = 0 } #This variable is used solely for mathematical purposes, and is set as equivalent to the clout of a given interest group. It exists so that IGs can be weighted higher or lower depending on whether they're in-government or not.
 }
@@ -2420,7 +2445,6 @@ fra_weekly_pulse_bonapartist_progress = { #Effects like these are run three time
 	set_variable = { name = bonapartist_progress_from_igs value = 0 }
 	set_variable = { name = bonapartist_progress_from_military value = 0 }
 	set_variable = { name = bonapartist_progress_from_legitimacy value = root.government_legitimacy } #Government legitimacy is a single constant, and so this variable is set immediately rather than needing a calculation.
-	set_variable = { name = bonapartist_progress_next value = 0 }
 	#From Characters
 	every_scope_character = {
 		limit = {
@@ -2475,13 +2499,6 @@ fra_weekly_pulse_bonapartist_progress = { #Effects like these are run three time
 		}
 		change_variable = { name = bonapartist_progress_from_legitimacy multiply = -0.5 } #If the ruler is not Bonapartist, they benefit from low legitimacy and suffer from high legitimacy.
 	}
-
-	#Final Compilation
-	change_variable = { name = bonapartist_progress_next add = var:bonapartist_progress_from_characters } #All sub-variables are added to bonapartist_progress_next here. At this point, all of the component variables are calculated properly, and converted to a decimal scale.
-	change_variable = { name = bonapartist_progress_next add = var:bonapartist_progress_from_igs }
-	change_variable = { name = bonapartist_progress_next add = var:bonapartist_progress_from_military }
-	change_variable = { name = bonapartist_progress_next add = var:bonapartist_progress_from_legitimacy }
-	change_variable = { name = bonapartist_progress_next add = var:bonapartist_progress_from_effects }
 }
 
 fra_weekly_pulse_orleanist_progress = { #See Bonapartist progress to see how this works.
@@ -2489,7 +2506,6 @@ fra_weekly_pulse_orleanist_progress = { #See Bonapartist progress to see how thi
 	set_variable = { name = orleanist_progress_from_igs value = 0 }
 	set_variable = { name = orleanist_progress_from_factories value = 0 }
 	set_variable = { name = orleanist_progress_from_legitimacy value = root.government_legitimacy }
-	set_variable = { name = orleanist_progress_next value = 0 }
 	#From Characters
 	every_scope_character = {
 		limit = {
@@ -2544,13 +2560,6 @@ fra_weekly_pulse_orleanist_progress = { #See Bonapartist progress to see how thi
 		}
 		change_variable = { name = orleanist_progress_from_legitimacy multiply = -0.5 }
 	}
-
-	#Final Compilation
-	change_variable = { name = orleanist_progress_next add = var:orleanist_progress_from_characters }
-	change_variable = { name = orleanist_progress_next add = var:orleanist_progress_from_igs }
-	change_variable = { name = orleanist_progress_next add = var:orleanist_progress_from_factories }
-	change_variable = { name = orleanist_progress_next add = var:orleanist_progress_from_legitimacy }
-	change_variable = { name = orleanist_progress_next add = var:orleanist_progress_from_effects }
 }
 
 fra_weekly_pulse_legitimist_progress = { #See Legitimist progress to see how this works.
@@ -2558,7 +2567,6 @@ fra_weekly_pulse_legitimist_progress = { #See Legitimist progress to see how thi
 	set_variable = { name = legitimist_progress_from_igs value = 0 }
 	set_variable = { name = legitimist_progress_from_farms value = 0 }
 	set_variable = { name = legitimist_progress_from_legitimacy value = root.government_legitimacy }
-	set_variable = { name = legitimist_progress_next value = 0 }
 	#From Characters
 	every_scope_character = {
 		limit = {
@@ -2616,70 +2624,29 @@ fra_weekly_pulse_legitimist_progress = { #See Legitimist progress to see how thi
 		}
 		change_variable = { name = legitimist_progress_from_legitimacy multiply = -0.5 }
 	}
-
-	#Final Compilation
-	change_variable = { name = legitimist_progress_next add = var:legitimist_progress_from_characters }
-	change_variable = { name = legitimist_progress_next add = var:legitimist_progress_from_igs }
-	change_variable = { name = legitimist_progress_next add = var:legitimist_progress_from_farms }
-	change_variable = { name = legitimist_progress_next add = var:legitimist_progress_from_legitimacy }
-	change_variable = { name = legitimist_progress_next add = var:legitimist_progress_from_effects }
 }
 
 fra_clear_divided_monarchist_variables = { #Clears all variables, to save memory/performance. Should be executed by anything that makes Divided Monarchists irrelevant.
-	remove_variable = bonapartist_progress 
 	remove_variable = bonapartist_progress_from_characters 
 	remove_variable = bonapartist_progress_from_igs 
 	remove_variable = bonapartist_progress_from_military 
 	remove_variable = bonapartist_progress_from_legitimacy 
 	remove_variable = bonapartist_progress_from_effects 
-	remove_variable = bonapartist_progress_next 
-	remove_variable = bonapartist_progress 
 	remove_variable = orleanist_progress_from_characters 
 	remove_variable = orleanist_progress_from_igs 
 	remove_variable = orleanist_progress_from_factories 
 	remove_variable = orleanist_progress_from_legitimacy 
 	remove_variable = orleanist_progress_from_effects 
-	remove_variable = orleanist_progress_next 
-	remove_variable = legitimist_progress 
 	remove_variable = legitimist_progress_from_characters 
 	remove_variable = legitimist_progress_from_igs 
 	remove_variable = legitimist_progress_from_farms 
 	remove_variable = legitimist_progress_from_legitimacy 
 	remove_variable = legitimist_progress_from_effects 
-	remove_variable = legitimist_progress_next 
 	remove_variable = ig_weight 
 }
 
 fra_freeze_divided_monarchist_progress = { #Used upon initiation of cement_the_rightful_dynasty, to prevent the bars from excessively accumulating.
 	set_variable = fra_divided_monarchists_freeze
-	set_variable = { name = bonapartist_progress_next value = 0 }
-	set_variable = { name = orleanist_progress_next value = 0 }
-	set_variable = { name = legitimist_progress_next value = 0 }
-}
-
-fra_define_leading_dynasty = { #This scripted effect determines which dynasty is the most powerful one, and sets fra_leading_dynasty_progress to be equal to that dynasty's progress variable. This allows the bar to work, and much easier calculation to take place.
-	if = {
-		limit = {
-			var:bonapartist_progress > var:legitimist_progress
-			var:bonapartist_progress > var:orleanist_progress
-		}
-		set_variable = { name = fra_leading_dynasty_progress value = var:bonapartist_progress }
-	}
-	else_if = {
-		limit = {
-			var:orleanist_progress > var:legitimist_progress
-			var:orleanist_progress > var:bonapartist_progress
-		}
-		set_variable = { name = fra_leading_dynasty_progress value = var:orleanist_progress }
-	}
-	else_if = {
-		limit = {
-			var:legitimist_progress > var:orleanist_progress
-			var:legitimist_progress > var:bonapartist_progress
-		}
-		set_variable = { name = fra_leading_dynasty_progress value = var:legitimist_progress }
-	}
-	clamp_variable = { name = fra_leading_dynasty_progress max = 360 min = 0 }  #These variables cannot exceed 360 or 0, to prevent bad and ugly displays.
 }
 
 # Used in IG scope
@@ -2693,7 +2660,9 @@ fra_disfavor_leader_ig_dynasty = {
 		owner = {
 			custom_tooltip = {
 				text = bonapartist_progress_decrease_10_tt
-				change_variable = { name = bonapartist_progress subtract = 10 }
+				je:je_divided_monarchists = {
+					add_progress = { value = -10 name = divided_monarchists_bonapartist_progress_bar }
+				}
 			}
 		}
 	}
@@ -2706,7 +2675,9 @@ fra_disfavor_leader_ig_dynasty = {
 		owner = {
 			custom_tooltip = {
 				text = orleanist_progress_decrease_10_tt
-				change_variable = { name = orleanist_progress subtract = 10 }
+				je:je_divided_monarchists = {
+					add_progress = { value = -10 name = divided_monarchists_orleanist_progress_bar }
+				}
 			}
 		}
 	}
@@ -2719,7 +2690,9 @@ fra_disfavor_leader_ig_dynasty = {
 		owner = {
 			custom_tooltip = {
 				text = legitimist_progress_decrease_10_tt
-				change_variable = { name = legitimist_progress subtract = 10 }
+				je:je_divided_monarchists = {
+					add_progress = { value = -10 name = divided_monarchists_legitimist_progress_bar }
+				}
 			}
 		}
 	}
@@ -2736,7 +2709,9 @@ fra_favor_leader_ig_dynasty = {
 		owner = {
 			custom_tooltip = {
 				text = bonapartist_progress_increase_10_tt
-				change_variable = { name = bonapartist_progress add = 10 }
+				je:je_divided_monarchists = {
+					add_progress = { value = 10 name = divided_monarchists_bonapartist_progress_bar }
+				}
 			}
 		}
 	}
@@ -2749,7 +2724,9 @@ fra_favor_leader_ig_dynasty = {
 		owner = {
 			custom_tooltip = {
 				text = orleanist_progress_increase_10_tt
-				change_variable = { name = orleanist_progress add = 10 }
+				je:je_divided_monarchists = {
+					add_progress = { value = 10 name = divided_monarchists_orleanist_progress_bar }
+				}
 			}
 		}
 	}
@@ -2762,7 +2739,9 @@ fra_favor_leader_ig_dynasty = {
 		owner = {
 			custom_tooltip = {
 				text = legitimist_progress_increase_10_tt
-				change_variable = { name = legitimist_progress add = 10 }
+				je:je_divided_monarchists = {
+					add_progress = { value = 10 name = divided_monarchists_legitimist_progress_bar }
+				}
 			}
 		}
 	}
@@ -2776,7 +2755,9 @@ fra_favor_ruler_dynasty = {
 		}
 		custom_tooltip = {
 			text = bonapartist_progress_increase_10_tt
-			change_variable = { name = bonapartist_progress add = 10 }
+			je:je_divided_monarchists = {
+				add_progress = { value = 10 name = divided_monarchists_bonapartist_progress_bar }
+			}
 		}
 	}
 	else_if = {
@@ -2785,7 +2766,9 @@ fra_favor_ruler_dynasty = {
 		}
 		custom_tooltip = {
 			text = orleanist_progress_increase_10_tt
-			change_variable = { name = orleanist_progress add = 10 }
+			je:je_divided_monarchists = {
+				add_progress = { value = 10 name = divided_monarchists_orleanist_progress_bar }
+			}
 		}
 	}
 	else_if = {
@@ -2794,7 +2777,9 @@ fra_favor_ruler_dynasty = {
 		}
 		custom_tooltip = {
 			text = legitimist_progress_increase_10_tt
-			change_variable = { name = legitimist_progress add = 10 }
+			je:je_divided_monarchists = {
+				add_progress = { value = 10 name = divided_monarchists_legitimist_progress_bar }
+			}
 		}
 	}
 }
@@ -2807,7 +2792,9 @@ fra_disfavor_ruler_dynasty = {
 		}
 		custom_tooltip = {
 			text = bonapartist_progress_decrease_10_tt
-			change_variable = { name = bonapartist_progress subtract = 10 }
+			je:je_divided_monarchists = {
+				add_progress = { value = -10 name = divided_monarchists_bonapartist_progress_bar }
+			}
 		}
 	}
 	else_if = {
@@ -2816,7 +2803,9 @@ fra_disfavor_ruler_dynasty = {
 		}
 		custom_tooltip = {
 			text = orleanist_progress_decrease_10_tt
-			change_variable = { name = orleanist_progress subtract = 10 }
+			je:je_divided_monarchists = {
+				add_progress = { value = -10 name = divided_monarchists_orleanist_progress_bar }
+			}
 		}
 	}
 	else_if = {
@@ -2825,7 +2814,9 @@ fra_disfavor_ruler_dynasty = {
 		}
 		custom_tooltip = {
 			text = legitimist_progress_decrease_10_tt
-			change_variable = { name = legitimist_progress subtract = 10 }
+			je:je_divided_monarchists = {
+				add_progress = { value = -10 name = divided_monarchists_legitimist_progress_bar }
+			}
 		}
 	}
 }
@@ -2862,7 +2853,14 @@ fra_handle_republic_monarch_assignment = { #Used specifically in the case of a R
 			remove_variable = supporting_legitimist_var
 		}
 		set_variable = bonapartist_restoration_var #Bonapartist restoration activated, for the purpose of je_divided_monarchists and other things it tracks.
-		change_variable = { name = bonapartist_progress add = 10 } #Gives a bonus to the Bonapartists for this cycle of je_divided_monarchists.
+		if = {
+			limit = {
+				has_journal_entry = je_divided_monarchists
+			}
+			je:je_divided_monarchists = {
+				add_progress = { value = 10 name = divided_monarchists_bonapartist_progress_bar }
+			}
+		}
 		set_variable = supporting_bonapartist_var #For the character interaction. The player can change this with the buttons whenever they wish.
 		hidden_effect = { generate_french_monarch = yes } #Standard generate_french_monarch effect.
 	}
@@ -2897,7 +2895,14 @@ fra_handle_republic_monarch_assignment = { #Used specifically in the case of a R
 			remove_variable = supporting_legitimist_var
 		}
 		set_variable = orleanist_restoration_var
-		change_variable = { name = orleanist_progress add = 10 }
+		if = {
+			limit = {
+				has_journal_entry = je_divided_monarchists
+			}
+			je:je_divided_monarchists = {
+				add_progress = { value = 10 name = divided_monarchists_orleanist_progress_bar }
+			}
+		}
 		set_variable = supporting_orleanist_var
 		hidden_effect = { generate_french_monarch = yes }
 	}
@@ -2932,7 +2937,14 @@ fra_handle_republic_monarch_assignment = { #Used specifically in the case of a R
 			remove_variable = supporting_orleanist_var
 		}
 		set_variable = legitimist_restoration_var
-		change_variable = { name = legitimist_progress add = 10 }
+		if = {
+			limit = {
+				has_journal_entry = je_divided_monarchists
+			}
+			je:je_divided_monarchists = {
+				add_progress = { value = 10 name = divided_monarchists_legitimist_progress_bar }
+			}
+		}
 		set_variable = supporting_legitimist_var
 		hidden_effect = { generate_french_monarch = yes }
 	}
@@ -2944,58 +2956,6 @@ fra_handle_republic_monarch_assignment = { #Used specifically in the case of a R
 ### Vargas
 
 calculate_populism_progress = {
-	set_variable = { name = populism_progress_var_next value = 0 }
-	set_variable = { name = populism_progress_from_radicals value = 0 }
-	every_scope_state = {
-		limit = {
-			is_incorporated = yes
-			turmoil >= 0.10
-		}
-		ROOT = {
-			change_variable = { name = populism_progress_from_radicals add = prev.turmoil }
-		}
-	}
-	set_variable = { name = populism_progress_from_loyalists value = 0 }
-	every_scope_state = {
-		limit = {
-			is_incorporated = yes
-			loyalty >= 0.10
-		}
-		ROOT = {
-			change_variable = { name = populism_progress_from_loyalists subtract = prev.loyalty }
-		}
-	}
-	set_variable = { name = populism_progress_from_unemployment value = 0 }
-	every_scope_state = {
-		limit = {
-			is_incorporated = yes
-		}
-		ROOT = {
-			change_variable = { name = populism_progress_from_unemployment add = prev.state_unemployment_rate }
-		}
-	}
-	set_variable = { name = populism_progress_from_pb value = 0 }
-	if = {
-		limit = {
-			ig:ig_petty_bourgeoisie = {
-				is_marginal = yes
-			}
-		}
-		ROOT = {
-			change_variable = { name = populism_progress_from_pb add = -10 }
-		}
-	}
-	else_if = {
-		limit = {
-			ig:ig_petty_bourgeoisie = {
-				is_powerful = yes
-			}
-		}
-		ROOT = {
-			change_variable = { name = populism_progress_from_pb add = 3 }
-		}
-	}
-
 	# From Laws
 	set_variable = { name = populism_progress_from_laws value = 0 }
 	# Cops
@@ -3055,34 +3015,15 @@ calculate_populism_progress = {
 	change_variable = { name = populism_progress_from_laws add = var:temp_ha_var_contribution }
 	remove_variable = temp_policing_var_contribution
 	remove_variable = temp_ha_var_contribution
-
-	change_variable = { name = populism_progress_var_next add = var:populism_progress_from_radicals }
-	change_variable = { name = populism_progress_var_next add = var:populism_progress_from_loyalists }
-	change_variable = { name = populism_progress_var_next add = var:populism_progress_from_unemployment }
-	change_variable = { name = populism_progress_var_next add = var:populism_progress_from_laws }
-	change_variable = { name = populism_progress_var_next add = var:populism_progress_from_pb }
-	change_variable = { name = populism_progress_var_next add = var:populism_progress_var_add }
-}
-
-add_populism_progress = {
-	change_variable = { name = populism_progress_var add = var:populism_progress_var_next }
 }
 
 set_populism_vars = {
-	set_variable = { name = populism_progress_from_radicals value = 0 }
-	set_variable = { name = populism_progress_from_loyalists value = 0 }
 	set_variable = { name = populism_progress_from_laws value = 0 }
-	set_variable = { name = populism_progress_from_pb value = 0 }
-	set_variable = { name = populism_progress_from_unemployment value = 0 }
 	set_variable = { name = populism_progress_var_add value = 0 }
 }
 
 clear_populism_vars = {
-	remove_variable = populism_progress_from_radicals
-	remove_variable = populism_progress_from_loyalists
 	remove_variable = populism_progress_from_laws
-	remove_variable = populism_progress_from_pb
-	remove_variable = populism_progress_from_unemployment
 	remove_variable = populism_progress_var_add
 }
 
@@ -3113,28 +3054,6 @@ do_risorgimento_math = {
 ### Communism
 
 calculate_communism_progress = {
-	set_variable = { name = communism_progress_var_next value = 0 }
-	set_variable = { name = communism_progress_from_radicals value = 0 }
-	every_scope_state = {
-		limit = {
-			is_incorporated = yes
-			turmoil >= 0.10
-		}
-		ROOT = {
-			change_variable = { name = communism_progress_from_radicals add = prev.turmoil }
-		}
-	}
-	set_variable = { name = communism_progress_from_loyalists value = 0 }
-	every_scope_state = {
-		limit = {
-			is_incorporated = yes
-			loyalty >= 0.10
-		}
-		ROOT = {
-			change_variable = { name = communism_progress_from_loyalists add = prev.loyalty }
-		}
-	}
-	change_variable = { name = communism_progress_from_loyalists multiply = -1 }
 	#From Poverty
 	set_variable = { name = communism_progress_from_poverty value = 0 }
 	every_scope_state = {
@@ -3149,34 +3068,7 @@ calculate_communism_progress = {
 			change_variable = { name = communism_progress_from_poverty add = prev.var:temp_sol }
 		}
 	}
-	#From Characters
-	set_variable = { name = communism_progress_from_characters value = 0 }
-	every_scope_character = {
-		limit = {
-			OR = {
-				has_ideology = ideology:ideology_communist
-				has_ideology = ideology:ideology_vanguardist
-				has_ideology = ideology:ideology_anarchist
-			}
-		}
-		ROOT = {
-			change_variable = { name = communism_progress_from_characters add = prev.popularity }
-		}
-	}
-	change_variable = { name = communism_progress_from_characters divide = 100 }
-	# From Interest Groups
-	set_variable = { name = communism_progress_from_igs value = 0 }
-	every_interest_group = {
-		limit = {
-			law_stance = {
-				law = law_type:law_council_republic
-				value > neutral
-			}
-		}
-		ROOT = {
-			set_variable = { name = communism_progress_from_igs value = prev.ig_clout }
-		}
-	}
+	
 	# From Laws
 	set_variable = { name = communism_progress_from_laws value = 0 }
 	# Cops
@@ -3246,38 +3138,16 @@ calculate_communism_progress = {
 		change_variable = { name = communism_progress_from_laws add = var:temp_ha_var_contribution }
 		remove_variable = temp_ha_var_contribution
 	}
-
-	# Compilation
-	change_variable = { name = communism_progress_var_next add = var:communism_progress_from_radicals }
-	change_variable = { name = communism_progress_var_next add = var:communism_progress_from_loyalists }
-	change_variable = { name = communism_progress_var_next add = var:communism_progress_from_poverty }
-	change_variable = { name = communism_progress_var_next add = var:communism_progress_from_igs }
-	change_variable = { name = communism_progress_var_next add = var:communism_progress_from_characters }
-	change_variable = { name = communism_progress_var_next add = var:communism_progress_from_laws }
-	change_variable = { name = communism_progress_var_next add = var:communism_progress_var_add }
-}
-
-add_communism_progress = {
-	change_variable = { name = communism_je_1_var add = var:communism_progress_var_next }
 }
 
 set_communism_vars = {
-	set_variable = { name = communism_progress_from_radicals value = 0 }
-	set_variable = { name = communism_progress_from_loyalists value = 0 }
 	set_variable = { name = communism_progress_from_poverty value = 0 }
-	set_variable = { name = communism_progress_from_igs value = 0 }
-	set_variable = { name = communism_progress_from_characters value = 0 }
 	set_variable = { name = communism_progress_from_laws value = 0 }
 	set_variable = { name = communism_progress_var_add value = 0 }
 }
 
 clear_communism_vars = {
-	remove_variable = communism_progress_var_next
-	remove_variable = communism_progress_from_radicals
-	remove_variable = communism_progress_from_loyalists
 	remove_variable = communism_progress_from_poverty
-	remove_variable = communism_progress_from_igs
-	remove_variable = communism_progress_from_characters
 	remove_variable = communism_progress_from_laws
 	remove_variable = communism_progress_var_add
 }
@@ -3817,158 +3687,11 @@ capitulate_to_revolution = {
 			months = normal_modifier_time
 			is_decaying = yes
 		}
-		add_ruling_interest_group = yes
-	}
-}
-
-calculate_brazil_slavery_progress = {
-	set_variable = { name = brz_slavery_next value = 0 }
-	if = {
-		limit = {
-			NOT = {
-				any_political_movement = {
-					is_political_movement_type = movement_to_preserve
-					OR = {
-						this.desired_law = law_type:law_legacy_slavery
-						this.desired_law = law_type:law_debt_slavery
-						this.desired_law = law_type:law_slave_trade
-					}
-				}
-			}
-		}
-		 # Towards Slaveowner Domination
 		if = {
 			limit = {
-				ig:ig_landowners = {
-					is_in_government = yes
-				}
+				is_insurrectionary = no
 			}
-			change_variable = {
-				name = brz_slavery_next
-				add = -1
-			}
-		}
-		if = {
-			limit = {
-				ig:ig_landowners = {
-					is_powerful = yes
-				}
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = -1
-			}
-		}
-		if = {
-			limit = {
-				has_modifier = brz_regency
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = -1
-			}
-		}
-		if = {
-			limit = {
-				ruler = {
-					OR = {
-						interest_group = {
-							is_interest_group_type = ig_landowners
-						}
-						has_ideology = ideology:ideology_slaver
-					}
-				}
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = -1
-			}
-		}
-		if = {
-			limit = {
-				any_scope_character = {
-					filter = {
-						OR = {
-							has_role = admiral
-							has_role = general
-						}
-					}
-					OR = {
-						has_ideology = ideology:ideology_slaver
-						interest_group = {
-							is_interest_group_type = ig_landowners
-						}
-					}
-					percent >= 0.5
-				}
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = -1
-			}
-		}
-		# Away from slaveowner Domination
-		if = {
-			limit = {
-				has_variable = var_slave_trade_suppression_var
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = 1
-			}
-		}
-		if = {
-			limit = {
-				ig:ig_landowners = {
-					is_marginal = yes
-				}
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = 1
-			}
-		}
-		if = {
-			limit = {
-				ig:ig_intelligentsia = {
-					is_in_government = yes
-				}
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = 1
-			}
-		}
-		if = {
-			limit = {
-				NOT = { 
-					has_law = law_type:law_slave_trade
-				}
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = 1
-			}
-		}
-		if = {
-			limit = {
-				NOT = { 
-					has_modifier = brz_regency 
-				}
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = 1
-			}
-		}
-		if = {
-			limit = {
-				has_variable = isabel_confirmed_heir_var
-			}
-			change_variable = {
-				name = brz_slavery_next
-				add = 1
-			}
+			add_ruling_interest_group = yes
 		}
 	}
 }
@@ -4114,8 +3837,17 @@ calculate_caudillo_progress = {
 	}
 }
 
-chi_add_1_fragile_unity = { # Actually subtracts from the bar
+chi_add_1_fragile_unity = {
 	custom_tooltip = chi_add_1_fragile_unity_tt
+	post_notification = warlord_china_explosion_point_add
+	change_variable = {
+		name = china_warlord_explosion
+		add = 1
+	}
+}
+
+chi_remove_1_fragile_unity = {
+	custom_tooltip = chi_remove_1_fragile_unity_tt
 	post_notification = warlord_china_explosion_point_remove
 	change_variable = {
 		name = china_warlord_explosion
@@ -4123,12 +3855,58 @@ chi_add_1_fragile_unity = { # Actually subtracts from the bar
 	}
 }
 
-chi_remove_1_fragile_unity = { # Actually adds to the bar
-	custom_tooltip = chi_remove_1_fragile_unity_tt
-	post_notification = warlord_china_explosion_point_add
-	change_variable = {
-		name = china_warlord_explosion
-		add = 1
+reset_afghan_treaty = {
+	custom_tooltip = {
+		text = reset_afghan_treaty_tt
+		if = {
+			limit = {
+				has_variable = proposed_durand_line
+			}
+			remove_variable = proposed_durand_line
+		}
+		if = {
+			limit = {
+				has_variable = proposed_indus_line
+			}
+			remove_variable = proposed_indus_line
+		}
+		if = {
+			limit = {
+				has_variable = proposed_status_quo
+			}
+			remove_variable = proposed_status_quo
+		}
+		if = {
+			limit = {
+				has_variable = proposed_torkestan_line
+			}
+			remove_variable = proposed_torkestan_line
+		}
+		if = {
+			limit = {
+				has_variable = proposed_amu_darya_line
+			}
+			remove_variable = proposed_amu_darya_line
+		}
+		if = {
+			limit = {
+				has_variable = proposed_status_quo_north
+			}
+			remove_variable = proposed_status_quo_north
+		}
+		if = {
+			limit = {
+				has_variable = proposed_compensation_for_afghanistan
+			}
+			remove_variable = proposed_compensation_for_afghanistan
+		}
+		if = {
+			limit = {
+				has_variable = proposed_reprisals_for_afghanistan
+			}
+			remove_variable = proposed_reprisals_for_afghanistan
+		}
+		remove_variable = afghanistan_delimitation_treaty_approved
 	}
 }
 
@@ -4186,4 +3964,492 @@ handle_revolutionary_sps = {
 			add_ruling_interest_group = yes
 		}
 	}
+}
+
+great_game_britain_progress_10 = {
+	custom_tooltip = {
+		text = great_game_points_britain_increases_10_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_great_game_control
+			}
+			je:je_great_game_control = {
+				add_progress = { value = -10 name = great_game_core_progress_bar }
+			}
+			update_gg_progressbar_tooltips = yes
+		}
+	}
+}
+
+great_game_britain_progress_15 = {
+	custom_tooltip = {
+		text = great_game_points_britain_increases_15_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_great_game_control
+			}
+			je:je_great_game_control = {
+				add_progress = { value = -15 name = great_game_core_progress_bar }
+			}
+			update_gg_progressbar_tooltips = yes
+		}
+	}
+}
+
+great_game_britain_progress_25 = {
+	custom_tooltip = {
+		text = great_game_points_britain_increases_25_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_great_game_control
+			}
+			je:je_great_game_control = {
+				add_progress = { value = -25 name = great_game_core_progress_bar }
+			}
+			update_gg_progressbar_tooltips = yes
+		}
+	}
+}
+
+great_game_britain_progress_50 = {
+	custom_tooltip = {
+		text = great_game_points_britain_increases_50_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_great_game_control
+			}
+			je:je_great_game_control = {
+				add_progress = { value = -50 name = great_game_core_progress_bar }
+			}
+			update_gg_progressbar_tooltips = yes
+		}
+	}
+}
+
+great_game_russia_progress_10 = {
+	custom_tooltip = {
+		text = great_game_points_russia_increases_10_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_great_game_control
+			}
+			je:je_great_game_control = {
+				add_progress = { value = 10 name = great_game_core_progress_bar }
+			}
+			update_gg_progressbar_tooltips = yes
+		}
+	}
+}
+
+great_game_russia_progress_15 = {
+	custom_tooltip = {
+		text = great_game_points_russia_increases_15_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_great_game_control
+			}
+			je:je_great_game_control = {
+				add_progress = { value = 15 name = great_game_core_progress_bar }
+			}
+			update_gg_progressbar_tooltips = yes
+		}
+	}
+}
+
+great_game_russia_progress_25 = {
+	custom_tooltip = {
+		text = great_game_points_russia_increases_25_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_great_game_control
+			}
+			je:je_great_game_control = {
+				add_progress = { value = 25 name = great_game_core_progress_bar }
+			}
+			update_gg_progressbar_tooltips = yes
+		}
+	}
+}
+
+complete_great_game_effect = {
+	set_global_variable = persia_conflict_started
+	set_global_variable = afghanistan_conflict_started
+	set_global_variable = korean_protectorate_started
+	set_global_variable = central_asia_consolidation_happened
+	set_global_variable = kazakhstan_revolt_happened
+	set_global_variable = caucasian_war_happened
+	random_list = {
+		50 = {
+			set_global_variable = caucasus_consolidated_var
+		}
+		50 = {
+			set_global_variable = caucasus_failure_var
+		}
+	}
+	random_list = {
+		50 = {
+			set_global_variable = kazakhstan_victory_var
+		}
+		50 = {
+			set_global_variable = kazakhstan_defeat_var
+		}
+	}
+	set_global_variable = khanates_russia_victory_var
+	random_list = {
+		50 = {
+			set_global_variable = korean_protectorate_success
+		}
+		50 = {
+			set_global_variable = korean_protectorate_failure
+		}
+	}
+	random_list = {
+		50 = {
+			set_global_variable = afghanistan_russia_victory_var
+		}
+		50 = {
+			set_global_variable = afghanistan_britain_victory_var
+		}
+		50 = {
+			set_global_variable = afghanistan_afghan_victory_var
+		}
+	}
+	random_list = {
+		50 = {
+			set_global_variable = persia_russia_victory_var
+		}
+		50 = {
+			set_global_variable = persia_britain_victory_var
+		}
+		50 = {
+			set_global_variable = persia_persian_victory_var
+		}
+	}
+	set_global_variable = china_border_codified_variable
+	set_global_variable = manchurian_railway_variable
+	set_global_variable = trans_siberian_done
+	set_global_variable = consolidated_british_india_variable
+	set_global_variable = contained_russian_pacific_variable
+}
+
+generate_pro_lobby_diplomatic_pact_opportunity = {
+	random_list = {
+		20 = {
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:relevant_country type = trade_agreement }
+				NOT = {
+					has_diplomatic_pact = {
+						who = scope:relevant_country
+						type = trade_agreement
+					}
+				}
+			}
+			set_variable = pro_lobby_proposal_trade_agreement
+		}
+		20 = {
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:relevant_country type = defensive_pact }
+				NOT = {
+					has_diplomatic_pact = {
+						who = scope:relevant_country
+						type = defensive_pact
+					}
+				}
+			}
+			set_variable = pro_lobby_proposal_defensive_pact
+		}
+		20 = {
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:relevant_country type = alliance }
+				NOT = {
+					has_diplomatic_pact = {
+						who = scope:relevant_country
+						type = alliance
+					}
+				}
+			}
+			set_variable = pro_lobby_proposal_alliance
+		}
+		20 = {
+			trigger = {
+				OR = {
+					can_create_diplomatic_pact = { target = scope:relevant_country type = foreign_investment_agreement }
+					can_create_diplomatic_pact = { target = scope:relevant_country type = foreign_investment_rights }
+				}
+				NOR = {
+					has_diplomatic_pact = {
+						who = scope:relevant_country
+						type = foreign_investment_rights
+					}
+					has_diplomatic_pact = {
+						who = scope:relevant_country
+						type = foreign_investment_agreement
+					}
+				}
+			}
+			set_variable = pro_lobby_proposal_investment_agreement
+		}
+		20 = {
+			trigger = {
+				scope:relevant_country = {
+					is_power_bloc_leader = yes
+				}
+				can_create_diplomatic_pact = { target = scope:relevant_country type = join_power_bloc }
+				NOT = {
+					is_in_same_power_bloc = scope:relevant_country
+				}
+			}
+			set_variable = pro_lobby_proposal_power_bloc
+		}
+		20 = {
+			trigger = {
+				is_power_bloc_leader = yes
+				can_create_diplomatic_pact = { target = scope:relevant_country type = invite_to_power_bloc }
+				NOT = {
+					is_in_same_power_bloc = scope:relevant_country
+				}
+			}
+			set_variable = pro_lobby_proposal_power_bloc_invite
+		}
+	}
+}
+
+generate_pro_lobby_diplomatic_pact_proposal = {
+	random_list = {
+		20 = { # Break an alliance
+			trigger = {
+				can_break_diplomatic_pact = { target = scope:third_party_country type = alliance }
+			}
+			set_variable = pro_lobby_proposal_break_alliance
+		}
+		20 = { # Break a trade agreement
+			trigger = {
+				can_break_diplomatic_pact = { target = scope:third_party_country type = trade_agreement }
+			}
+			set_variable = pro_lobby_proposal_break_trade_agreement
+		}
+		20 = { # Break a defensive pact
+			trigger = {
+				can_break_diplomatic_pact = { target = scope:third_party_country type = defensive_pact }
+			}
+			set_variable = pro_lobby_proposal_break_defensive_pact
+		}
+		20 = { # Do a rivalry
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:third_party_country type = rivalry }
+			}
+			set_variable = pro_lobby_proposal_rivalry
+		}
+		20 = { # Do an embargo
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:third_party_country type = embargo }
+			}
+			set_variable = pro_lobby_proposal_embargo
+		}
+		20 = { # Do a war
+			trigger = {
+				pro_lobby_war_valid_check = yes
+			}
+			set_variable = pro_lobby_proposal_war
+		}
+		20 = { # Leave Power Bloc
+			trigger = {
+				pro_lobby_leave_power_bloc_valid_check = yes
+			}
+			set_variable = pro_lobby_proposal_leave_power_bloc
+		}
+	}
+}
+
+generate_anti_lobby_diplomatic_pact_opportunity = {
+	random_list = {
+		20 = {
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:third_party_country type = trade_agreement }
+				NOT = {
+					has_diplomatic_pact = {
+						who = scope:third_party_country
+						type = trade_agreement
+					}
+				}
+			}
+			set_variable = anti_lobby_proposal_trade_agreement
+		}
+		20 = {
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:third_party_country type = defensive_pact }
+				NOT = {
+					has_diplomatic_pact = {
+						who = scope:third_party_country
+						type = defensive_pact
+					}
+				}
+			}
+			set_variable = anti_lobby_proposal_defensive_pact
+		}
+		20 = {
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:third_party_country type = alliance }
+				NOT = {
+					has_diplomatic_pact = {
+						who = scope:third_party_country
+						type = alliance
+					}
+				}
+			}
+			set_variable = anti_lobby_proposal_alliance
+		}
+		20 = {
+			trigger = {
+				OR = {
+					can_create_diplomatic_pact = { target = scope:relevant_country type = foreign_investment_agreement }
+					can_create_diplomatic_pact = { target = scope:relevant_country type = foreign_investment_rights }
+				}
+				NOR = {
+					has_diplomatic_pact = {
+						who = scope:third_party_country
+						type = foreign_investment_rights
+					}
+					has_diplomatic_pact = {
+						who = scope:third_party_country
+						type = foreign_investment_agreement
+					}
+				}
+			}
+			set_variable = anti_lobby_proposal_investment_agreement
+		}
+		20 = {
+			trigger = {
+				scope:third_party_country = {
+					is_power_bloc_leader = yes
+				}
+				can_create_diplomatic_pact = { target = scope:third_party_country type = join_power_bloc }
+				NOT = {
+					is_in_same_power_bloc = scope:third_party_country
+				}
+			}
+			set_variable = anti_lobby_proposal_power_bloc
+		}
+		20 = {
+			trigger = {
+				is_power_bloc_leader = yes
+				can_create_diplomatic_pact = { target = scope:third_party_country type = invite_to_power_bloc }
+				NOT = {
+					is_in_same_power_bloc = scope:third_party_country
+				}
+			}
+			set_variable = anti_lobby_proposal_power_bloc_invite
+		}
+	}
+}
+
+generate_anti_lobby_diplomatic_pact_proposal = {
+	random_list = {
+		20 = { # Break an alliance
+			trigger = {
+				can_break_diplomatic_pact = { target = scope:relevant_country type = alliance }
+			}
+			set_variable = anti_lobby_proposal_break_alliance
+		}
+		20 = { # Break a trade agreement
+			trigger = {
+				can_break_diplomatic_pact = { target = scope:relevant_country type = trade_agreement }
+			}
+			set_variable = anti_lobby_proposal_break_trade_agreement
+		}
+		20 = { # Break a defensive pact
+			trigger = {
+				can_break_diplomatic_pact = { target = scope:relevant_country type = defensive_pact }
+			}
+			set_variable = anti_lobby_proposal_break_defensive_pact
+		}
+		20 = { # Do a rivalry
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:relevant_country type = rivalry }
+			}
+			set_variable = anti_lobby_proposal_rivalry
+		}
+		20 = { # Do an embargo
+			trigger = {
+				can_create_diplomatic_pact = { target = scope:relevant_country type = embargo }
+			}
+			set_variable = anti_lobby_proposal_embargo
+		}
+		20 = { # Do a war
+			trigger = {
+				anti_lobby_war_valid_check = yes
+			}
+			set_variable = anti_lobby_proposal_war
+		}
+		20 = { # Leave Power Bloc
+			trigger = {
+				anti_lobby_leave_power_bloc_valid_check = yes
+			}
+			set_variable = anti_lobby_proposal_leave_power_bloc
+		}
+	}
+}
+
+clear_anti_lobby_vars = {
+	remove_variable = anti_lobby_proposal_break_alliance
+	remove_variable = anti_lobby_proposal_break_trade_agreement
+	remove_variable = anti_lobby_proposal_break_defensive_pact
+	remove_variable = anti_lobby_proposal_rivalry
+	remove_variable = anti_lobby_proposal_embargo
+	remove_variable = anti_lobby_proposal_war
+	remove_variable = anti_lobby_proposal_leave_power_bloc
+	remove_variable = anti_lobby_proposal_defensive_pact
+	remove_variable = anti_lobby_proposal_alliance
+	remove_variable = anti_lobby_proposal_trade_agreement
+	remove_variable = anti_lobby_proposal_power_bloc
+	remove_variable = anti_lobby_proposal_power_bloc_invite
+	remove_variable = anti_lobby_proposal_investment_agreement
+	remove_variable = anti_lobby_opportunity_target
+	remove_variable = anti_lobby_demand_target
+}
+
+clear_pro_lobby_vars = {
+	remove_variable = pro_lobby_proposal_defensive_pact
+	remove_variable = pro_lobby_proposal_alliance
+	remove_variable = pro_lobby_proposal_trade_agreement
+	remove_variable = pro_lobby_proposal_power_bloc
+	remove_variable = pro_lobby_proposal_power_bloc_invite
+	remove_variable = pro_lobby_proposal_investment_agreement
+	remove_variable = pro_lobby_proposal_break_alliance
+	remove_variable = pro_lobby_proposal_break_trade_agreement
+	remove_variable = pro_lobby_proposal_break_defensive_pact
+	remove_variable = pro_lobby_proposal_rivalry
+	remove_variable = pro_lobby_proposal_embargo
+	remove_variable = pro_lobby_proposal_war
+	remove_variable = pro_lobby_proposal_leave_power_bloc
+	remove_variable = pro_lobby_demand_target
+	remove_variable = pro_lobby_opportunity_target
+}
+
+update_gg_progressbar_tooltips = {
+	je:je_great_game_control = {
+		if = {
+			limit = {
+				"scripted_bar_progress(great_game_core_progress_bar)" < 0
+			}
+			set_bar_progress = { value = 0 name = great_game_core_progress_bar }
+		}
+		if = {
+			limit = {
+				"scripted_bar_progress(great_game_core_progress_bar)" > 200
+			}
+			set_bar_progress = { value = 200 name = great_game_core_progress_bar }
+		}
+		set_global_variable = { name = great_game_gbr_progress value = "scripted_bar_progress(great_game_core_progress_bar)" }
+		set_global_variable = { name = great_game_rus_progress value = 200 }
+		change_global_variable = { name = great_game_rus_progress subtract = global_var:great_game_gbr_progress }
+	}
+}
+
+clear_great_game_variables = {
+	remove_global_variable = great_game_gbr_progress
+	remove_global_variable = great_game_rus_progress
+	remove_global_variable = great_game_russian_economy_var
+	remove_global_variable = great_game_british_economy_var
+	remove_global_variable = great_game_economy_balance_var
 }

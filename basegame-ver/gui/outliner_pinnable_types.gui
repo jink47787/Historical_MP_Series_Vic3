@@ -802,17 +802,9 @@ types pinnable_outliner_items {
 							parentanchor = bottom|right
 							position = { 2 0 }
 						}
-					}
-					icon = {
-						datacontext = "[InterestGroup.GetParty]"
-						visible = "[InterestGroup.HasParty]"
-						texture = "[Party.GetIcon]"
-						size = { 20 20 }
-						parentanchor = vcenter
 
-						tooltipwidget = {
-							FancyTooltip_Party = {}
-						}
+						blockoverride "tooltip" {}
+						blockoverride "in_government_icon_tooltip" {}
 					}
 				}
 
@@ -873,6 +865,26 @@ types pinnable_outliner_items {
 					}
 				}
 
+				widget = {
+					name = "party_area"
+					size = {20 20}
+
+					#this is here even if the IG has no Party, to make sure everything else is aligned
+
+					visible = "[Not(IsDataModelEmpty(AccessPlayer.AccessActiveParties))]"
+
+					icon = {
+						datacontext = "[InterestGroup.GetParty]"
+						visible = "[InterestGroup.HasParty]"
+						texture = "[Party.GetIcon]"
+						size = { 100% 100% }
+
+						tooltipwidget = {
+							FancyTooltip_Party = {}
+						}
+					}
+				}
+
 				widget = { size = { 5 5 }}
 
 				character_portrait_mini = {
@@ -907,6 +919,8 @@ types pinnable_outliner_items {
 			onrightclick = "[RightClickMenuManager.ShowForIG(InterestGroup.AccessSelf)]"
 		}
 	}
+
+
 
 	type outliner_countries = pinnable_outliner_group {
 		datacontext = "[Outliner.AccessCategory('countries')]"
@@ -946,6 +960,85 @@ types pinnable_outliner_items {
 					margin_left = 5
 				}
 			}
+		}
+	}
+
+	type outliner_political_lobbies = pinnable_outliner_group {
+		
+		datacontext = "[Outliner.AccessCategory('political_lobbies')]"
+	
+		blockoverride "item" {
+			blockoverride "entry_size" {
+				size = { @entry_width @entry_height }
+			}
+
+			political_lobby_item = {
+				blockoverride "group_margin_left" {}
+
+				blockoverride "text_size" {
+					minimumsize = { 207 -1 }
+					maximumsize = { 207 -1 }
+					margin_left = 5
+				}
+			}
+		}
+	}
+
+	type political_lobby_item = pinnable_outliner_entry {
+		datacontext = "[OutlinerEntry.AccessScope.AccessPoliticalLobby]"
+
+		tooltipwidget = {
+			FancyTooltip_PoliticalLobby = {}
+		}
+
+		blockoverride "widget" {
+			hbox = {
+				layoutpolicy_horizontal = expanding
+
+				margin_left = 5
+				margin_right = 25
+				spacing = 7
+				maximumsize = { @entry_width -1 }
+				parentanchor = left
+	
+				political_lobby_icon_and_flag_tiny = {}
+
+				textbox = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+
+					block "expand_buttons_margin" {}
+					align = nobaseline
+					fontsize_min = 14
+					elide = right
+					max_width = 240
+					
+					raw_text = "[PoliticalLobby.GetNameNoFormatting]"
+				}
+
+				hbox = {
+					icon = {
+						name = "appeasement_icon"
+						texture = "gfx/interface/icons/political_lobby_icons/lobby_appeasement.dds"
+						size = { 20 20 }
+					}
+
+					textbox = {
+						autoresize = yes
+
+						raw_text = "#v [PoliticalLobby.GetAppeasement|+=]#!"
+
+						minimumsize = { 20 -1 }
+						align = right|nobaseline
+						margin_right = 3
+					}
+				}
+			}
+		}
+
+		blockoverride "onclick" {
+			onclick = "[InformationPanelBar.OpenPoliticalLobbyPanel(PoliticalLobby.AccessSelf)]"
+			using = lobby_hover_highlight
 		}
 	}
 
@@ -1033,8 +1126,7 @@ types pinnable_outliner_items {
 						flowcontainer = {
 							maximumsize = { 69 -1 }
 							scissor = yes
-							righttoleft = yes
-							datamodel = "[Market.AccessGoodsSortedByBalance]"
+							datamodel = "[Market.GetTopGoodsByLowestBalance('(int32)3')]"
 
 							item = {
 								button = {
@@ -1055,7 +1147,7 @@ types pinnable_outliner_items {
 						flowcontainer = {
 							maximumsize = { 69 -1 }
 							scissor = yes
-							datamodel = "[Market.AccessGoodsSortedByBalance]"
+							datamodel = "[Market.GetTopGoodsByHighestBalance('(int32)3')]"
 
 							item = {
 								button = {
@@ -1085,7 +1177,7 @@ types pinnable_outliner_items {
 					}
 
 					flowcontainer = {
-						datamodel = "[Market.AccessGoodsSortedByBalance]"
+						datamodel = "[Market.GetGoodsWithShortage]"
 						righttoleft = yes
 						spacing = 10
 						visible = "[Market.HasAnyGoodsShortage]"
@@ -1513,7 +1605,7 @@ types pinnable_outliner_items {
 	}
 
 	type player_item = flowcontainer {
-		margin_left = 5
+		margin_left = 15
 		
 		flowcontainer = {
 			visible = "[Or(Player.IsObserver, Not(Player.HasPlayable))]"
@@ -1581,32 +1673,6 @@ types pinnable_outliner_items {
 			}
 		}
 	}
-
-	type outliner_players = pinnable_outliner_group {
-		datacontext = "[Outliner.AccessCategory('players')]"
-
-		blockoverride "expand_buttons_visibility" {
-			# force show expand buttons
-			visible = yes
-		}
-
-		blockoverride "fixedgridbox_cell_size" {
-			addcolumn = @entry_width
-			addrow = 50
-		}
-
-		blockoverride "list_properties" {
-			datamodel = "[Outliner.AccessPlayers]"
-
-			item = {
-				blockoverride "entry_size" {
-					size = { @entry_width 50 }
-				}
-
-				player_item = {}
-			}
-		}
-	}
 	
 	type building_in_state_item = pinnable_expandable_outliner_entry {
 		datacontext = "[OutlinerEntry.AccessScope.AccessBuilding]"
@@ -1643,7 +1709,8 @@ types pinnable_outliner_items {
 				}
 
 				textbox = {
-					raw_text = "[Building.GetExpansionLevelDesc]"
+					text = "BUILDING_SIZE"
+					using = building_size_tooltip_with_ownership
 					align = nobaseline
 					fontsize_min = 12
 					margin_left = 10
@@ -1779,7 +1846,6 @@ types pinnable_outliner_items {
 			onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
 		}
 
-			
 		blockoverride "onclick" {
 			onclick = "[InformationPanelBar.OpenBuildingDetailsPanel( Building.AccessSelf )]"
 		}

@@ -1,3 +1,6 @@
+@entry_width = 350
+@entry_height = 30
+
 types ongoing_outliner_items {
 	### WARS ITEM
 	type outliner_war_item = widget {
@@ -599,7 +602,7 @@ types ongoing_outliner_items {
 
 			# Setbacks
 			hbox = {
-				visible = "[GreaterThan_int32(GetDefine('NPolitics', 'LAW_ENACTMENT_MAX_SETBACKS'), '(int32)0')]"
+				visible = "[GreaterThan_int32(GetPlayer.GetMaxLawEnactmentSetbacks, '(int32)0')]"
 				layoutpolicy_horizontal = preferred
 				layoutpolicy_vertical = preferred
 				spacing = 2
@@ -626,7 +629,7 @@ types ongoing_outliner_items {
 
 					#Setback 1
 					enactment_setback = {
-						visible = "[GreaterThanOrEqualTo_int32(GetDefine('NPolitics', 'LAW_ENACTMENT_MAX_SETBACKS'), '(int32)1')]"
+						visible = "[GreaterThanOrEqualTo_int32(GetPlayer.GetMaxLawEnactmentSetbacks, '(int32)1')]"
 
 						blockoverride "has_setback_visibility" {
 							visible = "[GreaterThanOrEqualTo_int32(Law.GetEnactmentSetbackCount, '(int32)1')]"
@@ -635,7 +638,7 @@ types ongoing_outliner_items {
 
 					#Setback 2
 					enactment_setback = {
-						visible = "[GreaterThanOrEqualTo_int32(GetDefine('NPolitics', 'LAW_ENACTMENT_MAX_SETBACKS'), '(int32)2')]"
+						visible = "[GreaterThanOrEqualTo_int32(GetPlayer.GetMaxLawEnactmentSetbacks, '(int32)2')]"
 
 						blockoverride "has_setback_visibility" {
 							visible = "[GreaterThanOrEqualTo_int32(Law.GetEnactmentSetbackCount, '(int32)2')]"
@@ -644,7 +647,7 @@ types ongoing_outliner_items {
 
 					#Setback 3
 					enactment_setback = {
-						visible = "[GreaterThanOrEqualTo_int32(GetDefine('NPolitics', 'LAW_ENACTMENT_MAX_SETBACKS'), '(int32)3')]"
+						visible = "[GreaterThanOrEqualTo_int32(GetPlayer.GetMaxLawEnactmentSetbacks, '(int32)3')]"
 
 						blockoverride "has_setback_visibility" {
 							visible = "[GreaterThanOrEqualTo_int32(Law.GetEnactmentSetbackCount, '(int32)3')]"
@@ -653,7 +656,7 @@ types ongoing_outliner_items {
 
 					#Setback 4
 					enactment_setback = {
-						visible = "[GreaterThanOrEqualTo_int32(GetDefine('NPolitics', 'LAW_ENACTMENT_MAX_SETBACKS'), '(int32)4')]"
+						visible = "[GreaterThanOrEqualTo_int32(GetPlayer.GetMaxLawEnactmentSetbacks, '(int32)4')]"
 
 						blockoverride "has_setback_visibility" {
 							visible = "[GreaterThanOrEqualTo_int32(Law.GetEnactmentSetbackCount, '(int32)4')]"
@@ -662,7 +665,7 @@ types ongoing_outliner_items {
 
 					#Setback 5
 					enactment_setback = {
-						visible = "[GreaterThanOrEqualTo_int32(GetDefine('NPolitics', 'LAW_ENACTMENT_MAX_SETBACKS'), '(int32)5')]"
+						visible = "[GreaterThanOrEqualTo_int32(GetPlayer.GetMaxLawEnactmentSetbacks, '(int32)5')]"
 
 						blockoverride "has_setback_visibility" {
 							visible = "[GreaterThanOrEqualTo_int32(Law.GetEnactmentSetbackCount, '(int32)5')]"
@@ -671,7 +674,7 @@ types ongoing_outliner_items {
 
 					#Setback 6
 					enactment_setback = {
-						visible = "[GreaterThanOrEqualTo_int32(GetDefine('NPolitics', 'LAW_ENACTMENT_MAX_SETBACKS'), '(int32)6')]"
+						visible = "[GreaterThanOrEqualTo_int32(GetPlayer.GetMaxLawEnactmentSetbacks, '(int32)6')]"
 
 						blockoverride "has_setback_visibility" {
 							visible = "[GreaterThanOrEqualTo_int32(Law.GetEnactmentSetbackCount, '(int32)6')]"
@@ -886,7 +889,7 @@ types ongoing_outliner_items {
 					size = { 90 4 }
 					
 					blockoverride "values" {
-						value = "[FixedPointToFloat(Country.GetRelationsWith( GetPlayer ))]"
+						value = "[IntToFloat(Country.GetRelationsWith( GetPlayer ))]"
 						min = "[GetDefine('NDiplomacy', 'MIN_RELATIONS')]"
 						max = "[GetDefine('NDiplomacy', 'MAX_RELATIONS')]"
 					}
@@ -942,7 +945,7 @@ types ongoing_outliner_items {
 
 		outliner_group = {
 			blockoverride "visibility" {
-				visible = "[GreaterThan_int32(GetDataModelSize(OutlinerEntry.AccessSubEntries), '(int32)1')]"
+				visible = "[GreaterThan_int32(OutlinerEntry.GetNumSubEntries, '(int32)1')]"
 			}
 
 			blockoverride "title_text" {
@@ -966,7 +969,7 @@ types ongoing_outliner_items {
 		}
 
 		flowcontainer = {
-			visible = "[Not(GreaterThan_int32(GetDataModelSize(OutlinerEntry.AccessSubEntries), '(int32)1'))]"
+			visible = "[Not(GreaterThan_int32(OutlinerEntry.GetNumSubEntries, '(int32)1'))]"
 			parentanchor = hcenter
 			direction = vertical
 			datamodel = "[OutlinerEntry.AccessSubEntries]"
@@ -975,6 +978,106 @@ types ongoing_outliner_items {
 				outliner_diplomatic_pact_item = {
 					datacontext = "[OutlinerEntry.AccessScope.AccessDiplomaticPact]"
 					datacontext = "[DiplomaticPact.GetSecondCountry]"
+				}
+			}
+		}
+	}
+
+	### PLAYERS LIST
+	type outliner_players = flowcontainer {
+		datacontext = "[Outliner.AccessCategory('players')]"
+		visible = "[GameIsMultiplayer]"
+		parentanchor = right
+		direction = vertical
+
+		background = {
+			using = default_background
+			alpha = 1
+			margin_right = 15
+			
+			modify_texture = {
+				texture = "gfx/interface/masks/fade_horizontal_center.dds"
+				spriteType = Corneredstretched
+				spriteborder = { 0 0 }
+				blend_mode = alphamultiply
+				alpha = 0.5
+			}
+		}
+
+		section_header_button = {
+			blockoverride "layout" {
+				size = { @entry_width 30 }
+			}
+
+			blockoverride "arrow_size" {
+				size = { 18 18 }
+			}
+
+			blockoverride "arrow_position" {
+				position = { 7 0 }
+				parentanchor = vcenter
+			}
+
+			blockoverride "fontsize" {}
+
+			blockoverride "left_textbox_default_format" {
+				default_format = "#v"
+			}
+
+			blockoverride "left_textbox_margin_left" {
+				margin_left = 30
+			}
+
+			blockoverride "left_text" {
+				text = "PLAYERS"
+			}
+
+			blockoverride "right_text" {
+				textbox = {
+					layoutstretchfactor_horizontal = 1
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					margin_right = 25
+					elide = right
+					align = right|nobaseline
+					alwaystransparent = yes
+					fontsize_min = 12
+					text = "[GetDataModelSize(Outliner.AccessPlayers)]"
+				}
+			}
+
+			blockoverride "onclick" {
+				onclick = "[OutlinerEntry.ToggleExpanded]"
+			}
+
+			blockoverride "onclick_showmore" {
+				visible = "[Not(OutlinerEntry.IsExpanded)]"
+			}
+
+			blockoverride "onclick_showless" {
+				visible = "[OutlinerEntry.IsExpanded]"
+			}
+		}
+
+		container = {
+			block "list_visibility" {
+				visible = "[OutlinerEntry.IsExpanded]"
+			}
+
+			fixedgridbox = {
+				block "fixedgridbox_cell_size" {
+					addcolumn = @entry_width
+					addrow = 50
+				}
+
+				block "datamodel" {
+					datamodel = "[Outliner.AccessPlayers]"
+				}
+
+				item = {
+					block "item" {
+						player_item = {}
+					}
 				}
 			}
 		}

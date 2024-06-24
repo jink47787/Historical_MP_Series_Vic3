@@ -132,39 +132,51 @@ input_context={
 	}
 
 	input_action = {
+		name = "open_power_bloc"
+		text = "SETTING_INPUT_ACTION_OPEN_POWER_BLOC"
+
+		scancode = 63	# F6
+	}
+
+	input_action = {
 		name = "open_diplomatic"
 		text = "SETTING_INPUT_ACTION_OPEN_DIPLOMATIC"
-		scancode = 63	# F6
+		scancode = 64	# F7
 	}
 
 	input_action = {
 		name = "open_technology"
 		text = "SETTING_INPUT_ACTION_OPEN_TECHNOLOGY"
-		scancode = 64	# F7
+		scancode = 65	# F8
 	}
 
 	input_action = {
 		name = "open_culture"
 		text = "SETTING_INPUT_ACTION_OPEN_CULTURE"
-		scancode = 65	# F8
+		scancode = 66	# F9
 	}
 
 	input_action = {
 		name = "open_population"
 		text = "SETTING_INPUT_ACTION_OPEN_POPULATION"
-		scancode = 66	# F9
+		scancode = 67	# F10
+		
 	}
 
 	input_action = {
 		name = "open_journal"
 		text = "SETTING_INPUT_ACTION_OPEN_JOURNAL"
-		scancode = 67	# F10
+		scancode = 13	# J
 	}
 
 	input_action = {
-		name = "open_decisions"
-		text = "SETTING_INPUT_ACTION_OPEN_DECISIONS"
-		scancode = 68	# F11
+		name = "open_companies"
+		text = "SETTING_INPUT_ACTION_OPEN_COMPANIES"
+		binding = {	# shift+F1
+			scancode = 58
+			modifier = shift
+		}
+		
 	}
 
 	input_action = {

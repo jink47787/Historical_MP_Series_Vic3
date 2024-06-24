@@ -12,7 +12,23 @@ types pop_browser_panel_types
 			text = "POP_BROWSER"
 		}
 
-		blockoverride "entire_content_area" {
+		blockoverride "animation_state_block" {
+			state = {
+				name = _show
+				start_sound = {
+					soundeffect = "event:/SFX/UI/SideBar/population"
+				}
+				start_sound = {
+					soundeffect = "snapshot:/Dynamic/mute_world_80"
+				}
+				start_sound = {
+					soundeffect = "snapshot:/Dynamic/mute_vfx_war_100"
+
+				}
+			}
+		}
+
+		blockoverride "scrollarea_content" {
 			vbox = {
 				layoutpolicy_vertical = expanding
 				layoutpolicy_horizontal = expanding
@@ -1410,6 +1426,7 @@ types pop_browser_panel_types
 								sort_button = {
 									size = { 90 30 }
 									text = "concept_population"
+									tooltip = "SORT_BY_POPULATION"
 									align = nobaseline
 									onclick = "[PopBrowserPanel.Sort('total_population')]"
 								}
@@ -1417,27 +1434,31 @@ types pop_browser_panel_types
 								sort_button = {
 									size = { 160 30 }
 									text = "POP_TYPE"
+									tooltip = "SORT_BY_POP_TYPE"
 									align = nobaseline
 									onclick = "[PopBrowserPanel.Sort('pop_type')]"
 								}
 
 								sort_button = {
 									size = { 130 30 }
-									text = "[concept_culture]"
+									text = "concept_culture"
+									tooltip = "SORT_BY_CULTURE"
 									align = nobaseline
 									onclick = "[PopBrowserPanel.Sort('culture')]"
 								}
 
 								sort_button = {
 									size = { 80 30 }
-									text = "[concept_religion]"
+									text = "concept_religion"
+									tooltip = "SORT_BY_RELIGION"
 									align = nobaseline
 									onclick = "[PopBrowserPanel.Sort('religion')]"
 								}
 
 								sort_button = {
 									size = { 110 30 }
-									text = "[concept_state]"
+									text = "concept_state"
+									tooltip = "SORT_BY_STATE"
 									align = nobaseline
 									onclick = "[PopBrowserPanel.Sort('state')]"
 								}
@@ -1445,6 +1466,7 @@ types pop_browser_panel_types
 								sort_button = {
 									size = { 145 30 }
 									text = "concept_building_workplace"
+									tooltip = "SORT_BY_BUILDING"
 									align = nobaseline
 									onclick = "[PopBrowserPanel.Sort('building')]"
 								}
@@ -1473,6 +1495,7 @@ types pop_browser_panel_types
 									sort_button = {
 										size = { 90 30 }
 										text = "RADICALS"
+										tooltip = "SORT_BY_RADICALS"
 										align = nobaseline
 										onclick = "[PopBrowserPanel.Sort('radicals')]"
 									}
@@ -1480,27 +1503,31 @@ types pop_browser_panel_types
 									sort_button = {
 										size = { 90 30 }
 										text = "LOYALISTS"
+										tooltip = "SORT_BY_LOYALISTS"
 										align = nobaseline
 										onclick = "[PopBrowserPanel.Sort('loyalists')]"
 									}
 
 									sort_button = {
 										size = { 200 30 }
-										text = "[concept_sol]"
+										text = "concept_sol"
+										tooltip = "SORT_BY_SOL"
 										align = nobaseline
 										onclick = "[PopBrowserPanel.Sort('standard_of_living')]"
 									}
 
 									sort_button = {
 										size = { 100 30 }
-										text = "[concept_political_strength]"
+										text = "concept_political_strength"
+										tooltip = "SORT_BY_POLITICAL_STRENGTH"
 										align = nobaseline
 										onclick = "[PopBrowserPanel.Sort('political_strength')]"
 									}
 
 									sort_button = {
 										size = { 100 30 }
-										text = "[concept_interest_group]"
+										text = "concept_interest_group"
+										tooltip = "SORT_BY_INTEREST_GROUP"
 										align = nobaseline
 										onclick = "[PopBrowserPanel.Sort('political_strength')]"
 									}
@@ -1544,13 +1571,15 @@ types pop_browser_panel_types
 									sort_button = {
 										size = { 90 30 }
 										text = "LITERACY"
+										tooltip = "SORT_BY_LITERACY"
 										align = nobaseline
 										onclick = "[PopBrowserPanel.Sort('literacy')]"
 									}
 
 									sort_button = {
 										size = { 90 30 }
-										text = "[concept_job_satisfaction]"
+										text = "concept_job_satisfaction"
+										tooltip = "SORT_BY_JOB_SATISFACTION"
 										align = nobaseline
 										onclick = "[PopBrowserPanel.Sort('job_satisfaction')]"
 									}
@@ -1559,6 +1588,7 @@ types pop_browser_panel_types
 										size = { 400 30 }
 										text = "NEEDS"
 										align = nobaseline
+										enabled = no
 										#onclick = "[PopBrowserPanel.Sort('needs')]"
 									}
 
@@ -1993,46 +2023,61 @@ types pop_browser_panel_types
 															margin_left = 5
 														}
 
+														v3_stacked_barchart = {
+															parentanchor = vcenter
+															size = { 400 30 }
 
-														widget = {
-															size = { 400 @spreadsheet_height }
-
-															flowcontainer = {
-																margin_left = 5
+															blockoverride "barchart_datamodel" {
 																datamodel = "[Pop.GetTopGoodsConsumption]"
-																tooltip = "[Pop.GetAdditionalSOLFactorsDesc]"
-																parentanchor = vcenter
+															}
 
-																item = {
-																	flowcontainer = {
-																		spacing = 10	
-																		datacontext = "[PopConsumptionGoods.GetGoods]"	
+															blockoverride "barchart_item_stretchfactor" {
+																# This is what is actually setting the size of the item
+																layoutstretchfactor_horizontal = "[FixedPointToInt(Multiply_CFixedPoint(PopConsumptionGoods.GetConsumptionRatio, '(CFixedPoint)100'))]"
+															}
 
-																		icon = {
-																			texture = "[Goods.GetTexture]"
-																			tooltip = "[Goods.GetStatePriceDesc]"
-																			size = { 26 26 }
+															blockoverride "barchart_item_datacontext" {
+																datacontext = "[PopConsumptionGoods.GetGoods]"
+															}
 
-																			textbox = {
-																				using = fontsize_small
-																				text = "[Goods.GetCompareIconAgainstBasePriceNoTooltip( Goods.GetStatePrice )]"
-																				parentanchor = bottom|right
-																				autoresize = yes
-																				align = nobaseline
-																				position = { 5 0 }
-																			}
-																		}
+															blockoverride "barchart_item_tooltip" {
+																tooltipwidget = {
+																	FancyTooltip_Goods_Pop_Consumption = {}
+																}
+															}
+
+															blockoverride "barchart_item_color" {
+																color = "[Goods.GetCategoryColor]"
+															}
+
+															blockoverride "barchart_item_margins" {}
+
+															blockoverride "barchart_item_icon" {
+																widget = {
+																	size = { 34 30 }
+																	icon = {
+																		texture = "[Goods.GetTexture]"
+																		tooltip = "[Goods.GetStatePriceDesc]"
+																		size = { 26 26 }
+																		parentanchor = center
+																		position = { -2 0 }
 
 																		textbox = {
+																			using = fontsize_small
+																			text = "[Goods.GetCompareIconAgainstBasePriceNoTooltip( Goods.GetStatePrice )]"
+																			parentanchor = bottom|right
 																			autoresize = yes
-																			raw_text = "#v [PopConsumptionGoods.GetConsumptionRatio|v%0]#!" 
 																			align = nobaseline
-																			parentanchor = vcenter
-																			minimumsize = { 44 -1 }
-																			maximumsize = { 44 -1 }
+																			position = { 5 0 }
 																		}
 																	}
 																}
+															}
+
+															blockoverride "barchart_plus_others_info" {
+																text = "AND_X_MORE_NEEDS"
+																tooltip = "NEEDS_BREAKDOWN"
+																size = { 28 -1 }
 															}
 														}
 													}
@@ -2085,7 +2130,7 @@ types pop_browser_panel_types
 		}
 	}
 
-	type filtered_pop_type_pol_str_piechart = pop_browser_chart {
+	type filtered_pop_type_pol_str_piechart = browser_chart {
 		blockoverride "datamodel" {
 			datamodel = "[PopBrowserPanel.GetFilteredPopTypesSortedByPolStr]"
 		}
@@ -2120,7 +2165,7 @@ types pop_browser_panel_types
 		}
 	}
 
-	type filtered_pop_type_population_piechart = pop_browser_chart {
+	type filtered_pop_type_population_piechart = browser_chart {
 		blockoverride "datamodel" {
 			datamodel = "[PopBrowserPanel.GetFilteredPopTypes]"
 		}
@@ -2156,7 +2201,7 @@ types pop_browser_panel_types
 		}
 	}
 
-	type filtered_state_population_piechart = pop_browser_chart {
+	type filtered_state_population_piechart = browser_chart {
 		blockoverride "datamodel" {
 			datamodel = "[PopBrowserPanel.GetFilteredStates]"
 		}
@@ -2191,7 +2236,7 @@ types pop_browser_panel_types
 		}
 	}
 
-	type filtered_culture_population_piechart = pop_browser_chart {
+	type filtered_culture_population_piechart = browser_chart {
 		blockoverride "datamodel" {
 			datamodel = "[PopBrowserPanel.GetFilteredCultures]"
 		}
@@ -2226,7 +2271,7 @@ types pop_browser_panel_types
 		}
 	}
 
-	type filtered_religion_population_piechart = pop_browser_chart {
+	type filtered_religion_population_piechart = browser_chart {
 		blockoverride "datamodel" {
 			datamodel = "[PopBrowserPanel.GetFilteredReligions]"
 		}
@@ -2261,7 +2306,7 @@ types pop_browser_panel_types
 		}
 	}
 
-	type pop_browser_chart = container {
+	type browser_chart = container {
 		onmousehierarchyenter = "[PdxGuiWidget.FindChild('chart_button').InterruptThenTriggerAnimation('hide_chart_button','show_chart_button')]"
 		onmousehierarchyleave = "[PdxGuiWidget.FindChild('chart_button').InterruptThenTriggerAnimation('show_chart_button','hide_chart_button')]"
 		alwaystransparent = no
@@ -2442,3 +2487,4 @@ template pop_browser_filter_button_icon {
 template pop_browser_section_header_size {
 	size = { 404 38 }
 }
+
