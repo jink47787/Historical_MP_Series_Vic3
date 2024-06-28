@@ -111,6 +111,7 @@
 	MOBILIZATION_BASE_DESIRED_RATIO_TO_ENEMY = 0.5   		# AI wants to have a total amount of mobilized army power that is equal to enemy mobilized army power * this
 	MOBILIZATION_MAIN_ATTACKER_ADDED_RATIO = 1.0  			# Add this to desired ratio for the main attacker in the war
 	MOBILIZATION_MAIN_DEFENDER_ADDED_RATIO = 1.0  			# Add this to desired ratio for the main defender in the war
+	MOBILIZATION_LOYAL_SUBJECT_OF_MAIN_PARTICIPANT_ADDED_RATIO = 0.75 # Add this to desired ratio for loyal subjects of main attacker/defender in the war
 	MOBILIZATION_PEACE_NEGOTIATOR_ADDED_RATIO = 0.5 		# Add this to desired ratio for any country that is or would become a peace negotiator (but isn't main attacker or defender)
 	MOBILIZATION_LOCAL_FRONTS_ADDED_RATIO = 0.5 			# Add this to desired ratio for any country that has least one local front
 	MOBILIZATION_UNINCORPORATED_OCCUPATION_ADDED_RATIO = 0.5	# Add this to desired ratio for any country whose unincorporated states are being occupied
@@ -121,6 +122,7 @@
     MOBILIZATION_MIN_ESCALATION_START = 50 	# Before this amount of escalation in a play, AI will only mobilize as a response to the enemy mobilizing (base)
 	MOBILIZATION_MIN_ESCALATION_BOLDNESS_FACTOR = 0.2 # Boldness is multiplied by this and subtracted from MOBILIZATION_MIN_MOBILIZATION_ESCALATION_START
     MOBILIZATION_MIN_MOBILIZATION_PEACE_NEGOTIATOR = 0.15   # AI will always mobilize at least this amount of forces if they are or would become a peace negotiator
+	MOBILIZATION_MIN_MOBILIZATION_LOYAL_SUBJECT_OF_MAIN_PARTICIPANT = 0.15   # AI will always mobilize at least this amount of forces if they are a loyal subject of main attacker/defender
 	MOBILIZATION_MIN_MOBILIZATION_TERRITORIAL_RISK = 0.15   #  AI will always mobilize at least this amount of forces if they might lose territory from the war/play
 	MOBILIZATION_MIN_MOBILIZATION_UNINCORPORATED_OCCUPATION = 0.25   #  AI will always mobilize at least this amount of forces if their unincorporated states are occupied
 	MOBILIZATION_MIN_MOBILIZATION_INCORPORATED_OCCUPATION = 0.5   #  AI will always mobilize at least this amount of forces if their incorporated states are occupied (overrides the multiplier for unincorporated occupation)
@@ -489,9 +491,12 @@
 	NAVAL_INVASION_MIN_RELATIVE_LOCAL_NAVY_STRENGTH = 0.5 			# AI wants at least this fraction of defending naval strength to risk a naval invasion
 	NAVAL_INVASION_MIN_RELATIVE_GLOBAL_NAVY_STRENGTH_ATTACKER = 0.25 # AI wants at least this fraction of naval strength in the overall war to risk a naval invasion as the attacking war side
 	NAVAL_INVASION_MIN_RELATIVE_GLOBAL_NAVY_STRENGTH_DEFENDER = 0.5 # AI wants at least this fraction of naval strength in the overall war to risk a naval invasion as the defending war side
-	NAVAL_INVASION_COOLDOWN_DAYS = 60 								# After launching a naval invasion, the AI will wait at least this long before launching another
+	NAVAL_INVASION_COOLDOWN_DAYS = 20 								# After launching a naval invasion, the AI will wait at least this long before launching another
 	NAVAL_INVASION_MIN_SCORE = 100									# AI won't bother launching naval invasions against theaters with a lower total state score than this
 	NAVAL_INVASION_MAX_LOCAL_FRONT_SCORE = 100						# Don't launch a naval invasion if there is a local front of at least this total score for the general
+
+	NAVAL_INVASION_MAX_AVAILABLE_ARMY_FRACTION = 0.5				# No more than this fraction of available armies can be used in naval invasions at the same time
+	NAVAL_INVASION_MAX_AVAILABLE_FLEET_FRACTION = 0.5				# No more than this fraction of available fleets can be used in naval invasions at the same time
 
     # Below data is used for General Orders:
 	HQ_DEFENSE_MIN_THEATER_SCORE = 100								# Theater of local HQ must have at least this importance score to have a minimum garrison
@@ -753,6 +758,16 @@
 	PRODUCTION_BUILDING_AUTONOMOUS_INVESTMENT_MILITARY_GOODS_FACTOR_MULT = 1.5 # Multiplies PRODUCTION_BUILDING_OUTPUT_NEEDED_MILITARY_GOODS_FACTOR & PRODUCTION_BUILDING_OUTPUT_WANTED_MILITARY_GOODS_FACTOR for autonomous investment pool constructions
 	PRODUCTION_BUILDING_AUTONOMOUS_INVESTMENT_INDUSTRIAL_GOODS_FACTOR_MULT = 4.0 # Multiplies PRODUCTION_BUILDING_OUTPUT_NEEDED_INDUSTRIAL_GOODS_FACTOR & PRODUCTION_BUILDING_OUTPUT_WANTED_INDUSTRIAL_GOODS_FACTOR for autonomous investment pool constructions
 	PRODUCTION_BUILDING_AUTONOMOUS_INVESTMENT_PROFIT_PRIVATIZE_SELF_OWNED_BUILDING_MULT = 0.75 # Multiply the total score for privatizing self-owned building levels by this
+	
+	# When the amount of saved value for foreign investment exceeds saved value for domestic investment, we start applying this bias to score for domestic autonomous constructions
+	# This is calculated as 1 + ( ( foreign investment / domestic investment - 1 ) * AUTONOMOUS_INVESTMENT_DOMESTIC_INVESTMENT_BIAS )
+	# The resulting multiplier is capped at AUTONOMOUS_INVESTMENT_DOMESTIC_INVESTMENT_BIAS_MAX
+	AUTONOMOUS_INVESTMENT_DOMESTIC_INVESTMENT_BIAS = 2.0 
+	AUTONOMOUS_INVESTMENT_DOMESTIC_INVESTMENT_BIAS_MAX = 10.0
+	
+	# Every this number of months, the saved values for domestic/foreign investment are reset to 0 
+	# This is to ensure that a prolonged period of domestic investment early game doesn't produce such high saved numbers that anything that comes after it doesn't matter
+	AUTONOMOUS_INVESTMENT_DOMESTIC_INVESTMENT_BIAS_RESET_TIME_IN_MONTHS = 60 
 	
 	# The AI for autonomous investment weights alters the weights for buildings based on how much of the investment pool originates from a certain ownership type building
 	# For example, if a high proportion of investment pool income is from Manor Houses, the building groups that manor houses have high investment weights for are weighted up
