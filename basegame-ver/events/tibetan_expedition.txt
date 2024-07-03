@@ -1714,6 +1714,9 @@ tibet_expedition_events.20 = { # Who to address the ultimatum to?
 			has_variable = delayed_expedition_events
 			has_variable = ultimatum_event
 		}
+		any_scope_character = {
+			has_variable = expedition_leader_var
+		}
 	}
 
 	cancellation_trigger = {
@@ -1747,18 +1750,28 @@ tibet_expedition_events.20 = { # Who to address the ultimatum to?
 			}
 		}
 		set_variable = ultimatum_event
+		random_scope_character = {
+			limit = {
+				has_variable = expedition_leader_var
+			}
+			save_scope_as = expedition_leader
+		}
 	}
 
 	option = {
 		name = tibet_expedition_events.20.a
 		default_option = yes
 
-		c:TIB = {
-			trigger_event = {
-				id = tibet_expedition_events.21 
-				days = 1
+		custom_tooltip = {
+			text = sending_tibet_ultimatum_tt
+			c:TIB = {
+				trigger_event = {
+					id = tibet_expedition_events.21 
+					days = 1
+				}
 			}
 		}
+
 		hidden_effect = {
 			set_variable = ultimatum_sent
 		}
@@ -1781,14 +1794,23 @@ tibet_expedition_events.20 = { # Who to address the ultimatum to?
 
 	option = {
 		name = tibet_expedition_events.20.b # ISN'T THERE SOMEONE YOU FORGOT?
-		trigger = { exists = scope:overlord_of_tibet }
+		trigger = {  # trigger tibet_expedition_events.22 only if overlord exists & c:TIB is subject (so this is not sent to an independent c:TIB with top_overlord)
+			exists = scope:overlord_of_tibet
+			c:TIB ?= {
+				is_subject = yes
+			}
+		} 
 
-		scope:overlord_of_tibet = {
-			trigger_event = {
-				id = tibet_expedition_events.22
-				days = 1
+		custom_tooltip = {
+			text = sending_tibet_overlord_ultimatum_tt
+			scope:overlord_of_tibet = {
+				trigger_event = {
+					id = tibet_expedition_events.22
+					days = 1
+				}
 			}
 		}
+
 		hidden_effect = {
 			set_variable = ultimatum_sent
 		}
@@ -1835,6 +1857,18 @@ tibet_expedition_events.21 = { # Ultimatum sent (Tibet)
 				save_scope_as = expedition_country
 			}
 		}
+		if = {
+			limit = {
+				c:TIB = {
+					is_subject = yes
+				}
+			}
+			c:TIB = {
+				overlord = {
+					save_scope_as = overlord_of_tibet
+				}
+			}
+		}
 	}
 
 	cancellation_trigger = {
@@ -1845,11 +1879,14 @@ tibet_expedition_events.21 = { # Ultimatum sent (Tibet)
 		name = tibet_expedition_events.21.a
 		default_option = yes
 
-		if = {
+		if = { # trigger tibet_expedition_events.26 only if overlord exists & c:TIB is subject (so this is not sent to an independent c:TIB with top_overlord)
 			limit = {
-				exists = top_overlord
+				exists = scope:overlord_of_tibet
+				c:TIB ?= {
+					is_subject = yes
+				}
 			}
-			top_overlord = {
+			scope:overlord_of_tibet = {
 				trigger_event = {
 					id = tibet_expedition_events.26 days = 1
 				}
@@ -1937,6 +1974,9 @@ tibet_expedition_events.21 = { # Ultimatum sent (Tibet)
 		change_relations = {
 			country = scope:expedition_country
 			value = -40
+		}
+		scope:expedition_country = { 
+			set_variable = received_subjugation_refusal_var # variable for expedition_country to fail their Tibet Expedition JE if this option is selected
 		}
 
 		scope:expedition_country = {
@@ -2091,6 +2131,12 @@ tibet_expedition_events.22 = { # Ultimatum sent (Overlord)
 		create_incident = {
 			country = scope:expedition_country
 			value = 40
+		}
+		scope:expedition_country = {
+			post_notification = tibet_overlord_refuses_demands
+		}
+		scope:expedition_country = { 
+			set_variable = received_subjugation_refusal_var # variable for expedition_country to fail their Tibet Expedition JE if this option is selected by player
 		}
 	}
 }

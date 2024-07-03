@@ -4529,7 +4529,147 @@ update_gg_progressbar_tooltips = {
 clear_great_game_variables = {
 	remove_global_variable = great_game_gbr_progress
 	remove_global_variable = great_game_rus_progress
-	remove_global_variable = great_game_russian_economy_var
-	remove_global_variable = great_game_british_economy_var
-	remove_global_variable = great_game_economy_balance_var
+	remove_global_variable = great_game_british_passive_var
+	remove_global_variable = great_game_russian_passive_var
+	remove_global_variable = great_game_balance_passive_var
+	remove_global_variable = great_game_central_asia_gdp
+}
+
+calculate_great_game_passive_progress = {
+	set_global_variable = { name = great_game_russian_passive_var value = 0 }
+	set_global_variable = { name = great_game_british_passive_var value = 0 }
+	set_global_variable = { name = great_game_balance_passive_var value = 0 }
+	set_global_variable = { name = great_game_central_asia_gdp value = 0 }
+	
+	every_state = {
+		limit = {
+			OR = {
+				region = sr:region_central_asia
+				region = sr:region_persia
+			}
+		}
+		change_global_variable = { name = great_game_central_asia_gdp add = this.gdp }
+	}
+
+	change_global_variable = { name = great_game_central_asia_gdp divide = 1000 }
+
+	c:GBR ?= {
+		every_scope_state = {
+			limit = {
+				OR = {
+					region = sr:region_central_asia
+					region = sr:region_persia
+				}
+			}
+			change_global_variable = { name = great_game_british_passive_var add = this.gdp }
+		}
+		every_subject_or_below = {
+			limit = {
+				any_scope_state = {
+					OR = {
+						region = sr:region_central_asia
+						region = sr:region_persia
+					}
+				}
+			}
+			every_scope_state = {
+				limit = {
+					OR = {
+						region = sr:region_central_asia
+						region = sr:region_persia
+					}
+				}
+				change_global_variable = { name = great_game_british_passive_var add = this.gdp }
+			}
+		}
+		power_bloc ?= {
+			every_power_bloc_member = {
+				limit = {
+					NOR = {
+						c:GBR ?= this
+						is_subject_of = c:GBR
+					}
+					any_scope_state = {
+						OR = {
+							region = sr:region_central_asia
+							region = sr:region_persia
+						}
+					}
+				}
+				every_scope_state = {
+					limit = {
+						OR = {
+							region = sr:region_central_asia
+							region = sr:region_persia
+						}
+					}
+					change_global_variable = { name = great_game_british_passive_var add = this.gdp }
+				}
+			}
+		}
+		change_global_variable = { name = great_game_british_passive_var divide = 1000 }
+		change_global_variable = { name = great_game_british_passive_var divide = global_var:great_game_central_asia_gdp }
+	}
+	
+	c:RUS ?= {
+		every_scope_state = {
+			limit = {
+				OR = {
+					region = sr:region_central_asia
+					region = sr:region_persia
+				}
+			}
+			change_global_variable = { name = great_game_russian_passive_var add = this.gdp }
+		}
+		every_subject_or_below = {
+			limit = {
+				any_scope_state = {
+					OR = {
+						region = sr:region_central_asia
+						region = sr:region_persia
+					}
+				}
+			}
+			every_scope_state = {
+				limit = {
+					OR = {
+						region = sr:region_central_asia
+						region = sr:region_persia
+					}
+				}
+				change_global_variable = { name = great_game_russian_passive_var add = this.gdp }
+			}
+		}
+		power_bloc ?= {
+			every_power_bloc_member = {
+				limit = {
+					NOR = {
+						c:RUS ?= this
+						is_subject_of = c:RUS
+					}
+					any_scope_state = {
+						OR = {
+							region = sr:region_central_asia
+							region = sr:region_persia
+						}
+					}
+				}
+				every_scope_state = {
+					limit = {
+						OR = {
+							region = sr:region_central_asia
+							region = sr:region_persia
+						}
+					}
+					change_global_variable = { name = great_game_russian_passive_var add = this.gdp }
+				}
+			}
+		}
+		change_global_variable = { name = great_game_russian_passive_var divide = 1000 }
+		change_global_variable = { name = great_game_russian_passive_var divide = global_var:great_game_central_asia_gdp  }
+	}
+
+	set_global_variable = { name = great_game_balance_passive_var value = global_var:great_game_russian_passive_var }
+	change_global_variable = { name = great_game_balance_passive_var subtract = global_var:great_game_british_passive_var }
+	change_global_variable = { name = great_game_balance_passive_var multiply = 5 }
 }

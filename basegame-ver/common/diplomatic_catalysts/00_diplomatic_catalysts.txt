@@ -22,6 +22,65 @@ catalyst_became_irrelevant = {
 	}	
 }
 
+catalyst_gained_land_border = {
+	category = cc_diplomatic_relevance
+	
+	ai_country_goal_recalculation = {
+		type = only_hostile
+		trigger = {
+			NOT = { is_country_type = unrecognized }
+			scope:target_country = { is_country_type = unrecognized }
+			has_technology_researched = civilizing_mission
+			"relations(scope:target_country)" < relations_threshold:amicable
+			country_rank >= rank_value:major_power
+		}
+		chance = {
+			value = 0.25
+			
+			if = {
+				limit = { country_rank >= rank_value:great_power }
+				multiply = 2
+			}
+
+			if = {
+				limit = { "relations(scope:target_country)" >= relations_threshold:cordial }
+				multiply = 0.5
+			}
+
+			if = {
+				limit = { is_in_same_power_bloc = scope:target_country }
+				multiply = 0.1
+			}			
+		}
+	}		
+}
+
+catalyst_lost_land_border = {
+	category = cc_diplomatic_relevance
+	
+	ai_country_goal_recalculation = {
+		type = more_friendly
+		trigger = {
+			NOT = { is_country_type = unrecognized }
+			scope:target_country = { is_country_type = unrecognized }
+			has_technology_researched = civilizing_mission
+			"relations(scope:target_country)" > relations_threshold:poor
+		}
+		chance = {
+			value = 0.25
+			
+			if = {
+				limit = { "relations(scope:target_country)" >= relations_threshold:amicable }
+				multiply = 4.0
+			}			
+			else_if = {
+				limit = { "relations(scope:target_country)" >= relations_threshold:cordial }
+				multiply = 2.0
+			}			
+		}
+	}	
+}
+
 catalyst_relations_level_increased = {
 	category = cc_relations_change
 	
@@ -1858,6 +1917,49 @@ catalyst_declined_bloc_invite = {
 	}
 }
 
+catalyst_left_power_bloc = {
+	category = cc_power_bloc_membership
+
+	ai_country_goal_recalculation = {
+		type = more_hostile
+		chance = {
+			value = 0.25
+			if = {
+				limit = {
+					is_power_bloc_leader = yes
+				}
+				add = 0.5
+			}
+			
+			if = {
+				limit = {
+					"relations(scope:target_country)" <= relations_threshold:hostile
+				}
+				multiply = 4.0
+			}	
+			else_if = {
+				limit = {
+					"relations(scope:target_country)" <= relations_threshold:cold
+				}
+				multiply = 3.0
+			}
+			else_if = {
+				limit = {
+					"relations(scope:target_country)" <= relations_threshold:poor
+				}
+				multiply = 2.0
+			}				
+		}
+	}
+		
+	effect = {
+		change_relations = {
+			country = scope:target_country
+			value = -30
+		}
+	}
+}
+
 catalyst_kicked_out_of_bloc = {
 	category = cc_power_bloc_membership
 	
@@ -2383,6 +2485,26 @@ catalyst_became_recognized = {
 				}
 				multiply = 2.0
 			}				
+		}
+	}	
+}
+
+catalyst_market_opened = {
+	category = cc_market_opened
+
+	ai_country_goal_recalculation = {
+		trigger = {
+			has_strategy = ai_strategy_economic_imperialism
+			scope:target_country = { 
+				is_country_type = unrecognized 
+				gdp >= 5000000
+			}
+		}
+	
+		type = more_friendly
+
+		chance = {
+			value = 1.0			
 		}
 	}	
 }

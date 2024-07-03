@@ -10,54 +10,24 @@ je_great_game_control = {
     immediate = {
 		set_global_variable = { name = great_game_gbr_progress value = 100 }
 		set_global_variable = { name = great_game_rus_progress value = 100 }
-		set_variable = { name = great_game_no_longer_power_bloc_leader_var value = 0 }
+		if = {
+			limit = {
+				OR = {
+					c:GBR ?= this
+					c:RUS ?= this
+				}
+			}
+			set_variable = { name = great_game_no_longer_power_bloc_leader_var value = 0 }
+		}
+		else = {
+			set_variable = { name = great_game_subjected_var value = 0 }
+		}
 		
 		if = {
 			limit = {
 				is_player = yes
 			}
-
-			set_global_variable = { name = great_game_russian_economy_var value = c:RUS.gdp }
-			every_country = {
-				limit = {
-					this.market = c:RUS.market
-				}
-				change_global_variable = { name = great_game_russian_economy_var add = this.gdp }
-			}
-			change_global_variable = { name = great_game_russian_economy_var divide = 10000000 }
-			set_global_variable = { name = great_game_british_economy_var value = c:GBR.gdp }
-			every_country = {
-				limit = {
-					this.market = c:GBR.market
-				}
-				change_global_variable = { name = great_game_british_economy_var add = this.gdp }
-			}
-			change_global_variable = { name = great_game_british_economy_var divide = 10000000 }
-			set_global_variable = { name = great_game_economy_balance_var value = global_var:great_game_russian_economy_var }
-			change_global_variable = { name = great_game_economy_balance_var divide = global_var:great_game_british_economy_var }
-			if = {
-				limit = {
-					global_var:great_game_economy_balance_var < 1
-				}
-				set_global_variable = { name = great_game_economy_balance_var_inverse value = -1 }
-				change_global_variable = { name = great_game_economy_balance_var_inverse divide = global_var:great_game_economy_balance_var }
-				set_global_variable = { name = great_game_economy_balance_var value = global_var:great_game_economy_balance_var_inverse }
-				remove_global_variable = great_game_economy_balance_var_inverse
-			}
-
-			set_global_variable = { name = great_game_russian_prestige_var value = c:RUS.prestige }
-			set_global_variable = { name = great_game_british_prestige_var value = c:GBR.prestige }
-			set_global_variable = { name = great_game_prestige_balance_var value = global_var:great_game_russian_prestige_var }
-			change_global_variable = { name = great_game_prestige_balance_var divide = global_var:great_game_british_prestige_var }
-			if = {
-				limit = {
-					global_var:great_game_prestige_balance_var < 1
-				}
-				set_global_variable = { name = great_game_prestige_balance_var_inverse value = -1 }
-				change_global_variable = { name = great_game_prestige_balance_var_inverse divide = global_var:great_game_prestige_balance_var }
-				set_global_variable = { name = great_game_prestige_balance_var value = global_var:great_game_prestige_balance_var_inverse }
-				remove_global_variable = great_game_prestige_balance_var_inverse
-			}
+			calculate_great_game_passive_progress = yes
 
 			scope:journal_entry = {
 				set_global_variable = { name = great_game_gbr_progress value = "scripted_bar_progress(great_game_core_progress_bar)" }
@@ -93,53 +63,175 @@ je_great_game_control = {
     }
 
 	complete = {
-		OR = {
-			custom_tooltip = {
-				text = great_game_complete_tt
-				NOT = {
-					any_country = {
-						capital = {
-							OR = {
-								region = sr:region_persia
-								region = sr:region_central_asia
-								region = sr:region_caucasus
+		trigger_if = {
+			limit = {
+				OR = {
+					c:GBR ?= this
+					c:RUS ?= this
+				}
+			}
+			OR = {
+				custom_tooltip = {
+					text = great_game_complete_tt
+					sr:region_caucasus = {
+						NOT = {
+							any_scope_state = {
+								is_capital = yes
+								owner = {
+									NOR = {
+										AND = {
+											exists = c:GBR
+											is_subject_of = c:GBR
+										}
+										AND = {
+											exists = c:RUS
+											is_subject_of = c:RUS
+										}
+										this.power_bloc ?= {
+											c:GBR ?= this.power_bloc_leader
+										}
+										this.power_bloc ?= {
+											c:RUS ?= this.power_bloc_leader
+										}
+									}
+								}
 							}
 						}
+					}
+					sr:region_central_asia = {
 						NOT = {
+							any_scope_state = {
+								is_capital = yes
+								owner = {
+									NOR = {
+										AND = {
+											exists = c:GBR
+											is_subject_of = c:GBR
+										}
+										AND = {
+											exists = c:RUS
+											is_subject_of = c:RUS
+										}
+										this.power_bloc ?= {
+											c:GBR ?= this.power_bloc_leader
+										}
+										this.power_bloc ?= {
+											c:RUS ?= this.power_bloc_leader
+										}
+									}
+								}
+							}
+						}
+					}
+					sr:region_persia = {
+						NOT = {
+							any_scope_state = {
+								is_capital = yes
+								owner = {
+									NOR = {
+										AND = {
+											exists = c:GBR
+											is_subject_of = c:GBR
+										}
+										AND = {
+											exists = c:RUS
+											is_subject_of = c:RUS
+										}
+										this.power_bloc ?= {
+											c:GBR ?= this.power_bloc_leader
+										}
+										this.power_bloc ?= {
+											c:RUS ?= this.power_bloc_leader
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				trigger_if = {
+					limit = {
+						c:RUS ?= this
+					}
+					c:GBR ?= {
+						country_rank < rank_value:great_power
+					}
+				}
+				trigger_if = {
+					limit = {
+						c:GBR ?= this
+					}
+					c:RUS ?= {
+						country_rank < rank_value:great_power
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				OR = {
+					c:PER ?= this
+					is_afghan_nation = yes
+				}
+			}
+			is_country_type = recognized
+			country_rank >= rank_value:major_power
+			custom_tooltip = {
+				text = not_in_european_power_bloc_tt
+				NOT = {
+					power_bloc ?= {
+						power_bloc_leader = {
 							OR = {
-								AND = {
-									exists = c:GBR
-									is_subject_of = c:GBR
-								}
-								AND = {
-									exists = c:RUS
-									is_subject_of = c:RUS
-								}
-								this.power_bloc ?= {
-									c:GBR ?= this.power_bloc_leader
-								}
-								this.power_bloc ?= {
-									c:RUS ?= this.power_bloc_leader
+								country_is_in_europe = yes
+								any_primary_culture = {
+									has_discrimination_trait = european_heritage
 								}
 							}
 						}
 					}
 				}
 			}
-			trigger_if = {
-				limit = {
-					c:RUS ?= this
+			custom_tooltip = {
+				text = europeans_expelled_from_casia_tt
+				NOT = {
+					c:GBR ?= {
+						OR = {
+							any_subject_or_below = {
+								any_scope_state = {
+									OR = {
+										region = sr:region_persia
+										region = sr:region_central_asia
+									}
+								}
+							}
+							any_scope_state = {
+								OR = {
+									region = sr:region_persia
+									region = sr:region_central_asia
+								}
+							}
+						}
+					}
 				}
-				c:GBR ?= {
-					country_rank < rank_value:great_power
-				}
-			}
-			trigger_if = {
-				limit = {
-					c:GBR ?= this
-				}
-				c:RUS ?= {
-					country_rank < rank_value:great_power
+				NOT = {
+					c:RUS ?= {
+						OR = {
+							any_subject_or_below = {
+								any_scope_state = {
+									OR = {
+										region = sr:region_persia
+										region = sr:region_central_asia
+									}
+								}
+							}
+							any_scope_state = {
+								OR = {
+									region = sr:region_persia
+									region = sr:region_central_asia
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -169,20 +261,72 @@ je_great_game_control = {
 						c:GBR ?= this
 					}
 				}
-				is_in_power_bloc = no
-			}
-			trigger_if = {
-				limit = {
-					OR = {
-						c:RUS ?= this
-						c:GBR ?= this
-					}
+				OR = {
+					is_in_power_bloc = no
 				}
 				custom_tooltip = {
 					text = not_leader_of_power_bloc_tt
 					is_in_power_bloc = yes
 					is_power_bloc_leader = no
 					var:great_game_no_longer_power_bloc_leader_var >= 60
+				}
+				AND = {
+					custom_tooltip = {
+						text = any_casia_country_recognised_tt
+						any_country = {
+							capital = {
+								OR = {
+									region = sr:region_persia
+									region = sr:region_central_asia
+								}
+							}
+							is_country_type = recognized
+							country_rank >= rank_value:major_power
+						}
+					}
+					custom_tooltip = {
+						text = europeans_expelled_from_casia_tt
+						NOT = {
+							c:GBR ?= {
+								OR = {
+									any_subject_or_below = {
+										any_scope_state = {
+											OR = {
+												region = sr:region_persia
+												region = sr:region_central_asia
+											}
+										}
+									}
+									any_scope_state = {
+										OR = {
+											region = sr:region_persia
+											region = sr:region_central_asia
+										}
+									}
+								}
+							}
+						}
+						NOT = {
+							c:RUS ?= {
+								OR = {
+									any_subject_or_below = {
+										any_scope_state = {
+											OR = {
+												region = sr:region_persia
+												region = sr:region_central_asia
+											}
+										}
+									}
+									any_scope_state = {
+										OR = {
+											region = sr:region_persia
+											region = sr:region_central_asia
+										}
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 			trigger_if = {
@@ -201,46 +345,17 @@ je_great_game_control = {
 					country_rank < rank_value:great_power
 				}
 			}
-			AND = {
-				custom_tooltip = {
-					text = any_casia_country_recognised_tt
-					any_country = {
-						capital = {
-							OR = {
-								region = sr:region_persia
-								region = sr:region_central_asia
-							}
-						}
-						is_country_type = recognized
-						country_rank >= rank_value:major_power
+			trigger_if = {
+				limit = {
+					OR = {
+						c:PER ?= this
+						is_afghan_nation = yes
 					}
 				}
 				custom_tooltip = {
-					text = europeans_expelled_from_casia_tt
-					NOT = {
-						any_country = {
-							OR = {
-								c:GBR ?= this
-								c:RUS ?= this
-							}
-							OR = {
-								any_subject_or_below = {
-									capital = {
-										OR = {
-											region = sr:region_persia
-											region = sr:region_central_asia
-										}
-									}
-								}
-								any_scope_state = {
-									OR = {
-										region = sr:region_persia
-										region = sr:region_central_asia
-									}
-								}
-							}
-						}
-					}
+					text = puppeted_for_too_long_tt
+					is_subject = yes
+					var:great_game_subjected_var >= 60
 				}
 			}
 		}
@@ -269,150 +384,166 @@ je_great_game_control = {
 				limit = {
 					is_player = yes
 				}
-				set_global_variable = { name = great_game_russian_economy_var value = c:RUS.gdp }
-				every_country = {
-					limit = {
-						this.market = c:RUS.market
-					}
-					change_global_variable = { name = great_game_russian_economy_var add = this.gdp }
-				}
-				change_global_variable = { name = great_game_russian_economy_var divide = 10000000 }
-				set_global_variable = { name = great_game_british_economy_var value = c:GBR.gdp }
-				every_country = {
-					limit = {
-						this.market = c:GBR.market
-					}
-					change_global_variable = { name = great_game_british_economy_var add = this.gdp }
-				}
-				change_global_variable = { name = great_game_british_economy_var divide = 10000000 }
-				set_global_variable = { name = great_game_economy_balance_var value = global_var:great_game_russian_economy_var }
-				change_global_variable = { name = great_game_economy_balance_var divide = global_var:great_game_british_economy_var }
-				if = {
-					limit = {
-						global_var:great_game_economy_balance_var < 1
-					}
-					set_global_variable = { name = great_game_economy_balance_var_inverse value = -1 }
-					change_global_variable = { name = great_game_economy_balance_var_inverse divide = global_var:great_game_economy_balance_var }
-					set_global_variable = { name = great_game_economy_balance_var value = global_var:great_game_economy_balance_var_inverse }
-					remove_global_variable = great_game_economy_balance_var_inverse
-				}
-
-				set_global_variable = { name = great_game_russian_prestige_var value = c:RUS.prestige }
-				set_global_variable = { name = great_game_british_prestige_var value = c:GBR.prestige }
-				set_global_variable = { name = great_game_prestige_balance_var value = global_var:great_game_russian_prestige_var }
-				change_global_variable = { name = great_game_prestige_balance_var divide = global_var:great_game_british_prestige_var }
-				if = {
-					limit = {
-						global_var:great_game_prestige_balance_var < 1
-					}
-					set_global_variable = { name = great_game_prestige_balance_var_inverse value = -1 }
-					change_global_variable = { name = great_game_prestige_balance_var_inverse divide = global_var:great_game_prestige_balance_var }
-					set_global_variable = { name = great_game_prestige_balance_var value = global_var:great_game_prestige_balance_var_inverse }
-					remove_global_variable = great_game_prestige_balance_var_inverse
-				}
+				calculate_great_game_passive_progress = yes
 			}
 			if = {
 				limit = {
-					is_in_power_bloc = yes
-					is_power_bloc_leader = no
+					OR = {
+						c:GBR ?= this
+						c:RUS ?= this
+					}
 				}
-				change_variable = {
-					name = great_game_no_longer_power_bloc_leader_var
-					add = 1
+				if = {
+					limit = {
+						is_in_power_bloc = yes
+						is_power_bloc_leader = no
+					}
+					change_variable = {
+						name = great_game_no_longer_power_bloc_leader_var
+						add = 1
+					}
+				}
+				if = {
+					limit = {
+						is_in_power_bloc = yes
+						is_power_bloc_leader = yes
+					}
+					set_variable = {
+						name = great_game_no_longer_power_bloc_leader_var
+						value = 0
+					}
 				}
 			}
-			if = {
-				limit = {
-					is_in_power_bloc = yes
-					is_power_bloc_leader = yes
+			else = {
+				if = {
+					limit = {
+						is_subject = yes
+					}
+					change_variable = {
+						name = great_game_subjected_var
+						add = 1
+					}
 				}
-				set_variable = {
-					name = great_game_no_longer_power_bloc_leader_var
-					value = 0
+				if = {
+					limit = {
+						is_subject = no
+					}
+					set_variable = {
+						name = great_game_subjected_var
+						value = 0
+					}
 				}
 			}
 		}
 	}
 
 	on_complete = {
-		custom_tooltip = outcome_depends_on_score_tt
 		if = {
 			limit = {
 				OR = {
-					scope:journal_entry = { scripted_bar_progress = { name = great_game_core_progress_bar value >= 120 } }
+					c:GBR ?= this
+					c:RUS ?= this
+				}
+			}
+			custom_tooltip = outcome_depends_on_score_tt
+			if = {
+				limit = {
+					OR = {
+						scope:journal_entry = { scripted_bar_progress = { name = great_game_core_progress_bar value >= 120 } }
+						AND = {
+							c:GBR ?= { country_rank < rank_value:great_power }
+							c:RUS ?= { country_rank >= rank_value:great_power }
+						}
+					}
+				}
+				if = {
+					limit = {
+						exists = c:RUS
+					}
+					c:RUS = {
+						trigger_event = { id = gg_core.1 popup = yes }
+					}
+				}
+				if = {
+					limit = {
+						exists = c:GBR
+					}
+					c:GBR = {
+						trigger_event = { id = gg_core.2 popup = yes }
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					scope:journal_entry = { scripted_bar_progress = { name = great_game_core_progress_bar value > 80 } }
+					scope:journal_entry = { scripted_bar_progress = { name = great_game_core_progress_bar value < 120 } }
 					AND = {
-						c:GBR ?= { country_rank < rank_value:great_power }
+						c:GBR ?= { country_rank >= rank_value:great_power }
 						c:RUS ?= { country_rank >= rank_value:great_power }
 					}
 				}
-			}
-			if = {
-				limit = {
-					exists = c:RUS
+				if = {
+					limit = {
+						exists = c:RUS
+					}
+					c:RUS = {
+						trigger_event = { id = gg_core.3 popup = yes }
+					}
 				}
-				c:RUS = {
-					trigger_event = { id = gg_core.1 popup = yes }
-				}
-			}
-			if = {
-				limit = {
-					exists = c:GBR
-				}
-				c:GBR = {
-					trigger_event = { id = gg_core.2 popup = yes }
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				scope:journal_entry = { scripted_bar_progress = { name = great_game_core_progress_bar value > 80 } }
-				scope:journal_entry = { scripted_bar_progress = { name = great_game_core_progress_bar value < 120 } }
-				AND = {
-					c:GBR ?= { country_rank >= rank_value:great_power }
-					c:RUS ?= { country_rank >= rank_value:great_power }
-				}
-			}
-			if = {
-				limit = {
-					exists = c:RUS
-				}
-				c:RUS = {
-					trigger_event = { id = gg_core.3 popup = yes }
-				}
-			}
-			if = {
-				limit = {
-					exists = c:GBR
-				}
-				c:GBR = {
-					trigger_event = { id = gg_core.3 popup = yes }
-				}
-			}
-		}
-		else_if = {
-			limit = {
-				OR = {
-					scope:journal_entry = { scripted_bar_progress = { name = great_game_core_progress_bar value <= 80 } }
-					AND = {
-						c:RUS ?= { country_rank < rank_value:great_power }
-						c:GBR ?= { country_rank >= rank_value:great_power }
+				if = {
+					limit = {
+						exists = c:GBR
+					}
+					c:GBR = {
+						trigger_event = { id = gg_core.3 popup = yes }
 					}
 				}
 			}
-			if = {
+			else_if = {
 				limit = {
-					exists = c:RUS
+					OR = {
+						scope:journal_entry = { scripted_bar_progress = { name = great_game_core_progress_bar value <= 80 } }
+						AND = {
+							c:RUS ?= { country_rank < rank_value:great_power }
+							c:GBR ?= { country_rank >= rank_value:great_power }
+						}
+					}
 				}
-				c:RUS = {
-					trigger_event = { id = gg_core.2 popup = yes }
+				if = {
+					limit = {
+						exists = c:RUS
+					}
+					c:RUS = {
+						trigger_event = { id = gg_core.2 popup = yes }
+					}
+				}
+				if = {
+					limit = {
+						exists = c:GBR
+					}
+					c:GBR = {
+						trigger_event = { id = gg_core.1 popup = yes }
+					}
 				}
 			}
-			if = {
-				limit = {
-					exists = c:GBR
+		}
+		else = {
+			custom_tooltip = europeans_forced_to_end_great_game_tt
+			trigger_event = { id = gg_core.4 popup = yes }
+			c:GBR ?= {
+				if = {
+					limit = {
+						has_journal_entry = je_great_game_control
+					}
+					post_notification = great_game_loss_to_natives
 				}
-				c:GBR = {
-					trigger_event = { id = gg_core.1 popup = yes }
+			}
+			c:RUS ?= {
+				if = {
+					limit = {
+						has_journal_entry = je_great_game_control
+					}
+					post_notification = great_game_loss_to_natives
 				}
 			}
 		}
@@ -732,7 +863,7 @@ je_disrupt_russian_caucasus = {
 	group = je_group_objectives
 
 	complete = {
-		c:CIR = {
+		c:CIR ?= {
             owns_entire_state_region = STATE_KUBAN
         }
 	}
