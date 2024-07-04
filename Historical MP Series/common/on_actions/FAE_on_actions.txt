@@ -4,7 +4,7 @@
 # scope:defender = defending commander
 # scope:state = location state
 
-FAE_on_battle_started = {
+fae_on_battle_started = {
     effect = {
         if = {
             # Conditional
@@ -12,16 +12,16 @@ FAE_on_battle_started = {
                 # State must have fort owned by the defender's country or a war ally of the defender's country
                 # and it can't be mothballed
                 scope:state ?= {
-                    has_building = FAE_building_forts
+                    has_building = fae_building_forts
                     OR = {
                         owner = scope:defender.owner
                         owner = {
                             is_in_war_together = scope:defender.owner
                         }
                     }
-                    this.b:FAE_building_forts = {
+                    this.b:fae_building_forts= {
                         NOT = {
-                            has_active_production_method = FAE_pm_mothballed
+                            has_active_production_method = fae_pm_mothballed
                         }
                     }
                 }
@@ -30,9 +30,9 @@ FAE_on_battle_started = {
                 # This on_action is fired twice (once for each country) for some reason
                 scope:defender ?= {
                     NOR = {
-                        has_modifier = FAE_md_fort_defense_strong
-                        has_modifier = FAE_md_fort_defense_mid
-                        has_modifier = FAE_md_fort_defense_weak
+                        has_modifier = fae_md_fort_defense_strong
+                        has_modifier = fae_md_fort_defense_mid
+                        has_modifier = fae_md_fort_defense_weak
                     }
                 }
             }
@@ -43,11 +43,11 @@ FAE_on_battle_started = {
                 if = {
                     limit = {
                         NOT = {
-                            has_variable = FAE_num_battles
+                            has_variable = fae_num_battles
                         }
                     }
                     set_variable = {
-                        name  = FAE_num_battles
+                        name  = fae_num_battles
                         value = 1
                     }
                 }
@@ -55,7 +55,7 @@ FAE_on_battle_started = {
                 # Battle already ongoing
                 else = {
                     change_variable = {
-                        name = FAE_num_battles
+                        name = fae_num_battles
                         add  = 1
                     }
                 }
@@ -75,26 +75,26 @@ FAE_on_battle_started = {
             set_local_variable = { # Mortality from concurrent battles
                 name  = fort_mortality_mult_battles
                 value = { # 0.5 + (0.5 * num_battles) => extra 50% mortality for each concurrent battle past first one
-                    add      = scope:state.var:FAE_num_battles
+                    add      = scope:state.var:fae_num_battles
                     multiply = 0.5
                     add      = 0.5
                 }
             }
             scope:state = {
                 set_variable = {
-                    name  = FAE_morality_mult_base
+                    name  = fae_morality_mult_base
                     value = local_var:fort_mortality_mult_base
                 }
                 
-                b:FAE_building_forts = {
+                b:fae_building_forts= {
                     if = {
                         limit = {
-                            has_modifier = FAE_md_fort_in_battle
+                            has_modifier = fae_md_fort_in_battle
                         }
-                        remove_modifier = FAE_md_fort_in_battle
+                        remove_modifier = fae_md_fort_in_battle
                     }
                     add_modifier = {
-                        name = FAE_md_fort_in_battle
+                        name = fae_md_fort_in_battle
                         multiplier = {
                             add      = local_var:fort_mortality_mult_base
                             multiply = local_var:fort_mortality_mult_battles
@@ -109,7 +109,7 @@ FAE_on_battle_started = {
                 value = 0
             }
             scope:battle = {
-                FAE_se_calculate_siege = {
+                fae_se_calculate_siege = {
                     SCOPE = attacker
                 }
             }
@@ -118,7 +118,7 @@ FAE_on_battle_started = {
             set_local_variable = {
                 name  = total_entrenchment
                 value = {
-                    add      = scope:state.b:FAE_building_forts.modifier:unit_fae_entrenchment_add
+                    add      = scope:state.b:fae_building_forts.modifier:unit_fae_entrenchment_add
                     multiply = {
                         scope:battle = {
                             every_combat_unit = {
@@ -140,13 +140,13 @@ FAE_on_battle_started = {
             # Save as variables for later use (battle conditions)
             scope:attacker = {
                 set_variable = {
-                    name  = FAE_siege
+                    name  = fae_siege
                     value = local_var:total_siege
                 }
             }
             scope:defender = {
                 set_variable = {
-                    name  = FAE_entrenchment
+                    name  = fae_entrenchment
                     value = local_var:total_entrenchment
                 }
             }
@@ -168,7 +168,7 @@ FAE_on_battle_started = {
                         divide   = local_var:total_entrenchment
                         
                         # Bounds
-                        min = FAE_WEAK_FORT_MIN_BONUS
+                        min = fae_WEAK_FORT_MIN_BONUS
                     }
                 }
                 
@@ -177,8 +177,8 @@ FAE_on_battle_started = {
                     name  = fort_defense_mult
                     value = {
                         add      = 1 # Default value for script math blocks is 0. DO NOT DELETE!!!
-                        add      = scope:state.b:FAE_building_forts.modifier:unit_defense_mult
-                        multiply = scope:state.b:FAE_building_forts.modifier:unit_defense_add
+                        add      = scope:state.b:fae_building_forts.modifier:unit_defense_mult
+                        multiply = scope:state.b:fae_building_forts.modifier:unit_defense_add
                         multiply = local_var:attacker_engineer_multiplier
                     }
                 }
@@ -186,7 +186,7 @@ FAE_on_battle_started = {
                     # name  = fort_provinces_mult
                     # value = {
                         # add      = 1
-                        # multiply = scope:state.b:FAE_building_forts.modifier:unit_provinces_lost_mult
+                        # multiply = scope:state.b:fae_building_forts.modifier:unit_provinces_lost_mult
                         # multiply = local_var:attacker_engineer_multiplier
                     # }
                 # }
@@ -194,7 +194,7 @@ FAE_on_battle_started = {
                     name  = fort_kill_rate_mult
                     value = {
                         add      = 1
-                        multiply = scope:state.b:FAE_building_forts.modifier:unit_kill_rate_add
+                        multiply = scope:state.b:fae_building_forts.modifier:unit_kill_rate_add
                         multiply = local_var:attacker_engineer_multiplier
                     }
                 }
@@ -203,41 +203,41 @@ FAE_on_battle_started = {
                 scope:defender = {
                     if = {
                         limit = {
-                            local_var:attacker_engineer_multiplier >= FAE_STRONG_FORT_BONUS_THRESHOLD
+                            local_var:attacker_engineer_multiplier >= fae_STRONG_FORT_BONUS_THRESHOLD
                         }
                         add_modifier = {
-                            name       = FAE_md_fort_defense_strong
+                            name       = fae_md_fort_defense_strong
                             multiplier = local_var:fort_defense_mult
                         }
                         add_modifier = {
-                            name       = FAE_md_fort_kill_rate_strong
+                            name       = fae_md_fort_kill_rate_strong
                             multiplier = local_var:fort_kill_rate_mult
                         }
                         # add_modifier = {
-                            # name       = FAE_md_fort_provinces_lost_strong
+                            # name       = fae_md_fort_provinces_lost_strong
                             # multiplier = local_var:fort_provinces_mult
                         # }
                     }
                     else_if = {
                         limit = {
-                            local_var:attacker_engineer_multiplier >= FAE_PARTIAL_FORT_BONUS_THRESHOLD
+                            local_var:attacker_engineer_multiplier >= fae_PARTIAL_FORT_BONUS_THRESHOLD
                         }
                         add_modifier = {
-                            name       = FAE_md_fort_defense_mid
+                            name       = fae_md_fort_defense_mid
                             multiplier = local_var:fort_defense_mult
                         }
                         add_modifier = {
-                            name       = FAE_md_fort_kill_rate_mid
+                            name       = fae_md_fort_kill_rate_mid
                             multiplier = local_var:fort_kill_rate_mult
                         }
                     }
                     else = {
                         add_modifier = {
-                            name       = FAE_md_fort_defense_weak
+                            name       = fae_md_fort_defense_weak
                             multiplier = local_var:fort_defense_mult
                         }
                         add_modifier = {
-                            name       = FAE_md_fort_kill_rate_weak
+                            name       = fae_md_fort_kill_rate_weak
                             multiplier = local_var:fort_kill_rate_mult
                         }
                     }
@@ -245,15 +245,15 @@ FAE_on_battle_started = {
                 scope:attacker ?= {
                     if = {
                         limit = {
-                            has_modifier = FAE_md_fort_occupation_speed
+                            has_modifier = fae_md_fort_occupation_speed
                         }
-                        remove_modifier = FAE_md_fort_occupation_speed
+                        remove_modifier = fae_md_fort_occupation_speed
                     }
                     add_modifier = {
-                        name       = FAE_md_fort_occupation_speed
+                        name       = fae_md_fort_occupation_speed
                         multiplier = {
                             add      = 1
-                            multiply = scope:state.b:FAE_building_forts.modifier:unit_occupation_mult
+                            multiply = scope:state.b:fae_building_forts.modifier:unit_occupation_mult
                             multiply = local_var:attacker_engineer_multiplier
                         }
                     }
@@ -264,32 +264,32 @@ FAE_on_battle_started = {
             else = {
                 scope:defender = {
                     add_modifier = {
-                        name       = FAE_md_fort_defense_strong
+                        name       = fae_md_fort_defense_strong
                         multiplier = {
                             add      = 1
-                            add      = scope:state.b:FAE_building_forts.modifier:unit_defense_mult
-                            multiply = scope:state.b:FAE_building_forts.modifier:unit_defense_add
+                            add      = scope:state.b:fae_building_forts.modifier:unit_defense_mult
+                            multiply = scope:state.b:fae_building_forts.modifier:unit_defense_add
                         }
                     }
                     add_modifier = {
-                        name       = FAE_md_fort_kill_rate_strong
-                        multiplier = scope:state.b:FAE_building_forts.modifier:unit_kill_rate_add
+                        name       = fae_md_fort_kill_rate_strong
+                        multiplier = scope:state.b:fae_building_forts.modifier:unit_kill_rate_add
                     }
                     # add_modifier = {
-                        # name       = FAE_md_fort_provinces_lost_strong
-                        # multiplier = scope:state.b:FAE_building_forts.modifier:unit_provinces_lost_mult
+                        # name       = fae_md_fort_provinces_lost_strong
+                        # multiplier = scope:state.b:fae_building_forts.modifier:unit_provinces_lost_mult
                     # }
                 }
                 scope:attacker ?= {
                     if = {
                         limit = {
-                            has_modifier = FAE_md_fort_occupation_speed
+                            has_modifier = fae_md_fort_occupation_speed
                         }
-                        remove_modifier = FAE_md_fort_occupation_speed
+                        remove_modifier = fae_md_fort_occupation_speed
                     }
                     add_modifier = {
-                        name       = FAE_md_fort_occupation_speed
-                        multiplier = scope:state.b:FAE_building_forts.modifier:unit_occupation_mult
+                        name       = fae_md_fort_occupation_speed
+                        multiplier = scope:state.b:fae_building_forts.modifier:unit_occupation_mult
                     }
                 }
             }
@@ -297,76 +297,76 @@ FAE_on_battle_started = {
             # Save fort for later use
             scope:defender = {
                 set_variable = {
-                    name  = FAE_fort_used
-                    value = scope:state.b:FAE_building_forts
+                    name  = fae_fort_used
+                    value = scope:state.b:fae_building_forts
                 }
             }
         }
     }
 }
 
-FAE_on_battle_ended = {
+fae_on_battle_ended = {
     effect = {
         scope:state ?= {
             # Only execute fort-related clean up logic if there was a defending general (because game state is only
-            # modified by FAE_on_battle_started if a defending general is present)
+            # modified by fae_on_battle_started if a defending general is present)
             if = {
                 limit = {
                     # Guard - this on_action is also fired twice
                     scope:defender ?= {
                         NOR = {
-                            has_modifier = FAE_md_fort_defense_strong
-                            has_modifier = FAE_md_fort_defense_mid
-                            has_modifier = FAE_md_fort_defense_weak
+                            has_modifier = fae_md_fort_defense_strong
+                            has_modifier = fae_md_fort_defense_mid
+                            has_modifier = fae_md_fort_defense_weak
                         }
                     }
                 }
                 
                 # Update battle counter
                 change_variable = {
-                    name     = FAE_num_battles
+                    name     = fae_num_battles
                     subtract = 1
                 }
                 if = {
                     limit = {
-                        var:FAE_num_battles = 0
+                        var:fae_num_battles = 0
                     }
-                    remove_variable = FAE_num_battles
-                    remove_variable = FAE_morality_mult_base
+                    remove_variable = fae_num_battles
+                    remove_variable = fae_morality_mult_base
                 }
                 
                 # Update fort mortality modifier
                 if = {
                     limit = {
-                        has_building = FAE_building_forts
+                        has_building = fae_building_forts
                     }
                     
                     # Recalculate fort mortality if battles still ongoing
                     if = {
                         limit = {
-                            has_variable = FAE_num_battles
+                            has_variable = fae_num_battles
                         }
                         set_local_variable = {
                             name  = fort_mortality_mult_base
-                            value = var:FAE_morality_mult_base
+                            value = var:fae_morality_mult_base
                         }
                         set_local_variable = {
                             name  = fort_mortality_mult_battles
                             value = {
-                                add      = var:FAE_num_battles
+                                add      = var:fae_num_battles
                                 multiply = 0.5
                                 add      = 0.5
                             }
                         }
-                        b:FAE_building_forts = {
+                        b:fae_building_forts= {
                             if = {
                                 limit = {
-                                    has_modifier = FAE_md_fort_in_battle
+                                    has_modifier = fae_md_fort_in_battle
                                 }
-                                remove_modifier = FAE_md_fort_in_battle
+                                remove_modifier = fae_md_fort_in_battle
                             }
                             add_modifier = {
-                                name = FAE_md_fort_in_battle
+                                name = fae_md_fort_in_battle
                                 multiplier = {
                                     add      = local_var:fort_mortality_mult_base
                                     multiply = local_var:fort_mortality_mult_battles
@@ -377,12 +377,12 @@ FAE_on_battle_ended = {
                     
                     # Clear fort mortality modifier if no more battles
                     else = {
-                        this.b:FAE_building_forts = {
+                        this.b:fae_building_forts= {
                             if = {
                                 limit = {
-                                    has_modifier = FAE_md_fort_in_battle
+                                    has_modifier = fae_md_fort_in_battle
                                 }
-                                remove_modifier = FAE_md_fort_in_battle
+                                remove_modifier = fae_md_fort_in_battle
                             }
                         }
                     }
@@ -391,7 +391,7 @@ FAE_on_battle_ended = {
         }
         
         trigger_event = {
-            id   = FAE_ev.2 # removes occupation speed malus from attacker
+            id   = fae_ev.2 # removes occupation speed malus from attacker
             days = 1 # 1 day delay to ensure occupation malus is applied
         }
         
@@ -399,88 +399,88 @@ FAE_on_battle_ended = {
             # wow this looks gross
             if = {
                 limit = {
-                    has_modifier = FAE_md_fort_defense_strong
+                    has_modifier = fae_md_fort_defense_strong
                 }
-                remove_modifier = FAE_md_fort_defense_strong
+                remove_modifier = fae_md_fort_defense_strong
             }
             if = {
                 limit = {
-                    has_modifier = FAE_md_fort_defense_mid
+                    has_modifier = fae_md_fort_defense_mid
                 }
-                remove_modifier = FAE_md_fort_defense_mid
+                remove_modifier = fae_md_fort_defense_mid
             }
             if = {
                 limit = {
-                    has_modifier = FAE_md_fort_defense_weak
+                    has_modifier = fae_md_fort_defense_weak
                 }
-                remove_modifier = FAE_md_fort_defense_weak
+                remove_modifier = fae_md_fort_defense_weak
             }
             if = {
                 limit = {
-                    has_modifier = FAE_md_fort_kill_rate_strong
+                    has_modifier = fae_md_fort_kill_rate_strong
                 }
-                remove_modifier = FAE_md_fort_kill_rate_strong
+                remove_modifier = fae_md_fort_kill_rate_strong
             }
             if = {
                 limit = {
-                    has_modifier = FAE_md_fort_kill_rate_mid
+                    has_modifier = fae_md_fort_kill_rate_mid
                 }
-                remove_modifier = FAE_md_fort_kill_rate_mid
+                remove_modifier = fae_md_fort_kill_rate_mid
             }
             if = {
                 limit = {
-                    has_modifier = FAE_md_fort_kill_rate_weak
+                    has_modifier = fae_md_fort_kill_rate_weak
                 }
-                remove_modifier = FAE_md_fort_kill_rate_weak
+                remove_modifier = fae_md_fort_kill_rate_weak
             }
             # if = {
                 # limit = {
-                    # has_modifier = FAE_md_fort_provinces_lost_strong
+                    # has_modifier = fae_md_fort_provinces_lost_strong
                 # }
-                # remove_modifier = FAE_md_fort_provinces_lost_strong
+                # remove_modifier = fae_md_fort_provinces_lost_strong
             # }
             # if = {
                 # limit = {
-                    # has_modifier = FAE_md_fort_provinces_lost_weak
+                    # has_modifier = fae_md_fort_provinces_lost_weak
                 # }
-                # remove_modifier = FAE_md_fort_provinces_lost_weak
+                # remove_modifier = fae_md_fort_provinces_lost_weak
             # }
             
             if = {
                 limit = {
-                    has_variable = FAE_fort_used
+                    has_variable = fae_fort_used
                 }
-                var:FAE_fort_used = {
+                var:fae_fort_used = {
                     if = {
                         limit = {
-                            has_modifier = FAE_md_fort_in_battle
+                            has_modifier = fae_md_fort_in_battle
                         }
-                        remove_modifier = FAE_md_fort_in_battle
+                        remove_modifier = fae_md_fort_in_battle
                     }
                     
                     state ?= { # Battle counter decrement failsafe
                         if = {
                             limit = {
-                                has_variable = FAE_num_battles
+                                has_variable = fae_num_battles
                                 NOT = {
                                     scope:state = THIS
                                 }
                             }
                             change_variable = {
-                                name     = FAE_num_battles
+                                name     = fae_num_battles
                                 subtract = 1
                             }
                             if = {
                                 limit = {
-                                    var:FAE_num_battles = 0
+                                    var:fae_num_battles = 0
                                 }
-                                remove_variable = FAE_num_battles
-                                remove_variable = FAE_morality_mult_base
+                                remove_variable = fae_num_battles
+                                remove_variable = fae_morality_mult_base
                             }
                         }
                     }
                 }
-                remove_variable = FAE_fort_used
+                remove_variable = fae_fort_used
             }
         }
     }
@@ -488,11 +488,11 @@ FAE_on_battle_ended = {
 
 # on_battle_ended doesn't fire for battles ended prematurely (e.g. from peace being signed mid-battle), so we're using
 # this to clean up lingering battle modifiers when wars end
-FAE_oa_on_war_end = {
+fae_oa_on_war_end = {
     effect = {
         every_country = {
             trigger_event = {
-                id   = FAE_ev.1
+                id   = fae_ev.1
                 days = 1 # 1 day delay to prevent race condition (or at least i think there is one? idfk at this point)
             }
         }
