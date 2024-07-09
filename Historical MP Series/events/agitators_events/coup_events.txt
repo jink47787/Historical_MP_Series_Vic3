@@ -217,6 +217,15 @@ coup.1 = {
 					save_scope_as = coup_desired_law
 				}
 			}
+			else = {
+				set_variable = { name = coup_for_law value = 4 }
+				random_law = {
+					limit = {
+						type = law_type:law_republic
+					}
+					save_scope_as = coup_desired_law
+				}
+			}
 		}
 		
 		scope:coup_ig = {
@@ -381,6 +390,11 @@ coup.2 = {
 		if = {
 			limit = {
 				has_law = law_type:law_monarchy
+				NOT = {
+					scope:coup_desired_law = {
+						type = law_type:law_autocracy
+					}
+				}
 			}
 			set_variable = {
 				name = abolishing_monarchy_var
@@ -735,7 +749,7 @@ coup.2 = {
 		name = coup.2.c
 		trigger = {
 			scope:coup_desired_law = {
-				law_type:law_republic
+				type = law_type:law_republic
 			}
 		}
 		default_option = yes
@@ -790,7 +804,7 @@ coup.2 = {
 		}
 	}
 	option = {
-		name = coup.2.g
+		name = coup.2.e
 		trigger = {
 			scope:coup_desired_law = {
 				type = law_type:law_theocracy
@@ -838,66 +852,7 @@ coup.2 = {
 			activate_law = law_type:law_oligarchy
 		}
 	}
-#	option = {
-#		name = coup.2.g
-#		trigger = {
-#			scope:coup_desired_law = {
-#				type = law_type:law_council_republic
-#			}
-#		}
-#		default_option = yes
-#		scope:coup_ig = {
-#			hidden_effect = {
-#				if = {
-#					limit = {
-#						has_modifier = modifier_unrivaled_in_government
-#					}
-#					remove_modifier = modifier_unrivaled_in_government
-#				}
-#			}
-#			add_modifier = {
-#				name = modifier_unrivaled_in_government
-#				months = long_modifier_time
-#				is_decaying = yes
-#			}
-#		}
-#		if = {
-#			limit = {
-#				any_country = {
-#					has_variable = coup_sponsor
-#					this.var:coup_sponsor = root
-#				}
-#			}
-#			root = { set_owes_obligation_to = { country = scope:coup_sponsor_obligation_target setting = yes } }	
-#			scope:coup_sponsor_obligation_target = {
-#				remove_variable = coup_sponsor
-#			}
-#		}
-#		scope:coup_ig = {
-#			leader = {
-#				set_character_as_ruler = yes
-#			}
-#		}
-#		if = {
-#			limit = {
-#				has_technology_researched = political_agitation
-#				NOT = {
-#					has_law = law_type:law_single_party_state
-#				}
-#			}
-#			activate_law = law_type:law_single_party_state
-#		}
-#		else_if = {
-#			limit = {
-#				NOT = {
-#					has_law = law_type:law_oligarchy
-#				}
-#			}
-#			activate_law = law_type:law_oligarchy
-#		}
-#	}
 }
-
 
 # Coup IG removed from power
 coup.3 = {
@@ -960,6 +915,8 @@ coup.3 = {
 			OR = {
 				has_law = law_type:law_censorship
 				has_law = law_type:law_outlawed_dissent
+			}
+			OR  = {
 				has_law = law_type:law_secret_police
 				has_law = law_type:law_national_guard
 				has_law = law_type:law_dedicated_police
@@ -1015,7 +972,7 @@ coup.3 = {
 				name = coup_prevented
 				months = long_modifier_time
 				is_decaying = yes
-				multiplier = -5 # -10 approval
+				# +2 approval
 			}
 		}
 		scope:coup_ig = {
@@ -1023,7 +980,7 @@ coup.3 = {
 				name = coup_prevented
 				months = long_modifier_time
 				is_decaying = yes
-				multiplier = -3 # -6 approval
+				multiplier = -5 # -10 approval
 			}
 			set_variable = { name = coup_guilty days = 3650 }
 		}
@@ -1356,8 +1313,9 @@ coup_pulse_events.1 = {
 		else_if = {
 			limit = {
 				scope:accused_general = {
-					interest_group = {
-						is_same_interest_group_type = scope:coup_ig
+					law_stance = {
+						law = scope:coup_desired_law.type
+						value < neutral
 					}
 				}
 			}
@@ -1382,7 +1340,9 @@ coup_pulse_events.1 = {
 		if = {
 			limit = {
 				scope:accused_general = {
-					is_same_interest_group_type = scope:coup_ig
+					interest_group = {
+						is_same_interest_group_type = scope:coup_ig
+					}
 				}
 			}
 			change_variable = {
