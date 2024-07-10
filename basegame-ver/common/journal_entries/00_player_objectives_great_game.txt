@@ -873,8 +873,16 @@ je_disrupt_russian_caucasus = {
 	}
 
 	fail = {
-		c:CIR ?= {
-			is_country_alive = no
+		custom_tooltip = {
+			text = circassia_dead_tt
+			OR = {	
+				c:CIR ?= {
+					is_country_alive = no
+				}
+				NOT = {
+					exists = c:CIR
+				}	
+			}
 		}
 	}
 
@@ -1253,6 +1261,9 @@ je_maintain_afghan_protectorate = {
 				percent >= 0.6
 			}
 		}
+		country_or_subject_owns_entire_state_region = STATE_KABUL
+		country_or_subject_owns_entire_state_region = STATE_HERAT
+		country_or_subject_owns_entire_state_region = STATE_KANDAHAR
 		scope:journal_entry = {
 			is_goal_complete = yes
 		}
@@ -1426,10 +1437,37 @@ je_secure_influence_over_persia = {
 	}
 
 	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
+		trigger_if = {
+			limit = {
+				exists = c:PER
+			}
+			custom_tooltip = {
+				text = persia_puppeted_tt
+				c:PER ?= {
+					is_subject_of = ROOT
+				}
+			}
 		}
-		exists = c:PER
+		trigger_else = {
+			any_state = {
+				filter = {
+					region = sr:region_persia
+					state_region = {
+						is_homeland = cu:persian
+					}
+				}
+				custom_tooltip = {
+					text = owned_by_this_country_or_subjects_tt
+					OR = {
+						owner = ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				percent >= 0.6
+			}
+		}
 		country_or_subject_owns_entire_state_region = STATE_IRAKAJEMI
 		country_or_subject_owns_entire_state_region = STATE_TABRIZ
 		country_or_subject_owns_entire_state_region = STATE_LARISTAN
@@ -1443,6 +1481,9 @@ je_secure_influence_over_persia = {
 				}
 			}
 		}
+		scope:journal_entry = {
+			is_goal_complete = yes
+		}
 	}
 
 	current_value = {
@@ -1455,6 +1496,37 @@ je_secure_influence_over_persia = {
 	
 	progressbar = yes
 
+	is_progressing = {
+		trigger_if = {
+			limit = {
+				exists = c:PER
+			}
+			c:PER ?= {
+				is_subject_of = root
+			}
+		}
+		trigger_else = {
+			any_state = {
+				filter = {
+					region = sr:region_persia
+					state_region = {
+						is_homeland = cu:persian
+					}
+				}
+				custom_tooltip = {
+					text = owned_by_this_country_or_subjects_tt
+					OR = {
+						owner = ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				percent >= 0.6
+			}
+		}
+	}
+
 	on_monthly_pulse = {
 		effect = {
 			if = {
@@ -1462,6 +1534,32 @@ je_secure_influence_over_persia = {
 					exists = c:PER
 					c:PER ?= {
 						is_subject_of = root
+					}
+				}
+				change_variable = { name = persia_variable add = 1 }
+			}
+			else_if = {
+				limit = {
+					NOT ={
+						exists = c:PER
+					}
+					any_state = {
+						filter = {
+							region = sr:region_persia
+							state_region = {
+								is_homeland = cu:persian
+							}
+						}
+						custom_tooltip = {
+							text = owned_by_this_country_or_subjects_tt
+							OR = {
+								owner = ROOT
+								owner = {
+									is_subject_of = ROOT
+								}
+							}
+						}
+						percent >= 0.6
 					}
 				}
 				change_variable = { name = persia_variable add = 1 }

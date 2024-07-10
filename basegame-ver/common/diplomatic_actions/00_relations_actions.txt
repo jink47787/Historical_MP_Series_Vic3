@@ -27,10 +27,10 @@
 		
 		relations_progress_per_day = 3 # At 100, +1 relations
 		relations_improvement_max = 50
-
-		second_modifier = {
-			country_pact_leverage_generation_mult = 0.1
-		}
+		
+		first_modifier = {
+			country_pact_leverage_generation_add = 300
+		}		
 		
 		requirement_to_maintain = {
 			trigger = {
@@ -63,7 +63,10 @@
 			trigger = {
 				custom_tooltip = {
 					text = DIPLO_ACTION_RELATIONS_AMICABLE_OR_GREATER_NOT
-					scope:target_country.relations:root < relations_threshold:amicable
+					OR = {
+						scope:target_country = { is_power_bloc_leader = yes }
+						scope:target_country.relations:root < relations_threshold:amicable
+					}
 				}
 			}
 		}
@@ -154,25 +157,40 @@
 			}
 		}	
 		
-		will_break = { 
-			NOR = {
-				has_attitude = {
-					who = scope:target_country
-					attitude = genial
-				}	
-				has_attitude = {
-					who = scope:target_country
-					attitude = conciliatory
-				}	
-				has_attitude = {
-					who = scope:target_country
-					attitude = cooperative
+		will_break = {
+			OR = {
+				NOR = {
+					has_attitude = {
+						who = scope:target_country
+						attitude = genial
+					}	
+					has_attitude = {
+						who = scope:target_country
+						attitude = conciliatory
+					}	
+					has_attitude = {
+						who = scope:target_country
+						attitude = cooperative
+					}
+					has_attitude = {
+						who = scope:target_country
+						attitude = protective
+					}					
+				}			
+				AND = {
+					scope:target_country.relations:root >= relations_threshold:amicable	
+					OR = {
+						country_rank >= rank_value:minor_power
+						NOT = {
+							has_attitude = {
+								who = scope:target_country
+								attitude = genial
+							}					
+						}						
+					}
 				}
-				has_attitude = {
-					who = scope:target_country
-					attitude = protective
-				}					
-			}		
+			}
+		
 		}
 	}
 }
