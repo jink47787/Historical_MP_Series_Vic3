@@ -243,9 +243,50 @@ je_taiping = {
 
 	scripted_button = qing_accept_han
 	scripted_button = qing_increase_recruitment
+	scripted_button = qing_rescind_increase_recruitment
 	
 	modifiers_while_active = {
 		modifier_taiping_occupation
+	}
+	
+	on_monthly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					has_variable = var_qing_increased_recruitment
+				}
+				remove_modifier = qing_delegate_levies
+				add_modifier = {
+					name = qing_delegate_levies
+					multiplier = global_var:qing_delegate_levies_multiplier
+				}
+				every_interest_group = {
+					limit = {
+						OR = {
+							is_interest_group_type = ig_landowners
+							is_interest_group_type = ig_armed_forces
+						}
+					}
+					hidden_effect = { remove_modifier = qing_provincial_political_power_increase }
+					add_modifier = {
+						name = qing_provincial_political_power_increase
+						is_decaying = yes
+						years = 40
+						multiplier = global_var:qing_delegate_levies_multiplier
+					}
+				}
+				change_global_variable = {
+					name = qing_delegate_levies_multiplier
+					add = 1
+				}
+				every_scope_war = {
+					add_war_war_support = {
+						target = ROOT
+						value = 200
+					}
+				}
+			}
+		}
 	}
 
 	complete = {
