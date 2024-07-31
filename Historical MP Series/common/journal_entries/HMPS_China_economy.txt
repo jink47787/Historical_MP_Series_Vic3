@@ -66,13 +66,54 @@ je_chinese_agriculture = {
 	group = je_group_historical_content
 	
 	modifiers_while_active = {
-		modifier_agricultural_econ_mining_debuff
+		modifier_china_subsistence_agri
 	}
 	
+	immediate = {
+		add_modifier = {
+			name = modifier_agricultural_econ_agri_debuff
+			months = -1
+		}
+		set_variable = { name = legitimist_progress_from_farms value = 0 }
+    }
+	
+	scripted_progress_bar = chinese_agriculture_progress_bar
+	
 	complete = {
-		OR = {
-			has_law = law_type:law_traditionalism
-			NOT = { has_journal_entry = je_warlord_china }
+		custom_tooltip = {
+			text = chinese_agriculture_complete_tt
+			scope:journal_entry = {
+				"scripted_bar_progress(chinese_agriculture_progress_bar)" >= 100
+			}
+		}
+	}
+	
+	on_complete = {
+		if = {
+			limit = {
+				has_modifier = modifier_agricultural_econ_agri_debuff
+			}
+			remove_modifier = modifier_agricultural_econ_agri_debuff
+		}
+	}
+	
+	on_monthly_pulse = {
+		effect = {
+			# From Buildings
+			set_variable = { name = legitimist_progress_from_farms value = 0 }
+			every_scope_building = {
+				limit = {
+					is_building_group = bg_agriculture
+					NOT = {
+						is_building_group = bg_subsistence_agriculture
+					}
+					weekly_profit > 0
+				}
+				ROOT = {
+					change_variable = { name = legitimist_progress_from_farms add = prev.level }
+				}
+			}
+			change_variable = { name = legitimist_progress_from_farms divide = 1000 }
 		}
 	}
 
