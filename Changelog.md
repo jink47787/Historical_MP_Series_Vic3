@@ -20,6 +20,7 @@ All mods / mod ideas used linked below:
 - Authority for Political Interactions: https://steamcommunity.com/sharedfiles/filedetails/?id=3045555636
 - Historically Accurate Randomize Farming Yields: https://steamcommunity.com/workshop/filedetails/?id=3073886807
 - War Is Politics: https://steamcommunity.com/sharedfiles/filedetails/?id=3124519140&searchtext=
+- Ideologies & Traits Expansion: https://steamcommunity.com/sharedfiles/filedetails/?id=3300629321
 Thanks to Gelre for his UI, Performance & Flava work.
 ---
 <br/>
