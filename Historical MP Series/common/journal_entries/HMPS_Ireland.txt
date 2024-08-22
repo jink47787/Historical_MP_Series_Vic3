@@ -1,0 +1,120 @@
+je_the_matter_of_ireland = {
+	should_be_pinned_by_default = yes
+	icon = "gfx/interface/icons/event_icons/ireland.dds"
+
+	group = je_group_internal_affairs
+
+	scripted_progress_bar = the_matter_of_ireland_progress_bar
+	
+	scripted_button = je_the_matter_of_ireland_colonisation_button
+
+    immediate = {
+		
+    }
+
+	complete = {
+		custom_tooltip = {
+			text = matter_of_ireland_success_tt
+			scope:journal_entry = {
+				"scripted_bar_progress(the_matter_of_ireland_progress_bar)" >= 200
+			}
+		}
+	}
+
+	on_complete = {
+		add_primary_culture = cu:irish
+	}
+
+	invalid = {
+		OR = {
+			NOT = {
+				exists = c:GBR
+			}
+			exists = c:IRE
+		}
+	}
+
+	on_invalid = {
+		
+	}
+
+	fail = {
+		custom_tooltip = {
+			text = matter_of_ireland_failure_tt
+			scope:journal_entry = {
+				"scripted_bar_progress(the_matter_of_ireland_progress_bar)" <= 0
+			}
+		}
+	}
+	
+	on_fail = {
+		custom_tooltip = {
+			text = matter_of_ireland_on_fail_tt
+			create_country = {
+				tag = IRE
+				origin = this
+				state = s:STATE_LEINSTER.region_state:GBR
+				on_created = {
+					activate_law = law_type:law_republic
+					ig:ig_landowners = {
+						remove_ideology = ideology_paternalistic
+						add_ideology = ideology_republican_paternalistic
+					}
+					ig:ig_rural_folk = {
+						remove_ideology = ideology_monarchist
+					}
+					ig:ig_armed_forces = {
+						remove_ideology = ideology_monarchist
+					}
+					add_modifier = {
+						name = modifier_irish_independence
+						months = -1
+						is_decaying = no
+					}
+					c:GBR = {
+						every_scope_state = {
+							limit = {
+								state_region = {
+									is_homeland = cu:irish
+								}
+								NOT = {
+									state_region = {
+										is_homeland = cu:british
+									}
+								}
+							}
+							set_state_owner = c:IRE
+						}
+						create_diplomatic_pact = {
+							country = c:IRE
+							type = dominion
+						}
+					}
+				}
+			}
+		}
+	}
+
+    on_weekly_pulse = {
+        effect = {
+			
+        }
+    }
+
+	on_monthly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					has_journal_entry = je_potato_famine
+					NOT = { has_variable = uk_potato_blight }
+				}
+				set_variable = uk_potato_blight
+			}
+		}
+	}
+
+	weight = 1000
+	transferable = yes
+	
+	can_revolution_inherit = yes
+}
