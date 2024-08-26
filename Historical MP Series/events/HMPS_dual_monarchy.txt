@@ -1,26 +1,11 @@
 ﻿namespace = dual_monarchy
 
-# Dual Monarchy event
+# Dual Monarchy event #happens when JE is completed, probably not needed
 dual_monarchy.1 = {
 	type = country_event
 
 	title = dual_monarchy.1.t
-	desc = {
-		first_valid = {
-			triggered_desc = {
-				desc = dual_monarchy.1.d
-				trigger = {
-					NOT = { has_variable = dual_monarchy_fail }
-				}
-			}
-			triggered_desc = {
-				desc = dual_monarchy.1.d2
-				trigger = {
-					has_variable = dual_monarchy_fail
-				}
-			}
-		}
-	}
+	desc = dual_monarchy.1.d
 	flavor = dual_monarchy.1.f
 
 	event_image = {
@@ -41,38 +26,10 @@ dual_monarchy.1 = {
 		cu:hungarian = {
 			save_scope_as = hungarian_culture
 		}
-		set_variable = button_dm_decision_taken
 	}
-
-	option = {
-		name = dual_monarchy.1.a
-		trigger = {
-			NOT = { has_variable = dual_monarchy_fail }
-		}
-		default_option = yes
-		custom_tooltip = austria_hungary_tt
-		add_primary_culture = cu:hungarian
-		add_loyalists = {
-			culture = cu:hungarian
-			value = 0.2
-		}
-		ig:ig_landowners = {
-			remove_ideology = ideology_austrian_hegemony
-			add_ideology = ideology_cultural_chauvinism
-			hidden_effect = {
-				set_interest_group_name = ig_landowners
-			}
-		}
-		ig:ig_armed_forces = {
-			remove_ideology = ideology_austrian_hegemony
-			add_ideology = ideology_cultural_chauvinism
-		}
-	}
+	
 	option = { # accept compromise
 		name = dual_monarchy.1.b
-		trigger = {
-			has_variable = dual_monarchy_fail
-		}
 		default_option = yes
 		custom_tooltip = austria_hungary_tt
 		add_primary_culture = cu:hungarian
@@ -103,39 +60,386 @@ dual_monarchy.1 = {
 			is_decaying = yes
 		}
 	}
-	option = { #reject compromise
-		name = dual_monarchy.1.c
-		trigger = {
-			has_variable = dual_monarchy_fail
-			NOT = { has_variable = button_dm }
+}
+
+#event that triggers revolt
+dual_monarchy.2 = {
+	type = country_event
+
+	title = dual_monarchy.2.t
+	desc = dual_monarchy.2.d
+	flavor = dual_monarchy.2.f
+
+	event_image = {
+		video = "unspecific_ruler_speaking_to_people"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	duration = 3
+
+	trigger = {
+		# triggered by dual monarchy JE
+	}
+	
+	immediate = {
+		c:HUN = {
+			capital = {
+				save_scope_as = hun_capital_scope
+			}
+			every_scope_state = {
+				limit = {
+					state_is_in_europe = yes
+				}
+				set_variable = hun_state_var
+			}
+			#change_subject_type = subject_type_protectorate
+			add_liberty_desire = 100
 		}
-		add_radicals = {
-			value = very_large_radicals
-			culture = cu:hungarian
-		}
-		# add radicals from discrimination
-		every_scope_state = {
-			limit = {
-				state_region = {
-					is_homeland = cu:hungarian
+	}
+	
+	#fight independence war
+	option = {
+		name = dual_monarchy.2.a
+		c:HUN = {
+			set_variable = hun_fighting_war_var
+			create_diplomatic_play = {
+				target_country = c:AUS
+				escalation = 80
+				type = dp_independence
+				
+				target_state = scope:hun_capital_scope
+		
+				add_war_goal = {
+					holder = c:AUS
+					type = reduce_autonomy
+					target_country = c:HUN
 				}
 			}
-			add_modifier = {
-				name = dual_monarchy_compromise_rejected
-				months = long_modifier_time
-				is_decaying = yes
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+				}
+				trigger_event = {
+					id = dual_monarchy.3
+					days = 20
+				}
 			}
 		}
 	}
-	option = { #Does nothing if you do this via the button
-		name = dual_monarchy.1.c
-		trigger = {
-			has_variable = dual_monarchy_fail
-			has_variable = button_dm
+	
+	#dont fight independence war
+	#option = {
+	#	name = dual_monarchy.2.a
+	#	#bad austria modifier
+	#	
+	#}
+}
+
+dual_monarchy.3 = {
+	type = country_event
+	placement = root
+
+	title = italian_unification.7.t
+	desc = italian_unification.7.d
+	flavor = italian_unification.7.f
+
+	duration = 1
+
+	event_image = {
+		video = "europenorthamerica_political_extremism"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+	
+	trigger = {
+		c:AUS ?= this
+		OR = {
+			has_state_in_state_region = STATE_LOMBARDY
+			has_state_in_state_region = STATE_VENETIA
+			AND = {
+				exists = c:VEN
+				c:VEN ?= {
+					is_subject_of = c:AUS
+					OR = {
+						has_state_in_state_region = STATE_LOMBARDY
+						has_state_in_state_region = STATE_VENETIA
+					}
+				}
+			}
+			AND = {
+				exists = c:LOM
+				c:LOM ?= {
+					is_subject_of = c:AUS
+					OR = {
+						has_state_in_state_region = STATE_LOMBARDY
+						has_state_in_state_region = STATE_VENETIA
+					}
+				}
+			}
 		}
-		add_loyalists = {
-			culture = cu:south_german
-			value = 0.2
+	}
+	
+	cancellation_trigger = {
+		NOT = { has_state_in_state_region = STATE_VENETIA }
+		NOT = { has_state_in_state_region = STATE_LOMBARDY }
+		NOT = { exists = c:RSM }
+	}
+	
+	immediate = {
+		if = {
+			limit = {
+				exists = c:VEN
+				c:VEN = {
+					is_subject_of = c:AUS
+				}
+			}
+			c:VEN = {
+				every_scope_state = {
+					set_state_owner = c:AUS
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = c:LOM
+				c:LOM = {
+					is_subject_of = c:AUS
+				}
+			}
+			c:LOM = {
+				every_scope_state = {
+					set_state_owner = c:AUS
+				}
+			}
+		}
+		create_country = {
+			tag = RSM
+			origin = this
+			state = s:STATE_VENETIA.region_state:AUS
+			state = s:STATE_LOMBARDY.region_state:AUS
+		}
+		c:RSM = {
+			activate_law = law_type:law_oligarchy
+			save_scope_as = rsm_scope	
+			capital = {
+				save_scope_as = rsm_capital_scope
+			}
+			create_diplomatic_play = {
+				target_country = c:AUS
+				type = dp_independence
+				
+				target_state = scope:rsm_capital_scope
+		
+				add_war_goal = {
+					holder = c:AUS
+					type = annex_country
+					target_country = c:RSM
+				}
+			}
+		}
+	}
+	
+	option = {
+		name = italian_unification.7.a
+		default_option = yes
+		custom_tooltip = {
+			text = italian_states_choose_sides_tt
+			every_country = {
+				limit = {
+					has_journal_entry = je_risorgimento
+					NOT = {
+						c:RSM ?= this
+					}
+				}
+				trigger_event = { id = italian_unification.8 days = 0 popup = yes }
+			}
+		}
+		custom_tooltip = italian_states_choose_sides_danger_tt
+	}
+	
+	
+	option = {
+		name = italian_unification.7.b
+		custom_tooltip = {
+			text = italian_states_choose_sides_tt
+			every_country = {
+				limit = {
+					has_journal_entry = je_risorgimento
+					NOT = {
+						c:RSM ?= this
+					}
+				}
+				trigger_event = { id = italian_unification.8 days = 0 popup = yes }
+			}
+		}
+		custom_tooltip = italian_states_choose_sides_danger_tt
+		play_as = c:RSM
+	}
+}
+
+#military occupation event
+dual_monarchy.4 = {
+	type = country_event
+
+	title = dual_monarchy.4.t
+	desc = dual_monarchy.4.d
+	flavor = dual_monarchy.4.f
+
+	event_image = {
+		video = "unspecific_ruler_speaking_to_people"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	duration = 3
+	
+	trigger = {
+		exists = c:AUS
+		c:AUS ?= this
+		exists = c:HUN
+		c:HUN = {
+			has_variable = hun_fighting_war_var
+			is_subject_type = subject_type_dominion
+			is_at_war = no
+		}
+		NOT = { has_variable = hungary_defeated_var }
+	}
+	
+	immediate = {
+		remove_variable = hun_fighting_war_var
+		set_variable = hungary_defeated_var
+		c:HUN = {
+			save_scope_as = scope_hungary
+		}
+	}
+	
+	#military occupation
+	option = {
+		name = dual_monarchy.4.a
+		default_option = yes
+		custom_tooltip = {
+			text = dual_monarchy.4.a.t1
+			c:HUN = {
+				every_scope_state = {
+					set_state_owner = ROOT
+				}
+			}
+			every_scope_state = {
+				limit = {
+					has_variable = hun_state_var
+				}
+				set_state_type = incorporated
+			}
+		}
+		ai_chance = {
+			base = 99
+		}
+	}
+	
+	#keep them as dominion (mp)
+	option = {
+		name = dual_monarchy.4.b
+		#modifier for hungary
+		c:HUN = {
+			add_modifier = {
+				name = modifier_hun_post_rev
+				is_decaying = yes
+				months = 241
+			}
+			activate_law = law_type:law_monarchy
+			add_liberty_desire = -100
+		}
+		
+		#modifier for austria
+		add_modifier = {
+			name = modifier_aus_post_rev
+			is_decaying = yes
+			months = 241
+		}
+		ai_chance = {
+			base = 1
 		}
 	}
 }
+
+
+#event to bring in Russia or Prussia on Austria's side
+
+#hungarian event
+#dual_monarchy.5 = {
+#	type = country_event
+#
+#	title = dual_monarchy.5.t
+#	desc = dual_monarchy.5.d
+#	flavor = dual_monarchy.5.f
+#
+#	event_image = {
+#		video = "unspecific_ruler_speaking_to_people"
+#	}
+#
+#	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+#
+#	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+#
+#	duration = 3
+#	
+#	immediate = {
+#		c:HUN = {
+#			every_scope_war = {
+#				limit = {
+#					has_war_goal = reduce_autonomy
+#				}
+#				save_scope_as = hungarian_war
+#			}
+#		}
+#	}
+#	
+#	trigger = {
+#		#triggered by decision, event for russia, if done well it should have a dynamic option of who can help
+#	}
+#	
+#	option = {
+#		#brings russia into war at cost of obligation
+#	}
+#	
+#}
+
+
+#Event that explains Hungarian Revolution to Austria
+dual_monarchy.6 = {
+	type = country_event
+
+	title = dual_monarchy.6.t
+	desc = dual_monarchy.6.d
+	flavor = dual_monarchy.6.f
+
+	event_image = {
+		video = "unspecific_ruler_speaking_to_people"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	duration = 3
+	
+	immediate = {
+		c:HUN = {
+			save_scope_as = scope_hungary
+		}
+	}
+	
+	option = {
+		name = dual_monarchy.6.a
+		default_option = yes
+	}
+}
+

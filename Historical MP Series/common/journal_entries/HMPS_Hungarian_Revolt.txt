@@ -1,0 +1,106 @@
+﻿#1848 Hungarian Revolution JE
+
+je_hungarian_revolt = {
+	icon = "gfx/interface/icons/event_icons/phrygian.dds"
+
+	group = je_group_crises
+	
+	should_be_pinned_by_default = yes
+
+	transferable = no
+	can_revolution_inherit = no
+	
+	#create hungary events for austria
+	
+	is_shown_when_inactive = {
+		c:HUN ?= this
+		is_subject_type = subject_type_personal_union
+	}
+
+	possible = {
+		#austria has political question JE
+		overlord = {
+			has_journal_entry = je_napoleons_legacy
+		}
+	}
+	
+	#scripted button to reduce it at the cost of 500 authority?
+	
+	immediate = {
+		overlord = {
+			trigger_event = {
+				id = dual_monarchy.6
+				days = 14
+			}
+		}
+	}
+	
+	complete = {
+		#reform bad laws
+		OR = {
+			overlord = {
+				OR = {
+					has_modifier = modifier_1848_victory
+					AND = {
+						custom_tooltip = {
+							text = je_hungarian_revolt.t1
+							NOT = { has_variable = failed_1848_var }
+							NOT = { has_journal_entry = je_napoleons_legacy }
+						}
+					}
+				}
+			}
+			NOR = {
+				has_law = law_type:law_traditionalism
+				has_law = law_type:law_serfdom
+				has_law = law_type:law_censorship
+				has_law = law_type:law_outlawed_dissent
+				has_law = law_type:law_no_legislature
+			}
+		}
+	}
+	
+	on_complete = {
+		change_subject_type = subject_type_protectorate
+		remove_modifier = modifier_pragmatic_sanction
+	}
+	
+	invalid = {
+		OR = {
+			is_subject = no
+			NOT = { is_subject_type = subject_type_personal_union }
+		}
+	}
+	
+
+	fail = {
+		#has springtime of peoples
+		overlord = {
+			has_journal_entry = je_springtime_of_the_peoples
+			capital = {
+				radical_fraction = {
+					value > 0.25
+				}
+			}
+		}
+	}
+	
+	on_fail = {
+		#trigger hungarian revolt
+		remove_modifier = modifier_pragmatic_sanction
+		#hungarian revolt
+		change_subject_type = subject_type_protectorate
+		add_liberty_desire = 100
+		activate_law = law_type:law_republic
+		c:AUS = {
+			trigger_event = {
+				id = dual_monarchy.2
+				days = 30
+			}
+		}
+		#add_modifier = {
+		#	name = hungarian_revolution_modifier
+		#}
+	}
+}
+

@@ -1,0 +1,225 @@
+﻿#global JE for europeans to track 1848 revolutions
+
+je_napoleons_legacy = {
+	icon = "gfx/interface/icons/event_icons/phrygian.dds"
+
+	group = je_group_crises
+	
+	progressbar = yes
+	should_be_pinned_by_default = yes
+
+	transferable = no
+	can_revolution_inherit = no
+	
+	modifiers_while_active = {
+		modifier_napoleons_legacy
+	}
+	
+	is_shown_when_inactive = {
+		capital = {
+			OR = {
+				region = sr:region_england
+				region = sr:region_north_sea_coast
+				#region = sr:region_iberia #remove this when carlist flavor
+				region = sr:region_france
+				region = sr:region_occitania
+				region = sr:region_rhine
+				region = sr:region_italy
+				region = sr:region_balkans
+				region = sr:region_north_germany
+				region = sr:region_south_germany
+				region = sr:region_baltic
+				region = sr:region_danubia
+				region = sr:region_poland
+				#region = sr:region_russia
+				#region = sr:region_dnieper
+			}
+		}
+	}
+
+	possible = {
+		#happens for all european majors and GPs at beginning of game
+		country_rank >= rank_value:major_power
+		is_subject = no
+		custom_tooltip = {
+			text = je_napoleons_legacy_t2
+			NOT = { has_global_variable = peoples_springtime_happening }
+			NOT = { has_global_variable = peoples_springtime_happened }
+		}
+		OR = {
+			AND = {
+				has_law = law_type:law_autocracy
+				has_law = law_type:law_oligarchy
+				has_law = law_type:law_technocracy
+				has_law = law_type:law_landed_voting
+			}
+			NOT = { has_law = law_type:law_right_of_assembly }
+		}
+	}
+	
+	#scripted button to reduce it at the cost of 500 authority?
+	
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_global_variable = global_1848_progress }
+			}
+			set_global_variable = {
+				name = global_1848_progress
+				value = 0
+			}
+		}
+		if = {
+			limit = {
+				NOT = { has_global_variable = global_1848_progress }
+			}
+			set_global_variable = {
+				name = 1848_radical_leader_mult_var
+				value = 1
+			}
+		}
+		set_variable = 1848_country_var
+		add_modifier = {
+			name = modifier_napoleon_announce
+			years = 20
+		}
+	}
+
+	current_value = {
+		value = global_var:global_1848_progress
+	}
+
+	goal_add_value = {
+		value = 25
+	}
+	
+	#things that cause this to increase (non laws are once per country)
+		#laws
+			#any european major passing voting laws (scaling)
+			#any european major passing parliamentary or dual executiy (+3)
+			#any european major passing total_separation (+2)
+			#any european major passing state atheism (+5)
+			#any european major passing republic (+5)
+		#Italy forming
+		#a revolution in any european major+ country (+10)
+		#radicals in a European capital (+1) (passive?)
+		#potato blight ending (or beginning?) (+10)
+		#a European losing a war (+5)
+		#releasing a subject (+5) 
+		
+		
+	#on_monthly_pulse = {
+	#	set_global_variable = {
+	#		name = 1848_radical_leader_mult_var
+	#		value = global_var:global_1848_progress
+	#	}
+	#	change_global_variable = {
+	#		name = 1848_radical_leader_mult_var
+	#		multiply = 4
+	#	}
+	#	every_country = {
+	#		limit = {
+	#			NOT = { has_journal_entry = je_napoleons_legacy }
+	#			has_modifier = modifier_napoleon_announce
+	#		}
+	#		remove_modifier = modifier_napoleon_announce
+	#	}
+	#}
+	
+	complete = {
+		NOR = {
+			has_law = law_type:law_traditionalism
+			has_law = law_type:law_serfdom
+			has_law = law_type:law_censorship
+			has_law = law_type:law_outlawed_dissent
+			has_law = law_type:law_secret_police
+			has_law = law_type:law_militarized_police
+			has_law = law_type:law_no_legislature
+			has_law = law_type:law_landed_voting
+		}
+		NOT = { has_journal_entry = je_divided_monarchists } #MAKE THIS SEPARATE JE LATER
+	}
+	
+	on_complete = {
+		set_variable = passed_1848_var
+		add_modifier = {
+			name = modifier_1848_victory
+			months = 60
+		}
+		hidden_effect = {
+			remove_modifier = modifier_napoleon_announce
+		}
+	}
+	
+	timeout = 7305
+	
+	on_timeout = {
+		set_global_variable = peoples_springtime_happened
+		hidden_effect = {
+			remove_modifier = modifier_napoleon_announce
+			every_country = {
+				limit = {
+					has_modifier = modifier_napoleon_announce
+				}
+				remove_modifier = modifier_napoleon_announce
+			}
+		}
+	}
+
+	fail = {
+		scope:journal_entry = {
+			is_goal_complete = yes
+		}
+	}
+	
+	on_fail = {
+		set_variable = failed_1848_var
+		if = {
+			limit = {
+				NOT = { has_global_variable = peoples_springtime_happening }
+			}
+			set_global_variable = peoples_springtime_happening
+		}
+		add_journal_entry = {
+			type = je_springtime_of_the_peoples
+		}
+		ordered_interest_group = {
+			limit = {
+				is_marginal = no
+				can_have_radical_leader = yes
+			}
+			order_by = ig_clout
+			leader = {
+				set_ideology = ideology:ideology_radical
+				add_modifier = {
+					name = 1848_popular_radical
+					months = normal_modifier_time
+					is_decaying = yes
+				}
+			}
+		}
+		custom_tooltip = je_napoleons_legacy_t1
+		show_as_tooltip = {
+			add_radicals = {
+				value = large_radicals
+			}
+		}
+		hidden_effect = {
+			every_country = {
+				limit = {
+					has_modifier = modifier_napoleon_announce
+				}
+				remove_modifier = modifier_napoleon_announce
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = yes
+				}
+				add_radicals_in_state = {
+					value = very_large_radicals
+				}
+			}
+		}
+	}
+}
+

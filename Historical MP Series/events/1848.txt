@@ -148,6 +148,323 @@
 	}
 }
 
+# Rise of Radicalism
+1848.4 = {
+	type = country_event
+	placement = root
+	title = 1848.4.t
+	desc = 1848.4.d
+	flavor = 1848.4.f
+
+	duration = 3
+
+	event_image = {
+		video = "europenorthamerica_political_extremism"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	trigger = {
+		# triggered by journal entry start
+	}
+
+	immediate = {
+		ordered_interest_group = {
+			limit = {
+				leader = {
+					has_ideology = ideology:ideology_radical
+				}
+			}
+			order_by = ig_clout
+			leader = {
+				save_scope_as = radical_leader_scope
+			}
+		}
+	}
+
+	option = { # reactionary option
+		name = 1848.4.a
+		default_option = yes
+		scope:radical_leader_scope = {
+			add_modifier = {
+				name = 1848_popular_radical
+				is_decaying = yes
+			}
+		}
+		add_modifier = {
+			name = suppressing_radicals
+			months = short_modifier_time
+		}
+		add_radicals = {
+			value = large_radicals
+			strata = middle
+		}
+		add_radicals = {
+			value = medium_radicals
+			strata = poor
+		}
+		ai_chance = {
+			base = 33
+		}
+	}
+	
+	option = { # radical option
+		name = 1848.4.b
+		scope:radical_leader_scope = {
+			add_modifier = {
+				name = 1848_popular_radical
+				months = normal_modifier_time
+				is_decaying = yes
+			}
+		}
+		if = {
+			limit = {
+				any_interest_group = {
+					is_marginal = no
+					can_have_radical_leader = yes
+				}
+			}
+			random_interest_group = {
+				limit = {
+					is_marginal = no
+					can_have_radical_leader = yes
+					leader = {
+						NOT = { has_modifier = 1848_popular_radical }
+					}
+				}
+				leader = {
+					set_ideology = ideology:ideology_radical
+					add_modifier = {
+						name = 1848_popular_radical
+						months = normal_modifier_time
+						is_decaying = yes
+					}
+				}
+			}
+		}
+		ai_chance = {
+			base = 66
+		}
+	}
+}
+
+# Radicals at the Gates
+1848.5 = {
+	type = country_event
+	placement = root
+	title = 1848.5.t
+	desc = 1848.5.d
+	flavor = 1848.5.f
+
+	duration = 3
+
+	cooldown = { months = normal_modifier_time }
+
+	event_image = {
+		video = "europenorthamerica_springtime_of_nations"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	trigger = {
+		# triggered by 1848 JE
+		NOT = {
+			any_interest_group = {
+				is_in_government = yes
+				leader = {
+					has_ideology = ideology:ideology_radical
+				}
+			}
+		}
+		any_interest_group = {
+			OR = {
+				is_powerful = yes
+				is_insurrectionary = yes
+			}
+			leader = {
+				has_ideology = ideology:ideology_radical
+			}
+		}
+		trigger_if = {
+			limit = {
+				OR = {
+					has_law = law_type:law_secret_police
+					has_law = law_type:law_national_guard
+				}
+			}
+			institution_investment_level = {
+				institution = institution_home_affairs
+				value >= 3
+			}
+		}
+	}
+
+	option = { # go secret police
+		name = 1848.5.a
+		if = {
+			limit = {
+				NOT = {
+					has_technology_researched = central_archives
+				}
+				has_technology_researched = centralization
+			}
+			add_technology_progress = { 
+				progress = 3500 
+				technology = central_archives 
+			}
+		}
+		if = {
+			limit = {
+				is_enacting_law = law_type:law_secret_police
+			}
+			# enactment chance
+			add_enactment_modifier = {
+				name = 1848_reactionary_enactment
+			}
+		}
+		if = {
+			limit = {
+				has_law = law_type:law_secret_police
+			}
+			add_modifier = {
+				name = 1848_institution_speed
+				months = short_modifier_time
+			}
+		}
+		add_journal_entry = {
+			type = je_secret_police
+		}
+		ai_chance = {
+			base = 1
+		}
+	}
+	option = { # go national guard
+		name = 1848.5.b
+		if = {
+			limit = {
+				is_enacting_law = law_type:law_national_guard
+			}
+			# enactment chance
+			add_enactment_modifier = {
+				name = 1848_reactionary_enactment
+			}
+		}
+		if = {
+			limit = {
+				has_law = law_type:law_national_guard
+			}
+			add_modifier = {
+				name = 1848_institution_speed
+				months = short_modifier_time
+			}
+		}
+		add_journal_entry = {
+			type = je_secret_police
+		}
+		ai_chance = {
+			base = 1
+		}
+	}
+	option = { # neither
+		name = 1848.5.c
+		default_option = yes
+		capital = {
+			add_radicals_in_state = {
+				value = medium_radicals
+			}
+		}
+		ai_chance = {
+			base = 10
+		}
+	}
+}
+
+# reaction completion event
+1848.6 = {
+	type = country_event
+	placement = root
+	title = 1848.6.t
+	desc = 1848.6.d
+	flavor = 1848.6.f
+
+	duration = 3
+
+	event_image = {
+		video = "votp_cops_march"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	trigger = {
+		# triggered by je_secret_police
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				has_law = law_type:law_secret_police
+			}
+			law_type:law_secret_police = {
+				save_scope_as = home_affairs_law
+			}
+		}
+		else = {
+			law_type:law_national_guard = {
+				save_scope_as = home_affairs_law
+			}
+		}
+	}
+	option = {
+		name = 1848.6.a
+		trigger = {
+			has_law = law_type:law_secret_police
+			any_interest_group = {
+				is_in_government = no
+				is_marginal = no
+				leader = {
+					has_ideology = ideology:ideology_radical
+				}
+			}
+		}
+		random_interest_group = {
+			limit = {
+				is_in_government = no
+				is_marginal = no
+				leader = {
+					has_ideology = ideology:ideology_radical
+				}
+			}
+			leader = {
+				kill_character = yes
+			}
+		}
+	}
+	option = {
+		name = 1848.6.b
+		trigger = {
+			has_law = law_type:law_national_guard
+		}
+		add_modifier = {
+			name = rooting_out_radicals
+			months = short_modifier_time
+		}
+	}
+	option = {
+		name = 1848.6.c
+		default_option = yes
+		add_modifier = {
+			name = home_affairs_cost_mod
+			months = short_modifier_time
+		}
+	}
+}
+
 # Theocracy Stamped Out
 1848.8 = {
 	type = country_event
@@ -420,323 +737,6 @@
 	}
 }
 
-# Rise of Radicalism
-1848.4 = {
-	type = country_event
-	placement = root
-	title = 1848.4.t
-	desc = 1848.4.d
-	flavor = 1848.4.f
-
-	duration = 3
-
-	event_image = {
-		video = "europenorthamerica_political_extremism"
-	}
-
-	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-
-	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
-
-	trigger = {
-		# triggered by journal entry start
-	}
-
-	immediate = {
-		random_interest_group = {
-			limit = {
-				OR = {
-					is_powerful = yes
-					is_insurrectionary = yes
-				}
-				leader = {
-					has_ideology = ideology:ideology_radical
-				}
-			}
-			leader = {
-				save_scope_as = radical_leader_scope
-			}
-		}
-	}
-
-	option = { # reactionary option
-		name = 1848.4.a
-		default_option = yes
-		scope:radical_leader_scope = {
-			add_modifier = {
-				name = 1848_popular_radical
-			}
-		}
-		add_modifier = {
-			name = suppressing_radicals
-			months = short_modifier_time
-		}
-		add_loyalists = {
-			strata = rich
-			value = very_large_radicals
-		}
-		add_radicals = {
-			value = medium_radicals
-			strata = middle
-		}
-		add_radicals = {
-			value = medium_radicals
-			strata = poor
-		}
-		ai_chance = {
-			base = 66
-		}
-	}
-	option = { # radical option
-		name = 1848.4.b
-		scope:radical_leader_scope = {
-			add_modifier = {
-				name = 1848_popular_radical
-			}
-		}
-		if = {
-			limit = {
-				any_interest_group = {
-					is_marginal = no
-					can_have_radical_leader = yes
-				}
-			}
-			random_interest_group = {
-				limit = {
-					is_marginal = no
-					can_have_radical_leader = yes
-				}
-				leader = {
-					set_ideology = ideology:ideology_radical
-					add_modifier = {
-						name = 1848_popular_radical
-					}
-				}
-			}
-		}
-		add_radicals = {
-			value = medium_radicals
-		}
-		ai_chance = {
-			base = 33
-		}
-	}
-}
-
-# Radicals at the Gates
-1848.5 = {
-	type = country_event
-	placement = root
-	title = 1848.5.t
-	desc = 1848.5.d
-	flavor = 1848.5.f
-
-	duration = 3
-
-	cooldown = { months = normal_modifier_time }
-
-	event_image = {
-		video = "europenorthamerica_springtime_of_nations"
-	}
-
-	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-
-	icon = "gfx/interface/icons/event_icons/event_protest.dds"
-
-	trigger = {
-		# triggered by 1848 JE
-		NOT = {
-			any_interest_group = {
-				is_in_government = yes
-				leader = {
-					has_ideology = ideology:ideology_radical
-				}
-			}
-		}
-		any_interest_group = {
-			OR = {
-				is_powerful = yes
-				is_insurrectionary = yes
-			}
-			leader = {
-				has_ideology = ideology:ideology_radical
-			}
-		}
-		trigger_if = {
-			limit = {
-				OR = {
-					has_law = law_type:law_secret_police
-					has_law = law_type:law_national_guard
-				}
-			}
-			institution_investment_level = {
-				institution = institution_home_affairs
-				value >= 3
-			}
-		}
-	}
-
-	option = { # go secret police
-		name = 1848.5.a
-		if = {
-			limit = {
-				NOT = {
-					has_technology_researched = central_archives
-				}
-				has_technology_researched = centralization
-			}
-			add_technology_progress = { 
-				progress = 3500 
-				technology = central_archives 
-			}
-		}
-		if = {
-			limit = {
-				is_enacting_law = law_type:law_secret_police
-			}
-			# enactment chance
-			add_enactment_modifier = {
-				name = 1848_reactionary_enactment
-			}
-		}
-		if = {
-			limit = {
-				has_law = law_type:law_secret_police
-			}
-			add_modifier = {
-				name = 1848_institution_speed
-				months = short_modifier_time
-			}
-		}
-		add_journal_entry = {
-			type = je_secret_police
-		}
-		ai_chance = {
-			base = 1
-		}
-	}
-	option = { # go national guard
-		name = 1848.5.b
-		if = {
-			limit = {
-				is_enacting_law = law_type:law_national_guard
-			}
-			# enactment chance
-			add_enactment_modifier = {
-				name = 1848_reactionary_enactment
-			}
-		}
-		if = {
-			limit = {
-				has_law = law_type:law_national_guard
-			}
-			add_modifier = {
-				name = 1848_institution_speed
-				months = short_modifier_time
-			}
-		}
-		add_journal_entry = {
-			type = je_secret_police
-		}
-		ai_chance = {
-			base = 1
-		}
-	}
-	option = { # neither
-		name = 1848.5.c
-		default_option = yes
-		capital = {
-			add_radicals_in_state = {
-				value = medium_radicals
-			}
-		}
-		ai_chance = {
-			base = 10
-		}
-	}
-}
-
-# reaction completion event
-1848.6 = {
-	type = country_event
-	placement = root
-	title = 1848.6.t
-	desc = 1848.6.d
-	flavor = 1848.6.f
-
-	duration = 3
-
-	event_image = {
-		video = "votp_cops_march"
-	}
-
-	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-
-	icon = "gfx/interface/icons/event_icons/event_skull.dds"
-
-	trigger = {
-		# triggered by je_secret_police
-	}
-
-	immediate = {
-		if = {
-			limit = {
-				has_law = law_type:law_secret_police
-			}
-			law_type:law_secret_police = {
-				save_scope_as = home_affairs_law
-			}
-		}
-		else = {
-			law_type:law_national_guard = {
-				save_scope_as = home_affairs_law
-			}
-		}
-	}
-	option = {
-		name = 1848.6.a
-		trigger = {
-			has_law = law_type:law_secret_police
-			any_interest_group = {
-				is_in_government = no
-				is_marginal = no
-				leader = {
-					has_ideology = ideology:ideology_radical
-				}
-			}
-		}
-		random_interest_group = {
-			limit = {
-				is_in_government = no
-				is_marginal = no
-				leader = {
-					has_ideology = ideology:ideology_radical
-				}
-			}
-			leader = {
-				kill_character = yes
-			}
-		}
-	}
-	option = {
-		name = 1848.6.b
-		trigger = {
-			has_law = law_type:law_national_guard
-		}
-		add_modifier = {
-			name = rooting_out_radicals
-			months = short_modifier_time
-		}
-	}
-	option = {
-		name = 1848.6.c
-		default_option = yes
-		add_modifier = {
-			name = home_affairs_cost_mod
-			months = short_modifier_time
-		}
-	}
-}
 
 #########
 # Pre-Revolution Buildup
