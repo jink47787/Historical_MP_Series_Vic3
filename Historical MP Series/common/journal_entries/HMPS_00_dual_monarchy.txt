@@ -5,6 +5,8 @@ je_dual_monarchy = {
 	
 	group = je_group_internal_affairs
 	
+	scripted_button = je_dual_monarchy_abandon_germany
+	
 	is_shown_when_inactive = {
 		exists = c:AUS
 		c:AUS = THIS
@@ -14,27 +16,58 @@ je_dual_monarchy = {
 				NOT = { is_subject_type = subject_type_personal_union }
 			}
 			NOT = { exists = c:HUN }
+			has_global_variable = peoples_springtime_happening
 			has_global_variable = peoples_springtime_happened
 		}
 	}
 	
 	possible = {
-		custom_tooltip = {
-			text = je_dual_monarchy.t1
-			has_variable = hungary_defeated_var
+		OR = {
+			custom_tooltip = {
+				text = je_dual_monarchy.t1
+				has_variable = hungary_defeated_var
+			}
+			AND = {
+				custom_tooltip = {
+					text = je_dual_monarchy.t4
+					OR = {
+						has_global_variable = peoples_springtime_happened
+						has_modifier = modifier_1848_victory
+					}
+				}
+				c:HUN ?= {
+					is_subject_of = ROOT
+				}
+			}
+			AND = {
+				owns_entire_state_region = STATE_TRANSDANUBIA
+				owns_entire_state_region = STATE_CENTRAL_HUNGARY
+			}
 		}
 	}
 	
+	#should complete if germany forms or if you give up on forming germany 
 	complete = {
-		NOT = { has_journal_entry = je_german_unification_idea }
-		NOT = { is_unification_candidate = GER }
+		OR = {
+			custom_tooltip = {
+				text = je_dual_monarchy.t5 #TEST THIS
+				has_variable = abandoned_germany
+			}
+			AND = {
+				NOT = { has_journal_entry = je_german_unification_idea }
+				hidden_trigger = {
+					NOT = { has_variable = je_german_unification_idea }
+				}
+				NOT = { is_unification_candidate = GER }
+			}
+			custom_tooltip = {
+				text = je_dual_monarchy.t2
+				exists = c:GER
+				NOT = { c:GER ?= this }
+			}
+		}
 		has_technology_researched = nationalism
 		has_technology_researched = egalitarianism
-		custom_tooltip = {
-			text = je_dual_monarchy.t2
-			exists = c:GER
-			NOT = { c:GER ?= this }
-		}
 	}
 
 	on_complete = {
@@ -44,60 +77,45 @@ je_dual_monarchy = {
 		trigger_event = {
 			id = dual_monarchy.1
 		}
+		c:HUN = {
+			if = {
+				limit = {
+					has_modifier = modifier_pragmatic_sanction
+				}
+				remove_modifier = modifier_pragmatic_sanction
+			}
+			add_modifier = {
+				name = modifier_ah_compromise
+				years = 50
+			}
+		}
 		if = {
 			limit = {
 				exists = c:HUN
 				c:HUN = {
 					is_subject_of = ROOT
-					OR = {
-						is_subject_type = subject_type_dominion
-					}
+					NOT = { is_subject_type = subject_type_puppet }
 				}
 			}
 			c:HUN = {
 				change_subject_type = subject_type_puppet
-				add_modifier = {
-					name = modifier_ah_compromise
-				}
-			}
-		}
-		if = {
-			limit = {
-				exists = c:HUN
-				c:HUN = {
-					is_subject_of = ROOT
-					OR = {
-						is_subject_type = subject_type_protectorate
-					}
-				}
-			}
-			c:HUN = {
-				change_subject_type = subject_type_dominion
-				add_modifier = {
-					name = modifier_ah_compromise
-				}
-			}
-		}
-		if = {
-			limit = {
-				exists = c:HUN
-				c:HUN = {
-					is_subject_of = ROOT
-					OR = {
-						is_subject_type = subject_type_personal_union
-					}
-				}
-			}
-			c:HUN = {
-				change_subject_type = subject_type_dominion
-				add_modifier = {
-					name = modifier_ah_compromise
-				}
 			}
 		}
 	}
 	
 	fail = {
+		OR = {
+			AND = {
+				exists = c:HUN
+				c:HUN = {
+					NOT = { is_subject_of = ROOT }
+				}
+			}
+			AND = {
+				NOT = { owns_entire_state_region = STATE_TRANSDANUBIA }
+				NOT = { owns_entire_state_region = STATE_CENTRAL_HUNGARY }
+			}
+		}
 		custom_tooltip = {
 			text = je_dual_monarchy.t3
 			exists = c:GER
@@ -107,10 +125,24 @@ je_dual_monarchy = {
 	
 	on_fail = {
 		remove_modifier = german_confederation_leader
-		add_modifier = {
-			name = dual_monarchy_compromise_rejected
-			is_decaying = yes
-			years = 10
+		if = {
+			limit = {
+				AND = {
+					exists = c:HUN
+					c:HUN = {
+						NOT = { is_subject_of = ROOT }
+					}
+				}
+				AND = {
+					NOT = { owns_entire_state_region = STATE_TRANSDANUBIA }
+					NOT = { owns_entire_state_region = STATE_CENTRAL_HUNGARY }
+				}
+			}
+			add_modifier = {
+				name = dual_monarchy_compromise_rejected
+				is_decaying = yes
+				years = 10
+			}
 		}
 	}
 
