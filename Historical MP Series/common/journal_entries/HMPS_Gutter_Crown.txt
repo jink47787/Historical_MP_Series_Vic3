@@ -8,11 +8,12 @@
 	# You must have at least landed voting, right of assembly, and voting rights to accept it
 
 	complete = {
-		NOT = { has_law = law_type:law_autocracy }
-		NOT = { has_law = law_type:law_oligarchy }
-		NOT = { has_law = law_type:law_landed_voting }
-		has_law = law_type:law_republic
+		OR = {
+			has_law = law_type:law_universal_suffrage
+			has_law = law_type:law_census_voting
+		}
 		has_law = law_type:law_right_of_assembly
+		NOT = { has_law = law_type:law_state_religion }
 		has_technology_researched = nationalism
 		country_rank = rank_value:great_power
 	}
@@ -24,24 +25,85 @@
 	# This is the wrong event, if you succeed then it starts germany event chain
 	on_complete = {
 		set_global_variable = gutter_crown
-		trigger_event = {
-			id = gutter_crown.1
-			popup = yes
+		set_variable = gutter_crown_var
+		add_modifier = {
+			name = liberal_germany
+			months = 120
+			is_decaying = yes
 		}
 		custom_tooltip = {
-			text = austria_will_kill_you_tt
+			text = je_gutter_crown.t1
+		}
+		s:STATE_BOHEMIA = {
+			add_claim = root
+		}
+		s:STATE_MORAVIA = {
+			add_claim = root
+		}
+		s:STATE_AUSTRIA = {
+			add_claim = root
+		}
+		s:STATE_STYRIA = {
+			add_claim = root
+		}
+		s:STATE_TYROL = {
+			add_claim = root
+		}
+		s:STATE_SOUTH_TYROL = {
+			add_claim = root
 		}
 	}
 
 	fail = {
-		has_journal_entry = je_springtime_of_the_peoples
+		OR = {
+			has_journal_entry = je_springtime_of_the_peoples
+			custom_tooltip = {
+				text = je_gutter_crown.t2
+				has_global_variable = peoples_springtime_happened
+			}
+		}
 	}
 	# if you fail then you get the refuse gutter crown event
 	on_fail = {
-		trigger_event = { 
-			id = gutter_crown.6
+		add_modifier = {
+			name = divine_monarchy
+			months = 180
+			is_decaying = yes
 		}
-		set_global_variable = gutter_crown_refused
+		ruler = {
+			add_modifier = {
+				name = rejected_gutter_crown
+				months = 120
+			}
+		}
+		every_interest_group = {
+			limit = {
+				OR = {
+					has_ideology = ideology:ideology_meritocratic
+					has_ideology = ideology:ideology_liberal
+					has_ideology = ideology:ideology_populist
+				}
+			}
+			add_modifier = {
+				name = chastened_liberals
+				months = 120
+				is_decaying = yes
+			}
+		}
+		ig:ig_landowners = {
+			add_modifier = {
+				name = happy_junkers
+				months = 120
+				is_decaying = yes
+			}
+		}
+		ig:ig_armed_forces = {
+			add_modifier = {
+				name = happy_junkers
+				is_decaying = yes
+				months = 120
+			}	
+		}
 	}
 	
 	progressbar = no
