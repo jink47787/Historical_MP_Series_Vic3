@@ -22,6 +22,7 @@ All mods / mod ideas used linked below:
 - War Is Politics: https://steamcommunity.com/sharedfiles/filedetails/?id=3124519140&searchtext=
 - Ideologies & Traits Expansion: https://steamcommunity.com/sharedfiles/filedetails/?id=3300629321
 - Better Civil War Flag: https://steamcommunity.com/sharedfiles/filedetails/?id=2945028897
+- GDP Ownership Display: https://steamcommunity.com/sharedfiles/filedetails/?id=3290552216
 Thanks to Gelre for his UI, Performance & Flava work.
 ---
 <br/>
