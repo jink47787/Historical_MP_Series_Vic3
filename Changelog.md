@@ -25,6 +25,7 @@ All mods / mod ideas used linked below:
 - GDP Ownership Display: https://steamcommunity.com/sharedfiles/filedetails/?id=3290552216
 - GDP Plot Line Plus Minimized https://steamcommunity.com/sharedfiles/filedetails/?id=3261478691&searchtext=graph
 - GDP Growth Rate (Fixed) https://steamcommunity.com/sharedfiles/filedetails/?id=3255320685
+- Kate's Liberate Country as Subject https://steamcommunity.com/sharedfiles/filedetails/?id=3241445760
 Thanks to Gelre for his UI, Performance & Flava work.
 ---
 <br/>
