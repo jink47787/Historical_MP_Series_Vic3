@@ -23,6 +23,8 @@ All mods / mod ideas used linked below:
 - Ideologies & Traits Expansion: https://steamcommunity.com/sharedfiles/filedetails/?id=3300629321
 - Better Civil War Flag: https://steamcommunity.com/sharedfiles/filedetails/?id=2945028897
 - GDP Ownership Display: https://steamcommunity.com/sharedfiles/filedetails/?id=3290552216
+- GDP Plot Line Plus Minimized https://steamcommunity.com/sharedfiles/filedetails/?id=3261478691&searchtext=graph
+- GDP Growth Rate (Fixed) https://steamcommunity.com/sharedfiles/filedetails/?id=3255320685
 Thanks to Gelre for his UI, Performance & Flava work.
 ---
 <br/>
