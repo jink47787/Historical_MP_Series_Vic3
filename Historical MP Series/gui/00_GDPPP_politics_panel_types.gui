@@ -1,0 +1,274 @@
+# COPY-PASTED FOR NOW
+@panel_width_minus_10 = 530			# used to be 450
+@panel_width = 540  				# used to be 460
+@panel_width_half = 270				# used to be 230
+@panel_width_plus_10 = 550  		# used to be 470
+@panel_width_plus_14 = 554			# used to be 474
+@panel_width_plus_14_half = 277		# used to be 237
+@panel_width_plus_20 = 560			# used to be 480
+@panel_width_plus_30 = 570			# used to be 490
+@panel_width_plus_70 = 610			# used to be 530
+
+types information_panels_types
+{
+	type v3_plotline_gdp = v3_plotline {
+		using = default_list_position
+		blockoverride "header" {
+			text = "GDP"
+		}
+		blockoverride "size" {
+			size = { 840 200 } # Returned to normal size
+		}
+		blockoverride "line_color" {
+			color = { .2 .9 .2 .9 }
+		}
+		blockoverride "line_plotpoints" {
+			visible = "[Not(IsEmpty(Country.GetGDPTrend))]"
+			plotpoints = "[GetTrendPlotPointsNormalized(Country.GetGDPTrend, GetMin(Country.GetGDPTrend), GetMax(Country.GetGDPTrend))]"
+		}
+		blockoverride "maxvalue" {
+			text = "[GetMax(Country.GetGDPTrend)|K]"
+		}
+		blockoverride "minvalue" {
+			raw_text = "[GetMin(Country.GetGDPTrend)|K]"
+		}
+		blockoverride "startdate" {
+			text = "[GetOldestDate(Country.GetGDPTrend)]"
+		}
+		blockoverride "enddate" {
+			text = "[GetLatestDate(Country.GetGDPTrend)]"
+		}
+		blockoverride "multiitem" {}
+
+		blockoverride "empty_state_visibility" {
+			visible = "[EqualTo_string(GetOldestDate(Country.GetGDPTrend), GetLatestDate(Country.GetGDPTrend))]"
+		}
+		blockoverride "empty_state_text" {
+			text = "GRAPH_NOT_INITIALIZED"
+		}
+	}
+
+	type v3_plotline_prestigeX = v3_plotline {
+		using = default_list_position
+		blockoverride "header" {
+			text = "[concept_prestige]"
+		}
+		blockoverride "size" {
+			size = { 840 100 }
+		}
+		blockoverride "line_color" {
+			color = { .3 .3 .9 .9 }
+		}
+		blockoverride "line_plotpoints" {
+			visible = "[Not(IsEmpty(Country.GetPrestigeTrend))]"
+			plotpoints = "[GetTrendPlotPointsNormalized(Country.GetPrestigeTrend, GetMin(Country.GetPrestigeTrend), GetMax(Country.GetPrestigeTrend))]"
+		}
+		blockoverride "maxvalue" {
+			text = "[GetMax(Country.GetPrestigeTrend)]"
+		}
+		blockoverride "minvalue" {
+			raw_text = "[GetMin(Country.GetPrestigeTrend)]"
+		}
+		blockoverride "startdate" {
+			text = "[GetOldestDate(Country.GetPrestigeTrend)]"
+		}
+		blockoverride "enddate" {
+			text = "[GetLatestDate(Country.GetPrestigeTrend)]"
+		}
+		blockoverride "multiitem" {}
+
+		blockoverride "empty_state_visibility" {
+			visible = "[EqualTo_string(GetOldestDate(Country.GetPrestigeTrend), GetLatestDate(Country.GetPrestigeTrend))]"
+		}
+		blockoverride "empty_state_text" {
+			text = "GRAPH_NOT_INITIALIZED"
+		}
+	}
+
+	type v3_plotline = flowcontainer {
+		margin_top = 10
+
+		flowcontainer = {
+			direction = vertical
+			margin_bottom = 40
+			margin_left = 60
+			margin_right = 30
+
+			background = {
+				using = paper_bg
+			}
+
+			# header
+			textbox = {
+				using = default_list_position
+
+				block "header" {
+					raw_text = "#title header name#!"
+				}
+				autoresize = yes
+				align = hcenter|nobaseline
+				margin_top = 10
+				margin_bottom = 10
+				default_format = "#title"
+				multiline = yes
+				maximumsize = { 300 -1 }
+			}
+
+			# graph
+			widget = {
+				block "size" {
+					size = { 360 200 }
+				}
+
+				block "empty_state" {
+					textbox = {
+						block "empty_state_visibility" {
+							visible = no
+						}
+						block "empty_state_text" {
+							raw_text = "#todo nothing to see here#!"
+						}
+						parentanchor = center
+						align = hcenter|nobaseline
+					}
+				}
+
+				background = {
+					texture = "gfx/interface/graph/graph_frame.dds"
+					spriteType = Corneredtiled
+					spriteborder = { 2.6 2.6 }
+					texture_density = 1.6
+					margin = { 4 4 }
+					alpha = 0.65
+
+					modify_texture = {
+						texture = "gfx/interface/backgrounds/default_bg_shading.dds"
+						spriteType = Corneredstretched
+						spriteborder = { 0 0 }
+						blend_mode = overlay
+						alpha = 0.7
+					}
+				}
+
+				widget = {
+					size = { 100% 100% }
+
+					block "datamodel" {}
+
+					block "everything_that_is_not_empty_state_visibility" {}
+
+					block "multiitem" {
+						item = {
+							plotline = {
+								size = { 100% 100% }
+								using = plot_line
+								width = 3.5 # 2.5
+
+								block "line_color" {
+									color = { 0.24 0.32 0.18 0.7 }
+								}
+
+								block "line_plotpoints" {}
+								block "tooltip" {}
+							}
+						}
+					}
+
+					block "singleitem" {
+						plotline = {
+							size = { 100% 100% }
+							using = plot_line
+							width = 3.0
+
+							block "line_color" {
+								color = { 0.24 0.32 0.18 0.7 }
+							}
+
+							block "tooltip" {}
+
+							block "line_plotpoints" {}
+						}
+					}
+
+					block "extra_plotlines" {}
+				}
+
+				axis = {
+					size = { 100% 100% }
+					direction = vertical
+
+					axis_label = {
+						textbox = {
+							autoresize = yes
+							widgetanchor = vcenter|right
+							parentanchor = left
+							margin_right = 8 # 10
+							margin_bottom = 10
+							align = left|nobaseline
+							using = fontsize_small
+							#default_format = "#title"
+
+							block "minvalue" {
+								raw_text = "0"
+							}
+						}
+					}
+
+					axis_label = {
+						textbox = {
+							autoresize = yes
+							widgetanchor = vcenter|right
+							parentanchor = left
+							margin_right = 8 # 10
+							margin_top = 10
+							align = left|nobaseline
+							using = fontsize_small
+							#default_format = "#title"
+
+							block "maxvalue" {
+								raw_text = "100%"
+							}
+						}
+					}
+				}
+
+				axis = {
+					size = { 100% 100% }
+					direction = horizontal
+
+					axis_label = {
+						textbox = {
+							autoresize = yes
+							parentanchor = bottom
+							widgetanchor = left|top
+							align = left
+							margin_top = 8
+							using = fontsize_small
+							#default_format = "#title"
+
+							block "startdate" {
+								text = "[PoliticsPanel.GetCloutGraphDateStart]"
+							}
+						}
+					}
+
+					axis_label = {
+						textbox = {
+							autoresize = yes
+							parentanchor = bottom
+							widgetanchor = right|top
+							align = right
+							margin_top = 8
+							using = fontsize_small
+							#default_format = "#title"
+
+							block "enddate" {
+								text = "[PoliticsPanel.GetCloutGraphDateEnd]"
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
