@@ -23,9 +23,10 @@ All mods / mod ideas used linked below:
 - Ideologies & Traits Expansion: https://steamcommunity.com/sharedfiles/filedetails/?id=3300629321
 - Better Civil War Flag: https://steamcommunity.com/sharedfiles/filedetails/?id=2945028897
 - GDP Ownership Display: https://steamcommunity.com/sharedfiles/filedetails/?id=3290552216
-- GDP Plot Line Plus Minimized https://steamcommunity.com/sharedfiles/filedetails/?id=3261478691&searchtext=graph
-- GDP Growth Rate (Fixed) https://steamcommunity.com/sharedfiles/filedetails/?id=3255320685
-- Kate's Liberate Country as Subject https://steamcommunity.com/sharedfiles/filedetails/?id=3241445760
+- GDP Plot Line Plus Minimized: https://steamcommunity.com/sharedfiles/filedetails/?id=3261478691&searchtext=graph
+- GDP Growth Rate (Fixed): https://steamcommunity.com/sharedfiles/filedetails/?id=3255320685
+- Kate's Liberate Country as Subject: https://steamcommunity.com/sharedfiles/filedetails/?id=3241445760
+- Remove all trade routes' line and arrows: https://steamcommunity.com/sharedfiles/filedetails/?id=2897200021
 Thanks to Gelre for his UI, Performance & Flava work.
 ---
 <br/>
