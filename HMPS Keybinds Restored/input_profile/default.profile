@@ -1,3 +1,5 @@
+version=1
+
 input_context={
 	name="common"
 
@@ -7,49 +9,49 @@ input_context={
 		scancode = 44			# Space
 		mouse_button = MOUSE_X2	# Mouse 5 AKA forward
 	}
-	
+
 	input_action = {
 		name = "increase_speed"
 		text = "SETTING_INPUT_ACTION_INCREASE_SPEED"
 		scancode = 46	# Equals (=)
 		scancode = 87	# Keypad +
 	}
-	
+
 	input_action = {
 		name = "decrease_speed"
 		text = "SETTING_INPUT_ACTION_DECREASE_SPEED"
 		scancode = 45	# Minus (-)
 		scancode = 86	# Keypad -
 	}
-	
+
 	input_action = {
 		name = "speed_1"
 		text = "SETTING_INPUT_ACTION_SPEED_ONE"
 		scancode = 30	# 1
 		scancode = 89	# Keypad 1
 	}
-	
+
 	input_action = {
 		name = "speed_2"
 		text = "SETTING_INPUT_ACTION_SPEED_TWO"
 		scancode = 31	# 2
 		scancode = 90	# Keypad 2
 	}
-	
+
 	input_action = {
 		name = "speed_3"
 		text = "SETTING_INPUT_ACTION_SPEED_THREE"
 		scancode = 32	# 3
 		scancode = 91	# Keypad 3
 	}
-	
+
 	input_action = {
 		name = "speed_4"
 		text = "SETTING_INPUT_ACTION_SPEED_FOUR"
 		scancode = 33	# 4
 		scancode = 92	# Keypad 4
 	}
-	
+
 	input_action = {
 		name = "speed_5"
 		text = "SETTING_INPUT_ACTION_SPEED_FIVE"
@@ -98,12 +100,6 @@ input_context={
 		scancode = 7	# D
 		scancode = 79	# Arrow Right
 	}
-
-	input_action = {
-		name = "location_finder"
-		text = "SETTING_INPUT_ACTION_LOCATION_FINDER"
-		scancode = 9	# F
-	}
 	
 	input_action = {
 		name = "open_politics"
@@ -136,45 +132,51 @@ input_context={
 	}
 
 	input_action = {
+		name = "open_power_bloc"
+		text = "SETTING_INPUT_ACTION_OPEN_POWER_BLOC"
+
+		scancode = 63	# F6
+	}
+
+	input_action = {
 		name = "open_diplomatic"
 		text = "SETTING_INPUT_ACTION_OPEN_DIPLOMATIC"
-		scancode = 63	# F6
+		scancode = 64	# F7
 	}
 
 	input_action = {
 		name = "open_technology"
 		text = "SETTING_INPUT_ACTION_OPEN_TECHNOLOGY"
-		scancode = 64	# F7
+		scancode = 65	# F8
 	}
 
 	input_action = {
 		name = "open_culture"
 		text = "SETTING_INPUT_ACTION_OPEN_CULTURE"
-		scancode = 65	# F8
+		scancode = 66	# F9
 	}
 
 	input_action = {
 		name = "open_population"
 		text = "SETTING_INPUT_ACTION_OPEN_POPULATION"
-		scancode = 66	# F9
+		scancode = 67	# F10
+		
 	}
 
 	input_action = {
 		name = "open_journal"
 		text = "SETTING_INPUT_ACTION_OPEN_JOURNAL"
-		scancode = 67	# F10
+		scancode = 13	# J
 	}
 
-	#input_action = {	#steam screenshot shortcut
-	#	name = "open_decisions"
-	#	text = "SETTING_INPUT_ACTION_OPEN_DECISIONS"
-	#	scancode = 69	# F12
-	#}
-
 	input_action = {
-		name = "map_list"
-		text = "SETTING_INPUT_ACTION_MAP_LIST"
-		scancode = 20	# Q
+		name = "open_companies"
+		text = "SETTING_INPUT_ACTION_OPEN_COMPANIES"
+		binding = {	# shift+F1
+			scancode = 58
+			modifier = shift
+		}
+		
 	}
 
 	input_action = {
@@ -184,69 +186,180 @@ input_context={
 	}
 	
 	input_action = {
-		name = "open_outliner"
-		text = "SETTING_INPUT_ACTION_OPEN_OUTLINER"
-		scancode = 225+58		# shift+F1"
+		name = "location_finder"
+		text = "SETTING_INPUT_ACTION_LOCATION_FINDER"
+		scancode = 9	# F
+	}
+
+	input_action = {
+		name = "map_list"
+		text = "SETTING_INPUT_ACTION_MAP_LIST"
+		scancode = 20	# Q
 	}
 
 	input_action = {
 		name = "tab_1"
 		text = "SETTING_INPUT_ACTION_TAB_1"
-		scancode = 225+30		# shift+1"
+		binding = {	# shift+1"
+			scancode = 30
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_2"
 		text = "SETTING_INPUT_ACTION_TAB_2"
-		scancode = 225+31		# shift+2"
+		binding = {	# shift+2"
+			scancode = 31
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_3"
 		text = "SETTING_INPUT_ACTION_TAB_3"
-		scancode = 225+32		# shift+3"
+		binding = {	# shift+3"
+			scancode = 32
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_4"
 		text = "SETTING_INPUT_ACTION_TAB_4"
-		scancode = 225+33		# shift+4"
+		binding = {	# shift+4"
+			scancode = 33
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "tab_5"
 		text = "SETTING_INPUT_ACTION_TAB_5"
-		scancode = 225+34		# shift+5"
+		binding = {	# shift+5"
+			scancode = 34
+			modifier = shift
+		}
 	}
 
 	input_action = {
 		name = "production_lens"
 		text = "SETTING_INPUT_ACTION_PRODUCTION_LENS"
-		scancode = 226+30		# alt+1"
+		binding = {	# alt+1"
+			scancode = 30
+			modifier = alt
+		}
 	}
 
 	input_action = {
 		name = "political_lens"
 		text = "SETTING_INPUT_ACTION_POLITICAL_LENS"
-		scancode = 226+31		# alt+2"
+		binding = {	# alt+2"
+			scancode = 31
+			modifier = alt
+		}
 	}
 
 	input_action = {
 		name = "diplomatic_lens"
 		text = "SETTING_INPUT_ACTION_DIPLOMATIC_LENS"
-		scancode = 226+32		# alt+3"
+		binding = {	# alt+3"
+			scancode = 32
+			modifier = alt
+		}
 	}
 
 	input_action = {
 		name = "military_lens"
 		text = "SETTING_INPUT_ACTION_MILITARY_LENS"
-		scancode = 226+33		# alt+4"
+		binding = {	# alt+4"
+			scancode = 33
+			modifier = alt
+		}
 	}
 
 	input_action = {
 		name = "trade_lens"
 		text = "SETTING_INPUT_ACTION_TRADE_LENS"
-		scancode = 226+34		# alt+5"
+		binding = {	# alt+5"
+			scancode = 34
+			modifier = alt
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_pinned"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_PINNED"
+		binding = {
+			scancode = 30
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_economy"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_ECONOMY"
+		binding = {
+			scancode = 31
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_politics"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_POLITICS"
+		binding = {
+			scancode = 32
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_diplomacy"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_DIPLOMACY"
+		binding = {
+			scancode = 33
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_military"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_MILITARY"
+		binding = {
+			scancode = 34
+			modifier = ctrl
+		}
+	}
+
+	input_action = { 
+		name = "outliner_toggle_all"
+		text = "SETTING_INPUT_ACTION_OUTLINER_TOGGLE_ALL"
+		binding = {
+			scancode = 35
+			modifier = ctrl
+		}
+	}
+
+	input_action = {
+		name = "construction_queue"
+		text = "SETTING_INPUT_ACTION_CONSTRUCTION_QUEUE"
+		scancode = 5 			# B
+	}
+
+	input_action = {
+		name = "toggle_construction_queue_pause"
+		text = "SETTING_INPUT_ACTION_TOGGLE_CONSTRUCTION_QUEUE_PAUSE"
+		binding = {	# ctrl+B
+			scancode = 5
+			modifier = ctrl
+		}
+	}
+
+	input_action = {
+		name = "back"
+		text = "SETTING_INPUT_ACTION_BACK"
+		mouse_button = MOUSE_X1	# mb4
 	}
 
 	input_action = {
@@ -262,21 +375,25 @@ input_context={
 	}
 
 	input_action = {
-		name = "construction_queue"
-		text = "SETTING_INPUT_ACTION_CONSTRUCTION_QUEUE"
-		scancode = 5 			# B
-	}
-
-	input_action = {
-		name = "toggle_construction_queue_pause"
-		text = "SETTING_INPUT_ACTION_TOGGLE_CONSTRUCTION_QUEUE_PAUSE"
-		scancode = 228+5 		# ctrl+B
-	}
-
-	input_action = {
 		name = "go_to_details"
 		text = "SETTING_INPUT_ACTION_GO_TO_DETAILS"
 		scancode = 10 			# G
+	}
+
+	input_action = { 
+		name = "toggle_pin"
+		text = "SETTING_INPUT_ACTION_TOGGLE_PIN"
+		binding = {
+			scancode = 27	# X
+		}
+	}
+
+	input_action = { 
+		name = "zoom_to"
+		text = "SETTING_INPUT_ACTION_ZOOM_TO"
+		binding = {
+			scancode = 29 	# Z
+		}
 	}
 
 	input_action = {
