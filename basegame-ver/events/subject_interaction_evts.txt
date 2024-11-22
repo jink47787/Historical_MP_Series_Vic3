@@ -19,12 +19,26 @@ subject_interactions.1 = {
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
 	immediate = {
-		random_interest_group = {
+		if = { # If British India
 			limit = {
-				is_in_government = yes
+				any_subject_or_below = {
+					has_variable = gubernatorial_candidate
+					c:BIC ?= this
+				}
 			}
-			save_temporary_scope_as = our_ruling_interest_group
-			save_scope_as = our_ruling_interest_group_permanent
+			ig:ig_industrialists = {
+				save_temporary_scope_as = our_ruling_interest_group
+				save_scope_as = our_ruling_interest_group_permanent
+			}
+		}
+		else = { # If not British India
+			random_interest_group = {
+				limit = {
+					is_in_government = yes
+				}
+				save_temporary_scope_as = our_ruling_interest_group
+				save_scope_as = our_ruling_interest_group_permanent
+			}
 		}
 		random_primary_culture = {
 			save_scope_as = our_primary_culture
@@ -60,18 +74,42 @@ subject_interactions.1 = {
 					}
 				}
 			}
-			random_interest_group = {
+			if = {
 				limit = {
-					is_same_interest_group_type = scope:our_ruling_interest_group
+					NOT = {
+						c:BIC ?= this
+					}
 				}
-				save_scope_as = their_our_ruling_interest_group
+				random_interest_group = {
+					limit = {
+						is_same_interest_group_type = scope:our_ruling_interest_group
+					}
+					save_scope_as = their_our_ruling_interest_group
+				}
+			}
+			else = { # If British India
+				ig:ig_industrialists = {
+					save_scope_as = their_our_ruling_interest_group
+				}
 			}
 			# if the subject's ruling IG is the same as the overlord's ruling IG, that will be addressed in event options
-			random_interest_group = {
+			if = {
 				limit = {
-					is_in_government = yes
+					NOT = {
+						c:BIC ?= this
+					}
 				}
-				save_scope_as = their_their_ruling_group
+				random_interest_group = {
+					limit = {
+						is_in_government = yes
+					}
+					save_scope_as = their_their_ruling_group
+				}
+			}
+			else = { # If British India
+				ig:ig_industrialists = {
+					save_scope_as = their_their_ruling_group
+				}
 			}
 		}
 	}
@@ -131,8 +169,15 @@ subject_interactions.1 = {
 	}
 	option = {
 		name = subject_interactions.1.b
+		trigger = {
+			NOT = {
+				c:BIC ?= scope:gubernatorial_change_country
+			}
+		}
 		show_as_unavailable = {
-			always = yes
+			NOT = {
+				c:BIC ?= scope:gubernatorial_change_country
+			}
 		}
 
 		scope:gubernatorial_change_country = {
@@ -180,6 +225,9 @@ subject_interactions.1 = {
 		name = subject_interactions.1.c
 		show_as_unavailable = {
 			exists = scope:their_multicultural_interest_group
+			NOT = {
+				c:BIC ?= scope:gubernatorial_change_country
+			}
 		}
 
 		trigger = {
@@ -193,6 +241,9 @@ subject_interactions.1 = {
 						value > neutral
 					}
 				}
+			}
+			NOT = {
+				c:BIC ?= scope:gubernatorial_change_country
 			}
 		}
 		highlighted_option = yes
