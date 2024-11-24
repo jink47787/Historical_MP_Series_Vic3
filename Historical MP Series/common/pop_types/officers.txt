@@ -1,7 +1,6 @@
 ﻿officers = {
 	texture = "gfx/interface/icons/pops_icons/officers.dds"
 	color = hsv{ 0.12 0.51 0.36 }
-	strata = middle
 	start_quality_of_life = 10
 	wage_weight = 5
 	paid_private_wage = yes
@@ -20,12 +19,18 @@
 			desc = "POP_STARVATION"	
 			
 			if = {
-				limit = { 
-					standard_of_living < 5
+				limit = {
+					is_in_mild_starvation = yes
 				}
-				value = 1
-			}		
-		}	
+				value = 0.5
+			}
+			else_if = {
+				limit = {
+					is_in_severe_starvation = yes
+				}
+				value = 1.5
+			}
+		}
 		
 	}
 	
@@ -35,9 +40,13 @@
 			limit = {
 				is_peasant_under_serfdom = no
 				OR = {
-					culture_accepted = yes
+					state = {
+						state_cultural_acceptance = {
+							target = PREV.culture
+						   	value > acceptance_status_4
+					   	}
+					}
 					is_pop_type = soldiers
-					is_pop_type = aristocrats
 				}
 			}
 			# baseline: ( literacy - 0.2 ) * 10, norm 2 for Soldiers with Literacy 30%
@@ -87,10 +96,29 @@
 			}
 			if = {
 				limit = {
-					culture_accepted = no
+					state = {
+						state_cultural_acceptance = {
+							target = PREV.culture
+						   	value < acceptance_status_5
+					   	}
+					}
 				}
 				multiply = {
-					value = 0.1
+					value = 0.4
+					desc = "QUALIFICATIONS_CULTURAL_DISCRIMINATION"
+				}
+			}
+			if = {
+				limit = {
+					state = {
+						state_cultural_acceptance = {
+							target = PREV.culture
+						   	value < acceptance_status_4
+					   	}
+					}
+				}
+				multiply = {
+					value = 0.5
 					desc = "QUALIFICATIONS_CULTURAL_DISCRIMINATION"
 				}
 			}
