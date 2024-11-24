@@ -31,6 +31,16 @@ law_vanguardism = {
 				country_has_voting_franchise = no
 			}
 		}
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	disallowing_laws = {
@@ -54,34 +64,9 @@ law_vanguardism = {
 			activate_law = law_type:law_no_legislature
 			activate_law = law_type:law_no_voting
 			activate_law = law_type:law_single_party_state
-			hidden_effect = {
-				if = {
-					limit = {
-						ROOT = {
-							ruler.interest_group = {
-								has_party = yes
-							}
-						}
-					}
-					ROOT = {
-						set_variable = { name = only_valid_party value = ruler.interest_group.party }
-					}
-				}
-				else_if = {
-					limit = {
-						NOT = {
-							any_active_party = {
-								exists = this
-							}
-						}
-					}
-					root = { gen_ruler_party = yes }
-				}
-			}
-			hidden_effect = { #Clears all currently active parties
-				deactivate_parties = yes
-			}
-			update_party_support = yes #Reactivates precisely one legal party
+			
+			set_only_legal_party_from_ig = ruler.interest_group
+			
 			custom_tooltip = {
 				text = sps_government_reshuffle_tt
 				every_interest_group = {
@@ -110,12 +95,9 @@ law_vanguardism = {
 		}
 	}
 	
-	possible_political_movements = {
-		law_oligarchy
-		law_landed_voting
-		law_autocracy
-		law_technocracy
-		law_elder_council
+	on_deactivate = {
+		unset_only_legal_party = yes
+		update_party_support = yes
 	}
 	
 	can_impose = {
@@ -132,10 +114,6 @@ law_vanguardism = {
 				can_impose_law_default = yes
 			}
 		}
-	}
-	
-	pop_support = {
-		value = 0
 	}
 	
 	ai_enact_weight_modifier = { #Petitions
@@ -178,7 +156,6 @@ law_autocracy = {
 		activate_law = law_type:law_no_voting
 		activate_law = law_type:law_independent_executive
 		scripted_effect_parties_disappearence = yes
-		clear_legal_single_party = yes
 		if = {
 			limit = {
 				has_modifier = missouri_compromise
@@ -197,12 +174,17 @@ law_autocracy = {
 		country_authority_mult = 0.20
 	}
 	
-	possible_political_movements = {
-		law_oligarchy
-		law_landed_voting
-		law_elder_council
-		law_technocracy
-		law_vanguardism
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	can_impose = {
@@ -215,31 +197,6 @@ law_autocracy = {
 				}
 			}
 			can_impose_law_default = yes
-		}
-	}
-	
-	pop_support = {
-		value = 0
-		add = {
-			desc = "POP_ARISTOCRATS"			
-			if = {
-				limit = {
-					owner = {
-						NOT = { has_law = law_type:law_oligarchy }
-					}
-					is_pop_type = aristocrats
-				}
-				value = 0.25
-			}
-		}
-		add = {
-			desc = "POP_OFFICIERS"			
-			if = {
-				limit = {
-					is_pop_type = officers
-				}
-				value = 0.25
-			}
 		}
 	}
 	
@@ -283,7 +240,6 @@ law_oligarchy = {
 		activate_law = law_type:law_no_voting
 		activate_law = law_type:law_independent_executive
 		scripted_effect_parties_disappearence = yes
-		clear_legal_single_party = yes
 		if = {
 			limit = {
 				has_modifier = missouri_compromise
@@ -297,17 +253,24 @@ law_oligarchy = {
 		country_legitimacy_govt_total_clout_add = 105
 		country_legitimacy_govt_size_add = 2
 		country_legitimacy_ideological_incoherence_mult = -0.45
+		country_officers_pol_str_mult = 0.5
 		country_aristocrats_pol_str_mult = 0.5
 		country_capitalists_pol_str_mult = 0.5
 		country_authority_add = 200
 		country_authority_mult = 0.15
 	}
 	
-	possible_political_movements = {
-		law_autocracy 
-		law_landed_voting
-		law_technocracy
-		law_elder_council
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	can_impose = {
@@ -320,34 +283,6 @@ law_oligarchy = {
 				}
 			}
 			can_impose_law_default = yes
-		}
-	}
-	
-	pop_support = {
-		value = 0
-		add = {
-			desc = "POP_ARISTOCRATS"			
-			if = {
-				limit = {
-					owner = {
-						NOT = { has_law = law_type:law_autocracy }
-					}
-					is_pop_type = aristocrats
-				}
-				value = 0.25
-			}
-		}
-		add = {
-			desc = "POP_CAPITALISTS"			
-			if = {
-				limit = {
-					owner = {
-						NOT = { has_law = law_type:law_wealth_voting }
-					}
-					is_pop_type = capitalists
-				}
-				value = 0.25
-			}
 		}
 	}
 	
@@ -386,7 +321,6 @@ law_technocracy = {
 			activate_law = law_type:law_appointed_bureaucrats
 		}
 		scripted_effect_parties_disappearence = yes
-		clear_legal_single_party = yes
 		if = {
 			limit = {
 				has_modifier = missouri_compromise
@@ -411,12 +345,27 @@ law_technocracy = {
 	unlocking_technologies = {
 		central_archives 
 	}
-
-	possible_political_movements = {
-		law_autocracy 
-		law_oligarchy
-		law_vanguardism
-		law_landed_voting
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
 	}
 	
 	can_impose = {
@@ -428,23 +377,7 @@ law_technocracy = {
 					has_law = scope:law
 				}
 			}
-			AND = { # modification of the standard trigger, only other technocracy countries can impose technocracy on their subjects
-				has_law = scope:law
-				can_impose_law_default = yes
-			}
-		}
-	}
-
-	pop_support = {
-		value = 0
-	}
-	
-	ai_enact_weight_modifier = { #Petitions
-		value = 0
-		
-		if = {
-			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
-			add = 750
+			can_impose_law_default = yes
 		}
 	}
 }
@@ -484,7 +417,6 @@ law_elder_council = {
 			activate_law = law_type:law_appointed_bureaucrats
 		}
 		scripted_effect_parties_disappearence = yes
-		clear_legal_single_party = yes
 		if = {
 			limit = {
 				has_law = law_type:law_single_party_state
@@ -510,14 +442,17 @@ law_elder_council = {
 		country_authority_add = 200
 	}
 	
-	possible_political_movements = {
-		law_autocracy 
-		law_oligarchy
-		law_landed_voting
-	}
-	
-	pop_support = {
-		value = 0
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 }
 
@@ -560,7 +495,6 @@ law_clerical_voting = {
 			activate_law = law_type:law_plurality
 		}
 		scripted_effect_parties_emergence = yes
-		clear_legal_single_party = yes
 	}
 
 	disallowing_laws = {
@@ -577,38 +511,17 @@ law_clerical_voting = {
 		country_authority_add = 200
 	}
 	
-	possible_political_movements = {
-		law_oligarchy
-		law_autocracy 
-	}
-	
-	pop_support = {
-		value = 0
-
-		add = {
-			desc = "POP_LITERACY" 
-			
-			if = {
-				limit = { 
-					OR = {
-						NOT = { strata = rich }
-						wealth < 30
-					}					
-					owner = { 
-						NOR = {
-							has_law = law_type:law_wealth_voting
-							has_law = law_type:law_census_voting
-							has_law = law_type:law_universal_suffrage
-							has_law = law_type:law_anarchy
-						}	
-					}
-				}
-				add = {
-					value = literacy_rate
-					divide = 4
-				}
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
 			}
-		}			
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	ai_enact_weight_modifier = { #Petitions
@@ -656,7 +569,6 @@ law_landed_voting = {
 			activate_law = law_type:law_plurality
 		}
 		scripted_effect_parties_emergence = yes
-		clear_legal_single_party = yes
 		if = {
 			limit = {
 				OR = {
@@ -689,12 +601,17 @@ law_landed_voting = {
 		country_authority_add = 200
 	}
 	
-	possible_political_movements = {
-		law_oligarchy
-		law_technocracy
-		law_autocracy 
-		law_wealth_voting
-		law_census_voting
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	can_impose = {
@@ -708,35 +625,6 @@ law_landed_voting = {
 			}
 			can_impose_law_default = yes
 		}
-	}
-	
-	pop_support = {
-		value = 0
-
-		add = {
-			desc = "POP_LITERACY" 
-			
-			if = {
-				limit = { 
-					OR = {
-						NOT = { strata = rich }
-						wealth < 30
-					}					
-					owner = { 
-						NOR = {
-							has_law = law_type:law_wealth_voting
-							has_law = law_type:law_census_voting
-							has_law = law_type:law_universal_suffrage
-							has_law = law_type:law_anarchy
-						}	
-					}
-				}
-				add = {
-					value = literacy_rate
-					divide = 2
-				}
-			}
-		}			
 	}
 	
 	ai_enact_weight_modifier = { #Petitions
@@ -780,7 +668,6 @@ law_wealth_voting = {
 			activate_law = law_type:law_plurality
 		}
 		scripted_effect_parties_emergence = yes
-		clear_legal_single_party = yes
 		if = {
 			limit = {
 				OR = {
@@ -812,10 +699,17 @@ law_wealth_voting = {
 		country_authority_add = 100
 	}
 	
-	possible_political_movements = {
-		law_landed_voting
-		law_census_voting
-		law_universal_suffrage
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	can_impose = {
@@ -829,31 +723,6 @@ law_wealth_voting = {
 			}
 			can_impose_law_default = yes
 		}
-	}
-	
-	pop_support = {
-		value = 0
-
-		add = {
-			desc = "POP_LITERACY"
-			
-			if = {
-				limit = { 
-					NOT = { strata = rich }
-					owner = { 
-						NOR = {
-							has_law = law_type:law_census_voting
-							has_law = law_type:law_universal_suffrage
-							has_law = law_type:law_anarchy
-						}	
-					}
-				}
-				add = {
-					value = literacy_rate
-					divide = 2
-				}
-			}
-		}			
 	}
 	
 	ai_enact_weight_modifier = { #Petitions
@@ -878,7 +747,7 @@ law_census_voting = {
 	}
 	
 	disallowing_laws = {
-		law_industry_banned
+		law_extraction_economy
 		law_the_company
 	}
 	
@@ -902,7 +771,6 @@ law_census_voting = {
 			activate_law = law_type:law_plurality
 		}
 		scripted_effect_parties_emergence = yes
-		clear_legal_single_party = yes
 		if = {
 			limit = {
 				OR = {
@@ -936,10 +804,17 @@ law_census_voting = {
 		country_authority_add = 50
 	}
 	
-	possible_political_movements = {
-		law_landed_voting
-		law_wealth_voting
-		law_universal_suffrage
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	can_impose = {
@@ -953,30 +828,6 @@ law_census_voting = {
 			}
 			can_impose_law_default = yes
 		}
-	}
-	
-	pop_support = {
-		value = 0
-
-		add = {
-			desc = "POP_LITERACY"
-			
-			if = {
-				limit = { 
-					wealth < 25
-					owner = { 
-						NOR = {
-							has_law = law_type:law_universal_suffrage
-							has_law = law_type:law_anarchy
-						}	
-					}
-				}
-				add = {
-					value = literacy_rate
-					divide = 2
-				}
-			}
-		}			
 	}
 	
 	ai_enact_weight_modifier = { #Petitions
@@ -1001,7 +852,7 @@ law_universal_suffrage = {
 	}
 	
 	disallowing_laws = {
-		law_industry_banned
+		law_extraction_economy
 		law_the_company
 	}
 	
@@ -1025,7 +876,6 @@ law_universal_suffrage = {
 			activate_law = law_type:law_plurality
 		}
 		scripted_effect_parties_emergence = yes
-		clear_legal_single_party = yes
 		if = {
 			limit = {
 				OR = {
@@ -1056,10 +906,17 @@ law_universal_suffrage = {
 		state_migration_pull_mult = 0.15
 	}
 	
-	possible_political_movements = {
-		law_census_voting
-		law_wealth_voting
-		law_anarchy
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	can_impose = {
@@ -1072,42 +929,6 @@ law_universal_suffrage = {
 				}
 			}
 			can_impose_law_default = yes
-		}
-	}
-	
-	pop_support = {
-		value = 0
-
-		add = {
-			desc = "POP_LITERACY"
-			
-			if = {
-				limit = { 
-					owner = { 
-						NOT = {
-							has_law = law_type:law_anarchy
-						}	
-					}
-				}
-				if = {
-					limit = {
-						wealth < 15
-					}
-					add = {
-						value = literacy_rate
-						divide = 2
-					}
-				}
-				if = {
-					limit = {
-						wealth < 10
-					}
-					add = {
-						value = literacy_rate
-						divide = 2
-					}
-				}
-			}			
 		}
 	}
 	
@@ -1159,14 +980,13 @@ law_anarchy = {
 			activate_law = law_type:law_national_militia
 		}
 		scripted_effect_parties_disappearence = yes
-		clear_legal_single_party = yes
 	}
 
 	disallowing_laws = {
 		law_chiefdom
 		law_theocracy
 		law_outlawed_dissent
-		law_industry_banned
+		law_extraction_economy
 		law_the_company
 	}
 	
@@ -1178,8 +998,17 @@ law_anarchy = {
 		state_migration_pull_mult = 0.15
 	}
 	
-	possible_political_movements = {
-		law_universal_suffrage
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
 	}
 	
 	can_impose = {
@@ -1202,21 +1031,6 @@ law_anarchy = {
 		exists = ruler
 		ruler = {
 			has_ideology = ideology:ideology_anarchist
-		}
-	}
-	
-	pop_support = {
-		value = 0
-
-		add = {
-			desc = "POP_LITERACY"
-			
-			if = {
-				limit = { 
-					wealth < 10
-				}
-				add = literacy_rate
-			}
 		}
 	}
 	
