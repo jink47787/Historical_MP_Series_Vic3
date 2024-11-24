@@ -1,0 +1,416 @@
+﻿je_potato_famine = {
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	group = je_group_crises
+	should_be_pinned_by_default = yes
+	progressbar = yes
+	
+	scripted_button = increase_welfare
+	scripted_button = decrease_welfare
+	scripted_button = fund_potato_famine_unincorporated
+	scripted_button = defund_potato_famine_unincorporated
+	scripted_button = suppress_unrest_pb
+	
+	immediate = {
+		#variable affects country wide political modifier, ticks up over course of famine but can be decreased if relief is given
+		#there should be a way to see your original SoL (could just let players look at the graph)
+		set_variable = {
+			name = food_crisis_var
+			value = 0
+		}
+		set_variable = {
+			name = food_crisis_fail
+			value = 10
+		}
+		set_variable = {
+			name = original_sol
+			value = root.average_sol
+		}
+		add_modifier = {
+			name = food_crisis_resentment
+			multiplier = root.var:food_crisis_var
+		}
+		#Button variables
+		
+		set_variable = {
+			name = potato_button_incorporated
+			value = 0
+		}
+	}
+		
+	
+	current_value = {
+		value = root.var:food_crisis_var
+	}
+
+	goal_add_value = {
+		value = root.var:food_crisis_fail
+	}
+	
+	progressbar = yes
+	
+	on_monthly_pulse = {
+		effect = {
+			#SoL check
+			set_variable = {
+				name = new_sol
+				value = root.average_sol
+			}
+			set_variable = {
+				name = change_sol
+				value = root.var:original_sol
+			}
+			change_variable = {
+				name = change_sol
+				subtract = root.var:new_sol
+			}
+			if = {
+				limit = {
+					has_variable = gained_sol
+				}
+				remove_variable = gained_sol
+			}
+			if = {
+				limit = {
+					root.var:change_sol < 0
+				}
+				set_variable = gained_sol
+				while = {
+					limit = {
+						root.var:change_sol < 0
+					}
+					change_variable = {
+						name = food_crisis_var
+						add = -0.1
+					}
+					change_variable = {
+						name = change_sol
+						add = 1
+					}
+				}
+			}
+			if = {
+				limit = {
+					root.var:change_sol >= 0
+					NOT = { has_variable = gained_sol }
+				}
+				while = {
+					limit = {
+						root.var:change_sol > 0
+					}
+					change_variable = {
+						name = food_crisis_var
+						add = 0.1
+					}
+					change_variable = {
+						name = change_sol
+						add = -1
+					}
+				}
+			}
+			
+			#grain price #meant to help LF countries
+			
+			if = {
+				limit = {
+					market_capital.market = {
+						mg:grain = {
+							market_goods_pricier >= 0.50
+						}
+					}
+				}
+				change_variable = {
+					name = food_crisis_var
+					add = 0.1
+				}
+			}
+			
+			if = {
+				limit = {
+					market_capital.market = {
+						mg:grain = {
+							market_goods_pricier <= 0.0
+						}
+					}
+				}
+				change_variable = {
+					name = food_crisis_var
+					add = -0.1
+				}
+			}
+			
+			#Tariffs
+			if = {
+				limit = {
+					has_export_priority_tariffs = g:grain
+				}
+				change_variable = {
+					name = food_crisis_var
+					add = 0.1
+				}
+			}
+			if = {
+				limit = {
+					has_import_priority_tariffs = g:grain
+				}
+				change_variable = {
+					name = food_crisis_var
+					add = -0.1
+				}
+			}
+			#Revolution
+			if = {
+				limit = {
+					NOT = { has_global_variable = revolution_blight_je }
+					any_country = {
+						country_rank = rank_value:great_power
+						any_scope_state = {
+							has_modifier = potato_blight_modifier
+						}
+						has_revolution = yes
+					}
+				}
+				change_variable = {
+					name = food_crisis_var
+					add = 2
+				}
+				set_global_variable = revolution_blight_je
+			}
+			#Serfdom
+			if = {
+				limit = {
+					has_law = law_type:law_serfdom
+					root.var:food_crisis_var >= 0.1
+				}
+				change_variable = {
+					name = food_crisis_var
+					add = -0.1
+				}
+			}
+			#Capital Radicals
+			if = {
+				limit = {
+					capital = {
+						radical_fraction = {
+							value > 0.25
+						}
+					}
+				}
+				change_variable = {
+					name = food_crisis_var
+					add = 0.2
+				}
+			}
+			
+			
+			#final modifier change
+			remove_modifier = food_crisis_resentment
+			add_modifier = {
+				name = food_crisis_resentment
+				multiplier = root.var:food_crisis_var
+			}
+			
+			#Variables for unincorporated button
+			if = {
+				limit = {
+					any_scope_state = {
+						is_incorporated = no
+						has_modifier = potato_blight_modifier
+						state_population > 500000
+					}
+				}
+				set_variable = {
+					name = fund_amount
+					value = 0
+				}
+				every_scope_state = {
+					limit = {
+						has_modifier = potato_blight_modifier
+						is_incorporated = no
+						state_population > 500000
+					}
+					ROOT = {
+						change_variable = {
+							name = fund_amount
+							add = 10000
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	complete = {
+		NOT = {
+			any_scope_state = {
+				has_modifier = potato_blight_modifier
+			}
+		}
+	}
+	
+	fail = {
+		OR = {
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+			has_revolution = yes
+		}
+	}
+	
+	on_fail = {
+		add_modifier = {
+			name = failed_potato_blight
+			months = 121
+			is_decaying = yes
+		}
+		set_variable = failed_pb_var
+		add_radicals = {
+			value = medium_radicals
+		}
+		hidden_effect = {
+			remove_modifier = food_crisis_resentment
+			#clear modifiers
+			if = {
+				limit = {
+					has_modifier = potato_famine_relief_country
+				}
+				remove_modifier = potato_famine_relief_country
+			}
+			if = {
+				limit = {
+					has_modifier = unincorporated_blight_bureau
+				}
+				remove_modifier = unincorporated_blight_bureau
+			}
+			if = {
+				limit = {
+					has_modifier = unincorporated_blight_aid
+				}
+				remove_modifier = unincorporated_blight_aid
+			}
+			if = {
+				limit = {
+					any_interest_group = {
+						has_modifier = principled_opposition
+					}
+				}
+				every_interest_group = {
+					limit = {
+						has_modifier = principled_opposition
+					}
+					remove_modifier = principled_opposition
+				}
+			}
+			if = {
+				limit = {
+					any_interest_group = {
+						has_modifier = unprincipled_opposition
+					}
+				}
+				every_interest_group = {
+					limit = {
+						has_modifier = unprincipled_opposition
+					}
+					remove_modifier = unprincipled_opposition
+				}
+			}
+			if = {
+				limit = {
+					any_scope_state = {
+						has_modifier = potato_famine_relief_unincorporated
+					}
+				}
+				every_scope_state = {
+					limit = {
+						has_modifier = potato_famine_relief_unincorporated
+					}
+					remove_modifier = potato_famine_relief_unincorporated
+				}
+			}
+		}
+	}
+
+	on_complete = {
+		set_variable = stamped_out_monarchy_var
+		add_modifier = {
+			name = won_potato_blight
+			months = 60
+		}
+		add_loyalists = {
+			value = small_radicals
+		}
+		hidden_effect = {
+			remove_modifier = food_crisis_resentment
+		}
+		if = {
+			limit = {
+				root.var:food_crisis_var >= 2.5
+			}
+			add_modifier = {
+				name = food_crisis_resentment
+				multiplier = root.var:food_crisis_var
+				months = 61
+				is_decaying = yes
+			}
+		}
+		hidden_effect = {
+			#clear modifiers
+			if = {
+				limit = {
+					has_modifier = potato_famine_relief_country
+				}
+				remove_modifier = potato_famine_relief_country
+			}
+			if = {
+				limit = {
+					has_modifier = unincorporated_blight_bureau
+				}
+				remove_modifier = unincorporated_blight_bureau
+			}
+			if = {
+				limit = {
+					has_modifier = unincorporated_blight_aid
+				}
+				remove_modifier = unincorporated_blight_aid
+			}
+			if = {
+				limit = {
+					any_interest_group = {
+						has_modifier = principled_opposition
+					}
+				}
+				every_interest_group = {
+					limit = {
+						has_modifier = principled_opposition
+					}
+					remove_modifier = principled_opposition
+				}
+			}
+			if = {
+				limit = {
+					any_interest_group = {
+						has_modifier = unprincipled_opposition
+					}
+				}
+				every_interest_group = {
+					limit = {
+						has_modifier = unprincipled_opposition
+					}
+					remove_modifier = unprincipled_opposition
+				}
+			}
+			if = {
+				limit = {
+					any_scope_state = {
+						has_modifier = potato_famine_relief_unincorporated
+					}
+				}
+				every_scope_state = {
+					limit = {
+						has_modifier = potato_famine_relief_unincorporated
+					}
+					remove_modifier = potato_famine_relief_unincorporated
+				}
+			}
+		}
+	}
+}

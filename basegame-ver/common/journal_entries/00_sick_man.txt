@@ -1,6 +1,8 @@
 ﻿je_sick_man_main = {
 	icon = "gfx/interface/icons/event_icons/event_skull.dds"
 
+	group = je_group_historical_content
+
 	complete = {
 		scope:journal_entry = {
 			is_goal_complete = yes
@@ -14,13 +16,28 @@
 		}
 	}
 
-	timeout = 7300
+	timeout = 10950
 
 	on_timeout = {
 		remove_modifier = sick_man_of_europe
 		trigger_event = {
 			id = sick_man.3
 		}
+		if = {
+			limit = {
+	       		is_in_power_bloc = yes
+	        	is_power_bloc_leader = yes				
+			}
+			custom_tooltip = sick_man_of_europe_lose_power_bloc
+		}
+		custom_tooltip = {
+			text = je_sick_man_main_failure_movements_tt
+			set_variable = {
+				name = failed_tanzimat
+				years = 20
+			}
+		}
+
 	}
 
 	current_value = {
@@ -34,11 +51,14 @@
 	progressbar = yes
 
 	weight = 10000
+	
 	should_be_pinned_by_default = yes
 }
 
 je_sick_man_syria = {
 	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_historical_content
 
 	complete = {
 		owns_entire_state_region = STATE_ALEPPO
@@ -47,6 +67,10 @@ je_sick_man_syria = {
 		owns_entire_state_region = STATE_PALESTINE
 		owns_entire_state_region = STATE_TRANSJORDAN
 		owns_entire_state_region = STATE_ADANA
+	}
+
+	modifiers_while_active = {
+		modifier_syrian_ambitions
 	}
 
 	on_complete = {
@@ -112,13 +136,17 @@ je_sick_man_syria = {
 		}
 	}
 
-	inheritable = no
+	transferable = no
 
 	weight = 5000
+	
+	should_be_pinned_by_default = yes
 }
 
 je_sick_man_egypt = {
 	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_historical_content
 
 	complete = {
 		OR = {
@@ -152,13 +180,17 @@ je_sick_man_egypt = {
 		}
 	}
 
-	inheritable = no
+	transferable = no
 
 	weight = 5000
+	
+	should_be_pinned_by_default = yes
 }
 
 je_sick_man_economy = {
 	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+
+	group = je_group_historical_content
 
 	complete = {
 		in_default = no
@@ -185,14 +217,17 @@ je_sick_man_economy = {
 		}
 	}
 
-	inheritable = no
+	transferable = no
 
 	weight = 5000
+	should_be_pinned_by_default = yes
 }
 
 # Literacy and Universities
 je_sick_man_education = {
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	group = je_group_historical_content
 
 	complete = {
 		any_scope_building = {
@@ -219,8 +254,7 @@ je_sick_man_education = {
 	}
 
 	goal_add_value = {
-		value = root.literacy_rate
-		add = 0.35
+		add = 0.2
 	}
 
 	invalid = {
@@ -230,9 +264,11 @@ je_sick_man_education = {
 		}
 	}
 
-	inheritable = no
+	transferable = no
 
 	weight = 5000
+
+	should_be_pinned_by_default = yes
 
 	progressbar = yes
 }
@@ -240,6 +276,8 @@ je_sick_man_education = {
 # Nationalism
 je_sick_man_separatism = {
 	icon = "gfx/interface/icons/event_icons/event_fire.dds"
+
+	group = je_group_historical_content
 
 	complete = {
 		scope:journal_entry = {
@@ -276,7 +314,7 @@ je_sick_man_separatism = {
 	}
 
 	fail = {
-		highest_secession_progress > 0.9
+		highest_secession_progress > 0.5
 	}
 
 	current_value = {
@@ -294,9 +332,11 @@ je_sick_man_separatism = {
 		}
 	}
 
-	inheritable = no
+	transferable = no
 
 	weight = 5000
+
+	should_be_pinned_by_default = yes
 
 	progressbar = yes
 }
@@ -305,17 +345,30 @@ je_sick_man_separatism = {
 je_sick_man_army = {
 	icon = "gfx/interface/icons/event_icons/event_military.dds"
 
+	group = je_group_historical_content
+
 	complete = {
-		army_size >= 250
+		army_size >= 100
 		has_technology_researched = napoleonic_warfare
-		NOT = {
-			any_scope_building = {
+		any_scope_building = {
+			filter = {
 				is_building_type = building_barracks
-				OR = {
-					has_active_production_method = pm_irregular_infantry
-					has_active_production_method = pm_no_artillery
-					has_active_production_method = pm_cannon_artillery
+			}			
+			NOR = {
+				building_has_goods_shortage = yes
+				has_active_production_method = pm_no_organization
+			}
+			percent = 1
+		}
+		NOT = {
+			any_military_formation = {
+				filter = {
+					is_army = yes
 				}
+				any_combat_unit = {
+					has_unit_type = unit_type:combat_unit_type_irregular_infantry
+				}
+				percent >= 0.25
 			}
 		}
 	}
@@ -342,7 +395,9 @@ je_sick_man_army = {
 		}
 	}
 
-	inheritable = no
+	transferable = no
+
+	should_be_pinned_by_default = yes
 
 	weight = 5000
 }
@@ -351,6 +406,8 @@ je_sick_man_army = {
 # Bureaucractic Reform
 je_sick_man_bureaucracy = {
 	icon = "gfx/interface/icons/event_icons/event_scales.dds"
+
+	group = je_group_historical_content
 
 	complete = {
 		NOR = { 
@@ -386,8 +443,10 @@ je_sick_man_bureaucracy = {
 		}
 	}
 
-	inheritable = no
+	transferable = no
 
 	weight = 5000
+
+	should_be_pinned_by_default = yes
 }
 

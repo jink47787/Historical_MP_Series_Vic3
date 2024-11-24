@@ -1,43 +1,5 @@
 ﻿namespace = character_events
 
-character_events.100 = {
-	type = country_event
-	hidden = yes
-	immediate = {
-		random_interest_group = {
-			limit = {
-				NOT = { has_variable = memento_mori }
-				NOT = {
-					any_scope_character = {
-						is_ruler = yes
-					}
-				}
-			}
-			save_scope_as = memento_mori_ig
-			leader = {
-				save_scope_as = memento_mori_leader
-			}
-			set_variable = {
-				name = memento_mori
-				years = 5
-			}
-		}
-		post_notification = ig_leader_memento_mori
-		scope:memento_mori_leader = {
-			kill_character = yes
-		}
-	}
-}
-
-character_events.1 = {
-	type = character_event
-	hidden = yes
-	immediate = {
-		remove_trait = wounded
-	}
-}
-
-
 character_events.2 = { #Rich industrialist wants to build a university
 	type = country_event
 	placement = scope:university_state
@@ -59,8 +21,18 @@ character_events.2 = { #Rich industrialist wants to build a university
 
 	trigger = {
 		has_technology_researched = academia
-		ig:ig_industrialists = {
-			is_marginal = no
+		trigger_if = {
+			limit = {
+				c:BIC ?= this
+			}
+			ig:ig_petty_bourgeoisie = {
+				is_marginal = no
+			}
+		}
+		trigger_else = {
+			ig:ig_industrialists = {
+				is_marginal = no
+			}
 		}
 		any_scope_state = {
 			is_incorporated = yes
@@ -72,9 +44,21 @@ character_events.2 = { #Rich industrialist wants to build a university
 	}
 
 	immediate = {
-		ig:ig_industrialists = {
-			leader = { 
-				save_scope_as = university_benefactor
+		if = {
+			limit = {
+				c:BIC ?= this
+			}
+			ig:ig_petty_bourgeoisie = {
+				leader = { 
+					save_scope_as = university_benefactor
+				}
+			}
+		}
+		else = {
+			ig:ig_industrialists = {
+				leader = { 
+					save_scope_as = university_benefactor
+				}
 			}
 		}
 		random_scope_state = {
@@ -141,6 +125,7 @@ character_events.3 = { #The duel
 	trigger = {
 		NOT = { has_variable = duels_banned }
 		any_scope_character = {
+			is_busy = no
 			is_ruler = no
 			NOT = {
 				has_trait = cautious
@@ -153,10 +138,12 @@ character_events.3 = { #The duel
 	immediate = {
 		random_scope_character = {
 			limit = {
+				is_busy = no
 				is_ruler = no
 				NOT = {
 					has_trait = cautious
 				}
+				is_immortal = no
 				age >= 18
 			}
 			save_scope_as = duel_participant_1
@@ -164,11 +151,13 @@ character_events.3 = { #The duel
 
 		random_scope_character = {
 			limit = {
+				is_busy = no
 				is_ruler = no
 				NOT = { this = scope:duel_participant_1 }
 				NOT = {
 					has_trait = cautious
 				}
+				is_immortal = no
 				age >= 18
 			}
 			save_scope_as = duel_participant_2
@@ -216,7 +205,10 @@ character_events.3 = { #The duel
 					if = {
 						limit = {
 							scope:duel_participant_1 = {
-								has_trait = bandit
+								OR = {
+									has_trait = bandit
+									has_trait = social_bandit
+								}
 							}
 						}
 						add = 10
@@ -311,7 +303,10 @@ character_events.3 = { #The duel
 					if = {
 						limit = {
 							scope:duel_participant_1 = {
-								has_trait = bandit
+								OR = {
+									has_trait = bandit
+									has_trait = social_bandit
+								}
 							}
 						}
 						add = 10
@@ -464,7 +459,9 @@ character_events.4 = { #Devout leader sleeping with a nun
 	trigger = {
 		any_scope_character = {
 			has_role = politician
+			is_ruler = no
 			age > 18
+			is_busy = no
 			interest_group = {
 				is_marginal = no
 				is_interest_group_type = ig_devout
@@ -476,7 +473,9 @@ character_events.4 = { #Devout leader sleeping with a nun
 		random_scope_character = {
 			limit = {
 				has_role = politician
+				is_ruler = no
 				age > 18
+				is_busy = no
 				interest_group = {
 					is_marginal = no
 					is_interest_group_type = ig_devout
@@ -489,17 +488,21 @@ character_events.4 = { #Devout leader sleeping with a nun
 	}
 
 	option = { #Steps down
-		default_option = yes
 		trigger = {
 			ig:ig_devout = {
 				is_in_government = yes
+			}
+			scope:devout_scandal = {
+				is_immortal = no
 			}
 		}
 		name = character_events.4.a
 		custom_tooltip = character_events.4.a.tt
 		hidden_effect = {
 			scope:devout_scandal = {
-				kill_character = yes
+                kill_character = {
+                    hidden = yes
+                }
 			}
 		}
 	}
@@ -522,6 +525,7 @@ character_events.4 = { #Devout leader sleeping with a nun
 
 	option = { #Ignore it
 		name = character_events.4.b
+		default_option = yes
 		scope:devout_scandal = {
 			add_modifier = {
 				name = modifier_devout_in_scandal
@@ -558,6 +562,11 @@ character_events.5 = { #A statue made of the king
 			NOT = { has_variable = ruler_statue_var }
 		}
 		NOT = { has_variable = ruler_statue_cooldown }
+		NOT = {
+			ruler = {
+				has_trait = trait_child
+			}
+		}
 	}
 
 	immediate = {
@@ -589,7 +598,7 @@ character_events.5 = { #A statue made of the king
 				name = ruler_statue_var
 				months = normal_modifier_time
 			}
-			add_radicals = {
+			add_radicals_in_state = {
   				value = small_radicals
   			}
   			set_variable = {
@@ -597,6 +606,13 @@ character_events.5 = { #A statue made of the king
   				value = yes
   				days = 5
   			}
+		}
+		if = {
+			limit = {
+				c:FRA ?= this
+				has_journal_entry = je_divided_monarchists
+			}
+			fra_favor_ruler_dynasty = yes
 		}
 	}
 
@@ -615,6 +631,13 @@ character_events.5 = { #A statue made of the king
 				months = normal_modifier_time
 			}
 		}
+		if = {
+			limit = {
+				c:FRA ?= this
+				has_journal_entry = je_divided_monarchists
+			}
+			fra_disfavor_ruler_dynasty = yes
+		}
 	}
 }
 
@@ -630,11 +653,10 @@ character_events.6 = { #Statue torn down
 	duration = 3
 
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_political_extremism.bk2"
+		video = "europenorthamerica_political_extremism"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/europenorthamerica/political_extremism"
 
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
@@ -702,7 +724,7 @@ character_events.6 = { #Statue torn down
 		}
 		scope:statue_state = {
 			remove_variable = ruler_statue_var
-			add_loyalists = {
+			add_loyalists_in_state = {
 				value = small_radicals
 			}
 		}
@@ -711,7 +733,7 @@ character_events.6 = { #Statue torn down
 				name = ruler_statue_var
 				months = normal_modifier_time
 			}
-			add_radicals = {
+			add_radicals_in_state = {
 				value = small_radicals
 			}
 		}

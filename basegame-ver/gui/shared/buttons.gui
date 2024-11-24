@@ -12,8 +12,51 @@
 types default_buttons
 {
 	type sort_button = button {
+		block "tooltip_placement"{
+			using = tooltip_ne
+		}
+
 		block "sound" {
 			using = sort_button_sound
+		}
+
+		block "background" {
+			using = sort_button_bg
+		}
+
+		### HIGHLIGHT
+		icon = {
+			block "selected_visibility" {
+				visible = no
+			}
+
+			using = highlighted_square_selection
+		}
+		
+		minimumsize = { -1 30 }
+		maximumsize = { -1 30 }
+		align = hcenter|nobaseline
+		margin_left = 10
+		margin_right = 10
+		elide = right
+	}
+
+	type sort_button_with_textbox = button {
+		minimumsize = { -1 30 }
+		maximumsize = { -1 30 }
+		margin_left = 10
+		margin_right = 10
+
+		block "tooltip_placement"{
+			using = tooltip_ne
+		}
+
+		block "sound" {
+			using = sort_button_sound
+		}
+
+		block "background" {
+			using = sort_button_bg
 		}
 
 		### HIGHLIGHT
@@ -25,55 +68,18 @@ types default_buttons
 			using = highlighted_square_selection
 		}
 
-		texture = "gfx/interface/buttons/sort_button.dds"
-		gfxtype = buttongfx
-		effectname = "NoHighlight"
-		spriteType = Corneredtiled
-		spriteborder = { 12 12 }
-		minimumsize = { -1 30 }
-		maximumsize = { -1 30 }
-		align = center|nobaseline
-		margin_left = 10
-		margin_right = 10
-		elide = right
-		texture_density = 2
-		using = disabled_stripes
-		
-		modify_texture = {
-			name = "bg_gradient"
-			texture = "gfx/interface/buttons/default_button_bg_gradient.dds"
-			spriteType = Corneredstretched
-			spriteborder = { 0 0 }
-			blend_mode = overlay
-			alpha = 0.5
-		}
-		modify_texture = {
-			name = "texture"
-			texture = "gfx/interface/textures/default_noise_texture.dds"
-			spriteType = Corneredtiled
-			spriteborder = { 0 0 }
-			blend_mode = overlay
-		}
-		
-		### mouse states
-		modify_texture = {
-			name = "mouse_enter"
-			texture = "gfx/interface/buttons/expand_button_bg_mouse_enter.dds"
-			spriteType = Corneredstretched
-			spriteborder = { 0 0 }
-			blend_mode = colordodge
-			alpha = 0
-		}
-		modify_texture = {
-			name = "mouse_press"
-			texture = "gfx/interface/buttons/default_button_mousepress.dds"
-			spriteType = Corneredstretched
-			spriteborder = { 0 0 }
-			blend_mode = overlay
-			alpha = 0
-		}		
-		using = default_mouse_states_animation
+		textbox = {
+			parentanchor = center
+			size = { 100% 100% }
+			margin = { 3 0 }
+			align = hcenter|nobaseline
+			elide = right
+			fontsize_min = 12
 
+			block "label_text" {
+				raw_text = "#todo Label#!"
+			}
+		}
 	}
 	
 	type tab_button = button {
@@ -134,28 +140,8 @@ types default_buttons
 		widget = {
 			name = "expand_button"
 			block "onclick_showmore" {}
-			
-		
-			state = {
-				name = _show
-		
-				start_sound = {
-					using = ui_sfx_increment
-				}
-			}
 		}
-		widget = {
-			name = "expanded_button"
-			block "onclick_showless" {}
-		
-			state = {
-				name = _show
-		
-				start_sound = {
-					using = ui_sfx_decrement
-				}
-			}
-		}
+		clicksound = "[SelectSound(PdxGuiWidget.FindChild('expand_button').IsVisible, 'event:/SFX/UI/Global/increment', 'event:/SFX/UI/Global/decrement')]"
 		blockoverride  "sound" {
 			using = ui_pointer_over
 		}
@@ -172,7 +158,10 @@ types default_buttons
 		
 		### ARROW
 		widget = {
-			size = { 25 25 }
+			block "arrow_size" {
+				size = { 25 25 }
+			}
+
 			block "arrow_position" {
 				position = { 5 0 }
 				parentanchor = left|vcenter
@@ -209,17 +198,25 @@ types default_buttons
 						layoutstretchfactor_horizontal = 5
 						layoutpolicy_horizontal = expanding
 						layoutpolicy_vertical = expanding
-						block "left_text" {}
-						margin_left = 40
 						margin_right = 5
 						elide = right
-						align = left|nobaseline
+						align = nobaseline
+						alwaystransparent = yes
+						fontsize_min = 12
+
+						block "left_text" {}
+
+						block "left_textbox_margin_left" {
+							margin_left = 40
+						}
+
 						block "fontsize" {
 							using = fontsize_large
 						}
-						default_format = "#title"
-						alwaystransparent = yes
-						fontsize_min = 12
+
+						block "left_textbox_default_format"{
+							default_format = "#title"
+						}
 					}
 				}
 				# block for values
@@ -264,6 +261,54 @@ template expand_arrow_expanded
 	framesize = { 100 100 }
 	size = { 24 24 }
 }
+
+template sort_button_bg 
+{
+	texture = "gfx/interface/buttons/sort_button.dds"
+	size = { -1 30 }
+	spriteType = Corneredtiled
+	spriteborder = { 12 12 }
+	texture_density = 2
+	using = disabled_stripes
+	gfxtype = buttongfx
+	effectname = "NoHighlight"
+	
+	modify_texture = {
+		name = "bg_gradient"
+		texture = "gfx/interface/buttons/default_button_bg_gradient.dds"
+		spriteType = Corneredstretched
+		spriteborder = { 0 0 }
+		blend_mode = overlay
+		alpha = 0.5
+	}
+	modify_texture = {
+		name = "texture"
+		texture = "gfx/interface/textures/default_noise_texture.dds"
+		spriteType = Corneredtiled
+		spriteborder = { 0 0 }
+		blend_mode = overlay
+	}
+
+	### mouse states
+	modify_texture = {
+		name = "mouse_enter"
+		texture = "gfx/interface/buttons/expand_button_bg_mouse_enter.dds"
+		spriteType = Corneredstretched
+		spriteborder = { 0 0 }
+		blend_mode = colordodge
+		alpha = 0
+	}
+	modify_texture = {
+		name = "mouse_press"
+		texture = "gfx/interface/buttons/default_button_mousepress.dds"
+		spriteType = Corneredstretched
+		spriteborder = { 0 0 }
+		blend_mode = overlay
+		alpha = 0
+	}		
+	using = default_mouse_states_animation
+}
+
 template expand_button_bg 
 {
 	texture = "gfx/interface/buttons/expand_button_bg.dds"
@@ -318,6 +363,7 @@ template expand_button_bg
 	}		
 	using = default_mouse_states_animation
 }
+
 template expand_button_bg_right_fade
 {
 	using = expand_button_bg
@@ -331,6 +377,14 @@ template expand_button_bg_right_fade
 		}
 	}
 }
+
+template expand_button_bg_dropdown 
+{
+	using = expand_button_bg
+	texture = "gfx/interface/buttons/expand_button_bg_dropdown.dds"
+	blockoverride "fade" {}
+}
+
 template expand_button_bg_left_fade
 {
 	using = expand_button_bg
@@ -796,7 +850,9 @@ template default_button
 			name = mouse_press
 			using = Animation_Curve_Default
 			using = button_animation_duration
-			
+			blockoverride "sound" {
+				clicksound = "event:/SFX/DLC/1.3_ip1/UI/character_invite"
+			}
 			modify_texture = {
 				name = "mouse_enter"
 				alpha = 0
@@ -845,6 +901,7 @@ template default_button_primary_big
 template default_button_action
 {
 	using = default_button
+	
 	texture = "gfx/interface/buttons/default_button_bg_action.dds"
 	blockoverride "bevel_texture" {
 		texture = "gfx/interface/buttons/default_button_bevel_action.dds"
@@ -941,6 +998,7 @@ template clean_button
 {
 	using = default_button
 }
+
 #remove ?
 template default_button_tertiary
 {

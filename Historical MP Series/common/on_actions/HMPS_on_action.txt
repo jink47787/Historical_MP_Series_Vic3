@@ -1,0 +1,926 @@
+﻿HMPS_treaty_port_cb_fix = {
+	effect = {
+		every_state = {
+			limit = {
+				owner = {
+					NOT = { is_country_type = decentralized }
+				}
+				is_coastal = yes
+				OR = {
+					is_treaty_port = yes
+					region = sr:region_north_china
+					region = sr:region_south_china
+					region = sr:region_manchuria
+					region = sr:region_japan
+				}
+				NOT = { has_building = building_port }
+			}
+			create_building = {
+				building = building_port
+				level = 1
+			}
+		}
+	}
+}
+
+HMPS_remove_bad_unis = {
+	effect = {
+		if = {
+			limit = {
+				is_incorporated = no
+				has_building = building_university
+			}
+			remove_building = building_university
+		}
+	}
+}
+
+HMPS_temp_savefix = {
+	effect = {
+		if = {
+			limit = {
+				has_modifier = small_nation_inno_modifier
+			}
+			remove_modifier = small_nation_inno_modifier
+		}
+	}
+}
+
+HMPS_rev_handling = {
+	effect = {
+		#disable revolts for ai with <= 3 states
+		#disable revolts for ai subjects
+		if = {
+			limit = {
+				is_player = no
+				is_immune_to_revolutions = no
+				OR = {
+					AND = {
+						any_scope_state = {
+							count = all
+							add_to_temporary_list = state_amount
+						}
+						list_size = { name = state_amount value <= 3 }
+					}
+					is_subject = yes
+				}
+			}
+			set_immune_to_revolutions = yes
+			#add_modifier = {
+			#	name = dev_test_modifier
+			#}
+		}
+		#disable player subjects/non subjects from being immune to revs
+		#disable large ai/small players from being immune to revs
+		if = {
+			limit = {
+				is_immune_to_revolutions = yes
+				OR = {
+					is_player = yes
+					AND = {
+						is_subject = no
+						any_scope_state = {
+							count = all
+							add_to_temporary_list = state_amount_2
+						}
+						list_size = { name = state_amount_2 value > 3 }
+					}
+				}
+			}
+			set_immune_to_revolutions = no
+		}
+	}
+}
+
+
+HMPS_Check_for_GM = {
+	effect = {
+		if = {
+			limit = {
+				has_global_variable = player_gm
+				any_country = {
+					has_modifier = game_master
+					is_player = no
+				}
+			}
+			random_country = {
+				limit = {
+					has_modifier = game_master
+				}
+				remove_modifier = game_master
+				remove_global_variable = player_gm
+			}
+		}
+	}
+}
+
+HMPS_ai_modifiers = {
+	effect = {
+		if = {
+			limit = {
+				has_modifier = ai_rebellion_buff
+				OR = {
+					is_player = yes
+					is_revolutionary = no
+				}
+			}
+			remove_modifier = ai_rebellion_buff
+		}
+	}
+}
+
+#Happens to on_revolution
+HMPS_revolution_boost = {
+	effect = {
+		if = {
+			limit = {
+				is_player = yes
+				scope:target = {
+					is_player = no
+				}
+			}
+			scope:target = {
+				add_modifier = {
+					name = ai_rebellion_buff
+				}
+			}
+		}
+		
+	}
+}
+
+#China dominion creation
+#One should be for if you don't have any other china states, the other should be to add china states to a dominion, the other should be for if you have a chinese puppet
+
+HMPS_China_Puppet = {
+	effect = {
+		ROOT = {
+			if = {
+				limit = {
+					is_subject = no
+					any_primary_culture = {
+						OR = {
+							has_discrimination_trait = sinosphere
+							has_discrimination_trait = han_chinese
+							has_discrimination_trait = tibetan_language
+						}
+					}
+					any_scope_state = {
+						has_variable = china_state_foreign_owned
+					}
+				}
+				every_scope_state = {
+					limit = {
+						has_variable = china_state_foreign_owned
+					}
+					remove_variable = china_state_foreign_owned
+				}
+			}
+			if = {
+				limit = {
+					#is_subject = no
+					NOT = {
+						any_primary_culture = {
+							OR = {
+								has_discrimination_trait = sinosphere
+								has_discrimination_trait = han_chinese
+								has_discrimination_trait = tibetan_language
+							}
+						}
+					}
+					any_scope_state = {
+						OR = {
+							region = sr:region_north_china
+							region = sr:region_south_china
+						}
+						NOT = { state_region = s:STATE_FORMOSA }
+						NOT = { has_variable = china_state_foreign_owned }
+						state_population > 3500000
+					}
+					#code to check if you already have a chinese dominion and puppet
+				}
+				every_scope_state = {
+					limit = {
+						OR = {
+							region = sr:region_north_china
+							region = sr:region_south_china
+						}
+						NOT = { state_region = s:STATE_FORMOSA }
+						state_population >= 3500000
+						NOT = { has_variable = china_state_foreign_owned }
+					}
+					set_variable = chinese_state_to_cede
+				}
+				random_scope_state = {
+					limit = {
+						has_variable = chinese_state_to_cede
+					}
+					save_scope_as = china_puppet_capital_scope
+				}
+				create_dynamic_country = {
+					origin = root
+					country_type = colonial
+					tier = principality
+					capital = scope:china_puppet_capital_scope
+					cede_state_trigger = {
+						has_variable = chinese_state_to_cede
+					}
+					on_created = {
+						every_scope_state = {
+							remove_variable = chinese_state_to_cede
+							set_variable = china_state_foreign_owned
+						}
+						add_primary_culture = cu:han
+						activate_law = law_type:law_extraction_economy
+						activate_law = law_type:law_republic
+						activate_law = law_type:law_autocracy
+						activate_law = law_type:law_peasant_levies
+						activate_law = law_type:law_no_home_affairs
+						activate_law = law_type:law_no_police
+						activate_law = law_type:law_no_schools
+						activate_law = law_type:law_no_health_system
+						activate_law = law_type:law_no_workers_rights
+						activate_law = law_type:law_no_social_security
+						activate_law = law_type:law_no_environmental_regulations
+					}
+				}
+				if = {
+					limit = {
+						root = {
+							is_country_type = unrecognized
+						}
+					}
+					create_diplomatic_pact = {
+						country = scope:china_puppet_capital_scope.owner
+						type = tributary
+					}
+				}
+				else = {
+					create_diplomatic_pact = {
+						country = scope:china_puppet_capital_scope.owner
+						type = dominion
+					}
+				}
+				
+				create_bidirectional_truce = {
+					country = scope:china_puppet_capital_scope.owner
+					months = 60
+				}
+			}
+		}
+	}
+}
+
+HMPS_France_Pop_Growth = {
+	effect = {
+		if = {
+			limit = {
+				NOT = { has_global_variable = french_pop_nerf }
+			}
+			c:FRA = {	
+				every_scope_state = {
+					limit = {
+						NOT = { state_region = s:STATE_ALSACE_LORRAINE }
+						state_is_in_europe = yes
+					}
+					add_modifier = {
+						name = france_baby_bust			
+						is_decaying = yes
+						years = 100
+					}
+					add_modifier = {
+						name = france_early_game_birth_fix			
+						is_decaying = yes
+						years = 30
+					}
+					set_global_variable = french_pop_nerf
+				}
+			}
+		}
+	}
+}
+
+HMPS_rr_counting = {
+	effect = {
+		# when a railroad finishes expanding, increase railroad variable
+		if = {
+			limit = {
+				is_building_type = building_railway
+			}
+			this.owner = {
+				trigger_event = {
+					id = "railroad_bubble.1"
+				}
+			}
+		}
+	}
+}
+
+decentralized_pop_fix = {
+	effect = {
+		every_country = {
+			limit = {
+				is_country_type = decentralized
+			}
+			every_scope_state = {
+				limit = {
+					NOT = {
+						has_modifier = decentralized_sol
+					}
+				}
+				add_modifier = {
+					name = decentralized_sol
+				}
+			}
+		}
+		every_country = {
+			limit = {
+				NOT = { is_country_type = decentralized }
+			}
+			every_scope_state = {
+				limit = {
+					has_modifier = decentralized_sol
+				}
+				add_modifier = {
+					name = decentralized_sol
+				}
+			}
+		}
+	}
+}
+
+HMPS_China_Ports_Fracture = {
+	effect = {
+		if = {
+			limit = {
+				has_journal_entry = je_warlord_china
+			}
+			every_state = {
+				limit = {
+					state_region = {
+						OR = {
+							is_homeland = cu:han
+							is_homeland = cu:manchu
+						}
+					}
+					ROOT ?= owner
+					is_split_state = yes
+					NOT = { has_modifier = chinese_treaty_port }
+				}
+				add_modifier = {
+					name = chinese_treaty_port
+				}
+				owner = {
+					change_global_variable = {
+						name = china_warlord_explosion
+						add = 4
+					}
+				}
+			}
+			every_state = {
+				limit = {
+					is_split_state = no
+					ROOT ?= owner
+					has_modifier = chinese_treaty_port
+				}
+				remove_modifier = chinese_treaty_port
+				owner = {
+					change_global_variable = {
+						name = china_warlord_explosion
+						add = -2
+					}
+				}
+			}
+		}
+	}
+}
+
+HMPS_Coastal_Capital = {
+	effect = {
+		if = {
+			limit = {
+				NOT = { has_modifier = coastal_capital }
+				capital = { is_coastal = yes }
+			}
+			add_modifier = {
+				name = coastal_capital
+				months = -1
+			}
+		}
+		if = {
+			limit = {
+				NOT = { has_modifier = near_coastal_capital }
+				capital = {
+					OR = {
+						state_region = s:STATE_NANJING
+						state_region = s:STATE_ILE_DE_FRANCE
+						state_region = s:STATE_BRANDENBURG
+						state_region = s:STATE_AUSTRIA
+						state_region = s:STATE_TRANSDANUBIA
+					}
+				}
+			}
+			add_modifier = {
+				name = near_coastal_capital
+				months = -1
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = coastal_capital
+				capital = {
+					is_coastal = no
+				}
+			}
+			remove_modifier = coastal_capital
+		}
+		if = {
+			limit = {
+				has_modifier = near_coastal_capital
+				capital = {
+					NOR = {
+						state_region = s:STATE_NANJING
+						state_region = s:STATE_ILE_DE_FRANCE
+						state_region = s:STATE_BRANDENBURG
+						state_region = s:STATE_AUSTRIA
+						state_region = s:STATE_TRANSDANUBIA
+					}
+				}
+			}
+			remove_modifier = near_coastal_capital
+		}
+	}
+}
+
+#moved to monthly_pulse_state
+HMPS_Slave_State_Migration = {
+	effect = {
+		if = {
+			limit = {
+				is_slave_state = yes
+				owner = {
+					c:USA ?= this
+				}
+				NOT = {	
+					has_modifier = slave_state_migration_debuff
+				}
+			}
+			add_modifier = {
+				name = slave_state_migration_debuff
+			}
+		}
+		else_if = {
+			limit = {
+				is_slave_state = no
+				has_modifier = slave_state_migration_debuff
+			}
+			remove_modifier = slave_state_migration_debuff
+		}
+	}
+}
+
+HMPS_Institution_Modifier = {
+	effect = {
+		every_scope_state = {
+			remove_modifier = colonial_institution_resettlement
+			remove_modifier = colonial_institution_exploitation
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 1
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 2
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+					multiplier = 2
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 3
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+					multiplier = 3
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 4
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+					multiplier = 4
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 5
+				has_law = law_type:law_colonial_resettlement
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_resettlement
+					multiplier = 5
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 1
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 2
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+					multiplier = 2
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 3
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+					multiplier = 3
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 4
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+					multiplier = 4
+				}
+			}
+		}
+		if = {
+			limit = {
+				institution:institution_colonial_affairs.investment = 5
+				has_law = law_type:law_colonial_exploitation
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+				}
+				add_modifier = {
+					name = colonial_institution_exploitation
+					multiplier = 5
+				}
+			}
+		}
+	}
+}
+
+
+HMPS_China = {
+	effect = {
+		if = {
+			limit = {
+				NOT = { has_modifier = han_power_increase }
+				exists = c:CHI
+				THIS = c:CHI
+				has_journal_entry = je_warlord_china
+				has_global_variable = qing_accepted_han
+			}
+			c:CHI = {
+				add_modifier = {
+					name = han_power_increase
+					is_decaying = no
+					years = -1
+				}
+			}
+		}
+		
+		if = {
+			limit = {
+				exists = c:CHI
+				THIS = c:CHI
+				has_global_variable = lost_opium_wars
+				NOT = { has_modifier = chinese_opium_addiction }
+				game_date <= 1896.01.01
+			}
+			c:CHI = { assign_opium_addiction_penalty = yes }
+		}
+		if = {
+			limit = {
+				exists = c:TPG
+				THIS = c:TPG
+				has_global_variable = lost_opium_wars
+				NOT = { has_modifier = chinese_opium_addiction }
+				game_date <= 1896.01.01
+			}
+			c:TPG = { assign_opium_addiction_penalty = yes }
+		}
+		
+		if = {
+			limit = {
+				NOT = { has_modifier = china_ai_help }
+				exists = c:CHI
+				THIS = c:CHI
+				is_player = no
+			}
+			c:CHI = {
+				add_modifier = {
+					name = china_ai_help
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = china_ai_help
+				exists = c:CHI
+				THIS = c:CHI
+				is_player = yes
+			}
+			c:CHI = { remove_modifier = china_ai_help }
+		}
+		
+		if = {
+			limit = {
+				exists = c:CHI
+				THIS = c:CHI
+				has_journal_entry = je_warlord_china
+				NOT = { has_global_variable = qing_accepted_han }
+			}
+			every_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_OUTER_MANCHURIA
+						state_region = s:STATE_SOUTHERN_MANCHURIA
+						state_region = s:STATE_NORTHERN_MANCHURIA
+						state_region = s:STATE_SHENGJING
+					}
+					NOT = { has_modifier = eight_banners }
+					owner = c:CHI
+				}
+				add_modifier = {
+					name = eight_banners
+					days = -1
+				}
+			}
+			every_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_OUTER_MANCHURIA
+						state_region = s:STATE_SOUTHERN_MANCHURIA
+						state_region = s:STATE_NORTHERN_MANCHURIA
+						state_region = s:STATE_SHENGJING
+					}
+					has_modifier = eight_banners
+					NOT = { owner = c:CHI }
+				}
+				remove_modifier = eight_banners
+			}
+		}
+		
+		if = {
+			limit = {
+				exists = c:CHI
+				THIS = c:CHI
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = no
+					state_region = {
+						OR = {
+							is_homeland = cu:han
+							is_homeland = cu:manchu
+						}
+					}
+				}
+				set_state_type = incorporated
+			}
+		}			
+	}
+}
+
+HMPS_undo_sp = {
+	effect = {
+		if = {
+			limit = {
+				has_global_variable = single_player
+				has_modifier = game_master
+				any_country = {
+					is_player = yes
+					NOT = { this = ROOT }
+				}
+			}
+			remove_global_variable = single_player
+		}
+	}
+}
+
+HMPS_1848_Revolution = {
+	effect = {
+		if = {
+			limit = {
+				OR = {
+				OR = {
+					has_journal_entry = je_napoleons_legacy
+					overlord = {
+						has_journal_entry = je_napoleons_legacy
+					}
+				}
+					overlord = {
+						has_journal_entry = je_napoleons_legacy
+					}
+				}
+				NOT = { has_variable = 1848_rev_var }
+			}
+			change_global_variable = {
+				name = global_1848_progress
+				add = 8
+			}
+			set_variable = 1848_rev_var
+		}
+	}
+}
+
+HMPS_1848_War = {
+	effect = {
+		if = {
+			limit = {
+				scope:target = {
+				OR = {
+					has_journal_entry = je_napoleons_legacy
+					overlord = {
+						has_journal_entry = je_napoleons_legacy
+					}
+				}
+					NOT = { has_variable = 1848_lost_war_var }
+				}
+			}
+			change_global_variable = {
+				name = global_1848_progress
+				add = 3
+			}
+			scope:target = {
+				set_variable = 1848_lost_war_var
+			}
+		}
+	}
+}
+
+HMPS_1848_Radicals = {
+	effect = {
+		if = {
+			limit = {
+				OR = {
+					has_journal_entry = je_napoleons_legacy
+					overlord = {
+						has_journal_entry = je_napoleons_legacy
+					}
+				}
+				capital = {
+					radical_fraction = {
+						value > 0.25
+					}
+				}
+				NOT = { has_variable = 1848_radical_capital_var }
+			}
+			change_global_variable = {
+				name = global_1848_progress
+				add = 3
+			}
+			set_variable = 1848_radical_capital_var
+		}
+	}
+}
+
+HMPS_1848_Italy = {
+	effect = {
+		if = {
+			limit = {
+				has_global_variable = global_1848_progress
+				OR = {
+					c:ITA ?= THIS
+					c:GER ?= THIS
+				}
+			}
+			change_global_variable = {
+				name = global_1848_progress
+				add = 3
+			}
+		}
+	}
+}
+
+#HMPS_1848_Regime_Change = {
+#	effect = {
+#		if = {
+#			limit = {
+#				has_journal_entry = je_napoleons_legacy
+#				has_modifier = forced_regime_change
+#				NOT = { has_variable = regime_change_1848_var }
+#			}
+#			change_global_variable = {
+#				name = global_1848_progress
+#				add = -5
+#			}
+#			set_variable = regime_change_1848_var
+#		}
+#	}
+#}
+
+HMPS_Remove_Hungary_Modifiers = {
+	effect = {
+		if = {
+			limit = {
+				is_subject = no
+				has_modifier = modifier_pragmatic_sanction
+			}
+			remove_modifier = modifier_pragmatic_sanction
+		}
+		if = {
+			limit = {
+				is_subject = no
+				has_modifier = modifier_reformed_hungary
+			}
+			remove_modifier = modifier_reformed_hungary
+		}
+		if = {
+			limit = {
+				is_subject = no
+				has_modifier = modifier_ah_compromise
+			}
+			remove_modifier = modifier_ah_compromise
+		}
+	}
+}
+
+HMPS_Reform_AH = {
+	effect = {
+		if = {
+			limit = {
+				has_variable = formed_ah
+				NOT = { country_has_primary_culture = cu:hungarian }
+			}
+			add_primary_culture = cu:hungarian
+		}
+	}
+}

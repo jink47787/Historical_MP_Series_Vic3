@@ -6,19 +6,34 @@
 	female_ruler = "RULER_TITLE_GOVERNOR_GENERAL"
 	
 	possible = {
-		has_law = law_type:law_republic
-		has_law = law_type:law_independent_executive
-		AND = { exists = c:GBR is_subject_of = c:GBR }
-		OR = {
-			AND = { exists = c:HBC c:HBC = ROOT }
-			AND = { exists = c:BIC c:BIC = ROOT }
-		}
-		is_subject_type = subject_type_dominion
+	is_subject_type = subject_type_chartered_company
+	#below is old code can delete if no issues
+	#	OR = {
+	#		has_law = law_type:law_extraction_economy
+	#		has_law = law_type:law_the_company
+	#	}
+	#	is_subject_type = subject_type_dominion
+	#	top_overlord = {
+	#		any_primary_culture = {
+	#			has_discrimination_trait = european_heritage
+	#		}
+	#	}
+	#	any_primary_culture = {
+	#		has_discrimination_trait = european_heritage
+	#	}
+	#}
+	
+	on_government_type_change = {
+		change_to_dictatorial = yes
+	}
+	
+	on_post_government_type_change = {
+		post_change_to_dictatorial = yes
 	}
 }
 
 gov_colonial_administration = {
-	transfer_of_power = presidential_elective
+	transfer_of_power = dictatorial
 	new_leader_on_reform_government = no
 
 	male_ruler = "RULER_TITLE_GOVERNOR_GENERAL"
@@ -26,7 +41,10 @@ gov_colonial_administration = {
 	
 	possible = {
 		has_law = law_type:law_republic
-		has_law = law_type:law_independent_executive
+		OR = {
+			is_subject_type = subject_type_colony
+			is_subject_type = subject_type_dominion
+		}
 		OR = {
 			AND = {
 				AND = { exists = c:NET is_subject_of = c:NET }
@@ -36,7 +54,7 @@ gov_colonial_administration = {
 			AND = {
 				exists = c:SPA
 				is_subject_of = c:SPA
-				is_subject_type = subject_type_puppet
+				is_subject_type = subject_type_colony
 				is_country_type = colonial
 				top_overlord = { NOT = { is_country_type = colonial } }
 				any_primary_culture = {
@@ -44,11 +62,38 @@ gov_colonial_administration = {
 				}
 				country_is_in_europe = no
 			}
+			AND = {
+				has_variable = senegal_subject_var
+				is_subject = yes
+			}
+			AND = {
+				has_variable = niger_subject_var
+				is_subject = yes
+			}
+			AND = {
+				has_variable = ethiopia_subject_var
+				is_subject = yes
+			}
+			AND = {
+				has_variable = zanj_subject_var
+				is_subject = yes
+			}
+			AND = {
+				has_variable = congo_subject_var
+				is_subject = yes
+			}
 		}
+	}
+
+	on_government_type_change = {
+		change_to_dictatorial = yes
+	}
+	on_post_government_type_change = {
+		post_change_to_dictatorial = yes
 	}
 }
 
-gov_crown_colony = {
+gov_governorate = {
 	transfer_of_power = presidential_elective
 	new_leader_on_reform_government = no
 
@@ -57,19 +102,31 @@ gov_crown_colony = {
 	
 	possible = {
 		has_law = law_type:law_republic
-		has_law = law_type:law_independent_executive
-		exists = c:GBR
-		is_subject_of = c:GBR
-		c:GBR = {
-			has_law = law_type:law_monarchy
+		OR = {
+			is_subject_type = subject_type_dominion
+			is_subject_type = subject_type_puppet
 		}
-		is_subject_type = subject_type_puppet
-		is_country_type = colonial
-		top_overlord = { NOT = { is_country_type = colonial } }
-		any_primary_culture = {
-			has_discrimination_trait = european_heritage
+		NOT = {
+			AND = {
+				top_overlord = {
+					any_primary_culture = {
+						has_discrimination_trait = european_heritage
+					}
+				}
+				any_primary_culture = {
+					has_discrimination_trait = european_heritage
+				}
+				country_is_in_europe = no
+			}
 		}
-		country_is_in_europe = no
+	}
+	
+	on_government_type_change = {
+		change_to_presidential_elective = yes
+	}
+	
+	on_post_government_type_change = {
+		post_change_to_presidential_elective = yes
 	}
 }
 
@@ -81,8 +138,26 @@ gov_dictatorship = {
 	
 	possible = {
 		has_law = law_type:law_republic
-		has_law = law_type:law_autocracy
-		country_has_voting_franchise = no
+		OR = {
+			has_law = law_type:law_vanguardism
+			has_law = law_type:law_autocracy
+		}
+		OR = {
+			country_has_voting_franchise = no
+			has_law = law_type:law_vanguardism
+		}
+		NOT = { has_law = law_type:law_command_economy }
+		NOT = {
+			is_subject_type = subject_type_puppet
+		}
+	}
+	
+	on_government_type_change = {
+		change_to_dictatorial = yes
+	}
+	
+	on_post_government_type_change = {
+		post_change_to_dictatorial = yes
 	}
 }
 
@@ -97,6 +172,20 @@ gov_presidential_oligarchy = {
 		has_law = law_type:law_oligarchy 
 		has_law = law_type:law_independent_executive
 		country_has_voting_franchise = no
+		NOT = {
+			OR = {
+				is_subject_type = subject_type_puppet
+				is_subject_type = subject_type_dominion
+			}
+		}
+	}
+	
+	on_government_type_change = {
+		change_to_dictatorial = yes
+	}
+	
+	on_post_government_type_change = {
+		post_change_to_dictatorial = yes
 	}
 }
 
@@ -112,6 +201,21 @@ gov_presidential_democracy_aristocratic = {
 		has_law = law_type:law_independent_executive
 		has_law = law_type:law_hereditary_bureaucrats
 		country_has_voting_franchise = yes
+		NOT = { has_law = law_type:law_vanguardism }
+		NOT = {
+			OR = {
+				is_subject_type = subject_type_puppet
+				is_subject_type = subject_type_dominion
+			}
+		}
+	}
+	
+	on_government_type_change = {
+		change_to_presidential_elective = yes
+	}
+	
+	on_post_government_type_change = {
+		post_change_to_presidential_elective = yes
 	}
 }
 
@@ -127,6 +231,21 @@ gov_presidential_democracy_unitary = {
 		has_law = law_type:law_independent_executive
 		has_law = law_type:law_appointed_bureaucrats
 		country_has_voting_franchise = yes
+		NOT = { has_law = law_type:law_vanguardism }
+		NOT = {
+			OR = {
+				is_subject_type = subject_type_puppet
+				is_subject_type = subject_type_dominion
+			}
+		}
+	}
+	
+	on_government_type_change = {
+		change_to_presidential_elective = yes
+	}
+	
+	on_post_government_type_change = {
+		post_change_to_presidential_elective = yes
 	}
 }
 
@@ -142,5 +261,20 @@ gov_presidential_democracy_federal = {
 		has_law = law_type:law_independent_executive
 		has_law = law_type:law_elected_bureaucrats
 		country_has_voting_franchise = yes
+		NOT = { has_law = law_type:law_vanguardism }
+		NOT = {
+			OR = {
+				is_subject_type = subject_type_puppet
+				is_subject_type = subject_type_dominion
+			}
+		}
+	}
+	
+	on_government_type_change = {
+		change_to_presidential_elective = yes
+	}
+	
+	on_post_government_type_change = {
+		post_change_to_presidential_elective = yes
 	}
 }

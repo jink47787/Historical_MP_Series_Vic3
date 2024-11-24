@@ -12,11 +12,10 @@ cold.101 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_antarctica.bk2"
+		video = "europenorthamerica_antarctica"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/arctic"
 	
 	option = {
 		name = cold.101.a
@@ -35,21 +34,22 @@ cold.102 = { #Choose commander
     duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_antarctica.bk2"
+		video = "europenorthamerica_antarctica"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/arctic"
 	
 	trigger = {
 		any_scope_character = {
 			has_role = admiral
+			is_busy = no
 		}
 	}
 
 	immediate = {
 		random_scope_character = {
 			limit = {
+				is_busy = no
 				has_role = admiral
 				has_variable = polar_explorer
 				is_ruler = no
@@ -59,11 +59,12 @@ cold.102 = { #Choose commander
 		if = {
 			random_scope_character = {
 				limit = {
+					is_busy = no
 					is_ruler = no
 					has_role = admiral
 					has_trait = explorer
 					NOT = {
-						this = scope:expedition_leader_1
+						scope:expedition_leader_1 ?= this
 					}
 				}
 				save_scope_as = expedition_leader_2
@@ -72,10 +73,11 @@ cold.102 = { #Choose commander
 		else = {
 			random_scope_character = {
 				limit = {
+					is_busy = no
 					is_ruler = no
 					has_role = admiral
 					NOT = {
-						this = scope:expedition_leader_1
+						scope:expedition_leader_1 ?= this
 					}
 				}
 				save_scope_as = expedition_leader_2
@@ -83,34 +85,28 @@ cold.102 = { #Choose commander
 		}
 		random_scope_character = {
 			limit = {
+				is_busy = no
 				is_ruler = no
 				has_role = admiral
 				NOR = {
-					this = scope:expedition_leader_1
-					this = scope:expedition_leader_2
+					scope:expedition_leader_1 ?= this
+					scope:expedition_leader_2 ?= this
 				}
 			}
 			save_scope_as = expedition_leader_3
 		}
 		random_scope_character = {
 			limit = {
+				is_busy = no
 				is_ruler = no
 				has_role = admiral
 				NOR = {
-					this = scope:expedition_leader_1
-					this = scope:expedition_leader_2
-					this = scope:expedition_leader_3
+					scope:expedition_leader_1 ?= this
+					scope:expedition_leader_2 ?= this
+					scope:expedition_leader_3 ?= this
 				}
 			}
 			save_scope_as = expedition_leader_4
-		}
-		set_variable = {
-			name = expedition_progress
-			value = 1
-		}
-		set_variable = {
-			name = expedition_peril
-			value = 1
 		}
 	}
 
@@ -126,12 +122,12 @@ cold.102 = { #Choose commander
 			name = modifier_large_expedition_cost
 			multiplier = money_amount_multiplier_medium
 		}
+		scope:expedition_leader_1 ?= {
+			set_variable = expedition_leader_var
+			set_character_busy_and_immortal = yes
+		}
 		add_journal_entry = {
 			type = je_antarctica
-		}
-		scope:expedition_leader_1 = {
-			set_variable = expedition_leader_var
-			set_character_busy = yes
 		}
 	}
 
@@ -145,12 +141,12 @@ cold.102 = { #Choose commander
 			name = modifier_large_expedition_cost
 			multiplier = money_amount_multiplier_medium
 		}
+		scope:expedition_leader_2 ?= {
+			set_variable = expedition_leader_var
+			set_character_busy_and_immortal = yes
+		}
 		add_journal_entry = {
 			type = je_antarctica
-		}
-		scope:expedition_leader_2 = {
-			set_variable = expedition_leader_var
-			set_character_busy = yes
 		}
 	}
 
@@ -164,12 +160,12 @@ cold.102 = { #Choose commander
 			name = modifier_large_expedition_cost
 			multiplier = money_amount_multiplier_medium
 		}
+		scope:expedition_leader_3 ?= {
+			set_variable = expedition_leader_var
+			set_character_busy_and_immortal = yes
+		}
 		add_journal_entry = {
 			type = je_antarctica
-		}
-		scope:expedition_leader_3 = {
-			set_variable = expedition_leader_var
-			set_character_busy = yes
 		}
 	}
 	
@@ -184,12 +180,12 @@ cold.102 = { #Choose commander
 			name = modifier_large_expedition_cost
 			multiplier = money_amount_multiplier_medium
 		}
+		scope:expedition_leader_4 ?= {
+			set_variable = expedition_leader_var
+			set_character_busy_and_immortal = yes
+		}
 		add_journal_entry = {
 			type = je_antarctica
-		}
-		scope:expedition_leader_4 = {
-			set_variable = expedition_leader_var
-			set_character_busy = yes
 		}
 	}
 }
@@ -206,15 +202,20 @@ cold.1 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_antarctica.bk2"
+		video = "europenorthamerica_antarctica"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/arctic"
 	
 	trigger = {
-		var:expedition_progress >= 2
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" >= 2
+		}
 		NOT = { has_variable = mountains_of_madness }
+	}
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
 	}
 	
 	immediate = {
@@ -299,15 +300,20 @@ cold.2 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/unspecific_iceberg.bk2"
+		video = "unspecific_iceberg"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/iceberg_in_the_antartica"
 	
 	trigger = {
-		var:expedition_progress = 1
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" = 1
+		}
 		NOT = { has_variable = discovery_hut_var }
+	}
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
 	}
 	
 	immediate = {
@@ -358,13 +364,17 @@ cold.3 = {
 		first_valid = {
 			triggered_desc = {
 				trigger = {
-					var:expedition_peril >= 7
+					je:je_antarctica ?= {
+						"scripted_bar_progress(expedition_peril_progress_bar)" >= 7
+					}
 				}
 				desc = cold.3.f
 			}
 			triggered_desc = {
 				trigger = {
-					var:expedition_peril < 7
+					je:je_antarctica ?= {
+						"scripted_bar_progress(expedition_peril_progress_bar)" < 7
+					}
 				}
 				desc = cold.3.f2
 			}
@@ -374,15 +384,20 @@ cold.3 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/unspecific_iceberg.bk2"
+		video = "unspecific_iceberg"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/iceberg_in_the_antartica"
 	
 	trigger = {
-		var:expedition_progress > 3
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" > 3
+		}
 		NOT = { has_variable = antarctic_got_lost }
+	}
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
 	}
 	
 	immediate = {
@@ -426,10 +441,9 @@ cold.4 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/unspecific_iceberg.bk2"
+		video = "unspecific_iceberg"
 	}
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/iceberg_in_the_antartica"
 
 	immediate = {
 		random_scope_character = {
@@ -476,14 +490,15 @@ cold.5 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_antarctica.bk2"
+		video = "europenorthamerica_antarctica"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/arctic"
 	
 	trigger = {
-		var:expedition_progress >= 6
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" >= 6
+		}
 		NOT = { has_variable = first_to_reach_south_pole }
 	}
 	
@@ -544,15 +559,20 @@ cold.6 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_antarctica.bk2"
+		video = "europenorthamerica_antarctica"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/arctic"
 	
 	trigger = {	
-		var:expedition_progress >= 3
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" >= 3
+		}
 		NOT = { has_variable = dog_meat }
+	}
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
 	}
 	
 	immediate = {
@@ -609,11 +629,10 @@ cold.7 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_antarctica.bk2"
+		video = "europenorthamerica_antarctica"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/arctic"
 	
 	immediate = {
 		save_scope_as = expedition_country
@@ -632,7 +651,7 @@ cold.7 = {
 		scope:expedition_leader = {
 			add_trait = explorer
 			set_variable = polar_explorer
-			set_character_busy = no
+			set_character_busy_and_immortal = no
 			add_modifier = {
 				name = succesfull_south_pole_modifier
 				multiplier = 2
@@ -651,7 +670,7 @@ cold.7 = {
 		scope:expedition_leader = {
 			add_trait = explorer
 			set_variable = polar_explorer
-			set_character_busy = no
+			set_character_busy_and_immortal = no
 			add_modifier = {
 				name = succesfull_south_pole_modifier
 			}
@@ -675,15 +694,20 @@ cold.8 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/unspecific_iceberg.bk2"
+		video = "unspecific_iceberg"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/iceberg_in_the_antartica"
 	
 	trigger = {
-		var:expedition_progress <= 1
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" <= 1
+		}
 		NOT = { has_variable = pack_ice }
+	}
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
 	}
 	
 	immediate = {
@@ -752,15 +776,20 @@ cold.9 = {
 		}
 	}
 	flavor = cold.9.f
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
+	}
+	
+	cooldown = { months = short_modifier_time }
 	
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/unspecific_iceberg.bk2"
+		video = "unspecific_iceberg"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/iceberg_in_the_antartica"
 	
 	option = { # Try to free yourself
 		name = cold.9.a
@@ -804,11 +833,10 @@ cold.10 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/unspecific_whaling.bk2"
+		video = "unspecific_whaling"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/whaling"
 	
 	immediate = {
 		save_scope_as = expedition_country
@@ -824,7 +852,7 @@ cold.10 = {
 		scope:expedition_leader = {
 			add_trait = explorer
 			set_variable = polar_explorer
-			set_character_busy = no
+			set_character_busy_and_immortal = no
 			add_modifier = {
 				name = safe_polar_exp_modifier
 				months = normal_modifier_time
@@ -848,15 +876,20 @@ cold.11 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/unspecific_iceberg.bk2"
+		video = "unspecific_iceberg"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/iceberg_in_the_antartica"
 	
 	trigger = {
-		var:expedition_progress < 2
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" < 2
+		}
 		NOT = { has_variable = great_ice_barrier_variable }
+	}
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
 	}
 	
 	immediate = {
@@ -895,23 +928,24 @@ cold.12 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_antarctica.bk2"
+		video = "europenorthamerica_antarctica"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/arctic"
 	
 	trigger = {
-		var:expedition_progress >= 3
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" >= 3
+		}
 		NOT = { has_variable = transantarctic_mountains_var }
+	}
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
 	}
 	
 	immediate = {
 		save_scope_as = expedition_country
-		set_variable = {
-			name = transantarctic_mountains_var
-			months = short_modifier_time
-		}
 	}
 	
 	option = { # Find a new route
@@ -927,6 +961,10 @@ cold.12 = {
 			33 = {
 				add_small_peril_effect = yes
 			}
+		}
+		set_variable = {
+			name = transantarctic_mountains_var
+			months = short_modifier_time
 		}
 	}
 	option = { # Take a known approach
@@ -949,13 +987,17 @@ cold.13 = {
 		first_valid = {
 			triggered_desc = {
 				trigger = {
-					var:expedition_peril >= 7
+					je:je_antarctica ?= {
+						"scripted_bar_progress(expedition_peril_progress_bar)" >= 7
+					}
 				}
 				desc = cold.13.f2
 			}
 			triggered_desc = {
 				trigger = {
-					var:expedition_peril < 7
+					je:je_antarctica ?= {
+						"scripted_bar_progress(expedition_peril_progress_bar)" < 7
+					}
 				}
 				desc = cold.13.f
 			}
@@ -965,15 +1007,20 @@ cold.13 = {
 	duration = 3
 	
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_antarctica.bk2"
+		video = "europenorthamerica_antarctica"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/unspecific/arctic"
 	
 	trigger = {
-		var:expedition_progress >= 3
+		je:je_antarctica ?= {
+			"scripted_bar_progress(expedition_progress_bar)" >= 3
+		}
 		NOT = { has_variable = strange_rock_var }
+	}
+
+	cancellation_trigger = {
+		NOT = { has_variable = on_expedition }
 	}
 	
 	immediate = {

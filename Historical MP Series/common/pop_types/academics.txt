@@ -1,9 +1,9 @@
 ﻿academics = {
 	texture = "gfx/interface/icons/pops_icons/academics.dds"
 	color = hsv{ 0.94 0.51 0.37 }
-	strata = middle
 	start_quality_of_life = 10
 	wage_weight = 4
+	paid_private_wage = yes
 	literacy_target = 0.80
 	education_access = 0.5
 	dependent_wage = 0.5	# per year
@@ -21,11 +21,17 @@
 			desc = "POP_STARVATION"	
 			
 			if = {
-				limit = { 
-					standard_of_living < 5
+				limit = {
+					is_in_mild_starvation = yes
 				}
-				value = 1
-			}		
+				value = 0.5
+			}
+			else_if = {
+				limit = {
+					is_in_severe_starvation = yes
+				}
+				value = 1.5
+			}
 		}
 		
 	}
@@ -35,9 +41,9 @@
 		if = {
 			limit = {
 				is_peasant_under_serfdom = no
-				literacy_rate > 0.2
+				literacy_rate > 0.35
 			}
-			# baseline: ( literacy - 0.2 ) * 10 + ( wealth / 10 ), norm 5
+			# baseline: ( literacy - 0.35 ) * 10 + ( wealth / 10 ), norm 5
 			add = {
 				value = literacy_rate
 				subtract = 0.35
@@ -69,24 +75,26 @@
 			}
 			if = {
 				limit = {
-					culture_accepted = no
-				}
-				multiply = {
-					value = 0.1
-					desc = "QUALIFICATIONS_CULTURAL_DISCRIMINATION"
-				}
-			}
-			if = {
-				limit = {
-					culture_accepted = no
-					owner = {
-						has_law = law_type:law_multicultural
+					state = {
+						state_cultural_acceptance = {
+							target = PREV.culture
+						   	value < acceptance_status_4
+					   	}
 					}
 				}
 				multiply = {
-					value = 2
-					desc = "QUALIFICATIONS_CULTURAL_DISCRIMINATION_SUFFERANCE"
+					value = 0.2
+					desc = "QUALIFICATIONS_CULTURAL_DISCRIMINATION"
 				}
+			if = {
+				limit = {
+					religion_accepted = no
+				}
+				multiply = {
+					value = 0.6
+					desc = "QUALIFICATIONS_RELIGIOUS_DISCRIMINATION"
+				}
+			}
 			}
 		}
 		else_if = {

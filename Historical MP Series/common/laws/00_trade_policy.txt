@@ -9,13 +9,22 @@ law_mercantilism = {
 	
 	progressiveness = 0
 	
+	disallowing_laws = {
+		law_command_economy
+	}	
+	
 	unlocking_technologies = {
 		international_trade
 	}
+
+	modifier = {
+		tariff_import_outside_power_bloc_mult = 0.5
+		tariff_export_outside_power_bloc_mult = 0.5
+	}
 	
 	tariff_modifier_no_priority = {
-		tariff_import_add = 0.15
-		tariff_export_add = 0.05
+		tariff_import_add = 0.10
+		tariff_export_add = 0.03
 	}	
 	
 	tariff_modifier_export_priority = {
@@ -26,17 +35,29 @@ law_mercantilism = {
 		tariff_export_add = 0.10
 	}
 
-	possible_political_movements = {
-		law_protectionism
-		law_free_trade
-	}	
-	
 	# Don't change back to mercantilism once we have protectionism or free trade
 	ai_will_do = {
 		NOR = {
 			has_law = law_type:law_protectionism
 			has_law = law_type:law_free_trade
 		}	
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+		
+		if = {
+			limit = { 
+				has_journal_entry = je_meiji_diplomacy
+				has_law = law_type:law_isolationism
+			}
+			add = 1000
+		}		
 	}
 }
 
@@ -50,23 +71,45 @@ law_protectionism = {
 	unlocking_technologies = {
 		stock_exchange
 	}
+
+	modifier = {
+		tariff_import_outside_power_bloc_mult = 1.0
+		tariff_export_outside_power_bloc_mult = 1.0
+	}
 	
 	tariff_modifier_no_priority = {
-		tariff_export_add = 0.10
-		tariff_import_add = 0.10
+		tariff_export_add = 0.05
+		tariff_import_add = 0.05
 	}	
 	
 	tariff_modifier_export_priority = {
-		tariff_import_add = 0.20
+		tariff_import_add = 0.15
 	}
 	
 	tariff_modifier_import_priority = {
-		tariff_export_add = 0.20
+		tariff_export_add = 0.15
 	}	
 	
-	possible_political_movements = {
-		law_free_trade
-	}	
+	modifier = {
+		country_leverage_resistance_mult = 0.25
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+		
+		if = {
+			limit = { 
+				has_journal_entry = je_meiji_diplomacy
+				has_law = law_type:law_isolationism
+			}
+			add = 1000
+		}		
+	}
 }
 
 law_free_trade = {
@@ -99,11 +142,25 @@ law_free_trade = {
 		country_trade_route_competitiveness_mult = 0.5
 		country_trade_route_quantity_mult = 0.5
 		country_trade_route_cost_mult = -0.5
+		country_leverage_resistance_mult = -0.25
 	}
 	
-	possible_political_movements = {
-		law_protectionism
-	}	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+		
+		if = {
+			limit = { 
+				has_journal_entry = je_meiji_diplomacy
+				has_law = law_type:law_isolationism
+			}
+			add = 1000
+		}		
+	}
 }
 
 law_isolationism = {
@@ -112,6 +169,15 @@ law_isolationism = {
 	icon = "gfx/interface/icons/law_icons/isolationism.dds"
 	
 	progressiveness = -50
+	
+	can_enact = {
+		NOT = {
+			OR = {
+				has_law = law_type:law_extraction_economy
+				has_law = law_type:law_the_company
+			}
+		}
+	}
 	
 	disallowing_laws = {
 		law_laissez_faire
@@ -123,18 +189,30 @@ law_isolationism = {
 		country_tech_spread_mult = -0.15
 		
 		country_max_declared_interests_mult = -0.5
+		country_leverage_resistance_mult = 1.0
 		
-		market_disallow_trade_routes = yes
+		market_disallow_trade_routes_bool = yes
 	}
 	
-	possible_political_movements = {
-		law_protectionism
-		law_free_trade
-	}	
+	on_activate = {
+		custom_tooltip = {
+			text = isolationism_force_single_market_tt
+			force_single_market = yes
+		}
+	}
 	
 	ai_will_do = {
 		ruler = {
-			has_ideology = ideology_traditionalist
+			has_ideology = ideology:ideology_traditionalist
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
 		}
 	}
 }

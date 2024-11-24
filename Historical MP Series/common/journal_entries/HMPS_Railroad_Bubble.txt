@@ -1,0 +1,122 @@
+﻿je_railroad_bubble = {
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	
+	group = je_group_crises
+
+	immediate = {
+		set_variable = {
+			name = railroad_bubble_progress
+			value = 0
+		}
+		set_variable = {
+			name = railroad_bubble_pops
+			value = 40
+		}
+		set_variable = {
+			name = rr_time_limit
+			value = 0
+		}
+	}
+	
+	#Takes 18 months to finish normally, or if you have a very big bubble
+	complete = {
+		OR = {
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+			custom_tooltip = {
+				text = je_railroad_bubble.c.t
+				var:rr_time_limit = 18
+			}
+		}
+	}
+	
+	# happens when variable gets too high or enough time passes
+	on_complete = {
+		trigger_event = {
+			id = railroad_bubble.5
+			popup = yes
+		}
+		custom_tooltip = {
+			text = je_railroad_bubble.c.tt
+		}
+	}
+	
+	# Every month, a variable will make the bubble bigger. If you are subsidizing RRs, or if transportation is expensive, bubble will increase more
+	on_monthly_pulse = {
+		effect = {
+			change_variable = {
+				name = rr_time_limit
+				add = 1
+			}
+			change_variable = {
+				name = railroad_bubble_mult
+				add = 1
+			}
+			change_variable = {
+				name = railroad_bubble_mult
+				add = root.var:rr_built
+			}
+			change_variable = {
+				name = railroad_bubble_progress
+				add = 1
+			}
+			if = {
+				limit = {
+					any_scope_state = {
+						any_scope_building = {
+							is_building_type = building_railway
+							is_subsidized = yes
+						}
+					}
+				}
+				change_variable = {
+					name = railroad_bubble_mult
+					add = 1
+				}
+			}
+			#I'm trying to replace event 4 with this
+			every_scope_building = {
+				limit = {
+					has_modifier = overvalued_railroads_building
+				}
+				remove_modifier = overvalued_railroads_building
+			}
+			every_scope_building = {
+				limit = {
+					is_building_type = building_railway
+				}
+				add_modifier = {
+					name = overvalued_railroads_building
+					multiplier = var:railroad_bubble_mult
+				}
+			}
+			every_scope_state = {
+				remove_modifier = overvalued_railroads_state
+				add_modifier = {
+					name = overvalued_railroads_state
+					multiplier = var:railroad_bubble_mult
+				}
+			}
+			change_variable = {
+				name = rr_built
+				multiply = 0
+			}
+		}
+	}
+	
+		
+	current_value = {
+		value = root.var:railroad_bubble_mult
+	}
+
+	goal_add_value = {
+		value = root.var:railroad_bubble_pops
+	}
+
+	progressbar = yes
+	can_revolution_inherit = yes
+    weight = 200
+	should_be_pinned_by_default = yes
+	
+}

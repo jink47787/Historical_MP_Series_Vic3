@@ -1,0 +1,421 @@
+﻿je_warlord_china = {
+	icon = "gfx/interface/icons/event_icons/qing_breakup.dds"
+	
+	group = je_group_historical_content
+	
+	modifiers_while_active = {
+		modifier_inward_china
+	}
+
+	immediate = {
+		random_law = {
+			limit = { type = law_type:law_monarchy }
+			save_scope_as = monarchy_scope
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = china_recognized_tt
+			has_global_variable = china_warlord_explosion_recognized
+		}
+		OR = {
+			custom_tooltip = {
+				text = china_abolished_monarchy_tt
+				has_variable = china_warlord_abolished_monarchy
+			}
+			AND = {
+				OR = {
+					has_law = law_type:law_monarchy
+					has_law = law_type:law_theocracy
+				}
+				has_technology_researched = pan-nationalism
+				has_technology_researched = political_agitation
+				NOT = {
+					any_civil_war = {
+						civil_war_progress > 0.5
+					}
+				}
+			}
+		}
+		custom_tooltip = {
+			text = china_completed_army_reform_tt
+			NOT = { has_journal_entry = je_army_reform_china }
+		}
+		gdp_ownership_ratio = {
+			target = ROOT
+			value >= 0.50
+		}
+	}
+
+	fail = {
+		custom_tooltip = {
+			text = je_china_failure_tt
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+		}
+		custom_tooltip = {
+			text = no_diplomatic_play_active_tt
+			NOT = {
+				any_diplomatic_play = {
+					target_is = ROOT
+				}
+			}
+		}
+		OR = {
+			is_player = yes
+			AND = {
+				is_ai = yes
+				any_country = {
+					has_technology_researched = political_agitation
+				}
+			}
+		}
+	}
+
+	on_complete = {
+		trigger_event = { id = warlord_china_events.200 }
+		if = {
+			limit = {
+				NOT = { country_has_primary_culture = cu:han }
+			}
+			add_primary_culture = cu:han
+		}
+		if = {
+			limit = {
+				has_modifier = han_power_increase
+			}
+			remove_modifier = han_power_increase
+		}
+		if = {
+			limit = {
+				cu:han = {
+					has_cultural_obsession = opium
+				}
+			}
+			cu:han = {
+				remove_cultural_obsession = opium
+			}
+		}
+		if = {
+			limit = {
+				cu:manchu = {
+					has_cultural_obsession = opium
+				}
+			}
+			cu:manchu = {
+				remove_cultural_obsession = opium
+			}
+		}
+	}
+	
+	on_fail = {
+		set_global_variable = {
+			name = china_warlord_explosion
+			value = 0
+		}
+		
+		hidden_effect = {
+			if = {
+				limit = {
+					has_modifier = han_power_increase
+				}
+				remove_modifier = han_power_increase
+			}
+			every_state = {
+				limit = {
+					has_modifier = eight_banners
+				}
+				remove_modifier = eight_banners
+			}
+			every_country = {
+				limit = {
+					NOT = { c:LAN ?= this }
+					OR = {
+						country_has_primary_culture = cu:han
+						country_has_primary_culture = cu:manchu
+						country_has_primary_culture = cu:hakka
+						country_has_primary_culture = cu:min
+						country_has_primary_culture = cu:yue
+						country_has_primary_culture = cu:miao
+						country_has_primary_culture = cu:zhuang
+						country_has_primary_culture = cu:yi
+					}
+					OR = {
+						is_subject = no
+						overlord = {
+							OR = {
+								country_has_primary_culture = cu:han
+								country_has_primary_culture = cu:manchu
+								country_has_primary_culture = cu:hakka
+								country_has_primary_culture = cu:min
+								country_has_primary_culture = cu:yue
+								country_has_primary_culture = cu:miao
+								country_has_primary_culture = cu:zhuang
+								country_has_primary_culture = cu:yi
+								country_has_primary_culture = cu:tibetan
+							}
+						}
+					}
+				}
+				every_scope_state = {
+					set_state_owner = ROOT
+				}
+			}
+		}
+		
+		### days = 2 to allow setting of state ownership
+		trigger_event = { id = warlord_china_events.100 days = 2 }
+	}
+	
+	invalid = {
+		custom_tooltip = {
+			text = warlord_china_fracture_invalid_tt
+			has_global_variable = china_shatters
+		}
+	}
+
+	current_value = {
+		value = global_var:china_warlord_explosion
+	}
+
+	goal_add_value = {
+		value = 100
+	}
+	
+	progressbar = yes
+
+	on_weekly_pulse = {
+		effect = {
+			### Increase Fracture
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_warlord_explosion_subject }
+					is_subject = yes
+				}
+				chi_add_1_fracture = yes
+				set_global_variable = china_warlord_explosion_subject
+			}
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_warlord_explosion_default }
+					in_default = yes
+					is_player = yes
+				}
+				chi_add_1_fracture = yes
+				set_global_variable = china_warlord_explosion_default
+			}
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_warlord_explosion_bankrupted }
+					has_modifier = declared_bankruptcy
+					is_player = yes
+				}
+				chi_add_1_fracture = yes
+				set_global_variable = china_warlord_explosion_bankrupted
+			}
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_abolished_monarchy }
+					has_law = law_type:law_monarchy
+					NOT = { has_variable = china_han_empire }
+					AND = {
+						exists = c:CHI
+						c:CHI = ROOT
+					}
+					country_has_primary_culture = cu:manchu
+					country_has_primary_culture = cu:han
+				}
+				remove_primary_culture = cu:han
+			}
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_abolished_monarchy }
+					OR = {
+						AND = {
+							exists = c:CHI
+							c:CHI = ROOT
+							NOT = { has_law = law_type:law_monarchy }
+						}
+						AND = {
+							exists = c:TPG
+							c:TPG = ROOT
+							has_law = law_type:law_republic
+						}
+					}
+				}
+				set_global_variable = china_abolished_monarchy
+				chi_add_1_fracture = yes
+				if = {
+					limit = {
+						NOT = { has_variable = china_han_empire }
+						exists = c:CHI
+						c:CHI = ROOT
+					}
+					trigger_event = { id = boxer_rebellion_events.4 days = 0 popup = yes }
+				}
+			}
+			if = {
+				limit = {
+					any_civil_war = {
+						civil_war_progress > 0.5
+						is_civil_war_type = revolution
+					}
+					NOT = { has_global_variable = china_warlord_civil_war_progress }
+				}
+				set_global_variable = china_warlord_civil_war_progress
+				chi_add_1_fracture = yes
+			}
+			
+			### Remove Fracture
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_warlord_explosion_economic_growth }
+					GDP >= 500000000
+				}
+				set_global_variable = china_warlord_explosion_economic_growth
+				chi_remove_1_fracture = yes
+			}
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_warlord_explosion_education_advancement }
+					literacy_rate >= 0.50
+				}
+				set_global_variable = china_warlord_explosion_education_advancement
+				chi_remove_1_fracture = yes
+			}
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_warlord_explosion_sol }
+					average_sol >= 12
+				}
+				set_global_variable = china_warlord_explosion_sol
+				chi_remove_1_fracture = yes
+			}
+			if = {
+				limit = {
+					NOT = { has_global_variable = china_warlord_explosion_recognized }
+					country_rank != rank_value:unrecognized_power
+					country_rank != rank_value:unrecognized_major_power
+					country_rank != rank_value:unrecognized_regional_power
+				}
+				set_global_variable = china_warlord_explosion_recognized
+				chi_remove_1_fracture = yes
+			}
+		}
+	}
+	
+	on_yearly_pulse = {
+		effect = {
+			### Fracture Gain
+			if = {
+				limit = {
+					NOT = { has_law = law_type:law_autocracy }
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = 0.2
+				}
+			}
+			if = {
+				limit = {
+					NOT = { has_law = law_type:law_outlawed_dissent }
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = 0.2
+				}
+			}			
+			if = {
+				limit = {
+					NOT = { has_law = law_type:law_peasant_levies }
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = 0.2
+				}
+			}
+			if = {
+				limit = {
+					limit = {
+						ig:ig_armed_forces = {
+							is_powerful = yes
+						}
+						has_journal_entry = je_army_reform_china
+					}
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = 0.2
+				}
+			}			
+			if = {
+				limit = {
+					NOT = { has_law = law_type:law_no_womens_rights }
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = 0.2
+				}
+			}
+			
+			if = {
+				limit = {
+					gdp_ownership_ratio = {
+						target = ROOT
+						value < 0.75
+					}
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = 0.1
+				}
+			}
+			
+			### Fracture Reduction
+			if = {
+				limit = {
+					GDP >= 400000000
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = -0.2
+				}
+			}
+			if = {
+				limit = {
+					is_ai = yes
+					date <= 1870.1.1
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = -1.0
+				}
+			}
+			if = {
+				limit = {
+					literacy_rate >= 0.40
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = -0.2
+				}
+			}
+			if = {
+				limit = {
+					average_sol >= 10
+				}
+				change_global_variable = {
+					name = china_warlord_explosion
+					add = -0.2
+				}
+			}
+		}
+	}
+
+	weight = 10000
+	should_be_pinned_by_default = yes
+	
+	can_revolution_inherit = yes
+}

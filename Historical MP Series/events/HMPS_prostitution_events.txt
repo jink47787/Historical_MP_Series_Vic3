@@ -1,0 +1,165 @@
+﻿namespace = prostitution
+
+# Contagious Diseases Acts
+prostitution.1 = {
+	type = country_event
+	placement = scope:cda_state
+	title = prostitution.1.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = prostitution.1.d
+				trigger = {
+					NOT = {
+						scope:cda_ig = {
+							is_interest_group_type = ig_armed_forces
+						}
+					}
+				}
+			}
+			triggered_desc = {
+				desc = prostitution.1.d2
+				trigger = {
+					scope:cda_ig = {
+						is_interest_group_type = ig_armed_forces
+					}
+				}
+			}
+		}
+	}
+	flavor = prostitution.1.f
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:cda_ig_leader
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_scales.dds"
+
+	duration = 3
+
+	trigger = {
+		NOT = { has_variable = police_cooldown }
+		NOT = {
+			has_variable = var_abolished_cda_permanently
+		}
+		institution_investment_level = {
+			institution = institution_police
+			value = 3
+		}
+		any_scope_state = {
+			is_incorporated = yes
+			has_building = building_urban_center
+		}
+		any_interest_group = {
+			is_in_government = yes
+			OR = {
+				leader = {
+					has_ideology = ideology:ideology_traditionalist
+				}
+				AND = {
+					OR = {
+						is_interest_group_type = ig_devout
+						is_interest_group_type = ig_armed_forces
+					}
+					NOT = {
+						leader = {
+							has_ideology = ideology:ideology_feminist
+						}
+					}
+				}
+			}
+		}
+		any_primary_culture = { # these attitudes are fairly specific to the West
+			has_discrimination_trait = european_heritage
+		}
+	}
+
+	immediate = {
+		set_variable = {
+			name = police_cooldown
+			years = 2
+		}
+		random_scope_state = {
+			limit = {
+				has_building = building_urban_center
+				is_incorporated = yes
+			}
+			save_scope_as = cda_state
+		}
+		random_interest_group = {
+			limit = {
+				is_in_government = yes
+				OR = {
+					leader = {
+						has_ideology = ideology:ideology_traditionalist
+					}
+					AND = {
+						OR = {
+							is_interest_group_type = ig_devout
+							is_interest_group_type = ig_armed_forces
+						}
+						NOT = {
+							leader = {
+								has_ideology = ideology:ideology_feminist
+							}
+						}
+					}
+				}
+			}
+			save_scope_as = cda_ig
+			leader = {
+				save_scope_as = cda_ig_leader
+			}
+		}
+	}
+
+	option = {
+		name = prostitution.1.a
+		default_option = yes
+		scope:cda_state = {
+			add_modifier = {
+				name = cda_enacted
+				months = normal_modifier_time	#was forever
+			}
+		}
+		scope:cda_ig = {
+			add_modifier = {
+				name = cda_enacted_ig
+				months = normal_modifier_time
+			}
+		}
+	}
+	option = {
+		name = prostitution.1.b
+		scope:cda_ig = {
+			add_modifier = {
+				name = cda_not_enacted_ig
+				months = normal_modifier_time
+			}
+		}
+	}
+	option = {
+		name = prostitution.1.c
+		trigger = {
+			has_technology_researched = modern_nursing
+			institution_investment_level = {
+				institution = institution_health_system
+				value = 3
+			}
+		}
+		highlighted_option = yes
+		scope:cda_ig = {
+			add_modifier = {
+				name = cda_not_enacted_ig
+				months = normal_modifier_time
+			}
+		}
+		add_modifier = {
+			name = cda_following_the_science
+			months = normal_modifier_time
+		}
+	}
+}

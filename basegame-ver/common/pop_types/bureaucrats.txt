@@ -1,10 +1,11 @@
 ﻿bureaucrats = {
 	texture = "gfx/interface/icons/pops_icons/bureaucrats.dds"
 	color = hsv{ 0.25 0.4 0.5 }
-	strata = middle
 	start_quality_of_life = 10
 	wage_weight = 4
+	paid_private_wage = yes
 	literacy_target = 0.40
+	education_access = 0.50
 	dependent_wage = 0.5	# per year
 	unemployment = yes
 	
@@ -19,26 +20,18 @@
 			desc = "POP_STARVATION"	
 			
 			if = {
-				limit = { 
-					standard_of_living < 5
-				}
-				value = 1
-			}		
-		}
-	
-		multiply = {
-			desc = "POP_WORKPLACE"
-		
-			if = {
-				limit = { 
-					pop_employment_building_group = bg_trade
+				limit = {
+					is_in_mild_starvation = yes
 				}
 				value = 0.5
 			}
-			else = {
-				value = 1
+			else_if = {
+				limit = {
+					is_in_severe_starvation = yes
+				}
+				value = 1.5
 			}
-		}	
+		}
 	}
 	
 	qualifications_growth_desc = "BUREAUCRATS_QUALIFICATIONS_DESC"
@@ -55,16 +48,26 @@
 				multiply = 20
 				desc = "QUALIFICATIONS_LITERACY_FACTOR"
 			}
+
 			if = {
 				limit = {
-					culture_accepted = yes
-					religion_accepted = yes
+					pop_acceptance >= acceptance_status_5
 				}
 				multiply = {
 					value = 2
 					desc = "POTENTIALS_CULTURAL_RELIGIOUS_ACCEPTANCE"
 				}
 			}
+			else_if = {
+				limit = {
+					pop_acceptance >= acceptance_status_4
+				}
+				multiply = {
+					value = 1.5
+					desc = "POTENTIALS_CULTURAL_RELIGIOUS_ACCEPTANCE"
+				}
+			}
+
 			if = {
 				limit = {
 					is_pop_type = clerks
@@ -85,7 +88,12 @@
 			}
 			if = {
 				limit = {
-					culture_accepted = no
+					state = {
+						state_cultural_acceptance = {  
+							target = PREV.culture
+						   	value < acceptance_status_4 
+					   	}
+					}
 				}
 				multiply = {
 					value = 0.1

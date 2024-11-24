@@ -1,0 +1,205 @@
+﻿	#1848 Hungarian Revolution JE
+
+je_hungarian_revolt = {
+	icon = "gfx/interface/icons/event_icons/phrygian.dds"
+
+	group = je_group_crises
+	
+	should_be_pinned_by_default = yes
+
+	transferable = no
+	can_revolution_inherit = no
+	
+	#create hungary events for austria
+	
+	is_shown_when_inactive = {
+		c:HUN ?= this
+		is_subject_type = subject_type_personal_union
+	}
+
+	possible = {
+		#austria has political question JE
+		overlord = {
+			has_journal_entry = je_napoleons_legacy
+		}
+	}
+	
+	complete = {
+		#reform bad laws
+		OR = {
+			overlord = {
+				custom_tooltip = {
+					text = je_hungarian_revolt.t1
+					OR = {
+						has_modifier = modifier_1848_victory
+						AND = {
+							NOT = { has_variable = failed_1848_var }
+							NOT = { has_journal_entry = je_napoleons_legacy }
+						}
+					}
+				}
+			}
+			NOR = {
+				has_law = law_type:law_traditionalism
+				has_law = law_type:law_serfdom
+				has_law = law_type:law_censorship
+				has_law = law_type:law_outlawed_dissent
+				has_law = law_type:law_no_legislature
+			}
+		}
+	}
+	
+	on_complete = {
+		add_modifier = {
+			name = modifier_reformed_hungary
+			years = 20
+		}
+	}
+	
+	invalid = {
+		OR = {
+			is_subject = no
+			NOT = { is_subject_type = subject_type_personal_union }
+		}
+	}
+	
+
+	fail = {
+		#has springtime of peoples
+		OR = {
+			overlord = {
+				has_journal_entry = je_springtime_of_the_peoples
+				capital = {
+					radical_fraction = {
+						value > 0.25
+					}
+				}
+			}
+			custom_tooltip = {
+				text = je_hungarian_revolt.t2
+				has_variable = triggered_hungarian_revolt
+			}
+		}
+	}
+	
+	on_fail = {
+		#trigger hungarian revolt
+		remove_modifier = modifier_pragmatic_sanction
+		remove_primary_culture = cu:south_german
+		change_subject_type = subject_type_protectorate
+		add_liberty_desire = 100
+		activate_law = law_type:law_republic
+		c:AUS = {
+			trigger_event = {
+				id = dual_monarchy.2
+				days = 30
+			}
+		}
+	}
+}
+
+
+je_hungarian_revolt_austria = {
+	icon = "gfx/interface/icons/event_icons/phrygian.dds"
+
+	group = je_group_crises
+	
+	should_be_pinned_by_default = yes
+
+	transferable = yes
+	can_revolution_inherit = no
+	
+	is_shown_when_inactive = {
+		c:AUS ?= this
+		game_date < 1937.1.1
+	}
+
+	possible = {
+		any_country = {
+			is_subject_of = ROOT
+			has_journal_entry = je_hungarian_revolt
+		}
+	}
+	
+	complete = {
+		#reform bad laws
+		OR = {
+			custom_tooltip = {
+				text = je_hungarian_revolt_austria.t1
+				OR = {
+					has_modifier = modifier_1848_victory
+					AND = {
+						NOT = { has_variable = failed_1848_var }
+						NOT = { has_journal_entry = je_napoleons_legacy }
+					}
+				}
+			}
+			c:HUN = {
+				NOR = {
+					has_law = law_type:law_traditionalism
+					has_law = law_type:law_serfdom
+					has_law = law_type:law_censorship
+					has_law = law_type:law_outlawed_dissent
+					has_law = law_type:law_no_legislature
+				}
+			}
+		}
+	}
+	
+	on_complete = {
+		show_as_tooltip = {
+			c:HUN = {
+				add_modifier = {
+					name = modifier_reformed_hungary
+					years = 20
+				}
+			}
+		}
+	}
+	
+	invalid = {
+		c:HUN ?= {
+			is_subject_of = ROOT
+			NOT = { has_journal_entry = je_hungarian_revolt }
+		}
+	}
+	
+	fail = {
+		#has springtime of peoples
+		OR = {
+			AND = {
+				has_journal_entry = je_springtime_of_the_peoples
+				capital = {
+					radical_fraction = {
+						value > 0.25
+					}
+				}
+			}
+			custom_tooltip = {
+				text = je_hungarian_revolt_austria.t2
+				c:HUN = {
+					has_variable = triggered_hungarian_revolt
+				}
+			}
+		}
+	}
+	
+	on_fail = {
+		show_as_tooltip = {
+			c:HUN = {
+				#trigger hungarian revolt
+				remove_modifier = modifier_pragmatic_sanction
+				remove_primary_culture = cu:south_german
+				change_subject_type = subject_type_protectorate
+				add_liberty_desire = 100
+				activate_law = law_type:law_republic
+			}
+			#explain button to call in russia
+			trigger_event = {
+				id = dual_monarchy.2
+				days = 30
+			}
+		}
+	}
+}
+

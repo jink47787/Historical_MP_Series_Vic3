@@ -1,0 +1,347 @@
+﻿# root = state
+# scope:culture = the culture we're evaluating the probability to spawn a new cultural community for.
+
+# Each (state, culture) combination is evaluated once per month.
+# Note: only cultures present in the same market as <state> are evaluated.
+
+cultural_community_creation_weight = {
+
+	# Conditions that block
+
+	if = {
+		limit = {
+			OR = {
+				devastation >= 50
+				turmoil >= 60
+				is_isolated_from_market = yes
+				
+				#Begin region specific community limits
+				
+				#Europe
+				AND = {
+					state_is_in_europe = yes
+					scope:culture = {
+						NOT = { has_discrimination_trait = european_heritage }
+						culture_is_discriminated_in = root.owner
+					}
+				}
+				
+				#Middle east
+				AND = {
+					state_is_in_middle_east = yes
+					scope:culture = {
+						NOT = { has_discrimination_trait = middle_eastern_heritage }
+						culture_is_discriminated_in = root.owner
+					}
+				}
+				
+				#Central asia
+				AND = {
+					state_is_in_central_asia = yes
+					scope:culture = {
+						NOT = { has_discrimination_trait = central_asian_heritage }
+						culture_is_discriminated_in = root.owner
+					}
+				}
+				
+				#Africa
+				AND = {
+					state_is_in_africa = yes
+					scope:culture = {
+						NOT = { has_discrimination_trait = african_heritage }
+						culture_is_discriminated_in = root.owner
+					}
+				}
+				
+				#reference as to what cultures are included for asian heritage groups
+				#
+				#north_asian_heritage (mongol, manchu)
+				#east_asian_heritage (china, japan)
+				#south_asian_heritage (indian)
+				#southeast_asian_heritage (indochina, indonesia, philippines)
+				
+				#India
+				AND = {
+					state_is_in_india = yes
+					scope:culture = {
+						NOT = { has_discrimination_trait = south_asian_heritage }
+						culture_is_discriminated_in = root.owner
+					}
+				}
+				
+				#Indonesia/Indochina
+				#These should probably be separated into indonesia/indochina specific conditions but I was lazy
+				AND = {
+					state_is_in_southeast_asia = yes
+					scope:culture = {
+						NOT = { has_discrimination_trait = southeast_asian_heritage }
+						culture_is_discriminated_in = root.owner
+					}
+				}
+				
+				#East asia
+				AND = {
+					state_is_in_east_asia = yes
+					scope:culture = {
+						NOT = { has_discrimination_trait = east_asian_heritage }
+						culture_is_discriminated_in = root.owner
+					}
+				}
+				
+				#specific limit to prevent mass exodus of chinese to japan and siberia
+				AND = {
+					OR = {
+						region = sr:region_japan
+						region = sr:region_west_siberia
+						region = sr:region_east_siberia
+					}
+					scope:culture = {
+						culture_is_discriminated_in = root.owner
+						OR = {
+							this = cu:tibetan
+							this = cu:han
+							this = cu:hakka
+							this = cu:miao
+							this = cu:min
+							this = cu:zhuang
+							this = cu:yi
+							this = cu:yue
+						}
+					}
+				}
+				
+				#anywhere else in the world is unable to get communities from discriminated
+				AND = {
+					NOT = {
+						state_is_in_europe = yes
+						state_is_in_middle_east = yes
+						state_is_in_central_asia = yes
+						state_is_in_africa = yes
+						state_is_in_india = yes
+						state_is_in_southeast_asia = yes
+						state_is_in_east_asia = yes
+						region = sr:region_japan
+						region = sr:region_west_siberia
+						region = sr:region_east_siberia
+					}
+					scope:culture = {
+						culture_is_discriminated_in = root.owner
+					}
+				}
+			}
+		}
+		add = 0
+	}
+	else = {
+		add = 0.001
+	
+		# Conditions that add
+		if = {
+			limit = {
+				has_port = yes
+			}
+			add = 0.001
+		}
+		
+		if = {
+			limit = {
+				has_decree = decree_greener_grass_campaign
+			}
+			add = 0.005
+		}
+	
+		if = {
+			limit = {
+				on_river = yes
+			}
+			add = 0.001
+		}
+	
+		if = {
+			limit = {
+				is_coastal = yes
+			}
+			add = 0.001
+		}
+	
+		if = {
+			limit = {
+				is_under_colonization = yes
+			}
+			add = 0.005
+		}
+	
+		if = {
+			limit = {
+				free_arable_land > 20
+			}
+			add = 0.001
+		}
+
+		if = {
+
+			limit = {
+				root = {
+					has_building = building_trade_center
+				}
+			}
+			add = 0.001
+		}
+
+		# Positive Conditions that Multiply
+	
+		if = {
+			limit = {
+				is_capital = yes
+			}
+			multiply = 1.1
+		}
+	
+		if = {
+			limit = {
+				owner = {
+					country_has_primary_culture = scope:culture
+				}
+			}
+			multiply = 2.5
+		}
+	
+		if = {
+			limit = {
+				OR = {
+					has_state_trait = state_trait_natural_harbors
+					has_state_trait = state_trait_good_soils
+					has_state_trait = state_trait_london_docklands
+					has_state_trait = state_trait_new_york_harbor
+					has_state_trait = state_trait_halifax_harbor
+					has_state_trait = state_trait_newark_harbor
+				}
+	
+			}
+			multiply = 1.2
+		}
+	
+		# Negative Conditions that multiply 
+	
+		if = {
+			limit = {
+				has_decree = decree_violent_suppression
+			}
+			multiply = 0.5
+		}
+		
+		if = {
+			limit = {
+				devastation >= 20
+			}
+			multiply = 0.5
+		}
+	
+		if = {
+			limit = {
+				turmoil >= 30
+			}
+			multiply = 0.5
+		}
+	
+		if = {
+			limit = {
+				state_unemployment_rate >= 0.1
+			}
+			multiply = 0.5
+		}
+	
+		if = {
+			limit = {
+				owner = {
+					is_at_war = yes
+				}
+			}
+			multiply = 0.5
+		}
+	
+		if = {
+			limit = {
+				state_has_goods_shortage = yes
+			}
+			multiply = 0.8
+		}
+	
+		multiply = market_access
+	
+		if = {
+			limit = {
+				is_in_revolt = yes
+			}
+			multiply = 0.5
+		}
+	
+		if = {
+			limit = {
+				is_slave_state = yes
+				scope:culture = {
+					NOT = { shares_heritage_trait_with_any_primary_culture = root.owner }
+				}
+			}
+			multiply = 0.1
+		}
+	
+		if = {
+			limit = {
+				has_state_trait = state_trait_malaria
+				root.owner = {
+					NOT = {
+						has_technology_researched = quinine
+					}
+				}
+			}
+			multiply = 0.5
+		}
+	
+		if = {
+			limit = {
+				has_state_trait = state_trait_severe_malaria
+				root.owner = {
+					NOT = {
+						has_technology_researched = malaria_prevention
+					}
+				}
+			}
+			multiply = 0.3
+		}
+
+		if = {
+			limit = {
+				scope:culture = {
+					culture_is_discriminated_in = root.owner
+				}
+			}
+			multiply = 0.3
+		}
+
+		if = {
+			limit = {
+				num_cultural_communities >=5
+			}
+			multiply = 0.5
+		}
+
+		if = {
+			limit = {
+				num_cultural_communities >=10
+			}
+			multiply = 0.2
+		}
+
+		if = {
+			limit = {
+				num_cultural_communities >=15
+			}
+			multiply = 0.1
+		}
+	}
+
+	# Bounds:
+	max = define:NPops|CULTURAL_COMMUNITY_MAX_PER_MONTH_CHANCE
+	min = 0
+}

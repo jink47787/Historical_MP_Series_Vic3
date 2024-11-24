@@ -1,0 +1,342 @@
+﻿namespace = railroad_bubble
+
+# Event that tracks variables which could trigger recession
+# Railroad bubble 
+
+railroad_bubble.1 = {
+	type = country_event
+	placement = root
+	hidden = yes
+
+	trigger = {
+		# triggered by on_actions
+	}
+	
+	immediate = {
+		if = {
+			limit = {
+				NOT = { has_variable = rr_built }
+			}
+			set_variable = {
+				name = rr_built
+				value = 0
+			}
+		}
+		else = {
+			change_variable = {
+				name = rr_built
+				add = 1
+			}
+		}
+		
+		### Chinese Mining JE
+		if = {
+			limit = {
+				has_journal_entry = je_chinese_industry
+			}
+			change_global_variable = {
+				name = chinese_rail_expansion
+				add = 1
+			}
+		}
+	}
+}
+
+railroad_bubble.2 = {
+	
+	type = country_event
+	placement = root
+	
+	hidden = yes
+
+	trigger = {
+		# triggered every year
+		has_variable = rr_built
+		NOT = { has_journal_entry = je_railroad_bubble }
+	}
+	
+	immediate = {
+		change_variable = {
+			name = rr_built
+			multiply = 0
+		}
+	}
+}
+
+#journal entry, set variables for intial recipient
+
+railroad_bubble.3 = {
+	type = country_event
+	placement = ROOT
+
+	title = railroad_bubble.3.t
+	desc = railroad_bubble.3.d
+	flavor = railroad_bubble.3.f
+	
+	duration = 3
+
+	event_image = {
+		video = "europenorthamerica_capitalists_meeting"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+	
+	trigger = {
+		country_rank >= rank_value:major_power
+		is_subject = no
+		has_variable = rr_built
+		root.var:rr_built >= 5
+		NOT = { has_technology_researched = international_exchange_standards }
+		NOT = { has_variable = railroad_bust }
+		OR = {
+			NOT = { has_global_variable = num_rr_busts }
+			global_var:num_rr_busts < 4
+		}
+	}
+	# resets variable,  add railroad bust variable
+	immediate = {
+		change_variable = {
+			name = rr_built
+			multiply = 0
+		}
+		set_variable = railroad_bust
+		if = {
+			limit = {
+				exists = global_var:num_rr_busts 
+			}
+			change_global_variable = {
+				name = num_rr_busts
+				add = 1
+			}
+		}
+		else = {
+			set_global_variable = {
+				name = num_rr_busts
+				value = 1
+			}
+		}
+	}
+	
+	option = {
+		name = railroad_bubble.3.a
+		add_journal_entry = {
+			type = je_railroad_bubble
+		}
+		#add modifier to country
+		add_modifier = {
+			name = railroad_bubble
+		}
+		set_variable = {
+			name = railroad_bubble_mult
+			value = 0
+		}
+		custom_tooltip = {
+			text = railroad_bubble.3.a.t
+			every_scope_building = {
+				limit = {
+					is_building_type = building_railway
+				}
+				add_modifier = {
+					name = overvalued_railroads_building
+				}
+			}
+			every_scope_state = {
+				add_modifier = {
+					name = overvalued_railroads_state
+				}
+			}
+		}
+		every_primary_culture = {
+			add_cultural_obsession = transportation
+		}
+	}
+}
+
+# railroad bubble modifier change
+
+#railroad_bubble.4 = {
+#	
+#	type = country_event
+#	placement = ROOT
+#
+#	hidden = yes
+#	
+#	trigger = {
+#		has_variable = railroad_bust
+#		any_scope_building = {
+#			has_modifier = overvalued_railroads_building
+#		}
+#		root.var:railroad_bubble_mult > 0
+#	}
+#	
+#	immediate = {
+#		every_scope_building = {
+#			limit = {
+#				has_modifier = overvalued_railroads_building
+#			}
+#			remove_modifier = overvalued_railroads_building
+#		}
+#		every_scope_building = {
+#			limit = {
+#				is_building_type = building_railway
+#			}
+#			add_modifier = {
+#				name = overvalued_railroads_building
+#				multiplier = root.var:railroad_bubble_mult
+#			}
+#		}	
+#	}
+#}
+
+#four months pass between peak of bubble and the bubble bursting
+
+railroad_bubble.5 = {
+	type = country_event
+	placement = ROOT
+
+	title = railroad_bubble.5.t
+	desc = railroad_bubble.5.d
+	flavor = railroad_bubble.5.f
+	
+	duration = 2
+
+	event_image = {
+		video = "europenorthamerica_capitalists_meeting"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+	
+	trigger = {
+		# triggered by je
+	}
+	
+	immediate = {
+		trigger_event = {
+			id = railroad_bubble.6
+			days = 150
+			popup = yes
+		}
+	}
+	
+	option = {
+		name = railroad_bubble.5.a
+		custom_tooltip = {
+			text = railroad_bubble.5.a.t
+			every_scope_building = {
+				limit = {
+					has_modifier = overvalued_railroads_building
+				}
+				remove_modifier = overvalued_railroads_building
+			}
+			every_scope_building = {
+				limit = {
+					is_building_type = building_railway
+				}
+				add_modifier = {
+					name = overvalued_railroads_building
+					multiplier = root.var:railroad_bubble_mult
+				}
+			}
+			every_scope_state = {
+				remove_modifier = overvalued_railroads_state
+				add_modifier = {
+					name = overvalued_railroads_state
+					multiplier = root.var:railroad_bubble_mult
+				}
+			}
+		}
+	}
+}
+
+# Railroad bubble burst event - modifier reduces investment efficiency, 
+# value is twice as bad as the bubble was good, time takes 1.5 the length of the bubble
+	
+railroad_bubble.6 = {
+	type = country_event
+	placement = ROOT
+
+	title = railroad_bubble.6.t
+	desc = railroad_bubble.6.d
+	flavor = railroad_bubble.6.f
+	
+	duration = 2
+
+	event_image = {
+		video = "europenorthamerica_rich_and_poor"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"	
+	
+	trigger = {
+		# triggered by event
+	}
+	
+	immediate = {
+		set_variable = bubble_burst
+	}
+	
+	option = {
+		name = railroad_bubble.6.a
+		if = {
+			limit = { root.var:railroad_bubble_mult < 14 }
+			add_radicals = {
+				value = small_radicals
+			}	
+		}
+		else_if = {
+			limit = { root.var:railroad_bubble_mult < 19 }
+			add_radicals = {
+				value = medium_radicals
+			}	
+		}
+		else = {
+			add_radicals = {
+				value = large_radicals
+			}	
+		}
+		remove_modifier = railroad_bubble
+		custom_tooltip = {
+			text = railroad_bubble.6.a.t
+			every_scope_building = {
+				limit = {
+					has_modifier = overvalued_railroads_building
+				}
+				remove_modifier = overvalued_railroads_building
+				}
+			every_scope_state = {
+				remove_modifier = overvalued_railroads_state
+			}
+		}
+		add_modifier = {
+			name = rr_bubble_pop
+			multiplier = root.var:railroad_bubble_mult
+			months = 36
+			is_decaying = yes
+		}
+		every_primary_culture = {
+			remove_cultural_obsession = transportation
+		}
+		#custom_tooltip = {
+		#	text = railroad_bubble.5.a.tt
+		#	limit = {
+		#		is_building_type = building_railway
+		#	}
+		#	every_scope_building = {
+		#		limit = { is_building_type = building_railway}
+		#		add_modifier = {
+		#			name = useless_railroads
+		#			multiplier = root.var:railroad_bubble_mult
+		#			months = 24
+		#			is_decaying = yes
+		#		}
+		#	}
+		#}
+	}
+}
+

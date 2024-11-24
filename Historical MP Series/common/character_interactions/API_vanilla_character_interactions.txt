@@ -1,0 +1,871 @@
+﻿#icon					Path to icon for both right click menu and character panel buttons
+#clicksound				Clicksound for both right click menu and character panel buttons
+
+#						All scopes are character scopes with the interacting country stored as the actor
+#potential				Trigger to check if the interaction should be shown
+#possible 				Trigger to check if the interaction is available
+#effect					The effects of the interaction
+#cooldown				Scriptable duration that this interaction will be unavailable for the interacting country
+
+#show_requirements		Whether to always show requirements, similar to highlighted options in events
+#show_confirmation_box	Whether to require confirmation
+
+#ai_chance				Scriptable value for the chance (0-100) that the AI will use this interaction when available, default 0
+
+grant_leadership_to_agitator = {
+    icon = "gfx/interface/character_panel/grant_command_not.dds"
+    clicksound = "event:/SFX/DLC/1.3_ip1/UI/agitator_promote"
+
+    potential = {
+        has_dlc_feature = agitators
+        has_role = agitator
+        owner = scope:actor
+    }
+
+    possible = {
+        interest_group = {
+            is_in_government = yes
+        }
+		trigger_if = {
+			limit = { owner = { has_law = law_type:law_state_atheism } }
+			NOT = { culture = { culture_is_discriminated_in = root.owner } }
+			NOR = {
+				has_ideology = ideology:ideology_theocrat
+				has_ideology = ideology:ideology_integralist
+				has_ideology = ideology:ideology_traditionalist
+			}
+		}
+		trigger_else = {
+			character_is_discriminated = no
+		}
+		OR = {
+			is_female = no
+			scope:actor = { has_law = law_type:law_womens_suffrage }
+		}
+        OR = {
+            popularity >= 100 # Looks nicer in the tooltip
+            scope:actor = {
+                OR = {
+                    authority >= api_sv_calculate_authority_cost_good
+                    api_st_has_free_grant_leadership = yes
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:actor = {
+            if = {
+                limit = {
+                    api_st_has_free_grant_leadership = yes
+                }
+                add_modifier = {
+                    name   = api_granted_leadership
+                    months = long_modifier_time
+                    multiplier = 0
+                }
+                set_local_variable = {
+                    name  = auth_cost
+                    value = 0
+                }
+            }
+            else = {
+                add_modifier = {
+                    name   = api_granted_leadership
+                    months = long_modifier_time
+                    is_decaying = yes
+                    multiplier  = api_sv_calculate_authority_cost_good
+                }
+                set_local_variable = {
+                    name  = auth_cost
+                    value = api_sv_calculate_authority_cost_good
+                }
+            }
+            hidden_effect = {
+                trigger_event = {
+                    id = api_ev.1
+                }
+            }
+        }
+        
+        remove_character_role = agitator
+        add_character_role = politician
+        custom_tooltip = {
+            text = make_agitator_ig_leader_tt
+            set_as_interest_group_leader = yes
+        }
+    }
+
+    # cooldown = { months = long_modifier_time }
+
+    ai_chance = {
+        value = -50
+        if = {
+            limit = {
+                popularity > interest_group.leader.popularity
+            }
+            add = 25
+        }
+        if = {
+            limit = {
+                interest_group.leader.popularity <= -50
+            }
+            add = 50
+        }
+        if = {
+            limit = {
+                interest_group.leader.popularity >= 50
+            }
+            add = -50
+        }
+        if = {
+            limit = {
+                interest_group = {
+                    ig_approval <= 0
+                }
+            }
+            add = 25
+        }
+        if = {
+            limit = {
+                this.ideology = owner.ruler.ideology
+            }
+            add = 50
+        }
+    }
+}
+
+grant_command_to_agitator = {
+    icon = "gfx/interface/character_panel/grant_command.dds"
+    clicksound = "event:/SFX/UI/Military/command_grant"
+
+    potential = {
+        has_dlc_feature = agitators
+        has_role = agitator
+        NOT = { has_role = general }
+        NOT = { has_role = admiral }
+        owner = scope:actor
+    }
+
+    possible = {
+        age >= define:NCharacters|ADULT_AGE
+        is_female = no
+        exists = owner.capital.land_hq
+        
+        OR = {
+            popularity >= 100
+            scope:actor = {
+                OR = {
+                    authority >= api_sv_calculate_authority_cost_good
+                    api_st_has_free_grant_command = yes
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:actor = {
+            if = {
+                limit = {
+                    api_st_has_free_grant_command = yes
+                }
+                add_modifier = {
+                    name   = api_granted_command
+                    months = long_modifier_time
+                    multiplier = 0
+                }
+                set_local_variable = {
+                    name  = auth_cost
+                    value = 0
+                }
+            }
+            else = {
+                add_modifier = {
+                    name   = api_granted_command
+                    months = long_modifier_time
+                    is_decaying = yes
+                    multiplier  = api_sv_calculate_authority_cost_good
+                }
+                set_local_variable = {
+                    name  = auth_cost
+                    value = api_sv_calculate_authority_cost_good
+                }
+            }
+            hidden_effect = {
+                trigger_event = {
+                    id = api_ev.1
+                }
+            }
+        }
+        
+        add_character_role = general
+    }
+
+    # cooldown = { months = long_modifier_time }
+
+    ai_chance = {
+        value = 0
+        if = {
+            limit = {
+                has_commander_traits = yes
+            }
+            add = 50
+        }	
+        if = {
+            limit = {
+                is_interest_group_type = ig_armed_forces
+            }
+            add = 25
+        }	
+        if = {
+            limit = {
+                NOT = {
+                    owner = {	
+                        any_scope_general = {
+                            exists = yes
+                        }
+                    }
+                }	
+            }
+            add = 25
+        }
+        if = {
+            limit = {
+                owner = {
+                    any_scope_war = {
+                        any_scope_front = {
+                            is_vulnerable_front = root
+                        }
+                    }
+                }	
+            }
+            add = 100
+        }
+    }
+}
+
+exile_character = {
+    clicksound = "event:/SFX/DLC/1.3_ip1/UI/exile_character"
+
+    potential = {
+        is_in_exile_pool = no
+        is_in_void = no
+        is_ruler = no
+        is_heir = no
+        # Cannot exile pure commanders, we have the retire interaction for that
+        OR = {
+            has_role = politician
+            has_role = agitator
+        }
+    }
+
+    show_requirements = yes
+
+    possible = {
+		is_commander = no
+        owner = {
+			is_player = yes
+            NOT = {
+				has_law = law_type:law_right_of_assembly
+                has_law = law_type:law_protected_speech
+				has_law = law_type:law_guaranteed_liberties
+            }
+        }
+        OR = {
+            interest_group = {
+                is_in_government = no
+                is_insurrectionary = no
+                is_marginal = no
+            }
+            has_role = agitator
+        }
+		popularity <= 50
+		custom_tooltip = {
+			text = ideology_not_too_close_tt
+			NOT = {
+				OR = {
+					AND = {
+						owner.ruler = {
+							has_socialist_ideology = yes
+						}
+						has_socialist_ideology = yes
+					}
+					AND = {
+						owner.ruler = {
+							has_progressive_ideology = yes
+						}
+						has_progressive_ideology = yes
+					}
+					AND = {
+						owner.ruler = {
+							has_liberal_ideology = yes
+						}
+						has_liberal_ideology = yes
+					}
+					AND = {
+						owner.ruler = {
+							has_reactionary_ideology = yes
+						}
+						has_reactionary_ideology = yes
+					}
+					AND = {
+						owner.ruler = {
+							has_conservative_ideology = yes
+						}
+						has_conservative_ideology = yes
+					}
+				}
+			}
+		}
+		owner = { government_legitimacy >= 25 }
+        
+        OR = {
+            popularity <= -100
+            scope:actor = {
+                OR = {
+                    authority >= api_sv_calculate_authority_cost_bad
+                    api_st_has_free_exile = yes
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:actor = {
+            if = {
+                limit = {
+                    api_st_has_free_exile = yes
+                }
+                add_modifier = {
+                    name   = api_exiled_agitator
+                    months = long_modifier_time
+                    multiplier = 0
+                }
+                set_local_variable = {
+                    name  = auth_cost
+                    value = 0
+                }
+            }
+            else = {
+                add_modifier = {
+                    name   = api_exiled_agitator
+                    months = long_modifier_time
+                    is_decaying = yes
+                    multiplier  = api_sv_calculate_authority_cost_bad
+                }
+                set_local_variable = {
+                    name  = auth_cost
+                    value = api_sv_calculate_authority_cost_bad
+                }
+            }
+            hidden_effect = {
+                trigger_event = {
+                    id = api_ev.1
+                }
+            }
+        }
+        
+        this.interest_group = {
+			save_scope_as = relevant_ig
+		}
+		this = {
+			save_scope_as = exile_scope
+		}
+		owner = {
+			save_scope_as = exiling_country_scope
+		}
+		if = {
+			limit = {
+				has_role = politician
+			}
+			owner = {
+				scope:relevant_ig = {
+					add_modifier = {
+						name = modifier_exiled_leader
+						months = normal_modifier_time
+						is_decaying = yes
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = { has_journal_entry = je_caudillo }
+				interest_group = {
+					is_interest_group_type = ig_armed_forces
+				}
+			}
+			if = {
+				limit = {
+					interest_group = {
+						leader = {
+							this = ROOT
+						}
+					}
+				}
+				owner = {
+					custom_tooltip = {
+						text = lose_large_caudillo_points
+						change_variable = {
+							name = caudillo_var
+							add = -200
+						}
+					}
+				}
+			}
+			else = {
+				owner = {
+					custom_tooltip = {
+						text = lose_caudillo_points
+						change_variable = {
+							name = caudillo_var
+							add = -100
+						}
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				owner = {
+					is_player = yes
+					NOT = { has_variable = achievement_agitate_elsewhere_var }
+				}
+				popularity >= 100
+			}
+			owner = { set_variable = achievement_agitate_elsewhere_var }
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					NOT = { has_role = agitator }
+				}
+				add_character_role = agitator
+			}
+			if = {
+				limit = {
+					has_role = general
+				}
+				remove_character_role = general
+			}
+			if = {
+				limit = {
+					has_role = admiral
+				}
+				remove_character_role = admiral
+			}
+			if = {
+				limit = {
+					has_role = politician
+				}
+				remove_character_role = politician
+			}
+		}
+		owner = {
+			custom_tooltip = exiling_dissident_radicals_factors
+		}
+		# Extra radical from exiling a popular character
+		if = {
+			limit = {
+				popularity >= 50
+			}
+			owner = {
+				add_radicals = {
+					value = small_radicals
+					interest_group = scope:relevant_ig
+				}
+			}
+		}
+		# Standard radicals from having Right of Assembly
+		if = {
+			limit = {
+				owner = { has_law = law_type:law_right_of_assembly }
+			}
+			owner = {
+				add_radicals = {
+					value = medium_radicals
+					interest_group = scope:relevant_ig
+				}
+			}
+		}
+		# Fewer radicals from Censorship
+		else_if = {
+			limit = {
+				owner = { has_law = law_type:law_censorship }
+			}
+			owner = {
+				add_radicals = {
+					value = small_radicals
+					interest_group = scope:relevant_ig
+				}
+			}
+		}
+		# Boring characters should be made interesting when being exiled
+		if = {
+			limit = {
+				has_ideology = ideology:ideology_moderate
+			}
+			adopt_random_antigovernment_ideology = yes
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					popularity > 15
+				}
+				add_modifier = {
+					name = in_exile_modifier
+				}
+				every_country = {
+					limit = {
+						has_diplomatic_relevance = scope:exiling_country_scope
+					}
+					post_notification = exile_notification
+				}
+			}
+			else = {
+				add_modifier = {
+					name = in_exile_modifier
+					multiplier = 3
+				}
+			}
+		}
+		custom_tooltip = {
+			text = exile_dissident_tt
+			exile_character_with_martyrdom = yes
+		}
+	}
+
+    # cooldown = { months = long_modifier_time }
+    show_confirmation_box = yes
+
+    ai_chance = {
+        value = -50
+        if = {
+            limit = {
+                interest_group = {
+                    ig_approval <= -5
+                }		
+            }
+            add = 25
+        }
+        if = {
+            limit = {
+                interest_group = {
+                    ig_approval <= -10
+                }		
+            }
+            add = 30
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    NOR = {
+                        has_law = law_type:law_autocracy
+                        has_law = law_type:law_oligarchy
+                        has_law = law_type:law_single_party_state
+                    }
+                }			
+            }
+            add = -25
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    has_law = law_type:law_secret_police
+                }			
+            }
+            add = 30
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    has_law = law_type:law_national_guard
+                }			
+            }
+            add = 15
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    has_law = law_type:law_guaranteed_liberties
+                }			
+            }
+            add = -100
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    has_law = law_type:law_outlawed_dissent
+                }			
+            }
+            add = 30
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    has_law = law_type:law_censorship
+                }			
+            }
+            add = 10
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    has_law = law_type:law_right_of_assembly
+                }			
+            }
+            add = -10
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    has_law = law_type:law_protected_speech
+                }			
+            }
+            add = -20
+        }
+    }
+}
+
+invite_exile = {
+    # icon = ""
+    clicksound = "event:/SFX/DLC/1.3_ip1/UI/character_invite"
+
+    potential = {
+        is_in_exile_pool = yes
+    }
+
+    show_requirements = yes
+
+    possible = {
+        scope:actor = { empty_agitator_slots >= 1 }
+        # Only popular individuals need apply
+        # popularity > 15 # api - Inviting unpopular agitators now incurs heavier authority cost
+        # Devout exiles must have country religion
+        trigger_if = {
+            limit = {
+                is_interest_group_type = ig_devout
+            }
+            custom_tooltip = {
+                text = invite_exile_devout_tt
+                religion = scope:actor.religion
+            }
+        }
+        # If you have state religion, exiles must have your religion
+        trigger_if = {
+            limit = {
+                NOT = { is_interest_group_type = ig_devout }
+                scope:actor ?= {
+                    has_law = law_type:law_state_religion
+                }
+            }
+            custom_tooltip = {
+                text = invite_exile_state_religion_tt
+                religion = scope:actor.religion
+            }
+        }
+        # cannot invite exiles with no cultural similarity if discriminated
+		OR = {
+			culture = { shares_heritage_trait_with_any_primary_culture = scope:actor }
+			culture = { shares_non_heritage_trait_with_any_primary_culture = scope:actor }
+			NOT = {
+				culture = {
+					culture_is_discriminated_in = scope:actor
+				}
+			}
+		}
+        # Cannot invite exiles if you have Closed Borders
+        scope:actor = {
+            NOT = { has_law = law_type:law_closed_borders }
+			OR = {
+				has_law = law_type:law_protected_speech
+				has_law = law_type:law_right_of_assembly
+				has_law = law_type:law_guaranteed_liberties
+			}
+        }
+        
+        # Can you afford the authority cost?
+        OR = {
+            popularity >= 100
+            scope:actor = {
+                OR = {
+                    authority >= api_sv_calculate_authority_cost_good
+                    api_st_has_free_invite = yes
+                }
+            }
+        }
+    }
+
+    effect = {
+        scope:actor = {
+            if = {
+                limit = {
+                    api_st_has_free_invite = yes
+                }
+                add_modifier = {
+                    name   = api_invited_agitator
+                    months = long_modifier_time
+                    multiplier = 0
+                }
+                set_local_variable = {
+                    name  = auth_cost
+                    value = 0
+                }
+            }
+            else = {
+                add_modifier = {
+                    name   = api_invited_agitator
+                    months = long_modifier_time
+                    is_decaying = yes
+                    multiplier  = api_sv_calculate_authority_cost_good
+                }
+                set_local_variable = {
+                    name  = auth_cost
+                    value = api_sv_calculate_authority_cost_good
+                }
+            }
+            hidden_effect = {
+                trigger_event = {
+                    id = api_ev.1
+                }
+            }
+        }
+        
+        transfer_character = scope:actor
+        set_variable = exile_to_ruler_var
+		set_variable = {
+			name = memento_mori_immunity
+			months = 60
+		}
+        custom_tooltip = invite_exile_start_join_movement_effect
+        hidden_effect = {
+            remove_modifier = in_exile_modifier
+        }
+        hidden_effect = {
+            if = {
+                limit = {
+                    has_variable = mazzini_var
+                    has_dlc_feature = voice_of_the_people_content
+                }
+                scope:actor = {
+                    trigger_event = { id = historical_agitators.7 days = 3 }
+                }
+            }
+            if = {
+                limit = {
+                    has_variable = garibaldi_var
+                    has_dlc_feature = voice_of_the_people_content
+                }
+                set_variable = {
+                    name = garibaldi_cooldown_var
+                    months = short_modifier_time
+                }
+            }
+			if = {
+				limit = {
+					NOT = {
+						exists = root.home_country
+						NOT = { root.home_country = scope:actor }
+					}
+				}
+				if = {
+					limit = {
+						root.home_country = {
+							any_interest_group = {
+								is_in_government = yes
+								OR = {
+									this.interest_group_type = root.interest_group_type
+									this.leader.ideology = root.ideology
+								}
+							}
+						}
+					}
+					root.home_country = {
+						create_diplomatic_catalyst = {
+							type = catalyst_invited_exile_positive
+							target = scope:actor
+						}		
+					}
+				}
+				else = {
+					root.home_country = {
+						create_diplomatic_catalyst = {
+							type = catalyst_invited_exile_negative
+							target = scope:actor
+						}		
+					}
+				}
+			}
+        }
+    }
+
+    # cooldown = { months = long_modifier_time }
+
+    ai_chance = {
+        value = -85
+        if = {
+            limit = {
+                popularity >= 75
+            }
+            add = 25
+        }	
+        if = {
+            limit = {
+                popularity >= 50
+            }
+            add = 25
+        }
+        if = {
+            limit = {
+                culture = {
+                    is_primary_culture_of = root
+                }			
+            }
+            add = 50
+        }
+        if = {
+            limit = {
+                scope:actor ?= {
+                    any_interest_group = {
+                        is_in_government = yes
+                        save_temporary_scope_as = ex_ig
+                    }
+                }		
+                ig_type_matches_former = yes	
+            }
+            add = 50
+        }
+        if = {
+            limit = {
+                scope:actor ?= { has_law = law_type:law_closed_borders }
+            }
+            add = -200
+        }
+        if = {
+            limit = {
+                scope:actor ?= { has_law = law_type:law_no_migration_controls }
+            }
+            add = 15
+        }
+        if = {
+            limit = {
+                scope:actor ?= { has_law = law_type:law_multicultural }
+            }
+            add = 15
+        }
+        if = { 
+            limit = {
+                scope:actor ?= {
+                    country_rank < rank_value:major_power
+                }
+            }
+            multiply = 0
+        }
+        if = { # Prevent potentially weird AI behavior by preserving >15 popularity requirement from vanilla for AI only
+            limit = {
+                popularity <= 15 
+            }
+            multiply = 0
+        }
+    }
+}

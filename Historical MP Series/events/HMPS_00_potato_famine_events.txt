@@ -1,0 +1,311 @@
+﻿namespace = potato_blight
+
+# Hungry forties
+
+#event happens when very bad harf hits somewhere in the original zone of regions in europe
+#event then spreads by strategic region, bringing bad HARF modifier and more random potato blight modifier
+#harf modifier stops changing for duration of famine
+#irish flavor, irish famine + migration target (maybe)
+
+#Event for when Potato blight first arrives
+potato_blight.1 = {
+
+	type = country_event
+	placement = root
+	title = potato_blight.1.t
+	desc = potato_blight.1.d
+	flavor = potato_blight.1.f
+	
+	duration = 3
+
+	event_image = {
+		video = "europenorthamerica_russian_serfs"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	
+	trigger = {
+		#triggered by on_actions
+	}
+	
+	immediate = {
+		every_state = {
+			limit = {
+				has_variable = potato_blight_origin 
+			}
+			save_scope_as = potato_blight_origin
+		}
+		add_journal_entry = {
+			type = je_potato_famine
+		}
+	}
+	
+	option = {
+		name = potato_blight.1.a
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_potato_famine
+			}		
+		}
+	}
+}
+
+#event for other countries in strategic region that don't have it yet
+
+potato_blight.2 = {
+
+	type = country_event
+	placement = root
+	title = potato_blight.2.t
+	desc = potato_blight.2.d
+	flavor = potato_blight.2.f
+	
+	duration = 3
+
+	event_image = {
+		video = "europenorthamerica_russian_serfs"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	
+	trigger = {
+		#triggered by on_actions
+	}
+	
+	cancellation_trigger = {
+		any_scope_state = {
+			has_modifier = potato_blight_modifier
+		}
+	}
+	
+	immediate = {
+		every_state = {
+			limit = {
+				has_variable = potato_blight_origin 
+			}
+			save_scope_as = potato_blight_origin
+		}
+	}
+	
+	option = {
+		name = potato_blight.2.a
+		default_option = yes
+	}
+}
+
+#je initializing event
+
+potato_blight.3 = {
+
+	type = country_event
+	placement = root
+	title = potato_blight.3.t
+	desc = potato_blight.3.d
+	flavor = potato_blight.1.f
+	
+	duration = 3
+
+	event_image = {
+		video = "europenorthamerica_russian_serfs"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	
+	trigger = {
+		any_scope_state = {
+			has_modifier = potato_blight_modifier
+		}
+		NOT = { has_journal_entry = je_potato_famine }
+		NOT = { has_modifier = failed_potato_blight }
+		NOT = { has_variable = failed_pb_var }
+		is_revolutionary = no
+	}
+	
+	immediate = {
+		add_journal_entry = {
+			type = je_potato_famine
+		}
+		ordered_scope_state = {
+			limit = {
+				has_modifier = potato_blight_modifier
+			}
+			order_by = state_population
+			save_scope_as = potato_blight_origin_local
+		}
+	}
+	
+	option = {
+		name = potato_blight.1.a
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_potato_famine
+			}		
+		}
+	}
+	
+}
+
+#blight stops spreading
+potato_blight.4 = {
+
+	type = country_event
+	placement = root
+	title = potato_blight.4.t
+	desc = potato_blight.4.d
+	flavor = potato_blight.4.f
+	
+	duration = 4
+
+	event_image = {
+		video = "europenorthamerica_russian_serfs"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	
+	trigger = {
+		#triggered by on_actions
+	}
+	
+	option = {
+		name = potato_blight.4.a
+	}
+	
+}
+
+#blight stops spreading
+potato_blight.5 = {
+
+	type = country_event
+	placement = root
+	title = potato_blight.5.t
+	desc = potato_blight.5.d
+	flavor = potato_blight.5.f
+	
+	duration = 5
+
+	event_image = {
+		video = "europenorthamerica_russian_serfs"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	
+	trigger = {
+		any_scope_state = {
+			has_modifier = modifier_irish_emigration
+		}
+		NOT = { has_variable = irish_event_var }
+	}
+	
+	immediate = {
+		set_variable = irish_event_var
+	}
+	
+	option = {
+		name = potato_blight.5.a
+		custom_tooltip = potato_blight.5.a.t1
+		show_as_tooltip = {
+			every_scope_state = {
+				limit = {
+					has_modifier = potato_blight_modifier
+					OR = {
+						state_region = s:STATE_MUNSTER
+						state_region = s:STATE_LEINSTER
+						state_region = s:STATE_ULSTER
+						state_region = s:STATE_CONNAUGHT
+					}
+				}
+				add_modifier = {
+					name = modifier_irish_emigration
+					years = 30
+				}
+			}
+		}
+	}
+}
+
+#potato blight ends
+potato_blight.6 = {
+
+	type = country_event
+	placement = root
+	title = potato_blight.6.t
+	desc = potato_blight.6.d
+	flavor = potato_blight.6.f
+	
+	duration = 3
+
+	event_image = {
+		video = "europenorthamerica_russian_serfs"
+	}
+	
+	trigger = {
+		any_scope_state = {
+			has_modifier = potato_blight_modifier
+		}
+		NOT = { has_global_variable = potato_blight_length }
+	}
+	
+	option = {
+		name = potato_blight.6.a
+		if = {
+			limit = {
+				has_modifier = unincorporated_blight_aid
+			}
+			remove_modifier = unincorporated_blight_aid
+			hidden_effect = {
+				remove_modifier = unincorporated_blight_bureau
+			}
+			custom_tooltip = {
+				text = defund_potato_famine_incorporated.t2
+			}
+			add_modifier = { 
+				name = unincorporated_blight_bureau
+				months = 12
+				is_decaying = yes
+			}
+			every_interest_group = {
+				limit = {
+					OR = {
+						law_stance = {
+							law = law_type:law_laissez_faire
+							value > neutral
+						}
+						law_stance = {
+							law = law_type:law_no_social_security
+							value > neutral
+						}
+						law_stance = {
+							law = law_type:law_national_supremacy
+							value > neutral
+						}
+					}
+				}
+				hidden_effect = {
+					if = {
+						limit = {
+							has_modifier = unprincipled_opposition
+						}
+						remove_modifier = unprincipled_opposition
+					}
+				}
+				add_modifier = {
+					name = unprincipled_opposition
+					months = 61
+					is_decaying = yes
+				}
+			}
+			every_scope_state = {
+				limit = {
+					has_modifier = potato_famine_relief_unincorporated
+				}
+				remove_modifier = potato_famine_relief_unincorporated
+			}
+		}
+		
+	}
+}

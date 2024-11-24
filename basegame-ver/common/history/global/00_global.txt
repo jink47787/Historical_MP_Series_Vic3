@@ -6,6 +6,83 @@ GLOBAL = {
 		ig:ig_landowners = { add_ideology = ideology_pro_slavery }
 	}
 	
+	# Jack the ripper, prevents the event from happening every game
+
+	every_country = {
+		if = {
+			limit = {
+				is_player = yes
+			}
+		}
+		random_list = {
+			1 = { set_variable = var_jack_ripper_possible }
+			9 = {
+				#Nothing Happens
+			}
+		}
+	}
+
+	c:BRZ ?= {
+		set_variable = {
+			name = pedropoints
+			value = 5
+		}
+	}
+	
+	c:HAI = {
+		add_treasury = {
+			value = gold_reserves_limit
+			multiply = -1.0
+		}
+	}
+
+	c:BIC ?= {
+		every_subject_or_below = {
+			limit = {
+				capital = {
+					OR = {
+						region = sr:region_madras
+						region = sr:region_bombay
+						region = sr:region_bengal
+						region = sr:region_central_india
+						region = sr:region_punjab
+						region = sr:region_himalayas
+						state_region = s:STATE_MANDALAY
+						state_region = s:STATE_KACHIN
+						state_region = s:STATE_SHAN_STATES
+						state_region = s:STATE_PEGU
+					}
+				}
+			}
+			set_variable = princely_state
+		}
+		add_treasury = { # EIC was slightly in debt at game start
+			value = gold_reserves_limit
+			multiply = -0.6
+		}
+	}
+
+	every_country = {
+		limit = {
+			OR = {
+				c:PRU ?= this
+				c:AUS ?= this
+				c:RUS ?= this
+			}
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:polish
+				}
+			}
+			set_variable = {
+				name = lingering_plc_resistance
+				months = very_long_modifier_time
+			}
+		}
+	}
+
 ###ACHIEVEMENT VARIABLES###
 	
 	#Serf's Up
@@ -150,8 +227,12 @@ GLOBAL = {
 	#Barbarys Back
 	every_country = {
 		limit = {
-			exists = c:ALD
-			this = c:ALD
+			OR = {
+				c:MAS ?= this
+				c:CON ?= this
+				c:AIT ?= this
+				c:TUG ?= this
+			}
 		}
 		set_variable = barbarys_back_ach_possible
 	}
@@ -233,6 +314,7 @@ GLOBAL = {
 			can_form_nation = GER
 		}
 		set_variable = three_hurrahs_ach_possible
+		set_variable = huge_ego_sorry_ach_possible
 	}
 	
 	#Solomon's Quest
@@ -249,6 +331,38 @@ GLOBAL = {
 			can_form_nation = SCA
 		}
 		set_variable = i_am_a_scandinavian_ach_possible
+	}
+
+	#Grander Colombia
+	every_country = {
+		limit = {
+			can_form_nation = GCO
+		}
+		set_variable = grander_colombia_ach_possible
+	}
+
+	#Manifest Mexico
+	every_country = {
+		limit = {
+			c:MEX ?= this
+		}
+		set_variable = manifest_mexico_ach_possible
+	}
+
+	#Not Yet Lost
+	every_country = {
+		limit = {
+			c:KRA ?= this
+		}
+		set_variable = not_yet_lost_ach_possible
+	}
+
+	#Declaration of Independence
+	every_country = {
+		limit = {
+			is_subject = yes
+		}
+		set_variable = declaration_of_independence_ach_possible
 	}
 
 	#Event Variables
@@ -287,16 +401,148 @@ GLOBAL = {
         }
 	}
 
-	c:UCA = {
+	c:UCA ?= {
 		add_radicals = {
-			value = 1.2
+			value = 0.25
 		}
 	}
 
-	c:BOL = {
+	c:PNI ?= {
 		trigger_event = {
-			id = south_america.2
-			days = 7
+			id = garibaldi_events.1
+			days = 6
+		}
+	}
+	
+	c:RUS ?= {
+		every_scope_state = {
+            limit = {
+                OR = {
+                    state_region = s:STATE_KUBAN
+                    state_region = s:STATE_DAGESTAN 
+                }
+            }
+            add_radicals_in_state = {
+                value = 0.30
+                culture = cu:circassian
+            }
+            add_radicals_in_state = {
+                value = 0.20
+                culture = cu:north_caucasian
+            }
+			add_radicals_in_state = {
+                value = 0.20
+            }
+        }
+        create_bidirectional_truce = {
+			country = c:CIR
+			months = 240
+		}
+		create_bidirectional_truce = {
+			country = c:CHC
+			months = 240
+		}
+		if = {
+			limit = {
+				has_dlc_feature = ep1_content
+			}
+			trigger_event = {
+				id = kazakhstan_events.2
+				days = 690
+			}
+		}
+	}
+
+	c:ARG ?= {
+		every_scope_state = {
+			limit = {
+				NOR = {
+					state_region = s:STATE_BUENOS_AIRES
+					state_region = s:STATE_SANTA_FE
+				}
+			}
+			add_radicals_in_state = {
+				value = 0.33
+				strata = upper
+			}
+			add_radicals_in_state = {
+				value = 0.25
+				strata = middle
+			}
+			add_radicals_in_state = {
+				value = 0.15
+				strata = lower
+			}
+		}
+	}
+
+	c:URU ?= {
+		add_radicals = {
+			value = 0.15
+		}
+	}
+
+	c:BOL ?= {
+		trigger_event = {
+			id = peru_bolivia_events.2
+			days = 45
+		}
+	}
+
+	c:NPU ?= {
+		add_radicals = {
+			value = 0.20
+		}
+	}
+
+	c:SPU ?= {
+		add_radicals = {
+			value = 0.15
+		}
+	}
+
+	c:IQU ?= {
+		add_radicals = {
+			value = 0.10
+		}
+	}
+
+	c:CHI ?= {
+		random_scope_state = {
+			limit = {	
+				state_region = s:STATE_SICHUAN
+			}
+			add_radicals_in_state = {
+                value = 0.1
+                culture = cu:han
+            }
+		}
+		random_scope_state = {
+			limit = {	
+				state_region = s:STATE_YUNNAN
+			}
+			add_radicals_in_state = {
+                value = 0.025
+                culture = cu:han
+            }
+		}
+		random_scope_state = {
+			limit = {	
+				state_region = s:STATE_CHONGQING
+			}
+			add_radicals_in_state = {
+                value = 0.05
+                culture = cu:han
+            }
+		}
+		add_radicals = {
+			value = 0.025
+			culture = cu:han
+		}
+		
+		set_variable = {
+			name = china_warlord_explosion
+			value = 5
 		}
 	}
 }

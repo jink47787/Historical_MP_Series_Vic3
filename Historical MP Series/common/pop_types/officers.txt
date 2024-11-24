@@ -1,9 +1,9 @@
 ﻿officers = {
 	texture = "gfx/interface/icons/pops_icons/officers.dds"
 	color = hsv{ 0.12 0.51 0.36 }
-	strata = middle
 	start_quality_of_life = 10
 	wage_weight = 5
+	paid_private_wage = yes
 	literacy_target = 0.50
 	dependent_wage = 0.5	# per year
 	unemployment = yes
@@ -19,12 +19,18 @@
 			desc = "POP_STARVATION"	
 			
 			if = {
-				limit = { 
-					standard_of_living < 5
+				limit = {
+					is_in_mild_starvation = yes
 				}
-				value = 1
-			}		
-		}	
+				value = 0.5
+			}
+			else_if = {
+				limit = {
+					is_in_severe_starvation = yes
+				}
+				value = 1.5
+			}
+		}
 		
 	}
 	
@@ -34,7 +40,12 @@
 			limit = {
 				is_peasant_under_serfdom = no
 				OR = {
-					culture_accepted = yes
+					state = {
+						state_cultural_acceptance = {
+							target = PREV.culture
+						   	value > acceptance_status_4
+					   	}
+					}
 					is_pop_type = soldiers
 				}
 			}
@@ -42,7 +53,7 @@
 			add = {
 				value = literacy_rate
 				subtract = 0.2
-				min = 0.2
+				min = 0.05
 				multiply = 30
 				desc = "QUALIFICATIONS_LITERACY_FACTOR"
 			}
@@ -58,10 +69,17 @@
 			if = {
 				limit = {
 					is_pop_type = soldiers
+					owner = {
+						is_at_war = yes
+					}
+					is_employed = yes
+					workplace = {
+						has_deployed_units = yes
+					}
 				}
 				multiply = {
-					value = 10
-					desc = "QUALIFICATIONS_FAVORED_TYPE"
+					value = 5
+					desc = "QUALIFICATIONS_DEPLOYED_SERVICEMEN"
 				}
 			}
 			if = {
@@ -78,7 +96,12 @@
 			}
 			if = {
 				limit = {
-					culture_accepted = no
+					state = {
+						state_cultural_acceptance = {
+							target = PREV.culture
+						   	value < acceptance_status_5
+					   	}
+					}
 				}
 				multiply = {
 					value = 0.4
@@ -87,14 +110,16 @@
 			}
 			if = {
 				limit = {
-					culture_accepted = no
-					owner = {
-						has_law = law_type:law_multicultural
+					state = {
+						state_cultural_acceptance = {
+							target = PREV.culture
+						   	value < acceptance_status_4
+					   	}
 					}
 				}
 				multiply = {
-					value = 2
-					desc = "QUALIFICATIONS_CULTURAL_DISCRIMINATION_SUFFERANCE"
+					value = 0.5
+					desc = "QUALIFICATIONS_CULTURAL_DISCRIMINATION"
 				}
 			}
 		}

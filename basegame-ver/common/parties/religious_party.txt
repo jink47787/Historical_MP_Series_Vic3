@@ -160,6 +160,18 @@ religious_party = {
 				}
 			}
 			triggered_desc = {
+				desc = party_hindu_mahasabha
+				trigger = {
+					ig:ig_devout = {
+						has_ideology = ideology:ideology_hindu_moralist
+					}
+					OR = {
+						c:BIC ?= this
+						c:BHT ?= this
+					}
+				}
+			}
+			triggered_desc = {
 				desc = party_religious
 				trigger = {
 					always = yes
@@ -179,6 +191,9 @@ religious_party = {
 			country_has_voting_franchise = yes
 		}
 	}
+	
+	# Root - IG considering joining
+	# scope:number - the number of IGs that would join this party before the root IG
 	join_weight = {
 		value = {
 			value = -5
@@ -187,9 +202,62 @@ religious_party = {
 		if = {
 			limit = {
 				owner = {
+					c:BIC ?= this
+					is_subject = yes
+					OR = {
+						has_modifier = modifier_india_crown_rule
+						has_modifier = modifier_india_company_rule
+					}
+				}
+				OR = {
+					is_interest_group_type = ig_industrialists
+					is_interest_group_type = ig_armed_forces
+				}
+			}
+			add = {
+				value = -100
+				desc = "india_colonial_government"
+			}
+		}
+		if = {
+			limit = {
+				owner = {
+					country_is_in_south_america = yes
+					any_primary_culture = {
+						has_discrimination_trait = hispanophone
+					}
+				}
+			}
+			add = {
+				value = -10
+				desc = "south_america_two_party_system"
+			}
+		}
+		if = {
+			limit = {
+				owner = {
+					country_is_in_north_america = yes
+					OR = {
+						country_has_primary_culture = cu:yankee
+						country_has_primary_culture = cu:dixie
+					}
+					has_law = law_type:law_presidential_republic
+				}
+			}
+			add = {
+				value = -10
+				desc = "usa_two_party_system"
+			}
+		}
+		if = {
+			limit = {
+				owner = {
 					any_interest_group = {
 						is_interest_group_type = ig_landowners
 						is_marginal = no
+					}
+					NOT = {
+						has_technology_researched = corporatism
 					}
 				}
 			}
@@ -250,8 +318,9 @@ religious_party = {
 				}
 				leader = {
 					OR = {
-						has_ideology = ideology_traditionalist
-						has_ideology = ideology_theocrat
+						has_ideology = ideology:ideology_traditionalist
+						has_ideology = ideology:ideology_theocrat
+						has_ideology = ideology:ideology_corporatist_leader
 					}
 				}
 			}
@@ -263,9 +332,9 @@ religious_party = {
 		if = { # antireligious characters and IG's will never join
 			limit = {
 				OR = {
-					has_ideology = ideology_anti_clerical
+					has_ideology = ideology:ideology_anti_clerical
 					leader = {
-						has_ideology = ideology_atheist
+						has_ideology = ideology:ideology_atheist
 					}
 				}
 			}
@@ -274,9 +343,23 @@ religious_party = {
 				desc = "from_antireligious"
 			}
 		}
+		if = { # Corporatism
+			limit = {
+				OR = {
+					has_ideology = ideology:ideology_corporatist
+					leader = {
+						has_ideology = ideology:ideology_corporatist_leader
+					}
+				}
+			}
+			add = {
+				value = 10
+				desc = "from_corporatism"
+			}
+		}
 		if = { # patriarchs more likely to join conservatives with women's suffrage
 			limit = {
-				has_ideology = ideology_patriarchal
+				has_ideology = ideology:ideology_patriarchal
 				owner = {
 					has_law = law_type:law_womens_suffrage
 				}
@@ -284,6 +367,132 @@ religious_party = {
 			add = {
 				value = 3
 				desc = "from_patriarchy"
+			}
+		}
+		if = {
+			limit = {
+				is_interest_group_type = ig_devout
+				is_powerful = yes
+			}
+			multiply = {
+				value = 2
+				desc = "from_archetype_party"
+			}
+		}
+		if = {
+			limit = {
+				scope:number = 1
+				is_powerful = no
+				is_marginal = no
+			}
+			multiply = {
+				value = 2
+				desc = "from_influential_supporting_member"
+			}
+		}
+		else_if = {
+			limit = {
+				scope:number = 2
+			}
+			multiply = {
+				value = 0.5
+				desc = "from_two_prior_members"
+			}
+		}
+		else_if = {
+			limit = {
+				scope:number = 3
+			}
+			multiply = {
+				value = 0.25
+				desc = "from_three_prior_members"
+			}
+		}
+		else_if = {
+			limit = {
+				scope:number > 3
+			}
+			multiply = {
+				value = 0.1
+				desc = "from_more_than_three_prior_members"
+			}
+		}
+		if = { # anti-orleanist
+			limit = {
+				leader = {
+					OR = {
+						has_ideology = ideology:ideology_bonapartist
+						has_ideology = ideology:ideology_legitimist
+					}
+				}
+				owner = {
+					any_interest_group = {
+						has_party = yes
+						party = {
+							is_party_type = religious_party
+						}
+						is_powerful = yes
+						leader = {
+							has_ideology = ideology:ideology_orleanist
+						}
+					}
+				}
+			}
+			add = {
+				value = -5
+				desc = "from_french_monarchist_rival"
+			}
+		}
+		if = { # anti-legitimist
+			limit = {
+				leader = {
+					OR = {
+						has_ideology = ideology:ideology_bonapartist
+						has_ideology = ideology:ideology_orleanist
+					}
+				}
+				owner = {
+					any_interest_group = {
+						has_party = yes
+						party = {
+							is_party_type = religious_party
+						}
+						is_powerful = yes
+						leader = {
+							has_ideology = ideology:ideology_legitimist
+						}
+					}
+				}
+			}
+			add = {
+				value = -5
+				desc = "from_french_monarchist_rival"
+			}
+		}
+		if = { # anti-bonapartist
+			limit = {
+				leader = {
+					OR = {
+						has_ideology = ideology:ideology_legitimist
+						has_ideology = ideology:ideology_orleanist
+					}
+				}
+				owner = {
+					any_interest_group = {
+						has_party = yes
+						party = {
+							is_party_type = religious_party
+						}
+						is_powerful = yes
+						leader = {
+							has_ideology = ideology:ideology_bonapartist
+						}
+					}
+				}
+			}
+			add = {
+				value = -5
+				desc = "from_french_monarchist_rival"
 			}
 		}
 	}

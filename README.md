@@ -6,6 +6,6 @@
 ---
 
 **Bugs reports or suggestions?**<br/>
-Post in the mod's MP discord [https://discord.gg/VYeTA362Z7] or modding server [https://discord.gg/29MCKHXZAp]
+Post in our discord [https://discord.gg/VYeTA362Z7] 
 
-**Mod Creators:** Townes, Gracchus, Dr
+**Mod Creators:** Gracchus, Dr, Zoomer, Mati, Swimmy

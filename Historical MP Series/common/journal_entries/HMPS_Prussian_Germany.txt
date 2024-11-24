@@ -1,0 +1,229 @@
+﻿je_prussian_germany = {
+	icon = "gfx/interface/icons/event_icons/germany.dds"
+	
+	group = je_group_historical_content
+
+	complete = {
+		hidden_trigger = {
+			NOT = {
+				has_variable = time_delay
+			}
+		}
+		OR = {
+			owns_entire_state_region = STATE_ALSACE_LORRAINE
+			AND = {
+				owns_entire_state_region = STATE_AUSTRIA
+				owns_entire_state_region = STATE_STYRIA
+				owns_entire_state_region = STATE_TYROL
+			}
+		}
+	}
+	
+	immediate = {
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:south_german
+				}
+			}
+			set_variable = south_germany
+			set_variable = {
+				name = time_delay
+				days = 2
+			}
+		}
+	}
+	
+	timeout = 7300
+	
+	on_timeout = {
+		add_primary_culture = cu:south_german
+		activate_law = law_type:law_national_supremacy
+	}
+	
+	invalid = {
+		NOT = { c:GER = ROOT }
+		NOT = { has_law = law_type:law_ethnostate } 
+	}
+	
+	on_complete = {
+		add_primary_culture = cu:south_german
+		activate_law = law_type:law_national_supremacy
+		ruler = {
+			add_modifier = {
+				name = german_unifier_ruler
+			}
+		}
+		custom_tooltip = {
+			text = je_prussian_germany.t
+			every_scope_state = {
+				limit = {
+					NOT = { state_region = s:STATE_ALSACE_LORRAINE }
+					state_region = {
+						OR = {
+							is_homeland = cu:north_german
+							is_homeland = cu:south_german
+						}
+					}
+				}
+				add_modifier = {
+					name = german_baby_boom
+					months = 300
+					is_decaying = yes
+				}
+			}
+		}
+		add_loyalists = {
+			culture = cu:south_german
+			value = 0.4
+		}
+		add_loyalists = {
+			culture = cu:north_german
+			value = 0.05
+		}
+		every_scope_state = {
+			limit = {
+				owner = ROOT
+				has_variable = south_germany
+			}
+			set_state_type = incorporated
+		}
+		every_scope_state = {
+			limit = {
+				has_variable = south_germany
+			}
+			remove_variable = south_germany
+		}
+	}
+	
+	weight = 10000
+	should_be_pinned_by_default = yes
+	can_revolution_inherit = yes
+	
+}
+
+je_kulturkampf = {
+	icon = "gfx/interface/icons/event_icons/kulturkampf.dds"
+	
+	group = je_group_historical_content
+	
+	modifiers_while_active = {
+		modifier_kulturkampf
+	}
+
+	is_shown_when_inactive = {
+		country_has_primary_culture = cu:north_german
+		c:GER ?= THIS
+	}
+	
+	possible = {
+		c:GER ?= THIS
+		c:GER ?= {
+			was_formed_from = PRU
+		}
+	}
+	
+	scripted_progress_bar = kulturkampf_core_progress_bar
+	
+	scripted_button = kulturkampf_secularization_button
+	
+	scripted_button = kulturkampf_oppress_poles_button
+
+	immediate = {
+		custom_tooltip = {
+			text = kulturkampf_loc_fix_2
+			ig:ig_devout = {
+				set_interest_group_name = ig_catholic_church
+			}
+		}
+	}
+	
+	complete = {
+		custom_tooltip = {
+			text = je_kulturkampf_complete
+			scope:journal_entry = {
+                "scripted_bar_progress(kulturkampf_core_progress_bar)" >= 200
+            }
+		}
+	}
+	
+	on_complete = {
+		if = {
+			limit = {
+ 				any_interest_group = {
+					has_modifier = modifier_kulturkampf_chauvinist
+				}
+			}
+			every_interest_group = {
+				limit = {
+					has_modifier = modifier_kulturkampf_chauvinist
+				}
+				remove_modifier = modifier_kulturkampf_chauvinist
+			}
+		}
+		custom_tooltip = {
+			text = kulturkampf_loc_fix
+			ig:ig_devout = { 
+				set_interest_group_name = ig_evangelical_church
+			}
+		}
+		if = {
+			limit = {
+				NOT = { has_law = law_type:law_total_separation }
+			}
+			activate_law = law_type:law_total_separation
+		}
+		every_scope_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_WEST_PRUSSIA
+					state_region = s:STATE_EAST_PRUSSIA
+					state_region = s:STATE_POSEN
+				}
+			}
+			add_modifier = {
+				name = eastern_settlement
+				years = 20
+			}
+		}
+	}
+	
+	fail = {
+		custom_tooltip = {
+			text = je_kulturkampf_fail
+			scope:journal_entry = {
+                "scripted_bar_progress(kulturkampf_core_progress_bar)" <= 0
+            }
+		}
+	}
+	
+	on_fail = {
+		if = {
+			limit = {
+ 				any_interest_group = {
+					has_modifier = modifier_kulturkampf_chauvinist
+				}
+			}
+			every_interest_group = {
+				limit = {
+					has_modifier = modifier_kulturkampf_chauvinist
+				}
+				remove_modifier = modifier_kulturkampf_chauvinist
+			}
+		}
+		custom_tooltip = {
+			text = kulturkampf_loc_fix
+			ig:ig_devout = { 
+				set_interest_group_name = ig_evangelical_church
+			}
+		}
+		ig:ig_devout = {
+			add_ideology = ideology_christian_democrat
+			remove_ideology = ideology_moralist
+		}
+	}
+	
+	weight = 10000
+	should_be_pinned_by_default = yes
+	can_revolution_inherit = yes
+}

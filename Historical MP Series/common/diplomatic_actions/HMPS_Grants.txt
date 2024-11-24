@@ -1,0 +1,115 @@
+﻿request_grant = {
+	groups= {
+		general
+	}
+	requires_approval = yes
+    should_notify_third_parties = yes
+	show_effect_in_tooltip = yes
+	can_use_obligations = yes
+	
+	potential = {
+		NOT = { is_country_type = decentralized }
+		scope:target_country = {
+			NOT = { is_country_type = decentralized }
+		}
+		#NOT = { has_modifier = received_grant }
+		game_date >= 1836.1.2
+	}
+	
+    possible = {
+		influence > 200
+		custom_tooltip = {
+			text = request_grant.t1 
+			NOT = { has_global_variable = grant_being_given }
+		}
+		custom_tooltip = {
+			text = request_grant.t4
+			NOT = { has_variable = recently_sent_grant_request }
+		}
+		custom_tooltip = {
+			text = request_grant.t5
+			var:max_money > 100000
+		}
+		scope:target_country = {
+			influence > 200
+			#NOT = { has_modifier = gave_grant }
+			is_subject = no
+			custom_tooltip = {
+				text = request_grant.t2
+				has_variable = remaining_credit
+			}
+			custom_tooltip = {
+				text = request_grant.t3
+				var:remaining_credit > 500000
+			}
+		}
+	}
+	
+	#Effect to make it so only one grant per month can be requested
+	
+    accept_effect = {
+		set_global_variable = {
+			name = grant_being_given
+			days = 31
+		}
+		set_variable = { 
+			name = grant_recipient
+			days = 95
+		}
+		add_modifier = {
+			name = received_grant
+			months = 61
+		}
+		set_variable = {
+			name = recently_sent_grant_request
+			days = 31
+		}
+		scope:target_country = {
+			add_modifier = {
+				name = gave_grant
+				months = 61
+			}
+			trigger_event = {
+				id = grants.1
+				days = 0
+				popup = yes
+			}
+		}
+    }
+	
+	decline_effect = {
+		set_variable = {
+			name = recently_sent_grant_request
+			days = 31
+		}
+		
+		#save_scope_as = initiator
+		#
+		#scope:initiator = {
+		#	set_variable = {
+		#		name = recently_sent_grant_request
+		#		days = 31
+		#	}
+		#}
+	}
+	
+    ai = {
+        will_propose = {
+            always = no
+        }
+        accept_score = {
+            value = 0
+            if = {
+                limit = {
+                    scope:actor = {
+                        is_ai = no
+                    }
+                }
+                add = {
+                    desc = "DIPLOMATIC_ACCEPTANCE_BASE"
+                    value = -100
+                }
+            }
+        }
+    }
+}

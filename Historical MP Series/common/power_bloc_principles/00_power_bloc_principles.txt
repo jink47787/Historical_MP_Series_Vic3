@@ -1,0 +1,936 @@
+﻿### See power_bloc_principle_groups for grouping, primary groups for identities etc.
+
+### CONSTRUCTION
+
+principle_construction_1 = {
+	icon = "gfx/interface/icons/principles_icons/construction.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {
+		building_group_bg_construction_infrastructure_usage_mult = -0.75
+		
+		# Members can form Construction type Companies unlock triggers in the company
+		# Members can form Construction type Companies unlock triggers in the company
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = {
+				ig:ig_industrialists ?= { is_in_government = yes }
+			}
+			add = 100
+		}			
+		
+		if = {
+			limit = { has_strategy = ai_strategy_industrial_expansion }
+			multiply = 1.5
+		}	
+		else_if = {
+			limit = { has_strategy = ai_strategy_resource_expansion }
+			multiply = 1.25
+		}	
+	}
+}
+
+### INTERNAL TRADE
+
+principle_internal_trade_1 = {
+	icon = "gfx/interface/icons/principles_icons/internal_trade.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+	
+	member_modifier = {
+		country_convoy_contribution_to_market_owner_add = 0.4
+		tariff_import_outside_power_bloc_mult = 0.2
+		tariff_export_outside_power_bloc_mult = 0.2
+		state_infrastructure_mult = 0.1
+		
+		# Cheaper port connections
+		country_port_connection_cost_mult = -0.25
+	}
+	
+	ai_weight = {
+		value = 200 # Good for trade leagues to have
+			
+		if = {
+			limit = { 
+				OR = {
+					has_law = law_type:law_mercantilism 
+					has_law = law_type:law_command_economy
+				}
+			}
+			add = 100
+		}	
+
+		if = {
+			limit = { 
+				power_bloc ?= { has_principle_group = principle_group:principle_group_external_trade }
+			}
+			multiply = 0.5
+		}
+	}	
+}
+
+### MARKET UNIFICATION
+
+principle_market_unification_1 = {
+	icon = "gfx/interface/icons/principles_icons/market_unification.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+	
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	leader_modifier = {
+		country_leverage_generation_mult = -0.25
+	}
+
+	member_modifier = {
+		country_influence_mult = -0.1
+	}
+
+	power_bloc_modifier = {
+		# Members are permanently part of the same Customs Union
+		power_bloc_customs_union_bool = yes
+	}
+	
+	ai_weight = {
+		value = 200 # Generally a good group for a PB to have
+		
+		if = {
+			limit = { has_strategy = ai_strategy_economic_imperialism }
+			multiply = 2.0
+		}
+	}
+}
+
+### SOVEREIGN EMPIRE
+### Vassal Subjects
+
+principle_vassalization_1 = {
+	icon = "gfx/interface/icons/principles_icons/vassals_subjects.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+	
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {		
+		# Modifiers from previous level(s)
+		country_authority_per_subject_add = 25
+		country_subject_income_transfer_mult = 0.10
+	
+		# Can use decrees on subjects
+		country_allow_enacting_decrees_in_subject_bool = yes
+	}
+	
+	leader_modifier = {
+		country_legitimacy_base_add = 10
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		add = {
+			value = num_subjects
+			multiply = 50
+			max = 500
+		}
+
+		if = {
+			limit = {
+				power_bloc ?= { NOT = { has_identity = identity:identity_sovereign_empire } } 				
+			}
+			multiply = 0.5
+		}		
+	}
+}
+
+### RESEARCH CONGLOMERATE
+
+principle_advanced_research_1 = {
+	icon = "gfx/interface/icons/principles_icons/advanced_research.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {
+		country_institution_size_change_speed_institution_schools_mult = 0.5
+		country_institution_cost_institution_schools_mult = -0.5
+		country_disallow_law_no_schools_bool = yes
+	}
+
+	leader_modifier = {
+		country_can_impose_same_lawgroup_education_system_in_power_bloc_bool = yes
+	}
+	
+	institution = institution_schools
+	institution_modifier = {
+		# School institution gives more tech spread
+		country_tech_spread_mult = 0.05
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = {
+				ig:ig_intelligentsia ?= { is_in_government = yes }
+			}
+			add = 100
+		}			
+
+		if = {
+			limit = { has_strategy = ai_strategy_progressive_agenda }
+			multiply = 1.5
+		}
+	}
+}
+
+### DEFENSIVE COOPERATION
+
+principle_defensive_cooperation_1 = {
+	icon = "gfx/interface/icons/principles_icons/defensive_coorperation.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {
+		# Countries forced to join defensive plays against members
+		country_join_power_bloc_member_in_defensive_plays_bool = yes
+		unit_defense_mult = 0.10
+	}
+
+	power_bloc_modifier = {
+		power_bloc_disallow_war_bool = yes
+		power_bloc_target_sway_cost_mult = -0.5
+	}
+	
+	leader_modifier = {
+		# Allows leader to impose their own law onto member countries in the army_model law group
+		country_can_impose_same_lawgroup_army_model_in_power_bloc_bool = yes
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = {
+				OR = {
+					has_strategy = ai_strategy_socialism_in_one_country
+					has_strategy = ai_strategy_armed_isolationism
+				}	
+			}
+			multiply = 1.5
+		}
+		
+		if = {
+			limit = { 
+				power_bloc ?= { has_principle_group = principle_group:principle_group_aggressive_coordination }			
+			}
+			multiply = 0.5
+		}
+
+		if = {
+			limit = {
+				power_bloc ?= { NOT = { has_identity = identity:identity_military_treaty_organization } } 				
+			}
+			multiply = 0.5
+		}		
+	}
+}
+
+### AGGRESSIVE COORDINATION
+
+principle_aggressive_coordination_1 = {
+	icon = "gfx/interface/icons/principles_icons/aggressive_coordination.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+	
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	power_bloc_modifier = {	
+		# Reduces cohesion
+		power_bloc_cohesion_add = -10
+	}
+	
+	member_modifier = {
+		# Modifiers from previous level(s)
+		country_initiator_war_goal_maneuver_cost_mult = -0.3
+		country_war_exhaustion_casualties_mult = -0.15
+	
+		# Countries forced to join diplomatic plays of members, other countries are not happy about this threat
+		country_join_power_bloc_member_in_plays_bool = yes
+		
+		unit_offense_mult = 0.10
+	}
+	
+	ai_weight = {
+		value = 100	
+		
+		if = {
+			limit = {
+				ig:ig_armed_forces ?= { is_in_government = yes }
+			}
+			add = 100
+		}
+		
+		if = {
+			limit = {
+				OR = {
+					has_strategy = ai_strategy_territorial_expansion
+					has_strategy = ai_strategy_world_revolution
+				}	
+			}
+			multiply = 1.5
+		}		
+		
+		if = {
+			limit = { 
+				power_bloc ?= { has_principle_group = principle_group:principle_group_defensive_cooperation }				
+			}
+			multiply = 0.5
+		}		
+	}	
+}
+
+### EXTERNAL TRADE
+
+principle_external_trade_1 = {
+	icon = "gfx/interface/icons/principles_icons/external_trade.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	power_bloc_modifier = {
+		# Unlocks a PM that grants Trade Centers Influence, checked with trigger on PM
+		# Modifiers from previous level(s)
+		power_bloc_trade_route_cost_mult = -0.75
+	
+		# Also unlocks a PM that grants Trade Centers Influence, checked with trigger on PM (from level 2)
+	}
+	
+	member_modifier = {
+		# Modifiers from previous level(s)
+		country_trade_route_cost_mult = -0.25
+		country_trade_route_competitiveness_mult = 0.33
+		
+		# Allows members to set up trade routes without diplomatic interests there
+		country_allow_trade_routes_without_interest_bool = yes
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = { has_law = law_type:law_free_trade }
+			add = 100
+		}	
+			
+		add = {
+			value = num_trade_routes
+			multiply = 5
+			max = 100
+		}
+
+		if = {
+			limit = {
+				power_bloc ?= { NOT = { has_identity = identity:identity_trade_league } } 				
+			}
+			multiply = 0.5
+		}
+		
+		if = {
+			limit = { 
+				power_bloc ?= { has_principle_group = principle_group:principle_group_internal_trade }			
+			}
+			multiply = 0.5
+		}		
+	}
+}
+
+### Food Standardization
+
+principle_food_standardization_1 = {
+	icon = "gfx/interface/icons/principles_icons/food_standardization.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+	
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {
+		#More efficient PM for vacuum canning
+		building_group_bg_agriculture_throughput_add = 0.1
+		
+		# Higher SoL
+		state_standard_of_living_add = 1
+		
+		#Unlocks a PM for Food Industries
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = {
+				OR = {
+					ig:ig_rural_folk ?= { is_in_government = yes }
+					ig:ig_trade_unions ?= { is_in_government = yes }
+				}			
+			}
+			add = 100
+		}
+
+		if = {
+			limit = {
+				has_strategy = ai_strategy_agricultural_expansion
+			}
+			multiply = 1.5
+		}
+	}		
+}
+
+### Police Coordination
+
+principle_police_coordination_1 = {
+	icon = "gfx/interface/icons/principles_icons/dedicated_police.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+	
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {
+		# Cheaper and faster police institution
+		country_institution_size_change_speed_institution_police_mult = 0.5
+		country_institution_cost_institution_police_mult = -0.5
+		country_disallow_law_no_police_bool = yes
+	}
+
+	leader_modifier = {
+		country_can_impose_same_lawgroup_policing_in_power_bloc_bool = yes
+	}
+
+	institution = institution_police
+	institution_modifier = {
+		# Police institution adds authority
+		country_authority_add = 50
+		
+		# Police institution reduces radicalism of political movements
+		political_movement_radicalism_add = -0.05
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = {
+				OR = {
+					ig:ig_landowners ?= { is_in_government = yes }
+					ig:ig_petty_bourgeoisie ?= { is_in_government = yes }
+				}			
+			}
+			add = 100
+		}
+
+		if = {
+			limit = {
+				OR = {
+					has_strategy = ai_strategy_conservative_agenda
+					has_strategy = ai_strategy_reactionary_agenda
+				}
+			}
+			multiply = 1.5
+		}	
+	}	
+}
+
+### TRANSPORT INFRASTRUCTURE
+
+principle_transport_1 = {
+	icon = "gfx/interface/icons/principles_icons/transport.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {
+		# Modifiers from previous level(s)
+		country_convoys_capacity_mult = 0.2
+		state_infrastructure_from_population_mult = 0.25
+		state_infrastructure_from_population_max_mult = 0.25 
+		
+		# Increased land trade capacity
+		market_land_trade_capacity_add = 100
+		
+		# Unlocks a set of PMs for Railways
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = {
+				ig:ig_industrialists ?= { is_in_government = yes }
+			}
+			add = 100
+		}	
+		
+		if = {
+			limit = { has_strategy = ai_strategy_industrial_expansion }
+			multiply = 1.5
+		}	
+		else_if = {
+			limit = { has_strategy = ai_strategy_resource_expansion }
+			multiply = 1.25
+		}
+	}
+}
+
+### Military Industry
+
+principle_military_industry_1 = {
+	icon = "gfx/interface/icons/principles_icons/military_industry.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+	
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+	
+	member_modifier = {
+		# Modifiers from previous level(s)	
+		building_war_machine_industry_throughput_add = 0.1
+		building_arms_industry_throughput_add = 0.1
+		building_artillery_foundries_throughput_add = 0.1
+		building_military_shipyards_throughput_add = 0.1
+		country_military_goods_cost_mult = -0.1
+		
+		# Supply routes use less convoys
+		character_supply_route_cost_mult = -0.33
+		
+		# Members get an unique mobilization option mechanic
+	}
+	
+	ai_weight = {
+		value = 100	
+		
+		if = {
+			limit = {
+				ig:ig_armed_forces ?= { is_in_government = yes }
+			}
+			add = 100
+		}
+
+		if = {
+			limit = {
+				"goods_production_rank(g:small_arms)" <= 3
+			}
+			add = 50
+		}
+		
+		if = {
+			limit = {
+				"goods_production_rank(g:artillery)" <= 3
+			}
+			add = 50
+		}
+
+		if = {
+			limit = {
+				"goods_production_rank(g:ammunition)" <= 3
+			}
+			add = 50
+		}			
+	}
+}
+
+### Colonial Offices
+
+principle_colonial_offices_1 = {
+	icon = "gfx/interface/icons/principles_icons/colonial_offices.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+	
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {
+		# Cheaper and faster colonial institution
+		country_institution_size_change_speed_institution_colonial_affairs_mult = 0.5
+		country_institution_cost_institution_colonial_affairs_mult = -0.5
+		country_disallow_law_no_colonial_affairs_bool = yes
+	}
+
+	leader_modifier = {
+		country_can_impose_same_lawgroup_colonization_in_power_bloc_bool = yes
+	}
+	
+	institution = institution_colonial_affairs
+	institution_modifier = {
+		# Modifiers from previous level(s)	
+		state_colony_growth_creation_factor = 0.05
+		country_infamy_generation_against_unrecognized_mult = -0.05
+	}
+	
+	ai_weight = {
+		value = 200 # High base weight if the leader has colonies
+		
+		if = {
+			limit = { has_strategy = ai_strategy_colonial_expansion }
+			multiply = 2.0
+		}
+
+		if = {
+			limit = {
+				NOT = { any_scope_state = { is_under_colonization = yes } }
+			}
+			multiply = 0.0
+		}			
+	}
+}
+
+### Foreign Investment
+
+principle_foreign_investment_1 = {
+	icon = "gfx/interface/icons/principles_icons/foreign_investment.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+	
+	# Members can always invest in power bloc coutries of lower rank
+	# Does not generate a tooltip, so a dummy modifier is required to show this effect
+	allows_foreign_investment_in_lower_rank = yes
+	
+	member_modifier = {
+		# Modifiers from previous level(s)	
+		country_nationalization_cost_non_members_mult = -0.5
+
+		# This modifier is just here to generate a tooltip. It doesn't actually do anything on its own
+		country_higher_leverage_from_economic_dependence_bool = yes
+	}
+	
+	power_bloc_modifier = {
+		# This modifier has no effects and is only here to generate a tooltip
+		power_bloc_allow_foreign_investment_lower_rank_bool = yes 
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = {
+				OR = {
+					ig:ig_industrialists ?= { is_in_government = yes }
+					ig:ig_landowners ?= { is_in_government = yes }
+				}
+			}	
+			add = 100
+		}		
+		
+		if = {
+			limit = { has_strategy = ai_strategy_economic_imperialism }
+			multiply = 2.0
+		}		
+	}
+}
+
+### Creative Legislature
+
+principle_creative_legislature_1 = {
+	icon = "gfx/interface/icons/principles_icons/creative_legislature.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+	
+	member_modifier = {
+		# Modifiers from previous level(s)	
+		country_law_enactment_stall_mult = -0.33
+		political_movement_radicalism_from_enactment_disapproval_mult = -0.25
+		political_movement_radicalism_from_enactment_approval_mult = 0.25
+		
+		# Can have one additional setback before failing a law enactment
+		country_law_enactment_max_setbacks_add = 1
+	}
+
+	ai_weight = {
+		value = 200 # High base value for ideological union, but also generally useful for others
+		
+		if = {
+			limit = {
+				power_bloc ?= { NOT = { has_identity = identity:identity_ideological_union } } 			
+			}
+			multiply = 0.5
+		}		
+	}
+}
+
+### Freedom of Movement
+
+principle_freedom_of_movement_1 = {
+	icon = "gfx/interface/icons/principles_icons/freedom_of_movement.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+	
+	possible = {
+		NOT = { has_law = law_type:law_closed_borders }
+	}
+	
+	member_modifier = {
+		# Modifiers from previous level(s)	
+		state_migration_quota_mult = 0.25
+		country_mass_migration_attraction_mult = 0.1	
+	}
+
+	power_bloc_modifier = {
+		# Unlocks a new PM for Art Academies that increases migration attraction, unlocked per trigger in the PM
+	
+		# Unlocks power-bloc wide migration
+		power_bloc_allow_wider_migration_area_bool = yes
+	}
+	
+	ai_weight = {
+		value = 100
+		
+		if = {
+			limit = {
+				ig:ig_intelligentsia ?= { is_in_government = yes }
+			}	
+			add = 100
+		}	
+
+		if = {
+			limit = {
+				OR = {
+					country_is_in_north_america = yes
+					country_is_in_central_america = yes
+					country_is_in_south_america = yes
+				}
+			}	
+			add = 100
+		}
+		
+		if = {
+			limit = {
+				has_law = law_type:law_migration_controls
+			}	
+			multiply = 0.5
+		}
+
+		if = {
+			limit = { has_strategy = ai_strategy_progressive_agenda }
+			multiply = 1.5
+		}
+
+		if = {
+			limit = { 
+				OR = {
+					has_strategy = ai_strategy_conservative_agenda
+					has_strategy = ai_strategy_reactionary_agenda
+				}			
+			}
+			multiply = 0.25
+		}		
+	}
+}
+
+### Divine Economics
+
+principle_divine_economics_1 = {
+	icon = "gfx/interface/icons/principles_icons/divine_economy.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	power_bloc_modifier = {
+		# Modifiers from previous level(s)		
+		power_bloc_religion_trade_route_competitiveness_mult = 0.75
+	}
+	
+	member_modifier = {
+		# Modifiers from previous level(s)		
+		country_subject_income_transfer_heathen_mult = 0.5		
+	
+		# Higher wages for state religion pops
+		country_state_religion_wages_mult = 0.25
+		
+		# New PM for Financial Districts/Manor Houses unlocked via trigger
+		state_clergymen_investment_pool_efficiency_mult = 1.0
+		state_clergymen_investment_pool_contribution_add = 0.05	
+	}
+
+	ai_weight = {
+		value = 200 # Religious PBs should tend towards picking the religious principles
+		
+		if = {
+			limit = {
+				ig:ig_devout ?= { is_in_government = yes }
+			}	
+			add = 100
+		}
+	}
+}
+
+### Exploit Members
+
+principle_exploit_members_1 = {
+	icon = "gfx/interface/icons/principles_icons/exploitation_of_members.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	leader_modifier = {
+		# Modifiers from previous level(s)		
+		country_authority_mult = 0.2
+		# Increase leader influence
+		country_influence_mult = 0.2
+	}
+	
+	non_leader_modifier = {
+		# Modifiers from previous level(s)		
+		country_authority_mult = -0.2
+		# Reduce non-leader influence
+		country_influence_mult = -0.2
+	}
+
+	power_bloc_modifier = {
+		power_bloc_cohesion_add = -20
+	}
+
+	ai_weight = {
+		value = 0
+		
+		if = {
+			limit = {
+				exists = power_bloc
+			}
+			
+			add = {
+				value = power_bloc.current_cohesion_number
+				subtract = 50
+				multiply = 4
+			}			
+		}
+		
+		if = {
+			limit = {
+				NOR = {
+					has_strategy = ai_strategy_territorial_expansion
+					has_strategy = ai_strategy_economic_imperialism
+				}
+			}
+			multiply = 0.5
+		}	
+	}
+}
+
+### Sacred Civics
+
+principle_sacred_civics_1 = {
+	icon = "gfx/interface/icons/principles_icons/sacred_civics.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+
+	member_modifier = {
+		# Modifiers from previous level(s)		
+		country_higher_diplomatic_acceptance_same_religion_bool = yes
+		country_reduced_liberty_desire_same_religion_bool = yes
+		#HMPS
+		country_leverage_generation_mult = 0.25
+		interest_group_ig_devout_approval_add = 5
+	}
+
+	leader_modifier = {
+		# Allows leader to impose their own law onto member countries in the church_and_state law group
+		country_can_impose_same_lawgroup_church_and_state_in_power_bloc_bool = yes
+	}
+
+	ai_weight = {
+		value = 200 # Religious PBs should tend towards picking the religious principles
+		
+		if = {
+			limit = {
+				ig:ig_devout ?= { is_in_government = yes }
+			}	
+			add = 100
+		}
+		
+		if = {
+			limit = { 
+				power_bloc ?= { NOT = { has_identity = identity:identity_religious } } 
+				# State Atheist Ideology bloc wants the power to enforce atheism
+				NAND = {
+					has_law = law_type:law_state_atheism
+					power_bloc ?= { has_identity = identity:identity_ideological_union }				
+				}
+			}
+			multiply = 0.25
+		}				
+	}
+}
+
+### Ideological Truth
+
+principle_ideological_truth_1 = {
+	icon = "gfx/interface/icons/principles_icons/ideological_truth.dds"
+	background = "gfx/interface/icons/principles_icons/principle_tier_1.dds"
+
+	visible = {
+		has_dlc_feature = power_bloc_features
+	}
+	
+	member_modifier = {
+		# Modifiers from previous level(s)		
+		interest_group_in_opposition_agitator_popularity_add = -33
+		country_bolster_cost_mult = -0.25
+		country_suppression_cost_mult = -0.25		
+		country_party_whip_impact_mult = 0.2
+		
+		# Members Legitimacy can't fall under 25
+		country_legitimacy_min_add = 25		
+	}
+
+	ai_weight = {
+		value = 200 # High base weight for ideological union
+		
+		if = { 
+			limit = { 
+				has_radical_leftist_government = yes
+			}
+			add = 100
+		}
+		
+		if = {
+			limit = {
+				OR = {
+					has_strategy = ai_strategy_world_revolution
+					has_strategy = ai_strategy_maintain_power_balance
+				}
+			}
+			multiply = 2.0
+		}
+	}
+}

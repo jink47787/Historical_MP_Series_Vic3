@@ -1,0 +1,257 @@
+﻿#icon					Path to icon for both right click menu and character panel buttons
+#clicksound				Clicksound for both right click menu and character panel buttons
+
+#						All scopes are character scopes with the interacting country stored as the actor
+#potential				Trigger to check if the interaction should be shown
+#possible 				Trigger to check if the interaction is available
+#effect					The effects of the interaction
+#cooldown				Scriptable duration that this interaction will be unavailable for the interacting country
+
+#show_requirements		Whether to always show requirements, similar to highlighted options in events
+#show_confirmation_box	Whether to require confirmation
+
+#ai_chance				Scriptable value for the chance (0-100) that the AI will use this interaction when available, default 0
+
+api_bolster_character = {
+	icon = "gfx/interface/icons/generic_icons/ig_bolster.dds"
+	clicksound = "event:/SFX/UI/Global/suppress"
+    
+    show_requirements = yes
+
+	potential = {
+		owner = scope:actor
+		is_commander = no
+        NOT = {
+            has_variable = api_character_bolstered
+        }
+	}
+
+	possible = {
+		trigger_if = {
+            limit = {
+                OR = {
+                    is_ruler = yes
+                }
+            }
+            is_ruler = no
+        }
+        trigger_if = {
+            limit = {
+                OR = {
+                    is_heir = yes
+                }
+            }
+            is_heir = no
+        }
+        scope:actor = {
+            authority >= 50
+        }
+        custom_tooltip = {
+            text = api_tt_character_not_suppressed
+            NOT = {
+                has_variable = api_character_suppressed
+            }
+        }
+        custom_tooltip = {
+            text = api_tt_not_at_bolster_cap
+            trigger_if = {
+                limit = {
+                    has_variable = api_character_career_modifier
+                }
+                var:api_character_career_modifier < 50
+            }
+        }
+		owner = {
+            NOT = {
+				has_law = law_type:law_protected_speech
+				has_law = law_type:law_guaranteed_liberties
+			}
+		}
+	}
+
+	effect = {
+        custom_tooltip = {
+            text = api_tt_character_bolstered
+            set_variable = api_character_bolstered
+        }
+        
+        scope:actor = {
+            custom_tooltip = api_tt_country_bolster_character
+            set_local_variable = {
+                name  = qty_delta
+                value = 1
+            }
+            hidden_effect = {
+                trigger_event = {
+                    id = api_ev.2
+                }
+            }
+        }
+        
+        custom_tooltip = api_tt_bolster_autostop
+	}
+
+	ai_chance = {
+		value = 0
+	}
+}
+
+api_unbolster_character = {
+	icon = "gfx/interface/icons/generic_icons/api_unbolster.dds"
+	clicksound = "event:/SFX/UI/Global/close"
+
+	potential = {
+		owner = scope:actor
+        has_variable = api_character_bolstered
+	}
+
+	possible = {
+		has_variable = api_character_bolstered
+	}
+
+	effect = {
+        custom_tooltip = {
+            text = api_tt_character_unbolstered
+            remove_variable = api_character_bolstered
+        }
+        
+        scope:actor = {
+            custom_tooltip = api_tt_country_unbolster_character
+            set_local_variable = {
+                name  = qty_delta
+                value = -1
+            }
+            hidden_effect = {
+                trigger_event = {
+                    id = api_ev.2
+                }
+            }
+        }
+	}
+
+	ai_chance = {
+		value = 0
+	}
+}
+
+api_suppress_character = {
+	icon = "gfx/interface/icons/generic_icons/ig_suppress.dds"
+	clicksound = "event:/SFX/UI/Global/suppress"
+    
+    show_requirements = yes
+
+	potential = {
+		owner = scope:actor
+		is_commander = no
+        NOT = {
+            has_variable = api_character_suppressed
+        }
+	}
+
+	possible = {
+		trigger_if = {
+            limit = {
+                OR = {
+                    is_ruler = yes
+                }
+            }
+            is_ruler = no
+        }
+        trigger_if = {
+            limit = {
+                OR = {
+                    is_heir = yes
+                }
+            }
+            is_heir = no
+        }
+        scope:actor = {
+            authority >= 50
+        }
+        custom_tooltip = {
+            text = api_tt_character_not_bolstered
+            NOT = {
+                has_variable = api_character_bolstered
+            }
+        }
+        custom_tooltip = {
+            text = api_tt_not_at_suppress_cap
+            trigger_if = {
+                limit = {
+                    has_variable = api_character_career_modifier
+                }
+                var:api_character_career_modifier > -50
+            }
+        }
+		owner = {
+            NOT = {
+				has_law = law_type:law_protected_speech
+				has_law = law_type:law_guaranteed_liberties
+			}
+		}
+	}
+
+	effect = {
+        custom_tooltip = {
+            text = api_tt_character_suppressed
+            set_variable = api_character_suppressed
+        }
+        
+        scope:actor = {
+            custom_tooltip = api_tt_country_suppress_character
+            set_local_variable = {
+                name  = qty_delta
+                value = 1
+            }
+            hidden_effect = {
+                trigger_event = {
+                    id = api_ev.3
+                }
+            }
+        }
+        
+        custom_tooltip = api_tt_suppress_autostop
+	}
+
+	ai_chance = {
+		value = 0
+	}
+}
+
+api_unsuppress_character = {
+	icon = "gfx/interface/icons/generic_icons/api_unsuppress.dds"
+	clicksound = "event:/SFX/UI/Global/close"
+
+	potential = {
+		owner = scope:actor
+        has_variable = api_character_suppressed
+	}
+
+	possible = {
+		has_variable = api_character_suppressed
+	}
+
+	effect = {
+        custom_tooltip = {
+            text = api_tt_character_unsuppressed
+            remove_variable = api_character_suppressed
+        }
+        
+        scope:actor = {
+            custom_tooltip = api_tt_country_unsuppress_character
+            set_local_variable = {
+                name  = qty_delta
+                value = -1
+            }
+            hidden_effect = {
+                trigger_event = {
+                    id = api_ev.3
+                }
+            }
+        }
+	}
+
+	ai_chance = {
+		value = 0
+	}
+}

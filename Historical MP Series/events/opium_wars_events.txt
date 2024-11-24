@@ -12,54 +12,23 @@ opium_wars.1 = {
 	duration = 3
 
 	event_image = {
-		video = "gfx/event_pictures/europenorthamerica_opium_smoker.bk2"
+		video = "europenorthamerica_opium_smoker"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/europenorthamerica/opium_smoker"
 
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
 	trigger = {
-		NOT = { has_variable = opium_wars_start_var }
+		NOT = { has_global_variable = opium_wars_start_var }
+		this = c:CHI
 		any_primary_culture = {
 			has_cultural_obsession = opium
-		}
-		is_country_type = unrecognized
-		total_population > 5000000
-		NOT = {
-			any_country = {
-				has_variable = opium_wars_target
-			}
-		}
-		is_subject = no
-		NOT = { has_law = law_type:law_free_trade }
-		any_market = {
-			owner = ROOT
-			any_trade_route = {
-				goods = g:opium
-				importer.owner = ROOT
-				NOT = { actor_market.owner = root }
-				actor_market.owner = {
-					country_rank >= rank_value:major_power
-					# Exclude countries that already have a treaty port e.g. Portugal at game start
-					NOT = {
-						any_scope_state = {
-							market = {
-								owner = ROOT
-							}
-						}
-					}
-				}
-			}
-		}
-		NOT = {
-			has_modifier = opium_wars_addiction_modifier
 		}
 	}
 
 	immediate = {
-		set_variable = opium_wars_start_var
+		set_global_variable = opium_wars_start_var
 		random_primary_culture = {
 			limit = {
 				has_cultural_obsession = opium
@@ -141,10 +110,6 @@ opium_wars.1 = {
 					}
 				}
 			}
-		}
-		add_modifier = {
-			name = opium_wars_addiction_modifier
-			months = normal_modifier_time
 		}
 		ai_chance = {
 			base = 100
@@ -229,35 +194,7 @@ opium_wars.2 = {
 			}		
 		}
 		ai_chance = {
-			base = 95
-		}
-	}
-	option = { # not interested
-		name = opium_wars.2.b
-		change_relations = {
-			country = scope:opium_wars_target_country
-			value = 20
-		}
-		hidden_effect = {	
-			every_country = {
-				limit = {
-					NOT = { this = root }
-					OR = {
-						this = scope:opium_wars_target_country
-						has_overlapping_interests = scope:opium_wars_target_country
-						has_overlapping_interests = root
-					}			
-				}
-				post_notification = opium_wars_british_response_passive
-			}	
-		
-			set_mutual_secret_goal = {
-				country = scope:opium_wars_target_country
-				secret_goal = befriend
-			}		
-		}		
-		ai_chance = {
-			base = 5
+			base = 100
 		}
 	}
 }
@@ -325,12 +262,9 @@ opium_wars.3 = {
 		}
 		if = {
 			limit = { has_journal_entry = je_warlord_china }
-			post_notification = warlord_china_explosion_point_remove
-			change_variable = {
-				name = china_warlord_explosion
-				subtract = 1
-			}
+			chi_remove_1_fracture = yes
 		}
+		hidden_effect = { add_banned_goods = g:opium }
 	}
 
 	option = {
@@ -346,7 +280,7 @@ opium_wars.3 = {
 			name = china_authority
 			months = normal_modifier_time
 		}
-		remove_modifier = opium_wars_addiction_modifier
+		remove_modifier = chinese_opium_addiction
 	}
 
 	option = {
@@ -361,7 +295,7 @@ opium_wars.3 = {
 			name = china_welfare
 			months = normal_modifier_time
 		}
-		remove_modifier = opium_wars_addiction_modifier
+		remove_modifier = chinese_opium_addiction
 	}
 }
 
@@ -451,24 +385,16 @@ opium_wars.4 = {
 		}
 		if = {
 			limit = { has_journal_entry = je_warlord_china }
-			set_variable = lost_opium_wars
-			post_notification = warlord_china_explosion_point_add
-			change_variable = {
-				name = china_warlord_explosion
-				add = 1
-			}
+			set_global_variable = lost_opium_wars
+			chi_add_1_fracture = yes
 		}
 	}
 
 	option = {
 		name = opium_wars.4.a
 		default_option = yes
-		add_modifier = {
-			name = opium_wars_lost
-			months = very_long_modifier_time
-		}
 		add_radicals = {
-			value = very_large_radicals
+			value = 0.3
 		}
 		if = {
 			limit = {

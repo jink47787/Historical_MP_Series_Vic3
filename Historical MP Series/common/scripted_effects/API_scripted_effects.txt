@@ -1,0 +1,130 @@
+﻿# Root: Country
+api_update_authority_use = {
+    # Remove modifier
+    if = {
+        limit = {
+            has_modifier = api_authority_cost
+        }
+        remove_modifier = api_authority_cost
+    }
+    
+    # Calculate authority usage
+    set_local_variable = {
+        name  = total_authority_usage
+        value = THIS.modifier:country_api_authority_add
+    }
+    
+    # Apply new modifier
+    if = {
+        limit = {
+            local_var:total_authority_usage < 0
+        }
+        
+        # Maths
+        set_local_variable = {
+            name  = denominator
+            value = {
+                add = 1
+                add = modifier:country_authority_mult
+            }
+        }
+        add_modifier = {
+            name       = api_authority_cost
+            multiplier = { # applied cost = (intended cost) / (1 + multipliers)
+                add    = local_var:total_authority_usage
+                divide = local_var:denominator
+            }
+        }
+    }
+}
+
+# Scope: country
+# Args: auth_cost
+# Exists because `modifier:country_api_authority_add` doesn't return the correct value immediately if the game is paused
+# or something, and we need the new value immediately for applying the modifier in the middle of the week (i.e., upon
+# using a character interaction) before the weekly update can happen
+api_update_authority_use_with_checking = {
+    # Record current authority
+    set_local_variable = {
+        name  = old_authority
+        value = authority
+    }
+    
+    # Remove modifier
+    if = {
+        limit = {
+            has_modifier = api_authority_cost
+        }
+        remove_modifier = api_authority_cost
+    }
+    
+    # Calculate authority usage
+    set_local_variable = {
+        name  = total_authority_usage
+        value = THIS.modifier:country_api_authority_add
+    }
+    
+    # Apply new modifier
+    # Maths
+    set_local_variable = {
+        name  = denominator
+        value = {
+            add = 1
+            add = modifier:country_authority_mult
+        }
+    }
+    add_modifier = {
+        name       = api_authority_cost
+        multiplier = { # applied cost = (intended cost) / (1 + multipliers)
+            add    = local_var:total_authority_usage
+            divide = local_var:denominator
+        }
+    }
+    
+    # Sanity check
+    set_local_variable = {
+        name  = new_authority
+        value = authority
+    }
+    set_local_variable = {
+        name  = intended_new_authority
+        value = {
+            add = local_var:old_authority
+            add = $auth_cost$
+        }
+    }
+    if = {
+        limit = {
+            authority != local_var:intended_new_authority # edge case as described in earlier comment
+        }
+        
+        # Redo if sanity check failed
+        remove_modifier = api_authority_cost
+        change_local_variable = {
+            name     = total_authority_usage
+            subtract = $auth_cost$
+        }
+        set_local_variable = {
+            name  = denominator
+            value = {
+                add = 1
+                add = modifier:country_authority_mult
+            }
+        }
+        add_modifier = {
+            name       = api_authority_cost
+            multiplier = { # applied cost = (intended cost) / (1 + multipliers)
+                add    = local_var:total_authority_usage
+                divide = local_var:denominator
+            }
+        }
+    }
+    
+    # Remove modifier if we don't need it
+    if = {
+        limit = {
+            local_var:total_authority_usage >= 0
+        }
+        remove_modifier = api_authority_cost
+    }
+}

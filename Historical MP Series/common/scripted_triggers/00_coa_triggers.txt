@@ -37,11 +37,11 @@ coa_undemocratic_monarchy_trigger = {
 }
 
 coa_republic_trigger = {
-	OR = {
-		has_law = law_type:law_presidential_republic
-		has_law = law_type:law_parliamentary_republic
-		has_law = law_type:law_council_leadership
-	}
+	has_law = law_type:law_republic
+}
+coa_federal_republic_trigger = {
+	coa_republic_trigger = yes
+	has_law = law_type:law_elected_bureaucrats
 }
 
 coa_dictatorship_trigger = {
@@ -51,7 +51,10 @@ coa_dictatorship_trigger = {
 
 coa_oligarchy_trigger = {
 	coa_republic_trigger = yes
-	has_law = law_type:law_oligarchy
+	OR = {
+		has_law = law_type:law_oligarchy
+		has_law = law_type:law_technocracy
+	}
 }
 
 coa_theocracy_trigger = {
@@ -63,7 +66,10 @@ coa_multicultural_trigger = {
 }
 
 coa_autocracy_trigger = {
-	has_law = law_type:law_autocracy 
+	OR = {
+		has_law = law_type:law_autocracy
+		has_law = law_type:law_single_party_state  
+	}
 }
 
 coa_anarchy_trigger = {
@@ -71,20 +77,10 @@ coa_anarchy_trigger = {
 }
 
 coa_communist_trigger = {
-	has_law = law_type:law_council_leadership
-	#OR = {
-	#	ig:ig_trade_unions = {
-	#		is_in_government = yes
-	#	}
-	#	any_interest_group = {
-	#		is_in_government = yes
-	#		has_ideology = ideology_proletarian
-	#	}
-	#}
-}
-
-coa_military_trigger = {
-	has_government_type = gov_dictatorship
+	has_law = law_type:law_republic
+	has_law = law_type:law_single_party_state
+	has_law = law_type:law_vanguardism
+	has_law = law_type:law_command_economy
 }
 
 coa_controls_part_of_ireland = {
@@ -106,11 +102,29 @@ coa_controls_part_of_france = {
 coa_fascist_trigger = {
 	# A fascist can lead a monarchy or a theocracy without the government changing form. The Papal State should retain the same flag even if the Pope's a fascist, for example.
 	# A fascist can also lead a democracy without the democracy immediately becoming fascist. If the fascist successfully implements his wildest dreams and becomes a dictatorship, then sure the government will become Fascist, but while there's still voting the government shouldn't count as (fully) fascist yet.
-	coa_dictatorship_trigger = yes
-	any_scope_character = {
-		is_ruler = yes
-		has_ideology = ideology_fascist
-    }
+	OR = {
+		AND = {
+			has_technology_researched = political_agitation
+			has_law = law_type:law_ethnostate
+			OR = {
+				has_law = law_type:law_autocracy
+				has_law = law_type:law_single_party_state
+			}
+			has_law = law_type:law_militarized_police
+			has_law = law_type:law_outlawed_dissent
+			has_law = law_type:law_secret_police
+			has_law = law_type:law_mass_conscription
+		}
+		AND = {
+			coa_dictatorship_trigger = yes
+			ruler ?= {
+				OR = {
+					has_ideology = ideology:ideology_fascist
+					has_ideology = ideology:ideology_integralist
+				}
+			}
+		}
+	}
 }
 
 coa_secessionist_or_revolutionary_trigger = {
@@ -123,16 +137,20 @@ coa_secessionist_or_revolutionary_trigger = {
 ### scope is COUNTRY DEFINITION ###
 
 coa_def_independent_trigger = {
-	exists = scope:target
-	scope:target = { is_subject = no }
+	exists = scope:actor
+	scope:actor ?= { is_subject = no }
+}
+coa_def_subject_trigger = {
+	exists = scope:actor
+	scope:actor ?= { is_subject = yes }
 }
 
 coa_def_lesser_subject_trigger = {
 	OR = {
-		NOT = { exists = scope:target }
+		NOT = { exists = scope:actor }
 		AND = {
-			exists = scope:target
-			scope:target = { 
+			exists = scope:actor
+			scope:actor ?= { 
 				OR = {
 					is_subject_type = subject_type_puppet
 					is_subject_type = subject_type_vassal
@@ -142,81 +160,126 @@ coa_def_lesser_subject_trigger = {
 	}
 }
 
+### UFB LARP ###
+
+coa_UFB_trigger = {
+	has_law = law_type:law_republic
+	has_law = law_type:law_elected_bureaucrats
+	has_law = law_type:law_universal_suffrage
+	#has_law = law_type:law_multicultural
+	has_law = law_type:law_total_separation
+	has_law = law_type:law_protected_speech
+	has_law = law_type:law_guaranteed_liberties
+	has_law = law_type:law_no_colonial_affairs
+	NOT = { has_law = law_type:law_plurality }
+	
+	scope:actor ?= {
+		NOT = {
+			any_scope_state = {
+				NOT = {
+					state_region = {
+						OR = {
+							this = s:STATE_HOME_COUNTIES
+							this = s:STATE_LANCASHIRE
+							this = s:STATE_WALES
+							this = s:STATE_YORKSHIRE
+							this = s:STATE_HIGHLANDS
+							this = s:STATE_MIDLANDS
+							this = s:STATE_EAST_ANGLIA
+							this = s:STATE_WEST_COUNTRY
+							this = s:STATE_LOWLANDS
+							this = s:STATE_ULSTER
+							this = s:STATE_MUNSTER
+							this = s:STATE_LEINSTER
+							this = s:STATE_CONNAUGHT
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 # Government
+
+coa_def_UFB_trigger = {
+	exists = scope:actor
+	scope:actor ?= { coa_UFB_trigger = yes }
+}
 
 coa_def_monarchy_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_monarchy_trigger = yes }
+	scope:actor ?= { coa_monarchy_trigger = yes }
 }
 
 coa_def_absolute_monarchy_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_absolute_monarchy_trigger = yes }
+	scope:actor ?= { coa_absolute_monarchy_trigger = yes }
 }
 
 coa_def_undemocratic_monarchy_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_undemocratic_monarchy_trigger = yes }
+	scope:actor ?= { coa_undemocratic_monarchy_trigger = yes }
 }
 
 coa_def_republic_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_republic_trigger = yes }
+	scope:actor ?= { coa_republic_trigger = yes }
+}
+
+coa_def_federal_republic_trigger = {
+	exists = scope:actor
+	scope:actor ?= { coa_federal_republic_trigger = yes }
 }
 
 coa_def_theocracy_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_theocracy_trigger = yes }
+	scope:actor ?= { coa_theocracy_trigger = yes }
 }
 
 coa_def_multicultural_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_multicultural_trigger = yes }
+	scope:actor ?= { coa_multicultural_trigger = yes }
 }
 
 coa_def_autocracy_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_autocracy_trigger = yes }
+	scope:actor ?= { coa_autocracy_trigger = yes }
 }
 
 coa_def_communist_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_communist_trigger = yes }
+	scope:actor ?= { coa_communist_trigger = yes }
 }
 
 coa_def_anarchy_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_anarchy_trigger = yes }
+	scope:actor ?= { coa_anarchy_trigger = yes }
 }
 
 coa_def_dictatorship_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_dictatorship_trigger = yes }
+	scope:actor ?= { coa_dictatorship_trigger = yes }
 }
 
 coa_def_oligarchy_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_oligarchy_trigger = yes }
+	scope:actor ?= { coa_oligarchy_trigger = yes }
 }
 
 coa_def_state_religion_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { has_law = law_type:law_state_religion }
+	scope:actor ?= { has_law = law_type:law_state_religion }
 }
 
 coa_def_egalitarian_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { has_law = law_type:law_multicultural }
-}
-
-coa_def_military_junta_flag_trigger = {
-	exists = scope:actor
-	scope:actor = { coa_military_trigger = yes }
+	scope:actor ?= { has_law = law_type:law_multicultural }
 }
 
 coa_def_fascist_flag_trigger = {
 	exists = scope:actor
-	scope:actor = { coa_fascist_trigger = yes }
+	scope:actor ?= { coa_fascist_trigger = yes }
 }
 
 # Overlord
@@ -236,7 +299,7 @@ coa_def_ensign_trigger = {
 
 coa_def_american_ensign_trigger = {
 	exists = c:USA
-	c:USA = { save_temporary_scope_as = custom_overlord }
+	c:USA ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
@@ -244,12 +307,12 @@ coa_def_british_ensign_trigger = {
 	OR = {
 		AND = {
 			exists = c:GBR
-			c:GBR = { save_temporary_scope_as = custom_overlord }
+			c:GBR ?= { save_temporary_scope_as = custom_overlord }
 			coa_def_ensign_trigger = yes
 		}
 		AND = {
 			exists = c:ENG
-			c:ENG = { save_temporary_scope_as = custom_overlord }
+			c:ENG ?= { save_temporary_scope_as = custom_overlord }
 			coa_def_ensign_trigger = yes
 		}
 	}
@@ -313,8 +376,8 @@ coa_def_dominant_scotland_trigger = {
 	OR = {
 		AND = {
 			exists = scope:actor
-			scope:actor = {
-				capital = {
+			scope:actor ?= {
+				capital ?= {
 					state_region = {
 						OR = {
 							this = s:STATE_LOWLANDS
@@ -326,7 +389,7 @@ coa_def_dominant_scotland_trigger = {
 		}
 		AND = {
 			exists = c:SCO
-			c:SCO = { save_temporary_scope_as = custom_overlord }
+			c:SCO ?= { save_temporary_scope_as = custom_overlord }
 			coa_def_ensign_trigger = yes
 		}		
 	}
@@ -334,48 +397,47 @@ coa_def_dominant_scotland_trigger = {
 
 coa_def_turkish_ensign_trigger = {
 	exists = c:TUR
-	c:TUR = { save_temporary_scope_as = custom_overlord }
+	c:TUR ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_chinese_ensign_trigger = {
 	exists = c:CHI
-	c:CHI = { save_temporary_scope_as = custom_overlord }
+	c:CHI ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_siam_ensign_trigger = {
 	exists = c:SIA
-	c:SIA = { save_temporary_scope_as = custom_overlord }
+	c:SIA ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_russian_ensign_trigger = {
 	exists = c:RUS
-	c:RUS = { save_temporary_scope_as = custom_overlord }
+	c:RUS ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_austrian_ensign_trigger = {
 	exists = c:AUS
-	c:AUS = { save_temporary_scope_as = custom_overlord }
+	c:AUS ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_brazilian_ensign_trigger = {
 	exists = c:BRZ
-	c:BRZ = { save_temporary_scope_as = custom_overlord }
+	c:BRZ ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_netherlands_ensign_trigger = {
 	exists = c:NET
-	c:NET = { save_temporary_scope_as = custom_overlord }
+	c:NET ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_colonial_ensign_trigger = {
-	# TODO there's probably a better way to do this although I'm not sure if every western nation should fit here
 	OR = {
 		coa_def_british_ensign_trigger = yes	
 		coa_def_french_ensign_trigger = yes	
@@ -481,14 +543,14 @@ coa_def_hispanic_american_trigger = {
 
 coa_SWE_use_norway_canton_trigger = {
 	exists = c:NOR
-	c:NOR = { 
+	c:NOR ?= { 
 		is_subject_of = scope:target
 	}
 }
 
 coa_SWE_use_union_mark_flag_trigger = {
 	NOT = { exists = c:NOR }
-	scope:actor = {
+	scope:actor ?= {
 		any_scope_state = {
 			state_region = {
 				is_homeland = norwegian
@@ -503,7 +565,7 @@ coa_SWE_use_union_mark_canton_trigger = {
 
 coa_SWE_karl_johan_is_king_trigger = {
 	exists = c:SWE
-	c:SWE = {
+	c:SWE ?= {
 		NOT = {
 			# hacky way to see if King Karl Johan has been succeeded
 			ruler = {
@@ -516,7 +578,7 @@ coa_SWE_karl_johan_is_king_trigger = {
 
 coa_def_controls_part_of_ireland = {
 	exists = scope:actor
-	scope:actor = {
+	scope:actor ?= {
 		OR = {
 			coa_controls_part_of_ireland = yes
 			any_subject_or_below = {
@@ -528,7 +590,7 @@ coa_def_controls_part_of_ireland = {
 
 coa_def_controls_part_of_france = {
 	exists = scope:actor
-	scope:actor = {
+	scope:actor ?= {
 		OR = {
 			coa_controls_part_of_france = yes
 			any_subject_or_below = {
@@ -540,7 +602,7 @@ coa_def_controls_part_of_france = {
 
 coa_def_war_trigger = {
 	exists = scope:actor
-	scope:actor = {
+	scope:actor ?= {
 		is_at_war = yes
 	}
 }
@@ -567,10 +629,8 @@ coa_def_catholic_trigger = {
 
 coa_def_kalmar_flag_trigger = {
 	exists = scope:actor
-	scope:actor = {
+	scope:actor ?= {
 		has_law = law_type:law_monarchy
-		ruler = {
-			has_culture = cu:danish
-		}
+		was_formed_from = DEN
 	}
 }

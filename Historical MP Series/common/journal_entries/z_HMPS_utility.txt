@@ -1,0 +1,161 @@
+﻿HMPS_utility_je = {
+
+	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+	
+	is_shown_when_inactive = {
+        is_ai = yes
+        OR = {
+            AND = {
+                has_global_variable = utility_tag_country
+                OR = {
+                    this = global_var:utility_tag_country
+                    global_var:utility_tag_country = {
+                        OR = {
+                            is_country_alive = no
+                            OR = {
+                                is_ai = no
+                                NOT = { # Human players eligible only if they conquered all the AIs
+                                    any_country = {
+                                        is_ai = yes
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            NOT = {
+                has_global_variable = utility_tag_country
+            }
+        }
+    }
+    
+    possible = {
+        always = yes
+    }
+    
+    immediate = {
+        if = {
+            limit = {
+                OR = {
+                    NOT = {
+                        has_global_variable = utility_tag_country
+                    }
+                    global_var:utility_tag_country = {
+                        OR = {
+                            is_country_alive = no
+                            OR = {
+                                is_ai = no
+                                NOT = {
+                                    any_country = {
+                                        is_ai = yes
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            set_global_variable = {
+                name  = utility_tag_country
+                value = this
+            }
+        }
+    }
+    
+    invalid = {
+        OR = {
+			AND = {
+				is_ai = no
+				any_country = {
+					is_ai = yes
+				}
+			}
+            AND = {
+                has_global_variable = utility_tag_country
+                this != global_var:utility_tag_country
+            }
+        }
+    }
+	
+	on_weekly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					has_decree = decree_emergency_relief
+					devastation > 0
+				}
+				state_region = { add_devastation = -0.70 }
+			}
+			every_country = {
+				every_political_movement = {
+					limit = {
+						NOT = { is_political_movement_type = movement_to_preserve }
+						OR = {
+							desired_law = law_type:law_peasant_levies
+							desired_law = law_type:law_national_militia
+							desired_law = law_type:law_professional_army
+							desired_law = law_type:law_mass_conscription
+							
+							desired_law = law_type:law_traditionalism
+							
+							desired_law = law_type:law_no_poll_taxes
+							desired_law = law_type:law_land_based_taxation
+							desired_law = law_type:law_per_capita_based_taxation
+									
+							desired_law = law_type:law_no_income_taxes
+							desired_law = law_type:law_low_income_tax
+							desired_law = law_type:law_moderate_income_tax
+							desired_law = law_type:law_high_income_tax
+							
+							desired_law = law_type:law_no_corporation_taxes
+							desired_law = law_type:law_low_corporation_tax
+							desired_law = law_type:law_moderate_corporation_tax
+							desired_law = law_type:law_high_corporation_tax
+							
+							desired_law = law_type:law_no_consumption_taxes
+							desired_law = law_type:law_low_consumption_tax
+							desired_law = law_type:law_moderate_consumption_tax
+							desired_law = law_type:law_high_consumption_tax
+						}
+					}
+					add_modifier = {
+						name = revolution_disbanded
+						months = -1
+					}
+					every_supporting_character = {
+						kill_character = {
+							hidden = yes
+						}
+					}
+				}
+			}
+			every_country = {
+				limit = {
+					has_law = law_type:law_the_company
+					NOT = {
+						c:BIC ?= this
+					}
+				}
+				activate_law = law_type:law_traditionalism
+			}
+			every_country = {
+				limit = {
+					is_subject = no
+					has_law = law_type:law_extraction_economy
+				}
+				activate_law = law_type:law_traditionalism
+			}
+		}
+	}
+	
+	weight = 0
+
+    transferable = no
+    
+    can_revolution_inherit = no
+
+    can_deactivate = yes
+    
+    should_be_pinned_by_default = no
+}
