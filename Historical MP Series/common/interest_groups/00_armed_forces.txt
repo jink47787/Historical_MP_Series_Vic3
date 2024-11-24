@@ -10,6 +10,12 @@
 		ideology_patriotic
 		ideology_cultural_chauvinism
 	}
+	
+	character_ideologies = {
+		ideology_moderate
+		ideology_orleanist
+		ideology_bonapartist
+	}
 
 	enable = {
 		always = yes
@@ -74,6 +80,27 @@
 				set_ig_trait = ig_trait:ig_trait_clube_militar
 				set_ig_trait = ig_trait:ig_trait_patriotic_fervor
 			}
+			else_if = {
+				limit = {
+					owner = {
+						has_dlc_feature = ip2_content
+						c:BIC ?= this
+					}
+				}
+				set_ig_trait = ig_trait:ig_trait_divided_ranks
+				set_ig_trait = ig_trait:ig_trait_imperial_service
+				set_ig_trait = ig_trait:ig_trait_veerta
+			}
+			else_if = {
+				limit = {
+					owner = {
+						c:PAN ?= this
+					}
+				}
+				set_ig_trait = ig_trait:ig_trait_materiel_waste
+				set_ig_trait = ig_trait:ig_trait_khalsa
+				set_ig_trait = ig_trait:ig_trait_patriotic_fervor
+			}
 			else = {
 				set_ig_trait = ig_trait:ig_trait_materiel_waste
 				set_ig_trait = ig_trait:ig_trait_veteran_consultation
@@ -104,6 +131,26 @@
 			ig:ig_armed_forces = {
 				add_ideology = ideology_bakufu
 				set_interest_group_name = ig_samurai
+			}
+		}
+				# India
+		else_if = {
+			limit = {
+				c:BIC ?= this
+			}
+			ig:ig_armed_forces = {
+				set_interest_group_name = ig_presidency_armies
+			}
+		}
+		# Sikh Empire
+		else_if = {
+			limit = {
+				c:PAN ?= this
+			}
+			ig:ig_armed_forces = {
+				set_interest_group_name = ig_khalsaji
+				remove_ideology = ideology_jingoist
+				add_ideology = ideology_sikh_militancy
 			}
 		}
 
@@ -176,6 +223,20 @@
 		}
 	}
 	on_disable = {}
+
+	priority_cultures = { #Country scope
+		rule = {
+			trigger = {
+				c:BIC ?= this
+				any_primary_culture = { 
+					cu:british = this
+				}
+			}
+			cultures = {
+				british scottish irish
+			}
+		}
+	}
 	on_character_ig_membership = {}
 
 	pop_potential = {
@@ -183,7 +244,7 @@
 			is_pop_type = soldiers
 			is_pop_type = officers
 			is_pop_type = aristocrats
-			pop_is_discriminated = no
+			pop_acceptance >= acceptance_status_4
 		}
 	}
 
@@ -194,7 +255,7 @@
 			desc = "POP_NOT_DISCRIMINATED"
 			if = {
 				limit = {
-					pop_is_discriminated = no
+					pop_acceptance >= acceptance_status_4
 				}
 				value = 25
 				if = { # Militarisation of colonial settlers
@@ -287,7 +348,15 @@
 				limit = {
 					is_pop_type = aristocrats
 				}
-				value = 50
+				value = 10
+				if = {
+					limit = {
+						owner = {
+							has_modifier = age_of_caudillos_modifier
+						}
+					}
+					add = 25
+				}
 				if = {
 					limit = {
 						owner = {
@@ -296,6 +365,17 @@
 					}
 					add = 50
 				}
+			}
+		}
+		
+		add = {
+			desc = "SIKH_MILITANCY"
+			if = {
+				limit = {
+					is_pop_type = aristocrats
+					religion = rel:sikh
+				}
+				add = 100
 			}
 		}
 
@@ -328,10 +408,24 @@
 				}
 				if = {
 					limit = {
-						strata = rich
+						strata = upper
 					}
 					value = 150
 				}
+			}
+		}
+		
+		add = {
+			desc = "POP_MILITARY_BUREAUCRACY"
+			if = {
+				limit = {
+					is_pop_type = bureaucrats
+					owner = {
+						c:ALK ?= this
+						has_government_type = gov_chartered_company
+					}
+				}
+				value = 100
 			}
 		}
 
@@ -529,15 +623,6 @@
 	# scope:character is the most popular commander in the IG
 	commander_leader_chance = {
 		value = 0.75
-		if = {
-			limit = {
-				exists = scope:character
-			}
-			multiply = {
-				value = 1
-				add = scope:character.popularity
-				min = 0
-			}
-		}
+		multiply = ig_commander_leader_chance_mult
 	}
 }
