@@ -1,0 +1,158 @@
+spain_test_button = {
+	name = "provoke_carlist_uprising_button"
+	desc = "provoke_carlist_uprising_desc"
+
+	possible = {
+		hidden_trigger = {
+			is_at_war = no
+			is_active_in_diplomatic_play = no
+			#NOT = { has_variable = carlist_uprising_cooldown }
+			carlism_mainland_state_repression = no
+			any_state = {
+				NOT = { state_region = s:STATE_BALEARES }
+				NOT = { state_region = s:STATE_TOLEDO }
+				is_homeland_of_country_cultures = ROOT
+				is_incorporated = yes
+				NOT = { has_variable = carlist_spawn_cooldown }
+			}
+		}
+	}
+	
+	effect = {
+		set_variable = { name = carlist_uprising_cooldown days = 1825 }
+		custom_tooltip = {
+			text = spawning_carlist_revolt
+			random_state = {
+				limit = {
+					NOT = { state_region = s:STATE_BALEARES }
+					NOT = { state_region = s:STATE_TOLEDO }
+					is_homeland_of_country_cultures = ROOT
+					is_incorporated = yes
+					NOT = { has_variable = carlist_spawn_cooldown }
+				}
+				save_scope_as = carlist_spawn
+				set_variable = carlist_spawn
+				set_variable = { name = carlist_spawn_cooldown years = 20 }
+			}
+			random_state = {
+				limit = {
+					NOT = { state_region = s:STATE_BALEARES }
+					NOT = { state_region = s:STATE_TOLEDO }
+					is_homeland_of_country_cultures = ROOT
+					is_incorporated = yes
+					any_neighbouring_state = { has_variable = carlist_spawn }
+					NOT = { has_variable = carlist_spawn }
+				}
+				if = {
+					limit = {
+						NOT = { has_decree = decree_political_repression }
+					}
+					random = {  
+						chance = 75
+						set_variable = carlist_spawn
+					}
+				}
+				if = {
+					limit = {
+						has_decree = decree_political_repression
+					}
+					random = {  
+						chance = 50
+						set_variable = carlist_spawn
+					}
+				}
+			}
+			random_state = {
+				limit = {
+					NOT = { state_region = s:STATE_BALEARES }
+					NOT = { state_region = s:STATE_TOLEDO }
+					is_homeland_of_country_cultures = ROOT
+					is_incorporated = yes
+					any_neighbouring_state = { has_variable = carlist_spawn }
+					NOT = { has_variable = carlist_spawn }
+				}
+				if = {
+					limit = {
+						NOT = { has_decree = decree_political_repression }
+					}
+					random = {  
+						chance = 50
+						set_variable = carlist_spawn
+					}
+				}
+				if = {
+					limit = {
+						has_decree = decree_political_repression
+					}
+					random = {  
+						chance = 25
+						set_variable = carlist_spawn
+					}
+				}
+			}
+			add_journal_entry = {
+				type = je_carlist_button_urpising_SPA
+			}
+			create_country = {
+				tag = SPC
+				origin = this
+				state = scope:carlist_spawn
+				
+				on_created = {
+					if = {
+						limit = {
+							NOT = {
+								has_law = law_type:law_monarchy
+							}
+						}
+						activate_law = law_type:law_monarchy
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_law = law_type:law_autocracy
+							}
+						}
+						activate_law = law_type:law_autocracy
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_law = law_type:law_state_religion
+							}
+						}
+						activate_law = law_type:law_state_religion
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_law = law_type:law_peasant_levies
+							}
+						}
+						activate_law = law_type:law_peasant_levies
+					}
+				}
+			}
+			every_state = {
+				limit = {
+					has_variable = carlist_spawn
+				}
+				save_scope_as = carlist_spawn
+				set_state_owner = c:SPC
+				set_state_type = incorporated
+				remove_variable = carlist_spawn
+			}
+			create_diplomatic_play = {
+				target_country = c:SPC
+				escalation = 80
+				type = dp_annex_war
+			
+				add_war_goal = {
+					holder = c:SPC
+					type = annex_country
+					target_country = c:SPA
+				}
+			}
+		}
+	}
+}

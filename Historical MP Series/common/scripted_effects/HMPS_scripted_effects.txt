@@ -1,0 +1,327 @@
+﻿assign_opium_addiction_penalty = {
+	if = {
+		limit = {
+			game_date <= 1846.01.01
+		}
+		add_modifier = {
+			name = chinese_opium_addiction
+			years = 60
+			is_decaying = yes
+		}
+	}
+	if = {
+		limit = {
+			game_date > 1846.01.01
+			game_date <= 1856.01.01
+		}
+		add_modifier = {
+			name = chinese_opium_addiction
+			years = 50
+			is_decaying = yes
+			multiplier = 0.83
+		}
+	}
+	if = {
+		limit = {
+			game_date > 1856.01.01
+			game_date <= 1866.01.01
+		}
+		add_modifier = {
+			name = chinese_opium_addiction
+			years = 40
+			is_decaying = yes
+			multiplier = 0.67
+		}
+	}
+	if = {
+		limit = {
+			game_date > 1866.01.01
+			game_date <= 1876.01.01
+		}
+		add_modifier = {
+			name = chinese_opium_addiction
+			years = 30
+			is_decaying = yes
+			multiplier = 0.5
+		}
+	}
+	if = {
+		limit = {
+			game_date > 1876.01.01
+			game_date <= 1886.01.01
+		}
+		add_modifier = {
+			name = chinese_opium_addiction
+			years = 20
+			is_decaying = yes
+			multiplier = 0.33
+		}
+	}
+	if = {
+		limit = {
+			game_date > 1886.01.01
+			game_date <= 1896.01.01
+		}
+		add_modifier = {
+			name = chinese_opium_addiction
+			years = 10
+			is_decaying = yes
+			multiplier = 0.17
+		}
+	}
+}
+
+assign_early_warlords_penalty = {
+	if = {
+		limit = {
+			year < 1840
+		}
+		add_modifier = {
+			name = early_warlords_collapse
+			years = 80
+			is_decaying = yes
+			multiplier = 80
+		}
+	}
+	else_if = {
+		limit = {
+			year < 1850
+		}
+		add_modifier = {
+			name = early_warlords_collapse
+			years = 70
+			is_decaying = yes
+			multiplier = 70
+		}
+	}
+	else_if = {
+		limit = {
+			year < 1860
+		}
+		add_modifier = {
+			name = early_warlords_collapse
+			years = 60
+			is_decaying = yes
+			multiplier = 60
+		}
+	}
+	else_if = {
+		limit = {
+			year < 1870
+		}
+		add_modifier = {
+			name = early_warlords_collapse
+			years = 50
+			is_decaying = yes
+			multiplier = 50
+		}
+	}
+	else_if = {
+		limit = {
+			year < 1880
+		}
+		add_modifier = {
+			name = early_warlords_collapse
+			years = 40
+			is_decaying = yes
+			multiplier = 40
+		}
+	}
+	else_if = {
+		limit = {
+			year < 1890
+		}
+		add_modifier = {
+			name = early_warlords_collapse
+			years = 30
+			is_decaying = yes
+			multiplier = 30
+		}
+	}
+	else_if = {
+		limit = {
+			year < 1900
+		}
+		add_modifier = {
+			name = early_warlords_collapse
+			years = 20
+			is_decaying = yes
+			multiplier = 20
+		}
+	}
+	else = {
+		add_modifier = {
+			name = early_warlords_collapse
+			years = 10
+			is_decaying = yes
+			multiplier = 10
+		}
+	}
+}
+
+force_single_market = {
+	if = {
+		limit = {
+			is_subject = yes
+			overlord = {
+				market = prev.market
+				NOT = {
+					has_diplomatic_pact = {
+						who = prev
+						type = grant_own_market
+					}
+				}
+			}
+		}
+		overlord = {
+			create_diplomatic_pact = {
+				country = prev
+				type = grant_own_market
+			}
+		}
+	}
+}
+
+calculate_tpg_reconstruction_law_progress = {
+	# From Laws
+	set_variable = { name = tpg_reconstruction_from_laws value = 0 }
+	# Cops
+	set_variable = { name = temp_policing_var_contribution value = institution:institution_police.investment }
+	if = {
+		limit = {
+			has_law = law_type:law_no_police
+		}
+		change_variable = { name = temp_policing_var_contribution add = 0 }
+	}
+	else_if = {
+		limit = {
+			has_law = law_type:law_local_police
+		}
+		change_variable = { name = temp_policing_var_contribution multiply = 0.1 }
+	}
+	else_if = {
+		limit = {
+			has_law = law_type:law_dedicated_police
+		}
+		change_variable = { name = temp_policing_var_contribution multiply = 0.2 }
+	}
+	else_if = {
+		limit = {
+			has_law = law_type:law_militarized_police
+		}
+		change_variable = { name = temp_policing_var_contribution multiply = 0.3 }
+	}
+	
+	# Internal Affairs
+	set_variable = { name = temp_ha_var_contribution value = institution:institution_home_affairs.investment }
+	if = {
+		limit = {
+			has_law = law_type:law_no_home_affairs
+		}
+		change_variable = { name = temp_ha_var_contribution add = 0 }
+	}
+	else_if = {
+		limit = {
+			has_law = law_type:law_guaranteed_liberties
+		}
+		change_variable = { name = temp_ha_var_contribution multiply = 0.1 }
+	}
+	else_if = {
+		limit = {
+			has_law = law_type:law_national_guard
+		}
+		change_variable = { name = temp_ha_var_contribution multiply = 0.2 }
+	}
+	else_if = {
+		limit = {
+			has_law = law_type:law_secret_police
+		}
+		change_variable = { name = temp_ha_var_contribution multiply = 0.3 }
+	}
+	change_variable = { name = tpg_reconstruction_from_laws add = var:temp_policing_var_contribution }
+	change_variable = { name = tpg_reconstruction_from_laws add = var:temp_ha_var_contribution }
+	remove_variable = temp_policing_var_contribution
+	remove_variable = temp_ha_var_contribution
+}
+calculate_liberal_fervor_level = {
+	if = {
+		limit = {
+			je:je_carlism_in_spain = {
+				"scripted_bar_progress(carlism_core_progress_bar)" < 450
+				"scripted_bar_progress(carlism_core_progress_bar)" >= 400
+			}
+			NOT = { has_modifier = liberal_fervor_level_1 }
+		}
+		remove_modifier = liberal_fervor_level_4
+		remove_modifier = liberal_fervor_level_3
+		remove_modifier = liberal_fervor_level_2
+		remove_modifier = liberal_fervor_level_5
+		add_modifier = {
+			name = liberal_fervor_level_1
+		}
+	}
+	else_if = {
+		limit = {
+			je:je_carlism_in_spain = {
+				"scripted_bar_progress(carlism_core_progress_bar)" < 400
+				"scripted_bar_progress(carlism_core_progress_bar)" >= 300
+			}
+			NOT = { has_modifier = liberal_fervor_level_2}
+		}
+		remove_modifier = liberal_fervor_level_5
+		remove_modifier = liberal_fervor_level_3
+		remove_modifier = liberal_fervor_level_4
+		remove_modifier = liberal_fervor_level_1
+		add_modifier = {
+			name = liberal_fervor_level_2
+		}
+	}
+	else_if = {
+		limit = {
+			je:je_carlism_in_spain = {
+				"scripted_bar_progress(carlism_core_progress_bar)" < 300
+				"scripted_bar_progress(carlism_core_progress_bar)" >= 200
+			}
+			NOT = { has_modifier = liberal_fervor_level_3 }
+		}
+		remove_modifier = liberal_fervor_level_5
+		remove_modifier = liberal_fervor_level_4
+		remove_modifier = liberal_fervor_level_2
+		remove_modifier = liberal_fervor_level_1
+		add_modifier = {
+			name = liberal_fervor_level_3
+		}
+	}
+	else_if = {
+		limit = {
+			je:je_carlism_in_spain = {
+				"scripted_bar_progress(carlism_core_progress_bar)" < 200
+				"scripted_bar_progress(carlism_core_progress_bar)" >= 100
+			}
+			NOT = { has_modifier = liberal_fervor_level_4 }
+		}
+		remove_modifier = liberal_fervor_level_5
+		remove_modifier = liberal_fervor_level_2
+		remove_modifier = liberal_fervor_level_3
+		remove_modifier = liberal_fervor_level_1
+		add_modifier = {
+			name = liberal_fervor_level_4
+		}
+	}
+	else_if = {
+		limit = {
+			je:je_carlism_in_spain = {
+				"scripted_bar_progress(carlism_core_progress_bar)" < 100
+				"scripted_bar_progress(carlism_core_progress_bar)" >= 0
+			}
+			NOT = { has_modifier = liberal_fervor_level_5 }
+		}
+		remove_modifier = liberal_fervor_level_1
+		remove_modifier = liberal_fervor_level_4
+		remove_modifier = liberal_fervor_level_3
+		remove_modifier = liberal_fervor_level_2
+		add_modifier = {
+			name = liberal_fervor_level_5
+		}
+	}
+}
