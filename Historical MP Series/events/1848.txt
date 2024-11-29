@@ -31,6 +31,9 @@
 		NOT = {
 			has_modifier = regicide_averted
 		}
+		ruler = {
+			is_immortal = no
+		}
 	}
 
 	option = {
@@ -154,7 +157,40 @@
 	type = country_event
 	placement = root
 	title = 1848.4.t
-	desc = 1848.4.d
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = 1848.4.d
+				trigger = {
+					any_interest_group = {
+						OR = {
+							is_powerful = yes
+							is_insurrectionary = yes
+						}
+						leader = {
+							has_ideology = ideology:ideology_radical
+						}
+					}
+				}
+			}
+			triggered_desc = {
+				desc = 1848.4.d_no_leader
+				trigger = {
+					NOT = {
+						any_interest_group = {
+							OR = {
+								is_powerful = yes
+								is_insurrectionary = yes
+							}
+							leader = {
+								has_ideology = ideology:ideology_radical
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	flavor = 1848.4.f
 
 	duration = 3
@@ -188,15 +224,36 @@
 	option = { # reactionary option
 		name = 1848.4.a
 		default_option = yes
-		scope:radical_leader_scope = {
+		scope:radical_leader_scope ?= {
 			add_modifier = {
 				name = 1848_popular_radical
-				is_decaying = yes
+			}
+		}
+		show_as_tooltip = {
+			if = {
+				limit = {
+					NOT = {
+						any_political_movement = {
+							is_political_movement_type = movement_radical
+						}
+					}
+				}
+				create_political_movement = { type = movement_radical }
+			}
+		}
+		je:je_springtime_of_the_peoples = {
+			add_modifier = {
+				name = modifier_springtime_of_the_peoples
+				multiplier = 0.5
 			}
 		}
 		add_modifier = {
 			name = suppressing_radicals
 			months = short_modifier_time
+		}
+		add_loyalists = {
+			strata = upper
+			value = medium_radicals
 		}
 		add_radicals = {
 			value = large_radicals
@@ -204,16 +261,15 @@
 		}
 		add_radicals = {
 			value = medium_radicals
-			strata = poor
+			strata = lower
 		}
 		ai_chance = {
 			base = 33
 		}
 	}
-	
 	option = { # radical option
 		name = 1848.4.b
-		scope:radical_leader_scope = {
+		scope:radical_leader_scope ?= {
 			add_modifier = {
 				name = 1848_popular_radical
 				months = normal_modifier_time
@@ -225,12 +281,14 @@
 				any_interest_group = {
 					is_marginal = no
 					can_have_radical_leader = yes
+					is_in_government = no
 				}
 			}
 			random_interest_group = {
 				limit = {
 					is_marginal = no
 					can_have_radical_leader = yes
+					is_in_government = no
 					leader = {
 						NOT = { has_modifier = 1848_popular_radical }
 					}
@@ -244,6 +302,26 @@
 					}
 				}
 			}
+		}
+		show_as_tooltip = {
+			if = {
+				limit = {
+					NOT = {
+						any_political_movement = {
+							is_political_movement_type = movement_radical
+						}
+					}
+				}
+				create_political_movement = { type = movement_radical }
+			}
+		}
+		je:je_springtime_of_the_peoples = {
+			add_modifier = {
+				name = modifier_springtime_of_the_peoples
+			}
+		}
+		add_radicals = {
+			value = medium_radicals
 		}
 		ai_chance = {
 			base = 66
@@ -430,6 +508,7 @@
 				is_marginal = no
 				leader = {
 					has_ideology = ideology:ideology_radical
+					is_immortal = no
 				}
 			}
 		}
@@ -996,7 +1075,7 @@
 	cooldown = { months = normal_modifier_time }
 
 	event_image = {
-		video = "asia_dead_cattle_poor_harvest"
+		video = "votp_realist_household"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
@@ -1016,7 +1095,10 @@
 			ig_approval < 0	
 		}
 
-		has_journal_entry = je_famine
+		any_scope_state = {
+			is_homeland_of_country_cultures = root
+			has_famine = yes
+		}
 	}
 
 	immediate = {
@@ -1035,7 +1117,8 @@
 
 		random_scope_state = {
 			limit = {
-				has_variable = famine_var
+				is_homeland_of_country_cultures = root
+				has_famine = yes
 			}
 			save_scope_as = 1848_famine_state
 		}

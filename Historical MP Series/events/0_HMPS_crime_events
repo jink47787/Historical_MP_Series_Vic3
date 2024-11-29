@@ -1,0 +1,68 @@
+﻿namespace = crime_events
+
+crime_events.10 = { #First horrific murders makes the newspapers
+	type = country_event
+	placement = scope:serial_killer_state
+
+	title = crime_events.10.t
+	desc = crime_events.10.d
+	flavor = crime_events.10.f
+
+	event_image = {
+		video = "southamerica_public_figure_assassination"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	duration = 3
+
+	trigger = {
+		has_variable = var_jack_ripper_possible
+		c:GBR ?= this #HMPS change
+		any_scope_state = {
+			is_incorporated = yes
+			any_scope_building = {
+				is_building_type = building_urban_center
+				level >= 10
+			}
+		}
+		AND = {
+			game_date > 1880.01.01
+			game_date < 1900.01.01
+		}
+		NOT = { has_law = law_type:law_no_police }
+		NOT = { has_variable = had_serial_killer_event }
+		NOT = { has_variable = ongoing_assassination_je }
+	}
+
+	immediate = {
+		set_variable = had_serial_killer_event
+		random_scope_state = {
+			limit = {
+				is_incorporated = yes
+				any_scope_building = {
+					is_building_type = building_urban_center
+					level >= 10
+				}
+			}
+			save_scope_as = serial_killer_state
+		}
+	}
+
+	option = {
+		name = crime_events.10.a
+		scope:serial_killer_state = {
+			add_modifier = {
+				name = serial_killer_state_mod
+				months = very_long_modifier_time
+			}
+		}
+		add_journal_entry = {
+			type = je_serial_killer
+			target = scope:serial_killer_state
+		}
+		set_variable = ongoing_serial_killer_je #so you don't get the assassination JE at the same time
+	}
+}
