@@ -28,7 +28,7 @@ grant_leadership_to_agitator = {
         }
 		trigger_if = {
 			limit = { owner = { has_law = law_type:law_state_atheism } }
-			NOT = { culture = { culture_is_discriminated_in = root.owner } }
+			religion = scope:actor.religion
 			NOR = {
 				has_ideology = ideology:ideology_theocrat
 				has_ideology = ideology:ideology_integralist
@@ -36,7 +36,9 @@ grant_leadership_to_agitator = {
 			}
 		}
 		trigger_else = {
-			character_is_discriminated = no
+			root.owner = {
+				cultural_acceptance_base = { target = scope:prev.culture value >= acceptance_status_3 }
+			}
 		}
 		OR = {
 			is_female = no
@@ -664,14 +666,12 @@ invite_exile = {
                 religion = scope:actor.religion
             }
         }
-        # cannot invite exiles with no cultural similarity if discriminated
+        # cannot only invite exiles with cultural similarity if discriminated
 		OR = {
 			culture = { shares_heritage_trait_with_any_primary_culture = scope:actor }
 			culture = { shares_non_heritage_trait_with_any_primary_culture = scope:actor }
-			NOT = {
-				culture = {
-					culture_is_discriminated_in = scope:actor
-				}
+			root.owner = {
+				cultural_acceptance_base = { target = scope:prev.culture value >= acceptance_status_3 }
 			}
 		}
         # Cannot invite exiles if you have Closed Borders
