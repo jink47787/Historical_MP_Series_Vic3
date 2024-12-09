@@ -47,50 +47,37 @@
 		law_isolationism = strongly_disapprove
 	}
 
-	possible = {
-		NOT = { has_role = agitator }
-		# no monarchists in countries with strong republican tradition
-		owner = {
+	country_trigger = {
+		exists = c:FRA
+		OR = {
+			c:FRA = this
+			civil_war_origin_country ?= c:FRA
+		}
+		NOR = {
+			any_interest_group = {
+				has_ideology = ideology:ideology_republican_paternalistic
+			}
+			has_variable = monarchy_stamped_out_var
 			AND = {
-				exists = c:FRA
 				OR = {
-					c:FRA = this
-					civil_war_origin_country = c:FRA
+					has_variable = legitimist_restoration_var
+					has_variable = bonapartist_restoration_var
 				}
-			}
-			NOR = {
-				any_interest_group = {
-					has_ideology = ideology:ideology_republican_paternalistic
-				}
-				has_variable = monarchy_stamped_out_var
-				AND = {
-					OR = {
-						has_variable = legitimist_restoration_var
-						has_variable = bonapartist_restoration_var
-					}
-					has_variable = one_true_french_dynasty
-				}
-			}
-		}
-		scope:interest_group = { 
-			OR = {
-				is_interest_group_type = ig_industrialists
-				is_interest_group_type = ig_petty_bourgeoisie
-				is_interest_group_type = ig_armed_forces
-			}
-		}
-		scope:interest_group = {
-			NOR = {
-				has_variable = communist_ig_var
-				has_variable = chose_vanguardism
-				has_variable = chose_fascism
-				has_variable = chose_conservatism
-				has_variable = chose_ethno_nationalism
+				has_variable = one_true_french_dynasty
 			}
 		}
 	}
 
-	leader_weight = {
+	interest_group_leader_trigger = {
+		ideology_orleanist_valid_trigger = yes
+	}
+
+	non_interest_group_leader_trigger = {
+		NOT = { has_role = agitator }
+		ideology_orleanist_valid_trigger = yes
+	}
+
+	interest_group_leader_weight = {
 		value = 200
 		# less likely in a theocracy
 		if = {
@@ -117,11 +104,10 @@
 		# more likely for intelligentsia, industrialists, and PB with traditional economic laws
 		if = {
 			limit = {
-				scope:interest_group = {
-					OR = {
-						is_interest_group_type = ig_petty_bourgeoisie
-						is_interest_group_type = ig_industrialists
-					}
+				OR = {
+					is_interest_group_type = ig_petty_bourgeoisie
+					is_interest_group_type = ig_intelligentsia
+					is_interest_group_type = ig_industrialists
 				}
 				owner = {
 					OR = {
@@ -141,9 +127,7 @@
 					has_law = law_type:law_monarchy
 					NOT = { has_variable = orleanist_restoration_var }
 				}
-				scope:interest_group = {
-					ig_approval < 0
-				}
+				ig_approval < 0
 			}
 			add = 75
 		}
@@ -155,20 +139,50 @@
 					NOT = { has_law = law_type:law_monarchy }
 					NOT = { has_variable = orleanist_restoration_var }
 				}
-				scope:interest_group = {
-					ig_approval < 0
-				}
+				ig_approval < 0
 			}
 			add = 25
 		}
 		# conservative and/or reactionary leaders have a higher spawn chance if the Anti-Dreyfusards won.
 		if = {
 			limit = {
-				scope:interest_group = {
-					has_variable = anti_dreyfusard_victory
-				}
+				has_variable = anti_dreyfusard_victory
 			}
 			add = 50
+		}
+		if = {
+			limit = {
+				OR = {
+					has_variable = communist_ig_var
+					has_variable = chose_vanguardism
+					has_variable = chose_anarchism
+					has_variable = chose_communism
+					has_variable = chose_ethno_nationalism
+					has_variable = chose_conservatism
+					has_variable = chose_fascism
+				}
+			}
+			multiply = 0.1
+		}
+	}
+	
+	non_interest_group_leader_weight = {
+		value = 100
+		if = {
+			limit = {
+				interest_group = {
+					OR = {
+						has_variable = communist_ig_var
+						has_variable = chose_vanguardism
+						has_variable = chose_anarchism
+						has_variable = chose_communism
+						has_variable = chose_ethno_nationalism
+						has_variable = chose_conservatism
+						has_variable = chose_fascism
+					}
+				}
+			}
+			multiply = 0.1
 		}
 	}
 }
@@ -219,51 +233,37 @@ ideology_legitimist = {
 		law_outlawed_dissent = strongly_approve
 	}
 
-	possible = {
-		NOT = { has_role = agitator }
-		# no monarchists in countries with strong republican tradition
-		owner = {
+	country_trigger = {
+		exists = c:FRA
+		OR = {
+			c:FRA = this
+			civil_war_origin_country ?= c:FRA
+		}
+		NOR = {
+			any_interest_group = {
+				has_ideology = ideology:ideology_republican_paternalistic
+			}
+			has_variable = monarchy_stamped_out_var
 			AND = {
-				exists = c:FRA
 				OR = {
-					c:FRA = this
-					civil_war_origin_country = c:FRA
+					has_variable = legitimist_restoration_var
+					has_variable = bonapartist_restoration_var
 				}
+				has_variable = one_true_french_dynasty
 			}
-			NOR = {
-				any_interest_group = {
-					has_ideology = ideology:ideology_republican_paternalistic
-				}
-				has_variable = monarchy_stamped_out_var
-				AND = {
-					OR = {
-						has_variable = orleanist_restoration_var
-						has_variable = bonapartist_restoration_var
-					}
-					has_variable = one_true_french_dynasty
-				}
-			}
-		}
-		scope:interest_group = { 
-			OR = {
-				is_interest_group_type = ig_devout
-				is_interest_group_type = ig_rural_folk
-				is_interest_group_type = ig_petty_bourgeoisie
-				is_interest_group_type = ig_landowners
-			}
-		}
-		scope:interest_group = {
-			NOR = {
-				has_variable = communist_ig_var
-				has_variable = chose_vanguardism
-				has_variable = chose_fascism
-				has_variable = chose_conservatism
-				has_variable = chose_ethno_nationalism
-			}
-		}
+		}		
 	}
 
-	leader_weight = {
+	interest_group_leader_trigger = {
+		ideology_legitimist_valid_trigger = yes
+	}
+
+	non_interest_group_leader_trigger = {
+		NOT = { has_role = agitator }
+		ideology_legitimist_valid_trigger = yes
+	}
+
+	interest_group_leader_weight = {
 		value = 200
 		# less likely in a theocracy
 		if = {
@@ -280,9 +280,7 @@ ideology_legitimist = {
 				owner = {
 					NOT = { has_law = law_type:law_monarchy }
 				}
-				scope:interest_group = {
-					ig_approval > 0
-				}
+				ig_approval > 0
 			}
 			add = -100
 		}
@@ -290,7 +288,7 @@ ideology_legitimist = {
 		# more likely for LO and Devout
 		if = {
 			limit = {
-				scope:interest_group = {
+				OR = {
 					is_interest_group_type = ig_landowners
 					is_interest_group_type = ig_devout
 				}
@@ -300,13 +298,45 @@ ideology_legitimist = {
 		# conservative and/or reactionary leaders have a higher spawn chance if the Anti-Dreyfusards won.
 		if = {
 			limit = {
-				scope:interest_group = {
-					has_variable = anti_dreyfusard_victory
-				}
+				has_variable = anti_dreyfusard_victory
 			}
 			add = 50
 		}
-	}
+		if = {
+			limit = {
+				OR = {
+					has_variable = communist_ig_var
+					has_variable = chose_vanguardism
+					has_variable = chose_anarchism
+					has_variable = chose_communism
+					has_variable = chose_ethno_nationalism
+					has_variable = chose_conservatism
+					has_variable = chose_fascism
+				}
+			}
+			multiply = 0.1
+		}
+	}	
+	
+	non_interest_group_leader_weight = {
+		value = 100
+		if = {
+			limit = {
+				interest_group = {
+					OR = {
+						has_variable = communist_ig_var
+						has_variable = chose_vanguardism
+						has_variable = chose_anarchism
+						has_variable = chose_communism
+						has_variable = chose_ethno_nationalism
+						has_variable = chose_conservatism
+						has_variable = chose_fascism
+					}
+				}
+			}
+			multiply = 0.1
+		}
+	}	
 }
 
 ideology_bonapartist = {
@@ -364,51 +394,37 @@ ideology_bonapartist = {
 	}
 
 
-	possible = {
-		NOT = { has_role = agitator }
-		# no monarchists in countries with strong republican tradition
-		owner = {
+	country_trigger = {
+		exists = c:FRA
+		OR = {
+			c:FRA = this
+			civil_war_origin_country ?= c:FRA
+		}
+		NOR = {
+			any_interest_group = {
+				has_ideology = ideology:ideology_republican_paternalistic
+			}
+			has_variable = monarchy_stamped_out_var
 			AND = {
-				exists = c:FRA
 				OR = {
-					c:FRA = this
-					civil_war_origin_country = c:FRA
+					has_variable = legitimist_restoration_var
+					has_variable = bonapartist_restoration_var
 				}
+				has_variable = one_true_french_dynasty
 			}
-			NOR = {
-				any_interest_group = {
-					has_ideology = ideology:ideology_republican_paternalistic
-				}
-				has_variable = monarchy_stamped_out_var
-				AND = {
-					OR = {
-						has_variable = orleanist_restoration_var
-						has_variable = legitimist_restoration_var
-					}
-					has_variable = one_true_french_dynasty
-				}
-			}
-		}
-		scope:interest_group = { 
-			OR = {
-				is_interest_group_type = ig_rural_folk
-				is_interest_group_type = ig_petty_bourgeoisie
-				is_interest_group_type = ig_industrialists
-				is_interest_group_type = ig_armed_forces
-			}
-		}
-		scope:interest_group = {
-			NOR = {
-				has_variable = communist_ig_var
-				has_variable = chose_vanguardism
-				has_variable = chose_fascism
-				has_variable = chose_conservatism
-				has_variable = chose_ethno_nationalism
-			}
-		}
+		}		
 	}
 
-	leader_weight = {
+	interest_group_leader_trigger = {
+		ideology_bonapartist_valid_trigger = yes
+	}
+
+	non_interest_group_leader_trigger = {
+		NOT = { has_role = agitator }
+		ideology_bonapartist_valid_trigger = yes
+	}
+
+	interest_group_leader_weight = {
 		value = 200
 		# less likely in a theocracy
 		if = {
@@ -425,9 +441,7 @@ ideology_bonapartist = {
 				owner = {
 					NOT = { has_law = law_type:law_monarchy }
 				}
-				scope:interest_group = {
-					ig_approval > 0
-				}
+				ig_approval > 0
 			}
 			add = -100
 		}
@@ -435,11 +449,9 @@ ideology_bonapartist = {
 		# more likely for PB and AF
 		if = {
 			limit = {
-				scope:interest_group = {
-					OR = {
-						is_interest_group_type = ig_petty_bourgeoisie
-						is_interest_group_type = ig_armed_forces
-					}
+				OR = {
+					is_interest_group_type = ig_petty_bourgeoisie
+					is_interest_group_type = ig_armed_forces
 				}
 			}
 			add = 50
@@ -447,11 +459,43 @@ ideology_bonapartist = {
 		# conservative and/or reactionary leaders have a higher spawn chance if the Anti-Dreyfusards won.
 		if = {
 			limit = {
-				scope:interest_group = {
-					has_variable = anti_dreyfusard_victory
-				}
+				has_variable = anti_dreyfusard_victory
 			}
 			add = 50
 		}
+		if = {
+			limit = {
+				OR = {
+					has_variable = communist_ig_var
+					has_variable = chose_vanguardism
+					has_variable = chose_anarchism
+					has_variable = chose_communism
+					has_variable = chose_ethno_nationalism
+					has_variable = chose_conservatism
+					has_variable = chose_fascism
+				}
+			}
+			multiply = 0.1
+		}
 	}
+	
+	non_interest_group_leader_weight = {
+		value = 100
+		if = {
+			limit = {
+				interest_group = {
+					OR = {
+						has_variable = communist_ig_var
+						has_variable = chose_vanguardism
+						has_variable = chose_anarchism
+						has_variable = chose_communism
+						has_variable = chose_ethno_nationalism
+						has_variable = chose_conservatism
+						has_variable = chose_fascism
+					}
+				}
+			}
+			multiply = 0.1
+		}
+	}	
 }
