@@ -32,7 +32,7 @@ Thanks to Henry for helping design and create the data visualization for the pop
 ---
 <br/>
 
-**Any problems or changes to suggest can talk to lead devs: Townes, Gracchus or Dr**
+**Any problems or changes to suggest can talk to lead devs: [REDACTED], Gracchus or Dr**
 
 <br/>
 ---
