@@ -3,87 +3,108 @@
 	
 	group = je_group_historical_content
 	
-	is_shown_when_inactive = {
-		country_has_primary_culture = cu:north_german
+	scripted_progress_bar = roonsreform_core_progress_bar
+	
+	scripted_button = roonsreform_gap_theory_button
+	
+	modifiers_while_active = {
+		constitutional_crisis
 	}
 	
-	immediate = {
-		set_variable = {
-			name = pru_parliment_crisis_var
-			value = 0
-		}
-		add_modifier = {
-			name = constitutional_crisis
+	is_shown_when_inactive = {
+		OR = {
+			c:PRU ?= THIS
+			AND = {
+				c:GER ?= THIS
+				c:GER ?= {
+					was_formed_from = PRU
+				}
+			}
 		}
 	}
 
 	possible = {
-		country_has_primary_culture = cu:north_german
-		has_law = law_type:law_mass_conscription
-		NOT = { has_law = law_type:law_no_legislature }
-	}
-	
-	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
-		}
-		NOT = { has_law = law_type:law_professional_army }
-	}
-	
-	fail = {
-		has_law = law_type:law_professional_army
-	}
-
-	on_monthly_pulse = {
-		effect = {
-			if = {
-				limit = {
-					NOT = { has_law = law_type:law_professional_army }
-				}
-				change_variable = {
-					name = pru_parliment_crisis_var
-					add = 1
+		OR = {
+			c:PRU ?= THIS
+			AND = {
+				c:GER ?= THIS
+				c:GER ?= {
+					was_formed_from = PRU
 				}
 			}
 		}
+		OR = {
+			institution_investment_level = { institution = institution_army_model value >= 3 }
+			is_enacting_law = law_type:law_mass_conscription
+		}
 	}
 	
+	complete = {
+		has_law = law_type:law_mass_conscription
+	}
+	
+	fail = {
+		custom_tooltip = {
+			text = pru_constitutional_crisis_fail
+			scope:journal_entry = {
+				"scripted_bar_progress(roonsreform_core_progress_bar)" >= 60
+			}
+		}
+		ig:ig_armed_forces = { is_in_government = no is_powerful = no }
+	}
+
+	
 	on_complete = {
-		remove_modifier = constitutional_crisis
-		add_modifier = {
-			name = junker_victory
-			months = 240
-			is_decaying = yes
+		if = {
+			limit = {
+				has_modifier = modifier_roonsreform_gap_theory
+			}
+			remove_modifier = modifier_roonsreform_gap_theory
+		}
+		ig:ig_petty_bourgeoisie = {
+			set_ig_trait = ig_trait:ig_trait_culture_of_militarism
 		}
 	}
 	
 	on_fail = {
-		remove_modifier = constitutional_crisis
-		ig:ig_landowners = {
+		if = {
+			limit = {
+				has_modifier = modifier_roonsreform_gap_theory
+			}
+			remove_modifier = modifier_roonsreform_gap_theory
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_political_movement = {
+						OR = {
+							is_political_movement_type = movement_liberal
+							is_political_movement_type = movement_modernizer
+							is_political_movement_type = movement_radical
+						}
+					}
+				}
+			}
+			create_political_movement = { type = movement_radical }
+			custom_tooltip = {
+				text = pru_constitutional_crisis_modifier_add
+			}
+		}
+		random_political_movement = {
+			limit = { 
+				OR = {
+					is_political_movement_type = movement_liberal
+					is_political_movement_type = movement_modernizer
+					is_political_movement_type = movement_radical
+				}
+			}
 			add_modifier = {
-				name = mad_junkers
-				months = 72 
+				name = modifier_ger_democrat_surge
+				years = 15
 				is_decaying = yes
 			}
 		}
-		ig:ig_armed_forces = {
-			add_modifier = {
-				name = mad_junkers
-				months = 72
-				is_decaying = yes
-			}
-		}
 	}
-
-	current_value = {
-		value = root.var:pru_parliment_crisis_var
-	}
-
-	goal_add_value = {
-		value = 60
-	}
-
-	progressbar = yes
 
 	can_revolution_inherit = yes
 
