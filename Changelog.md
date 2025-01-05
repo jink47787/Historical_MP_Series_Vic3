@@ -28,9 +28,10 @@ All mods / mod ideas used linked below:
 - Kate's Liberate Country as Subject: https://steamcommunity.com/sharedfiles/filedetails/?id=3241445760
 - Remove all trade routes' line and arrows: https://steamcommunity.com/sharedfiles/filedetails/?id=2897200021
 - Join War mod: https://steamcommunity.com/sharedfiles/filedetails/?id=3015811655
-- Add Wargoals mod: https://steamcommunity.com/sharedfiles/filedetails/?id=3390504397
+- Add Wargoals During Wars: https://steamcommunity.com/sharedfiles/filedetails/?id=3390504397
 Thanks to Gelre for his UI, Performance & Flava work.
-Thanks to Henry for helping design and create the data visualization for the pop rework. 
+Thanks to Henry, Orange, and Eilmer as HMPS junior devs. 
+Thanks to Yyyman for his Italy company changes.
 ---
 <br/>
 
