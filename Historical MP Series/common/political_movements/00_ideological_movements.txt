@@ -363,14 +363,28 @@
 			desc = "STANDARD_OF_LIVING_FOR_SLAVES"
 		}
 		
-		if = {
-			limit = { 
-				owner ?= { has_journal_entry = je_acw_countdown }
+		#if = {
+		#	limit = { 
+		#		owner ?= { has_journal_entry = je_acw_countdown }
+		#	}
+		#	
+		#	add = {
+		#		value = 0.2
+		#		desc = "je_acw_countdown"
+		#	}
+		#}
+		
+		if = { #factor added by HMPS: making sure USA gets 100% activisim when trying to pass slave trade
+			limit = {
+				owner ?= {
+					has_journal_entry = je_acw_countdown
+					is_enacting_law = law_type:law_slave_trade
+				}
 			}
 			
 			add = {
-				value = 0.2
-				desc = "je_acw_countdown"
+				value = 1.0
+				desc = "je_acw_activism_while_banning_slavery"
 			}
 		}		
 	}
@@ -453,7 +467,7 @@ movement_pro_slavery = {
 				is_pop_type = aristocrats
 			}
 			add = {
-				value = 45
+				value = 70
 				desc = "POP_ARISTOCRATS"
 			}
 		}	
@@ -658,8 +672,22 @@ movement_pro_slavery = {
 			}
 			
 			add = {
-				value = 0.1
+				value = 0.2
 				desc = "RULER_IS_ANTI_SLAVERY"
+			}
+		}
+	
+		if = { #factor added by HMPS: making sure USA gets 100% activisim when trying to ban slavery
+			limit = {
+				owner ?= {
+					has_journal_entry = je_acw_countdown
+					is_enacting_law = law_type:law_slavery_banned
+				}
+			}
+			
+			add = {
+				value = 1.0
+				desc = "je_acw_activism_while_banning_slavery"
 			}
 		}
 	
@@ -2319,6 +2347,17 @@ movement_anarchist = {
 				multiply = 0.025
 				min = 0
 			}
+			#Anarchists don't like police beating people up
+			if = {
+				limit = { 
+					has_law = law_type:law_militarized_police
+				}
+				add = {
+					value = country_turmoil
+					divide = 0.4
+					desc = "IG_DISLIKES_POLICE_BRUTALITY"
+				}
+			}	
 		}
 	}	
 }
@@ -2573,7 +2612,32 @@ movement_communist = {
 					value = 0.1
 					desc = "NO_INSTITUTION_workplace_safety"
 				}		
-			}		
+			}
+			if = { #Communists hate police if they're beating up people and they're the ones not doing it
+				limit = { 
+					AND = {
+						has_law = law_type:law_militarized_police
+						NOT = {
+							any_interest_group = {
+								is_in_government = yes
+								has_party = yes
+								party = {
+									OR = {
+										is_party_type = communist_party
+										is_party_type = social_democrat_party
+										is_party_type = anarchist_party
+									}
+								}
+							}
+						}
+					}
+				}
+				add = {
+					value = country_turmoil
+					divide = 0.5
+					desc = "COMMUNIST_IG_DISLIKES_POLICE_BRUTALITY"
+				}
+			}			
 		}
 	}
 }
@@ -2582,7 +2646,7 @@ movement_fascist = {
 	category = movement_category_ideological
 	
 	# Fascists care about a lot of law groups, so the impact of each should be lesser
-	active_law_radicalism_multiplier = 0.5
+	active_law_radicalism_multiplier = 0.75
 	
 	ideology = ideology_fascist
 	character_ideologies = {
@@ -2719,7 +2783,7 @@ movement_fascist = {
 					is_pop_type = shopkeepers
 				}
 				add = {
-					value = 15
+					value = 21
 					desc = "POP_SHOPKEEPERS"
 				}
 			}
@@ -2901,6 +2965,26 @@ movement_fascist = {
 					desc = "NUMBER_OF_CLAIMS"
 				}				
 			}
+		}
+		owner ?= {
+			add = {
+				value = country_turmoil
+				divide = 0.3
+				desc = "COUNTRY_TURMOIL_NO_MIL_POLICE"
+			}	
+		}
+		owner = {
+			#Fascists feel better about turmoil with militarized police
+			if = {
+				limit = { 
+					has_law = law_type:law_militarized_police
+				}
+				add = {
+					value = country_turmoil
+					divide = -0.3
+					desc = "IG_LIKES_POLICE_BRUTALITY"
+				}
+			}	
 		}
 	}	
 }
@@ -3428,8 +3512,19 @@ movement_liberal = {
 					value = 0.1
 					desc = "NO_INSTITUTION_schools"
 				}		
-			}				
-		}
+			}
+			#Liberals don't like police beating people up
+			if = {
+				limit = { 
+					has_law = law_type:law_militarized_police
+				}
+				add = {
+					value = country_turmoil
+					divide = 0.6
+					desc = "IG_DISLIKES_POLICE_BRUTALITY"
+				}
+			}			
+		}				
 	}		
 }
 
@@ -3756,7 +3851,18 @@ movement_radical = {
 					value = -0.1
 					desc = "NO_INSTITUTION_police"
 				}		
-			}			
+			}
+			#Radicals don't like police beating people up
+			if = {
+				limit = { 
+					has_law = law_type:law_militarized_police
+				}
+				add = {
+					value = country_turmoil
+					divide = 0.5
+					desc = "IG_DISLIKES_POLICE_BRUTALITY"
+				}
+			}				
 		}
 	}		
 }
@@ -4528,7 +4634,7 @@ movement_feminist = {
 	category = movement_category_ideological
 	
 	# Pretty much a single issue movement
-	law_enactment_radicalism_multiplier = 1.5 
+	law_enactment_radicalism_multiplier = 2.5 
 	
 	ideology = ideology_feminist_ig
 	character_ideologies = {
@@ -4536,6 +4642,12 @@ movement_feminist = {
 		ideology_humanitarian
 	}
 	
+	disband_trigger = {
+		has_law = law_type:law_womens_suffrage
+	}
+	
+	on_disbanded = {}
+		
 	creation_trigger = {
 		has_technology_researched = feminism
 	}	
@@ -4908,7 +5020,7 @@ movement_reactionary = {
 					is_pop_type = shopkeepers
 				}
 				add = {
-					value = 12
+					value = 18
 					desc = "POP_SHOPKEEPERS"
 				}
 			}
@@ -5033,8 +5145,21 @@ movement_reactionary = {
 		owner ?= {
 			add = {
 				value = country_turmoil
-				divide = 0.25
-				desc = "COUNTRY_TURMOIL"
+				divide = 0.33
+				desc = "COUNTRY_TURMOIL_NO_MIL_POLICE"
+			}	
+		}
+		owner = {
+			#Reactionaries feel better about turmoil with militarized police
+			if = {
+				limit = { 
+					has_law = law_type:law_militarized_police
+				}
+				add = {
+					value = country_turmoil
+					divide = -0.6
+					desc = "IG_LIKES_POLICE_BRUTALITY"
+				}
 			}	
 		}
 	}
