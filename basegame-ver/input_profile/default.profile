@@ -374,6 +374,18 @@ input_context={
 		scancode = 10 			# G
 	}
 
+	input_action = {
+		name = "merge"
+		text = "SETTING_INPUT_ACTION_MERGE"
+		scancode = 16 			# M
+	}
+
+	input_action = {
+		name = "country_panel"
+		text = "SETTING_INPUT_ACTION_COUNTRY_PANEL"
+		scancode = 21 			# R
+	}
+
 	input_action = { 
 		name = "toggle_pin"
 		text = "SETTING_INPUT_ACTION_TOGGLE_PIN"
