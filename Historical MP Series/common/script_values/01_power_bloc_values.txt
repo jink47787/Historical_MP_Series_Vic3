@@ -66,7 +66,7 @@ power_bloc_leverage_gain = {
 	
 	if = {
 		limit = {
-			has_treaty_port_in_country = scope:target
+			has_treaty_port_in_market = scope:target.market
 		}
 		add = {
 			value = 200
@@ -539,40 +539,45 @@ ai_power_bloc_identity_score = {
 	### Trade League
 	if = {
 		limit = {
-			scope:actor.power_bloc ?= {
+			scope:source_country.power_bloc ?= {
 				has_identity = identity:identity_trade_league
 			}
 		}
 		### Isolationism
 		if = {
 			limit = {
-				modifier:market_disallow_trade_routes_bool = yes
+				modifier:country_disallow_trade_bool = yes
 			}
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_DISALLOWED_TRADE_ROUTES"
 				value = -200
 			}
 		}
-		### Trade routes: increase for each trade route between the two countries
+		### Trade: increase with mutual trade value
 		if = {
 			limit = {
 				"num_mutual_trade_route_levels_with_country(scope:actor)" > 0
 			}
 			add = {
-				desc = "DIPLOMATIC_ACCEPTANCE_MUTUAL_TRADE_ROUTES"
-				value = "num_mutual_trade_route_levels_with_country(scope:actor)"
-				multiply = 1
-				max = 25
+				desc = "DIPLOMATIC_ACCEPTANCE_MUTUAL_TRADE_VALUE"
+				value = "mutual_trade_value_with_country(scope:source_country)"
+				multiply = 50000
+				divide = { # We modulate this value by GDP, clamped to a range to ensure it remains relevant for very small/very large economies
+					value = gdp
+					max = scope:source_country.gdp # We use whichever GDP is smaller
+					min = 1000000
+				}
+				max = 50
 			}
 		}
 		### Economic Dependence: increase if high, decrease if low
 		if = {
 			limit = {
-				"economic_dependence(scope:actor)" > 1
+				"economic_dependence(scope:source_country)" > 1
 			}
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_HIGH_ECONOMIC_DEPENDENCE"
-				value = "economic_dependence(scope:actor)"
+				value = "economic_dependence(scope:source_country)"
 				subtract = 1
 				multiply = 25
 				max = 50
@@ -580,11 +585,11 @@ ai_power_bloc_identity_score = {
 		}
 		else_if = {
 			limit = {
-				"economic_dependence(scope:actor)" < 1
+				"economic_dependence(scope:source_country)" < 1
 			}
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_LOW_ECONOMIC_DEPENDENCE"
-				value = "economic_dependence(scope:actor)"
+				value = "economic_dependence(scope:source_country)"
 				subtract = 1
 				multiply = 50
 				min = -50
@@ -594,7 +599,7 @@ ai_power_bloc_identity_score = {
 	### Sovereign Empire
 	else_if = {
 		limit = {
-			scope:actor.power_bloc ?= {
+			scope:source_country.power_bloc ?= {
 				has_identity = identity:identity_sovereign_empire
 			}
 		}
@@ -612,7 +617,9 @@ ai_power_bloc_identity_score = {
 		### Doesn't need the protection
 		if = {
 			limit = {
-				has_powerful_protectors = yes
+				has_powerful_protectors = {
+					ACTOR_SCOPE = scope:source_country
+				}
 			}
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_POWERFUL_PROTECTORS_THEM"
@@ -623,29 +630,29 @@ ai_power_bloc_identity_score = {
 	### Ideological Union
 	else_if = {
 		limit = {
-			scope:actor.power_bloc ?= {
+			scope:source_country.power_bloc ?= {
 				has_identity = identity:identity_ideological_union
 			}
 		}
 		### Strong weight for ideological opinion
 		if = {
 			limit = {
-				"ai_ideological_opinion(scope:actor)" > 0
+				"ai_ideological_opinion(scope:source_country)" > 0
 			}
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_IDEOLOGICAL_OPINION"
-				value = "ai_ideological_opinion(scope:actor)"
+				value = "ai_ideological_opinion(scope:source_country)"
 				multiply = 0.5
 				max = 50
 			}
 		}
 		else_if = {
 			limit = {
-				"ai_ideological_opinion(scope:actor)" < 0
+				"ai_ideological_opinion(scope:source_country)" < 0
 			}
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_IDEOLOGICAL_OPINION_NEGATIVE"
-				value = "ai_ideological_opinion(scope:actor)"
+				value = "ai_ideological_opinion(scope:source_country)"
 				multiply = 0.5
 				min = -50
 			}
@@ -674,7 +681,7 @@ ai_power_bloc_identity_score = {
 	### Military Treaty
 	else_if = {
 		limit = {
-			scope:actor.power_bloc ?= {
+			scope:source_country.power_bloc ?= {
 				has_identity = identity:identity_military_treaty_organization
 			}
 		}
@@ -731,14 +738,14 @@ ai_power_bloc_identity_score = {
 	### Religious homogeneity
 	else_if = {
 		limit = {
-			scope:actor.power_bloc ?= {
+			scope:source_country.power_bloc ?= {
 				has_identity = identity:identity_religious
 			}
 		}
 		### Same religion
 		if = {
 			limit = {
-				religion = scope:actor.religion
+				religion = scope:source_country.religion
 			}
 			add = {
 				desc = "DIPLOMATIC_ACCEPTANCE_SAME_RELIGION"
@@ -750,7 +757,7 @@ ai_power_bloc_identity_score = {
 			if = {
 				limit = {
 					religion = {
-						shares_heritage_trait_with_state_religion = scope:actor
+						shares_heritage_trait_with_state_religion = scope:source_country
 					}
 				}
 				add = {
