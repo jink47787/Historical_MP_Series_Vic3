@@ -5,10 +5,11 @@
 	group = je_group_foreign_affairs
 
 	is_shown_when_inactive = {
+		NOT = { is_country_type = unrecognized }
 		has_technology_researched = quinine
 		any_scope_state = {
 			is_incorporated = no
-			state_in_africa = yes
+			state_is_in_africa = yes
 		}
 	}
 
@@ -16,74 +17,54 @@
 		is_country_type = recognized
 		has_technology_researched = malaria_prevention
 		OR = {
-			any_scope_state = {
-				is_incorporated = no
-				state_in_africa = yes
-				OR = {
-					has_state_trait = state_trait_malaria
-					has_state_trait = state_trait_severe_malaria
-				}
-			}
-			any_country = {
-				is_subject_of = ROOT
-				any_scope_state = {
-					is_incorporated = no
-					state_in_africa = yes
-					OR = {
-						has_state_trait = state_trait_malaria
-						has_state_trait = state_trait_severe_malaria
-					}
-				}
-			}
-		}
-		OR = {
 			has_law = law_type:law_colonial_resettlement
 			has_law = law_type:law_colonial_exploitation
+		}
+		OR = {
+			any_scope_state = {
+				state_is_in_africa = yes
+				is_incorporated = no
+				is_treaty_port = no
+			}
+			any_subject_or_below = {
+				country_is_in_africa = yes
+			}
 		}
 	}
 
 	immediate = {
 		trigger_event = {
 			id = africa_colonial_events.1
-			days = 0
 			popup = yes
 		}
 		save_scope_as = scramble_for_africa_self
+
+		set_variable = {
+			name = controlled_colonies_in_africa_cached
+			value = controlled_colonies_in_africa
+		}
 	}
 
 	complete = {
 		custom_tooltip = {
 			text = scramble_for_africa_complete_tt
-			any_scope_state = {
-				is_incorporated = no
-				state_in_africa = yes
-				count >= 7
+			var:controlled_colonies_in_africa_cached ?= {
+				this >= scope:journal_entry.goal_value
 			}
 		}
 		custom_tooltip = {
 			text = scramble_for_africa_complete_2_tt
 			any_state_region = {
 				filter = {
-					OR = {
-						region = sr:region_nile_basin
-						region = sr:region_ethiopia
-						region = sr:region_north_africa
-						region = sr:region_senegal
-						region = sr:region_niger
-						region = sr:region_congo
-						region = sr:region_southern_africa
-						region = sr:region_zanj		
-					}
+					state_is_in_africa = yes
 				}
-				NOT = {
-					any_scope_state = {
-						owner = {
-							country_is_in_africa = yes
-							OR = {
-								is_country_type = decentralized
-								is_country_type = unrecognized
+				any_scope_state = {
+					owner = {
+						OR = {
+							is_country_type = recognized
+							top_overlord ?= {
+								is_country_type = recognized
 							}
-							is_subject = no
 						}
 					}
 				}
@@ -96,34 +77,51 @@
 		remove_modifier = scrambling_for_africa
 		trigger_event = {
 			id = africa_colonial_events.2
-			days = 0
 			popup = yes
 		}
+		if = {
+			limit = {
+				has_variable = controlled_colonies_in_africa_cached
+			}
+			remove_variable = controlled_colonies_in_africa_cached
+		}
+	}
+
+
+	# goal_value
+	current_value = {
+		value = 7
 	}
 
 	fail = {
 		custom_tooltip = {
 			text = scramble_for_africa_fail_tt
-			NOT = {
+			NOR = {
 				any_scope_state = {
 					is_incorporated = no
-					state_in_africa = yes
+					state_is_in_africa = yes
+				}
+				any_subject_or_below = {
+					country_is_in_africa = yes
 				}
 			}
 		}
 	}
 
 	on_fail = {
+		#trigger_event = {
+		#	id = africa_colonial_events.3
+		#	days = 0
+		#	popup = yes
+		#}
 		remove_modifier = scrambling_for_africa
+		if = {
+			limit = {
+				has_variable = controlled_colonies_in_africa_cached
+			}
+			remove_variable = controlled_colonies_in_africa_cached
+		}
 	}
-
-	#on_fail = {
-	#	trigger_event = {
-	#		id = africa_colonial_events.3
-	#		days = 0
-	#		popup = yes
-	#	}
-	#}
 
 	status_desc = {
 		first_valid = {
@@ -133,7 +131,7 @@
 					any_scope_state = {
 						count >= 6
 						is_incorporated = no
-						state_in_africa = yes
+						state_is_in_africa = yes
 					}
 				}
 			}
@@ -143,7 +141,7 @@
 					any_scope_state = {
 						count >= 4
 						is_incorporated = no
-						state_in_africa = yes
+						state_is_in_africa = yes
 					}
 				}
 			}
@@ -153,7 +151,7 @@
 					any_scope_state = {
 						count >= 1
 						is_incorporated = no
-						state_in_africa = yes
+						state_is_in_africa = yes
 					}
 				}
 			}
@@ -170,7 +168,16 @@
 
 	}
 
-	on_monthly_pulse = {
+	on_weekly_pulse = {
+		effect = {
+			set_variable = {
+				name = controlled_colonies_in_africa_cached
+				value = controlled_colonies_in_africa
+			}
+		}
+	}
+
+	on_yearly_pulse = {
 		random_events = {
 			100 = 0
 			10 = africa_colonial_events.4
