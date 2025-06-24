@@ -38,21 +38,37 @@
 		is_revolutionary = no
 	}
 
-    non_fulfillment = {
-        consequences = withdraw
+	requirement_to_maintain = {
+		trigger = {
+			scope:source_country = {
+				NOT = { has_subject_relation_with = scope:target_country }
+			}
+		}
+	}
 
-        conditions = {
-            weekly = {
-				scope:article = {
-					OR = {
-						source_country.country_rank < target_country.country_rank
-						source_country = { is_subject = yes }
-						target_country = { is_subject = no }
-					}
-				}
-            }
-        }
-    }
+	requirement_to_maintain = {
+		trigger = {
+			scope:source_country.country_rank >= scope:target_country.country_rank
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
+			scope:target_country = { is_subject = yes }
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
+			trigger_if = {
+				limit = { scope:source_country = { is_subject = yes } }
+				scope:target_country.overlord ?= scope:source_country.overlord
+			}
+			trigger_else = {
+				scope:source_country.country_rank >= scope:target_country.country_rank
+			}
+		}
+	}
 
 	can_ratify = {
 		scope:target_country = {
@@ -107,7 +123,11 @@
 
 	on_entry_into_force = {}
 
-	on_withdrawal = {}
+	on_withdrawal = {
+		scope:withdrawing_country = {
+			create_bidirectional_truce = { country = scope:non_withdrawing_country months = 12 }
+		}
+	}
 	on_break = {
 		if = {
 			limit = {
