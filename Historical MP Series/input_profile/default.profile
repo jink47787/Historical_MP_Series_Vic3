@@ -243,11 +243,11 @@ input_context={
 		scancode = 226+33		# alt+4"
 	}
 
-	input_action = {
-		name = "trade_lens"
-		text = "SETTING_INPUT_ACTION_TRADE_LENS"
-		scancode = 226+34		# alt+5"
-	}
+	#input_action = {
+	#	name = "trade_lens"
+	#	text = "SETTING_INPUT_ACTION_TRADE_LENS"
+	#	scancode = 226+34		# alt+5"
+	#}
 
 	input_action = {
 		name = "confirm"
