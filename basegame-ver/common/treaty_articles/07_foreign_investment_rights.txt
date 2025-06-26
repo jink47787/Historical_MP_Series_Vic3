@@ -11,9 +11,9 @@
 		is_investment_rights
 		can_be_enforced
 		can_be_renegotiated
-		recipient_pays_maintenance
 	}
 
+	maintenance_paid_by = target_country
 	usage_limit = once_per_side
 
 	unlocked_by_technologies = {
@@ -29,21 +29,50 @@
 			has_dlc_feature = foreign_investment
 			has_dlc_feature = mp1_treaties
 		}
-		NOT = { is_country_type = decentralized }
-		is_revolutionary = no
+
 	}
 
 	possible = {
-		NOT = { is_country_type = decentralized }
-		is_revolutionary = no
 		NOT = {
 			is_subject_of = scope:other_country
+		}
+		trigger_if = {
+			limit = {
+				is_subject = yes
+				NOT = {
+					is_subject_of = scope:other_country
+				}
+			}
+			NOT = {
+				scope:other_country = {
+					any_scope_treaty = {
+						binds = root.top_overlord
+						any_scope_article = {
+							has_type = foreign_investment_rights
+							source_country = root.top_overlord
+						}
+					}
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				exists = power_bloc
+				exists = scope:other_country.power_bloc
+				power_bloc = scope:other_country.power_bloc
+				power_bloc ?= {
+					has_principle = principle:principle_foreign_investment_3
+				}
+			}
+			NOT = {
+				country_rank >= scope:other_country.country_rank
+			}
 		}
 	}
 
 	can_ratify = {
         custom_tooltip = {
-            text = DUPLICATE_ARTICLE_SAME_INPUTS
+            text = DUPLICATE_ARTICLE_SAME_INPUTS_TREATY
             NOT = {
                 scope:source_country = {
                     any_scope_treaty = {
@@ -117,9 +146,19 @@
 
 				if = {
 					limit = {
+						has_law_or_variant = law_type:law_isolationism
+					}
+					add = {
+						desc = "law_isolationism"
+						add = -100
+					}
+				}
+
+				if = {
+					limit = {
 						any_diplomatic_catalyst = {
 							is_diplomatic_catalyst_type = catalyst_declared_bankruptcy
-							target ?= scope:source_country
+							target ?= scope:target_country
 						}
 					}
 					add = {
@@ -145,14 +184,14 @@
 
 				add = {
 					desc = "DIPLOMATIC_ACCEPTANCE_MUTUAL_TRADE_VALUE"
-					value = "mutual_trade_value_with_country(scope:source_country)"
+					value = "mutual_trade_value_with_country(scope:target_country)"
 					multiply = 50000
 					divide = { # We modulate this value by GDP, clamped to a range to ensure it remains relevant for very small/very large economies
 						value = gdp
-						max = scope:source_country.gdp # We use whichever GDP is smaller
+						max = scope:target_country.gdp # We use whichever GDP is smaller
 						min = 1000000
 					}
-					max = 25
+					max = 10
 				}
 
 				add = {
@@ -161,15 +200,15 @@
 						limit = {
 							OR = {
 								has_attitude = {
-									who = scope:source_country
+									who = scope:target_country
 									attitude = antagonistic
 								}
 								has_attitude = {
-									who = scope:source_country
+									who = scope:target_country
 									attitude = belligerent
 								}
 								has_attitude = {
-									who = scope:source_country
+									who = scope:target_country
 									attitude = rebellious
 								}
 							}
@@ -191,11 +230,21 @@
 					value = -10
 				}
 
+				if = {
+					limit = {
+						has_law_or_variant = law_type:law_isolationism
+					}
+					add = {
+						desc = "law_isolationism"
+						add = -100
+					}
+				}
+
 				add = {
 					desc = "DIPLOMATIC_ACCEPTANCE_GDP"
 					value = "scope:source_country.ai_gdp_comparison(scope:target_country)"
 					min = -50
-					max = 50
+					max = 25
 				}
 
 				if = {
@@ -217,7 +266,7 @@
 					}
 					add = {
 						desc = "DIPLOMATIC_ACCEPTANCE_ECONOMIC_IMPERIALISM"
-						add = 50
+						add = 25
 					}
 				}
 
@@ -232,7 +281,7 @@
 					}
 					add = {
 						desc = "catalyst_declared_bankruptcy"
-						add = 50
+						add = 25
 					}
 				}
 
@@ -245,7 +294,7 @@
 						max = scope:source_country.gdp # We use whichever GDP is smaller
 						min = 1000000
 					}
-					max = 50
+					max = 25
 				}
 
 				add = {
@@ -290,22 +339,6 @@
 								}
 							}
 						}
-						value = -100
-					}
-				}
-
-				if = {
-					limit = {
-						scope:target_country = {
-							c:CHI ?= THIS
-							OR = {
-								country_rank >= rank_value:unrecognized_major_power
-								country_rank >= rank_value:great_power
-							}
-						}
-					}
-					add = {
-						desc = "DIPLOMATIC_ACCEPTANCE_IS_CHINA"
 						value = -100
 					}
 				}
@@ -362,7 +395,7 @@
 					}
 					add = {
 						desc = "LOBBY_OPPORTUNITY_BONUS"
-						value = 20
+						value = 10
 					}
 				}
 
@@ -375,7 +408,7 @@
 					}
 					add = {
 						desc = "LOBBY_OPPORTUNITY_BONUS"
-						value = 10
+						value = 5
 					}
 				}
 			}

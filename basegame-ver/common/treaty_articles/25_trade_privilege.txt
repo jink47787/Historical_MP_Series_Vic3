@@ -11,9 +11,9 @@
 		is_trade_privilege
 		can_be_enforced
 		can_be_renegotiated
-		recipient_pays_maintenance
 	}
 
+	maintenance_paid_by = target_country
 	usage_limit = once_per_side
 
     unlocked_by_technologies = {
@@ -25,8 +25,7 @@
 	}
 
 	visible = {
-		NOT = { is_country_type = decentralized }
-		is_revolutionary = no
+
 		is_junior_in_customs_union = no
 	}
 
@@ -54,7 +53,7 @@
 		scope:target_country = { is_junior_in_customs_union = no }
 
         custom_tooltip = {
-            text = DUPLICATE_ARTICLE_SAME_INPUTS
+            text = DUPLICATE_ARTICLE_SAME_INPUTS_TREATY
 			NOT = {
 				scope:source_country = {
 					any_scope_treaty = {
@@ -132,6 +131,16 @@
 					save_temporary_scope_as = actor
 				}
 
+				if = {
+					limit = {
+						has_law_or_variant = law_type:law_isolationism
+					}
+					add = {
+						desc = "law_isolationism"
+						add = -100
+					}
+				}
+
 				add = {
 					desc = "DIPLOMATIC_ACCEPTANCE_GDP"
 					value = "scope:target_country.ai_gdp_comparison(root)"
@@ -149,7 +158,7 @@
 						max = scope:target_country.gdp # We use whichever GDP is smaller
 						min = 1000000
 					}
-					max = 50
+					max = 10
 				}
 
 				add = {
@@ -223,7 +232,7 @@
 						max = scope:source_country.gdp # We use whichever GDP is smaller
 						min = 1000000
 					}
-					max = 50
+					max = 10
 				}
 
 				add = {
@@ -326,7 +335,7 @@
 					}
 					add = {
 						desc = "LOBBY_OPPORTUNITY_BONUS"
-						value = 20
+						value = 10
 					}
 				}
 
@@ -339,7 +348,7 @@
 					}
 					add = {
 						desc = "LOBBY_OPPORTUNITY_BONUS"
-						value = 10
+						value = 5
 					}
 				}
 			}
@@ -352,20 +361,12 @@
 			if = { # if we are only trading Trade Privileges
 				limit = {
 					scope:treaty ?= {
-						NOT = {
-							any_scope_article_option = {
-								NOT = { has_type = trade_privilege }
-							}
-						}
-						any_scope_article_option = {
-							count = 2
-							has_type = trade_privilege
-						}
+						is_equal_exchange = yes
 					}
 				}
 				add = {
 					desc = "DIPLOMATIC_ACCEPTANCE_EQUAL_EXCHANGE"
-					value = 10
+					value = 5
 
 					if = {
 						limit = {
@@ -401,18 +402,15 @@
 			else_if = { # if we are trading Trade Privileges but also other stuff
 				limit = {
 					scope:treaty ?= {
+						is_equal_exchange = yes
 						any_scope_article_option = {
 							NOT = { has_type = trade_privilege }
-						}
-						any_scope_article_option = {
-							count = 2
-							has_type = trade_privilege
 						}
 					}
 				}
 				add = {
 					desc = "DIPLOMATIC_ACCEPTANCE_EQUAL_EXCHANGE"
-					value = 10
+					value = 5
 
 					if = {
 						limit = {
@@ -449,6 +447,7 @@
 			if = {
 				limit = {
 					scope:target_country ?= this
+					scope:source_country = { is_ai = no }
 					scope:treaty ?= {
 						NOT = {
 							any_scope_article_option = {

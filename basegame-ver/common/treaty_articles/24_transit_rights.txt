@@ -11,9 +11,9 @@
 		is_transit_rights
 		can_be_enforced
 		can_be_renegotiated
-				recipient_pays_maintenance
 	}
 
+	maintenance_paid_by = target_country
     usage_limit = once_per_side
 
     unlocked_by_technologies = {
@@ -21,12 +21,12 @@
     }
 
 	visible = {
-		NOT = { is_country_type = decentralized }
+
 		is_junior_in_customs_union = no
 	}
 
 	possible = {
-		NOT = { is_country_type = decentralized }
+
 		is_junior_in_customs_union = no
 		scope:other_country ?= {
 			is_junior_in_customs_union = no
@@ -34,6 +34,27 @@
 	}
 
     can_ratify = {
+        custom_tooltip = {
+            text = DUPLICATE_ARTICLE_SAME_INPUTS_TREATY
+            NOT = {
+                scope:source_country = {
+                    any_scope_treaty = {
+                        hidden_trigger = {
+							OR = {
+								scope:treaty = {
+									is_renegotiation = no
+								}
+								scope:treaty.amended_treaty != this
+							}
+						}
+                        any_scope_article = {
+                            has_type = transit_rights
+                            source_country = scope:source_country
+                        }
+                    }
+                }
+            }
+        }
 		scope:target_country = {
 			OR = {
 				has_strategic_land_adjacency = scope:source_country
@@ -154,6 +175,7 @@
 			if = {
 				limit = {
 					scope:target_country ?= this
+					scope:source_country = { is_ai = no }
 					scope:treaty ?= {
 						NOT = {
 							any_scope_article_option = {

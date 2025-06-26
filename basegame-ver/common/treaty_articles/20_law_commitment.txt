@@ -9,12 +9,10 @@
 
 	flags = {
         is_law_commitment
-		can_be_renegotiated
         can_be_enforced
-		recipient_pays_maintenance
 	}
 
-	usage_limit = once_per_side_with_same_inputs
+	usage_limit = once_per_side
 
 	maintenance_paid_by = target_country
 
@@ -27,13 +25,11 @@
     }
 
 	visible = {
-		NOT = { is_country_type = decentralized }
-		is_revolutionary = no
+
 	}
 
 	possible = {
-		NOT = { is_country_type = decentralized }
-		is_revolutionary = no
+
         NOT = { is_subject_of = scope:other_country }
         save_temporary_scope_as = target_country
         scope:other_country = {
@@ -71,7 +67,7 @@
             }
         }
         custom_tooltip = {
-            text = DUPLICATE_ARTICLE_SAME_INPUTS
+            text = DUPLICATE_ARTICLE_SAME_INPUTS_TREATY
             trigger_if = {
                 limit = {
                     exists = root.input_law
@@ -96,6 +92,9 @@
 					}
 				}
             }
+        }
+        custom_tooltip = {
+            text = DUPLICATE_ARTICLE_SAME_INPUTS
             scope:treaty ?= {
                 NOT = {
                     any_scope_article_option = {
@@ -320,8 +319,33 @@
 
                 add = {
                     desc = "DIPLOMATIC_ACCEPTANCE_BASE_ADDITIONAL"
-                    value = -25
+                    value = -30
+
+                    if = {
+                        limit = {
+                            NOT = { exists = scope:is_treaty_active }
+                            any_scope_treaty = {
+                                any_scope_article = {
+                                    has_type = law_commitment
+                                    source_country = scope:source_country
+                                }
+                            }
+                        }
+                        add = {
+                            value = -300
+                        }
+                    }
                 }
+
+				if = {
+					limit = {
+						has_law_or_variant = law_type:law_isolationism
+					}
+					add = {
+						desc = "law_isolationism"
+						add = -100
+					}
+				}
 
                 add = {
                     desc = "DIPLOMATIC_ACCEPTANCE_LIKES_LAW"
@@ -373,7 +397,7 @@
 
                 add = {
                     desc = "DIPLOMATIC_ACCEPTANCE_BASE_ADDITIONAL"
-                    value = -25
+                    value = -30
                 }
 
                 add = {

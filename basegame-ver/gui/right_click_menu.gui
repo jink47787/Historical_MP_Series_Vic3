@@ -3635,6 +3635,7 @@ right_click_menu = {
 					enabled = "[And(IsValid( BuildingType.ToggleMonopoly ), Not(BuildingBrowserBuildingTypeItem.HasAllForcedPrivatization))]"
 					onclick = "[Execute(BuildingBrowserBuildingTypeItem.RemoveAllPrivatization)]"
 					onclick = "[Execute(BuildingType.ToggleMonopoly)]"
+					onclick = "[RightClickMenuManager.Close]"
 					tooltip = "COUNTRY_MONOPOLIZE_TOOLTIP_ACTIVATE"
 					using = icon_toggle_single_off_sound
 
@@ -3652,6 +3653,7 @@ right_click_menu = {
 					visible = "[And(Not(BuildingType.HasCountryMonopoly), Not(IsValid(BuildingBrowserBuildingTypeItem.RemoveAllPrivatization)))]"
 					enabled = "[And(IsValid( BuildingType.ToggleMonopoly ), Not(BuildingBrowserBuildingTypeItem.HasAllForcedPrivatization))]"
 					onclick = "[Execute(BuildingType.ToggleMonopoly)]"
+					onclick = "[RightClickMenuManager.Close]"
 					tooltip = "COUNTRY_MONOPOLIZE_TOOLTIP_ACTIVATE"
 					using = icon_toggle_single_off_sound
 
@@ -3683,6 +3685,7 @@ right_click_menu = {
 					visible = "[BuildingType.HasCountryMonopoly]"
 					enabled = "[IsValid(BuildingType.ToggleMonopoly)]"
 					onclick = "[Execute(BuildingType.ToggleMonopoly)]"
+					onclick = "[RightClickMenuManager.Close]"
 					tooltip = "COUNTRY_MONOPOLIZE_TOOLTIP_DEACTIVATE"
 					using = icon_toggle_single_off_sound
 
@@ -3697,6 +3700,7 @@ right_click_menu = {
 				visible = "[BuildingBrowserBuildingTypeItem.HasAllPrivatization]"
 				enabled = "[And(IsValid( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization ), Not(BuildingBrowserBuildingTypeItem.HasAllForcedPrivatization))]"
 				onclick = "[Execute( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization )]"
+				onclick = "[RightClickMenuManager.Close]"
 				tooltip = "PRIVATIZATION_ALL_YES"
 				using = icon_toggle_single_off_sound
 
@@ -3709,6 +3713,7 @@ right_click_menu = {
 			building_type_ownership_button = {
 				visible = "[And(BuildingBrowserBuildingTypeItem.HasMixedPrivatization, Not(Or(BuildingType.HasCountryMonopoly, BuildingBrowserBuildingTypeItem.HasAllNoPrivatization)))]"
 				onclick = "[Execute( BuildingBrowserBuildingTypeItem.RemoveAllPrivatization )]"
+				onclick = "[RightClickMenuManager.Close]"
 				tooltip = "PRIVATIZATION_ALL_MIXED_DEACTIVATE_ALL"
 				using = icon_toggle_single_off_sound
 
@@ -3733,6 +3738,7 @@ right_click_menu = {
 				enabled = "[IsValid( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization )]"
 				onclick = "[Execute(BuildingType.ToggleMonopoly)]"
 				onclick = "[Execute( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization )]"
+				onclick = "[RightClickMenuManager.Close]"
 				tooltip = "PRIVATIZATION_ALL_NO"
 				using = icon_toggle_single_off_sound
 
@@ -3751,6 +3757,7 @@ right_click_menu = {
 				enabled = "[IsValid( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization)]"
 				onclick = "[Execute(BuildingType.ToggleMonopoly)]"
 				onclick = "[Execute( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization )]"
+				onclick = "[RightClickMenuManager.Close]"
 				tooltip = "PRIVATIZATION_ALL_MIXED_ACTIVATE_ALL"
 				using = icon_toggle_single_off_sound
 
@@ -3768,6 +3775,7 @@ right_click_menu = {
 				visible = "[And(Not(BuildingType.HasCountryMonopoly), BuildingBrowserBuildingTypeItem.HasAllNoPrivatization)]"
 				enabled = "[IsValid( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization)]"
 				onclick = "[Execute( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization )]"
+				onclick = "[RightClickMenuManager.Close]"
 				tooltip = "PRIVATIZATION_ALL_NO"
 				using = icon_toggle_single_off_sound
 
@@ -3785,6 +3793,7 @@ right_click_menu = {
 				visible = "[And(Not(BuildingType.HasCountryMonopoly), BuildingBrowserBuildingTypeItem.HasMixedPrivatization)]"
 				enabled = "[IsValid( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization)]"
 				onclick = "[Execute( BuildingBrowserBuildingTypeItem.ToggleAllPrivatization )]"
+				onclick = "[RightClickMenuManager.Close]"
 				tooltip = "PRIVATIZATION_ALL_MIXED_ACTIVATE_ALL"
 				using = icon_toggle_single_off_sound
 
@@ -7472,7 +7481,7 @@ template article_input_fixed_bottom {
 				position = { -10 0 }
 				using = default_button_action
 				using = tooltip_se
-				enabled = "[And(And(ArticleDraft.IsPossible, ArticleDraft.CanAddWarGoal(GetPlayer.Self, WarGoal.GetDiplomaticPlay.Self)), ArticleDraft.HasAllRequiredInputsSet)]"
+				enabled = "[And4(ArticleDraft.IsPossible, ArticleDraft.CanAddWarGoal(GetPlayer.Self, WarGoal.GetDiplomaticPlay.Self), ArticleDraft.HasAllRequiredInputsSet, IsValid(WarGoal.GetDiplomaticPlay.AddWarGoal(WarGoal.Self)) )]"
 				onclick = "[WarGoal.SetArticleInputsFromDraft(ArticleDraft.Self)]"
 				onclick = "[Execute(WarGoal.GetDiplomaticPlay.AddWarGoal(WarGoal.Self))]"
 				onclick = "[InformationPanelBar.OpenPreviousPanel]"
@@ -7482,6 +7491,13 @@ template article_input_fixed_bottom {
 					RegularTooltip_WarGoalArticle = {
 						blockoverride "primary_secondary_demand_text_visibility" {
 							visible = no
+						}
+
+						blockoverride "can_add_article_text" {
+							custom_tooltip_textbox_with_empty_line = {
+								visible = "[Not(IsValid(WarGoal.GetDiplomaticPlay.AddWarGoal(WarGoal.Self)))]"
+								text = "[GetDesc(WarGoal.GetDiplomaticPlay.AddWarGoal(WarGoal.Self))]"
+							}
 						}
 					}
 				}
@@ -7550,7 +7566,7 @@ template article_input_fixed_bottom {
 				position = { -10 0 }
 				using = default_button_action
 				using = tooltip_se
-				enabled = "[And(And(ArticleDraft.IsPossible, ArticleDraft.CanAddWarGoal(GetPlayer.Self, WarGoal.GetDiplomaticPlay.Self)), ArticleDraft.HasAllRequiredInputsSet)]"
+				enabled = "[And(And(ArticleDraft.IsPossible, IsValid( SwayCountryPanel.AccessDiplomaticPlay.CreateSway( GetPlayer.Self, SwayCountryPanel.GetCountry, SwayOffer.Self ))), ArticleDraft.HasAllRequiredInputsSet)]"
 				onclick = "[SwayOffer.SetArticleInputsFromDraft(ArticleDraft.Self)]"
 				onclick = "[Execute( SwayCountryPanel.AccessDiplomaticPlay.CreateSway( GetPlayer.Self, SwayCountryPanel.GetCountry, SwayOffer.Self ))]"
 				onclick = "[InformationPanelBar.OpenDiplomaticPlayPanelTab( SwayCountryPanel.AccessDiplomaticPlay, 'default' )]"
@@ -7575,7 +7591,7 @@ template article_input_fixed_bottom {
 			}
 
 			flowcontainer = {
-				visible = "[And(TreatyDraft.IsValidDataContext, ArticleDraft.HasAllRequiredInputsSet)]"
+				visible = "[And(Not(WarGoal.IsValidDataContext),And(TreatyDraft.IsValidDataContext, ArticleDraft.HasAllRequiredInputsSet))]"
 				parentanchor = center
 				spacing = 5
 				margin = { 10 10 }
@@ -7597,6 +7613,40 @@ template article_input_fixed_bottom {
 					text = "[ArticleDraft.GetAcceptance(TreatyDraft.GetRightCountry.Self)|+=0]"
 				}
 			}
+			
+			flowcontainer = {
+				visible = "[And( PdxGuiWidget.HasContext( 'SwayOffer' ), WarGoal.IsValidDataContext )]"
+				parentanchor = center
+				spacing = 5
+				margin = { 10 10 }
+				using = tooltip_se
+				tooltip = "[SwayOffer.GetWouldAcceptSwayDesc(SwayCountryPanel.GetDiplomaticPlay, GetPlayer.Self, SwayCountryPanel.GetCountry)]"
+
+				background = {
+					using = simple_frame
+				}		
+
+				icon = {
+					visible = "[SwayOffer.WouldAcceptSway(SwayCountryPanel.GetDiplomaticPlay, GetPlayer.Self, SwayCountryPanel.GetCountry)]"
+					size = { 22 22 }
+					texture = "gfx/interface/icons/generic_icons/approval_icon.dds"
+				}
+
+				icon = {
+					visible = "[Not(SwayOffer.WouldAcceptSway(SwayCountryPanel.GetDiplomaticPlay, GetPlayer.Self, SwayCountryPanel.GetCountry))]"
+					size = { 22 22 }
+					texture = "gfx/interface/icons/generic_icons/disapproval_icon.dds"
+				}
+
+				textbox = {
+					parentanchor = vcenter
+					autoresize = yes
+					align = nobaseline
+					max_width = 40
+					using = elide_fontsize_min
+					text = "[SwayOffer.GetAcceptSwayScore(SwayCountryPanel.GetDiplomaticPlay, GetPlayer.Self, SwayCountryPanel.GetCountry)|+=0]"
+				}
+			}			
 		}
 	}
 }
@@ -7630,7 +7680,7 @@ types article_input_types
 			}
 
 			size = { 100% 100% }
-			texture = "gfx/interface/icons/generic_icons/undecided_icon.dds"
+			texture = "gfx/interface/icons/generic_icons/maybe_icon.dds"
 		}
 	}
 
@@ -7665,7 +7715,7 @@ types article_input_types
 
 			size = { 100% 100% }
 			alwaystransparent = yes
-			texture = "gfx/interface/icons/generic_icons/undecided_icon.dds"
+			texture = "gfx/interface/icons/generic_icons/maybe_icon.dds"
 		}
 	}
 
@@ -8789,7 +8839,7 @@ types article_input_types
 					}
 
 					blockoverride "impose_number_text" {
-						raw_text = "#b [GetDataModelSize(ArticleDraft.GetValidLaws(Law.GetLawType.Self))]#!"
+						raw_text = "#b [GetDataModelSize(ArticleDraft.GetValidLaws(Law.GetLawType.Self))|+]#!"
 					}
              	}
 
@@ -9782,103 +9832,194 @@ types article_input_types
 			parentanchor = vcenter|right
 			spacing = 5
 
-			scrollbar = {
+			### QUANTITY SLIDERS DIVIDED INTO 2 SCROLLBARS FOR THE TOOLTIPS' SAKE
+			flowcontainer = {
 				visible = "[ArticleDraft.HasInputValue('goods')]"
 				parentanchor = hcenter
-				direction = horizontal
-				size = { 240 20 }
-				value = "[ArticleDraft.GetQuantity]"
-				enabled = "[NotEqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
 
-				min = "[ArticleDraft.GetMinValidQuantity]"
-				max = "[ArticleDraft.GetMaxValidQuantity]"
-				step = 1.0
-				wheelstep = 1.0
+				flowcontainer = {
+					visible = "[NotEqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
+					margin_top = 5
+					tooltip = "ARTICLE_DRAFT_GOODS_QUANTITY_SLIDER_TOOLTIP_ENABLED"
 
-				onvaluechanged = "[ArticleDraft.OnQuantityChangedSlider]"
+					scrollbar = {
+						direction = horizontal
+						size = { 240 20 }
+						value = "[ArticleDraft.GetQuantity]"
+						enabled = "[NotEqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
 
-				track = {
-					using = SettingsValueTrack
+						min = "[ArticleDraft.GetMinValidQuantity]"
+						max = "[ArticleDraft.GetMaxValidQuantity]"
+						step = 1.0
+						wheelstep = 1.0
+
+						onvaluechanged = "[ArticleDraft.OnQuantityChangedSlider]"
+
+						track = {
+							using = SettingsValueTrack
+						}
+
+						slider = {
+							using = SettingsValueSlider
+						}
+
+						dec_button = {
+							using = SettingsValueDecButton
+						}
+
+						inc_button = {
+							using = SettingsValueIncButton
+						}
+					}
 				}
 
-				slider = {
-					using = SettingsValueSlider
-				}
+				flowcontainer = {
+					visible = "[EqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
+					margin_top = 5
+					tooltip = "ARTICLE_DRAFT_GOODS_QUANTITY_SLIDER_TOOLTIP_DISABLED"
 
-				dec_button = {
-					using = SettingsValueDecButton
-				}
+					scrollbar = {
+						direction = horizontal
+						size = { 240 20 }
+						value = "[ArticleDraft.GetQuantity]"
+						enabled = "[NotEqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
 
-				inc_button = {
-					using = SettingsValueIncButton
+						min = "[ArticleDraft.GetMinValidQuantity]"
+						max = "[ArticleDraft.GetMaxValidQuantity]"
+						step = 1.0
+						wheelstep = 1.0
+
+						onvaluechanged = "[ArticleDraft.OnQuantityChangedSlider]"
+
+						track = {
+							using = SettingsValueTrack
+						}
+
+						slider = {
+							using = SettingsValueSlider
+						}
+
+						dec_button = {
+							using = SettingsValueDecButton
+						}
+
+						inc_button = {
+							using = SettingsValueIncButton
+						}
+					}
 				}
 			}
 
-			scrollbar = {
+			### QUANTITY SLIDER WITHOUT FUNCTION CALLS IF NO GOOD HAS BEEN SELECTED
+			flowcontainer = {
 				visible = "[Not(ArticleDraft.HasInputValue('goods'))]"
-				enabled = no
 				parentanchor = hcenter
-				direction = horizontal
-				size = { 240 20 }
-				value = 0
+				margin_top = 5
 
-				min = 0.0
-				max = 1.0
-				step = 1.0
-				wheelstep = 1.0
+				scrollbar = {
+					enabled = no
+					direction = horizontal
+					size = { 240 20 }
+					value = 0
 
-				track = {
-					using = SettingsValueTrack
-				}
+					min = 0.0
+					max = 1.0
+					step = 1.0
+					wheelstep = 1.0
 
-				slider = {
-					using = SettingsValueSlider
-				}
+					track = {
+						using = SettingsValueTrack
+					}
 
-				dec_button = {
-					using = SettingsValueDecButton
-				}
+					slider = {
+						using = SettingsValueSlider
+					}
 
-				inc_button = {
-					using = SettingsValueIncButton
+					dec_button = {
+						using = SettingsValueDecButton
+					}
+
+					inc_button = {
+						using = SettingsValueIncButton
+					}
 				}
 			}
 
 			flowcontainer = {
 				parentanchor = hcenter
 
-				# Set the amount
-				editbox = {
+				# Write the amount - Goods is selected - Divided in two due to the tooltips
+				flowcontainer = {
 					visible = "[ArticleDraft.HasInputValue('goods')]"
-					name = "treaty_amount_edit"
-					parentanchor = vcenter
-					maxcharacters = 30
-					size = { 150 40 }
-					alwaystransparent = no
-					focuspolicy = click
-					focus_on_visible = no
-					align = nobaseline
-					margin_left = 10
 
-					background = {
-						using = text_edit_bg
+					editbox = {
+						visible = "[NotEqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
+						name = "treaty_amount_edit_1"
+						tooltip = "ARTICLE_DRAFT_GOODS_QUANTITY_SLIDER_TOOLTIP_ENABLED"
+						parentanchor = vcenter
+						maxcharacters = 30
+						size = { 150 40 }
+						alwaystransparent = no
+						focuspolicy = click
+						focus_on_visible = no
+						align = nobaseline
+						margin_left = 10
+						enabled = "[NotEqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
+
+						background = {
+							using = text_edit_bg
+						}
+
+						text = "[ArticleDraft.GetQuantity]"
+						ontextchanged = "[ArticleDraft.OnQuantityChanged]"
+						text_validator = "[ArticleDraft.GetQuantityValidator]"
+
+						textbox = {
+							parentanchor = right|vcenter
+							position = { -10 0 }
+							align = nobaseline
+							autoresize = yes
+							using = elide_fontsize_min
+							max_width = 70
+							raw_text = "[ArticleDraft.GetQuantityPercentage|0%]"
+						}
 					}
 
-					text = "[ArticleDraft.GetQuantity]"
-					ontextchanged = "[ArticleDraft.OnQuantityChanged]"
-					text_validator = "[ArticleDraft.GetQuantityValidator]"
-
-					textbox = {
-						parentanchor = right|vcenter
-						position = { -10 0 }
+					editbox = {
+						visible = "[EqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
+						name = "treaty_amount_edit_2"
+						tooltip = "ARTICLE_DRAFT_GOODS_QUANTITY_SLIDER_TOOLTIP_DISABLED"
+						parentanchor = vcenter
+						maxcharacters = 30
+						size = { 150 40 }
+						alwaystransparent = no
+						focuspolicy = click
+						focus_on_visible = no
 						align = nobaseline
-						autoresize = yes
-						using = elide_fontsize_min
-						max_width = 70
-						raw_text = "[ArticleDraft.GetQuantityPercentage|0%]"
+						margin_left = 10
+						enabled = "[NotEqualTo_int32(ArticleDraft.GetMinValidQuantity, ArticleDraft.GetMaxValidQuantity)]"
+
+						background = {
+							using = text_edit_bg
+						}
+
+						text = "[ArticleDraft.GetQuantity]"
+						ontextchanged = "[ArticleDraft.OnQuantityChanged]"
+						text_validator = "[ArticleDraft.GetQuantityValidator]"
+
+						textbox = {
+							parentanchor = right|vcenter
+							position = { -10 0 }
+							align = nobaseline
+							autoresize = yes
+							using = elide_fontsize_min
+							max_width = 70
+							raw_text = "[ArticleDraft.GetQuantityPercentage|0%]"
+						}
 					}
 				}
 
+				# Write the amount - Goods is not selected
 				editbox = {
 					visible = "[Not(ArticleDraft.HasInputValue('goods'))]"
 					name = "treaty_amount_edit_no_good"
@@ -10801,9 +10942,10 @@ types right_click_menu {
 
 					block "highlight_glow" {}
 
-					icon = {
+					button = {
 						size = { 50 50 }
 						parentanchor = hcenter
+						alwaystransparent = yes
 
 						block "texture" {
 							texture = "gfx/interface/icons/generic_icons/generic_concept_icon.dds"

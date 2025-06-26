@@ -1,6 +1,6 @@
 ﻿host_power_bloc_embassy = {
 	kind = directed
-	cost = 50
+	cost = 25
 
 	relations_progress_per_day = 0.5
 	relations_improvement_max = 25
@@ -10,9 +10,9 @@
 	flags = {
 		is_host_power_bloc_embassy
 		can_be_renegotiated
-		recipient_pays_maintenance
 	}
 
+	maintenance_paid_by = target_country
 	usage_limit = once_per_treaty
 
 	unlocked_by_technologies = {
@@ -24,13 +24,11 @@
 	}
 
 	visible = {
-		NOT = { is_country_type = decentralized }
-		is_revolutionary = no
+
 	}
 
 	possible = {
-		NOT = { is_country_type = decentralized }
-		is_revolutionary = no
+
 		trigger_if = {
 			limit = {
 				exists = power_bloc
@@ -41,14 +39,8 @@
 	}
 
 	can_ratify = {
-		scope:target_country = {
-			is_power_bloc_leader = yes
-		}
-		scope:source_country = {
-			is_power_bloc_leader = no
-		}
         custom_tooltip = {
-            text = DUPLICATE_ARTICLE_SAME_INPUTS
+            text = DUPLICATE_ARTICLE_SAME_INPUTS_TREATY
             NOT = {
                 scope:source_country = {
                     any_scope_treaty = {
@@ -71,29 +63,36 @@
         }
 	}
 
-    non_fulfillment = {
-        consequences = freeze
+	requirement_to_maintain = {
+		trigger = {
+			scope:source_country = {
+				is_power_bloc_leader = no
+			}
+		}
+	}
 
-        conditions = {
-            weekly = {
-                scope:article = {
-					OR = {
-						target_country = {
-							is_power_bloc_leader = no
-						}
-						source_country = {
-							is_power_bloc_leader = yes
-						}
-						AND = {
-							exists = source_country.power_bloc
-							exists = target_country.power_bloc
-							source_country.power_bloc = target_country.power_bloc
-						}
-					}
-                }
-            }
-        }
-    }
+	requirement_to_maintain = {
+		trigger = {
+			scope:target_country = {
+				is_power_bloc_leader = yes
+			}
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
+			trigger_if = {
+				limit = {
+					exists = scope:source_country.power_bloc
+					exists = scope:target_country.power_bloc
+				}
+				NOT = { scope:source_country.power_bloc = scope:target_country.power_bloc }
+			}
+			trigger_else = {
+				always = yes
+			}
+		}
+	}
 
 	on_entry_into_force = {}
 
@@ -511,7 +510,7 @@
 					}
 					add = {
 						desc = "LOBBY_OPPORTUNITY_BONUS"
-						value = 20
+						value = 10
 					}
 				}
 
@@ -524,7 +523,7 @@
 					}
 					add = {
 						desc = "LOBBY_OPPORTUNITY_BONUS"
-						value = 10
+						value = 5
 					}
 				}
 			}
