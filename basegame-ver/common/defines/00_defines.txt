@@ -155,7 +155,7 @@ NPolitics = {
 	LAW_ENACTMENT_COOLDOWN_DAYS = 730		# When an enactment fails, or is manually stopped after at least one checkpoint, that law can't be tried to be enacted for this many days [>=0]
 	LAW_ENACTMENT_ADVANCE_FACTOR = 2		# The _base_ advance chance is the success chance multiplied by this factor [>=1]
 	LAW_ENACTMENT_RULER_IDEOLOGY_EFFECT = 0.05 # Ruler ideology has this impact on a law's chance to pass or stall depending on relative approval
-	LAW_ENACTMENT_LAW_COMMITMENT_EFFECT = 0.15 # Committing to enacting a law via treaty adds this much to pass chance
+	LAW_ENACTMENT_LAW_COMMITMENT_EFFECT = 0.05 # Committing to enacting a law via treaty adds this much to pass chance, scaled by the number of ranks the country the comittee has on the committer
 	LAW_ENACTMENT_MOVEMENT_SUPPORT_PASS_EFFECT = 1.0 # Movement support has this impact on a law's chance to pass
 	LAW_ENACTMENT_MOVEMENT_SUPPORT_STALL_EFFECT = 1.0 # Movement support has this impact on a law's chance to stall
 	LAW_ENACTMENT_IG_CLOUT_STALL_EFFECT = 1.0 # Opposing IG clout has this base impact on a law's chance to stall
@@ -432,10 +432,11 @@ NEconomy = {
 	EMPLOYMENT_PROPORTIONALITY_LIMIT = 0.1		# A building cannot have a difference of ratio of full employment between any two professions greater than this limit
 	MINIMUM_EMPLOYEES = 10						# If a building has fewer employees than this, it will always attempt to hire
 	BUILDING_RAISE_WAGES_DIVIDEND_INCOME_FACTOR = 0.5 # A pop with dividend income has its wealth multiplied by 1 - ( the fraction of their income that is dividends * this ) to ensure buildings don't start wage dumping just because all employees are getting dividends
+	BUILDING_RAISE_WAGES_OWNERSHIP_BUILDING_FACTOR = 0.5 # Buildings that own other buildings multiply their target wages by this to ensure profitability
 	BUILDING_RAISE_WAGES_MIN_RELEVANT_POP_SIZE = 50 # Pops with less workforce than this are ignored when checking whether a profitable building should raise wages because of radicalizing workers
 	BUILDING_RAISE_WAGES_DISCRIMINATION_FACTOR = 0.66 # Profitable buildings only care to raise wages for discriminated pops if their wealth to expected SoL ratio is less than this
 	BUILDING_LOWER_WAGES_TARGET_WEALTH_MULT = 1.2 # Buildings will consider lowering wages if all significant pops working in them have this * the target wealth to expected SoL ratio
-	BUILDING_PREFER_LAYOFFS_TARGET_WEALTH_MULT = 0.5 # Buildings will prefer laying off pops if any significant pops working in them have this * the target wealth to expected SoL ratio or below
+	BUILDING_PREFER_LAYOFFS_TARGET_WEALTH_MULT = 0.66 # Buildings will prefer laying off pops if any significant pops working in them have this * the target wealth to expected SoL ratio or below
 	BUILDING_DEFAULT_MIN_EARNINGS_TO_HIRE_EMPLOYEES = 3  # Non-subsidized buildings will not hire if it would result in their annual earnings/employee falling below this threshold (default value, can be overridden for building group)
 	BUILDING_PROFIT_TARGET_TO_RAISE_WAGES = 0.25	# Required profit margin to consider raising wages for SoL or employment reasons, with BUILDING_WEEKS_BETWEEN_PAY_CHANGES weeks cooldown
 	BUILDING_PROFIT_TARGET_TO_LOWER_WAGES = 0.15	# If profit margin is this or below, buildings should lower their wages, with BUILDING_WEEKS_BETWEEN_PAY_CHANGES weeks cooldown
@@ -732,6 +733,8 @@ NMilitary = {
 
 	MANPOWER_RATIO_REQUIRED_TO_CLEAR_DEFEATED_ADMIRALS = 0.75	# A Defeated fleet without at least this ratio of current/max manpower will remain Defeated
 
+	MILITARY_FORMATION_AUTO_DEPLOY_DISTANCE_LIMIT = 150			# Armies are not auto-deployed to fronts that are located further than this pixel-distance from the army's current position
+
 	BASECAMP_WANTED_FORMATIONS_SCORE = 1.0			# The more formations we need to add to the basecamp the higher the score
 	BASECAMP_DISTANCE_SCORE_THRESHOLD = 100			# Is multiplied with penalties below and then is subtracted from the basecamp score
 	BASECAMP_DISTANCE_PENALTY = 0.4					# The further basecamp is from the formation the lower the score
@@ -753,6 +756,7 @@ NMilitary = {
 
 NDiplomacy = {
 	DEFAULT_DIPLOMATIC_PLAY = "dp_default_treaty_article"
+	DEFAULT_WAR_GOAL_IS_HUMILIATION = yes # If this is false, default war goal is instead money transfer
 
 	DEFAULT_TRUCE_MONTHS = 60
 	PEACE_DEAL_DURATION_IN_DAYS = 30
@@ -778,6 +782,9 @@ NDiplomacy = {
 	DIPLOMATIC_PACT_COST_MULT_FROM_PARIAH = 1.00		# Maintenance cost of a pact is increased by this when at Pariah level of infamy
 	DIPLOMATIC_PACT_COST_LOBBY_CLOUT_MULT = 0.01		# Each point of clout from pro/anti-country lobbies reduces or increases the influence cost multiplier of maintaining pacts with them by this amount, depending on whether the pact matches their goals
 	DIPLOMATIC_PACT_COST_LOBBY_CLOUT_MAX = 0.5			# Cost multiplier impact of pro/anti-country lobbies cannot be greater than this
+	
+	TREATY_ARTICLE_COST_LOBBY_CLOUT_MULT = 0.01			# Each point of clout from pro/anti-country lobbies reduces or increases the influence cost multiplier of maintaining treaty articles with them by this amount
+	TREATY_ARTICLE_COST_LOBBY_CLOUT_MAX = 0.5			# Cost multiplier impact of pro/anti-country lobbies cannot be greater than this
 
 	RIVALRY_BASE_SCALING = 1.0
 	RIVALRY_SCALING_PER_INTEREST = 0.5
@@ -925,32 +932,42 @@ NDiplomacy = {
 	WAR_GOAL_INFAMY_REDUCTION_FOR_TARGET = -0.5 		# This much of a war goal's infamy value is removed from the target when target has it enforced on them
 
 	# Higher priority wargoals are executed first
-	WAR_GOAL_EXECUTION_PRIORITY_COLONIZATION_RIGHTS = 2
-	WAR_GOAL_EXECUTION_PRIORITY_FOREIGN_INVESTMENT_RIGHTS = 3
-	WAR_GOAL_EXECUTION_PRIORITY_FORCE_NATIONALIZATION = 4
-	WAR_GOAL_EXECUTION_PRIORITY_HUMILIATION = 5
-	WAR_GOAL_EXECUTION_PRIORITY_OPEN_MARKET = 6
-	WAR_GOAL_EXECUTION_PRIORITY_REGIME_CHANGE = 7
-	WAR_GOAL_EXECUTION_PRIORITY_UNIFICATION_LEADERSHIP = 9
-	WAR_GOAL_EXECUTION_PRIORITY_ANNEX_COUNTRY = 10
-	WAR_GOAL_EXECUTION_PRIORITY_LIBERATE_COUNTRY = 11
-	WAR_GOAL_EXECUTION_PRIORITY_JOIN_POWER_BLOC = 12
-	WAR_GOAL_EXECUTION_PRIORITY_MAKE_PROTECTORATE = 13
-	WAR_GOAL_EXECUTION_PRIORITY_MAKE_TRIBUTARY = 14
-	WAR_GOAL_EXECUTION_PRIORITY_MAKE_DOMINION = 15
-	WAR_GOAL_EXECUTION_PRIORITY_REDUCE_AUTONOMY = 16
-	WAR_GOAL_EXECUTION_PRIORITY_INCREASE_AUTONOMY = 17
-	WAR_GOAL_EXECUTION_PRIORITY_CONQUER_STATE = 21
-	WAR_GOAL_EXECUTION_PRIORITY_RETURN_STATE = 22
-	WAR_GOAL_EXECUTION_PRIORITY_REVOKE_ALL_CLAIMS = 30
-	WAR_GOAL_EXECUTION_PRIORITY_REVOKE_CLAIM = 31
-	WAR_GOAL_EXECUTION_PRIORITY_CONTAIN_THREAT = 40
-	WAR_GOAL_EXECUTION_PRIORITY_TRANSFER_SUBJECT = 50
-	WAR_GOAL_EXECUTION_PRIORITY_LIBERATE_SUBJECT = 51
-	WAR_GOAL_EXECUTION_PRIORITY_LEAVE_POWER_BLOC = 100
-	WAR_GOAL_EXECUTION_PRIORITY_INDEPENDENCE = 100
-	WAR_GOAL_EXECUTION_PRIORITY_SECESSION = 100
 	WAR_GOAL_EXECUTION_PRIORITY_UNIFICATION = 200
+
+	WAR_GOAL_EXECUTION_PRIORITY_INDEPENDENCE = 100
+	WAR_GOAL_EXECUTION_PRIORITY_SECESSION = 99
+	WAR_GOAL_EXECUTION_PRIORITY_LEAVE_POWER_BLOC = 98
+	
+	WAR_GOAL_EXECUTION_PRIORITY_LIBERATE_COUNTRY = 90
+	
+	WAR_GOAL_EXECUTION_PRIORITY_ANNEX_COUNTRY = 80
+	
+	WAR_GOAL_EXECUTION_PRIORITY_RETURN_STATE = 70
+	WAR_GOAL_EXECUTION_PRIORITY_CONQUER_STATE = 69
+	
+	WAR_GOAL_EXECUTION_PRIORITY_CONTAIN_THREAT = 60
+	WAR_GOAL_EXECUTION_PRIORITY_TRANSFER_SUBJECT = 59
+	WAR_GOAL_EXECUTION_PRIORITY_LIBERATE_SUBJECT = 58
+	
+	WAR_GOAL_EXECUTION_PRIORITY_REVOKE_ALL_CLAIMS = 50
+	WAR_GOAL_EXECUTION_PRIORITY_REVOKE_CLAIM = 49
+	
+	WAR_GOAL_EXECUTION_PRIORITY_INCREASE_AUTONOMY = 40
+	WAR_GOAL_EXECUTION_PRIORITY_REDUCE_AUTONOMY = 39
+	
+	WAR_GOAL_EXECUTION_PRIORITY_JOIN_POWER_BLOC = 30
+	WAR_GOAL_EXECUTION_PRIORITY_UNIFICATION_LEADERSHIP = 29
+	
+	WAR_GOAL_EXECUTION_PRIORITY_REGIME_CHANGE = 20
+	WAR_GOAL_EXECUTION_PRIORITY_OPEN_MARKET = 19
+	WAR_GOAL_EXECUTION_PRIORITY_HUMILIATION = 18
+	WAR_GOAL_EXECUTION_PRIORITY_FORCE_NATIONALIZATION = 17
+	WAR_GOAL_EXECUTION_PRIORITY_FOREIGN_INVESTMENT_RIGHTS = 16
+	WAR_GOAL_EXECUTION_PRIORITY_COLONIZATION_RIGHTS = 15
+	
+	WAR_GOAL_EXECUTION_PRIORITY_MAKE_DOMINION = 14
+	WAR_GOAL_EXECUTION_PRIORITY_MAKE_TRIBUTARY = 13
+	WAR_GOAL_EXECUTION_PRIORITY_MAKE_PROTECTORATE = 12
 
 	DIPLOMATIC_PLAY_ABANDON_SUPPORT_RELATIONS_IMPACT = 50
 	DIPLOMATIC_PLAY_ESCALATION_DAILY = 1
@@ -1195,8 +1212,8 @@ NPops = {
 	CONVERSION_UNINCORPORATED_MULT = 0.1 		# CONVERSION_RATE is multiplied by this in unincorporated states
 	MIN_CONVERSION = 1							# If there is any conversion at least this many people will convert
 
-	OBSESSION_DEMAND_MIN = 1.0					# The minimum relative demand of an obsession (overrides min demand in buy package goods categories)
-	OBSESSION_DEMAND_MULT = 2.0					# Demand of an obsession is multiplied by this
+	DEFAULT_OBSESSION_DEMAND_MIN = 0.5					# The minimum relative demand of an obsession (overrides min demand in buy package goods categories), can be overriden in pop need
+	DEFAULT_OBSESSION_DEMAND_MULT = 1.5					# Demand of an obsession is multiplied by this, can be overriden in pop need
 	MIN_POPS_FOR_NEW_OBSESSION = 50000			# At least this many pops of a culture must live in a market to get an obsession from its goods
 	MIN_SUPPLY_LEVEL_FOR_NEW_OBSESSION = 0.5	# Supply needs to be at least this times the demand
 	MIN_DEMAND_VALUE_FOR_NEW_OBSESSION = 500	# At this amount of (number of units * goods base price) needs to be demanded in a market to create a new obsession
@@ -1205,10 +1222,13 @@ NPops = {
 	OBSESSION_SPAWN_CHANCE_MAX_SUPPLY_MULT = 3.0		# Supply relative to demand above this isn't factored into spawn chance
 	OBSESSION_SPAWN_CHANCE_PRESTIGE_GOODS_MULT = 4.0	# Chance for a new obsession to spawn is multiplied by 1 + this, scaled by fraction of the goods supply that is prestige goods
 	TABOO_DEMAND_MULT = 0.5						# Demand of a taboo is multiplied by this
-	PRESTIGE_GOODS_DEMAND_MULT = 1.0			# Demand for goods is multiplied by ( 1 + this ), scaled by how much of the local supply is prestige goods
+	DEFAULT_PRESTIGE_GOODS_DEMAND_INCREASE = 0.5	# Demand for goods is multiplied by ( 1 + this ), scaled by how much of the local supply is prestige goods, can be overriden in pop need
 	MAX_DEMAND_ADJUSTMENT_BASE_AMOUNT = 0.01	# Controls how much a pop can change demand of a substituable goods in a single update (base)
 	MAX_DEMAND_ADJUSTMENT_SCALED_AMOUNT = 0.09	# Controls how much a pop can change demand of a substituable goods in a single update (scaled)
 	MAX_DEMAND_ADJUSTMENT_SCALE = 1.0			# At this delta between target and current demand, apply max demand adjustment scale
+	
+	PRESTIGE_GOOD_SOL_BONUS_SCALING = 0.4 		# Added multiplier to SoL, scales with % of pop buy package that is prestige goods
+	PRESTIGE_GOOD_SOL_MAX_BONUS = 0.2 			# Added multiplier to SoL from prestige goods cannot be higher than this
 
 	# To allow local goods to properly compete with non-local ones in large markets, we add a fraction of the market production of the local good that is equal to ( 1 - the state's GDP share ) * this
 	# This is only done for the purposes of goods substitution supply and *not* for price calculations
@@ -1265,6 +1285,9 @@ NPops = {
 	# UX/UI Labeling #
 	MIGRATION_PULL_HIGH_THRESHOLD = 1.25										# State must have a migration pull of at least market average * this to get market immigration
 	MIGRATION_PULL_LOW_THRESHOLD = 0.75											# State must have a migration pull of less or equal than market average * this to get full amount of emigration
+
+	# Treaty Ports #
+	TREATY_PORT_INITIAL_MIGRATION = 1000										# This is the amount of people of the taker country's first primary culture to migrate to a treaty port upon establishment
 
 ## Migration Attraction ##
 	MIGRATION_PULL_EMPTY_STATE = 100											# If a state has no pops at all, give it a huge migration pull
@@ -1640,6 +1663,7 @@ NWar = {
 	OCCUPATION_STATE_DEFENSIVE_BATTLE_VICTORY_SCORE = 50 # How many occupation "points" each country receives after winning a defensive battle
 	OCCUPATION_STATE_CLEAR_OCCUPATION_FRACTION = 0.5 # Fraction of occupation score dedicated to clear occupation from your own States (if any).
 
+	LAND_INVASION_TRAVEL_TIME_LIMIT_DAYS = 30							# How many days formation can travel at most for a land invasion
 	LAND_INVASION_PREPARATION_DURATION_DAYS = 14 						# How many days should pass since the first army arrived to the invasion front to start advancing it
 	NAVAL_INVASION_PREPARATION_DURATION_DAYS = 14 						# How many days should pass since the first army arrived to the naval invasion front to start advancing it without the sea node being blocked by enemy fleet
 	LAND_INVASION_MAX_LAND_BATTLE_DEFEATS_AT_ZERO_OCCUPATION = 3 		# At this number of land defeats with zero occupation you fail the invasion

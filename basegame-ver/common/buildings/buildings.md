@@ -30,6 +30,10 @@
             # trigger definition
         }
     
+        can_have_country_monopoly = {                       # optional custom trigger (country scope) for whether building can be part of a monopoly
+            #trigger definition
+        }
+
         construction_points = int32							# number of construction points required for construction
         construction_modifier = {							# (optional) applied to the construction camp at a scale of weekly construction output / construction_points
             # modifier definition							# commonly used to add an additional cost of construction that will be consumed over the duration of construction

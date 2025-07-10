@@ -10,6 +10,8 @@
 	flags = {
 		is_treaty_port
 		can_be_enforced
+		giftable
+		hostile
 	}
 
 	usage_limit = once_per_side_with_same_inputs
@@ -25,7 +27,6 @@
     }
 
 	visible = {
-
 		any_scope_state = {
 			is_coastal = yes
 		}
@@ -38,6 +39,54 @@
 		}
 		scope:other_country = {
 			NOT = { is_subject_of = root }
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
+			exists = scope:article.input_state
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
+			trigger_if = {
+				limit = {
+					exists = scope:is_treaty_active
+				}
+				scope:article.input_state ?= {
+					state_region = {
+						any_scope_state = {
+							owner = scope:article.target_country
+							controls_treaty_port_province = yes
+						}
+					}
+				}
+			}
+			trigger_else = {
+				always = yes
+			}
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
+			trigger_if = {
+				limit = {
+					exists = scope:is_treaty_active
+				}
+				scope:article.input_state ?= {
+					state_region = {
+						any_scope_state = {
+							owner = scope:article.source_country
+							is_treaty_port = no
+						}
+					}
+				}
+			}
+			trigger_else = {
+				always = yes
+			}
 		}
 	}
 
@@ -60,7 +109,7 @@
 				}
 			}
 		}
-		
+
 	}
 
 	state_valid_trigger = {
@@ -148,9 +197,9 @@
 	}
 
 	on_withdrawal = {
-		scope:article.input_state = {
+		scope:article_options.input_state = {
 			state_region = {
-				add_claim = scope:article.source_country
+				add_claim = scope:article_options.source_country
 			}
 		}
 	}
@@ -262,40 +311,6 @@
 			}
 		}
 
-		contextual_accept_score = {
-			value = 0
-
-			if = {
-				limit = {
-					exists = scope:article.input_state
-					scope:target_country ?= this
-				}
-				if = {
-					limit = { "scope:article.input_state.ai_treaty_port_value(root)" > 0 }
-					if = {
-						limit = {
-							scope:target_country ?= this
-							scope:source_country = { is_ai = no }
-							scope:treaty ?= {
-								NOT = {
-									any_scope_article_option = {
-										OR = {
-											source_country ?= scope:target_country
-											is_giftable_treaty_article = no
-										}
-									}
-								}
-							}
-						}
-						add = {
-							desc = "DIPLOMATIC_ACCEPTANCE_GIFT"
-							value = 200
-						}
-					}
-				}
-			}
-		}
-
 		wargoal_score_multiplier = {
 			value = 1
 
@@ -303,8 +318,8 @@
 			if = {
 				limit = {
 					has_journal_entry = je_opium_wars
-					NOT = { is_diplomatic_play_enemy_of = scope:target_country }
-					scope:target_country = {
+					NOT = { is_diplomatic_play_enemy_of = scope:source_country }
+					scope:source_country = {
 						has_variable = opium_wars_target
 					}
 					scope:article.input_state = {
@@ -317,14 +332,20 @@
 	}
 
 	wargoal = {
-		execution_priority = 23
+		execution_priority = 71
 		contestion_type = control_target_state
 
 		maneuvers = {
-			value = 5
+			value = 0
+
+			add = {
+				desc = "MANEUVERS_BASE_VALUE"
+				value = 5
+			}
 
 			scope:target_country = {
 				multiply = {
+					desc = "MANEUVERS_TARGET_COUNTRY_POPULATION_FACTOR"
 					value = total_population
 					divide = define:NDiplomacy|SWAY_OFFER_WARGOAL_MANEUVERS_COST_POPULATION_SCALING_FACTOR
 					multiply = define:NDiplomacy|SWAY_OFFER_WARGOAL_MANEUVERS_COST_POPULATION_SCALING_MULTIPLIER
@@ -341,11 +362,13 @@
 					exists = scope:state
 				}
 				add = {
+					desc = "INFAMY_STATE_POPULATION_FACTOR"
 					value = scope:state.state_population
 					divide = 10000
 					max = 5
 				}
 				add = {
+					desc = "INFAMY_STATE_GDP_FACTOR"
 					value = scope:state.gdp
 					divide = 50000
 					max = 5

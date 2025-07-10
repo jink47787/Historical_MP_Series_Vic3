@@ -11,6 +11,7 @@
 		is_non_colonization_agreement
 		can_be_enforced
 		can_be_renegotiated
+		hostile
 	}
 
 	usage_limit = once_per_side_with_same_inputs
@@ -132,6 +133,8 @@
 			if = {
 				limit = {
 					exists = scope:article.input_strategic_region
+					scope:article.input_strategic_region = { "ai_colonization_value(scope:source_country)" > 0 }
+					scope:article.input_strategic_region = { "ai_colonization_value(scope:target_country)" > 0 }
 				}
 
 				if = {
@@ -146,9 +149,12 @@
 						save_temporary_scope_as = actor
 					}
 
-					add = {
-						desc = "DIPLOMATIC_ACCEPTANCE_BASE_ADDITIONAL"
-						value = -25
+					scope:article.input_strategic_region = {
+						subtract = {
+							desc = "DIPLOMATIC_ACCEPTANCE_COLONIAL_INTEREST"
+							value = "ai_colonization_value(scope:source_country)"
+							multiply = 2
+						}
 					}
 
 					add = {
@@ -158,13 +164,13 @@
 							limit = {
 								country_rank >= rank_value:great_power
 							}
-							value = -25
+							value = -50
 						}
 						else_if = {
 							limit = {
 								country_rank >= rank_value:major_power
 							}
-							value = -10
+							value = -25
 						}
 					}
 
@@ -177,31 +183,7 @@
 									is_country_type = unrecognized
 								}
 							}
-							value = -25
-						}
-					}
-
-					subtract = {
-						desc = "DIPLOMATIC_ACCEPTANCE_VALUE_OF_STATES_IN_REGION"
-
-						if = {
-							limit = {
-								scope:article.input_strategic_region = {
-									any_scope_state = {
-										owner = scope:source_country
-									}
-								}
-							}
-							scope:article.input_strategic_region = {
-								every_scope_state = {
-									limit = {
-										owner = scope:source_country
-									}
-									add = "this.ai_state_value(scope:source_country)"
-									multiply = 0.5
-									max = 100
-								}
-							}
+							value = -100
 						}
 					}
 
@@ -267,27 +249,10 @@
 						save_temporary_scope_as = actor
 					}
 
-					add = {
-						desc = "DIPLOMATIC_ACCEPTANCE_VALUE_OF_STATES_IN_REGION"
-
-						if = {
-							limit = {
-								scope:article.input_strategic_region = {
-									any_scope_state = {
-										owner = scope:target_country
-									}
-								}
-							}
-							scope:article.input_strategic_region = {
-								every_scope_state = {
-									limit = {
-										owner = scope:target_country
-									}
-									add = "this.ai_state_value(scope:target_country)"
-									multiply = 0.5
-									max = 25
-								}
-							}
+					scope:article.input_strategic_region = {
+						add = {
+							desc = "DIPLOMATIC_ACCEPTANCE_COLONIAL_INTEREST"
+							value = "ai_colonization_value(scope:target_country)"
 						}
 					}
 
@@ -316,27 +281,6 @@
 							value = 10
 						}
 					}
-
-					add = {
-						desc = "DIPLOMATIC_ACCEPTANCE_ATTITUDE"
-
-						if = {
-							limit = {
-								NOT = { exists = scope:is_treaty_active }
-								OR = {
-									has_attitude = {
-										who = scope:source_country
-										attitude = disinterested
-									}
-									has_attitude = {
-										who = scope:source_country
-										attitude = wary
-									}
-								}
-							}
-							value = -300
-						}
-					}
 				}
 				else_if = {
 					limit = { NOT = { exists = scope:is_treaty_active } }
@@ -345,13 +289,25 @@
 						value = -300
 					}
 				}
+				else = {
+					add = {
+						desc = "DIPLOMATIC_ACCEPTANCE_DOES_NOT_WANT_ARTICLE"
+						value = -30
+					}
+				}
+			}
+			else = {
+				add = {
+					desc = "DIPLOMATIC_ACCEPTANCE_DOES_NOT_WANT_ARTICLE"
+					value = -100
+				}
 			}
 		}
 	}
 
 	wargoal = {
-		execution_priority = 60
-		contestion_type = control_target_country_capital
+		execution_priority = 21
+		contestion_type = control_any_target_incorporated_state
 
 		maneuvers = {
 			value = 2.5
@@ -377,7 +333,7 @@
 						}
 					}
 				}
-				add = 15
+				add = 10
 			}
 
 			if = {
@@ -397,7 +353,7 @@
 					}
 				}
 			}
-			max = 25
+			max = 20
 		}
 	}
 }
