@@ -136,10 +136,33 @@ types treaty_draft_panel_types
 				hbox = {
 					layoutpolicy_horizontal = expanding
 					margin = { 10 0 }
-					spacing = 5
 
-					small_flag = {
+					### Using a container here to make sure the influence cost background goes behind the flag.
+					container = {
 						datacontext = "[TreatyDraft.GetLeftCountry]"
+
+						### LEFT TOTAL INFLUENCE COST
+						widget = {
+							parentanchor = vcenter
+							position = { 53 0 }
+							size = { 68 29 }
+
+							total_influence_cost = {
+								blockoverride "horizontal_margins" {
+									margin_left = 2
+									margin_right = 9
+								}
+
+								blockoverride "influence_number" {
+									raw_text = "#v [TreatyDraft.GetCost(Country.Self)|0]#!"
+								}
+							}
+						}
+
+						### LEFT FLAG
+						small_flag = {
+							parentanchor = vcenter
+						}
 					}
 
 					expand = {}
@@ -174,6 +197,35 @@ types treaty_draft_panel_types
 
 					expand = {}
 
+					### RIGHT TOTAL INFLUENCE COST
+					total_influence_cost = {
+						datacontext = "[TreatyDraft.GetRightCountry]"
+
+						blockoverride "expand_before" {
+							expand = {}
+						}
+
+						blockoverride "expand_after" {}
+
+						blockoverride "horizontal_margins" {
+							margin_left = 5
+							margin_right = 5
+						}
+
+						blockoverride "background_margin" {
+							margin_right = 10
+						}
+
+						blockoverride "text_minimumsize" {
+							minimumsize = { 20 -1 }
+						}
+
+						blockoverride "influence_number" {
+							raw_text = "#v [TreatyDraft.GetCost(Country.Self)|0]#!"
+						}
+					}
+
+					### RIGHT FLAG
 					small_flag = {
 						datacontext = "[TreatyDraft.GetRightCountry]"
 					}
@@ -288,6 +340,7 @@ types treaty_draft_panel_types
 									}
 
 									blockoverride "right_click_menu_onclick" {
+										onclick = "[RightClickMenuManager.Close]"
 										onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_right')]"
 									}
 								}
@@ -344,26 +397,33 @@ types treaty_draft_panel_types
 						}
 					}
 
+					### OBLIGATIONS & RESET BUTTON
 					hbox = {
 						layoutpolicy_horizontal = expanding
+						spacing = 5
+						margin = { 15 5 }
 
-						expand = {}
-
-						### OBLIGATION - OWE & USE
-						vbox = {
-							spacing = 5
-							margin = { 5 5 }
+						### OWE OBLIGATION
+						widget = {
+							size = { 200 40 }
 
 							background = {
-								using = fade_center_colored_black
-								alpha = 0.3
+								visible = "[Not(TreatyDraft.WillOweObligation(TreatyDraft.GetLeftCountry.Self))]"
+								using = entry_bg_simple_solid
+								alpha = 0.4
+							}
+
+							background = {
+								visible = "[TreatyDraft.WillOweObligation(TreatyDraft.GetLeftCountry.Self)]"
+								using = paper_bg
 							}
 
 							hbox = {
-								visible = "[Not(TreatyDraft.CanCallInObligation(TreatyDraft.GetLeftCountry.Self))]"
 								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = expanding
 								spacing = 5
-								using = tooltip_se
+								margin = { 10 5 }
+								using = tooltip_ne
 								tooltip = "[TreatyDraft.GetOweObligationDesc(TreatyDraft.GetLeftCountry.Self)]"
 								enabled = "[TreatyDraft.CanOweObligation(TreatyDraft.GetLeftCountry.Self)]"
 
@@ -379,50 +439,24 @@ types treaty_draft_panel_types
 									}
 								}
 
-								icon = {
-									size = { 25 25 }
-									texture = "gfx/interface/icons/generic_icons/obligation.dds"
+								textbox = {
+									align = nobaseline
+									autoresize = yes
+									using = elide_fontsize_min
+									max_width = 150
+									text = "OWE_OBLIGATION"
 								}
 
-								textbox = {
-									text = "OWE_OBLIGATION"
-									autoresize = yes
-									align = nobaseline
-								}
+								expand = {}
 							}
 
-							hbox = {
-								visible = "[TreatyDraft.CanCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
-								layoutpolicy_horizontal = expanding
-								spacing = 5
-								margin = { 5 5 }
-
-								tooltip = "[TreatyDraft.GetCallInObligationDesc(TreatyDraft.GetLeftCountry.Self)]"
-
-								widget = {
-									size = { 25 25 }
-
-									checkbutton = {
-										parentanchor = center
-										using = check_button
-										size = { 100% 100% }
-										onclick = "[TreatyDraft.ToggleCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
-										checked = "[TreatyDraft.WillCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
-									}
-								}
-
-								icon = {
-									size = { 25 25 }
-									texture = "gfx/interface/icons/generic_icons/obligation.dds"
-								}
-
-								textbox = {
-									text = "USE_OBLIGATION"
-									autoresize = yes
-									align = nobaseline
-								}
+							icon = {
+								visible = "[TreatyDraft.WillOweObligation(TreatyDraft.GetLeftCountry.Self)]"
+								using = highlighted_square_selection
 							}
 						}
+
+						expand = {}
 
 						### RESET MENU BUTTON
 						button_icon_round = {
@@ -437,6 +471,112 @@ types treaty_draft_panel_types
 						}
 
 						expand = {}
+
+						### CALL IN OBLIGATION
+						widget = {
+							visible = "[TreatyDraft.CanCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
+							size = { 200 40 }
+
+							background = {
+								visible = "[Not(TreatyDraft.WillCallInObligation(TreatyDraft.GetLeftCountry.Self))]"
+								using = entry_bg_simple_solid
+								alpha = 0.4
+							}
+
+							background = {
+								visible = "[TreatyDraft.WillCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
+								using = paper_bg
+							}
+
+							hbox = {
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = expanding
+								spacing = 5
+								margin = { 10 5 }
+								using = tooltip_ne
+								tooltip = "[TreatyDraft.GetCallInObligationDesc(TreatyDraft.GetLeftCountry.Self)]"
+								enabled = "[TreatyDraft.CanCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
+
+								widget = {
+									size = { 25 25 }
+
+									checkbutton = {
+										using = check_button
+										size = { 100% 100% }
+										onclick = "[TreatyDraft.ToggleCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
+										checked = "[TreatyDraft.WillCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
+									}
+								}
+
+								textbox = {
+									align = nobaseline
+									autoresize = yes
+									using = elide_fontsize_min
+									max_width = 150
+									text = "USE_OBLIGATION"
+								}
+
+								expand = {}
+							}
+
+							icon = {
+								visible = "[TreatyDraft.WillCallInObligation(TreatyDraft.GetLeftCountry.Self)]"
+								using = highlighted_square_selection
+							}
+						}
+
+						### ASK FOR OBLIGATION
+						widget = {
+							visible = "[Not(TreatyDraft.CanCallInObligation(TreatyDraft.GetLeftCountry.Self))]"
+							size = { 200 40 }
+
+							background = {
+								visible = "[Not(TreatyDraft.WillAskForObligation(TreatyDraft.GetLeftCountry.Self))]"
+								using = entry_bg_simple_solid
+								alpha = 0.4
+							}
+
+							background = {
+								visible = "[TreatyDraft.WillAskForObligation(TreatyDraft.GetLeftCountry.Self)]"
+								using = paper_bg
+							}
+
+							hbox = {
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = expanding
+								spacing = 5
+								margin = { 10 5 }
+								using = tooltip_ne
+								tooltip = "[TreatyDraft.GetAskForObligationDesc(TreatyDraft.GetLeftCountry.Self)]"
+								enabled = "[TreatyDraft.CanAskForObligation(TreatyDraft.GetLeftCountry.Self)]"
+
+								widget = {
+									size = { 25 25 }
+
+									checkbutton = {
+										using = check_button
+										size = { 100% 100% }
+										onclick = "[TreatyDraft.ToggleAskForObligation(TreatyDraft.GetLeftCountry.Self)]"
+										checked = "[TreatyDraft.WillAskForObligation(TreatyDraft.GetLeftCountry.Self)]"
+									}
+								}
+
+								textbox = {
+									align = nobaseline
+									autoresize = yes
+									using = elide_fontsize_min
+									max_width = 150
+									text = "REVERSE_SWAY_OFFER_OBLIGATION"
+								}
+
+								expand = {}
+							}
+
+							icon = {
+								visible = "[TreatyDraft.WillAskForObligation(TreatyDraft.GetLeftCountry.Self)]"
+								using = highlighted_square_selection
+							}
+						}
 					}
 
 					hbox = {
@@ -446,20 +586,12 @@ types treaty_draft_panel_types
 						margin = { 5 0 }
 
 						seal_and_signature ={
-							#visible = "[TreatyDraft.WouldAcceptTreaty(TreatyDraft.GetRightCountry)]" #todo PRCAL-38322
-							datacontext = "[TreatyDraft.GetLeftCountry]"
-						}
-
-						seal_and_signature_unsigned = {
-							#visible = "[Not(TreatyDraft.WouldAcceptTreaty(TreatyDraft.GetLefttCountry))]" #todo PRCAL-38322
-							visible = no
 							datacontext = "[TreatyDraft.GetLeftCountry]"
 						}
 
 						#RIGHT SIGNATURE
 						seal_and_signature ={
-							#visible = "[TreatyDraft.WouldAcceptTreaty(TreatyDraft.GetRightCountry)]" #todo PRCAL-38322
-							visible = no
+							visible = "[TreatyDraft.WillAIAccept(TreatyDraft.GetRightCountry.Self)]"
 							datacontext = "[TreatyDraft.GetRightCountry]"
 
 							blockoverride " signature_texture" {
@@ -473,7 +605,7 @@ types treaty_draft_panel_types
 						}
 
 						seal_and_signature_unsigned = {
-							#visible = "[Not(TreatyDraft.WouldAcceptTreaty(TreatyDraft.GetRightCountry))]" #todo PRCAL-38322
+							visible = "[Not(TreatyDraft.WillAIAccept(TreatyDraft.GetRightCountry.Self))]"
 							datacontext = "[TreatyDraft.GetRightCountry]"
 
 							blockoverride "signature_icon_position" {
@@ -832,6 +964,16 @@ types treaty_draft_panel_types
 		}
 	}
 
+	type article_draft_influence_cost = article_influence_cost {
+		blockoverride "influence_cost_alpha" {
+			alpha = "[TransparentIfZero(ArticleDraft.GetCostFor(Country.Self))]"
+		}
+
+		blockoverride "influence_cost_text" {
+			raw_text = "#v [ArticleDraft.GetCostFor(Country.Self)|0]#!"
+		}
+	}
+
 	type article_draft = vbox {
 		layoutpolicy_horizontal = expanding
 
@@ -910,14 +1052,13 @@ types treaty_draft_panel_types
 				layoutpolicy_horizontal = expanding
 				layoutpolicy_vertical = expanding
 				margin = { 10 5 }
-				spacing = 5
 
 				### MUTUAL AGREEMENT
 				treaty_textbox = {
 					visible = "[ArticleDraft.HasKind('mutual')]"
 					text = "[ArticleDraft.GetShortDesc]"
 					autoresize = yes
-					maximumsize = { 410 60 }
+					maximumsize = { 290 60 }
 					align = nobaseline
 					using = elide_fontsize_min
 					multiline = yes
@@ -943,6 +1084,7 @@ types treaty_draft_panel_types
 					using = default_button
 
 					block "right_click_menu_onclick" {
+						onclick = "[RightClickMenuManager.Close]"
 						onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 					}
 
@@ -967,6 +1109,7 @@ types treaty_draft_panel_types
 					using = default_button
 
 					block "right_click_menu_onclick" {
+						onclick = "[RightClickMenuManager.Close]"
 						onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 					}
 
@@ -995,6 +1138,7 @@ types treaty_draft_panel_types
 					tooltip = "ARTICLE_DRAFT_CLICK_TO_CHANGE"
 
 					block "right_click_menu_onclick" {
+						onclick = "[RightClickMenuManager.Close]"
 						onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 					}
 
@@ -1022,6 +1166,7 @@ types treaty_draft_panel_types
 					datacontext = "[ArticleDraft.GetGoods]"
 
 					block "right_click_menu_onclick" {
+						onclick = "[RightClickMenuManager.Close]"
 						onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 					}
 
@@ -1032,6 +1177,7 @@ types treaty_draft_panel_types
 						using = default_button
 
 						block "right_click_menu_onclick" {
+							onclick = "[RightClickMenuManager.Close]"
 							onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 						}
 
@@ -1064,12 +1210,14 @@ types treaty_draft_panel_types
 					datacontext = "[ArticleDraft.GetGoods]"
 
 					block "right_click_menu_onclick" {
+						onclick = "[RightClickMenuManager.Close]"
 						onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 					}
 
 					button = {
 						enabled = "[ArticleDraft.CanBeModified]"
 						block "right_click_menu_onclick" {
+							onclick = "[RightClickMenuManager.Close]"
 							onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 						}
 						parentanchor = vcenter|right
@@ -1111,6 +1259,7 @@ types treaty_draft_panel_types
 						using = default_button
 
 						block "right_click_menu_onclick" {
+							onclick = "[RightClickMenuManager.Close]"
 							onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 						}
 
@@ -1141,6 +1290,7 @@ types treaty_draft_panel_types
 						using = default_button
 
 						block "right_click_menu_onclick" {
+							onclick = "[RightClickMenuManager.Close]"
 							onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 						}
 
@@ -1173,6 +1323,7 @@ types treaty_draft_panel_types
 					datacontext = "[ArticleDraft.GetLawType]"
 
 					block "right_click_menu_onclick" {
+						onclick = "[RightClickMenuManager.Close]"
 						onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 					}
 
@@ -1183,6 +1334,7 @@ types treaty_draft_panel_types
 						using = default_button
 
 						block "right_click_menu_onclick" {
+							onclick = "[RightClickMenuManager.Close]"
 							onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
 						}
 
@@ -1218,117 +1370,83 @@ types treaty_draft_panel_types
 
 				vbox = {
 					layoutpolicy_horizontal = expanding
-					maximumsize = { 50 -1 }
+					maximumsize = { 150 -1 }
 					spacing = 2
 
+					### INFLUENCE COST AND ICONS - DIRECTED
 					hbox = {
+						visible = "[ArticleDraft.HasKind('directed')]"
 						layoutpolicy_horizontal = expanding
-						maximumsize = { 50 -1 }
-						alpha = "[TransparentIfZero(ArticleDraft.GetCost)]"
 
-						background = {
-							visible = "[ArticleDraft.HasKind('directed')]"
-							using = entry_bg_simple_solid
-							alpha = 0.4
-							margin_left = 10
+						expand = {}
+
+						article_draft_influence_cost = {
+							datacontext = "[ArticleDraft.GetMaintenancePayer]"
 						}
+					}
 
-						background = {
-							visible = "[ArticleDraft.HasKind('mutual')]"
-							using = entry_bg_simple_solid
-							alpha = 0.4
-						}
+					### INFLUENCE COSTS AND ICONS - MUTUAL
+					hbox = {
+						visible = "[ArticleDraft.HasKind('mutual')]"
+						layoutpolicy_horizontal = expanding
+						spacing = 25
 
-						### INFLUENCE ICON - DIRECTED
-						widget = {
-							visible = "[ArticleDraft.HasKind('directed')]"
-							size = { 10 20 }
+						expand = {}
 
-							icon = {
-								parentanchor = center
-								size = { 25 25 }
-								texture = "gfx/interface/icons/topbar/influence_icon.dds"
-								position = { -15 0 }
+						article_draft_influence_cost = {
+							datacontext = "[ArticleDraft.GetFirstOrSource]"
+
+							blockoverride "maximumsize" {
+								maximumsize = { 60 -1 }
+								minimumsize = { 60 -1 }
 							}
 						}
 
-						### INFLUENCE ICON - MUTUAL
-						widget = {
-							visible = "[ArticleDraft.HasKind('mutual')]"
-							size = { 10 20 }
+						article_draft_influence_cost = {
+							datacontext = "[ArticleDraft.GetSecondOrTarget]"
 
-							icon = {
-								parentanchor = center
-								size = { 25 25 }
-								texture = "gfx/interface/icons/topbar/influence_icon.dds"
-								position = { -5 0 }
+							blockoverride "maximumsize" {
+								maximumsize = { 60 -1 }
+								minimumsize = { 60 -1 }
 							}
-						}
-
-						widget = {
-							visible = "[ArticleDraft.HasKind('directed')]"
-							size = { 10 10 }
-
-							### FLAG (who is paying)
-							miniature_flag_no_interact = {
-								parentanchor = center
-								position = { -2 0 }
-								datacontext = "[ArticleDraft.GetMaintenancePayer]"
-								blockoverride "tooltip" {}
-							}
-						}
-
-						### INFLUENCE COST - DIRECTED
-						textbox = {
-							visible = "[ArticleDraft.HasKind('directed')]"
-							layoutpolicy_horizontal = expanding
-							layoutpolicy_vertical = expanding
-							align = right|nobaseline
-							margin_right = 5
-							using = elide_fontsize_min
-							raw_text = "#v [ArticleDraft.GetCost|0]#!"
-						}
-
-						### INFLUENCE COST - MUTUAL
-						textbox = {
-							visible = "[ArticleDraft.HasKind('mutual')]"
-							layoutpolicy_horizontal = expanding
-							layoutpolicy_vertical = expanding
-							align = right|nobaseline
-							margin_right = 5
-							using = elide_fontsize_min
-							raw_text = "#v [ArticleDraft.GetCost|0]#!"
 						}
 					}
 
 					hbox = {
 						layoutpolicy_horizontal = expanding
-						maximumsize = { 50 -1 }
 
-						background = {
-							using = entry_bg_simple_solid
-							alpha = 0.4
-						}
+						expand = {}
 
-						### ACCEPTANCE ICON
-						widget = {
-							size = { 10 20 }
-
-							treaty_draft_input_acceptance_icon = {
-								parentanchor = center
-								size = { 20 20 }
-								position = { -5 0 }
-							}
-						}
-
-						### ACCEPTANCE VALUE
-						textbox = {
+						hbox = {
 							layoutpolicy_horizontal = expanding
-							layoutpolicy_vertical = expanding
-							align = right|nobaseline
-							margin_right = 5
-							using = elide_fontsize_min
-							raw_text = "#v [ArticleDraft.GetAcceptance(TreatyDraft.GetRightCountry.Self)|0+=]#!"
+							maximumsize = { 50 -1 }
+
+							background = {
+								using = entry_bg_simple_solid
+								alpha = 0.4
+							}
+
+							### ACCEPTANCE ICON
+							widget = {
+								size = { 10 20 }
+
+								treaty_draft_input_acceptance_icon = {
+									parentanchor = center
+									size = { 20 20 }
+									position = { -5 0 }
+								}
+							}
+
+							### ACCEPTANCE VALUE
+							textbox = {
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = expanding
+								align = right|nobaseline
+								margin_right = 5
+								elide = right
+								fontsize_min = 10
+								raw_text = "#v [ArticleDraft.GetAcceptance(TreatyDraft.GetRightCountry.Self)|0+=]#!"
+							}
 						}
 					}
 				}
@@ -1350,12 +1468,12 @@ types treaty_draft_panel_types
 				layoutpolicy_vertical = preferred
 
 				simple_article_button = {
-					visible = "[Not(ArticleType.RequiresAnyInput)]"
+					visible = "[And(ArticleType.IsVisible(Country.Self, TreatyDraft.GetOtherCountry(Country.Self).Self), Not(ArticleType.RequiresAnyInput))]"
 					datacontext = "[Country]"
 				}
 
 				additional_input_article_button = {
-					visible = "[ArticleType.RequiresAnyInput]"
+					visible = "[And(ArticleType.IsVisible(Country.Self, TreatyDraft.GetOtherCountry(Country.Self).Self), ArticleType.RequiresAnyInput)]"
 					enabled = "[ArticleType.IsAvailable(Country.Self, TreatyDraft.GetOtherCountry(Country.Self).Self)]"
 					datacontext = "[Country]"
 				}
@@ -1486,8 +1604,7 @@ types treaty_draft_panel_types
 						custom_tooltip_textbox = {
 							parentanchor = vcenter
 							max_width = 500
-							default_format = "#tooltippable"
-							text = "[TreatyDraft.GetArticleTypeAcceptance(ArticleType.Self, Country.Self)|+=0]"
+							text = "TREATY_DRAFT_ACCEPTANCE_WITH_LABEL"
 						}
 					}
 				}

@@ -8,8 +8,9 @@
 	icon = "gfx/interface/icons/diplomatic_treaties_articles_icons/military_assistance_treaties.dds"
 
 	flags = {
-		is_military_assistance
 		can_be_renegotiated
+		giftable
+		friendly
 	}
 
 	maintenance_paid_by = source_country
@@ -57,7 +58,7 @@
         conditions = {
             weekly = {
 				scope:article = {
-					source_country.army_power_projection < target_country.army_power_projection
+					source_country = { army_power_projection < prev.target_country.army_power_projection }
 				}
             }
         }
@@ -67,22 +68,25 @@
 		scope:source_country = {
 			is_revolutionary = no
 		}
-		scope:target_country = {
-			any_scope_treaty = {
-				count < 2
-				hidden_trigger = {
-					OR = {
-						scope:treaty = {
-							is_renegotiation = no
+		custom_tooltip = {
+			text = military_assistance_limit_tt
+			scope:target_country = {
+				any_scope_treaty = {
+					count < 2
+					hidden_trigger = {
+						OR = {
+							scope:treaty = {
+								is_renegotiation = no
+							}
+							scope:treaty.amended_treaty != this
 						}
-						scope:treaty.amended_treaty != this
+					}
+					any_scope_article = {
+						has_type = military_assistance
+						target_country = scope:target_country
 					}
 				}
-				any_scope_article = {
-					has_type = military_assistance
-					target_country = scope:target_country
-				}
-			}
+			}		
 		}
         custom_tooltip = {
             text = DUPLICATE_ARTICLE_SAME_INPUTS_TREATY
@@ -628,27 +632,6 @@
 						desc = "LOBBY_OPPORTUNITY_BONUS"
 						value = 5
 					}
-				}
-			}
-
-			if = {
-				limit = {
-					scope:target_country ?= this
-					scope:source_country = { is_ai = no }
-					scope:treaty ?= {
-						NOT = {
-							any_scope_article_option = {
-								OR = {
-									source_country ?= scope:target_country
-									is_giftable_treaty_article = no
-								}
-							}
-						}
-					}
-				}
-				add = {
-					desc = "DIPLOMATIC_ACCEPTANCE_GIFT"
-					value = 200
 				}
 			}
 		}

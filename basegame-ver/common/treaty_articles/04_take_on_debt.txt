@@ -5,7 +5,7 @@
 	icon = "gfx/interface/icons/diplomatic_treaties_articles_icons/take_on_debt_treaties.dds"
 
 	flags = {
-		is_take_on_debt
+		giftable
 	}
 
 	maintenance_paid_by = source_country
@@ -60,15 +60,14 @@
 				}
 				change_relations = { country = scope:debt_giver value = 30 }
 
-				#hidden_effect = {
-				#	scope:debt_giver = {
-				#		set_variable = {
-				#			name = debt_bought_out_recently
-				#			value = yes
-				#			days = 7300
-				#		}
-				#	}
-				#}
+				hidden_effect = {
+					scope:debt_giver = {
+						set_variable = {
+							name = debt_bought_out_recently
+							days = 7300
+						}
+					}
+				}
 			}
 		}
 	}
@@ -125,6 +124,15 @@
 				add = {
 					desc = "DIPLOMATIC_ACCEPTANCE_BASE_ADDITIONAL"
 					value = -25
+
+					if = {
+						limit = {
+							scope:target_country = {
+								has_variable = debt_bought_out_recently
+							}
+						}
+						add = -75
+					}
 				}
 
 				add = {
@@ -228,7 +236,7 @@
 				}
 
 				add = {
-					desc = "DIPLOMATIC_ACCEPTANCE_DEBT"
+					desc = "DIPLOMATIC_ACCEPTANCE_DEBT_TARGET"
 
 					if = {
 						limit = {
@@ -298,31 +306,6 @@
 						}
 						value = 40
 					}
-				}
-			}
-		}
-
-		contextual_accept_score = {
-			value = 0
-
-			if = {
-				limit = {
-					scope:target_country ?= this
-					scope:source_country = { is_ai = no }
-					scope:treaty ?= {
-						NOT = {
-							any_scope_article_option = {
-								OR = {
-									source_country ?= scope:target_country
-									is_giftable_treaty_article = no
-								}
-							}
-						}
-					}
-				}
-				add = {
-					desc = "DIPLOMATIC_ACCEPTANCE_GIFT"
-					value = 200
 				}
 			}
 		}

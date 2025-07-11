@@ -1,6 +1,6 @@
 ﻿#root = evaluating country
 #scope:other_country = other country
-#scope:binding_period = binding period of the treaty (in days)
+#scope:treaty_options = treaty options
 static_treaty_acceptance = {
 	value = 0
 
@@ -23,13 +23,13 @@ static_treaty_acceptance = {
 		if = {
 			limit = {
 				NOT = { exists = scope:is_treaty_active }
-				exists = scope:binding_period
-				scope:binding_period >= 18250
+				exists = scope:treaty_options.binding_period
+				scope:treaty_options.binding_period >= 18250
 			}
 			add = 25
 
 			add = {
-				value = scope:binding_period
+				value = scope:treaty_options.binding_period
 				min = 365
 				divide = 365
 				max = 150
@@ -51,12 +51,12 @@ static_treaty_acceptance = {
 			if = {
 				limit = {
 					NOT = { exists = scope:is_treaty_active }
-					exists = scope:binding_period
-					scope:binding_period > 18250
+					exists = scope:treaty_options.binding_period
+					scope:treaty_options.binding_period > 18250
 				}
 				add = {
 					value = 5
-					multiply = scope:binding_period
+					multiply = scope:treaty_options.binding_period
 					divide = 365
 					subtract = 25
 					max = 100
@@ -318,5 +318,44 @@ static_treaty_acceptance = {
 		value = "scope:other_country.lobby_foreign_anti_clout(root)"
 		multiply = -100
 		min = -15
+	}
+	
+	if = {
+		limit = {
+			scope:other_country ?= { is_ai = no }
+			scope:treaty_options ?= {
+				is_exchanging_obligations = no
+				any_scope_article_option = {
+					is_giftable_to = root	
+					is_desired_by = root
+				}
+				NOT = {
+					any_scope_article_option = {
+						OR = {
+							NOT = { is_giftable_to = root }
+							NOT = { is_desired_by = root }
+						}
+					}
+				}
+			}
+		}
+		add = {
+			desc = "DIPLOMATIC_ACCEPTANCE_GIFT"
+			value = 1000
+		}
+	}
+	else_if = {
+		limit = {
+			scope:treaty_options ?= {
+				is_equal_exchange = yes
+				any_scope_article_option = {				
+					is_desired_by = root
+				}				
+			}
+		}
+		add = {
+			desc = "DIPLOMATIC_ACCEPTANCE_EQUAL_EXCHANGE"
+			value = 30
+		}
 	}
 }

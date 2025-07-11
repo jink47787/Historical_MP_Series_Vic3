@@ -46,7 +46,7 @@
 	DIPLO_PROPOSAL_ANSWER_CHANCE = 5 	# Chance per tick of AI answering a proposal (1 = 1%)
 	DIPLO_PROPOSAL_TO_PLAYER_COOLDOWN_MONTHS = 120 # Do not make the same exact proposal to the player for this amount of months
     DIPLO_PROPOSAL_LIKELY_NON_ACCEPTED_COOLDOWN_MONTHS = 120 # When AI rolls the dice on whether or not to attempt a proposal it thinks will be rejected, don't try again for this time
-    DIPLO_PROPOSAL_LIKELY_NON_ACCEPTED_TREATY_COOLDOWN_MONTHS = 12 # When AI fails to propose a treaty to another AI, wait this long  before trying again with the same country 
+    DIPLO_PROPOSAL_LIKELY_NON_ACCEPTED_TREATY_COOLDOWN_MONTHS = 12 # When AI fails to propose a treaty to another AI, wait this long  before trying again with the same country
     DIPLO_PROPOSAL_NO_OBLIGATION_COOLDOWN_MONTHS = 120 # If the AI decides not to offer an obligation for a proposal, remember that decision for this many months
 
 	DIPLO_PROPOSAL_ACCEPT_THRESHOLD = 1					# At this or more acceptance on a diplomatic action without uses_random_approval flag, AI says yes to a proposal. Each point above it increases chance to accept a uses_random_approval or treaty proposal
@@ -672,9 +672,11 @@
 
 	MONEY_SPENDING_MILITARY_CRITICAL_THRESHOLD = 0.5 # If actual-to-wanted number of barracks/naval bases is below this, AI will not consider downsizing them further
 	MONEY_SPENDING_MILITARY_EXCESSIVE_THRESHOLD = 2.0 # If actual-to-wanted number of barracks/naval bases is above this, AI considers it a target for cutting spending when needed
-	MONEY_SPENDING_CONSTRUCTION_CRITICAL_THRESHOLD = 0.75 # If actual-to-wanted number of construction sector buildings is below this, AI considers it very important to get more
+	MONEY_SPENDING_CONSTRUCTION_CRITICAL_THRESHOLD = 0.75 # If actual-to-wanted construction production is below this, AI considers it very important to get more
+	MONEY_SPENDING_CONSTRUCTION_EXCESSIVE_THRESHOLD = 1.05 # If actual-to-wanted construction production is at least this, AI considers it nice to have
 	MONEY_SPENDING_INNOVATION_CRITICAL_THRESHOLD = 0.75 # If innovation production compared to cap is worse than this, AI considers it very important to improve
 	MONEY_SPENDING_INNOVATION_DESIRED_THRESHOLD = 1.0 # If innovation production compared to cap is worse than this, AI considers it important to improve
+	MONEY_SPENDING_INNOVATION_EXCESSIVE_THRESHOLD = 1.25 # If innovation production compared to cap is at least this, AI considers it nice to have
 	MONEY_SPENDING_SUPPLY_NETWORK_CRITICAL_THRESHOLD = 0.75 # If supply network is worse than this, AI considers it critical to improve it
 	MONEY_SPENDING_SUPPLY_NETWORK_DESIRED_THRESHOLD = 1.25 # If supply network is worse than this, AI wants to improve it
 	MONEY_SPENDING_SUPPLY_NETWORK_EXCESSIVE_CONVOYS = 2000 # If AI has more than this amount of free convoys, it's fine to downsize ports to save money
@@ -731,6 +733,13 @@
 	CONSUMPTION_TAX_MAX_NUM_TAXED_GOODS_BASE = 0 # Base max number of goods AI wants to tax
 	CONSUMPTION_TAX_MAX_NUM_TAXED_GOODS_PER_MISSING_TAX_TYPE = 2 # Added to max number of goods AI wants to tax for each other type of tax it does not collect
 
+	# GDP limiters on where the AI will construct Trade Centers - note that decreasing these can adversely affect performance!
+	TRADE_CENTER_MINIMUM_GDP_MARKET_CAPITAL = 100000			# For market capital states, yearly GDP
+	TRADE_CENTER_MINIMUM_GDP_NON_MARKET_CAPITAL = 500000		# For all other states, yearly GDP
+	TRADE_CENTER_MINIMUM_GDP_NON_COASTAL_MULT = 2.0 			# Multiplies the GDP threshold for non-coastal states (additive)
+	TRADE_CENTER_MINIMUM_GDP_UNRECOGNIZED_MULT = 2.0 			# Multiplies the GDP threshold for unrecognized countries (additive)
+	TRADE_CENTER_MINIMUM_GDP_PASSED_YEARS_MULT = 0.02 			# Above values are multiplied by 1 + ( number of years since game start * this ) (additive)
+
 	# Below data is used to calculate how much weight the AI places on a production building
 	PRODUCTION_BUILDING_RANDOM_FACTOR = 10.0 # The higher this is, the more random AI construction will be
 	PRODUCTION_BUILDING_STATE_RANDOM_FACTOR = 1.0 # The higher this is, the more random AI state selection for building types will be
@@ -740,7 +749,7 @@
 	PRODUCTION_BUILDING_GOODS_DEFICIT_FACTOR = 10000 # Per pound of predicted building deficit (divided by employee count per level and multiplies a negative value)
 	PRODUCTION_BUILDING_GOODS_DEFICIT_SUBSIDIZE_FACTOR = 5000 # Overrides PRODUCTION_BUILDING_GOODS_DEFICIT_FACTOR for subsidized buildings
 	PRODUCTION_BUILDING_PRODUCED_VALUE_FACTOR = 0.25 # Per pound of produced goods in base value
-	PRODUCTION_BUILDING_PRODUCED_TRADE_CAPACITY_FACTOR = 1000 # Per produced trade capacity, multiplied by the available potential for trade in the state and divided by state GDP
+	PRODUCTION_BUILDING_PRODUCED_TRADE_CAPACITY_FACTOR = 10000 # Per produced trade capacity, multiplied by the available potential for trade in the state and divided by state GDP
 	PRODUCTION_BUILDING_PRODUCED_TRADE_CAPACITY_GDP_ADDED_FOR_DIVISOR = 10000 # Added to state GDP when dividing PRODUCTION_BUILDING_PRODUCED_TRADE_CAPACITY_FACTOR
 	PRODUCTION_BUILDING_PRODUCED_TRADE_CAPACITY_EXPECTED_REVENUE_PER_UNIT = 25 # Each trade capacity is loosely expected to generate about this much revenue, used when predicting revenue from new TCs
 	PRODUCTION_BUILDING_PRODUCED_CONVOYS_FACTOR = 10 # Per produced convoy
@@ -778,7 +787,7 @@
 	PRODUCTION_BUILDING_VERY_LONG_CONSTRUCTION_TIME_THRESHOLD = 60
 	PRODUCTION_BUILDING_VERY_LONG_CONSTRUCTION_TIME_MULT = 0.25 # Multiply score by this if construction time would take more than PRODUCTION_BUILDING_VERY_LONG_CONSTRUCTION_TIME_THRESHOLD weeks at full construction industry usage (ignores MAX_WEEKLY_CONSTRUCTION_PROGRESS)
 	PRODUCTION_BUILDING_FOREIGN_INVESTMENT_HAS_RECENT_NATIONALIZATION_MULT = 0.1 # Multiply score by this if the construction is a foreign investment into a country that has recently nationalized buildings held by investor country
-	PRODUCTION_BUILDING_FOREIGN_INVESTMENT_COMPANY_MULT = 10 # Multiply score by this if the construction is a foreign investment by the country that has at least one established company for the building type
+	PRODUCTION_BUILDING_FOREIGN_INVESTMENT_COMPANY_MULT = 1.5 # Multiply score by this if the construction is a foreign investment by the country that has at least one established company for the building type
 
 	# Government construction applies this multiplier to domestic states when determining where to construct
 	GOVERNMENT_CONSTRUCTION_DOMESTIC_INVESTMENT_BIAS = 2.0
@@ -788,19 +797,19 @@
 	# For example, when trying to form company_lkab it is much more likely to select Norrland as the
 	# Values below determine the exact weight for this for government vs private investment
 	# There are two sets of weights: One applied for the building type as a whole (when compared to other building types), and a second applied only when selecting the state for the building type
-	GOVERNMENT_COMPANY_TARGET_BUILDING_TYPE_CONSTRUCTION_FACTOR = 3
+	GOVERNMENT_COMPANY_TARGET_BUILDING_TYPE_CONSTRUCTION_FACTOR = 5
 	GOVERNMENT_COMPANY_TARGET_STATE_NO_BUILDING_CONSTRUCTION_FACTOR = 20 	# Applied when the state does not already have the target building type
 	GOVERNMENT_COMPANY_TARGET_STATE_WITH_BUILDING_CONSTRUCTION_FACTOR = 50	# Applied when the state *does* already have the target building type
-	AUTONOMOUS_INVESTMENT_COMPANY_TARGET_BUILDING_TYPE_CONSTRUCTION_FACTOR = 3
+	AUTONOMOUS_INVESTMENT_COMPANY_TARGET_BUILDING_TYPE_CONSTRUCTION_FACTOR = 5
 	AUTONOMOUS_INVESTMENT_COMPANY_TARGET_STATE_NO_BUILDING_CONSTRUCTION_FACTOR = 20 # Applied when the state does not already have the target building type
 	AUTONOMOUS_INVESTMENT_COMPANY_TARGET_STATE_WITH_BUILDING_CONSTRUCTION_FACTOR = 50 # Applied when the state *does* already have the target building type
-	
+
 	PRODUCTION_BUILDING_TREATY_PORT_TRADE_CENTER_FACTOR = 5.0 		# Score for Trade Center buildings in Treaty Ports is multiplied by this when selecting state for a construction
 	PRODUCTION_BUILDING_TREATY_PORT_NON_TRADE_CENTER_FACTOR = 0.10 	# Score for non Trade Center buildings in Treaty Ports is multiplied by this when selecting state for a construction
 
 	# The factors below are only applied to government constructions
 	PRODUCTION_BUILDING_GOVERNMENT_CONSTRUCTION_MONOPOLY_MULT = 1.5 # Multiply score by this if we have a government monopoly for the buildng type
-	
+
 	PRODUCTION_BUILDING_LOW_EMPLOYMENT_THRESHOLD = 0.8 # The AI will not expand buildings with less than this employment unless those buildings hired last week
 
 	# The factors below are only applied to autonomous investments
@@ -908,7 +917,7 @@
 	PRODUCTION_METHOD_STICKINESS_DOWNGRADE = 0.75 # Score of non-current method is multiplied by this when it produces less (or equal) goods base value in total
 	PRODUCTION_METHOD_CHANCE_TO_CHANGE = 0.1 # Chance that the AI will consider changing a production method when evaluating methods
 	PRODUCTION_METHOD_LOW_POP_THRESHOLD = 50000 # If a state's population is less than this, use the scoring factor below for low-pop PMs
-	PRODUCTION_METHOD_LOW_POP_FACTOR = 100 # If a state's population is less than PRODUCTION_METHOD_LOW_POP_THRESHOLD, multiply score by this for low-pop PMs
+	PRODUCTION_METHOD_LOW_POP_FACTOR = 100000 # If a state's population is less than PRODUCTION_METHOD_LOW_POP_THRESHOLD, add this score for low-pop PMs
 
 	# At this amount or above of Nationalization Desire (set in ai strategies & building type), the AI will want to nationalize production buildings
 	NATIONALIZATION_DESIRE_NATIONALIZE_THRESHOLD = 1.0
@@ -1045,7 +1054,7 @@
 	# Whenever a Trade Center successfully excecutes a trade, it uses up one of its weekly trades
 	# Whenever it *fails* to execute a trade, it uses up this fraction of its total amount of weekly trades
 	# This is so that Trade Centers with hundreds of weekly trades do not try and trade over and over again, using up tons of performance for no gain
-	AUTONOMOUS_TRADE_WEEKLY_TRADES_FRACTION_USED_FOR_FAILED_TRADE = 0.1
+	AUTONOMOUS_TRADE_WEEKLY_TRADES_FRACTION_USED_FOR_FAILED_TRADE = 0.2
 
 	TRADE_VALUE_DELTA_FACTOR = 3.0							# When calculating treaty trade value, the delta between production/consumption counts for this much more than base production/consumption values
 	TRADE_VALUE_BASE_MULTIPLIER = 0.001							# Base multiplier applied to the value for treaty trade based purely on production & consumption
@@ -1067,7 +1076,7 @@
 	COMPANY_TYPE_BUILDING_GROUP_WEIGHT_IMPACT = 1.5		# The AI's average strategy weight mult for the building groups associated with this company is modulated towards 1 by this value and applied to AI preference for the company (ie; if this is 0.5, then the difference between the average AI preference and 1 is halved - 1.5 becomes 1.25, 0.5 becomes 0.75 etc)
 
 	MILITARY_UNITS_PER_FORMATION_ARMY = 50				# The AI aims to have armies of roughly this size, and will create new formations in land HQs accordingly
-	MILITARY_UNITS_PER_FORMATION_FLEET = 30				# The AI aims to have fleets of roughly this size, and will create new formations in naval HQs accordingly
+	MILITARY_UNITS_PER_FORMATION_FLEET = 100			# The AI aims to have fleets of roughly this size, and will create new formations in naval HQs accordingly
 	MILITARY_UNITS_MIN_FOR_GARRISON_FORMATION = 15 		# If a land HQ has at least this number of units we set the minimum number of formations to 2, so that there will be a garrison formation present
 	MILITARY_UNITS_MIN_FOR_GARRISON_FORMATION_IN_CAPITAL_HQ = 5 		# Overrides MILITARY_UNITS_MIN_FOR_GARRISON_FORMATION for the capital land HQ, since not leaving the capital undefended is extremely critical
 	MILITARY_UNITS_GARRISON_BATTALION_MULT = 0.33		# The garrison formation in each HQ should receive this portion of its total number of battalions
@@ -1117,11 +1126,16 @@
 	TREATIES_ACCEPTANCE_WITHDRAW_BINDING_PERIOD_THRESHOLD = -800		# Threshold at or under which AI will withdraw from treaties while they are still binding
 	TREATIES_DEFAULT_LENGTH_YEARS = 5 									# How long treaties the AI will propose
 
+	COLONIZATION_VALUE_BASE = 25										# Base AI value for a region they are able to colonize
+	COLONIZATION_VALUE_HAS_COLONY_MULTIPLIER = 2.0						# Colonization value is multiplied by this if the AI has a growing colony in the region
+	COLONIZATION_VALUE_NO_PRESENCE_MULTIPLIER = 0.2						# Colonization value is multiplied by this if the AI has no presence in the region or adjacent regions
 
 	# Transit rights desire
 	TRANSIT_RIGHTS_BASE_DESIRE = 100									# Base desire for Transit Rights, only applied if they would actually help connect a market area for the receiving country
 
 	TREATY_OBLIGATION_WE_OWE_THEM_ACCEPTANCE = -40		# How country A's acceptance of a treaty changes if A would owe B an obligation as part of the treaty. Note: "WE" is the country doing the evaluation, not the player
 	TREATY_OBLIGATION_THEY_OWE_US_ACCEPTANCE = 30		# How country A's acceptance of a treaty changes if A would be owed an obligation by B as part of the treaty. Note: "US" is the country doing the evaluation, not the player
-	TREATY_OBLIGATION_THEY_CALL_US_IN_ACCEPTANCE = 30	# How country A's acceptance of a traty changes if B is calling in an obligation that A owes B. Note: "US" is the country doing the evaluation, not the player
+	TREATY_OBLIGATION_THEY_OWE_US_RECENTLY_REPUDIATED_ACCEPTANCE = 15		# Same as above, but use this if B has recently repudiated an obligation (A values it less because B's word is not worth as much)
+	TREATY_OBLIGATION_THEY_CALL_US_IN_ACCEPTANCE = 30	# How country A's acceptance of a treaty changes if B is calling in an obligation that A owes B. Note: "US" is the country doing the evaluation, not the player
+	TREATY_OBLIGATION_THEY_CALL_US_IN_RECENTLY_REPUDIATED_ACCEPTANCE = 15	# Same as above, but use this if B has recently repudiated an obligation (A values it less because they're less inclined to follow honor agreements that B is willing to ignore)
 }
