@@ -1,7 +1,7 @@
 ﻿je_sick_man_main = {
-	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	icon = "gfx/interface/icons/event_icons/ottoman_breakup.dds"
 	
-	group = je_group_tanzimat
+	group = je_group_historical_content
 
 	complete = {
 		scope:journal_entry = {
@@ -12,6 +12,42 @@
 	on_complete = {
 		remove_modifier = sick_man_of_europe
 		set_variable = sick_man_complete_success
+		if = {
+			limit = {
+				has_variable = completed_tanzimat_education
+			}
+			if = {
+				limit = {
+					NOT = { has_technology_researched = empiricism }
+				}
+				add_technology_progress = { progress = 1000 technology = empiricism }
+			}
+			if = {
+				limit = {
+					has_technology_researched = empiricism
+					NOT = { has_technology_researched = dialectics }
+				}
+				add_technology_progress = { progress = 3000 technology = dialectics }
+			}
+		}
+		if = {
+			limit = {
+				has_variable = completed_tanzimat_military
+			}
+			if = {
+				limit = {
+					NOT = { has_technology_researched = empiricism }
+				}
+				add_technology_progress = { progress = 1000 technology = empiricism }
+			}
+			if = {
+				limit = {
+					has_technology_researched = empiricism
+					NOT = { has_technology_researched = dialectics }
+				}
+				add_technology_progress = { progress = 3000 technology = dialectics }
+			}
+		}
 		trigger_event = {
 			id = sick_man.2
 		}
@@ -55,9 +91,9 @@
 }
 
 je_sick_man_syria = {
-	icon = "gfx/interface/icons/event_icons/event_military.dds"
+	icon = "gfx/interface/icons/event_icons/egypt_breakup.dds"
 	
-	group = je_group_tanzimat
+	group = je_group_historical_content
 
 	complete = {
 		OR = {
@@ -111,20 +147,10 @@ je_sick_man_syria = {
 		}
 		if = {
 			limit = {
-				OR = {
-					AND = {
-						exists = c:EGY
-						c:EGY = {
-							is_subject_of = ROOT
-						}
-					}
-					AND = {
-						owns_entire_state_region = STATE_SINAI
-						owns_entire_state_region = STATE_UPPER_EGYPT
-						owns_entire_state_region = STATE_MIDDLE_EGYPT
-						owns_entire_state_region = STATE_LOWER_EGYPT
-					}
-				}
+				owns_entire_state_region = STATE_SINAI
+				owns_entire_state_region = STATE_UPPER_EGYPT
+				owns_entire_state_region = STATE_MIDDLE_EGYPT
+				owns_entire_state_region = STATE_LOWER_EGYPT
 			}
 			custom_tooltip = je_sick_man_advance
 			change_variable = {
@@ -160,24 +186,16 @@ je_sick_man_syria = {
 }
 
 je_sick_man_egypt = {
-	icon = "gfx/interface/icons/event_icons/event_military.dds"
+	icon = "gfx/interface/icons/event_icons/egypt_breakup.dds"
 	
-	group = je_group_tanzimat
+	group = je_group_historical_content
 
 	complete = {
-		OR = {
-			AND = {
-				exists = c:EGY
-				c:EGY = {
-					is_subject_of = ROOT
-				}
-			}
-			AND = {
-				owns_entire_state_region = STATE_SINAI
-				owns_entire_state_region = STATE_UPPER_EGYPT
-				owns_entire_state_region = STATE_MIDDLE_EGYPT
-				owns_entire_state_region = STATE_LOWER_EGYPT
-			}
+		AND = {
+			owns_entire_state_region = STATE_SINAI
+			owns_entire_state_region = STATE_UPPER_EGYPT
+			owns_entire_state_region = STATE_MIDDLE_EGYPT
+			owns_entire_state_region = STATE_LOWER_EGYPT
 		}
 	}
 
@@ -202,10 +220,70 @@ je_sick_man_egypt = {
 	should_be_pinned_by_default = yes
 }
 
-je_sick_man_economy = {
-	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+je_sick_man_greece = {
+	icon = "gfx/interface/icons/event_icons/greece_breakup.dds"
 	
-	group = je_group_tanzimat
+	group = je_group_historical_content
+
+	complete = {
+		OR = {
+			owns_entire_state_region = STATE_PELOPONNESE
+			any_subject_or_below = {
+				owns_entire_state_region = STATE_PELOPONNESE
+			}
+		}
+		OR = {
+			owns_entire_state_region = STATE_ATTICA
+			any_subject_or_below = {
+				owns_entire_state_region = STATE_ATTICA
+			}
+		}
+	}
+	
+	on_complete = {
+		custom_tooltip = je_sick_man_advance
+		change_variable = {
+			name = sick_man_var
+			add = 1
+		}
+		set_variable = completed_syria_je
+		s:STATE_NORTHERN_SERBIA = {
+			add_claim = ROOT
+		}
+		s:STATE_WALLACHIA = {
+			add_claim = ROOT
+		}
+		s:STATE_MOLDAVIA = {
+			add_claim = ROOT
+		}
+		s:STATE_MONTENEGRO = {
+			add_claim = ROOT
+		}
+	}
+
+	invalid = {
+		custom_tooltip = {
+			text = finished_sick_man_tt
+			has_variable = sick_man_complete
+		}
+	}
+
+	on_weekly_pulse = {
+		events = {
+			greek_crisis_events.1
+		}
+	}
+
+	transferable = no
+
+	weight = 5000
+	should_be_pinned_by_default = yes
+}
+
+je_sick_man_economy = {
+	icon = "gfx/interface/icons/event_icons/industry.dds"
+	
+	group = je_group_historical_content
 
 	complete = {
 		in_default = no
@@ -213,6 +291,7 @@ je_sick_man_economy = {
 			type = bg_service
 			value  >= 30
 		}
+		any_scope_pop = { percent<0.7 NOT = { is_pop_type = peasants } }
 		#any_scope_state = {
 		#	is_incorporated = yes
 		#	has_building = building_urban_center
@@ -244,14 +323,19 @@ je_sick_man_economy = {
 
 # Literacy and Universities
 je_sick_man_education = {
-	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	icon = "gfx/interface/icons/event_icons/research.dds"
 	
-	group = je_group_tanzimat
+	group = je_group_historical_content
+	
+	scripted_progress_bar = tanzimat_education_core_progress_bar
 
 	complete = {
 		NOT = { has_law = law_type:law_no_schools }
-		scope:journal_entry = {
-			is_goal_complete = yes
+		custom_tooltip = {
+			text = je_sick_man_education_complete
+			scope:journal_entry = {
+                "scripted_bar_progress(tanzimat_education_core_progress_bar)" >= 100
+            }
 		}
 	}
 
@@ -262,15 +346,9 @@ je_sick_man_education = {
 			name = sick_man_var
 			add = 1
 		}
+		set_variable = completed_tanzimat_education
 	}
 
-	current_value = {
-		value = root.literacy_rate
-	}
-
-	goal_add_value = {
-		add = 0.1
-	}
 
 	invalid = {
 		custom_tooltip = {
@@ -283,14 +361,14 @@ je_sick_man_education = {
 
 	weight = 5000
 	should_be_pinned_by_default = yes
-	progressbar = yes
+
 }
 
 # Nationalism
 je_sick_man_separatism = {
 	icon = "gfx/interface/icons/event_icons/event_fire.dds"
 	
-	group = je_group_tanzimat
+	group = je_group_historical_content
 
 	complete = {
 		scope:journal_entry = {
@@ -356,7 +434,7 @@ je_sick_man_separatism = {
 je_sick_man_army = {
 	icon = "gfx/interface/icons/event_icons/event_military.dds"
 	
-	group = je_group_tanzimat
+	group = je_group_historical_content
 
 	complete = {
 		army_size >= 100
@@ -416,12 +494,28 @@ je_sick_man_army = {
 je_sick_man_bureaucracy = {
 	icon = "gfx/interface/icons/event_icons/event_scales.dds"
 
-	group = je_group_tanzimat
+	group = je_group_historical_content
+	
+	scripted_progress_bar = tanzimat_bureaucracy_core_progress_bar
 	
 	complete = {
-		NOR = { 
-			has_law = law_type:law_hereditary_bureaucrats 
-			has_law = law_type:law_traditionalism
+		OR = {
+			AND = {
+				custom_tooltip = {
+					text = je_sick_man_bureaucracy_complete
+					scope:journal_entry = {
+						"scripted_bar_progress(tanzimat_bureaucracy_core_progress_bar)" >= 100
+					}
+				}
+				OR = {
+					NOT = { has_law = law_type:law_hereditary_bureaucrats }
+					NOT = { has_law = law_type:law_traditionalism }
+				}	
+			}
+			NOR = { 
+				has_law = law_type:law_hereditary_bureaucrats 
+				has_law = law_type:law_traditionalism
+			}
 		}
 		bureaucracy >= 0 
 		approaching_bureaucracy_shortage = no
