@@ -1,11 +1,11 @@
 ﻿namespace = krakatoa
 
-krakatoa.1 = { #krakatoa erupts and you're the owner
+krakatoa.1 = { # Krakatoa erupts and you're the owner
 	type = country_event
 	placement = scope:krakatoa_state
 
 	event_image = {
-		video = "unspecific_devastation"
+		video = "unspecific_fire"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
@@ -16,11 +16,8 @@ krakatoa.1 = { #krakatoa erupts and you're the owner
 	desc = krakatoa.1.d
 	flavor = krakatoa.1.f
 
-	#Cooldown handled by variable
 	trigger = {
 		game_date >= 1850.1.1
-		NOT = { has_variable = mega_eruption }
-		NOT = { global_var:number_of_mega_eruptions > 3 }
 		NOT = { has_global_variable = krakatoa_var }
 		any_scope_state = {
 			state_region = s:STATE_WEST_JAVA
@@ -36,19 +33,33 @@ krakatoa.1 = { #krakatoa erupts and you're the owner
 			save_scope_as = krakatoa_state
 			owner = {
 				save_scope_as = krakatoa_country
-				set_variable = krakatoa_country_var
+			}
+		}
+		krakatoa_tsunami_effect = yes
+		set_global_variable = {
+			name = krakatoa_temperature_drop
+			value = {
+				fixed_range = {
+					min = krakatoa_temperature_drop_roll_min
+					max = krakatoa_temperature_drop_roll_max
+				}
+			}
+		}
+		set_global_variable = {
+			name = krakatoa_temperature_recovery_rate
+			value = {
+				add = global_var:krakatoa_temperature_drop
+				divide = 60
 			}
 		}
 		every_country = {
 			limit = {
-				is_player = yes
-				NOT = { has_variable = krakatoa_country_var }
+				NOT = { scope:krakatoa_country ?= this }
 			}
 			trigger_event = { id = krakatoa.5 } #notification event
 		}
 		every_country = {
 			limit = {
-				is_player = yes
 				any_scope_state = {
 					is_coastal = yes
 					OR = {
@@ -68,6 +79,19 @@ krakatoa.1 = { #krakatoa erupts and you're the owner
 			}
 			trigger_event = { id = krakatoa.2 } #tsunamis
 		}
+		add_journal_entry = {
+			type = je_krakatoa
+		}
+		je:je_krakatoa ?= {
+			add_progress = {
+				value = {
+					value = global_var:krakatoa_temperature_drop
+					multiply = 100
+					multiply = -1
+				}
+				name = je_krakatoa_thermometer_progress_bar
+			}
+		}
 	}
 
 	duration = 3
@@ -82,15 +106,17 @@ krakatoa.1 = { #krakatoa erupts and you're the owner
 			}
 		}
 		scope:krakatoa_state.state_region = {
-			add_devastation = 80
+			add_devastation = 15 # plus 30 from the Tsunami
 		}
 		add_modifier = {
 			name = krakatoa_cost_modifier
 			days = short_modifier_time
 			multiplier = money_amount_multiplier_small
 		}
-		add_journal_entry = {
-			type = je_krakatoa
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_krakatoa
+			}
 		}
 	}
 
@@ -103,15 +129,17 @@ krakatoa.1 = { #krakatoa erupts and you're the owner
 			}
 		}
 		scope:krakatoa_state.state_region = {
-			add_devastation = 100
+			add_devastation = 30 # plus 30 from the Tsunami
 		}
 		capital = {
 			add_radicals_in_state = { #public outrage
 				value = medium_radicals
 			}
 		}
-		add_journal_entry = {
-			type = je_krakatoa
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_krakatoa
+			}
 		}
 	}
 }
@@ -121,7 +149,7 @@ krakatoa.5 = { #krakatoa erupts but youre not the owner
 	placement = scope:krakatoa_state
 
 	event_image = {
-		video = "unspecific_devastation"
+		video = "unspecific_fire"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
@@ -134,6 +162,22 @@ krakatoa.5 = { #krakatoa erupts but youre not the owner
 
 	duration = 3
 
+	immediate = {
+		add_journal_entry = {
+			type = je_krakatoa
+		}
+		je:je_krakatoa ?= {
+			add_progress = {
+				value = {
+					value = global_var:krakatoa_temperature_drop
+					multiply = 100
+					multiply = -1
+				}
+				name = je_krakatoa_thermometer_progress_bar
+			}
+		}
+	}
+
 	option = { #send some humaritarian help
 		name = krakatoa.5.a
 		change_relations = {
@@ -145,8 +189,10 @@ krakatoa.5 = { #krakatoa erupts but youre not the owner
 			days = short_modifier_time
 			multiplier = money_amount_multiplier_small
 		}
-		add_journal_entry = {
-			type = je_krakatoa
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_krakatoa
+			}
 		}
 	}
 
@@ -157,9 +203,10 @@ krakatoa.5 = { #krakatoa erupts but youre not the owner
 			country = scope:krakatoa_country
 			value = -30
 		}
-		change_infamy = 5
-		add_journal_entry = {
-			type = je_krakatoa
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_krakatoa
+			}
 		}
 	}
 }
@@ -174,7 +221,7 @@ krakatoa.2 = { #global tsunamis
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
-	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
 
 	title = krakatoa.2.t
 	desc = krakatoa.2.d
@@ -200,7 +247,6 @@ krakatoa.2 = { #global tsunamis
 			}
 			save_scope_as = tsunami_state
 		}
-		krakatoa_tsunami_effect = yes
 	}
 
 	duration = 3
@@ -208,7 +254,12 @@ krakatoa.2 = { #global tsunamis
 	option = { #this is a tragedy
 		name = krakatoa.2.a
 		default_option = yes
-		custom_tooltip = krakatoa_tsunami_tt
+		show_as_tooltip = {
+			s:STATE_WEST_JAVA = {
+				start_harvest_condition = tsunami
+			}
+			krakatoa_tsunami_effect = yes
+		}
 	}
 }
 
@@ -229,27 +280,28 @@ krakatoa.3 = { #crop failure
 	flavor = krakatoa.3.f
 
 	trigger = {
-		NOT = { has_global_variable = krakatoa_crop_failure_var }
-		is_player = yes
-		any_scope_building = {
-			OR = {
-				is_farm_building = yes
-				is_plantation_building = yes
+		NOR = {
+			has_variable = crop_failure_big_var
+			has_variable = crop_failure_medium_var
+			has_variable = crop_failure_small_var
+		}
+		any_scope_state = {
+			state_region = {
+				has_harvest_condition = disease_outbreak
+				NOT = {
+					has_variable = krakatoa_crop_failure
+				}
 			}
 		}
 	}
 
 	immediate = {
-		set_global_variable = krakatoa_crop_failure_var
 		random_scope_state = {
 			limit = {
-				any_scope_building = {
-					OR = {
-						is_farm_building = yes
-						is_plantation_building = yes
-					}
+				state_region = { has_harvest_condition = disease_outbreak }
+				NOT = {
+					has_variable = krakatoa_crop_failure
 				}
-				NOT = { has_variable = krakatoa_crop_failure_var }
 			}
 			save_scope_as = farm_state
 		}
@@ -264,51 +316,13 @@ krakatoa.3 = { #crop failure
 				set_variable = crop_failure_small_var
 			}
 		}
-		hidden_effect = {
-			if = {
-				limit = {
-					has_variable = crop_failure_big_var
-				}
-				every_country = {
-					limit = { is_player = no }
-					add_modifier = {
-						name = crop_failure_big_modifier
-						days = normal_modifier_time
-					}
-				}
-			}
-			if = {
-				limit = {
-					has_variable = crop_failure_medium_var
-				}
-				every_country = {
-					limit = { is_player = no }
-					add_modifier = {
-						name = crop_failure_medium_modifier
-						days = normal_modifier_time
-					}
-				}
-			}
-			if = {
-				limit = {
-					has_variable = crop_failure_small_var
-				}
-				every_country = {
-					limit = { is_player = no }
-					add_modifier = {
-						name = crop_failure_small_modifier
-						days = normal_modifier_time
-					}
-				}
-			}
-		}
-		custom_tooltip = krakatoa_crop_failure_tt
 	}
 
 	duration = 3
 
 	option = { #we throw money to minimize the thing
 		name = krakatoa.3.a
+		custom_tooltip = krakatoa_crop_failure_medium_modifier_tt
 		custom_tooltip = krakatoa_crop_failure_tt
 		add_modifier = {
 			name = krakatoa_crop_cost_modifier
@@ -319,150 +333,251 @@ krakatoa.3 = { #crop failure
 			limit = {
 				has_variable = crop_failure_big_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_big_modifier
-						days = normal_modifier_time
-						multiplier = 0.75
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
 					}
 				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
+						days = normal_modifier_time
+					}
+				}
+				add_modifier = {
+					name = crop_failure_big_modifier
+					days = normal_modifier_time
+					multiplier = 0.75
+					is_decaying = yes
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_big_modifier_tt
 		}
 		if = {
 			limit = {
 				has_variable = crop_failure_medium_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_medium_modifier
-						days = normal_modifier_time
-						multiplier = 0.75
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
 					}
 				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
+						days = normal_modifier_time
+					}
+				}
+				add_modifier = {
+					name = crop_failure_medium_modifier
+					days = normal_modifier_time
+					multiplier = 0.75
+					is_decaying = yes
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_medium_modifier_tt
 		}
 		if = {
 			limit = {
 				has_variable = crop_failure_small_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_small_modifier
-						days = normal_modifier_time
-						multiplier = 0.75
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
 					}
 				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
+						days = normal_modifier_time
+					}
+				}
+				add_modifier = {
+					name = crop_failure_small_modifier
+					days = normal_modifier_time
+					multiplier = 0.75
+					is_decaying = yes
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_small_modifier_tt
+		}
+
+		ai_chance = {
+			base = 3
 		}
 	}
 
 	option = { #oh well
 		name = krakatoa.3.b
 		default_option = yes
+		custom_tooltip = krakatoa_crop_failure_big_modifier_tt
 		custom_tooltip = krakatoa_crop_failure_tt
 		if = {
 			limit = {
 				has_variable = crop_failure_big_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_big_modifier
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
+					}
+				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
 						days = normal_modifier_time
 					}
 				}
+				add_modifier = {
+					name = crop_failure_big_modifier
+					days = normal_modifier_time
+					multiplier = 1
+					is_decaying = yes
+				}
+				add_radicals_in_state = {
+					value = medium_radicals
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_big_modifier_tt
 		}
 		if = {
 			limit = {
 				has_variable = crop_failure_medium_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_medium_modifier
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
+					}
+				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
 						days = normal_modifier_time
 					}
 				}
+				add_modifier = {
+					name = crop_failure_medium_modifier
+					days = normal_modifier_time
+					multiplier = 1
+					is_decaying = yes
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_medium_modifier_tt
 		}
 		if = {
 			limit = {
 				has_variable = crop_failure_small_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_small_modifier
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
+					}
+				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
 						days = normal_modifier_time
 					}
 				}
+				add_modifier = {
+					name = crop_failure_small_modifier
+					days = normal_modifier_time
+					multiplier = 1
+					is_decaying = yes
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_small_modifier_tt
+		}
+
+		ai_chance = {
+			base = 1
 		}
 	}
 
-	option = { #then again, emergency relief was here to save us!
+	option = { # open the granaries
 		name = krakatoa.3.c
 		highlighted_option = yes
+		custom_tooltip = krakatoa_crop_failure_small_modifier_tt
 		custom_tooltip = krakatoa_crop_failure_tt
 		trigger = {
-			scope:farm_state = {
-				has_decree = decree_emergency_relief
+			NOT = {
+				has_law = law_type:law_no_social_security
 			}
 		}
 		if = {
 			limit = {
 				has_variable = crop_failure_big_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_big_modifier
-						days = normal_modifier_time
-						multiplier = 0.75
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
 					}
 				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
+						days = normal_modifier_time
+					}
+				}
+				add_modifier = {
+					name = crop_failure_big_modifier
+					days = normal_modifier_time
+					multiplier = 0.5
+					is_decaying = yes
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_big_modifier_tt
 		}
 		if = {
 			limit = {
 				has_variable = crop_failure_medium_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_medium_modifier
-						days = normal_modifier_time
-						multiplier = 0.75
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
 					}
 				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
+						days = normal_modifier_time
+					}
+				}
+				add_modifier = {
+					name = crop_failure_medium_modifier
+					days = normal_modifier_time
+					multiplier = 0.5
+					is_decaying = yes
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_medium_modifier_tt
 		}
 		if = {
 			limit = {
 				has_variable = crop_failure_small_var
 			}
-			hidden_effect = {
-				every_scope_state = {
-					add_modifier = {
-						name = crop_failure_small_modifier
-						days = normal_modifier_time
-						multiplier = 0.75
+			every_scope_state = {
+				limit = {
+					state_region = {
+						has_harvest_condition = disease_outbreak
 					}
 				}
+				state_region = {
+					set_variable = {
+						name = krakatoa_crop_failure
+						days = normal_modifier_time
+					}
+				}
+				add_modifier = {
+					name = crop_failure_small_modifier
+					days = normal_modifier_time
+					multiplier = 0.5
+					is_decaying = yes
+				}
 			}
-			custom_tooltip = krakatoa_crop_failure_small_modifier_tt
+		}
+
+		ai_chance = {
+			base = 100
 		}
 	}
 }

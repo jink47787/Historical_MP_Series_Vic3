@@ -9,6 +9,7 @@ drought = {
 	incompatible_with = hailstorm
 	incompatible_with = torrential_rains
 	incompatible_with = moderate_rainfall
+	incompatible_with = tsunami
 	# Incompatible with Drought: flood, frost, hailstorm, heatwave, torrential rains, pollinator surge, optimal sunlight
 	# Replaces heatwave, optimal sunlight, pollinator surge
 
@@ -78,6 +79,7 @@ flood = {
 	incompatible_with = drought
 	incompatible_with = wildfire
 	incompatible_with = frost
+	incompatible_with = tsunami
 	# Incompatible with flood: frost, wildfire, torrential rains, pollinator surge, optimal sunlight, moderate rainfall, drought
 	# Replaces torrential rains, pollinator surge, optimal sunlight, moderate rainfall
 
@@ -162,6 +164,7 @@ frost = {
 	incompatible_with = moderate_rainfall
 	incompatible_with = torrential_rains
 	incompatible_with = flood
+	incompatible_with = tsunami
 	# Incompatible with frost: drought, flood, wildfire, locust swarm, heatwave, torrential rains, pollinator surge, optimal sunlight, moderate rainfall
 	# Replaces locust swarm, pollinator surge, optimal sunlight, moderate rainfall
 
@@ -193,6 +196,12 @@ frost = {
 			min = 2
 			max = 4
 		}
+		if = {
+			limit = {
+				has_global_variable = krakatoa_temperature_drop
+			}
+			add = global_var:krakatoa_temperature_drop
+		}
 	}
 
 	chance = {
@@ -202,6 +211,15 @@ frost = {
 				has_harvest_condition = hailstorm
 			}
 			multiply = 1.5
+		}
+		if = {
+			limit = {
+				has_global_variable = krakatoa_temperature_drop
+			}
+			multiply = {
+				value = krakatoa_temperature_drop_harvest_condition_chance_base_mult
+				add = global_var:krakatoa_temperature_drop
+			}
 		}
 	}
 
@@ -221,6 +239,7 @@ wildfire = {
 	incompatible_with = hailstorm
 	incompatible_with = torrential_rains
 	incompatible_with = moderate_rainfall
+	incompatible_with = tsunami
 	# Incompatible with Wildfire: flood, frost, hail, locusts, heatwave, torrential rains, pollinators, optimal sunlight, moderate rainfall
 	# Replaces locusts, heatwave, pollinators, optimal sunlight, moderate rainfall
 
@@ -301,6 +320,7 @@ hailstorm = {
 	incompatible_with = wildfire
 	incompatible_with = heatwave
 	incompatible_with = optimal_sunlight
+	incompatible_with = tsunami
 	# Incompatible with hailstorm: drought, wildfire, locusts, heatwave, pollinators, optimal sunlight, moderate rainfall
 	# Replaces locusts, pollinators, moderate rainfall
 
@@ -331,6 +351,12 @@ hailstorm = {
 			min = 2
 			max = 4
 		}
+		if = {
+			limit = {
+				has_global_variable = krakatoa_temperature_drop
+			}
+			add = global_var:krakatoa_temperature_drop
+		}
 	}
 
 	chance = {
@@ -343,6 +369,15 @@ hailstorm = {
 				}
 			}
 			multiply = 1.3
+		}
+		if = {
+			limit = {
+				has_global_variable = krakatoa_temperature_drop
+			}
+			multiply = {
+				value = krakatoa_temperature_drop_harvest_condition_chance_base_mult
+				add = global_var:krakatoa_temperature_drop
+			}
 		}
 	}
 
@@ -501,10 +536,40 @@ disease_outbreak = {
 			min = 3
 			max = 7
 		}
+		if = {
+			limit = {
+				has_global_variable = krakatoa_temperature_drop
+			}
+			add = global_var:krakatoa_temperature_drop
+		}
 	}
 
 	chance = {
 		value = 0.0008
+
+		if = {
+			limit = {
+				has_global_variable = krakatoa_temperature_drop
+			}
+			multiply = {
+				value = krakatoa_temperature_drop_harvest_condition_chance_base_mult
+				add = {
+					value = global_var:krakatoa_temperature_drop
+					multiply = 5
+					if = {
+						limit = {
+							OR = {
+								state_is_in_europe  = yes
+								state_is_in_north_america = yes
+								state_is_in_central_asia = yes
+								state_is_in_east_asia = yes
+							}
+						}
+						add = krakatoa_temperature_drop_disease_outbreak_chance_mult
+					}
+				}
+			}
+		}
 	}
 
 	color = { 78 70 57 }
@@ -600,6 +665,12 @@ torrential_rains = {
 			min = 2
 			max = 5
 		}
+		if = {
+			limit = {
+				has_global_variable = krakatoa_temperature_drop
+			}
+			add = global_var:krakatoa_temperature_drop
+		}
 	}
 
 	chance = {
@@ -612,6 +683,15 @@ torrential_rains = {
 				}
 			}
 			multiply = 1.3
+		}
+		if = {
+			limit = {
+				has_global_variable = krakatoa_temperature_drop
+			}
+			multiply = {
+				value = krakatoa_temperature_drop_harvest_condition_chance_base_mult
+				add = global_var:krakatoa_temperature_drop
+			}
 		}
 	}
 
@@ -782,4 +862,76 @@ moderate_rainfall = {
 	color = { 65 100 250 }
 	icon = "gfx/interface/icons/harvest_condition_icons/moderate_rainfall.dds"
 	map_texture = "gfx/map/map_painting/harvest_conditions_map_patterns/harvest_conditions_good.dds"
+}
+
+# Natural Disasters
+tsunami = {
+	trigger = {
+		always = no # Currently only triggered through je_krakatoa
+	}
+
+	range = {
+		integer_range = {
+			min = 1
+			max = 5
+		}
+	}
+
+	duration = {
+		fixed_range = {
+			min = 36
+			max = 78
+		}
+	}
+
+	modifier = {
+		#Infrastructure
+		state_infrastructure_mult = -0.05
+
+		#MAPI
+		state_market_access_price_impact = -0.05
+
+		#Throughput
+		building_group_bg_agriculture_throughput_add = -0.05
+		building_group_bg_plantations_throughput_add = -0.05
+		building_group_bg_ranching_throughput_add = -0.05
+		building_group_bg_extraction_throughput_add = -0.05
+
+		#Subsistence
+		state_peasants_consumption_multiplier_add = 0.05
+
+		#Mortality
+		state_mortality_mult = 0.05
+	}
+
+	intensity = {
+		if = {
+			limit = {
+				OR = {
+					region = sr:region_indonesia
+					region = sr:region_indochina
+					region = sr:region_oceania
+				}
+			}
+			fixed_range = {
+				min = 3
+				max = 6
+			}
+		}
+		else = {
+			fixed_range = {
+				min = 1
+				max = 3
+			}
+		}
+	}
+
+	chance = {
+		value = 0
+	}
+
+	color = { 23 106 173 }
+	icon = "gfx/interface/icons/harvest_condition_icons/flood.dds"
+	map_texture = "gfx/map/map_painting/harvest_conditions_map_patterns/harvest_conditions_bad.dds"
+	graphics = flood
 }

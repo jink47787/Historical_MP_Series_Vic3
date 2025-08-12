@@ -60,6 +60,22 @@ types sway_country_types
 							sway_offer_item = {
 								visible = "[SwayOffer.RequiresAnyInput]"
 								onclick = "[RightClickMenuManager.ToggleSwayOfferArticleTypeInput(SwayOffer.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_right')]"
+
+								blockoverride "maneuvers_and_infamy" {}
+
+								blockoverride "acceptance_icon" {
+									### PLUS ICON
+									button = {
+										texture = "gfx/interface/buttons/button_icons/plus.dds"
+										parentanchor = vcenter
+										size = { 40 40 }
+										alwaystransparent = yes
+									}
+								}
+
+								blockoverride "button_style" {
+									using = default_button
+								}
 							}
 
 							sway_offer_item = {
@@ -180,85 +196,112 @@ types sway_country_types
 
 	type sway_offer_item = button {
 		enabled = "[IsValid( SwayCountryPanel.AccessDiplomaticPlay.CreateSway( GetPlayer.Self, SwayCountryPanel.GetCountry, SwayOffer.Self ))]"
-		tooltip = "SWAY_OFFER_TOOLTIP"
-		using = default_button_action
+		
+		block "war_goal_tooltip" {
+			tooltip = "SWAY_OFFER_TOOLTIP"
+		}
+
+		block "button_style" {
+			using = default_button_action
+		}
 
 		container = {
 			resizeparent = yes
 			minimumsize = { 550 60 }
 
-			icon = {
+			small_flag_no_interact = {
+				datacontext = "[SwayOffer.GetCountryForFlag(SwayCountryPanel.GetCountry)]"
+				parentanchor = vcenter
 				position = { 10 0 }
-				size = { 55 55 }
-				texture = "[SwayOffer.GetTexture]"
-				parentanchor = left|vcenter
-				widgetanchor = left|vcenter
-			}
-
-			icon = {
-				visible = "[SwayOffer.WouldAcceptSway(SwayCountryPanel.GetDiplomaticPlay.Self, GetPlayer.Self, SwayCountryPanel.GetCountry)]"
-				parentanchor = right|vcenter
-				position = { -10 0 }
-				size = { 40 40 }
-				texture = "gfx/interface/icons/generic_icons/approval_icon.dds"
-			}
-
-			icon = {
-				visible = "[Not(SwayOffer.WouldAcceptSway(SwayCountryPanel.GetDiplomaticPlay.Self, GetPlayer.Self, SwayCountryPanel.GetCountry))]"
-				parentanchor = right|vcenter
-				position = { -10 0 }
-				size = { 40 40 }
-				texture = "gfx/interface/icons/generic_icons/disapproval_icon.dds"
 			}
 
 			flowcontainer = {
-				direction = horizontal
-				position = { -60 0 }
+				visible = "[SwayOffer.GetOfferedWarGoal.IsValid]"
+				parentanchor = vcenter
+				position = { 70 0 }
+
+				icon = {
+					visible = "[WarGoal.HoldsArticle]"
+					datacontext = "[SwayOffer.GetOfferedWarGoal]"
+					size = { 50 50 }
+					texture = "[WarGoal.GetArticleType.GetIcon]"
+				}
+
+				icon = {
+					visible = "[Not(WarGoal.HoldsArticle)]"
+					datacontext = "[SwayOffer.GetOfferedWarGoal]"
+					size = { 50 50 }
+					texture = "[SwayOffer.GetTexture]"
+				}
+			}
+
+			icon = {
+				visible = "[Not(SwayOffer.GetOfferedWarGoal.IsValid)]"
+				parentanchor = vcenter
+				position = { 70 0 }
+				size = { 50 50 }
+				texture = "[SwayOffer.GetTexture]"
+			}
+
+			flowcontainer = {
+				position = { -10 0 }
 				parentanchor = right|vcenter
 				spacing = 10
 
-				flowcontainer = {
-					parentanchor = vcenter
-					spacing = 5
-
-					textbox = {
-						visible = "[And(SwayOffer.GetOfferedWarGoal.IsValid,GreaterThan_CFixedPoint(SwayOffer.GetOfferedWarGoal.GetInfamyAmount, '(CFixedPoint)0'))]"
-						datacontext = "[SwayOffer.GetOfferedWarGoal]"
-						text = "WARGOAL_INFAMY"
-						autoresize = yes
-						maximumsize = { 100 -1 }
-						minimumsize = { 60 -1 }
-						multiline = yes
+				block "maneuvers_and_infamy" {
+					flowcontainer = {
+						direction = vertical
 						parentanchor = vcenter
-						align = right|nobaseline
-						using = fontsize_large
-					}
+						spacing = 2
 
-					textbox = {
-						visible = "[Not(SwayCountryPanel.IsReverseSway)]"
-						raw_text = "@maneuvers! #v [SwayOffer.CalcManeuversCost(GetPlayer.Self, SwayCountryPanel.GetCountry, SwayCountryPanel.GetDiplomaticPlay)]#!"
-						autoresize = yes
-						maximumsize = { 100 -1 }
-						multiline = yes
-						parentanchor = vcenter
-						align = nobaseline
-						using = fontsize_large
+						container = {
+							visible = "[And(SwayOffer.GetOfferedWarGoal.IsValid, GreaterThan_CFixedPoint(SwayOffer.GetOfferedWarGoal.GetInfamyAmount, '(CFixedPoint)0'))]"
+
+							textbox = {
+								datacontext = "[SwayOffer.GetOfferedWarGoal]"
+								text = "WARGOAL_INFAMY"
+								autoresize = yes
+								max_width = 100
+								minimumsize = { 60 -1 }
+								align = nobaseline
+							}
+						}
+
+						textbox = {
+							visible = "[Not(SwayCountryPanel.IsReverseSway)]"
+							raw_text = "@maneuvers! #v [SwayOffer.CalcManeuversCost(GetPlayer.Self, SwayCountryPanel.GetCountry, SwayCountryPanel.GetDiplomaticPlay)]#!"
+							autoresize = yes
+							max_width = 100
+							minimumsize = { 60 -1 }
+							align = nobaseline
+						}
 					}
 				}
 
-				small_flag_no_interact = {
-					datacontext = "[SwayOffer.GetCountryForFlag(SwayCountryPanel.GetCountry)]"
-					parentanchor = vcenter
+				block "acceptance_icon" {
+					icon = {
+						visible = "[SwayOffer.WouldAcceptSway(SwayCountryPanel.GetDiplomaticPlay.Self, GetPlayer.Self, SwayCountryPanel.GetCountry)]"
+						parentanchor = vcenter
+						size = { 40 40 }
+						texture = "gfx/interface/icons/generic_icons/approval_icon.dds"
+					}
+
+					icon = {
+						visible = "[Not(SwayOffer.WouldAcceptSway(SwayCountryPanel.GetDiplomaticPlay.Self, GetPlayer.Self, SwayCountryPanel.GetCountry))]"
+						parentanchor = vcenter
+						size = { 40 40 }
+						texture = "gfx/interface/icons/generic_icons/disapproval_icon.dds"
+					}
 				}
 			}
 
 			textbox = {
-				position = { 75 0 }
+				position = { 125 0 }
 				using = fontsize_large
 				parentanchor = vcenter
 				text = "[SwayOffer.GetName(GetPlayer.Self, SwayCountryPanel.GetCountry, SwayCountryPanel.GetDiplomaticPlay)]"
 				autoresize = yes
-				maximumsize = { 245 -1 }
+				maximumsize = { 290 -1 }
 				elide = right
 				fontsize_min = 12
 				align = nobaseline

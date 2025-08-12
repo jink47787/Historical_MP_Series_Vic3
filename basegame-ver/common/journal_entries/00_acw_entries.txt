@@ -167,10 +167,9 @@ je_acw_reincorporate = {
 
 	group = je_group_usa_american_civil_war
 
-	complete = {
-		any_scope_state = {
-			count = all
-			filter = {
+	immediate = {
+		every_scope_state = {
+			limit = {
 				state_region = {
 					is_homeland = cu:dixie
 				}
@@ -179,12 +178,31 @@ je_acw_reincorporate = {
 					value > 0
 				}
 			}
-			state_region = {
-				is_homeland = cu:dixie
+			root = {
+				add_to_variable_list = {
+					name = acw_dixie_states
+					target = prev
+				}
 			}
-			is_incorporated = yes
-			custom_tooltip = {
-				text = acw_reincorporate_loyalist_tt
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = "ACW_REINCORPORATE_TT"
+
+			any_scope_state = {
+				filter = {
+					state_region = {
+						is_homeland = cu:dixie
+					}
+					culture_percent_state = {
+						target = cu:dixie
+						value > 0
+					}
+				}
+				count = all
+				is_incorporated = yes
 				loyalist_fraction = {
 					value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
 					culture = cu:dixie
@@ -194,6 +212,7 @@ je_acw_reincorporate = {
 	}
 
 	on_complete = {
+		clear_variable_list = acw_dixie_states
 		custom_tooltip = {
 			text = dont_lose_dixie_culture
 			set_variable = acw_keep_dixie
@@ -216,6 +235,42 @@ je_acw_reincorporate = {
 		}
 	}
 
+	on_weekly_pulse = {
+		effect = {
+			clear_variable_list = acw_dixie_states
+			if = {
+				limit = {
+					any_scope_state = {
+						state_region = {
+							is_homeland = cu:dixie
+						}
+						culture_percent_state = {
+							target = cu:dixie
+							value > 0
+						}
+					}
+				}
+				every_scope_state = {
+					limit = {
+						state_region = {
+							is_homeland = cu:dixie
+						}
+						culture_percent_state = {
+							target = cu:dixie
+							value > 0
+						}
+					}
+					root = {
+						add_to_variable_list = {
+							name = acw_dixie_states
+							target = prev
+						}
+					}
+				}
+			}
+		}
+	}
+
 	invalid = {
 		NOT = {
 			any_scope_state = {
@@ -226,7 +281,17 @@ je_acw_reincorporate = {
 		}
 	}
 
+	on_invalid = {
+		clear_variable_list = acw_dixie_states
+	}
+
 	timeout = 4380
+
+	on_timeout = {
+		clear_variable_list = acw_dixie_states
+	}
+
+	should_be_pinned_by_default = yes
 }
 
 je_acw_equality = {
@@ -275,6 +340,8 @@ je_acw_equality = {
 			}
 		}
 	}
+
+	should_be_pinned_by_default = yes
 }
 
 je_acw_wild_wild_west = {
@@ -369,4 +436,5 @@ je_acw_wild_wild_west = {
 	progressbar = yes
 
 	timeout = 4380
+	should_be_pinned_by_default = yes
 }
