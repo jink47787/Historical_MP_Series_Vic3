@@ -216,12 +216,67 @@ bic_breakup.1 = {
 		if = {
 			limit = {
 				exists = c:PAN
+				c:PAN ?= {
+					is_player = yes
+				}
 			}
 			c:PAN = {
 				change_tag = PAK
 			}
 		}
-		
+		every_scope_state = {
+			if = {
+				limit = {
+					NOT = {
+						OR = {
+							state_is_in_india = yes
+							state_is_in_central_asia = yes #to make sure that if india takes Tibet some how, it wont get transfered away to UK
+							region = sr:region_persia
+						}
+					}
+				}
+				set_state_owner  = c:GBR
+			}
+			else_if = {
+				limit = {
+					OR = {
+						religion_percent_state = {
+							target = rel:sunni
+							value >= 0.50
+						}
+						religion_percent_state = { # To stop a few boarder gore creating edge cases
+							target = rel:shiite
+							value >= 0.50
+						}
+					}
+				}
+				if = {
+					limit = {
+						exists = c:PAK
+					}
+					set_state_owner = c:PAK
+				}
+				else = {
+					create_country = {
+						tag = PAK
+						origin = root
+						state = this
+						on_created = {
+							activate_law = law_type:law_republic
+							activate_law = law_type:law_oligarchy
+						}
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = c:PAK
+			}
+			c:PAK = {
+				set_capital = s:STATE_PUNJAB
+			}
+		}
 		every_direct_subject = {
 			if = {
 				limit = {
@@ -276,63 +331,6 @@ bic_breakup.1 = {
 				}
 			}
 		}
-		every_scope_state = {
-			if = {
-				limit = {
-					NOT = {
-						OR = {
-							state_is_in_india = yes
-							state_is_in_central_asia = yes #to make sure that if india takes Tibet some how, it wont get transfered away to UK
-							region = sr:region_persia
-						}
-					}
-				}
-				set_state_owner  = c:GBR
-			}
-			else_if = {
-				limit = {
-					OR = {
-						religion_percent_state = {
-							target = rel:sunni
-							value >= 0.50
-						}
-						religion_percent_state = { # To stop a few boarder gore creating edge cases
-							target = rel:shiite
-							value >= 0.50
-						}
-					}
-				}
-				if = {
-					limit = {
-						exists = c:PAK
-					}
-					set_state_owner = c:PAK
-				}
-				else = {
-					create_country = {
-						tag = PAK
-						origin = root
-						state = this
-						on_created = {
-							#activate_law = law_type:law_republic
-							#activate_law = law_type:law_oligarchy
-							if = {
-								limit = {
-									c:BIC ?= {
-										any_scope_state = {
-											state_region = s:STATE_PEGU
-										}
-									}
-								}
-								s:STATE_PEGU.region_state:BIC = {
-									set_state_owner = c:BUR
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 		if = {
 			limit = {
 				exists = c:PAK
@@ -377,7 +375,12 @@ bic_breakup.1 = {
 				country_type = recognized
 				set_state_religion = rel:sunni
 				every_scope_state = {
-					set_state_type = incorporated
+					if = {
+						limit = {
+							state_is_in_india = yes
+						}
+						set_state_type = incorporated
+					}
 				}
 			}
 		}
