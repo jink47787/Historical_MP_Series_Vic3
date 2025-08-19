@@ -253,10 +253,9 @@ je_acw_reincorporate = {
 	
 	group = je_group_usa_american_civil_war
 
-	complete = {
-		any_scope_state = {
-			count = all
-			filter = {
+	immediate = {
+		every_scope_state = {
+			limit = {
 				state_region = {
 					is_homeland = cu:dixie
 				}
@@ -265,18 +264,41 @@ je_acw_reincorporate = {
 					value > 0
 				}
 			}
-			state_region = {
-				is_homeland = cu:dixie
+			root = {
+				add_to_variable_list = {
+					name = acw_dixie_states
+					target = prev
+				}
 			}
-			is_incorporated = yes	
-			loyalist_fraction = {
-				value >= 0.1
-				culture = cu:dixie
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = "ACW_REINCORPORATE_TT"
+
+			any_scope_state = {
+				filter = {
+					state_region = {
+						is_homeland = cu:dixie
+					}
+					culture_percent_state = {
+						target = cu:dixie
+						value > 0
+					}
+				}
+				count = all
+				is_incorporated = yes
+				loyalist_fraction = {
+					value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+					culture = cu:dixie
+				}
 			}
 		}
 	}
 
 	on_complete = {
+		clear_variable_list = acw_dixie_states
 		custom_tooltip = {
 			text = gain_dixie_culture
 			set_variable = acw_gain_dixie
@@ -299,6 +321,41 @@ je_acw_reincorporate = {
 		}
 	}
 
+	on_weekly_pulse = {
+		effect = {
+			clear_variable_list = acw_dixie_states
+			if = {
+				limit = {
+					any_scope_state = {
+						state_region = {
+							is_homeland = cu:dixie
+						}
+						culture_percent_state = {
+							target = cu:dixie
+							value > 0
+						}
+					}
+				}
+				every_scope_state = {
+					limit = {
+						state_region = {
+							is_homeland = cu:dixie
+						}
+						culture_percent_state = {
+							target = cu:dixie
+							value > 0
+						}
+					}
+					root = {
+						add_to_variable_list = {
+							name = acw_dixie_states
+							target = prev
+						}
+					}
+				}
+			}
+		}
+	}
 	invalid = {
 		NOT = {
 			any_scope_state = {
@@ -309,7 +366,17 @@ je_acw_reincorporate = {
 		}
 	}
 
-	timeout = 6570 #Increased time by 50% to get Dixie
+
+	on_invalid = {
+		clear_variable_list = acw_dixie_states
+	}
+
+	timeout = 6570
+
+	on_timeout = {
+		clear_variable_list = acw_dixie_states
+	}
+
 	
 	should_be_pinned_by_default = yes
 }
