@@ -1,0 +1,94 @@
+﻿namespace = defacto_capitulate
+
+#Event for subject which is 50% occupied and at -100 Warsupport
+
+defacto_capitulate.1 = {
+	type = country_event
+	placement = root
+	title = defacto_capitulate.1.t
+	desc = defacto_capitulate.1.d
+	flavor = defacto_capitulate.1.f
+	
+	duration = 1
+	
+	cooldown = { days = 45 }
+	
+	event_image = {
+		video = "southamerica_aristocrats"
+	}
+	
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	
+	trigger = {
+		NOT = { has_modifier = modifier_defacto_capitulate }
+		enemy_occupation >= 0.5
+		is_at_war = yes
+		is_subject = yes
+		any_scope_war = {
+			has_war_support = {
+				target = ROOT
+				value <= -100
+			}
+		}
+	}
+	
+	immediate = {
+		ROOT = {
+			save_scope_as = defacto_surrender_scope
+		}
+	}
+	
+	option = {
+		name = defacto_capitulate.1.a
+		default_option = yes
+		add_modifier = modifier_defacto_capitulate
+		every_country = {
+			limit = {
+				has_war_with = ROOT
+			}
+			post_notification = defacto_surrendered
+		}
+	}
+	
+	option = {
+		name = defacto_capitulate.1.b
+		every_scope_war = {
+			limit = {
+				has_war_support = {
+					target = ROOT
+					value <= -100
+				}
+			}
+ 			add_war_war_support = {
+ 				target = ROOT
+ 				value = 50
+ 			}
+		}
+	}
+}
+
+defacto_capitulate.2 = {
+	type = country_event
+	hidden = yes
+	
+	trigger = {
+		has_modifier = modifier_defacto_capitulate
+		NOT = {
+			AND = {
+				enemy_occupation >= 0.1
+				is_at_war = yes
+				is_subject = yes
+				any_scope_war = {
+					has_war_support = {
+						target = ROOT
+						value <= -100
+					}
+				}
+			}
+		}
+	}
+	
+	immediate = {
+		remove_modifier = modifier_defacto_capitulate
+	}
+}
