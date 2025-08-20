@@ -85,3 +85,78 @@ usa_politics.1 = { #Andrew Jackson could stay in politics...
 		}
 	}
 }
+
+usa_politics.2 = { #California Genocide of Natives
+	type = country_event
+	
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	event_image = {
+		video = "europenorthamerica_native_american"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	
+	title = usa_politics.2.t
+	desc = usa_politics.2.d
+	flavor = usa_politics.2.f
+
+	trigger = {
+		exists = c:USA # this checks if a country with the tag "USA" exists
+		this = c:USA # this checks if a country with the tag "USA" is the current scoped country
+	}
+	
+	immediate = {
+		s:STATE_CALIFORNIA = {
+			random_scope_state = {
+				limit = {
+					owner = {
+						OR = {
+							c:USA = THIS
+							is_subject_of = c:USA
+						}
+					}
+				}
+				save_scope_as = cali_scope
+			}
+		}
+	}
+	
+	option = { # Unrestricted settlement which kills the natives
+		name = usa_politics.2.a
+		default_option = yes
+		scope:cali_scope = {
+			kill_population_percent_in_state = {
+				percent = 0.20
+				culture = cu:hokan
+			}
+			add_modifier = { # hokan sol
+				name = unrestricted_californian_colonization
+				years = 20
+				is_decaying = yes
+			}
+		}
+	}
+	option = { # Restrict settlement which avoids killing the natives
+		name = native_resettlement.3.b
+		add_radicals = {
+			value = 0.02
+			culture = cu:yankee
+		}
+		scope:cali_scope = {
+			kill_population_percent_in_state = {
+				percent = 0.05
+				culture = cu:hokan
+			}
+			add_modifier = { # hokan sol
+				name = restricted_californian_colonization
+				years = 20
+				is_decaying = yes
+			}
+		}
+		add_modifier = {
+			name = USA_paying_removal_costs
+			multiplier = money_amount_multiplier_very_small
+			days = short_modifier_time
+		}
+	}
+}
