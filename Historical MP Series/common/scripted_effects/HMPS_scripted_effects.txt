@@ -228,3 +228,72 @@ calculate_tpg_reconstruction_law_progress = {
 	remove_variable = temp_policing_var_contribution
 	remove_variable = temp_ha_var_contribution
 }
+
+handle_research_insitution_bureaucracy_cost_scaling_modifier = {
+	### Stopping ppl from being able to go into large Burea deficit from Research
+
+	if = {
+		limit = {
+			institution_investment_level = {
+				institution = institution_research
+				value > 1
+			}
+			relative_bureaucracy < 0.5
+		}		
+		change_institution_investment_level = {
+			institution = institution_research
+			investment = -1
+		}
+		
+	}	
+	
+	### Handling the cost modifier
+	# Removing old modifier
+	if = {
+		limit = {
+			has_modifier = modifier_country_institution_cost_institution_research_mult
+		}
+		remove_modifier = modifier_country_institution_cost_institution_research_mult
+	}	
+	
+	# Getting multiplier for new modifier
+	set_variable = {
+		name = institution_cost_multiplier
+		value = 0
+	}
+	if = {
+		limit = { has_law = law_type:law_private_research_grant_funding }
+		change_variable = {
+			name = institution_cost_multiplier
+			add = 0.5
+		}
+	}
+	if = {
+		limit = { has_law = law_type:law_government_directed_research }
+		change_variable = {
+			name = institution_cost_multiplier
+			add = 1.25
+		}
+	}
+	if = {
+		limit = { has_law = law_type:law_government_private_research_partnerships }
+		change_variable = {
+			name = institution_cost_multiplier
+			add = 1.5
+		}
+	}
+	if = {
+		limit = { NOT = { var:institution_cost_multiplier = 0 } }
+
+		change_variable = {
+			name = institution_cost_multiplier
+			multiply = institution:institution_research.investment
+		}
+		add_modifier = {
+			name = modifier_country_institution_cost_institution_research_mult
+			multiplier = var:institution_cost_multiplier
+		}
+		
+	}
+	remove_variable = institution_cost_multiplier
+}
