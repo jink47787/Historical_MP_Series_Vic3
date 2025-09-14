@@ -163,6 +163,130 @@ gm_actions.1 = {
 		}
 	}
 	
+	#Transfering States and Subjects
+	#Set Marked Country
+	option = {
+		name = gm_actions.1.m
+		remove_global_variable = GM_taking_action
+		scope:recipient = { 
+			remove_variable = actionee
+			if = {
+				limit = {
+					has_modifier = modifier_marked_by_game_master
+				}
+				remove_modifier = modifier_marked_by_game_master
+			}
+			else = {
+				add_modifier = {
+					name = modifier_marked_by_game_master
+					days = 7
+				}
+			}
+		}
+		every_country = {
+			limit = {
+				NOT = { this = scope:recipient }
+				has_modifier = modifier_marked_by_game_master
+			}
+			remove_modifier = modifier_marked_by_game_master
+		}
+	}
+	
+	#Transfer States to Marked Country
+	option = {
+		name = gm_actions.1.n
+		scope:recipient = { 
+			remove_variable = actionee
+		}
+		remove_global_variable = GM_taking_action
+		
+		if = {
+			limit = {
+				any_country = {
+					has_modifier = modifier_marked_by_game_master
+					NOT = { this = scope:recipient }
+				}
+			}
+			random_country = {
+				limit = {
+					has_modifier = modifier_marked_by_game_master
+					NOT = { this = scope:recipient }
+				}
+				save_scope_as = marked_country
+			}
+			scope:recipient = {
+				if = {
+					limit = {
+						any_scope_state = {
+							has_decree = decree_host_scope
+						}
+					}
+					every_scope_state = {
+						limit = {
+							has_decree = decree_host_scope
+						}
+						set_state_owner = scope:marked_country
+					}
+				}
+			}
+		}
+	}
+	
+	#Make Into Subject of Marked Country
+	option = {
+		name = gm_actions.1.o
+		scope:recipient = { 
+			remove_variable = actionee
+		}
+		remove_global_variable = GM_taking_action
+		
+		if = {
+			limit = {
+				any_country = {
+					has_modifier = modifier_marked_by_game_master
+					NOT = { this = scope:recipient }
+				}
+			}
+			random_country = {
+				limit = {
+					has_modifier = modifier_marked_by_game_master
+					NOT = { this = scope:recipient }
+				}
+				save_scope_as = marked_country
+			}
+			scope:marked_country = {
+				if = {
+					limit = {
+						is_country_type = unrecognized
+					}
+					create_diplomatic_pact = {
+						country = scope:recipient
+						type = vassal
+					}
+				}
+				else_if = {
+					limit = {
+						scope:recipient = {
+							is_country_type = colonial
+						}
+					}
+					create_diplomatic_pact = {
+						country = scope:recipient
+						type = colony
+					}
+				}
+				else = {
+					create_diplomatic_pact = {
+						country = scope:recipient
+						type = puppet
+					}
+				}
+			}
+		}
+	}
+	
+
+	
 	#Disable GM decision
 	
 	option = {
