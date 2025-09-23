@@ -18,17 +18,19 @@ peoples_springtime.1 = {
 			triggered_desc = {
 				desc = peoples_springtime.1.d
 				trigger = {
-					NAND = {
-						c:FRA ?= this
-						has_variable = france_had_revolution
+					NOT = {
+						scope:revolutionary_country ?= {
+							has_variable = france_had_revolution
+						}
 					}
 				}
 			}
 			triggered_desc = {
 				desc = peoples_springtime.1.d_france
 				trigger = {
-					c:FRA ?= this
-					has_variable = france_had_revolution
+					scope:revolutionary_country ?= {
+						has_variable = france_had_revolution
+					}
 				}
 			}
 		}
@@ -36,32 +38,19 @@ peoples_springtime.1 = {
 	flavor = peoples_springtime.1.f
 
 	trigger = {
-		NOT = { has_global_variable = peoples_springtime_happening }
-		NOT = { has_global_variable = peoples_springtime_happened }
-		country_is_in_europe = yes
-		has_technology_researched = egalitarianism
-		OR = {
-			any_political_movement = {
-				OR = {
-					is_political_movement_type = movement_liberal
-					is_political_movement_type = movement_radical
-				}
-				is_revolutionary = yes
-			}
-			AND = {
-				c:FRA ?= this
-				has_variable = france_had_revolution
-			}
-		}
+		# Triggered by on_action
 	}
 
 	immediate = {
-		set_global_variable = {
-			name = peoples_springtime_happening
-		}
-		set_global_variable = {
-			name = peoples_springtime_recent
-			days = normal_modifier_time
+		if = {
+			limit = {
+				NOT = {
+					any_political_movement = {
+						is_political_movement_type = movement_radical
+					}
+				}
+			}
+			create_political_movement = { type = movement_radical }
 		}
 		random_political_movement = {
 			limit = {
@@ -71,7 +60,23 @@ peoples_springtime.1 = {
 		}
 		if = {
 			limit = {
-				scope:radical_movement ?= {
+				NOT = {
+					any_political_movement = {
+						is_political_movement_type = movement_radical
+					}
+				}
+			}
+			create_political_movement = { type = movement_liberal }
+		}
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_liberal
+			}
+			save_scope_as = liberal_movement_scope
+		}
+		if = {
+			limit = {
+			scope:radical_movement ?= {
 					any_supporting_character = {
 						has_role = agitator
 					}
@@ -97,6 +102,14 @@ peoples_springtime.1 = {
 			days = normal_modifier_time
 			is_decaying = yes
 		}
+		add_radicals = {
+			value = medium_radicals
+			strata = lower
+		}
+		add_radicals = {
+			value = small_radicals
+			strata = middle
+		}
 		if = {
 			limit = {
 				exists = scope:radical_ig_leader
@@ -118,6 +131,10 @@ peoples_springtime.1 = {
 			days = normal_modifier_time
 			is_decaying = yes
 			multiplier = 0.5
+		}
+		add_radicals = {
+			value = small_radicals
+			strata = lower
 		}
         if = {
 			limit = {
@@ -478,7 +495,7 @@ peoples_springtime.5 = {
 }
 
 # End of the Springtime of the Peoples
-peoples_springtime.6 = {
+peoples_springtime.6 = { # Fired by on_action
 	type = country_event
 	event_image = {
 		video = "europenorthamerica_political_extremism"
@@ -492,20 +509,7 @@ peoples_springtime.6 = {
 	desc = peoples_springtime.6.d
 	flavor = peoples_springtime.6.f
 
-	trigger = {
-		OR = {
-			has_variable = completed_peoples_stringtime
-			has_journal_entry = je_springtime_of_the_peoples
-		}
-		has_global_variable = peoples_springtime_happening
-		NOT = { has_global_variable = peoples_springtime_recent }
-		NOT = {
-			any_country = {
-				has_variable = completed_peoples_stringtime_recent
-			}
-		}
-
-	}
+	cooldown = { days = never_fire_again_modifier_time }
 
 	duration = 3
 
@@ -521,7 +525,7 @@ peoples_springtime.6 = {
 					limit = {
 						OR = {
 							has_journal_entry = je_springtime_of_the_peoples
-							has_variable = completed_peoples_stringtime
+							has_variable = completed_peoples_springtime
 						}
 						NOT = { this = root }
 					}
@@ -530,10 +534,6 @@ peoples_springtime.6 = {
 						days = 1
 					}
 				}
-			}
-			set_global_variable = {
-				name = peoples_springtime_happened
-				value = yes
 			}
 		}
 		default_option = yes
@@ -562,7 +562,15 @@ peoples_springtime.7 = {
 		random_interest_group = {
 			limit = {
 				is_in_government = yes
-				leader = { has_ideology = ideology:ideology_radical }
+				OR = {
+					has_ideology = ideology:ideology_proletarian
+					leader = {
+						OR = {
+							has_ideology = ideology:ideology_radical
+							has_socialist_ideology = yes
+						}
+					}
+				}
 			}
 			save_scope_as = radical_ig
 		}
@@ -581,6 +589,81 @@ peoples_springtime.7 = {
 		default_option = yes
 		add_loyalists = {
 			value = 0.1
+		}
+	}
+}
+
+# Rejuvenation
+peoples_springtime.71 = {
+	type = country_event
+
+	event_image = {
+		video = "unspecific_ruler_speaking_to_people"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	title = peoples_springtime.71.t
+	desc = peoples_springtime.71.d
+	flavor = peoples_springtime.71.f
+
+	duration = 3
+
+	immediate = {
+		random_interest_group = {
+			limit = {
+				is_in_government = yes
+				leader = { has_ideology = ideology:ideology_radical }
+			}
+			save_scope_as = radical_ig
+		}
+		random_primary_culture = {
+			save_scope_as = primary_culture_scope
+		}
+	}
+
+	option = {
+		name = peoples_springtime.71.a
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_universal_suffrage
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = modifier_age_of_liberty
+				days = normal_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				has_journal_entry = je_king_in_parliament
+			}
+			custom_tooltip = {
+				text = je_king_in_parliament_advance_50_tt
+				change_variable = { name = parliamentarianism_var add = 50 }
+			}
+		}
+	}
+
+	option = {
+		name = peoples_springtime.71.b
+		default_option = yes
+		add_loyalists = {
+			value = 0.1
+			culture = scope:primary_culture_scope
+		}
+		if = {
+			limit = {
+				has_journal_entry = je_king_in_parliament
+			}
+			custom_tooltip = {
+				text = je_king_in_parliament_advance_25_tt
+				change_variable = { name = parliamentarianism_var add = 25 }
+			}
 		}
 	}
 }
@@ -616,6 +699,461 @@ peoples_springtime.8 = {
 		default_option = yes
 		add_loyalists = {
 			value = 0.1
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			set_strategy = ai_strategy_conservative_agenda
+		}
+		if = {
+			limit = {
+				has_variable = conservative_distribution_of_power_law
+				has_variable = conservative_free_speech_law
+				has_variable = conservative_internal_security_law
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_law = var:conservative_distribution_of_power_law
+					}
+				}
+				activate_law = var:conservative_distribution_of_power_law
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_law = var:conservative_free_speech_law
+					}
+				}
+				activate_law = var:conservative_free_speech_law
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_law = var:conservative_internal_security_law
+					}
+				}
+				activate_law = var:conservative_internal_security_law
+			}
+		}
+	}
+}
+
+# Revolution
+peoples_springtime.9 = {
+	type = country_event
+
+	event_image = {
+		video = "votp_barricade"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	title = peoples_springtime.9.t
+	desc = peoples_springtime.9.d
+	flavor = peoples_springtime.9.f
+
+	duration = 3
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		any_political_movement = {
+			OR = {
+				movement_is_liberal = yes
+				movement_is_socialist = yes
+			}
+			is_insurrectionary = yes
+		}
+		capital = {
+			turmoil >= 0.10
+		}
+	}
+
+	immediate = {
+		save_scope_as = relevant_country
+		capital = {
+			save_scope_as = relevant_state
+		}
+		ruler = {
+			save_scope_as = ruler_scope
+		}
+	}
+
+	option = {
+		name = peoples_springtime.9.a
+		default_option = yes
+		set_variable = had_springtime_revolution
+		hidden_effect = {
+			set_immune_to_revolutions = yes
+			add_modifier = {
+				name = modifier_revolutionary_cabinet
+				days = 120
+				is_decaying = yes
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_universal_suffrage
+				}
+			}
+			activate_law = law_type:law_universal_suffrage
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_right_of_assembly
+				}
+			}
+			activate_law = law_type:law_right_of_assembly
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_national_guard
+				}
+			}
+			activate_law = law_type:law_national_guard
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_serfdom
+			}
+			activate_law = law_type:law_tenant_farmers
+		}
+		hidden_effect = {
+			ordered_interest_group = {
+				limit = {
+					OR = {
+						has_ideology = ideology:ideology_liberal
+						leader = {
+							has_ideology = ideology:ideology_radical
+						}
+					}
+				}
+				order_by = ig_clout
+				add_modifier = { #TODO PRCAL-14137 replace with the modifier that makes revolution impossible
+					name = modifier_springtime_kick_out_of_insurrection
+					days = 75
+				}
+			}
+		}
+		every_interest_group = {
+			limit = {
+				is_in_government = yes
+				NOR = {
+					has_ideology = ideology:ideology_liberal
+					leader = {
+						has_ideology = ideology:ideology_radical
+					}
+				}
+			}
+			add_modifier = {
+				name = modifier_revolution_defeated_light
+				months = 12
+				is_decaying = yes
+			}
+		}
+		show_as_tooltip = {
+			every_interest_group = {
+				limit = {
+					is_in_government = yes
+					NOR = {
+						has_ideology = ideology:ideology_liberal
+						leader = {
+							has_ideology = ideology:ideology_radical
+						}
+					}
+				}
+				remove_ruling_interest_group = yes
+			}
+			ordered_interest_group = {
+				limit = {
+					OR = {
+						has_ideology = ideology:ideology_liberal
+						leader = {
+							has_ideology = ideology:ideology_radical
+						}
+					}
+				}
+				order_by = ig_clout
+				abandon_revolution = yes
+				add_ruling_interest_group = yes
+			}
+			call_election = {
+				months = 2
+			}
+		}
+		hidden_effect = {
+			set_strategy = ai_strategy_progressive_agenda
+			trigger_event = { id = peoples_springtime.91 days = 5 }
+		}
+	}
+
+	option = {
+		name = peoples_springtime.9.b
+		set_variable = had_springtime_revolution
+		hidden_effect = {
+			set_immune_to_revolutions = yes
+			add_modifier = {
+				name = modifier_revolutionary_cabinet
+				days = 120
+				is_decaying = yes
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_census_voting
+				}
+			}
+			activate_law = law_type:law_census_voting
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_right_of_assembly
+				}
+			}
+			activate_law = law_type:law_right_of_assembly
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_national_guard
+				}
+			}
+			activate_law = law_type:law_national_guard
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_serfdom
+			}
+			activate_law = law_type:law_tenant_farmers
+		}
+		hidden_effect = {
+			ordered_interest_group = {
+				limit = {
+					OR = {
+						has_ideology = ideology:ideology_liberal
+						leader = {
+							has_ideology = ideology:ideology_radical
+						}
+					}
+				}
+				order_by = ig_clout
+				add_modifier = {  #TODO PRCAL-14137 replace with the modifier that makes revolution impossible
+					name = modifier_springtime_kick_out_of_insurrection
+					days = 75
+				}
+			}
+		}
+		every_interest_group = {
+			limit = {
+				is_in_government = yes
+				NOR = {
+					has_ideology = ideology:ideology_liberal
+					leader = {
+						has_ideology = ideology:ideology_radical
+					}
+				}
+			}
+			add_modifier = {
+				name = modifier_revolution_defeated_light
+				months = 12
+				is_decaying = yes
+			}
+		}
+		show_as_tooltip = {
+			every_interest_group = {
+				limit = {
+					is_in_government = yes
+					NOR = {
+						has_ideology = ideology:ideology_liberal
+						leader = {
+							has_ideology = ideology:ideology_radical
+						}
+					}
+				}
+				remove_ruling_interest_group = yes
+			}
+			ordered_interest_group = {
+				limit = {
+					OR = {
+						has_ideology = ideology:ideology_liberal
+						leader = {
+							has_ideology = ideology:ideology_radical
+						}
+					}
+				}
+				order_by = ig_clout
+				abandon_revolution = yes
+				add_ruling_interest_group = yes
+			}
+			call_election = {
+				months = 2
+			}
+		}
+		hidden_effect = {
+			set_strategy = ai_strategy_progressive_agenda
+			trigger_event = { id = peoples_springtime.91 days = 5 }
+		}
+	}
+
+	option = {
+		name = peoples_springtime.9.c
+		random_civil_war = {
+			add_civil_war_progress = revolution_advance_large
+		}
+	}
+}
+
+# Revolution folllowup
+peoples_springtime.91 = {
+	type = country_event
+
+	event_image = {
+		video = "votp_barricade"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	hidden = yes
+
+	duration = 3
+
+	cooldown = { days = normal_modifier_time }
+
+	immediate = {
+		ordered_interest_group = {
+			limit = {
+				OR = {
+					has_ideology = ideology:ideology_liberal
+					leader = {
+						has_ideology = ideology:ideology_radical
+					}
+				}
+			}
+			order_by = ig_clout
+			abandon_revolution = yes
+			add_ruling_interest_group = yes
+		}
+		every_interest_group = {
+			limit = {
+				is_in_government = yes
+				NOR = {
+					has_ideology = ideology:ideology_liberal
+					leader = {
+						has_ideology = ideology:ideology_radical
+					}
+				}
+			}
+			remove_ruling_interest_group = yes
+			add_modifier = {
+				name = modifier_revolution_defeated_light
+				months = 12
+				is_decaying = yes
+			}
+		}
+		call_election = {
+			months = 2
+		}
+		update_party_support = yes
+		hidden_effect = {
+			if = {
+				limit = {
+					in_election_campaign = yes
+				}
+				every_active_party = { # Hidden effect to benefit liberals
+					limit = {
+						OR = {
+							is_party_type = liberal_party
+							is_party_type = radical_party
+						}
+					}
+					add_momentum = momentum_very_large
+				}
+			}
+		}
+		set_immune_to_revolutions = no
+	}
+}
+
+# Red Summer
+peoples_springtime.10 = {
+	type = country_event
+
+	event_image = {
+		video = "ip3_agitator_reading_manifesto"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	title = peoples_springtime.10.t
+	desc = peoples_springtime.10.d
+	flavor = peoples_springtime.10.f
+
+	duration = 3
+
+	immediate = {
+		if = {
+			limit = {
+				OR = {
+					month >= 11
+					month < 2
+				}
+			}
+			set_variable = red_winter
+		}
+		if = {
+			limit = {
+				month >= 2
+				month < 5
+			}
+			set_variable = red_spring
+		}
+		if = {
+			limit = {
+				month >= 5
+				month < 8
+			}
+			set_variable = red_summer
+		}
+		if = {
+			limit = {
+				month >= 8
+				month < 11
+			}
+			set_variable = red_autumn
+		}
+	}
+
+	option = {
+		name = peoples_springtime.10.a
+		default_option = yes
+		custom_tooltip = {
+			text = red_summer_tt
+			add_journal_entry = { type = je_red_summer }
+		}
+	}
+
+	option = {
+		name = peoples_springtime.10.b
+		custom_tooltip = {
+			text = red_summer_tt
+			add_journal_entry = { type = je_red_summer }
+		}
+		custom_tooltip = {
+			text = red_summer_counter_revolution_bonus_tt
+			set_variable = { name = var_counter_revolution_bonus value = 1 }
 		}
 	}
 }

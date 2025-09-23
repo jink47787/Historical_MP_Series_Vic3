@@ -3,8 +3,17 @@
 
 	group = je_group_historical_content
 
-	is_shown_when_inactive = {
+	is_shown_in_lobby = {
 		country_has_primary_culture = cu:greek
+	}
+
+	is_shown_when_inactive = {
+		AND = {
+			country_has_primary_culture = cu:greek
+			any_scope_state = {
+				is_greek_homeland = yes
+			}
+		}
 	}
 
 	possible = {
@@ -12,34 +21,219 @@
 		custom_tooltip = {
 			text = greek_state_possible_tt
 			any_scope_state = {
-				state_region = {
-					is_homeland = cu:greek
-				}
-				count >= 3
+				is_greek_homeland = yes
+				count >= greek_homeland_states_owned_to_activate_min
+				owner = root
 			}
 		}
 		is_subject = no
+		hidden_trigger = {
+			NOT = {
+				has_variable = je_greek_nationalism_complete
+			}
+		}
+		is_diplomatic_play_committed_participant = no
 	}
+
+	status_desc = {
+        first_valid = {
+            triggered_desc = {
+                desc = greek_nationalism_status_loc
+                trigger = {
+                    NOR = {
+                    	has_variable = embrace_megali_idea_var
+                    	has_variable = embrace_ambitious_agenda_var
+                    }
+                }
+            }
+            triggered_desc = {
+                desc = megali_idea_status_loc
+                trigger = {
+                    has_variable = embrace_megali_idea_var
+                }
+            }
+            triggered_desc = {
+                desc = byzantium_status_loc
+                trigger = {
+                	has_variable = embrace_ambitious_agenda_var
+                }
+            }
+        }
+    }
 
 	immediate = {
 		trigger_event = { id = greece.1 }
+
+		if = {
+			limit = {
+				NOT = {
+					has_variable = ionian_islands_requirement_var
+				}
+			}
+			set_variable = { name = ionian_islands_requirement_var value = 0 }
+		}
+	}
+
+	on_monthly_pulse = {
+		effect = {
+		}
+	}
+
+	on_yearly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					NOT = { has_variable = embrace_ambitious_agenda_var }
+					has_variable = embrace_megali_idea_var
+					any_scope_state = {
+						state_region = s:STATE_IONIAN_ISLANDS
+					}
+					NOT = { has_game_rule = plausible_formable_nations }
+					has_law_or_variant = law_type:law_monarchy
+					government_legitimacy >= 75
+				}
+				random_list = {
+					90 = { trigger_event = { id = greece.2 days = 7 popup = yes } } # For Taking the The Great Idea™ Too Far
+					10 = { } # nothing happens this year
+				}
+			}
+		}
 	}
 
 	complete = {
-		custom_tooltip = {
-			text = greek_state_complete_tt
-			any_scope_state = {
-				state_region = {
-					is_homeland = cu:greek
-				}
-				count >= 7
+		is_at_war = no
+		is_subject = no
+		country_rank >= rank_value:minor_power
+		gold_reserves > 0
+		trigger_if = {
+			limit = {
+				NOT = { has_variable = embrace_ambitious_agenda_var }
+				NOT = { has_variable = embrace_megali_idea_var }
 			}
+			custom_tooltip = {
+				text = greek_state_complete_tt
+				any_scope_state = {
+					is_greek_homeland = yes
+					count >= greek_homeland_states_owned_to_complete_min
+					owner = root
+				}
+			}
+			custom_tooltip = {
+	            text = no_insurrectionary_movement_tt
+	            NOT = {
+	                any_political_movement = {
+	                    is_insurrectionary = yes
+	                }
+	            }
+	        }
+		}
+		trigger_if = { # triggers if greece.1.a was selected and alters the completion conditions
+			limit = {
+				has_variable = embrace_megali_idea_var
+			}
+			custom_tooltip = {
+				text = greek_state_complete_tt_2
+				any_scope_state = {
+					is_greek_homeland = yes
+					count >= greek_homeland_states_owned_to_complete_max
+					owner = root
+				}
+			}
+			government_legitimacy >= 50 # if the government_legitimacy here is changed, greek_nationalism_legitimacy_min in event_values must be updated to be reflected in loc
+		}
+		trigger_if = { # triggers if greece.2.a was selected and alters the completion conditions
+			limit = {
+				has_variable = embrace_ambitious_agenda_var
+				NOT = { has_game_rule = plausible_formable_nations }
+			}
+			has_law_or_variant = law_type:law_monarchy
+			custom_tooltip = {
+				text = greek_state_complete_tt_3
+				any_scope_state = {
+					is_byzantium_state_region = yes
+					count >= byzantium_state_region_owned_to_complete
+					owner = root
+				}
+			}
+			custom_tooltip = {
+				text = byz_is_this_tt
+				c:BYZ ?= this
+			}
+			government_legitimacy >= 50
 		}
 	}
 
 	on_complete = {
-		trigger_event = { id = greece.2 }
+		trigger_event = { id = greece.4 }
+		set_variable = je_greek_nationalism_complete
 	}
 
-	weight = 20
+	event_outcome_completed_desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					NOT = { has_variable = embrace_ambitious_agenda_var }
+					NOT = { has_variable = embrace_megali_idea_var }
+				}
+				desc = event_effects_greece.4_tt_1
+			}
+			triggered_desc = {
+				trigger = {
+					has_variable = embrace_megali_idea_var
+				}
+				desc = event_effects_greece.4_tt_2
+			}
+			triggered_desc = {
+				trigger = {
+					has_variable = embrace_ambitious_agenda_var
+					NOT = { has_game_rule = plausible_formable_nations }
+				}
+				desc = event_effects_greece.4_tt_3
+			}
+		}
+	}
+
+	fail = {
+		OR = {
+			is_subject = yes
+		 	AND = {
+				country_rank < rank_value:minor_power
+				gold_reserves < 0
+		 	}
+		}
+	}
+
+	on_fail = {
+		trigger_event = { id = greece.5 }
+		set_variable = je_greek_nationalism_complete
+	}
+
+	event_outcome_failed_desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					NOT = { has_variable = embrace_ambitious_agenda_var }
+					NOT = { has_variable = embrace_megali_idea_var }
+				}
+				desc = event_effects_greece.5_tt_1
+			}
+			triggered_desc = {
+				trigger = {
+					has_variable = embrace_megali_idea_var
+				}
+				desc = event_effects_greece.5_tt_2
+			}
+			triggered_desc = {
+				trigger = {
+					has_variable = embrace_ambitious_agenda_var
+					NOT = { has_game_rule = plausible_formable_nations }
+				}
+				desc = event_effects_greece.5_tt_3
+			}
+		}
+	}
+
+	weight = 100
+
+	should_be_pinned_by_default = yes
 }

@@ -1,0 +1,294 @@
+﻿je_grunderzeit = {
+	group = je_group_historical_content
+	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+
+	should_be_pinned_by_default = yes
+	weight = 10000
+
+	scripted_progress_bar = grunderzeit_progress_bar
+
+	status_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = grunderzeit_status_desc_default_key
+				trigger = {
+					NOT = {
+						has_variable = grunderzeit_started_var
+					}
+				}
+			}
+			triggered_desc = {
+				desc = grunderzeit_status_desc_key_1 # very low
+				trigger = {
+					je:je_grunderzeit ?= {
+						"scripted_bar_progress(grunderzeit_progress_bar)" = 1
+					}
+				}
+			}
+			triggered_desc = {
+				desc = grunderzeit_status_desc_key_2 # low
+				trigger = {
+					je:je_grunderzeit ?= {
+						"scripted_bar_progress(grunderzeit_progress_bar)" = 2
+					}
+				}
+			}
+			triggered_desc = {
+				desc = grunderzeit_status_desc_key_3 # high
+				trigger = {
+					je:je_grunderzeit ?= {
+						"scripted_bar_progress(grunderzeit_progress_bar)" = 3
+					}
+				}
+			}
+			triggered_desc = {
+				desc = grunderzeit_status_desc_key_4 # very high
+				trigger = {
+					je:je_grunderzeit ?= {
+						"scripted_bar_progress(grunderzeit_progress_bar)" = 4
+					}
+				}
+			}
+			triggered_desc = {
+				desc = grunderzeit_status_desc_key_0 # very high
+				trigger = {
+					je:je_grunderzeit ?= {
+						"scripted_bar_progress(grunderzeit_progress_bar)" = 0
+					}
+				}
+			}
+		}
+	}
+
+	is_shown_when_inactive = {
+		has_dlc_feature = ip3_content
+		NOR = {
+			has_variable = grunderzeit_started_var
+			has_global_variable = grunderzeit_happened_global_var
+		}
+		country_is_in_german_confederation = yes
+	}
+
+	modifiers_while_active = {
+		modifier_grunderzeit_boom
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = grunderzeit_possible_tt
+			has_global_variable = grunderzeit_possible_global_var
+		}
+		# NB: This JE is activated by a global variable set in a monthly on_action for performance reasons
+		# on_actions requirements:
+		# any_in_global_list = {
+		#	variable = german_confederation_country_list
+		#	has_technology_researched = mutual_funds
+		#	any_scope_building = {
+		#		is_building_type = building_railway
+		#	}
+		#	percent >= 0.75
+		#}
+	}
+
+	immediate = {
+		# Startup Effects
+		set_variable = grunderzeit_started_var
+		set_variable = grunderzeit_quarterly_count_1
+		set_global_variable = grunderzeit_ongoing_global_var
+		trigger_event = { id = grunderzeit.3 popup = yes }
+		hidden_effect = {
+			every_in_global_list = {
+				variable = german_confederation_country_list
+				set_strategy = ai_strategy_industrial_expansion # To make the AI get the picture
+			}
+		}
+		# Baseline German GDP
+		if = {
+			limit = {
+				NOT = {
+					exists = global_var:grunderzeit_combined_gdp_global_var_baseline
+				}
+			}
+			set_global_variable = { # Creates the baseline German GDP variable
+				name = grunderzeit_combined_gdp_global_var_baseline
+				value = root.gdp
+			}
+		}
+		else_if = {
+			limit = {
+				exists = global_var:grunderzeit_combined_gdp_global_var_baseline
+			}
+			change_global_variable = { # Combines all German GDPs into the baseline
+				name = grunderzeit_combined_gdp_global_var_baseline
+				add = root.gdp
+			}
+		}
+		# Initial Actual German GDP (initially same as baseline) - Global variable only used in immediate / for the first month. Is replaced by grunderzeit_actual_gdp_script_value after that
+		if = {
+			limit = {
+				NOT = {
+					exists = global_var:grunderzeit_combined_gdp_global_var_actual
+				}
+			}
+			set_global_variable = { # Creates the baseline German GDP variable
+				name = grunderzeit_combined_gdp_global_var_actual
+				value = root.gdp
+			}
+		}
+		else_if = {
+			limit = {
+				exists = global_var:grunderzeit_combined_gdp_global_var_actual
+			}
+			change_global_variable = { # Combines all German GDPs into the baseline
+				name = grunderzeit_combined_gdp_global_var_actual
+				add = root.gdp
+			}
+		}
+		# Initial German GDP goal
+		set_global_variable = { # Redefines goal based on actual GDP
+			name = grunderzeit_combined_gdp_global_var_goal
+			value = {
+				value = global_var:grunderzeit_combined_gdp_global_var_baseline
+				multiply = 1.025 # Revenues will be increased by 2.5% for each financial quarterly, or I will lop off your mother's feet before you can even say as much as Donaudampfschifffahrtselektrizitätenhauptbetriebswerkbauunterbeamtengesellschaft
+			}
+		}
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			if = { # In the absence of an 'on_every_three_month_pulse'
+				limit = {
+					has_variable = grunderzeit_quarterly_count_1
+				}
+				remove_variable = grunderzeit_quarterly_count_1
+				set_variable = grunderzeit_quarterly_count_2
+			}
+			else_if = {
+				limit = {
+					has_variable = grunderzeit_quarterly_count_2
+				}
+				remove_variable = grunderzeit_quarterly_count_2
+				set_variable = grunderzeit_quarterly_count_3
+			}
+			else_if = { # All effects are ran every three months
+				limit = {
+					has_variable = grunderzeit_quarterly_count_3
+				}
+				remove_variable = grunderzeit_quarterly_count_3
+				set_variable = grunderzeit_quarterly_count_1
+
+				# Check to see whether or not you've reached the goal: i.e. if actual is higher than or equal to goal or not
+				if = { # Advances progress bar by 1 if you have met the goal (cannot exceed 4)
+					limit = {
+						grunderzeit_actual_gdp_script_value >= global_var:grunderzeit_combined_gdp_global_var_goal
+					}
+					if = {
+						limit = {
+							scope:journal_entry = {
+								"scripted_bar_progress(grunderzeit_progress_bar)" < 4
+							}
+						}
+						scope:journal_entry = {
+							add_progress = {
+								value = 1
+								name = grunderzeit_progress_bar
+							}
+						}
+					}
+				}
+				else_if = { # Depletes the progress bar by 1 if you failed to meet the goal
+					limit = {
+						grunderzeit_actual_gdp_script_value < global_var:grunderzeit_combined_gdp_global_var_goal
+					}
+					if = {
+						limit = {
+							scope:journal_entry = {
+								"scripted_bar_progress(grunderzeit_progress_bar)" > 0
+							}
+						}
+						scope:journal_entry = {
+							add_progress = {
+								value = -1
+								name = grunderzeit_progress_bar
+							}
+						}
+					}
+				}
+
+				if = {
+					limit = {
+						NOT = {
+							any_in_global_list = {
+								variable = german_confederation_country_list
+								has_variable = grunderzeit_quarterly_count_3 # The last country to execute these effects will update the targets
+							}
+						}
+					}
+					# Baseline (updated quarterly)
+					if = {
+						limit = {
+							exists = global_var:grunderzeit_combined_gdp_global_var_baseline
+						}
+						set_global_variable = { # Redefines the baseline based on actual GDP
+							name = grunderzeit_combined_gdp_global_var_baseline
+							value = grunderzeit_actual_gdp_script_value
+						}
+					}
+					if = {
+						limit = {
+							exists = global_var:grunderzeit_combined_gdp_global_var_baseline
+							exists = global_var:grunderzeit_combined_gdp_global_var_goal
+						}
+						# German GDP aim (updated quarterly)
+						set_global_variable = { # Redefines goal based on baseline GDP
+							name = grunderzeit_combined_gdp_global_var_goal
+							value = {
+								value = global_var:grunderzeit_combined_gdp_global_var_baseline
+								multiply = 1.025 # Revenues will be increased by 2.5% for each financial quarterly, or I will lop off your mother's feet before you can even say as much as Donaudampfschifffahrtselektrizitätenhauptbetriebswerkbauunterbeamtengesellschaft
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	fail = {
+		custom_tooltip = {
+			text = je_grunderzeit_fail_tt
+			scope:journal_entry = {
+				"scripted_bar_progress(grunderzeit_progress_bar)" = 0
+			}
+		}
+	}
+
+	on_fail = {
+		grunderzeit_variable_cleanup = yes
+		set_global_variable = grunderzeit_happened_global_var # To ensure no wonkiness
+		trigger_event = { id = grunderzeit.1 popup = yes }
+	}
+
+	event_outcome_failed_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = event_effects_grunderzeit.1_tt
+			}
+		}
+	}
+
+	timeout = 10950
+
+	on_timeout = {
+		grunderzeit_variable_cleanup = yes
+		set_global_variable = grunderzeit_happened_global_var # To ensure no wonkiness
+		trigger_event = { id = grunderzeit.2 popup = yes }
+	}
+
+	event_outcome_timeout_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = event_effects_grunderzeit.2_tt
+			}
+		}
+	}
+}

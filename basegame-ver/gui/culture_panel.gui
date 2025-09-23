@@ -239,6 +239,11 @@ types society_panel
 					onclick = "[AccessPlayer.SortCultures('name')]"
 				}
 
+				blockoverride "sort_fervor"
+				{
+					onclick = "[AccessPlayer.SortCultures('fervor')]"
+				}
+
 				blockoverride "sort_acceptance"
 				{
 					onclick = "[AccessPlayer.SortCultures('acceptance')]"
@@ -585,6 +590,12 @@ types society_panel
 							text = "CULTURE_NAME_AND_PRIMARY"
 						}
 						
+						blockoverride "cr_item_fervor"
+						{
+							text = "CULTURE_FERVOR_AND_ARROW_ICON"
+							tooltip = "CULTURE_FERVOR_TOOLTIP"
+						}
+
 						blockoverride "cr_item_acceptance"
 						{
 							text = "[Culture.GetAcceptanceIn(GetPlayer.Self)|=]"
@@ -620,6 +631,13 @@ types society_panel
 						blockoverride "cr_item_name"
 						{
 							text = "RELIGION_NAME_AND_STATE_RELIGION"
+						}
+
+						blockoverride "cr_item_in_front_of_name" {
+							icon = {
+								size = { 24 24 }
+								texture = "[Religion.GetTexture]"
+							}
 						}
 
 						blockoverride "cr_item_onclick"
@@ -1088,12 +1106,13 @@ types society_panel
 					textbox = {
 						parentanchor = hcenter
 						minimumsize = { 250 -1 }
-						maximumsize = { 250 -1 }
+						maximumsize = { 250 62 }
 						default_format = "#v"
 						margin = { 6 0 }
 						multiline = yes
 						autoresize = yes
 						align = hcenter|nobaseline
+						using = elide_fontsize_min
 						using = fontsize_xl
 
 						block "group_name" {
@@ -1112,7 +1131,7 @@ types society_panel
 
 
 	type culture_or_religion_sort_buttons_widget = widget {
-		size = { 535 40 }
+		size = { 540 40 }
 
 		vbox = {
 			layoutpolicy_horizontal = expanding
@@ -1136,6 +1155,24 @@ types society_panel
 					}
 					
 				}
+
+				sort_button = {
+					size = { 70 30 }
+					raw_tooltip = "[concept_fervor]"
+					visible = "[InformationPanel.IsTabSelected('cultures')]"
+
+					block "sort_fervor" {
+						# onclick = ?
+					}
+					
+					button = {
+						parentanchor = center
+						size = { 25 25 }
+						alwaystransparent = yes
+						texture = "gfx/interface/buttons/sort_button_icons/sort_icon_fervor.dds"
+					}
+				}
+
 				sort_button = {
 					size = { 65 30 }
 					raw_tooltip = "[concept_acceptance]"
@@ -1241,16 +1278,34 @@ types society_panel
 						block "cr_item_button_name" {
 							# name = ? (for tutorial)
 						}
-						
-						textbox = {
-							size = { 100% 100% }
-							align = left|nobaseline
-							multiline = yes
+
+						hbox = {
+							spacing = 5
 							margin = { 10 0 }
 
-							block "cr_item_name" {
-								raw_text = "???"
+							block "cr_item_in_front_of_name" {}
+						
+							textbox = {
+								layoutpolicy_vertical = expanding
+								layoutpolicy_horizontal = expanding
+								align = nobaseline
+								multiline = yes
+
+								block "cr_item_name" {
+									raw_text = "???"
+								}
 							}
+						}
+					}
+
+					textbox = {
+						size = { 70 0 }
+						layoutpolicy_vertical = expanding
+						align = right|nobaseline
+						visible = "[InformationPanel.IsTabSelected('cultures')]"
+						
+						block "cr_item_fervor" {
+							raw_text = "???"
 						}
 					}
 					
@@ -1427,7 +1482,7 @@ types society_panel
 
 	type clickable_population_acceptance_status_chart = v3_clickable_stacked_barchart {
 		block "barchart_size" {
-			size = { 520 85 } 
+			size = { 520 85 }
 		}
 
 		blockoverride "barchart_datamodel" {
@@ -1622,7 +1677,6 @@ types society_panel
 
 		textbox = {
 			autoresize = yes
-			parentanchor = hcenter
 
 			block "distribution_label" {
 				raw_text = "???"
@@ -1636,7 +1690,7 @@ types society_panel
 
 	type population_acceptance_status_chart = v3_stacked_barchart {
 		block "barchart_size" {
-			size = { @panel_width 40 }
+			size = { 520 40 }
 		}
 
 		blockoverride "barchart_item_margins" {

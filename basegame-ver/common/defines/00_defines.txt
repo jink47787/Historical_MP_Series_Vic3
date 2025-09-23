@@ -47,12 +47,13 @@ NCountry = {
 	CONSTRUCTION_QUEUE_INCREMENT_CONTROL = 10 # Increment/Decrement used for buildings construction queue when holding down Ctrl
 	WEEKS_TO_STORE_LOYALIST_RADICAL_STATISTICS = 52 # Number of weeks of statistics for loyalists/radicals that is stored and shown
 	INCORPORATION_TIME_SAME_CULTURE = 2				# Years if the state is a Homeland of one of the country's primary cultures
-	INCORPORATION_TIME_SAME_HERITAGE = 5			# Years if the state is a Homeland of a culture that matches of one of the country's primary cultures' Heritage traits
-	INCORPORATION_TIME_SAME_TRAIT = 10				# Years if the state is a Homeland of a culture with any trait in common with a country's primary cultures
+	INCORPORATION_TIME_SAME_HERITAGE_OR_LANGUAGE = 5			# Years if the state is a Homeland of a culture that matches of one of the country's primary cultures' Heritage traits
+	INCORPORATION_TIME_SAME_TRAIT_GROUP = 10				# Years if the state is a Homeland of a culture with any trait in common with a country's primary cultures
 	INCORPORATION_TIME_NO_MATCH = 20				# Years if the state's Homeland cultures have nothing in common with the country's primary cultures
 	INCORPORATION_TIME_MIN_MULTIPLIER = 0.1			# Incorporation speed cannot be reduced below this by modifiers
 	JOURNAL_ENTRY_UPDATE_ACTIVE = 4					# Number of days between each update of Active (Possible) Journal Entries, can be overriden on journal entry type
 	JOURNAL_ENTRY_UPDATE_INACTIVE = 14				# Number of days between each update of Inactive Journal Entries, can be overriden on journal entry type
+	MAX_TRADITION_TRAITS_PER_CULTURE = 4			# How many tradition traits a culture is allowed to have at most
 }
 
 NPolitics = {
@@ -60,6 +61,8 @@ NPolitics = {
 	DISTRIBUTION_OF_POWER_GROUP = "lawgroup_distribution_of_power"	# Law from this group is used for the power_bloc_worst_progressiveness_difference_government_type trigger to represent the Distribution of Power
 	TARIFF_LAW_GROUP = "lawgroup_trade_policy"	# Law from this group is shown to player as their tariff law
 	TAX_LAW_GROUP = "lawgroup_taxation"	# Law from this group is shown to player as their tax law
+	
+	NUM_TIMES_TO_LOOP_THROUGH_LAWS = 3	# When creating a law set, how many times do we loop through all law groups? This is done more than once in order to allow laws that are unlocked by other laws to be changed
 
 	DEFAULT_IDEOLOGY = "ideology_moderate" # Used as a fallback if an ideology cannot be selected for a character
 
@@ -186,7 +189,7 @@ NPolitics = {
 
 	DEFAULT_LAW_ACTIVATION_DATE = "1836.1.1"
 
-	CIVIL_WAR_COOLDOWN_MONTHS = 6									# After a civil war concludes, it takes this long before another one can start
+	CIVIL_WAR_COOLDOWN_MONTHS = 9									# After a civil war concludes, it takes this long before another one can start
 
 	# If there are multiple civil wars that could start, and the current active one has lower activism, it can potentially be replaced by a more viable civil war
 	# This is the minimum delta required for another civil war to replace the active one
@@ -221,7 +224,16 @@ NPolitics = {
 	CIVIL_WAR_UPRISING_ARMY_FRACTION_CLOUT_FACTOR = 0.25 # Target fraction of the army that should rebel, multiplied by insurrectionary IG clout in the area
 	CIVIL_WAR_UPRISING_NAVY_FRACTION_MILITARY_SUPPORT_FACTOR = 0.75 # Target fraction of the navy that should rebel, multiplied by insurrectionary movement military support
 	CIVIL_WAR_UPRISING_NAVY_FRACTION_CLOUT_FACTOR = 0.25 # Target fraction of the navy that should rebel, multiplied by insurrectionary IG clout in the area
-
+	
+	# Insurrectionary countries receive an injection of military goods in their capital, below values control which goods and in which quantities
+	# Multiplies are based on the states assigned to the civil war and the pre-civil war market sell & buy orders
+	CIVIL_WAR_STOCKPILE_SMALL_ARMS_GOODS_TYPE = "small_arms"
+	CIVIL_WAR_STOCKPILE_SMALL_ARMS_MULTIPLIER = 0.80
+	CIVIL_WAR_STOCKPILE_AMMUNITION_GOODS_TYPE = "ammunition"
+	CIVIL_WAR_STOCKPILE_AMMUNITION_MULTIPLIER = 0.80
+	CIVIL_WAR_STOCKPILE_ARTILLERY_GOODS_TYPE = "artillery"
+	CIVIL_WAR_STOCKPILE_ARTILLERY_MULTIPLIER = 0.65
+	
 	CIVIL_WAR_MAX_PROGRESS_AT_CHECKPOINT = 0.25	# A civil war can advance at most this amount per checkpoint, regardless of radicalism
 	MIN_RADICALISM_FOR_CIVIL_WAR_PROGRESSION = 0.75	# A political movement must have this much radicalism for a civil war to start organizing
 	MIN_RADICALISM_FOR_CIVIL_WAR_START = 1.0		# Allow a civil war to start at this amount of radicalism or more
@@ -233,7 +245,7 @@ NPolitics = {
 	CIVIL_WAR_CONSCRIPTION_RATE_POPULAR_SUPPORT_MULTIPLIER = 0.25 # At 100% popular support, insurrectionary states gain this multiplier of civil_war_conscription modifier
 	CIVIL_WAR_CONSCRIPTION_RATE_CLOUT_MULTIPLIER = 0.05 # At 100% clout from supporting IGs, insurrectionary states gain this multiplier of civil_war_conscription modifier
 	CIVIL_WAR_CONSCRIPTION_RATE_MAX_MULTIPLIER = 0.1 # Total multiplier of civil_war_conscription modifier cannot exceed this number (this is intentionally much lower than the possible maximum scaling above, as movements very rarely have >10-20% popular support)
-	CIVIL_WAR_LOSER_IG_AND_MOVEMENT_DEBUFF_YEARS = 10			# Debuff duration in years for IG that looses in a revolution
+	CIVIL_WAR_LOSER_IG_AND_MOVEMENT_DEBUFF_YEARS = 20			# Debuff duration in years for IG that looses in a revolution
 
 	SECESSION_WON_LOYALISTS_INCREASED_PERCENTAGE = 0.5		# This percentage of pops in the secession country of the seceded culture will become more loyal after a secession is victorious
 	SECESSION_START_RADICALS_REDUCED_PERCENTAGE = 1.0		# The number of radicals of pops of the seceded culture in states that seceded will decrease by this amount when a secession war begins
@@ -251,11 +263,15 @@ NPolitics = {
 	TURMOIL_STATE_HIGH_EFFECTS_THRESHOLD = 0.50			# Above this turmoil, add a harsher modifier
 	TURMOIL_STATE_EXTREME_EFFECTS_THRESHOLD = 0.75		# Above this turmoil, add the harshest modifier
 
+	OBSTINANCE_MAX = 0.2								# Maximum amount of obstinance a state can have (when at max the state will get 100% effect of the obstinance modifier)
+	OBSTINANCE_MOVEMENT_REQUIRED_RADICALISM = 0.5		# Minimum amount of radicalism/activism required for a movement to contribute to a state's obstinance
+
 	MIN_INSTITUTION_INVESTMENT = 1						# Lowest Investment Level for active Institutions (modifier is clamped to this)
 	MAX_INSTITUTION_INVESTMENT = 5						# Highest Investment Level for active Institutions (modifier is clamped to this)
 	DAILY_INSTITUTION_SIZE_CHANGE = 0.0028				# Percent increase / decrease in Institution Size per day (0.0028 ~ 1/365)
 
-	INITIAL_MOMENTUM_VARIANCE = 0.5						# How much Momentum should vary at the start of the election period
+	INITIAL_MOMENTUM_MIN = 0.5							# Minimum randomly assigned Momentum at the start of the election period
+	INITIAL_MOMENTUM_MAX = 1.5							# Maximum randomly assigned Momentum at the start of the election period
 	POPULARITY_MOMENTUM_FACTOR = 0.005					# How much Momentum does a party gain or lose from their leader's popularity
 	ELECTION_INTERVAL_YEARS = 4							# How many years normally pass between elections
 	CAMPAIGN_PERIOD_MONTHS = 6							# How long the Campaign Period before the election is
@@ -322,6 +338,7 @@ NEconomy = {
 	COUNTRY_GDP_MODIFIER_MAX_MULTIPLIER = 200000		# The country_gdp modifier multiplier cannot be higher than this
 
 	ECONOMY_OF_SCALE_START_LEVEL = 1					# Level at which buildings start getting economy of scale bonuses. Levels lower than this value provide no bonus [>=1]
+	USE_NATIONALIZED_ECONOMY_OF_SCALE_PENALTY = no		# Whether ECONOMY_OF_SCALE_NATIONALIZED_FRACTION_MULT should be applied to economy of scale modifier for buildings with nationalized levels
 	ECONOMY_OF_SCALE_NATIONALIZED_FRACTION_MULT = 0.5	# Non-government building economy of scale modifier if multiplied by (1 - the fraction of nationalized levels * this)
 
 	IN_DEFAULT_MINIMUM_PENALTY_SCALE = 0.1				# This amount of the 'in default' throughput penalty is applied right away
@@ -501,10 +518,16 @@ NEconomy = {
 	SLAVE_BASKET_SCALED_MAX = 1					# Multiplied by lowest non-slave wealth in the building
 	SLAVE_BASKET_SUBSISTENCE_GOODS_MULT = 0.05 	# Goods consumed for slaves in subsistence buildings are multiplied by this
 
-	DEBT_SLAVERY_ENSLAVEMENT_RATE = 0.005		# Under debt slavery up to this much of a state's populace can be enslaved for their debts each week
-	DEBT_SLAVERY_ENSLAVEMENT_RATE_PER_POP = 0.1 # No more than this fraction of a single pop can be enslaved each week
-	DEBT_SLAVERY_ENSLAVEMENT_RATE_DROP_OFF_PER_WEALTH = 0.01 # Each point of wealth reduces max enslavement rate on a pop by this
-	DEBT_SLAVERY_MAX_STATE_SLAVE_FRACTION = 0.15 # If more than this % of a state's population are slaves, do not enslave any more pops under debt slavery
+	COLONIAL_SLAVERY_ENSLAVEMENT_RATE = 0.005						# Under colonial slavery up to this much of a state's populace can be enslaved for their debts each week
+	COLONIAL_SLAVERY_ENSLAVEMENT_RATE_PER_POP = 0.15				# No more than this fraction of a single pop can be enslaved each week
+	COLONIAL_SLAVERY_ENSLAVEMENT_RATE_DROP_OFF_PER_WEALTH = 0.01	# Each point of wealth reduces max enslavement rate on a pop by this
+	COLONIAL_SLAVERY_MAX_STATE_SLAVE_FRACTION = 0.25				# If more than this % of a state's population are slaves, do not enslave any more pops under colonial slavery
+	COLONIAL_SLAVERY_ACCEPTANCE_THRESHOLD = 60						# Pops with this or more acceptance in their state do not get enslaved under colonial slavery
+
+	DEBT_SLAVERY_ENSLAVEMENT_RATE = 0.005							# Under debt slavery up to this much of a state's populace can be enslaved for their debts each week
+	DEBT_SLAVERY_ENSLAVEMENT_RATE_PER_POP = 0.1						# No more than this fraction of a single pop can be enslaved each week
+	DEBT_SLAVERY_ENSLAVEMENT_RATE_DROP_OFF_PER_WEALTH = 0.01		# Each point of wealth reduces max enslavement rate on a pop by this
+	DEBT_SLAVERY_MAX_STATE_SLAVE_FRACTION = 0.15					# If more than this % of a state's population are slaves, do not enslave any more pops under debt slavery
 
 	SLAVE_TRADE_MIN_VACANCIES_NEEDED_TO_IMPORT = 500 # There needs to be at least this many (non-subsistence) vacancies in buildings that can be filled by slaves in order for slave import to happen
 	SLAVE_TRADE_MIN_POPULATION_TO_EXPORT = 100000	 # There needs to be at least this many people in the state in order for it to be selected, or remain valid, as a slave import target
@@ -547,6 +570,9 @@ NEconomy = {
 	EMPLOYMENT_DIVIDEND_ESTIMATE_MULT = 2.0			# When deciding employment overestimate dividends since they vary a lot and we really dont want to move someone to a job without a dividend that then turns out worse
 
 	GOODS_DEFAULT_TRADE_QUANTITY = 10				# Base quantity traded by trade centers if not otherwise specified in goods type
+
+	MIN_POPS_PER_PROFESSION = 3						# A building can hire at least this many pops in a profession, even if it has fewer than this number of pops available
+	POPS_PER_PROFESSION_LOG_BASE = 10				# The number of pops in a profession is calculated as logarithm of employees count with this base 
 
 	ESTABLISH_COLONY_PROVIDE_PORT = yes				# If establishing a colony should build a port for coastal colonies in order to immediately connect them to the market.
 	ESTABLISH_COLONY_PORT_COST = 100000				# How much money it costs to establish a coastal colony that builds a port
@@ -751,6 +777,7 @@ NMilitary = {
 	BLOCKADE_WORLD_MARKET_ACCESS_IMPACT_SCALING = 0.75		# Reduction of world market access for blockaded world market hubs, scales against blockade level
 	BLOCKADE_SHIPPING_LANE_IMPACT_SCALING = 0.75			# Reduction of efficiency for blockaded shipping lanes, scales against blockade level of either start or end point, whichever is most blockaded
 	BLOCKADE_THROUGHPUT_IMPACT_SCALING = 0.75				# Reduction of throughput for buildings affected by blockades, scales against blockade level
+	BLOCKADE_SEA_PRESENCE_TRESHOLD = 0.5						# At what level of sea presence is the blockade effective
 
 	OFFICERS_TO_SERVICEMEN_RATIO_THRESHOLD = 0.75	# If the officer to servicemen ratio falls below this percentage from its ideal ratio for a building, the combat units provided by that building will start applying the effectiveness factor defined below. A threshold value means the effectiveness factor kicks in in later (when lacking more officers) [>= 0 and <= 1]
 	OFFICERS_TO_SERVICEMEN_RATIO_EFFECTIVENESS_FACTOR_MIN = -0.5	# The effectiveness factor to offense and defense applied to units provided by a building that completely lacks officers. -1 means -100%. Total offense and defence cannot drop below MIN_OFFENSE_DEFENCE. [>= -1 and <= 0]
@@ -810,7 +837,7 @@ NDiplomacy = {
 	REQUIRED_DAMAGE_RELATIONS_PROGRESS = -100		# How much change relations progress is needed to decrease relations by 1 point
 
 	INITIAL_LIBERTY_DESIRE = 50             							# Liberty Desire value which the Diplomatic Pact gets initialized to.
-	WEEKLY_LIBERTY_DESIRE_FROM_SUPPORT_INDEPENDENCE_TOTAL_MAX = 1		# Maximum weekly increase in liberty desire from all Support Independence targeting the country
+	WEEKLY_LIBERTY_DESIRE_FROM_SUPPORT_INDEPENDENCE_TOTAL_MAX = 0.5		# Maximum weekly increase in liberty desire from all Support Independence targeting the country
 
 	MIN_INFAMY = 0							# Infamy can't be lower than this
 	MAX_INFAMY = 1000						# Infamy can't be higher than this
@@ -902,7 +929,6 @@ NDiplomacy = {
 	WAR_GOAL_REGIME_CHANGE_MONTHS = 60 # Government in country with forced regime change is locked in for this number of months [>= 0]
 	WAR_GOAL_REGIME_CHANGE_MAX_IDEOLOGICAL_OPINION = -5 # If ideological opinion is above this, regime change can't be used
 	WAR_GOAL_REGIME_CHANGE_MIN_LAW_PROGRESSIVENESS_DIFFERENCE = 50 # If the difference between the target wargoal holder's laws in a law group are not at least this, don't change it as part of regime change
-	WAR_GOAL_REGIME_CHANGE_NUM_TIMES_TO_LOOP_THROUGH_LAWS = 3	# How many times do we loop through the laws to check what to change? This is done more than once in order to allow laws that are unlocked by other laws to be changed
 	WAR_GOAL_INCREASE_AUTONOMY_MIN_LIBERTY_DESIRE = 75 # A subject must have at least this much LD to use the increase autonomy wargoal
 	WAR_GOAL_INDEPENDENCE_MIN_LIBERTY_DESIRE = 90 # A subject must have at least this much LD to use the independence wargoal
 
@@ -1178,6 +1204,7 @@ NPops = {
 
 	DEFAULT_POP_TYPE = "laborers"				# Used by: create_pop effects; migration; injured military leaving their outposts; slaves default employment role; etc.
 	SLAVE_POP_TYPE = "slaves"					# This is the type of pop that debtors will become
+	ACADEMICS_POP_TYPE = "academics"			# Academic pops
 	OFFICERS_POP_TYPE = "officers"					# This is the type of pop that is considered military officers
 	SERVICEMEN_POP_TYPE = "soldiers"					# This is the type of pop that is considered military servicemen
 
@@ -1212,6 +1239,7 @@ NPops = {
 
 	ASSIMILATION_RATE = 0.002					# Percentage of pops who will Assimilate into a different Culture each month, if eligible
 	MIN_ASSIMILATION = 1						# If there is any assmiliation at least this many people will assimilate
+	ASSIMILATION_IN_HOMELAND_MULT = 0.75		# Assimilation rate is multiplied by this in homelands
 
 	CONVERSION_RATE = 0.002						# Percentage of pops who will Convert into a different Religion each month, if eligible
 	CONVERSION_UNINCORPORATED_MULT = 0.1 		# CONVERSION_RATE is multiplied by this in unincorporated states
@@ -1273,16 +1301,53 @@ NPops = {
 	# Acceptance #
 	MIN_ACCEPTANCE_VALUE = 0													# It is both the minimum acceptance value a pop can have as well as the explicit threshold scripted for the first acceptance status [any signed 32 bit value]
 	MAX_ACCEPTANCE_VALUE = 100													# It is both the maximum acceptance value a pop can have as well as the (implied) upper bound of the last acceptance status [> MIN_ACCEPTANCE_VALUE]
-	ACCEPTANCE_FROM_HOMELAND_COMMUNITY = 10										# The amount of acceptance a pop gets from living in their homeland, applied statically on their Cultural Community
+	ACCEPTANCE_FROM_HOMELAND_COMMUNITY = 0										# The amount of acceptance a pop gets from living in their homeland, applied statically on their Cultural Community
+	ACCEPTANCE_FROM_NOT_HOMELAND_COMMUNITY = 0									# The amount of acceptance a pop gets from not living in their homeland, applied statically on their Cultural Community
 	MIN_REQUIRED_ACCEPTANCE_FOR_MIGRATION = 30		 							# If a pop would have less than this much acceptance in a target state, they won't mass migrate there
 	EXPECTED_ACCEPTANCE_INCREASE_TO_MIGRATE = 10                                # A pop will look to increase their acceptance by this much when mass migrating, but might accept less if mass migration attraction difference is high enough
 	MAX_ACCEPTANCE_RATIO_MULT_MIGRATION = 5										# A difference in acceptance between source and target in mass migrations will result in at most this much increased migration
+
+	BUCKET_MIGRATION_EXPIRATION_YEARS = 5									    # How long a migration bucket will be kept before it is removed
+	BUCKET_MIGRATION_THRESHOLD = 1000											# How many pops need to be in a bucket before it is executes migration
+	BUCKET_MIGRATION_MIN_LEFTOVER_THRESHOLD = 1000								# Minimum number of pops that can stay without being moved over to another state when a bucket migration is executed
+	MIGRATION_PULL_CULTURE_VACANCIES_MODIFIER = 0.25							# Modifies migration pull for pop if there is vacancies available for the pop culture
+	MIGRATION_PULL_CULTURE_NO_VACANCIES_MODIFIER = -0.5							# Modifies migration pull for pop if there is no vacancies available for the pop culture
 
 	# Cultural Communities #
 	CULTURAL_COMMUNITY_LINGER_TIME_WEEKS = 3									# When the last pop of a given culture leaves a state, the corresponding cultural community will be removed after this long
 	CULTURAL_COMMUNITY_MAX_PER_MONTH_CHANCE = 0.04
 	CULTURAL_COMMUNITY_ACCEPTANCE_DELTA_ON_SPAWN = -0.3							# The percentage of the maximum cultural acceptance that should be added as a delta to the cultural community when it first appears
 	CULTURAL_COMMUNITY_ACCEPTANCE_DELTA_DECAY_PER_MONTH = 0.25					# The amount of acceptance delta that will decay each month
+
+	# Cultural Fervor #
+	CULTURAL_FERVOR_MAX = 100													# The maximum value of cultural fervor
+	CULTURAL_FERVOR_MIN = 0														# The minimum value of cultural fervor
+	CULTURAL_FERVOR_DRIFT = 0.01												# Factor to control the monthly drift from current to target Fervor
+	CULTURAL_FERVOR_DRIFT_MIN = 0.05											# The minimum amount fervor will move towards its target (unless it would overshoot)
+
+	CULTURAL_FERVOR_LITERACY_IMPACT = 35										# The impact of pops literacy on the cultural fervor
+    CULTURAL_FERVOR_WAR_IMPACT = 20												# The impact of a war on the cultural fervor, unused
+    CULTURAL_FERVOR_CASUALTIES_IMPACT_MAX = 30									# The maximum impact of casualties from war and attrition on the cultural fervor
+	CULTURAL_FERVOR_CASUALTIES_RATIO_MAX = 0.1									# The ratio of dead to living that gives the maximum casualty impact on the cultural fervor
+    CULTURAL_FERVOR_ACADEMICS_IMPACT = 0.002									# The impact of pops education access on the cultural fervor per person
+	CULTURAL_FERVOR_ACADEMICS_IMPACT_CAP = 25									# Cap for the academics impact
+	CULTURAL_FERVOR_ACCEPTANCE_IMPACT = -0.05									# The impact of a pops acceptance on the cultural fervor
+
+	CULTURAL_FERVOR_NATIONALISM_IMPACT= 5										# The impact of nationalism on the cultural fervor, if all pops of a culture lives under nationalsim, then the cultural fervor will increase by this amount, else a fraction of it
+	CULTURAL_FERVOR_PAN_NATIONALISM_IMPACT = 5									# The impact of pan-nationalism on the cultural fervor, if all pops of a culture lives under pannationalsim, then the cultural fervor will increase by this amount, else a fraction of it
+
+	CULTURAL_FERVOR_PUBLIC_SCHOOLS_IMPACT = 10									# The impact of public schools on the cultural fervor, if all pops of a culture lives under public schools, then the cultural fervor will increase by this amount, else a fraction of it
+
+	CULTURAL_FERVOR_OTHER_CULTURES_RELEASED_IMPACT = 10							# The impact on non-primary cultures in country where a culture gets released
+
+	CULTURAL_FERVOR_NATIONAL_AWAKENING_THRESHOLD = 25							# The fervor threshold over which it is possible for a culture to have a national awakening
+	CULTURAL_NATIONAL_AWAKENING_CHANCE_INCREASE_PER_FERVOR = 0.01				# The increase in chance per point of fervor of a national awakening happening once fervor is above the awakening threshold
+	CULTURAL_FERVOR_NATIONAL_AWAKENING_IMPACT = 20								# The impact on fervor from having a national awakening
+	CULTURAL_FERVOR_NATIONAL_AWAKENING_DEFAULT_LENGTH_MONTHS = 120				# The default length of a national awakening in months
+
+	CULTURAL_FERVOR_ASSIMILATIOM_EFFECT = 0.01									# The effect cultural fervor has on assimilation, it makes it this much harder to assimilate with higher fervor
+	CULTURAL_FERVOR_WAR_SUPPORT_EFFECT = 0.01									# The effect cultural fervor has on war support
+	CULTURAL_FERVOR_CONQUEST_RADICILIZATION_IMPACT = -0.005						# This modifies the radicialization of pops in a state when it is conquered by a country with a primary culture the same as the pops
 
 	# Slavery #
 	MIGRATION_MIN_POP_AMOUNT = 1												# No less than this amount of a pop can migrate each week (if any migration at all should happen)
@@ -1297,12 +1362,11 @@ NPops = {
 ## Migration Attraction ##
 	MIGRATION_PULL_EMPTY_STATE = 100											# If a state has no pops at all, give it a huge migration pull
 	MIGRATION_PULL_FROM_LIVING_STANDARD = 2										# Migration pull from each point of average living standard in target state
-	MIGRATION_PULL_FROM_AVAILABLE_EMPLOYMENT = 1.5								# Migration pull is increased by for each 10k available non subsistence jobs
+	MIGRATION_PULL_FROM_AVAILABLE_EMPLOYMENT = 30								# Migration pull is increased by the % of available non subsistence jobs compared to employed non subsistence pops, multiplied by this
 	MIGRATION_PULL_FROM_AVAILABLE_EMPLOYMENT_MAX = 30							# Migration pull from available non subsistence jobs cannot exceed this
-	MIGRATION_PULL_FROM_AVAILABLE_ARABLE_LAND_MAX_EMPLOYMENT_MULTIPLIER = 0.75	# Count available arable land as though the subsistence farm has only this fraction of its max employment, so that massive states in China with mostly full subsistence farms don't get a huge migration boost
-	MIGRATION_PULL_FROM_AVAILABLE_ARABLE_LAND_EMPLOYMENT = 0.5					# Migration pull is increased by for each 10k available subsistence jobs
-	MIGRATION_PULL_FROM_AVAILABLE_ARABLE_LAND_EMPLOYMENT_MAX = 30				# Migration pull from available subsistence jobs cannot exceed this
-	MIGRATION_PULL_REDUCTION_FROM_UNEMPLOYMENT = 1								# Migration pull is reduced by this for each 10k unemployed pops
+	MIGRATION_PULL_FROM_AVAILABLE_SUBSISTENCE_EMPLOYMENT = 2					# Migration pull is increased by the % of available subsistence jobs compared to employed non subsistence pops, multiplied by this
+	MIGRATION_PULL_FROM_AVAILABLE_SUBSISTENCE_EMPLOYMENT_MAX = 10				# Migration pull from available subsistence jobs cannot exceed this
+	MIGRATION_PULL_REDUCTION_FROM_UNEMPLOYMENT = 50								# Migration pull is reduced by the % of unemployed pops compared to employed pops, multiplied by this
 	MIGRATION_PULL_REDUCTION_FROM_UNEMPLOYMENT_MAX = 50							# Migration pull reduction from unemployment cannot exceed this
 
 ## Market Migrations ##
@@ -1522,6 +1586,9 @@ NEvents = {
 NTechnology = {
 	TECH_SPREAD_RANDOM_RANGE = 0.5 # How much can distribution of tech spread vary each week
 	TECH_AHEAD_OF_TIME_PENALTY_FACTOR = 0.25	# For every tech in a previous era not already researched in this category, take this multiple of the cost as an additional penalty (multiplied by number of eras between the techs)
+
+	NATIONALISM_TECHNOLOGY_TYPE = "nationalism" 				# Technology type for nationalism techs
+	PAN_NATIONALISM_TECHNOLOGY_TYPE = "pan-nationalism" 		# Technology type for pan-nationalism techs
 }
 
 NCharacters = {
@@ -1662,6 +1729,7 @@ NWar = {
 	WAR_EXHAUSTION_ANTI_WAR_LOBBY_CLOUT_FACTOR = 1.0 # At 100% lobby clout opposed to the war
 	WAR_EXHAUSTION_PRO_WAR_LOBBY_CLOUT_FACTOR = -1.0 # At 100% lobby clout supporting to the war
 	WAR_EXHAUSTION_MAX = 100 # War Exhaustion can never exceed this
+	WAR_EXHAUSTION_MIN = 0 # War Exhaustion can never go below this
 	OCCUPATION_STATE_BASE_WEIGHT = 1
 	OCCUPATION_STATE_POP_WEIGHT = 1
 	OCCUPATION_STATE_INCORPORATED_WEIGHT = 10

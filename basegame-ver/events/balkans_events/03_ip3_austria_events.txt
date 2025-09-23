@@ -1,0 +1,564 @@
+﻿namespace = austria_events
+
+# For c:AUS, Austria
+
+# Ferdinand I of Austria abdicates
+austria_events.30 = {
+	type = country_event
+	placement = root
+	title = austria_events.30.t
+	desc = austria_events.30.d
+	flavor = austria_events.30.f
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:relevant_ruler
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	cooldown = { days = stupidly_long_modifier_time }
+
+	duration = 3
+
+	dlc = dlc014
+
+	trigger = {
+		has_dlc_feature = ip3_content
+		NOT = { has_variable = ferdinand_I_abdicated_var }
+		c:AUS ?= this
+		any_scope_character = {
+			AND = {
+				is_ruler = yes
+				has_template = aus_ferdinand_I_habsburg_template
+			}
+		}
+		any_scope_character = {
+			has_template = aus_franz_josef_I_habsburg_template
+		}
+		game_date >= 1848.12.1
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				AND = {
+					is_ruler = yes
+					has_template = aus_ferdinand_I_habsburg_template
+				}
+			}
+			save_scope_as = relevant_ruler
+		}
+		random_scope_character = {
+			limit = {
+				has_template = aus_franz_josef_I_habsburg_template
+			}
+			save_scope_as = relevant_heir
+		}
+		ig:ig_landowners ?= {
+			save_scope_as = landowners_ig
+			leader = {
+				save_scope_as = ig_leader_scope
+			}
+		}
+		set_variable = ferdinand_I_abdicated_var
+	}
+
+	cancellation_trigger = {
+		OR  = {
+			NOT = {
+				any_scope_character = {
+					has_template = aus_ferdinand_I_habsburg_template
+				}
+			}
+			NOT = {
+				any_scope_character = {
+					has_template = aus_franz_josef_I_habsburg_template
+				}
+			}
+		}
+	}
+
+	option = {
+		name = austria_events.30.a
+		default_option = yes
+		custom_tooltip = {
+			text = ferdinand_I_abdicates_tt
+			scope:relevant_ruler = {
+				kill_character = yes # Ferdinand I "abdicates", Franz Joseph I of Austria becomes ruler
+			}
+			create_character = {
+				# Rudolf, Crown Prince of Austria, is the new heir
+				template = aus_maximilian_I_habsburg_template
+			}
+		}
+		if = {
+			limit = {
+				has_journal_entry = je_metternich
+			}
+			custom_tooltip = metternich_agenda_value_improves_tt
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_scope_character = {
+						has_template = aus_klemens_von_metternich
+					}
+				}
+				scope:ig_leader_scope = {
+					has_trait = experienced_political_operator
+				}
+			}
+			scope:ig_leader_scope = {
+				remove_trait = experienced_political_operator
+				add_trait = expert_political_operator
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					any_scope_character = {
+						has_template = aus_klemens_von_metternich
+					}
+				}
+				scope:ig_leader_scope = {
+					has_trait = basic_political_operator
+				}
+			}
+			scope:ig_leader_scope = {
+				remove_trait = basic_political_operator
+				add_trait = experienced_political_operator
+			}
+		}
+		else_if = {
+			limit = {
+				NOT = {
+					any_scope_character = {
+						has_template = aus_klemens_von_metternich
+					}
+				}
+				scope:ig_leader_scope = {
+					NOR = {
+						has_trait = basic_political_operator
+						has_trait = experienced_political_operator
+						has_trait = expert_political_operator
+					}
+				}
+			}
+			scope:ig_leader_scope = {
+				add_trait = basic_political_operator
+			}
+		}
+	}
+}
+
+# Birth of Rudolf
+austria_events.31 = {
+	type = country_event
+	placement = root
+	title = austria_events.31.t
+	desc = austria_events.31.d
+	flavor = austria_events.31.f
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:new_heir
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	cooldown = { days = stupidly_long_modifier_time }
+
+	duration = 3
+
+	trigger = {
+		any_scope_character = {
+			is_ruler = yes
+			has_template = aus_franz_josef_I_habsburg_template
+		}
+		any_scope_character = {
+			has_template = aus_maximilian_I_habsburg_template
+		}
+		game_date >= 1858.8.21
+		c:AUS ?= this
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				is_ruler = yes
+				has_template = aus_franz_josef_I_habsburg_template
+			}
+			save_scope_as = relevant_ruler
+		}
+		random_scope_character = {
+			limit = {
+				has_template = aus_maximilian_I_habsburg_template
+			}
+			add_trait = experienced_naval_commander # historically, he was in the Imperial Austrian Navy around this time
+			disinherit_character = yes
+			save_scope_as = old_heir
+		}
+		create_character = {
+			# Rudolf, Crown Prince of Austria, is the new heir
+			template = aus_rudolf_habsburg
+			save_scope_as = new_heir
+		}
+	}
+
+	cancellation_trigger = {
+		OR  = {
+			NOT = {
+				any_scope_character = {
+					has_template = aus_franz_josef_I_habsburg_template
+				}
+			}
+			NOT = {
+				any_scope_character = {
+					has_template = aus_rudolf_habsburg
+				}
+			}
+		}
+	}
+
+	option = {
+		name = austria_events.31.a
+		default_option = yes
+		custom_tooltip = {
+			text = rudolf_habsburg_becomes_heir_tt
+		}
+	}
+}
+
+# The Mayerling Incident
+austria_events.32 = {
+	type = country_event
+	placement = root
+	title = austria_events.32.t
+	desc = austria_events.32.d
+	flavor = austria_events.32.f
+
+	event_image = {
+		video = "ip3_police_raid"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	cooldown = { days = stupidly_long_modifier_time }
+
+	duration = 3
+
+	dlc = dlc014
+
+	trigger = {
+		has_dlc_feature = ip3_content
+		NOT = { has_variable = mayerling_incident_happened_var }
+		any_scope_character = {
+			has_template = aus_rudolf_habsburg
+		}
+		game_date >= 1889.1.30
+		c:AUS ?= this
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				is_ruler = yes
+			}
+			save_scope_as = relevant_ruler
+		}
+		random_scope_character = {
+			limit = {
+				has_template = aus_rudolf_habsburg
+			}
+			save_scope_as = relevant_heir
+		}
+		set_variable = mayerling_incident_happened_var
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			any_scope_character = {
+				has_template = aus_rudolf_habsburg
+			}
+		}
+	}
+
+	option = {
+		name = austria_events.32.a
+		default_option = yes
+		custom_tooltip = {
+			text = rudolf_habsburg_death_tt
+			scope:relevant_heir = {
+				kill_character = { hidden = yes } # Rudolf dies
+			}
+			create_character = {
+				#  Franz Ferdinand is the new heir
+				template = aus_franz_ferdinand
+			}
+		}
+		add_modifier = {
+			name = cover_up_death
+			days = normal_modifier_time
+		}
+	}
+	option = {
+		name = austria_events.32.b
+		custom_tooltip = {
+			text = rudolf_habsburg_death_tt
+			scope:relevant_heir = {
+				kill_character = { hidden = yes } # Rudolf dies
+			}
+			create_character = {
+				#  Franz Ferdinand is the new heir
+				template = aus_franz_ferdinand
+			}
+		}
+		scope:relevant_ruler = {
+			add_modifier = {
+				name = royal_family_scandal
+				days = normal_modifier_time
+			}
+		}
+	}
+}
+
+# Grand Exhibition, Austria–Japan relations
+# An event for Japan to decide if they want to participate
+austria_events.33 = {
+	type = country_event
+	placement = root
+	title = austria_events.33.t
+	desc = austria_events.33.d
+	flavor = austria_events.33.f
+
+	event_image = {
+		video = "unspecific_world_fair"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	cooldown = { days = stupidly_long_modifier_time }
+
+	duration = 3
+
+	dlc = dlc014
+
+	trigger = {
+		has_dlc_feature = ip3_content
+		NOT = { has_variable = austria_events_33_happened_var }
+		NOT = {
+			has_law_or_variant = law_type:law_isolationism
+			has_law_or_variant = law_type:law_closed_borders
+		}
+		c:JAP ?= this
+		is_at_war = no
+		c:AUS ?= {
+			relations:root >= relations_threshold:neutral
+			is_at_war = no
+			has_journal_entry = je_grand_exhibition
+		}
+	}
+
+	immediate = {
+		set_variable = austria_events_33_happened_var
+		ROOT = {
+			save_scope_as = japan_scope
+		}
+		c:AUS ?= {
+			random_scope_state = {
+				limit = {
+					is_capital = yes
+				}
+				save_scope_as = relevant_state_scope
+			}
+			save_scope_as = austria_scope
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			ROOT = {
+				is_at_war = yes
+			}
+			c:AUS ?= {
+				OR = {
+					relations:root < relations_threshold:neutral
+					is_at_war = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = austria_events.33.a
+		default_option = yes
+		custom_tooltip = {
+			text = did_attend_worlds_fair_tt
+		}
+		scope:austria_scope ?= {
+			post_notification = japan_austria_message
+			create_diplomatic_catalyst = {
+				type = catalyst_event_positive
+				target = scope:japan_scope
+			}
+			change_relations = {
+				country = scope:japan_scope
+				value = 5
+			}
+			trigger_event = { id = austria_events.34 days = 15 popup = yes }
+		}
+		add_modifier = {
+			name = grand_exhibition_paticipation_cost #cost money
+			multiplier = money_amount_multiplier_very_small
+			days = short_modifier_time
+		}
+		if = {
+			limit = {
+				any_scope_state = {
+					has_building = building_arts_academy
+				}
+			}
+			add_modifier = {
+				name = grand_exhibition_participation_prestige
+				days = normal_modifier_time
+			}
+		}
+	}
+	option = {
+		name = austria_events.33.b
+		custom_tooltip = {
+			text = did_not_attend_worlds_fair_tt
+		}
+	}
+}
+
+# Grand Exhibition, Austria–Japan relations
+austria_events.34 = {
+	type = country_event
+	placement = root
+
+	title = {
+		first_valid = {
+			triggered_desc = {
+				desc = austria_events.34.t
+				trigger = {
+					scope:japan_scope = {
+						country_has_primary_culture = cu:japanese
+					}
+				}
+			}
+			triggered_desc = {
+				desc = austria_events.34.t2
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+	desc = austria_events.34.d
+	flavor = austria_events.34.f
+
+	event_image = {
+		video = "asia_confucianism_shinto"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	cooldown = { days = stupidly_long_modifier_time }
+
+	duration = 3
+
+	dlc = dlc014
+
+	trigger = { # triggered from austria_events.33.a
+		NOT = { has_variable = japan_attends_vienna_world_fair_var }
+	}
+
+	immediate = {
+		set_variable = japan_attends_vienna_world_fair_var
+		ROOT = {
+			save_scope_as = austria_scope
+		}
+		c:JAP ?= {
+			save_scope_as = japan_scope
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			ROOT = {
+				is_at_war = yes
+			}
+			c:JAP ?= {
+				OR = {
+					relations:root < relations_threshold:neutral
+					is_at_war = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = austria_events.34.a
+		default_option = yes
+		add_modifier = {
+			name = cultural_exchange_prestige
+			days = moderately_long_modifier_time
+		}
+		c:JAP ?= {
+			post_notification = austria_japan_message
+			create_diplomatic_catalyst = {
+				type = catalyst_event_positive
+				target = root
+			}
+			change_relations = {
+				country = c:AUS
+				value = 5
+			}
+			add_modifier = {
+				name = cultural_exchange_research_speed
+				days = moderately_long_modifier_time
+			}
+		}
+	}
+	option = {
+		name = austria_events.34.b
+		every_scope_state = {
+			if = {
+				limit = {
+					has_building = building_arts_academy
+				}
+				add_modifier = {
+					name = cultural_exchange_art
+					days = moderately_long_modifier_time
+				}
+			}
+		}
+		c:JAP ?= {
+			post_notification = austria_japan_message
+			create_diplomatic_catalyst = {
+				type = catalyst_event_positive
+				target = root
+			}
+			change_relations = {
+				country = c:AUS
+				value = 5
+			}
+			add_modifier = {
+				name = cultural_exchange_research_speed
+				days = moderately_long_modifier_time
+			}
+		}
+	}
+}

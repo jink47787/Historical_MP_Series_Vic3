@@ -4,7 +4,7 @@
 		### Royalist movements
 		if = {
 			limit = {
-				has_law = law_type:law_monarchy
+				has_law_or_variant = law_type:law_monarchy
 				country_has_voting_franchise = no
 				NOT = { c:FRA ?= this } # No generic royalist movement for France
 			}
@@ -12,20 +12,48 @@
 		}
 		else_if = {
 			limit = {
-				has_law = law_type:law_monarchy
+				has_law_or_variant = law_type:law_monarchy
 				country_has_voting_franchise = yes
 				NOT = { c:FRA ?= this } # No generic royalist movement for France
 			}
 			create_political_movement = { type = movement_royalist_constitutional }
 		}
 
+		### Liberal movements
+		if = {
+			limit = {
+				has_technology_researched = democracy
+				OR = {
+					has_law_or_variant = law_type:law_landed_voting
+					has_law_or_variant = law_type:law_wealth_voting
+					has_law_or_variant = law_type:law_census_voting
+					has_law_or_variant = law_type:law_universal_suffrage
+				}
+			}
+			create_political_movement = { type = movement_liberal }
+		}
+
+		### Labour movements
+		if = {
+			limit = {
+				has_technology_researched = labor_movement
+			}
+			create_political_movement = { type = movement_labor }
+		}
+
 		### Abolitionist movements
 		if = {
 			limit = {
-				NOT = { has_law = law_type:law_slavery_banned }
+				NOT = { has_law_or_variant = law_type:law_slavery_banned }
 			}
-			create_political_movement = { type = movement_pro_slavery }
-
+			if = {
+				limit = {
+					NOT = {
+						has_law_or_variant = law_type:law_colonial_slavery
+					}
+				}
+				create_political_movement = { type = movement_pro_slavery }
+			}
 			if = {
 				limit = {
 					has_technology_researched = empiricism
@@ -42,6 +70,7 @@
 			}
 			create_political_movement = { type = movement_religious_minority religion = rel:hindu }
 			create_political_movement = { type = movement_religious_minority religion = rel:sunni }
+			create_political_movement = { type = movement_cultural_minority culture = cu:bengali }
 		}
 		else_if = { # France gets Legitimists instead
 			limit = {
@@ -53,29 +82,26 @@
 		}
 
 		### Cultural majority movements
-		create_political_movement = { type = movement_cultural_majority }
-
-		### Labour movements
 		if = {
 			limit = {
-				has_technology_researched = labor_movement
-			}
-			create_political_movement = { type = movement_labor }
-		}
-
-		### Liberal movements
-		if = {
-			limit = {
-				has_technology_researched = democracy
 				OR = {
-					has_law = law_type:law_landed_voting
-					has_law = law_type:law_wealth_voting
-					has_law = law_type:law_census_voting
-					has_law = law_type:law_universal_suffrage
+					country_has_primary_culture = cu:north_german
+					country_has_primary_culture = cu:south_german
 				}
-				NOT = { c:FRA ?= this }
 			}
-			create_political_movement = { type = movement_liberal }
+			create_political_movement = { type = movement_german_national }
+		}
+		else_if = {
+			limit = {
+				OR = {
+					country_has_primary_culture = cu:north_italian
+					country_has_primary_culture = cu:south_italian
+				}
+			}
+			create_political_movement = { type = movement_italian_national }
+		}
+		else = {
+			create_political_movement = { type = movement_cultural_majority }
 		}
 	}
 	c:FRA ?= {
@@ -86,7 +112,25 @@
 	}
 	c:AUS ?= {
 		create_political_movement = { type = movement_cultural_minority culture = cu:polish }
-		create_political_movement = { type = movement_cultural_minority culture = cu:hungarian }
+		create_political_movement = { type = movement_cultural_minority culture = cu:czech }
+		create_political_movement = { type = movement_cultural_minority culture = cu:north_italian }
+		create_political_movement = { type = movement_liberal }
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_liberal
+			}
+			set_suppression = yes
+		}
+	}
+	c:HUN ?= {
+		create_political_movement = { type = movement_liberal }
+		create_political_movement = { type = movement_cultural_minority culture = cu:serb }
+	}
+	c:CRO ?= {
+		create_political_movement = { type = movement_yugoslav_national }
+	}
+	c:SER ?= {
+		create_political_movement = { type = movement_yugoslav_national }
 	}
 	c:PRU ?= {
 		create_political_movement = { type = movement_cultural_minority culture = cu:polish }
@@ -105,5 +149,37 @@
 	}
 	c:BIC ?= {
 		create_political_movement = { type = movement_utilitarian }
+	}
+	c:HAI ?= {
+		create_political_movement = { type = movement_cultural_minority culture = cu:caribeno }
+	}
+	c:GBR ?= {
+		create_political_movement = { type = movement_cultural_minority culture = cu:irish }
+	}
+
+	# brewing rebellions of 1837
+	c:ONT ?= {
+		create_political_movement = { type = movement_radical }
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_radical
+			}
+			add_modifier = {
+				name = can_reformer_movement_fury
+				days = very_long_modifier_time
+			}
+		}
+	}
+	c:QUE ?= {
+		create_political_movement = { type = movement_radical }
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_radical
+			}
+			add_modifier = {
+				name = can_reformer_movement_fury
+				days = very_long_modifier_time
+			}
+		}
 	}
 }

@@ -1,0 +1,1102 @@
+﻿namespace = balkan_wars
+
+# "The Balkan League", initiation event.
+balkan_wars.1 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.1.t
+	desc = balkan_wars.1.d
+	flavor = balkan_wars.1.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "southamerica_aristocrats"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	cancellation_trigger = {
+		OR = {
+			has_variable = balkan_league_immediate_rejector
+			NOT = {
+				has_journal_entry = je_the_balkan_league
+			}
+		}
+	}
+
+	immediate = {
+		sr:region_balkans = {
+			save_scope_as = balkans_scope
+		}
+		c:TUR = {
+			save_scope_as = ottoman_empire_scope
+		}
+	}
+
+	option = {
+		name = balkan_wars.1.a
+		default_option = yes
+		custom_tooltip = balkan_wars.1.a_opener_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_the_balkan_league
+			}
+			custom_tooltip = balkan_wars.1.a_league_members_list_tt
+		}
+		set_variable = balkan_league_acceptor
+		set_variable = balkan_league_member
+		hidden_effect = {
+			generate_balkan_league_side_list = yes
+			generate_ottoman_side_list = yes
+			#subjects notified they might be pulled in
+			c:TUR ?= { 
+				every_subject_or_below = {
+					limit = {
+						NOT = {
+							has_variable = balkan_wars_14_fired
+						}
+					}
+					trigger_event = {
+						id = balkan_wars.14
+						days = 30
+					}
+				}
+			}	
+		}
+	}
+	option = { #pull out
+		trigger = {
+			is_player = yes
+		}
+		name = balkan_wars.1.b
+		c:TUR = {
+			change_relations = {
+				country = root
+				value = 20
+			}
+		}
+	    every_country = {
+    	    limit = {
+    	        NOT = { this = root }
+    	        has_journal_entry = je_the_balkan_league
+    	    }
+			change_relations = {
+				country = root
+				value = -20
+			}
+        }
+        custom_tooltip = balkan_wars.1.b_tt
+    	set_variable = {
+    		name = balkan_league_immediate_rejector
+    	}
+	}
+}
+
+# "End of an Era", after winning the war.
+balkan_wars.2 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.2.t
+	desc = balkan_wars.2.d
+	flavor = balkan_wars.2.f
+	duration = 1
+	dlc = dlc014
+	event_image = {
+		video = "unspecific_military_parade"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	immediate = {
+		sr:region_balkans = {
+			save_scope_as = balkans_scope
+		}
+		c:TUR = {
+			save_scope_as = ottoman_empire_scope
+		}
+	}
+
+	option = {
+		name = balkan_wars.2.a
+		add_modifier = {
+			name = balkan_wars_victorious_balkan_league_mod
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+		if = {
+			limit = {
+				has_variable = balkan_league_fought_alone_var
+			}
+			custom_tooltip = balkan_wars.2.tt_1
+			add_modifier = {
+				name = modifier_balkan_wars_won_alone
+				days = very_long_modifier_time
+				is_decaying = yes
+			}
+		}
+	}
+}
+
+# "Freedom Undone", after losing the war and becoming a subject.
+balkan_wars.3 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.3.t
+	desc = balkan_wars.3.d
+	flavor = balkan_wars.3.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "southamerica_war_civilians"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	trigger = {
+		is_subject = yes
+		NOT = {
+			has_modifier = balkan_wars_traitor_mod
+		}
+	}
+
+	immediate = {
+		top_overlord = {
+			save_scope_as = overlord_scope
+		}
+	}
+
+	option = {
+		name = balkan_wars.3.a
+		add_modifier = {
+			name = balkan_wars_vassalized_mod
+			days = short_modifier_time
+		}
+		every_diplomatically_relevant_country = {
+			limit = {
+				NOT = {
+					this = root
+				}
+				has_journal_entry = je_the_balkan_league
+			}
+			change_relations = {
+				country = ROOT
+				value = -10
+			}
+		}
+	}
+}
+
+# "Broken Alliance", invalidation event
+balkan_wars.4 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.4.t
+	desc = balkan_wars.4.d
+	flavor = balkan_wars.4.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "ip3_village_school"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	trigger = {
+		NOT = {
+			has_variable = balkan_league_immediate_rejector
+		}
+	}
+
+	option = {
+		name = balkan_wars.4.a
+		custom_tooltip = balkan_wars.4.a_tt
+	}
+}
+
+# "Disposable Loyalty", after pressing the "resign" button.
+balkan_wars.5 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.5.t
+	desc = balkan_wars.5.d
+	flavor = balkan_wars.5.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "africa_leader_arguing"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	trigger = {
+		NOT = {
+			has_modifier = balkan_wars_traitor_mod
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			has_variable = balkan_league_immediate_rejector
+			NOT = {
+				has_journal_entry = je_the_balkan_league
+			}
+		}
+	}
+
+	immediate = {
+		c:TUR = {
+			save_scope_as = ottoman_empire_scope
+		}
+	}
+
+	option = {
+		default_option = yes
+		name = balkan_wars.5.a
+		add_modifier = {
+			name = balkan_wars_traitor_mod
+			days = short_modifier_time
+		}
+		c:TUR = {
+			change_relations = {
+				country = root
+				value = 30
+			}
+		}
+	    every_country = {
+            limit = {
+                NOT = { this = root }
+                has_journal_entry = je_the_balkan_league
+            }
+			change_relations = {
+				country = root
+				value = -15
+			}
+        }
+	}
+
+	option = {
+		name = balkan_wars.5.b
+		custom_tooltip = {
+			text = "balkan_wars_5.b_protectorate_tt"
+			c:TUR = {
+				create_diplomatic_pact = {
+					country = root
+					type = protectorate
+				}
+			}
+		}
+		c:TUR = {
+			change_relations = {
+				country = root
+				value = 50
+			}
+		}
+		add_modifier = {
+			name = balkan_wars_traitor_mod
+			days = short_modifier_time
+		}
+		every_country = {
+			limit = {
+				NOT = { this = root }
+				has_journal_entry = je_the_balkan_league
+			}
+			change_relations = {
+				country = root
+				value = -25
+			}
+        }
+	}
+}
+
+# "Failed Ambitions", after losing the war without being a subject.
+balkan_wars.6 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.6.t
+	desc = balkan_wars.6.d
+	flavor = balkan_wars.6.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "middleeast_battlefield_trenches"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	immediate = {
+		c:TUR = {
+			save_scope_as = ottoman_empire_scope
+		}
+		sr:region_balkans = {
+			save_scope_as = balkans_scope
+		}
+	}
+
+	option = {
+		name = balkan_wars.6.a
+		default_option = yes
+		ruler = {
+			add_modifier = {
+				name = balkan_wars_failed_ambitions_mod
+				days = normal_modifier_time
+			}
+		}
+	}
+}
+
+# "Local Draftees", for increasing conscription rate.
+balkan_wars.7 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.7.t
+	desc = balkan_wars.7.d
+	flavor = balkan_wars.7.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "ip3_officer_inspecting_peasant_conscripts"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	cancellation_trigger = {
+		OR = {
+			has_variable = balkan_league_immediate_rejector
+			NOT = {
+				has_journal_entry = je_the_balkan_league
+			}
+		}
+	}
+
+	immediate = {
+		c:TUR = {
+			save_scope_as = ottoman_empire_scope
+		}
+	}
+
+	option = {
+		name = balkan_wars.7.a
+		default_option = yes
+		add_modifier = {
+			name = balkan_wars_muster_conscripts_low_mod
+			days = 1825
+			multiplier = money_amount_multiplier_small
+		}
+	}
+
+	option = {
+		name = balkan_wars.7.b
+		add_modifier = {
+			name = balkan_wars_muster_conscripts_high_mod
+			days = 1825
+			multiplier = money_amount_multiplier_small
+		}
+	}
+}
+
+# "A Student of Strategy", for improving an existing general's traits.
+balkan_wars.8 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.8.t
+	desc = balkan_wars.8.d
+	flavor = balkan_wars.8.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "unspecific_trains"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+		any_scope_general = {
+			count > 0
+			commander_is_available = yes
+			is_ruler = no
+		}
+		root = {
+			has_modifier = balkan_wars_military_tech_boost_mod
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_modifier = balkan_wars_military_tech_boost_mod
+		}
+		OR = {
+			has_variable = balkan_league_immediate_rejector
+			NOT = {
+				has_journal_entry = je_the_balkan_league
+			}
+		}
+	}
+
+	cooldown = {
+		days = normal_modifier_time
+	}
+
+	immediate = {
+		random_scope_general = {
+			save_scope_as = scoped_general
+		}
+	}
+
+	option = {
+		name = balkan_wars.8.a
+		scope:scoped_general = {
+			random_list = {
+				3 = { add_trait = stalwart_defender }
+				2 = { add_trait = basic_defensive_strategist }
+				1 = { add_trait = tactful }
+			}
+		}
+	}
+
+	option = {
+		name = balkan_wars.8.b
+		scope:scoped_general = {
+			random_list = {
+				3 = { add_trait = basic_offensive_planner }
+				2 = { add_trait = basic_artillery_commander }
+				1 = { add_trait = direct }
+			}
+		}
+	}
+
+	option = {
+		name = balkan_wars.8.c
+		default_option = yes
+		scope:scoped_general = {
+			random_list = {
+				1 = { add_trait = forest_commander }
+				1 = { add_trait = plains_commander }
+				1 = { add_trait = mountain_commander }
+			}
+		}
+	}
+}
+
+# "Caught in the Middle", gives options to kill or move Turkish pops out.
+balkan_wars.9 = {
+	type = country_event
+	placement = scope:caught_root_state_scope
+	title = balkan_wars.9.t
+	desc = balkan_wars.9.d
+	flavor = balkan_wars.9.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "ip3_angry_mob_raiding_minorities"
+	}
+
+	dlc = dlc014
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	trigger = {
+		any_scope_state = {
+			any_scope_pop = {
+				has_pop_culture = turkish
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			has_variable = balkan_league_immediate_rejector
+			NOT = {
+				has_journal_entry = je_the_balkan_league
+			}
+		}
+	}
+
+
+	immediate = {
+		random_scope_state = {
+			limit = {
+				any_scope_pop = {
+					has_pop_culture = turkish
+				}
+			}
+			save_scope_as = caught_root_state_scope
+		}
+
+		c:TUR = {
+			save_scope_as = ottoman_empire_scope
+		}
+
+		c:TUR = {
+			sr:region_anatolia = {
+				random_scope_state = {
+					save_scope_as = caught_ottoman_state_scope
+				}
+			}
+		}
+		ig:ig_armed_forces ?= {
+			save_scope_as = armed_forces_scope
+		}
+
+		cu:turkish = {
+			save_scope_as = turkish_pop_scope
+		}
+
+
+		if = {
+			limit = {
+				s:STATE_EASTERN_THRACE = {
+					any_scope_state = {
+						owner = c:TUR
+					}
+				}
+			}
+			s:STATE_EASTERN_THRACE = {
+				random_scope_state = {
+					save_scope_as = cruelty_ottoman_state_scope
+				}
+			}
+		}
+		if = {
+			limit = {
+				s:STATE_EASTERN_THRACE = {
+					any_scope_state = {
+						NOT = {
+						owner = c:TUR
+						}
+					}
+				}
+			}
+			c:TUR = {
+				sr:region_anatolia = {
+					random_scope_state = {
+						save_scope_as = cruelty_ottoman_state_scope
+					}
+				}
+			}
+		}
+	}
+
+	cooldown = {
+		days = short_modifier_time
+	}
+
+	option = {
+		name = balkan_wars.9.a
+		scope:caught_root_state_scope = {
+			custom_tooltip = {
+				text = balkan_wars.9.a_move_pops_tt
+					every_scope_pop = {
+						limit = {
+							culture = cu:turkish
+						}
+					move_pop = scope:caught_ottoman_state_scope
+				}
+			}
+		}
+		c:TUR = {
+			change_relations = {
+				country = root
+				value = 30
+			}
+		}
+		add_radicals = {
+			value = medium_radicals
+			culture = cu:serb
+		}
+	}
+
+	option = {
+		name = balkan_wars.9.b
+		default_option = yes
+		scope:caught_root_state_scope = {
+			custom_tooltip = {
+				text = balkan_wars.9.b_move_pops_tt
+				every_scope_pop = {
+					limit = {
+						culture = cu:turkish
+					}
+					move_partial_pop = {
+						state = scope:caught_ottoman_state_scope
+						population_ratio = 0.75
+					}
+				}
+			}
+		}
+		scope:caught_root_state_scope = {
+			custom_tooltip = {
+				text = balkan_wars.9.b_kill_pops_tt
+				kill_population_percent_in_state = {
+					percent = 1
+					culture = cu:turkish
+				}
+			}
+		}
+		add_loyalists = {
+			value = small_radicals
+			culture = cu:serb
+		}
+		c:TUR = {
+			change_relations = {
+				country = root
+				value = -15
+			}
+		}
+	}
+
+	option = {
+		name = balkan_wars.9.c
+		trigger = {
+			root.ruler = {
+				has_trait = cruel
+			}
+		}
+		scope:caught_root_state_scope = {
+			custom_tooltip = {
+				text = balkan_wars.9.c_move_pops_tt
+				every_scope_pop = {
+					limit = {
+						culture = cu:turkish
+					}
+					move_partial_pop = {
+						state = scope:cruelty_ottoman_state_scope
+						population_ratio = 0.5
+					}
+				}
+			}
+		}
+		scope:caught_root_state_scope = {
+			custom_tooltip = {
+				text = balkan_wars.9.c_kill_pops_tt
+				kill_population_percent_in_state = {
+					percent = 1
+					culture = cu:turkish
+				}
+			}
+		}
+		add_loyalists = {
+			value = medium_radicals
+			culture = cu:serb
+		}
+		c:TUR = {
+			change_relations = {
+				country = root
+				value = -30
+			}
+		}
+		if = {
+			limit = {
+				root.ruler = {
+					has_trait = cruel
+				}
+			}
+			custom_tooltip = balkan_wars.9.c_cruel_trait_tt
+		}
+	}
+
+	option = {
+		name = balkan_wars.9.e
+		scope:caught_root_state_scope = {
+			custom_tooltip = {
+				text = balkan_wars.9.e_kill_pops_tt
+					kill_population_percent_in_state = {
+					percent = 0.05
+					culture = cu:turkish
+				}
+			}
+		}
+		c:TUR = {
+			change_relations = {
+				country = root
+				value = 15
+			}
+		}
+		add_radicals = {
+			value = small_radicals
+			culture = cu:serb
+		}
+	}
+}
+
+# "Surplus Management", for spending surplus money from the funding expenses.
+balkan_wars.10 = {
+	type = country_event
+	placement = scope:barracks_state_scope
+	title = balkan_wars.10.t
+	desc = balkan_wars.10.d
+	flavor = balkan_wars.10.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "europenorthamerica_london_center"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+		any_scope_state = {
+			NOT = {
+			has_building = building_barracks
+			}
+		}
+		root = {
+			has_modifier = balkan_wars_military_tech_boost_mod
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_modifier = balkan_wars_military_tech_boost_mod
+		}
+		OR = {
+			has_variable = balkan_league_immediate_rejector
+			NOT = {
+				has_journal_entry = je_the_balkan_league
+			}
+		}
+	}
+
+	cooldown = {
+		days = normal_modifier_time
+	}
+
+	immediate = {
+		random_scope_state = {
+			limit = {
+				NOT = {
+				has_building = building_barracks
+				}
+			}
+			save_scope_as = barracks_state_scope
+		}
+	}
+
+	option = {
+		name = balkan_wars.10.a
+		default_option = yes
+		scope:barracks_state_scope = {
+			create_building ={
+				building = "building_barracks"
+				level = 1
+				reserves = 1
+				subsidized = no
+			}
+		}
+	}
+
+	option = {
+		name = balkan_wars.10.b
+		add_modifier = {
+			name = balkan_wars_surplus_armed_forces_boost_mod
+			days = normal_modifier_time
+		}
+	}
+
+	option = {
+		name = balkan_wars.10.c
+		add_loyalists = {
+			 value = 0.15
+ 			 pop_type = soldiers
+		}
+		add_loyalists = {
+			 value = 0.15
+ 			 pop_type = officers
+		}
+	}
+}
+
+# "Chaos in the Balkans", to inform the Ottomans about the war that's about to begin and a potential Balkans partitioning
+balkan_wars.11 = {
+	type = country_event
+	placement = root
+	title = balkan_wars.11.t
+	desc = balkan_wars.11.d
+	flavor = balkan_wars.11.f
+	duration = 3
+	dlc = dlc014
+	event_image = {
+		video = "ep1_cossacks"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+	}
+
+	cancellation_trigger = {
+	}
+
+	immediate = {
+		sr:region_balkans = {
+			save_scope_as = balkans_scope
+		}
+	}
+
+	option = {
+		name = balkan_wars.11.a
+		default_option = yes
+		custom_tooltip = balkan_wars.11.a_opener_tt
+		every_in_global_list = {
+			variable = balkan_league_side_list
+			custom_tooltip = balkan_wars.11.a_league_members_list_tt
+		}
+	}
+}
+
+balkan_wars.12 = {
+# "The War Begins", to inform the backer League members about the war after pressing the button
+	type = country_event
+	placement = root
+	title = balkan_wars.12.t
+	desc = balkan_wars.12.d
+	flavor = balkan_wars.12.f
+	duration = 1
+	dlc = dlc014
+	event_image = {
+		video = "europenorthamerica_before_the_battle"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+	}
+
+	cancellation_trigger = {
+		OR = {
+			has_variable = balkan_league_immediate_rejector
+			NOT = {
+				has_journal_entry = je_the_balkan_league
+			}
+		}
+	}
+
+	immediate = {
+        random_diplomatic_play = {
+            limit = {
+                is_diplomatic_play_type = dp_balkan_war
+            }
+            save_scope_as = balkan_war_scope
+		}
+		sr:region_balkans = {
+			save_scope_as = balkans_scope
+		}
+		c:TUR = {
+			save_scope_as = ottoman_empire_scope
+		}
+        random_country = {
+            limit = {
+                has_variable = first_balkan_war_initiator
+        	}
+            save_scope_as = first_balkan_war_initiator
+        }
+	}
+
+	option = {
+		name = balkan_wars.12.a
+		default_option = yes
+        custom_tooltip = joined_balkan_war_tt
+        if = {
+        	limit = { #only add the countries once.
+        		NOT = {
+        			has_global_variable = balkan_war_started
+        		}
+        	}
+        	every_in_global_list = {
+				variable = balkan_league_side_list
+            	scope:balkan_war_scope = {
+            		add_initiator_backers = { prev }
+            	}
+            }
+            set_global_variable = balkan_war_started
+        }
+        if = { #independence for invited subjects
+        	limit = {
+        		exists = c:TUR
+        		is_subject_of = c:TUR
+        	}
+        	add_liberty_desire = 100
+        	scope:balkan_war_scope = {
+                add_war_goal = {
+                    holder = root
+                    type = independence
+                    target_country = c:TUR
+                    primary_demand = yes
+                }
+            }
+        }
+        c:TUR = {
+            every_scope_state = {
+                limit = {
+                    OR = {
+                        region = sr:region_balkans
+                        region = sr:region_danubia
+                    }
+                    has_claim_by = root
+                }
+                scope:balkan_war_scope = {
+                    add_war_goal = {
+                        holder = root
+                        type = return_state
+                        target_state = prev
+                        primary_demand = yes
+                    }
+                }
+            }
+        }
+	}
+}
+
+balkan_wars.13 = {
+# "The Cataclysm", to inform the Ottomans about the lost war and partitioned Balkans
+	type = country_event
+	placement = root
+	title = balkan_wars.13.t
+	desc = balkan_wars.13.d
+	flavor = balkan_wars.13.f
+	duration = 1
+	dlc = dlc014
+	event_image = {
+		video = "unspecific_devastation"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	cooldown = {
+		days = 60
+	}
+
+	immediate = {
+        random_diplomatic_play = {
+            limit = {
+                is_diplomatic_play_type = dp_balkan_war
+            }
+            save_scope_as = balkan_war_scope
+		}
+        random_country = {
+            limit = {
+                has_variable = first_balkan_war_initiator
+            }
+            save_scope_as = first_balkan_war_initiator
+		}
+		sr:region_balkans = {
+			save_scope_as = balkans_scope
+		}
+	}
+
+	option = {
+		name = balkan_wars.13.a
+		default_option = yes
+		hidden_effect = {
+			partition_ottoman_balkans = yes
+		}
+		custom_tooltip = {
+			text = "the_cataclysm_partitioning"
+		}
+	}
+}
+
+
+balkan_wars.14 = { #Turkish Subjects learn about the Balkan League 
+	type = country_event
+	placement = root
+	title = balkan_wars.14.t
+	desc = balkan_wars.14.d
+	flavor = balkan_wars.14.f
+	duration = 1
+	dlc = dlc014
+	event_image = {
+		video = "southamerica_aristocrats"
+	}
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	trigger = { #fired by begining of Balkan League. 
+		NOT = {
+			has_variable = balkan_wars_14_fired
+		}
+		is_subject_of = c:TUR
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			exists = c:TUR
+			is_subject_of = c:TUR
+			any_country = {
+				has_journal_entry = je_the_balkan_league
+			}
+		}
+	}
+
+	immediate = {
+		save_scope_as = subject_nation_scope
+		c:TUR = {
+			save_scope_as = ottoman_empire_scope
+		}
+		set_variable = balkan_wars_14_fired
+	}
+
+	option = { #support them
+		name = balkan_wars.14.a
+		default_option = yes
+		add_modifier = {
+			name = balkan_league_side_supporter
+			days = long_modifier_time
+		}
+		custom_tooltip = balkan_wars.14_clarification_increase_tt
+		every_country = {
+			limit = {
+				has_journal_entry = je_the_balkan_league
+			}
+			change_relations = {
+				country = root
+				value = 30
+			}
+		}
+	}
+	
+	option = { #stay loyal
+		name = balkan_wars.14.b
+		ai_chance = { #if very low liberty desire, stay loyal. 
+			base = 0
+			modifier = {
+				trigger = {
+					liberty_desire < 15
+				}
+				add = 100
+			}
+		}
+		c:TUR = {
+			change_relations = {
+				country = root
+				value = 50
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_global_variable = tur_warned_balkan_league
+					}
+				}
+				set_global_variable = tur_warned_balkan_league
+				post_notification = tur_warned_balkan_league_notification
+			}
+		}
+		custom_tooltip = balkan_wars.14_clarification_decrease_tt
+	    every_country = {
+    	    limit = {
+    	        NOT = { this = root }
+    	        has_journal_entry = je_the_balkan_league
+    	    }
+			change_relations = {
+				country = root
+				value = -30
+			}
+        }
+	}
+}

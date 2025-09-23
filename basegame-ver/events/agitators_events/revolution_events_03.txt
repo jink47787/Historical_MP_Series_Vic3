@@ -23,7 +23,10 @@ revolution_pulse2_events.1 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
-		reactionary_revolution_ongoing = yes
+		 any_civil_war = {
+			civil_war_is_reactionary_revolution = yes
+			civil_war_progress_low = yes
+		}
 		any_interest_group = {
 			is_insurrectionary = yes
 			is_marginal = no
@@ -32,7 +35,6 @@ revolution_pulse2_events.1 = {
 				leader = { has_role = general }
 			}
 		}
-		revolution_progress_low = yes
 		any_country = {
 			NOT = { this = ROOT }
 			NOT = { is_country_type = decentralized }
@@ -43,11 +45,22 @@ revolution_pulse2_events.1 = {
 	}
 
 	cancellation_trigger = {
-		NOT = { any_revolution_ongoing = yes }
+		NOT = {
+			any_civil_war = {
+				civil_war_is_reactionary_revolution = yes
+				civil_war_progress_low = yes
+			}
+		}
 	}
 
 	immediate = {
-		save_revolution_scopes = yes
+		random_civil_war = {
+			limit = {
+				civil_war_is_reactionary_revolution = yes
+				civil_war_progress_low = yes
+			}
+			civil_war_save_scopes = yes
+		}
 		random_interest_group = {
 			limit = {
 				is_insurrectionary = yes
@@ -175,9 +188,16 @@ revolution_pulse2_events.2 = {
 		}
 		if = {
 			limit = {
-				reactionary_revolution_ongoing = yes
+				 any_civil_war = {
+					civil_war_is_reactionary_revolution = yes
+				}
 			}
-			save_revolution_scopes = yes
+			random_civil_war = {
+				limit = {
+					civil_war_is_reactionary_revolution = yes
+				}
+				civil_war_save_scopes = yes
+			}
 		}
 	}
 
@@ -191,7 +211,7 @@ revolution_pulse2_events.2 = {
 		}
 		if = {
 			limit = {
-				reactionary_revolution_ongoing = yes
+				 exists = scope:ongoing_revolution
 			}
 			random_list = {
 				50 = {
@@ -329,35 +349,79 @@ revolution_pulse2_events.3 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
-		OR = {
-			socialist_revolution_ongoing = yes
-			AND = {
-				liberal_revolution_ongoing = yes
-				NOT = { has_law = law_type:law_council_republic }
+		any_civil_war = {
+			OR = {
+				civil_war_is_socialist_revolution = yes
+				civil_war_is_liberal_revolution = yes
+			}
+			OR = {
+				civil_war_progress_low = yes
+				civil_war_progress_high = yes
 			}
 		}
-		OR = {
-			revolution_progress_low = yes
-			revolution_progress_high = yes
-		}
-		any_country = {
-			NOT = {	this = root }
-			country_rank >= rank_value:major_power
-			OR = {
-				has_law = law_type:law_autocracy
-				has_law = law_type:law_monarchy
-				NOT = {
-					any_interest_group = {
-						is_in_government = yes
-						OR = {
-							is_interest_group_type = ig_trade_unions
-							is_interest_group_type = ig_intelligentsia
+		NOT = { has_law_or_variant = law_type:law_council_republic }
+		any_scope_state = {
+			turmoil >= 0.20
+			any_scope_building = {
+				OR = {
+					is_industry_building = yes
+					is_heavy_industry_building = yes
+				}
+				level >= 3
+				occupancy >= 0.5
+			}
+			any_neighbouring_state = {
+				owner = {
+					country_rank >= root.country_rank
+					OR = {
+						has_law_or_variant = law_type:law_autocracy
+						has_law_or_variant = law_type:law_monarchy
+						NOT = {
+							any_interest_group = {
+								is_in_government = yes
+								OR = {
+									is_interest_group_type = ig_trade_unions
+									is_interest_group_type = ig_intelligentsia
+								}
+							}
 						}
 					}
 				}
 			}
-			any_neighbouring_state = {
-				owner = root
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			any_civil_war = {
+				OR = {
+					civil_war_is_socialist_revolution = yes
+					civil_war_is_liberal_revolution = yes
+				}
+				OR = {
+					civil_war_progress_low = yes
+					civil_war_progress_high = yes
+				}
+			}
+		}
+	}
+
+	immediate = {
+		random_civil_war = {
+			limit = {
+				OR = {
+					civil_war_is_socialist_revolution = yes
+					civil_war_is_liberal_revolution = yes
+				}
+				OR = {
+					civil_war_progress_low = yes
+					civil_war_progress_high = yes
+				}
+			}
+			civil_war_save_scopes = yes
+		}
+		random_scope_state = {
+			limit = {
 				turmoil >= 0.20
 				any_scope_building = {
 					OR = {
@@ -367,73 +431,60 @@ revolution_pulse2_events.3 = {
 					level >= 3
 					occupancy >= 0.5
 				}
-			}
-		}
-	}
-
-	cancellation_trigger = {
-		NOT = { any_revolution_ongoing = yes }
-	}
-
-	immediate = {
-		save_revolution_scopes = yes
-		random_country = {
-			limit = {
-				NOT = {	this = root }
-				country_rank >= rank_value:major_power
-				OR = {
-					has_law = law_type:law_autocracy
-					has_law = law_type:law_monarchy
-					NOT = {
-						any_interest_group = {
-							is_in_government = yes
-							OR = {
-								is_interest_group_type = ig_trade_unions
-								is_interest_group_type = ig_intelligentsia
+				any_neighbouring_state = {
+					owner = {
+						country_rank >= root.country_rank
+						OR = {
+							has_law_or_variant = law_type:law_autocracy
+							has_law_or_variant = law_type:law_monarchy
+							NOT = {
+								any_interest_group = {
+									is_in_government = yes
+									OR = {
+										is_interest_group_type = ig_trade_unions
+										is_interest_group_type = ig_intelligentsia
+									}
+								}
 							}
 						}
 					}
 				}
-				any_neighbouring_state = {
-					owner = root
-					turmoil >= 0.20
-					any_scope_building = {
-						OR = {
-							is_industry_building = yes
-							is_heavy_industry_building = yes
-						}
-						level >= 3
-						occupancy >= 0.5
+			}
+			save_scope_as = transnational_unrest_squashing_state_scope
+			random_scope_building = {
+				limit = {
+					OR = {
+						is_industry_building = yes
+						is_heavy_industry_building = yes
 					}
+					level >= 3
+					occupancy >= 0.5
 				}
+				save_scope_as = transnational_unrest_squashing_factory_scope
 			}
 			random_neighbouring_state = {
 				limit = {
-					owner = root
-					turmoil >= 0.20
-					any_scope_building = {
+					owner = {
+						country_rank >= root.country_rank
 						OR = {
-							is_industry_building = yes
-							is_heavy_industry_building = yes
+							has_law_or_variant = law_type:law_autocracy
+							has_law_or_variant = law_type:law_monarchy
+							NOT = {
+								any_interest_group = {
+									is_in_government = yes
+									OR = {
+										is_interest_group_type = ig_trade_unions
+										is_interest_group_type = ig_intelligentsia
+									}
+								}
+							}
 						}
-						level >= 3
-						occupancy >= 0.5
 					}
 				}
-				random_scope_building = {
-					limit = {
-						OR = {
-							is_industry_building = yes
-							is_heavy_industry_building = yes
-						}
-						level >= 3
-						occupancy >= 0.5
-					}
-					save_scope_as = transnational_unrest_squashing_factory_scope
+				owner = {
+					save_scope_as = transnational_unrest_squashing_country_scope
 				}
-				save_scope_as = transnational_unrest_squashing_state_scope
 			}
-			save_scope_as = transnational_unrest_squashing_country_scope
 		}
 	}
 
@@ -522,14 +573,14 @@ revolution_pulse2_events.4 = {
 
 	trigger = {
 		NOT = { has_variable = abolished_scrip_wages_var }
-		OR = {
-			socialist_revolution_ongoing = yes
-			AND = {
-				liberal_revolution_ongoing = yes
-				NOT = { has_law = law_type:law_council_republic }
+		NOT = { has_law_or_variant = law_type:law_council_republic }
+		any_civil_war = {
+			OR = {
+				civil_war_is_socialist_revolution = yes
+				civil_war_is_liberal_revolution = yes
 			}
+			civil_war_progress_low = yes
 		}
-		revolution_progress_low = yes
 		any_scope_state = {
 			is_incorporated = yes
 			turmoil >= 0.10
@@ -549,7 +600,16 @@ revolution_pulse2_events.4 = {
 	}
 
 	immediate = {
-		save_revolution_scopes = yes
+		random_civil_war = {
+			limit = {
+				OR = {
+					civil_war_is_socialist_revolution = yes
+					civil_war_is_liberal_revolution = yes
+				}
+				civil_war_progress_low = yes
+			}
+			civil_war_save_scopes = yes
+		}
 		random_scope_state = {
 			limit = {
 				is_incorporated = yes
@@ -581,7 +641,15 @@ revolution_pulse2_events.4 = {
 	}
 
 	cancellation_trigger = {
-		NOT = { any_revolution_ongoing = yes }
+		NOT = {
+			any_civil_war = {
+				OR = {
+					civil_war_is_socialist_revolution = yes
+					civil_war_is_liberal_revolution = yes
+				}
+				civil_war_progress_low = yes
+			}
+		}
 	}
 
 	option = {
@@ -664,15 +732,11 @@ revolution_pulse2_events.5 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
-		OR = {
-			any_secession_ongoing = yes
-			any_revolution_ongoing = yes
-		}
-		OR = {
-			secession_progress_medium = yes
-			secession_progress_high = yes
-			revolution_progress_medium = yes
-			revolution_progress_high = yes
+		any_civil_war = {
+			OR = {
+				civil_war_progress_medium = yes
+				civil_war_progress_high = yes
+			}
 		}
 		any_scope_state = {
 			is_in_revolt = yes
@@ -692,14 +756,26 @@ revolution_pulse2_events.5 = {
 	}
 
 	cancellation_trigger = {
-		NOR = {
-			any_revolution_ongoing = yes
-			any_secession_ongoing = yes
+		NOT = {
+			any_civil_war = {
+				OR = {
+					civil_war_progress_medium = yes
+					civil_war_progress_high = yes
+				}
+			}
 		}
 	}
 
 	immediate = {
-		save_revolution_scopes = yes
+		random_civil_war = {
+			limit = {
+				OR = {
+					civil_war_progress_medium = yes
+					civil_war_progress_high = yes
+				}
+			}
+			civil_war_save_scopes = yes
+		}
 		random_scope_state = {
 			limit = {
 				is_in_revolt = yes
@@ -762,7 +838,7 @@ revolution_pulse2_events.5 = {
 				days = short_modifier_time
 			}
 		}
-		ig:ig_armed_forces = {
+		ig:ig_armed_forces ?= {
 			add_modifier = {
 				name = ig_furious_at_cowardice
 				days = short_modifier_time
@@ -794,17 +870,15 @@ revolution_pulse2_events.7 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
-		NOT = {
-			has_variable = hatmakersfeud_var
-		}
-		OR = {
-			socialist_revolution_ongoing = yes
-			AND = {
-				liberal_revolution_ongoing = yes
-				NOT = { has_law = law_type:law_council_republic }
+		NOT = { has_variable = hatmakersfeud_var }
+		NOT = { has_law_or_variant = law_type:law_council_republic }
+		any_civil_war = {
+			OR = {
+         		civil_war_is_socialist_revolution = yes
+         		civil_war_is_liberal_revolution = yes
 			}
+			civil_war_progress_low = yes
 		}
-		revolution_progress_low = yes
 		any_interest_group = {
 			OR = {
 				is_interest_group_type = ig_rural_folk
@@ -819,11 +893,28 @@ revolution_pulse2_events.7 = {
 	}
 
 	cancellation_trigger = {
-		NOT = { any_revolution_ongoing = yes }
+		NOT = {
+			any_civil_war = {
+				OR = {
+					civil_war_is_socialist_revolution = yes
+					civil_war_is_liberal_revolution = yes
+				}
+				civil_war_progress_low = yes
+			}
+		}
 	}
 
 	immediate = {
-		save_revolution_scopes = yes
+		random_civil_war = {
+			limit = {
+				OR = {
+					civil_war_is_socialist_revolution = yes
+					civil_war_is_liberal_revolution = yes
+				}
+				civil_war_progress_low = yes
+			}
+			civil_war_save_scopes = yes
+		}
 		random_list = {
 			1 = {
 				set_variable = custom_profession_hatmaker_var
@@ -930,7 +1021,7 @@ revolution_pulse2_events.8 = {
 	}
 
 	immediate = {
-		save_revolution_scopes = yes
+		# Inherits scopes from the last event
 		random_scope_state = {
 			limit = {
 				has_variable = hatmakerfeud_state_var
@@ -1025,11 +1116,10 @@ revolution_pulse2_events.9 = {
 	trigger = {
 		any_civil_war = {
 			is_civil_war_type = revolution
-		}
-		any_revolution_ongoing = yes
-		OR = {
-			revolution_progress_medium = yes
-			revolution_progress_high = yes
+			OR = {
+				civil_war_progress_medium = yes
+				civil_war_progress_high = yes
+			}
 		}
 		any_interest_group = {
 			is_insurrectionary = yes
@@ -1047,11 +1137,28 @@ revolution_pulse2_events.9 = {
 	}
 
 	cancellation_trigger = {
-		NOT = { any_revolution_ongoing = yes }
+		NOT = {
+			any_civil_war = {
+				is_civil_war_type = revolution
+				OR = {
+					civil_war_progress_medium = yes
+					civil_war_progress_high = yes
+				}
+			}
+		}
 	}
 
 	immediate = {
-		save_revolution_scopes = yes
+		random_civil_war = {
+			limit = {
+				is_civil_war_type = revolution
+				OR = {
+					civil_war_progress_medium = yes
+					civil_war_progress_high = yes
+				}
+			}
+			civil_war_save_scopes = yes
+		}
 		random_interest_group = {
 			limit = {
 				is_insurrectionary = yes
@@ -1133,8 +1240,10 @@ revolution_pulse2_events.10 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
-		any_revolution_ongoing = yes
-		revolution_progress_high = yes
+		any_civil_war = {
+			is_civil_war_type = revolution
+			civil_war_progress_high = yes
+		}
 		any_interest_group = {
 			is_insurrectionary = yes
 		}
@@ -1150,11 +1259,22 @@ revolution_pulse2_events.10 = {
 	}
 
 	cancellation_trigger = {
-		NOT = { any_revolution_ongoing = yes }
+		NOT = {
+			any_civil_war = {
+				is_civil_war_type = revolution
+				civil_war_progress_high = yes
+			}
+		}
 	}
 
 	immediate = {
-		save_revolution_scopes = yes
+		random_civil_war = {
+			limit = {
+				is_civil_war_type = revolution
+				civil_war_progress_high = yes
+			}
+			civil_war_save_scopes = yes
+		}
 		random_interest_group = {
 			limit = {
 				is_insurrectionary = yes

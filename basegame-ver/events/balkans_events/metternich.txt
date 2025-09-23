@@ -1,0 +1,264 @@
+﻿namespace = metternich
+
+metternich.1 = { # Metternich's retirement
+	type = country_event
+	placement = root
+	title = metternich.1.t
+	desc = metternich.1.d
+	flavor = metternich.1.f
+	duration = 3
+	dlc = dlc014
+
+	gui_window = event_window_1char_lord_kitchener
+
+	left_icon = scope:metternich_scope
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				has_template = aus_klemens_von_metternich
+			}
+			save_scope_as = metternich_scope
+		}
+		clear_geheime_staatskonferenz = yes
+	}
+
+	option = {
+		name = metternich.1.a
+		default_option = yes
+		custom_tooltip = {
+			text = metternich_retirement_tt
+			scope:metternich_scope = {
+				if = {
+					limit = {
+						is_immortal = yes
+					}
+					set_character_immortal = no
+				}
+				kill_character = { hidden = yes }
+			}
+		}
+		if = {
+			limit = {
+				AND = {
+					techs_researched >= 52
+					leading_producer_of = g:fine_art
+				}
+			}
+			add_modifier = {
+				name = metternich_modifier_t4
+				days = long_modifier_time
+				multiplier = metternich_agenda_value
+			}
+		}
+		else_if = {
+			limit = {
+				techs_researched >= 52
+			}
+			add_modifier = {
+				name = metternich_modifier_t3
+				days = long_modifier_time
+				multiplier = metternich_agenda_value
+			}
+		}
+		else_if = {
+			limit = {
+				leading_producer_of = g:fine_art
+			}
+			add_modifier = {
+				name = metternich_modifier_t2
+				days = long_modifier_time
+				multiplier = metternich_agenda_value
+			}
+		}
+		else = {
+			add_modifier = {
+				name = metternich_modifier_t1
+				days = long_modifier_time
+				multiplier = metternich_agenda_value
+			}
+		}
+		custom_tooltip = metternich_memory_text_tt
+	}
+}
+
+metternich.2 = { # Metternich's resignation
+	type = country_event
+	placement = root
+	title = metternich.2.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = metternich.2.d_revolution
+				trigger = {
+					any_political_movement = {
+						is_revolutionary = yes
+					}
+				}
+			}
+			triggered_desc = {
+				desc = metternich.2.d_gov_change
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+	flavor = metternich.2.f
+	duration = 3
+	dlc = dlc014
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:metternich_scope
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				has_template = aus_klemens_von_metternich
+			}
+			save_scope_as = metternich_scope
+		}
+		ig:ig_landowners ?= {
+			save_scope_as = aristocracy_ig
+		}
+		clear_geheime_staatskonferenz = yes
+	}
+
+	option = {
+		name = metternich.2.a
+		default_option = yes
+		custom_tooltip = metternich_resignation_and_flee_tt
+		scope:metternich_scope = {
+			hidden_effect = {
+				if = {
+					limit = {
+						is_immortal = yes
+					}
+					set_character_immortal = no
+				}
+			}
+			if = {
+				limit = {
+					owner = {
+						any_political_movement = {
+							is_revolutionary = yes
+						}
+					}
+				}
+				set_ideology = ideology:ideology_modernizer_leader
+				exile_character = yes
+			}
+			else = {
+				hidden_effect = { kill_character = { hidden = yes } }
+			}
+		}
+	}
+}
+
+metternich.3 = { # Metternich Staatskonferenz Reform
+	type = country_event
+	placement = root
+	title = metternich.3.t
+	desc = metternich.3.d
+	flavor = metternich.3.f
+	duration = 3
+	dlc = dlc014
+
+	event_image = {
+		video = "votp_conspiring"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	trigger = {
+		has_modifier = modifier_geheime_staatskonferenz
+		any_scope_character = {
+			has_template = aus_klemens_von_metternich
+			interest_group = {
+				is_in_government = yes
+			}
+		}
+		any_scope_character = {
+			has_template = aus_franz_anton_von_kolowrat_liebsteinsky
+		}
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	cancellation_trigger = {
+
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				has_template = aus_klemens_von_metternich
+			}
+			save_scope_as = metternich_scope
+		}
+		random_scope_character = {
+			limit = {
+				has_template = aus_franz_anton_von_kolowrat_liebsteinsky
+			}
+			save_scope_as = kolowrat_scope
+		}
+	}
+
+	option = {
+		name = metternich.3.a
+		default_option = yes
+		remove_modifier = modifier_geheime_staatskonferenz
+		add_modifier = modifier_geheime_staatskonferenz_metternich
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_BOHEMIA
+			}
+			add_radicals_in_state = {
+				pop_type = aristocrats
+				value = large_radicals
+			}
+		}
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_MORAVIA
+			}
+			add_radicals_in_state = {
+				pop_type = aristocrats
+				value = large_radicals
+			}
+		}
+	}
+
+	option = {
+		name = metternich.3.b
+		remove_modifier = modifier_geheime_staatskonferenz
+		add_modifier = modifier_geheime_staatskonferenz_kolowrat
+	}
+}

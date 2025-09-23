@@ -1,0 +1,2324 @@
+﻿namespace = hungary_events
+
+hungary_events.1 = { # Pearl of the Danube
+	type = country_event
+	placement = ROOT
+
+	title = hungary_events.1.t
+	desc = hungary_events.1.d
+	flavor = hungary_events.1.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "ip3_agitator_reading_manifesto"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+
+	trigger = {
+	}
+
+	immediate = {
+
+	}
+
+	option = {
+		name = hungary_events.1.a
+		default_option = yes
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_CENTRAL_HUNGARY
+			}
+			add_modifier = {
+				name = modifier_budapest_chain_bridge
+			}
+			add_modifier = {
+				name = modifier_budapest_steam_mills
+				days = long_modifier_time
+			}
+		}
+		ig:ig_industrialists = {
+			add_modifier = {
+				name = modifier_budapest_grain_barons
+				days = normal_modifier_time
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.1.b
+		add_modifier = {
+			name = modifier_budapest_paris_of_the_east
+			days = long_modifier_time
+		}
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_CENTRAL_HUNGARY
+			}
+			add_modifier = {
+				name = modifier_budapest_chain_bridge
+			}
+		}
+		ig:ig_intelligentsia ?= {
+			add_modifier = {
+				name = modifier_budapest_academy
+				days = normal_modifier_time
+			}
+		}
+	}
+}
+
+hungary_events.2 = { # Serbian Revolt
+	type = country_event
+	placement = c:BNT.capital
+
+	title = hungary_events.2.t
+	desc = hungary_events.2.d
+	flavor = hungary_events.2.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "ip3_officer_inspecting_peasant_conscripts"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	duration = 3
+
+	trigger = {
+		OR = {
+			AND = {
+				any_scope_state = {
+					state_region = s:STATE_DELVIDEK
+				}
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:serb
+					}
+					OR = {
+						turmoil > 0.15
+						obstinance >= 0.05
+					}
+				}
+				country_average_cultural_acceptance = {
+					target = cu:serb
+					value < acceptance_status_4
+				}
+				NOT = {
+					exists = c:BNT
+				}
+				any_diplomatic_play = {
+					OR = {
+						AND = {
+							target = c:HUN
+							initiator = c:AUS
+						}
+						AND = {
+							target = c:AUS
+							initiator = c:HUN
+						}
+					}
+				}
+			}
+			c:AUS ?= this
+		}
+	}
+
+
+	immediate = {
+		c:HUN ?= {
+			save_scope_as = hungary_country_scope
+		}
+		c:BNT = {
+			save_scope_as = banat_country_scope
+		}
+		c:AUS ?= {
+			save_scope_as = austria_country_scope
+		}
+		if = {
+			limit = { # The effects are only run by Hungary to avoid dupes
+				c:HUN ?= this
+			}
+			if = {
+				limit = {
+					capital = {
+						state_region = s:STATE_DELVIDEK
+					}
+					any_scope_state = {
+						state_region = s:STATE_CENTRAL_HUNGARY
+					}
+				}
+				set_capital = STATE_CENTRAL_HUNGARY
+			}
+			create_country = {
+				origin = root
+				tag = BNT
+				state = s:STATE_DELVIDEK.region_state:HUN
+				on_created = {
+					set_variable = serbian_voivoideship_var
+					if = {
+						limit = {
+							NOT = {
+								has_law = law_type:law_monarchy
+							}
+						}
+						activate_law = law_type:law_monarchy
+					}
+					if = {
+						limit = {
+							year < 1851
+						}
+						create_character = {
+							template = BNT_stevan_supljikac
+						}
+					}
+					if = {
+						limit = {
+							year < 1855
+						}
+						create_character = {
+							template = BNT_josif_rajacic
+						}
+					}
+					if = {
+						limit = {
+							year < 1855
+						}
+						create_character = {
+							template = BNT_stevan_knicanin
+						}
+					}
+					random_scope_state = {
+						limit = {
+							state_region = s:STATE_DELVIDEK
+						}
+						STATE_DELVIDEK_state_name_assign = yes
+					}
+					s:STATE_BANAT = {
+						add_claim = c:BNT
+					}
+					c:AUS = {
+						trigger_event = { id = hungary_events.2 popup = yes }
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.2.a
+		default_option = yes
+		trigger = {
+			c:HUN ?= this
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:serb
+			days = normal_modifier_time
+			multiplier = 5
+		}
+		c:BNT = {
+			add_modifier = {
+				name = modifier_serbian_volunteers
+				days = normal_modifier_time
+			}
+		}
+		random_diplomatic_play = {
+			limit = {
+				OR = {
+					AND = {
+						target = c:HUN
+						initiator = c:AUS
+					}
+					AND = {
+						target = c:AUS
+						initiator = c:HUN
+					}
+				}
+			}
+			if = {
+				limit = {
+					target = c:HUN
+				}
+				add_initiator_backers = { c:BNT }
+			}
+			else_if = {
+				limit = {
+					initiator = c:HUN
+				}
+				add_target_backers = { c:BNT }
+			}
+			add_war_goal = {
+				holder = c:HUN
+				target_country = c:BNT
+				type = annex_country
+			}
+			if = {
+				limit = {
+					c:HUN ?= {
+						any_scope_state = {
+							state_region = s:STATE_BANAT
+						}
+					}
+				}
+				add_war_goal = {
+					holder = c:BNT
+					type = conquer_state
+					target_state = s:STATE_BANAT.region_state:HUN
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.2.b
+		trigger = {
+			c:HUN ?= this
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:serb
+			days = normal_modifier_time
+			multiplier = 5
+		}
+		play_as = c:BNT
+		c:BNT = {
+			add_modifier = {
+				name = modifier_serbian_volunteers
+				days = normal_modifier_time
+			}
+		}
+		random_diplomatic_play = {
+			limit = {
+				OR = {
+					AND = {
+						target = c:HUN
+						initiator = c:AUS
+					}
+					AND = {
+						target = c:AUS
+						initiator = c:HUN
+					}
+				}
+			}
+			if = {
+				limit = {
+					target = c:HUN
+				}
+				add_initiator_backers = { c:BNT }
+			}
+			else_if = {
+				limit = {
+					initiator = c:HUN
+				}
+				add_target_backers = { c:BNT }
+			}
+			add_war_goal = {
+				holder = c:HUN
+				target_country = c:BNT
+				type = annex_country
+			}
+			if = {
+				limit = {
+					c:HUN ?= {
+						any_scope_state = {
+							state_region = s:STATE_BANAT
+						}
+					}
+				}
+				add_war_goal = {
+					holder = c:BNT
+					type = conquer_state
+					target_state = s:STATE_BANAT.region_state:HUN
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.2.c
+		default_option = yes
+		trigger = {
+			c:AUS ?= this
+		}
+		c:AUS = {
+			create_diplomatic_pact = {
+				country = c:BNT
+				type = crown_land
+			}
+		}
+		show_as_tooltip = {
+			add_fervor_target_modifier = { #changes target
+				culture = cu:serb
+				days = normal_modifier_time
+				multiplier = 5
+			}
+			c:BNT = {
+				add_modifier = {
+					name = modifier_serbian_volunteers
+					days = normal_modifier_time
+				}
+			}
+			random_diplomatic_play = {
+				limit = {
+					OR = {
+						AND = {
+							target = c:HUN
+							initiator = c:AUS
+						}
+						AND = {
+							target = c:AUS
+							initiator = c:HUN
+						}
+					}
+				}
+				if = {
+					limit = {
+						target = c:HUN
+					}
+					add_initiator_backers = { c:BNT }
+				}
+				else_if = {
+					limit = {
+						initiator = c:HUN
+					}
+					add_target_backers = { c:BNT }
+				}
+				add_war_goal = {
+					holder = c:HUN
+					target_country = c:BNT
+					type = annex_country
+				}
+				if = {
+					limit = {
+						c:HUN ?= {
+							any_scope_state = {
+								state_region = s:STATE_BANAT
+							}
+						}
+					}
+					add_war_goal = {
+						holder = c:BNT
+						type = conquer_state
+						target_state = s:STATE_BANAT.region_state:HUN
+					}
+				}
+			}
+		}
+	}
+}
+
+hungary_events.3 = { # Slovakian revolt
+	type = country_event
+	placement = c:SLV.capital
+
+	title = hungary_events.3.t
+	desc = hungary_events.3.d
+	flavor = hungary_events.3.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "ip3_officer_inspecting_peasant_conscripts"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	duration = 3
+
+	trigger = {
+		OR = {
+			AND = {
+				any_scope_state = {
+					state_region = s:STATE_SLOVAKIA
+				}
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:slovak
+					}
+					OR = {
+						turmoil > 0.15
+						obstinance >= 0.05
+					}
+				}
+				country_average_cultural_acceptance = {
+					target = cu:slovak
+					value < acceptance_status_4
+				}
+				NOT = {
+					exists = c:SLV
+				}
+				any_diplomatic_play = {
+					OR = {
+						AND = {
+							target = c:HUN
+							initiator = c:AUS
+						}
+						AND = {
+							target = c:AUS
+							initiator = c:HUN
+						}
+					}
+				}
+			}
+			c:AUS ?= this
+		}
+	}
+
+	immediate = {
+		c:HUN ?= {
+			save_scope_as = hungary_country_scope
+		}
+		c:AUS ?= {
+			save_scope_as = austria_country_scope
+		}
+		if = {
+			limit = { # The effects are only run by Hungary to avoid dupes
+				c:HUN ?= this
+			}
+			if = {
+				limit = {
+					capital = {
+						state_region = s:STATE_SLOVAKIA
+					}
+					any_scope_state = {
+						state_region = s:STATE_CENTRAL_HUNGARY
+					}
+				}
+				set_capital = STATE_CENTRAL_HUNGARY
+			}
+			create_country = {
+				origin = root
+				tag = SLV
+				state = s:STATE_SLOVAKIA.region_state:HUN
+				on_created = {
+					s:STATE_RUTHENIA = {
+						add_claim = c:SLV
+					}
+					c:AUS = {
+						trigger_event = { id = hungary_events.3 popup = yes }
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.3.a
+		default_option = yes
+		trigger = {
+			c:HUN ?= this
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:slovak
+			days = normal_modifier_time
+			multiplier = 5
+		}
+		c:SLV = {
+			add_modifier = {
+				name = modifier_slovak_volunteers
+				days = normal_modifier_time
+			}
+		}
+		random_diplomatic_play = {
+			limit = {
+				OR = {
+					AND = {
+						target = c:HUN
+						initiator = c:AUS
+					}
+					AND = {
+						target = c:AUS
+						initiator = c:HUN
+					}
+				}
+			}
+			if = {
+				limit = {
+					target = c:HUN
+				}
+				add_initiator_backers = { c:SLV }
+			}
+			else_if = {
+				limit = {
+					initiator = c:HUN
+				}
+				add_target_backers = { c:SLV }
+			}
+			add_war_goal = {
+				holder = c:HUN
+				target_country = c:SLV
+				type = annex_country
+			}
+			if = {
+				limit = {
+					c:HUN ?= {
+						any_scope_state = {
+							state_region = s:STATE_RUTHENIA
+						}
+					}
+				}
+				add_war_goal = {
+					holder = c:SLV
+					type = conquer_state
+					target_state = s:STATE_RUTHENIA.region_state:HUN
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.3.b
+		trigger = {
+			c:HUN ?= this
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:slovak
+			days = normal_modifier_time
+			multiplier = 5
+		}
+		c:SLV = {
+			add_modifier = {
+				name = modifier_slovak_volunteers
+				days = normal_modifier_time
+			}
+		}
+		play_as = c:SLV
+		random_diplomatic_play = {
+			limit = {
+				OR = {
+					AND = {
+						target = c:HUN
+						initiator = c:AUS
+					}
+					AND = {
+						target = c:AUS
+						initiator = c:HUN
+					}
+				}
+			}
+			if = {
+				limit = {
+					target = c:HUN
+				}
+				add_initiator_backers = { c:SLV }
+			}
+			else_if = {
+				limit = {
+					initiator = c:HUN
+				}
+				add_target_backers = { c:SLV }
+			}
+			add_war_goal = {
+				holder = c:HUN
+				target_country = c:SLV
+				type = annex_country
+			}
+			if = {
+				limit = {
+					c:HUN ?= {
+						any_scope_state = {
+							state_region = s:STATE_RUTHENIA
+						}
+					}
+				}
+				add_war_goal = {
+					holder = c:SLV
+					type = conquer_state
+					target_state = s:STATE_RUTHENIA.region_state:HUN
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.3.c
+		default_option = yes
+		trigger = {
+			c:AUS ?= this
+		}
+		c:AUS = {
+			create_diplomatic_pact = {
+				country = c:SLV
+				type = crown_land
+			}
+		}
+		show_as_tooltip = {
+			add_fervor_target_modifier = { #changes target
+				culture = cu:slovak
+				days = normal_modifier_time
+				multiplier = 5
+			}
+			c:SLV = {
+				add_modifier = {
+					name = modifier_slovak_volunteers
+					days = normal_modifier_time
+				}
+			}
+			random_diplomatic_play = {
+				limit = {
+					OR = {
+						AND = {
+							target = c:HUN
+							initiator = c:AUS
+						}
+						AND = {
+							target = c:AUS
+							initiator = c:HUN
+						}
+					}
+				}
+				if = {
+					limit = {
+						target = c:HUN
+					}
+					add_initiator_backers = { c:SLV }
+				}
+				else_if = {
+					limit = {
+						initiator = c:HUN
+					}
+					add_target_backers = { c:SLV }
+				}
+				add_war_goal = {
+					holder = c:HUN
+					target_country = c:SLV
+					type = annex_country
+				}
+				if = {
+					limit = {
+						c:HUN ?= {
+							any_scope_state = {
+								state_region = s:STATE_RUTHENIA
+							}
+						}
+					}
+					add_war_goal = {
+						holder = c:SLV
+						type = conquer_state
+						target_state = s:STATE_RUTHENIA.region_state:HUN
+					}
+				}
+			}
+		}
+	}
+}
+
+hungary_events.4 = { # Hungary Calls for Union
+	type = country_event
+	placement = ROOT
+
+	title = hungary_events.4.t
+	desc = hungary_events.4.d
+	flavor = hungary_events.4.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	duration = 3
+
+	trigger = {
+		# Triggered by button
+	}
+
+	immediate = {
+		c:HUN = {
+			save_scope_as = hungary_country_scope
+		}
+		c:TRS = {
+			save_scope_as = transylvania_country_scope
+		}
+	}
+
+	option = {
+		name = hungary_events.4.a
+		default_option = yes
+		if = {
+			limit = {
+				c:AUS ?= {
+					any_subject_or_below = {
+						c:TRS ?= this
+					}
+				}
+			}
+			c:AUS ?= {
+				trigger_event = { id = hungary_events.5 popup = yes }
+			}
+		}
+		c:HUN ?= {
+			trigger_event = { id = hungary_events.5 popup = yes }
+		}
+		c:HUN = {
+			annex = root
+		}
+		play_as = c:HUN
+		show_as_tooltip = {
+			add_loyalists = {
+				value = medium_radicals
+				culture = cu:hungarian
+			}
+			add_loyalists = {
+				value = medium_radicals
+				culture = cu:szekely
+			}
+			add_radicals = {
+				value = medium_radicals
+				culture = cu:romanian
+			}
+			add_radicals = {
+				value = small_radicals
+				culture = cu:south_german
+			}
+		}
+		ai_chance = {
+			base = 100
+		}
+	}
+
+	option = {
+		name = hungary_events.4.b
+		if = {
+			limit = {
+				c:AUS ?= {
+					any_subject_or_below = {
+						c:TRS ?= this
+					}
+				}
+			}
+			add_liberty_desire = -25
+			change_relations = { country = c:AUS value = 30 }
+			change_relations = { country = c:HUN value = -40 }
+			create_diplomatic_catalyst = {
+				type = catalyst_event_negative
+				target = c:HUN
+			}
+			c:AUS ?= {
+				post_notification = trs_unification_rejected_message
+			}
+		}
+		add_radicals = {
+			value = medium_radicals
+			culture = cu:hungarian
+		}
+		add_radicals = {
+			value = medium_radicals
+			culture = cu:szekely
+		}
+		add_loyalists = {
+			value = medium_radicals
+			culture = cu:romanian
+		}
+		add_loyalists = {
+			value = small_radicals
+			culture = cu:south_german
+		}
+		c:HUN ?= {
+			post_notification = trs_unification_rejected_message
+		}
+		ai_chance = {
+			base = 0
+		}
+	}
+}
+
+hungary_events.5 = { # Transylvania Ratifies Union
+	type = country_event
+	placement = ROOT
+
+	title = hungary_events.5.t
+	desc = hungary_events.5.d
+	flavor = hungary_events.5.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "unspecific_politicians_arguing"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	duration = 3
+
+	trigger = {
+		# Triggered by event
+	}
+
+	immediate = {
+		c:HUN = {
+			save_scope_as = hungary_country_scope
+		}
+	}
+
+	option = {
+		name = hungary_events.5.a
+		default_option = yes
+		trigger = {
+			c:HUN ?= this
+		}
+		custom_tooltip = transylvanian_diet_abolished
+		add_loyalists = {
+			value = medium_radicals
+			culture = cu:hungarian
+		}
+		add_loyalists = {
+			value = medium_radicals
+			culture = cu:szekely
+		}
+		add_radicals = {
+			value = large_radicals
+			culture = cu:romanian
+		}
+		add_radicals = {
+			value = medium_radicals
+			culture = cu:south_german
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:romanian
+			days = long_modifier_time
+			multiplier = 5
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:south_german
+			days = long_modifier_time
+			multiplier = 5
+		}
+		every_scope_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_NORTHERN_TRANSYLVANIA
+					state_region = s:STATE_SOUTHERN_TRANSYLVANIA
+				}
+			}
+			add_modifier = {
+				name = modifier_not_allowed_transylvanian_autonomy
+				days = long_modifier_time
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.5.b
+		trigger = {
+			c:HUN ?= this
+		}
+		custom_tooltip = transylvanian_diet_retained
+		add_loyalists = {
+			value = small_radicals
+			culture = cu:hungarian
+		}
+		add_loyalists = {
+			value = small_radicals
+			culture = cu:szekely
+		}
+		add_radicals = {
+			value = medium_radicals
+			culture = cu:romanian
+		}
+		add_radicals = {
+			value = small_radicals
+			culture = cu:south_german
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:romanian
+			days = long_modifier_time
+			multiplier = -5
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:south_german
+			days = long_modifier_time
+			multiplier = -5
+		}
+		every_scope_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_NORTHERN_TRANSYLVANIA
+					state_region = s:STATE_SOUTHERN_TRANSYLVANIA
+				}
+			}
+			set_state_type = unincorporated
+			add_modifier = {
+				name = modifier_allowed_transylvanian_autonomy
+				days = long_modifier_time
+			}
+		}
+		add_modifier = {
+			name = modifier_transylvanian_bands
+			days = normal_modifier_time
+		}
+	}
+
+	option = {
+		name = hungary_events.5.c
+		default_option = yes
+		trigger = {
+			c:AUS ?= this
+		}
+		change_relations = { country = c:HUN value = 20 }
+		add_radicals = {
+			culture = cu:south_german
+			value = small_radicals
+		}
+		set_variable = austria_folded_to_hungary_var
+		ai_chance = {
+			base = 50
+		}
+	}
+
+	option = {
+		name = hungary_events.5.e
+		trigger = {
+			c:AUS ?= this
+			NOT = {
+				is_diplomatic_play_ally_of = c:HUN
+			}
+		}
+		show_as_unavailable = {
+			c:AUS ?= this
+			is_diplomatic_play_ally_of = c:HUN
+		}
+		c:HUN ?= {
+			trigger_event = { id = hungary_events.6 popup = yes }
+		}
+		change_relations = { country = c:HUN value = -30 }
+		custom_tooltip = hungary_likely_lead_to_war_tt
+		create_diplomatic_catalyst = {
+			type = catalyst_event_negative
+			target = c:HUN
+		}
+		add_radicals = {
+			culture = cu:hungarian
+			value = medium_radicals
+		}
+		ai_chance = {
+			base = 200
+			modifier = {
+				trigger = {
+					c:AUS ?= {
+						ruler = {
+							has_trait = compliant
+						}
+					}
+				}
+				add = -100
+			}
+			modifier = {
+				trigger = {
+					c:AUS ?= {
+						is_diplomatic_play_committed_participant = yes
+					}
+				}
+				add = -100
+			}
+		}
+	}
+}
+
+hungary_events.6 = { # Austrian Ultimatum
+	type = country_event
+	placement = ROOT
+
+	title = hungary_events.6.t
+	desc = hungary_events.6.d
+	flavor = hungary_events.6.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+
+	trigger = {
+	}
+
+	immediate = {
+		c:AUS = {
+			save_scope_as = austria_country_scope
+			set_variable = hungarian_ultimatum_sent_var
+		}
+		c:HUN = {
+			save_scope_as = hungary_country_scope
+		}
+	}
+
+	cooldown = { days = short_modifier_time }
+
+	option = {
+		name = hungary_events.6.a
+		default_option = yes
+		c:AUS = {
+			create_diplomatic_play = {
+				name = hungarian_revolution
+				type = dp_hungarian_revolution
+				target_state = c:HUN.capital
+
+				add_war_goal = {
+					holder = c:HUN
+					type = independence
+					target_country = c:AUS
+					primary_demand = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.6.b
+		custom_tooltip = austrian_ultimatium_tt
+		add_liberty_desire = -50
+		add_radicals = {
+			value = large_radicals
+		}
+		add_modifier = {
+			name = modifier_humiliated_by_austria
+			days = normal_modifier_time
+		}
+		if = { # Undoes April Laws
+			limit = {
+				has_variable = hungarian_revolution_twelve_points_var
+			}
+			if = {
+				limit = {
+					has_variable = conservative_distribution_of_power_law
+					has_variable = conservative_free_speech_law
+					has_variable = conservative_internal_security_law
+				}
+				if = {
+					limit = {
+						NOT = {
+							has_law = var:conservative_distribution_of_power_law
+						}
+					}
+					activate_law = var:conservative_distribution_of_power_law
+				}
+				if = {
+					limit = {
+						NOT = {
+							has_law = var:conservative_free_speech_law
+						}
+					}
+					activate_law = var:conservative_free_speech_law
+				}
+				if = {
+					limit = {
+						NOT = {
+							has_law = var:conservative_internal_security_law
+						}
+					}
+					activate_law = var:conservative_internal_security_law
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_variable = hungarian_revolution_annex_transylvania_button_var
+			}
+			every_scope_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_NORTHERN_TRANSYLVANIA
+						state_region = s:STATE_SOUTHERN_TRANSYLVANIA
+					}
+				}
+				set_state_owner = c:AUS
+			}
+		}
+		set_variable = hungary_folded_to_austria_var
+	}
+}
+
+hungary_events.7 = { # On your Feet, Magyar
+	type = country_event
+	placement = ROOT
+
+	title = hungary_events.7.t
+	desc = hungary_events.7.d
+	flavor = hungary_events.7.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "ip3_officer_inspecting_peasant_conscripts"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	duration = 3
+
+	trigger = {
+		# Triggered by button
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = hungary_events.7.a
+		default_option = yes
+		add_fervor_target_modifier = { #changes target
+			culture = cu:hungarian
+			days = normal_modifier_time
+			multiplier = 5
+		}
+		add_modifier = {
+			name = modifier_defenders_of_the_homeland
+			days = normal_modifier_time
+		}
+		add_modifier = {
+			name = modifier_honved_mobilization_programme
+			days = normal_modifier_time
+			multiplier = money_amount_multiplier_large
+		}
+		custom_tooltip = {
+			text = every_state_with_enlistment_decree_get_modifier
+			every_scope_state = {
+				limit = {
+					has_decree = decree_enlistment_efforts
+				}
+				add_modifier = {
+					name = modifier_mustering_the_honved
+					days = normal_modifier_time
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.7.b
+		add_fervor_target_modifier = { #changes target
+			culture = cu:hungarian
+			days = normal_modifier_time
+			multiplier = 5
+		}
+		add_modifier = {
+			name = modifier_autumn_campaign
+			days = normal_modifier_time
+		}
+		add_modifier = {
+			name = modifier_honved_mobilization_programme
+			days = normal_modifier_time
+			multiplier = money_amount_multiplier_large
+		}
+		custom_tooltip = {
+			text = every_state_with_enlistment_decree_get_modifier
+			every_scope_state = {
+				limit = {
+					has_decree = decree_enlistment_efforts
+				}
+				add_modifier = {
+					name = modifier_mustering_the_honved
+					days = normal_modifier_time
+				}
+			}
+		}
+	}
+}
+
+hungary_events.8 = { # Romanian revolt
+	type = country_event
+	placement = c:TRS.capital
+
+	title = hungary_events.8.t
+	desc = hungary_events.8.d
+	flavor = hungary_events.8.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "ip3_officer_inspecting_peasant_conscripts"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	duration = 3
+
+	trigger = {
+		OR = {
+			AND = {
+				any_scope_state = {
+					state_region = s:STATE_SOUTHERN_TRANSYLVANIA
+				}
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:romanian
+					}
+					OR = {
+						turmoil > 0.15
+						obstinance >= 0.05
+					}
+				}
+				country_average_cultural_acceptance = {
+					target = cu:romanian
+					value < acceptance_status_4
+				}
+				NOT = {
+					exists = c:TRS
+				}
+				any_diplomatic_play = {
+					OR = {
+						AND = {
+							target = c:HUN
+							initiator = c:AUS
+						}
+						AND = {
+							target = c:AUS
+							initiator = c:HUN
+						}
+					}
+				}
+			}
+			c:AUS ?= this
+		}
+	}
+
+	immediate = {
+		c:HUN ?= {
+			save_scope_as = hungary_country_scope
+		}
+		c:AUS ?= {
+			save_scope_as = austria_country_scope
+		}
+		c:TRS ?= {
+			every_scope_character = { # Hungarians politicians and generals get purged
+				limit = {
+					OR = {
+						culture = cu:szekely
+						culture = cu:hungarian
+					}
+				}
+				kill_character = {
+					hidden = yes
+				}
+			}
+		}
+		if = {
+			limit = { # The effects are only run by Hungary to avoid dupes
+				c:HUN ?= this
+			}
+			if = {
+				limit = {
+					capital = {
+						state_region = s:STATE_SOUTHERN_TRANSYLVANIA
+					}
+					any_scope_state = {
+						state_region = s:STATE_CENTRAL_HUNGARY
+					}
+				}
+				set_capital = STATE_CENTRAL_HUNGARY
+			}
+			create_country = {
+				origin = root
+				tag = TRS
+				state = s:STATE_SOUTHERN_TRANSYLVANIA.region_state:HUN
+				on_created = {
+					set_variable = romanian_transylvanian_revolt_var
+					if = {
+						limit = {
+							year > 1844
+							year < 1870
+						}
+						create_character = {
+							template = trs_avram_iancu
+							on_created = {
+								set_character_as_ruler = yes
+							}
+						}
+					}
+					remove_primary_culture = cu:hungarian
+					remove_primary_culture = cu:szekely
+					random_scope_state = {
+						limit = {
+							state_region = s:STATE_SOUTHERN_TRANSYLVANIA
+						}
+						STATE_SOUTHERN_TRANSYLVANIA_state_name_assign = yes
+					}
+					s:STATE_NORTHERN_TRANSYLVANIA = {
+						add_claim = c:TRS
+					}
+					c:AUS = {
+						trigger_event = { id = hungary_events.8 popup = yes }
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.8.a
+		default_option = yes
+		trigger = {
+			c:HUN ?= this
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:romanian
+			days = normal_modifier_time
+			multiplier = 5
+		}
+		c:TRS = {
+			add_modifier = {
+				name = modifier_auraria_gemina_legion
+				days = normal_modifier_time
+			}
+			ruler = {
+				random_list = {
+					75 = {
+						add_trait = war_criminal
+					}
+					25 = {
+					}
+				}
+			}
+			custom_tooltip = transylvanian_massacres_tt
+			random_scope_state = {
+                kill_population_percent_in_state = {
+                    percent = 0.015
+                    culture = cu:hungarian
+                }
+                kill_population_percent_in_state = {
+                    percent = 0.01
+                    culture = cu:romanian
+                }
+                kill_population_percent_in_state = {
+                    percent = 0.005
+                    culture = cu:south_german
+                }
+                kill_population_percent_in_state = {
+                    percent = 0.005
+                    culture = cu:ashkenazi
+                }
+			}
+		}
+		random_diplomatic_play = {
+			limit = {
+				OR = {
+					AND = {
+						target = c:HUN
+						initiator = c:AUS
+					}
+					AND = {
+						target = c:AUS
+						initiator = c:HUN
+					}
+				}
+			}
+			if = {
+				limit = {
+					target = c:HUN
+				}
+				add_initiator_backers = { c:TRS }
+			}
+			else_if = {
+				limit = {
+					initiator = c:HUN
+				}
+				add_target_backers = { c:TRS }
+			}
+			add_war_goal = {
+				holder = c:HUN
+				target_country = c:TRS
+				type = annex_country
+			}
+			if = {
+				limit = {
+					c:HUN ?= {
+						any_scope_state = {
+							state_region = s:STATE_NORTHERN_TRANSYLVANIA
+						}
+					}
+				}
+				add_war_goal = {
+					holder = c:TRS
+					type = conquer_state
+					target_state = s:STATE_NORTHERN_TRANSYLVANIA.region_state:HUN
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.8.b
+		trigger = {
+			c:HUN ?= this
+		}
+		add_fervor_target_modifier = { #changes target
+			culture = cu:romanian
+			days = normal_modifier_time
+			multiplier = 5
+		}
+		play_as = c:TRS
+		c:TRS = {
+			add_modifier = {
+				name = modifier_auraria_gemina_legion
+				days = normal_modifier_time
+			}
+			ruler = {
+				random_list = {
+					75 = {
+						add_trait = war_criminal
+					}
+					25 = {
+					}
+				}
+			}
+			custom_tooltip = transylvanian_massacres_tt
+			random_scope_state = {
+                kill_population_percent_in_state = {
+                    percent = 0.015
+                    culture = cu:hungarian
+                }
+                kill_population_percent_in_state = {
+                    percent = 0.01
+                    culture = cu:romanian
+                }
+                kill_population_percent_in_state = {
+                    percent = 0.005
+                    culture = cu:south_german
+                }
+                kill_population_percent_in_state = {
+                    percent = 0.005
+                    culture = cu:ashkenazi
+                }
+			}
+		}
+		random_diplomatic_play = {
+			limit = {
+				OR = {
+					AND = {
+						target = c:HUN
+						initiator = c:AUS
+					}
+					AND = {
+						target = c:AUS
+						initiator = c:HUN
+					}
+				}
+			}
+			if = {
+				limit = {
+					target = c:HUN
+				}
+				add_initiator_backers = { c:TRS }
+			}
+			else_if = {
+				limit = {
+					initiator = c:HUN
+				}
+				add_target_backers = { c:TRS }
+			}
+			add_war_goal = {
+				holder = c:HUN
+				target_country = c:TRS
+				type = annex_country
+			}
+			if = {
+				limit = {
+					c:HUN ?= {
+						any_scope_state = {
+							state_region = s:STATE_NORTHERN_TRANSYLVANIA
+						}
+					}
+				}
+				add_war_goal = {
+					holder = c:TRS
+					type = conquer_state
+					target_state = s:STATE_NORTHERN_TRANSYLVANIA.region_state:HUN
+				}
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.8.c
+		default_option = yes
+		trigger = {
+			c:AUS ?= this
+		}
+		c:AUS = {
+			create_diplomatic_pact = {
+				country = c:TRS
+				type = crown_land
+			}
+		}
+		show_as_tooltip = {
+			add_fervor_target_modifier = { #changes target
+				culture = cu:romanian
+				days = normal_modifier_time
+				multiplier = 5
+			}
+		}
+		show_as_tooltip = {
+			c:TRS = {
+				add_modifier = {
+					name = modifier_auraria_gemina_legion
+					days = normal_modifier_time
+				}
+				ruler = {
+					random_list = {
+						75 = {
+							add_trait = war_criminal
+						}
+						25 = {
+						}
+					}
+				}
+				custom_tooltip = transylvanian_massacres_tt
+				random_scope_state = {
+	                kill_population_percent_in_state = {
+	                    percent = 0.015
+	                    culture = cu:hungarian
+	                }
+	                kill_population_percent_in_state = {
+	                    percent = 0.01
+	                    culture = cu:romanian
+	                }
+	                kill_population_percent_in_state = {
+	                    percent = 0.005
+	                    culture = cu:south_german
+	                }
+	                kill_population_percent_in_state = {
+	                    percent = 0.005
+	                    culture = cu:ashkenazi
+	                }
+				}
+			}
+			random_diplomatic_play = {
+				limit = {
+					OR = {
+						AND = {
+							target = c:HUN
+							initiator = c:AUS
+						}
+						AND = {
+							target = c:AUS
+							initiator = c:HUN
+						}
+					}
+				}
+				if = {
+					limit = {
+						target = c:HUN
+					}
+					add_initiator_backers = { c:TRS }
+				}
+				else_if = {
+					limit = {
+						initiator = c:HUN
+					}
+					add_target_backers = { c:TRS }
+				}
+				add_war_goal = {
+					holder = c:HUN
+					target_country = c:TRS
+					type = annex_country
+				}
+				if = {
+					limit = {
+						c:HUN ?= {
+							any_scope_state = {
+								state_region = s:STATE_NORTHERN_TRANSYLVANIA
+							}
+						}
+					}
+					add_war_goal = {
+						holder = c:TRS
+						type = conquer_state
+						target_state = s:STATE_NORTHERN_TRANSYLVANIA.region_state:HUN
+					}
+				}
+			}
+		}
+	}
+}
+
+ hungary_events.9 = { # Hungary Enacts April Laws
+ 	type = country_event
+ 	placement = ROOT
+
+ 	title = hungary_events.9.t
+ 	desc = hungary_events.9.d
+ 	flavor = hungary_events.9.f
+
+ 	dlc = dlc014
+
+ 	event_image = {
+ 		video = "ip3_agitator_reading_manifesto"
+ 	}
+
+ 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+ 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+ 	duration = 3
+
+ 	trigger = {
+ 	}
+
+ 	immediate = {
+ 		c:HUN = {
+ 			save_scope_as = hungary_country_scope
+ 		}
+ 	}
+
+ 	option = {
+ 		name = hungary_events.9.a
+ 		default_option = yes
+ 		change_relations = { country = c:HUN value = 20 }
+ 		add_radicals = {
+ 			culture = cu:south_german
+ 			value = small_radicals
+ 		}
+ 		show_as_tooltip = {
+	 		c:HUN = {
+				activate_law = law_type:law_census_voting
+				activate_law = law_type:law_protected_speech
+				activate_law = law_type:law_tenant_farmers
+				activate_law = law_type:law_freedom_of_conscience
+				activate_law = law_type:law_national_guard
+				activate_law = law_type:law_per_capita_based_taxation
+				activate_law = law_type:law_interventionism
+				every_interest_group = {
+					limit = {
+						law_stance = {
+							law = law_type:law_census_voting
+							value > neutral
+						}
+						is_marginal = no
+					}
+					add_modifier = {
+						name = modifier_the_spirit_of_48
+						days = moderately_long_modifier_time
+						is_decaying = yes
+					}
+				}
+				add_modifier = {
+					name = modifier_revolutionary_fervor
+					days = short_modifier_time
+					is_decaying = yes
+				}
+			}
+ 		}
+ 		set_variable = austria_folded_to_hungary_var
+ 		ai_chance = {
+ 			base = 50
+ 		}
+ 	}
+
+ 	option = {
+ 		name = hungary_events.9.b
+		trigger = {
+			NOT = {
+				is_diplomatic_play_ally_of = c:HUN
+			}
+		}
+		show_as_unavailable = {
+			is_diplomatic_play_ally_of = c:HUN
+		}
+
+ 		c:HUN ?= {
+ 			trigger_event = { id = hungary_events.6 popup = yes }
+ 		}
+ 		change_relations = { country = c:HUN value = -30 }
+ 		custom_tooltip = hungary_likely_lead_to_war_tt
+ 		create_diplomatic_catalyst = {
+ 			type = catalyst_event_negative
+ 			target = c:HUN
+ 		}
+ 		add_radicals = {
+ 			culture = cu:hungarian
+ 			value = medium_radicals
+ 		}
+ 		ai_chance = {
+ 			base = 200
+ 			modifier = {
+ 				trigger = {
+ 					c:AUS ?= {
+ 						ruler = {
+ 							has_trait = compliant
+ 						}
+ 					}
+ 				}
+ 				add = -100
+ 			}
+ 			modifier = {
+ 				trigger = {
+ 					c:AUS ?= {
+ 						is_diplomatic_play_committed_participant = yes
+ 					}
+ 				}
+ 				add = -100
+ 			}
+ 		}
+ 	}
+}
+
+hungary_events.11 = { # Franz Joseph Revolkes April Laws
+	type = country_event
+	placement = ROOT
+
+	title = hungary_events.11.t
+	desc = hungary_events.11.d
+	flavor = hungary_events.11.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+
+	trigger = {
+		c:AUS ?= this
+		NOT = { has_variable = hungarian_ultimatum_sent_var }
+		NOT = { is_diplomatic_play_ally_of = c:HUN }
+		c:HUN ?= {
+			is_subject_of = root
+			OR = {
+				has_variable = hungarian_revolution_twelve_points_var
+				has_variable = hungarian_revolution_annex_transylvania_button_var
+			}
+		}
+		ruler = {
+			NOR = {
+				has_template = aus_ferdinand_I_habsburg_template
+				has_trait = compliant
+			}
+		}
+	}
+
+	immediate = {
+		c:HUN = {
+			save_scope_as = hungary_country_scope
+		}
+	}
+
+	cooldown = { days = long_modifier_time }
+
+	option = {
+		name = hungary_events.11.a
+		default_option = yes
+		custom_tooltip = hungary_likely_lead_to_war_tt
+		c:HUN ?= {
+			trigger_event = { id = hungary_events.6 popup = yes }
+		}
+		ai_chance = {
+			base = 100
+		}
+	}
+
+	option = {
+		name = hungary_events.11.b
+		change_relations = { country = c:HUN value = 20 }
+		add_radicals = {
+			culture = cu:south_german
+			value = small_radicals
+		}
+		set_variable = austria_folded_to_hungary_var
+		ai_chance = {
+			base = 10
+		}
+	}
+}
+
+hungary_events.12 = { # Hungarian Revolution Triumphant
+	type = country_event
+	placement = ROOT
+
+	title = hungary_events.12.t
+	desc = hungary_events.12.d
+	flavor = hungary_events.12.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "europenorthamerica_london_center"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+
+	trigger = {
+	}
+
+	immediate = {
+		set_variable = hungary_achievement
+	}
+
+	option = {
+		name = hungary_events.12.a
+		default_option = yes
+		ai_chance = {
+			base = 50
+		}
+		custom_tooltip = {
+			text = increased_chance_of_liberal_leaders_tt
+			set_variable = hungarian_revolution_increased_liberalism
+		}
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_census_voting
+					value > neutral
+				}
+				is_marginal = no
+			}
+			add_modifier = {
+				name = modifier_hungarian_radicalism
+				days = normal_modifier_time
+			}
+		}
+		add_modifier = {
+			name = modifier_a_liberal_century
+			days = long_modifier_time
+		}
+		add_loyalists = {
+			culture = cu:hungarian
+			value = small_radicals
+		}
+		add_loyalists = {
+			culture = cu:szekely
+			value = small_radicals
+		}
+	}
+
+	option = {
+		name = hungary_events.12.b
+		ai_chance = {
+			base = 50
+		}
+		add_modifier = {
+			name = modifier_efficient_magyarization
+			days = long_modifier_time
+		}
+		add_loyalists = {
+			culture = cu:hungarian
+			value = large_radicals
+		}
+		add_loyalists = {
+			culture = cu:szekely
+			value = large_radicals
+		}
+	}
+}
+
+hungary_events.13 = { # Crown of St. Stephen
+	type = country_event
+	placement = ROOT
+
+	title = hungary_events.13.t
+	desc = hungary_events.13.d
+	flavor = hungary_events.13.f
+
+	dlc = dlc014
+
+	event_image = {
+		video = "ep1_power_blocs"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+
+	trigger = {
+		c:HUN ?= this
+		is_at_war = no
+		is_subject = no
+		NOT = {
+			has_variable = crown_of_st_stephen_var
+		}
+	}
+
+	immediate = {
+		set_variable = crown_of_st_stephen_var
+		c:HUN = {
+			save_scope_as = hungary_scope
+		}
+		c:RUS ?= {
+			save_scope_as = russia_scope
+		}
+		c:GBR ?= {
+			save_scope_as = britain_scope
+		}
+		c:FRA ?= {
+			save_scope_as = france_scope
+		}
+	}
+
+	option = {
+		name = hungary_events.13.a
+		default_option = yes
+		ai_chance = {
+			base = 50
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_presidential_republic
+				}
+			}
+			activate_law = law_type:law_presidential_republic
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = established_the_hungarian_republic
+				days = normal_modifier_time
+			}
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = established_the_hungarian_republic_negative
+				days = normal_modifier_time
+			}
+		}
+	}
+
+	option = {
+		name = hungary_events.13.b
+		ai_chance = {
+			base = 50
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_monarchy
+				}
+			}
+			activate_law = law_type:law_monarchy
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = restored_the_throne_of_st_stephen
+				days = normal_modifier_time
+			}
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = restored_the_throne_of_st_stephen_negative
+				days = normal_modifier_time
+			}
+		}
+		create_character = {
+			first_name = MA_tyA_s
+			last_name = culture
+			noble = yes
+			culture = cu:hungarian
+			interest_group = ig_landowners
+			ideology = ideology_moderate
+			age = default
+			ruler = yes
+		}
+	}
+
+	option = {
+		name = hungary_events.13.c
+		highlighted_option = yes
+		trigger = {
+			c:RUS ?= {
+				has_law = law_type:law_monarchy
+			}
+		}
+		ai_chance = {
+			base = 50
+		}
+		create_diplomatic_catalyst = {
+			type = catalyst_event_positive
+			target = c:RUS
+		}
+		c:RUS.power_bloc ?= {
+			add_leverage = { target = prev value = 200 }
+		}
+		change_relations = { country = c:RUS value = 30 }
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_monarchy
+				}
+			}
+			activate_law = law_type:law_monarchy
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = restored_the_throne_of_st_stephen
+				days = normal_modifier_time
+			}
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = restored_the_throne_of_st_stephen_negative
+				days = normal_modifier_time
+			}
+		}
+		create_character = {
+			first_name = MA_tyA_s
+			last_name = Romanov
+			noble = yes
+			culture = cu:russian
+			interest_group = ig_landowners
+			ideology = ideology_royalist
+			age = default
+			ruler = yes
+		}
+		c:RUS = {
+			post_notification = hungarian_king_elected_from_our_country
+		}
+	}
+
+	option = {
+		name = hungary_events.13.e
+		highlighted_option = yes
+		trigger = {
+			c:GBR ?= {
+				has_law = law_type:law_monarchy
+			}
+		}
+		ai_chance = {
+			base = 50
+		}
+		create_diplomatic_catalyst = {
+			type = catalyst_event_positive
+			target = c:GBR
+		}
+		c:GBR.power_bloc ?= {
+			add_leverage = { target = prev value = 200 }
+		}
+		change_relations = { country = c:GBR value = 30 }
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_monarchy
+				}
+			}
+			activate_law = law_type:law_monarchy
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = restored_the_throne_of_st_stephen
+				days = normal_modifier_time
+			}
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = restored_the_throne_of_st_stephen_negative
+				days = normal_modifier_time
+			}
+		}
+		create_character = {
+			first_name = MA_tyA_s
+			last_name = of_Saxe-Coburg-Gotha
+			noble = yes
+			culture = cu:british
+			interest_group = ig_landowners
+			ideology = ideology_market_liberal
+			age = default
+			ruler = yes
+		}
+		c:GBR = {
+			post_notification = hungarian_king_elected_from_our_country
+		}
+	}
+	option = {
+		name = hungary_events.13.g
+		highlighted_option = yes
+		trigger = {
+			c:FRA ?= {
+				has_law = law_type:law_monarchy
+			}
+		}
+		ai_chance = {
+			base = 50
+		}
+		create_diplomatic_catalyst = {
+			type = catalyst_event_positive
+			target = c:FRA
+		}
+		c:FRA.power_bloc ?= {
+			add_leverage = { target = prev value = 200 }
+		}
+		change_relations = { country = c:FRA value = 30 }
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_monarchy
+				}
+			}
+			activate_law = law_type:law_monarchy
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = restored_the_throne_of_st_stephen
+				days = normal_modifier_time
+			}
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_monarchy
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = restored_the_throne_of_st_stephen_negative
+				days = normal_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				c:FRA = {
+					ruler = {
+						has_variable = legitimist_leader
+					}
+				}
+			}
+			create_character = {
+				first_name = MA_tyA_s
+				last_name = de_Bourbon
+				noble = yes
+				culture = cu:french
+				interest_group = ig_landowners
+				ideology = ideology_traditionalist
+				age = default
+				ruler = yes
+			}
+		}
+		if = {
+			limit = {
+				c:FRA = {
+					ruler = {
+						has_variable = orleanist_leader
+					}
+				}
+			}
+			create_character = {
+				first_name = MA_tyA_s
+				last_name = d_Orleans
+				noble = yes
+				culture = cu:french
+				interest_group = ig_industrialists
+				ideology = ideology_market_liberal
+				age = default
+				ruler = yes
+			}
+		}
+		if = {
+			limit = {
+				c:FRA = {
+					ruler = {
+						has_variable = bonapartist_leader
+					}
+				}
+			}
+			create_character = {
+				first_name = MA_tyA_s
+				last_name = Bonaparte
+				noble = yes
+				culture = cu:french
+				interest_group = ig_armed_forces
+				ideology = ideology_jingoist_leader
+				age = default
+				ruler = yes
+			}
+		}
+		c:FRA = {
+			post_notification = hungarian_king_elected_from_our_country
+		}
+	}
+}

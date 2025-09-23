@@ -1,11 +1,25 @@
 ﻿# This is executed last among all history
 GLOBAL = {
 	every_country = {
-		limit = { NOT = { has_law = law_type:law_slavery_banned } }
-		ig:ig_landowners = { add_ideology = ideology_pro_slavery }
+		limit = { NOT = { has_law_or_variant = law_type:law_slavery_banned } }
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_colonial_slavery
+			}
+			ig:ig_landowners ?= { add_ideology = ideology_pro_slavery_colonial }
+		}
+		else = {
+			ig:ig_landowners ?= { add_ideology = ideology_pro_slavery }
+		}
 	}
 
-	# Jack the ripper, prevents the event from happening every game
+	every_country = {
+		limit = {
+			has_law_or_variant = law_type:law_monarchy
+			has_law_or_variant = law_type:law_autocracy
+		}
+		set_variable = king_in_parliament_possible
+	}
 
 	c:BRZ ?= {
 		set_variable = {
@@ -13,6 +27,8 @@ GLOBAL = {
 			value = 5
 		}
 	}
+
+	### Debt
 
 	c:HAI = {
 		add_treasury = {
@@ -47,6 +63,66 @@ GLOBAL = {
 		}
 	}
 
+	c:BEL ?= { # Historically 9.5:1 ratio of debt to yearly revenue
+		add_treasury = {
+			value = gold_reserves_limit
+			multiply = -2.85
+		}
+	}
+
+	c:NET ?= { # Historically 3.2:1 ratio of debt to yearly revenue
+		add_treasury = {
+			value = gold_reserves_limit
+			multiply = -0.96
+		}
+	}
+
+	c:AUS ?= { # Historically 5.33:1 ratio of debt to yearly revenue
+		add_treasury = {
+			value = gold_reserves_limit
+			multiply = -1.59
+		}
+	}
+
+	c:PRU ?= { # Historically 3.8:1 ratio of debt to yearly revenue
+		add_treasury = {
+			value = gold_reserves_limit
+			multiply = -1.14
+		}
+	}
+
+	c:TUR ?= { # Historically had no foreign debt prior to 1854
+		add_treasury = {
+			value = gold_reserves_limit
+			multiply = -0.5
+		}
+	}
+
+	c:MON ?= { # Were not wealthy, their gold_reserves limit is inflated, but we give the player a little time to figure themselves out.
+		add_treasury = {
+			value = gold_reserves_limit
+			multiply = -0.40
+		}
+	}
+
+	every_country = { # Other Balkan countries - none should be too "rich"
+		limit = {
+			OR = {
+				c:SER ?= this
+				c:WAL ?= this
+				c:MOL ?= this
+				c:GRE ?= this
+				c:HUN ?= this
+				c:CRO ?= this
+				c:TRS ?= this
+			}
+		}
+		add_treasury = {
+			value = gold_reserves_limit
+			multiply = -0.5
+		}
+	}
+
 	every_country = {
 		limit = {
 			OR = {
@@ -68,12 +144,11 @@ GLOBAL = {
 		}
 	}
 
-
 ###ACHIEVEMENT VARIABLES###
 
 	#Serf's Up
 	every_country = {
-	   limit = { has_law = law_type:law_serfdom }
+	   limit = { has_law_or_variant = law_type:law_serfdom }
 	   set_variable = serfs_up_ach_possible
 	}
 
@@ -529,6 +604,149 @@ GLOBAL = {
 		set_variable = {
 			name = china_warlord_explosion
 			value = 5
+		}
+	}
+
+	s:STATE_LAOS.region_state:DAI = {
+		add_modifier = {
+			name = recently_conquered_state
+			is_decaying = yes
+			months = 60
+		}
+	}
+
+	c:AUS ?= {
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_AUSTRIA
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+				strata = middle
+            }
+			add_radicals_in_state = {
+                value = small_radicals
+				strata = lower
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:czech
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:czech
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:polish
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:polish
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:north_italian
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:north_italian
+            }
+		}
+	}
+
+	c:TRS ?= {
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:hungarian
+				}
+			}
+			add_radicals_in_state = {
+                value = very_large_radicals
+                culture = cu:hungarian
+            }
+		}
+	}
+
+	c:HUN ?= {
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:slovak
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:slovak
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:serb
+				}
+			}
+			add_radicals_in_state = {
+                value = medium_radicals
+                culture = cu:serb
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:hungarian
+				}
+			}
+			add_radicals_in_state = {
+                value = medium_radicals
+                culture = cu:hungarian
+            }
+		}
+	}
+
+	c:TUR ?= {
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:bosniak
+				}
+			}
+			add_radicals_in_state = {
+                value = very_large_radicals
+                culture = cu:bosniak
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:serb
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:serb
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:bulgarian
+				}
+			}
+			add_radicals_in_state = {
+                value = medium_radicals
+                culture = cu:bulgarian
+            }
 		}
 	}
 }

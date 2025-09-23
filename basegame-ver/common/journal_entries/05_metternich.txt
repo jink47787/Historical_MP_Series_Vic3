@@ -1,0 +1,153 @@
+﻿je_metternich = {
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	group = je_group_historical_content
+
+	is_shown_in_lobby = {
+		has_dlc_feature = ip3_content #National Awakening
+		c:AUS ?= this
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				has_template = aus_klemens_von_metternich
+			}
+			save_scope_as = metternich_scope
+		}
+		ig:ig_landowners ?= {
+			save_scope_as = aristocracy_scope
+		}
+		heir ?= {
+			save_scope_as = franz_joseph_scope
+		}
+		set_variable = { name = landowners_out_var value = 0 }
+	}
+
+	complete = {
+		OR = {
+			trigger_if = {
+				limit = {
+					exists = scope:franz_joseph_scope
+				}
+				scope:franz_joseph_scope ?= {
+					age >= 18
+					custom_tooltip = {
+						text = franz_joseph_acceded_tt
+						is_ruler = yes
+					}
+				}
+			}
+			trigger_else = {
+				ruler = {
+					age >= 18
+					NOR = {
+						has_trait = psychological_affliction
+						has_trait = cancer
+						has_trait = senile
+					}
+				}
+			}
+		}
+	}
+
+	on_monthly_pulse = {
+		random_events = {
+			100 = 0
+			10 = metternich.3
+		}
+		effect = {
+			if = {
+				limit = {
+					ig:ig_landowners ?= {
+						is_in_government = no
+					}
+				}
+				change_variable = { name = landowners_out_var add = 1 }
+			}
+			else = {
+				set_variable = { name = landowners_out_var value = 0 }
+			}
+		}
+	}
+
+	on_complete = {
+		custom_tooltip = {
+			text = metternich_retirement_tt
+		}
+		trigger_event = { id = metternich.1 }
+	}
+	
+	event_outcome_completed_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = event_effects_metternich.1_tt
+			}
+		}
+	}
+
+	fail = {
+		OR = {
+			any_political_movement = {
+				is_revolutionary = yes
+			}
+			custom_tooltip = {
+				text = landowners_out_of_government_for_six_months_or_more_tt
+				exists = var:landowners_out_var
+				var:landowners_out_var > 6
+				ig:ig_landowners ?= {
+					is_in_government = no
+				}
+			}
+			custom_tooltip = {
+				text = metternich_not_leader_of_landowners_tt
+				NOT = {
+					ig:ig_landowners.leader ?= {
+						has_template = aus_klemens_von_metternich
+					}
+				}
+			}
+		}
+	}
+
+	on_fail = {
+		if = {
+			limit = {
+				ig:ig_landowners.leader ?= {
+					has_template = aus_klemens_von_metternich
+				}
+			}
+			custom_tooltip = metternich_resignation_and_flee_tt
+			trigger_event = { id = metternich.2 }
+		}
+	}
+	
+	event_outcome_failed_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = event_effects_metternich.2_tt
+			}
+		}
+	}
+
+	invalid = {
+		NOT = {
+			has_law_or_variant = law_type:law_monarchy
+		}
+	}
+
+	on_invalid = {
+		scope:metternich_scope = {
+			if = {
+				limit = {
+					is_immortal = yes
+				}
+				set_character_immortal = no
+			}
+			exile_character = yes
+		}
+	}
+
+	weight = 200
+	should_be_pinned_by_default = yes
+}

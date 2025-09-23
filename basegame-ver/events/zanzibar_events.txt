@@ -31,17 +31,24 @@ zanzibar.1 = {
 		}
 		create_country = {
 			tag = ZAN
-			origin = this
+			origin = ROOT
 			state = s:STATE_ZANZIBAR.region_state:OMA
 			on_created = {
+		 		# We are creating the Busaidi Sultanate of Zanzibar — it was very much an Arab state up until the Zanzibar Revolution
+		 		add_primary_culture = cu:bedouin
+		 		remove_primary_culture = cu:swahili
+				set_state_religion = rel:ibadi
+
 				create_character = {
-					first_name = "Majid"
-					last_name = "al_Said"
-					historical = yes
-					culture=cu:bedouin
-					ruler = yes
-					traits = { hedonist ambitious }
-					birth_date = 1834.10.19 # Majid's exact birthdate is unknown, so it is arbitrarily being set to the same month and day as the start of his reign as sultan, because a January 1st birthday is boring.
+					template = zan_majid_bin_said # Sultan Majid of Zanzibar
+				}
+				if = {
+					limit = {
+						game_date > 1837.1.1
+					}
+					create_character = {
+						template = zan_barghash_bin_said # Barghash bin Said, younger brother of Majid
+					}
 				}
 			}
 		}
@@ -86,6 +93,40 @@ zanzibar.1 = {
 			}
 			s:STATE_RIFT_VALLEY.region_state:OMA = { set_state_owner = c:ZAN }
 		}
+
+		c:ZAN ?= {
+			# if Zanzibar would not immediately trigger the fail conditions of Lion of the Zanj, give it the Lion of the Zanj JE
+			if = {
+				limit = {
+			    	NOR = {
+			    		is_subject = yes
+				        any_neighbouring_state = {
+				        	state_region = {
+								OR = {
+									this = s:STATE_KENYA
+									this = s:STATE_RIFT_VALLEY
+									this = s:STATE_ZANZIBAR
+									this = s:STATE_TANGANYIKA
+								}
+							}
+		        			OR = {
+			        			owner = {
+			        				country_is_in_africa = no
+			        			}
+			        			owner = {
+			        				is_subject = yes
+			        				top_overlord = {
+			        					country_is_in_africa = no
+			        				}
+			        			}
+		        			}
+				        }
+			        }
+				}
+
+				add_journal_entry = { type = je_lion_of_the_zanj }
+			}
+		}
 	}
 
 	option = {
@@ -121,6 +162,51 @@ zanzibar.1 = {
 				exists = s:STATE_RIFT_VALLEY.region_state:OMA
 			}
 			s:STATE_RIFT_VALLEY.region_state:OMA = { set_state_owner = c:ZAN }
+		}
+
+		if = {
+			limit = {
+				num_subjects >= 1
+			}
+			every_direct_subject = {
+				limit = {
+					country_is_in_africa = yes
+				}
+			}
+		}
+
+		c:ZAN ?= {
+			# if Zanzibar would not immediately trigger the fail conditions of Lion of the Zanj, give it the Lion of the Zanj JE
+			if = {
+				limit = {
+			    	NOR = {
+			    		is_subject = yes
+				        any_neighbouring_state = {
+				        	state_region = {
+								OR = {
+									this = s:STATE_KENYA
+									this = s:STATE_RIFT_VALLEY
+									this = s:STATE_ZANZIBAR
+									this = s:STATE_TANGANYIKA
+								}
+							}
+		        			OR = {
+			        			owner = {
+			        				country_is_in_africa = no
+			        			}
+			        			owner = {
+			        				is_subject = yes
+			        				top_overlord = {
+			        					country_is_in_africa = no
+			        				}
+			        			}
+		        			}
+				        }
+			        }
+				}
+
+				add_journal_entry = { type = je_lion_of_the_zanj }
+			}
 		}
 	}
 
@@ -165,6 +251,967 @@ zanzibar.1 = {
 			}
 			s:STATE_RIFT_VALLEY = {
 				add_claim = c:ZAN
+			}
+		}
+
+		c:ZAN ?= {
+			# if Zanzibar would not immediately trigger the fail conditions of Lion of the Zanj, give it the Lion of the Zanj JE
+			if = {
+				limit = {
+			    	NOR = {
+			    		is_subject = yes
+				        any_neighbouring_state = {
+				        	state_region = {
+								OR = {
+									this = s:STATE_KENYA
+									this = s:STATE_RIFT_VALLEY
+									this = s:STATE_ZANZIBAR
+									this = s:STATE_TANGANYIKA
+								}
+							}
+		        			OR = {
+			        			owner = {
+			        				country_is_in_africa = no
+			        			}
+			        			owner = {
+			        				is_subject = yes
+			        				top_overlord = {
+			        					country_is_in_africa = no
+			        				}
+			        			}
+		        			}
+				        }
+			        }
+				}
+
+				add_journal_entry = { type = je_lion_of_the_zanj }
+			}
+		}
+	}
+}
+
+zanzibar.2 = { # The [Nation] East African Company
+	type = country_event
+	placement = ROOT
+
+	title = zanzibar.2.t
+	desc = zanzibar.2.d
+	flavor = zanzibar.2.f
+
+	event_image = {
+		video = "africa_construction_colony"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+
+
+	immediate = {
+		save_scope_as = deag_scope
+
+		c:ZAN ?= {
+			save_scope_as = zanzibar_scope
+			capital.region = {
+				save_scope_as = zanzibar_strategic_region_scope
+			}
+		}
+
+		if = {
+			limit = {
+				any_scope_state = {
+					state_region = {
+						any_scope_state = {
+							owner = {
+								c:ZAN = this
+							}
+						}
+					}
+				}
+			}
+			random_scope_state = {
+				limit = {
+					state_region = {
+						any_scope_state = {
+							owner = {
+								c:ZAN = this
+							}
+						}
+					}
+				}
+				state_region = {
+					save_scope_as = zanzibar_tanganyika_scope
+				}
+			}
+		}
+		else = {
+			c:ZAN.capital.state_region = {
+				save_scope_as = zanzibar_tanganyika_scope
+			}
+		}
+
+		if = {
+			limit = {
+				any_interest_group = {
+					OR = {
+						law_stance = {
+							law = law_type:law_colonial_resettlement
+							value > neutral
+						}
+						law_stance = {
+							law = law_type:law_colonial_exploitation
+							value > neutral
+						}
+					}
+					is_insurrectionary = no
+					is_revolutionary = no
+				}
+			}
+			random_interest_group = {
+				limit = {
+					OR = {
+						law_stance = {
+							law = law_type:law_colonial_resettlement
+							value > neutral
+						}
+						law_stance = {
+							law = law_type:law_colonial_exploitation
+							value > neutral
+						}
+					}
+					is_insurrectionary = no
+					is_revolutionary = no
+				}
+				save_scope_as = sympathetic_to_colonialists_ig
+			}
+		}
+	}
+
+	option = {
+		name = zanzibar.2.a  # let them do their thing
+		default_option = yes
+
+		# Consolidate ZAN with any potential ongoing civil wars, just to not think about that headache
+		if = {
+			limit = {
+				any_diplomatic_play = {
+					is_diplomatic_play_type = dp_revolution
+					target = c:ZAN
+				}
+			}
+			every_country = {
+				limit = {
+					is_revolutionary = yes
+					is_diplomatic_play_enemy_of = c:ZAN
+				}
+				c:ZAN = {
+					annex = prev
+				}
+			}
+		}
+
+		# Reduce Zanzibar in Zanzibar state down to the islands of Unguja and Pemba
+		if = {
+			limit = {
+				exists = s:STATE_ZANZIBAR.region_state:ZAN
+			}
+
+			# ZAN should keep:
+			# xE020B0 - Unguja Island
+			# x414325 - Pemba Island
+
+			s:STATE_ZANZIBAR = {
+				set_owner_of_provinces = {
+					country = ROOT
+					provinces = {
+						x16F859 x438029 x6021AF x60A0AF x65FD48 x6B7D25 x7D05E3 x93DC46 xA06030 xA50F53 xE0D920 xE60324 xF87B77
+					}
+				}
+			}
+		}
+
+		# if Zanzibar is a one-state state and doesn't have STATE_ZANZIBAR at all, just... let it die, man.
+		if = {
+			limit = {
+				NOT = { exists = s:STATE_ZANZIBAR.region_state:ZAN }
+				c:ZAN = {
+					is_ai = yes
+					any_scope_state = {
+						count = 1
+					}
+				}
+			}
+			annex = c:ZAN
+		}
+
+		# if Zanzibar has more than one state, regardless of whether it's a player or AI, and regardless of whether it's a subject or independent, mess it UP
+		else_if = {
+			limit = { c:ZAN = { any_scope_state = { count > 1 } } }
+			c:ZAN = {
+				# Cede Zanzibari holdings to ROOT in any state region where ROOT already has a presence
+				every_scope_state = {
+					limit = {
+						is_capital = no
+						state_region = {
+							any_scope_state = {
+								owner = ROOT
+							}
+						}
+					}
+					set_state_owner = ROOT
+				}
+
+				# Cede Zanzibari holdings to other colonial powers in any state region where ROOT does not have a presence
+				every_scope_state = {
+					limit = {
+						is_capital = no
+						state_region = {
+							any_scope_state = {
+								owner = {
+									NOT = { ROOT = this }
+									country_is_in_africa = no
+								}
+							}
+						}
+					}
+					state_region = {
+						save_temporary_scope_as = ceded_state_region
+					}
+					region = {
+						ordered_scope_country = {
+							limit = {
+								country_is_in_africa = no
+								any_scope_state = {
+									state_region = {
+										any_scope_state = {
+											owner = c:ZAN
+										}
+									}
+								}
+							}
+							order_by = country_rank
+
+							save_temporary_scope_as = highest_ranking_colonizer
+						}
+					}
+					set_state_owner = scope:highest_ranking_colonizer
+
+					if = {
+						limit = {
+							scope:highest_ranking_colonizer = {
+								is_player = yes
+							}
+						}
+						scope:highest_ranking_colonizer = {
+							post_notification = zanzibar_2_player_notification
+						}
+					}
+				}
+
+				# Any Zanzibari states that are not the capital state and are not touched by outside colonizers become breakaway states
+
+				every_scope_state = {
+					limit = {
+						is_capital = no
+						state_region = {
+							NOT = {
+								any_scope_state = {
+									owner = {
+										country_is_in_africa = yes
+									}
+								}
+							}
+						}
+					}
+					create_dynamic_country = {
+						origin = c:ZAN
+						country_type = unrecognized
+						tier = principality
+						culture = cu:swahili
+						religion = rel:sunni
+						capital = prev
+					}
+				}
+			}
+		}
+
+		c:ZAN = {
+			trigger_event = { id = zanzibar.3 }
+		}
+
+		hidden_effect = {
+			# notify countries with an interest in Zanzibar's strategic region what's going on
+			every_country = {
+				limit = {
+					NOR = {
+						is_country_type = decentralized
+						ROOT = this
+						c:ZAN ?= this
+						AND = {
+							any_scope_state = {
+					        	OR = {
+									state_region = s:STATE_KENYA
+									state_region = s:STATE_RIFT_VALLEY
+									state_region = s:STATE_ZANZIBAR
+									state_region = s:STATE_TANGANYIKA
+									state_region = s:STATE_LINDI
+								}
+							}
+						}
+					}
+					has_interest_marker_in_region = scope:zanzibar_strategic_region_scope # probably region_zanj 99% of the time
+				}
+				post_notification = zanzibar_2_notification
+			}
+		}
+
+		### remember, you too experience politics
+		every_interest_group = {
+			limit = {
+				OR = {
+					law_stance = {
+						law = law_type:law_colonial_resettlement
+						value > neutral
+					}
+					law_stance = {
+						law = law_type:law_colonial_exploitation
+						value > neutral
+					}
+				}
+				is_insurrectionary = no
+				is_revolutionary = no
+			}
+			add_modifier = {
+				name = ig_colonialists_pleased
+				days = normal_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_interest_group = {
+						OR = {
+							law_stance = {
+								law = law_type:law_colonial_resettlement
+								value > neutral
+							}
+							law_stance = {
+								law = law_type:law_colonial_exploitation
+								value > neutral
+							}
+						}
+						is_insurrectionary = no
+						is_revolutionary = no
+					}
+				}
+			}
+			ig:ig_armed_forces ?= {
+				add_modifier = {
+					name = ig_colonialists_pleased
+					days = normal_modifier_time
+				}
+			}
+		}
+	}
+
+	option = {
+		name = zanzibar.2.b  # hey buddy cut that out
+		trigger = { is_player = yes } # why even bother giving this option to the AI
+
+		every_interest_group = {
+			limit = {
+				OR = {
+					law_stance = {
+						law = law_type:law_colonial_resettlement
+						value > neutral
+					}
+					law_stance = {
+						law = law_type:law_colonial_exploitation
+						value > neutral
+					}
+				}
+				is_insurrectionary = no
+				is_revolutionary = no
+			}
+			add_modifier = {
+				name = ig_colonialists_displeased
+				days = normal_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_interest_group = {
+						OR = {
+							law_stance = {
+								law = law_type:law_colonial_resettlement
+								value > neutral
+							}
+							law_stance = {
+								law = law_type:law_colonial_exploitation
+								value > neutral
+							}
+						}
+						is_insurrectionary = no
+						is_revolutionary = no
+					}
+				}
+			}
+			ig:ig_armed_forces ?= {
+				add_modifier = {
+					name = ig_colonialists_displeased
+					days = normal_modifier_time
+				}
+			}
+		}
+	}
+}
+
+zanzibar.3 = { # The Lion With No Pride
+	type = country_event
+	placement = ROOT
+
+	title = zanzibar.3.t
+	desc = zanzibar.3.d
+	flavor = zanzibar.3.f
+
+	event_image = {
+		video = "southamerica_war_civilians"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+
+	option = {
+		name = zanzibar.3.a
+		default_option = yes
+
+		custom_tooltip = {
+			text = zanzibar.3.tt
+		}
+
+		if = {
+			limit = {
+				is_subject = no
+				any_subject_or_below = {
+					NOT = { any_overlord_or_above = { NOT = { ROOT = this } } }
+				}
+			}
+			every_subject_or_below = {
+				limit = {
+					NOT = { any_overlord_or_above = { NOT = { ROOT = this } } }
+				}
+				make_independent = yes
+			}
+		}
+	}
+}
+
+# Heirs of Queen Aziza
+zanzibar.4 = {
+	type = country_event
+	placement = ROOT
+
+	title = zanzibar.4.t
+	desc = zanzibar.4.d
+	flavor = zanzibar.4.f
+
+	event_image = {
+		video = "africa_diplomats_negotiating"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+
+	option = {
+		name = zanzibar.4.a
+		default_option = yes
+
+		show_as_tooltip = {
+			if = {
+				limit = { NOT = { owns_entire_state_region = STATE_RIFT_VALLEY } }
+				s:STATE_RIFT_VALLEY = {
+					add_claim = ROOT
+				}
+			}
+			if = {
+				limit = { NOT = { owns_entire_state_region = STATE_TANGANYIKA } }
+				s:STATE_TANGANYIKA = {
+					add_claim = ROOT
+				}
+			}
+			if = {
+				limit = { NOT = { owns_entire_state_region = STATE_KENYA } }
+				s:STATE_KENYA = {
+					add_claim = ROOT
+				}
+			}
+			if = {
+				limit = { NOT = { owns_entire_state_region = STATE_ZANZIBAR } }
+				s:STATE_ZANZIBAR = {
+					add_claim = ROOT
+				}
+			}
+			if = {
+				limit = { NOT = { owns_entire_state_region = STATE_LINDI } }
+				s:STATE_LINDI = {
+					add_claim = ROOT
+				}
+			}
+
+			if = {
+				limit = {
+					any_primary_culture = { cu:bedouin = this }
+					owns_entire_state_region = STATE_RIFT_VALLEY
+					owns_entire_state_region = STATE_TANGANYIKA
+					owns_entire_state_region = STATE_KENYA
+					owns_entire_state_region = STATE_ZANZIBAR
+					owns_entire_state_region = STATE_LINDI
+				}
+				s:STATE_ZANZIBAR = {
+					add_homeland = cu:bedouin
+				}
+			}
+			if = {
+				limit = {
+					any_primary_culture = { cu:swahili = this }
+					owns_entire_state_region = STATE_RIFT_VALLEY
+					owns_entire_state_region = STATE_TANGANYIKA
+					owns_entire_state_region = STATE_KENYA
+					owns_entire_state_region = STATE_ZANZIBAR
+					owns_entire_state_region = STATE_LINDI
+				}
+				s:STATE_RIFT_VALLEY = {
+					add_homeland = cu:swahili
+				}
+				s:STATE_TANGANYIKA = {
+					add_homeland = cu:swahili
+				}
+				s:STATE_LINDI = {
+					add_homeland = cu:swahili
+				}
+			}
+		}
+	}
+}
+
+# Tippu Tip
+zanzibar.5 = {
+	type = country_event
+	placement = root
+	title = zanzibar.5.t
+	desc = zanzibar.5.d
+	flavor = zanzibar.5.f
+
+	duration = 3
+
+	event_image = {
+		video = "europenorthamerica_springtime_of_nations"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	trigger = {
+		game_date > 1865.1.1
+		game_date < 1890.1.1
+
+		NOT = { has_global_variable = tippu_tip_appeared }
+
+		# Zanzibar is doing a colonialism
+		NOT = {
+			has_law_or_variant = law_type:law_no_colonial_affairs
+		}
+		any_scope_state = {
+			is_under_colonization = yes
+		}
+
+		# 'Lualaba' (actually Congo Orientale) should not be colonized by anyone yet
+		s:STATE_CONGO_ORIENTALE = {
+			NOT = {
+				any_scope_state = {
+					NOT = { owner = { is_country_type = decentralized } }
+				}
+			}
+		}
+	}
+
+	immediate = {
+		set_global_variable = tippu_tip_appeared
+		s:STATE_CONGO_ORIENTALE = {
+			random_scope_state = {
+				limit = {
+					owner = {
+						is_country_type = decentralized
+					}
+				}
+				save_scope_as = tippu_tip_state
+			}
+		}
+	}
+
+	option = {
+		name = zanzibar.5.a
+		default_option = yes
+		custom_tooltip = {
+			text = tippu_tip_country_spawn_tt
+			create_country = {
+				origin = ROOT
+				tag = UTR
+				state = scope:tippu_tip_state
+
+				on_created = {
+					activate_law = law_type:law_slave_trade
+					create_character = {
+						template = zan_tippu_tip
+						on_created = {
+							set_character_as_ruler = yes
+						}
+					}
+					if = {
+						limit = {
+							capital = {
+								NOT = {
+									any_scope_building = {
+										is_building_type = building_barracks
+										level > 2
+									}
+								}
+							}
+						}
+						capital = {
+							create_building={
+								building="building_barracks"
+								level=2
+								reserves=1
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		ai_chance = {
+			base = 1
+
+			modifier = {
+				trigger = {
+					ruler ?= {
+						OR = {
+							has_trait = ambitious
+							has_trait = reckless
+						}
+					}
+				}
+				add = -10
+			}
+			modifier = {
+				trigger = {
+					ruler ?= {
+						OR = {
+							has_trait = cautious
+							has_trait = tactful
+						}
+					}
+				}
+				add = 10
+			}
+		}
+	}
+	option = {
+		name = zanzibar.5.b
+		custom_tooltip = {
+			text = tippu_tip_country_spawn_subject_tt
+			create_country = {
+				origin = ROOT
+				tag = UTR
+				state = scope:tippu_tip_state
+
+				on_created = {
+					activate_law = law_type:law_slave_trade
+					create_character = {
+						template = zan_tippu_tip
+						ruler = yes
+					}
+				}
+			}
+
+			ROOT = {
+				create_diplomatic_pact = {
+					country = c:UTR
+					type = tributary
+				}
+			}
+		}
+
+		every_interest_group = {
+			limit = {
+				leader = {
+					has_ideology = ideology:ideology_abolitionist
+				}
+			}
+			add_modifier = {
+				name = ig_abolitionists_mad
+				days = normal_modifier_time
+			}
+		}
+
+		# nobody else liked this
+		je:je_earn_recognition ?= {
+			add_progress = { value = -50 name = earn_recognition_progress_bar }
+		}
+
+		ai_chance = {
+			base = 1
+
+			modifier = {
+				trigger = {
+					ruler ?= {
+						has_ideology = ideology:ideology_slaver
+					}
+				}
+				add = 5
+			}
+			modifier = {
+				trigger = {
+					ruler ?= {
+						OR = {
+							has_trait = ambitious
+							has_trait = reckless
+						}
+					}
+				}
+				add = 10
+			}
+			modifier = {
+				trigger = {
+					ruler ?= {
+						OR = {
+							has_trait = cautious
+							has_trait = tactful
+						}
+					}
+				}
+				add = -10
+			}
+			modifier = {
+				trigger = {
+					any_interest_group ?= {
+						leader = {
+							has_ideology = ideology:ideology_slaver
+						}
+					}
+				}
+				add = 5
+			}
+		}
+	}
+	option = {
+		name = zanzibar.5.c
+
+		custom_tooltip = {
+			text = tippu_tip_spawn_tt
+			create_character = {
+				template = zan_tippu_tip
+				on_created = {
+					add_character_role = agitator
+					remove_character_role = general
+					if = {
+						limit = { c:ZAN ?= { NOT = { has_law_or_variant = law_type:law_slavery_banned } } }
+						set_ideology = ideology:ideology_traditionalist
+					}
+				}
+			}
+		}
+
+		# nods of approval from the sidelines
+		je:je_earn_recognition ?= {
+			add_progress = { value = 10 name = earn_recognition_progress_bar }
+		}
+
+		ai_chance = {
+			base = 0
+
+			modifier = {
+				trigger = {
+					ruler ?= {
+						OR = {
+							has_ideology = ideology:ideology_abolitionist
+							has_ideology = ideology:ideology_humanitarian
+							has_ideology = ideology:ideology_humanitarian_royalist
+						}
+					}
+				}
+				add = 25
+			}
+			modifier = {
+				trigger = {
+					any_interest_group ?= {
+						leader = {
+							OR = {
+								has_ideology = ideology:ideology_abolitionist
+								has_ideology = ideology:ideology_humanitarian
+								has_ideology = ideology:ideology_humanitarian_royalist
+							}
+						}
+					}
+				}
+				add = 5
+			}
+		}
+	}
+	option = {
+		name = zanzibar.5.dd
+		highlighted_option = yes
+		trigger = {
+			OR = {
+				ruler ?= {
+					has_ideology = ideology:ideology_slaver
+				}
+				any_interest_group = {
+					is_in_government = yes
+					leader = { has_ideology = ideology:ideology_slaver }
+				}
+			}
+		}
+
+		custom_tooltip = {
+			text = tippu_tip_general_tt
+			create_character = {
+				template = zan_tippu_tip
+			}
+		}
+
+		every_interest_group = {
+			limit = {
+				leader = {
+					has_ideology = ideology:ideology_abolitionist
+				}
+			}
+			add_modifier = {
+				name = ig_abolitionists_mad
+				days = normal_modifier_time
+			}
+		}
+
+		# head-shakes of disapproval from the sidelines
+		je:je_earn_recognition ?= {
+			add_progress = { value = -10 name = earn_recognition_progress_bar }
+		}
+
+		ai_chance = {
+			base = 0
+
+			modifier = {
+				trigger = {
+					ruler ?= {
+						has_ideology = ideology:ideology_slaver
+					}
+				}
+				add = 25
+			}
+			modifier = {
+				trigger = {
+					any_interest_group ?= {
+						leader = {
+							has_ideology = ideology:ideology_slaver
+						}
+					}
+				}
+				add = 5
+			}
+		}
+	}
+}
+
+# The End of Arab Rule
+zanzibar.6 = {
+	type = country_event
+	placement = root
+	title = zanzibar.6.t
+	desc = zanzibar.6.d
+	flavor = zanzibar.6.f
+
+	duration = 3
+
+	event_image = {
+		video = "europenorthamerica_springtime_of_nations"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	trigger = {
+		# triggered by on_new_ruler on_action
+	}
+
+	immediate = {
+		ruler ?= {
+			save_scope_as = zan_ruler
+			culture = {
+				save_scope_as = zan_ruler_culture
+			}
+		}
+		cu:swahili = {
+			save_scope_as = zan_swahili_culture
+		}
+		cu:bedouin = {
+			save_scope_as = zan_omani_culture
+		}
+
+		set_global_variable = decided_future_of_zanzibar
+	}
+
+	option = {
+		name = zanzibar.6.a
+		default_option = yes
+
+		add_primary_culture = cu:swahili
+		set_state_religion = rel:sunni
+		remove_primary_culture = cu:bedouin
+
+		add_radicals = {
+			culture = cu:bedouin
+			value = very_large_radicals
+		}
+
+		ai_chance = {
+			base = 1
+		}
+	}
+
+	option = {
+		name = zanzibar.6.b
+
+		# Zanzibar remains an Arab state
+
+		add_radicals = {
+			culture = cu:swahili
+			value = very_large_radicals
+		}
+
+		ai_chance = {
+			base = 0
+
+			modifier = {
+				trigger = {
+					ruler ?= {
+						culture = {
+							has_discrimination_trait_group = heritage_group_middle_eastern
+						}
+					}
+				}
+				add = 10
 			}
 		}
 	}

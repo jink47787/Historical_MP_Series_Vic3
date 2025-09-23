@@ -43,6 +43,20 @@ war_exhaustion_from_country_turmoil = {
 	add = country_turmoil
 	multiply = define:NWar|WAR_EXHAUSTION_TURMOIL_FACTOR
 }
+war_support_from_fervor = {
+	if = {
+		limit = {
+			scope:war = {
+				OR = {
+					is_target_of_wargoal_in_war = root
+					is_holder_of_wargoal_in_war = root
+				}
+			}
+		}
+		subtract = country_fervor_primary_culture
+		multiply = define:NPops|CULTURAL_FERVOR_WAR_SUPPORT_EFFECT
+	}
+}
 
 war_exhaustion = {
 	# save all values that make up the war exhaustion calculation since we frequently refer to them numerous times below
@@ -56,6 +70,8 @@ war_exhaustion = {
 	save_temporary_value_as = temp_war_exhaustion_from_acceptance_of_dead
 	value = war_exhaustion_from_country_turmoil
 	save_temporary_value_as = temp_war_exhaustion_from_country_turmoil
+	value = war_support_from_fervor
+	save_temporary_value_as = temp_war_support_from_fervor
 	value = war_exhaustion_from_lobby_clout
 	save_temporary_value_as = temp_war_exhaustion_from_lobby_clout
 	value = war_support_from_lobby_clout
@@ -165,6 +181,14 @@ war_exhaustion = {
 	}
 
 	if = {
+		limit = { scope:temp_war_support_from_fervor <= -0.01 }
+		add = {
+			add = scope:temp_war_support_from_fervor
+			desc = "WAR_SUPPORT_FROM_FERVOR"
+		}
+	}
+
+	if = {
 		limit = { scope:temp_war_exhaustion_from_country_turmoil >= 0.01 }
 		add = {
 			add = scope:temp_war_exhaustion_from_country_turmoil
@@ -194,4 +218,5 @@ war_exhaustion = {
 	}
 
 	max = define:NWar|WAR_EXHAUSTION_MAX
+	min = define:NWar|WAR_EXHAUSTION_MIN
 }

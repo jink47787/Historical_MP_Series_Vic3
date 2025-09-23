@@ -79,8 +79,14 @@ types sway_country_types
 							}
 
 							sway_offer_item = {
-								visible = "[And( Not( SwayOffer.RequiresAnyInput ), Or( DiplomaticPlay.IsPrimaryParticipant(GetPlayer), DiplomaticPlay.IsUndecidedParticipant(GetPlayer) ) )]"
+								visible = "[And( Not( SwayOffer.RequiresAnyInput ), And(Or( DiplomaticPlay.IsPrimaryParticipant(GetPlayer), DiplomaticPlay.IsUndecidedParticipant(GetPlayer) ), Not( GetPlayer.HasAnyAllianceLikeTreatiesWith(SwayCountryPanel.GetOtherCountry.Self) ) ) )]"
 								onclick = "[Execute( SwayCountryPanel.AccessDiplomaticPlay.CreateSway( GetPlayer.Self, SwayCountryPanel.GetCountry, SwayOffer.Self ))]"
+								onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+							}
+
+							sway_offer_item = {
+								visible = "[And( Not( SwayOffer.RequiresAnyInput ), And(Or( DiplomaticPlay.IsPrimaryParticipant(GetPlayer), DiplomaticPlay.IsUndecidedParticipant(GetPlayer) ), GetPlayer.HasAnyAllianceLikeTreatiesWith(SwayCountryPanel.GetOtherCountry.Self) ) )]"
+								onclick = "[PopupManager.AskConfirmation( SwayCountryPanel.AccessDiplomaticPlay.CreateSway( GetPlayer.Self, SwayCountryPanel.GetCountry, SwayOffer.Self ))]"
 								onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
 							}
 
@@ -110,12 +116,23 @@ types sway_country_types
 					visible = "[DiplomaticPlay.IsInitiator(SwayCountryPanel.GetCountry)]"
 
 					direct_support_button = {
-						visible = "[DiplomaticPlay.IsUndecidedParticipant(GetPlayer)]"
+						visible = "[And(DiplomaticPlay.IsUndecidedParticipant(GetPlayer), Not(GetPlayer.HasAnyAllianceLikeTreatiesWith(DiplomaticPlay.GetInitiator)))]"
 
 						blockoverride "button_properties" {
 							enabled = "[DiplomaticPlay.CanSupportInitiator(GetPlayer)]"
 							tooltip = "SUPPORT_INITIATOR_DIPLOMATIC_PLAY_TOOLTIP"
 							onclick = "[Execute(DiplomaticPlay.SupportInitiator(GetPlayer))]"
+							onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+						}
+					}
+
+					direct_support_button = {
+						visible = "[And(DiplomaticPlay.IsUndecidedParticipant(GetPlayer), GetPlayer.HasAnyAllianceLikeTreatiesWith(DiplomaticPlay.GetInitiator))]"
+
+						blockoverride "button_properties" {
+							enabled = "[DiplomaticPlay.CanSupportInitiator(GetPlayer)]"
+							tooltip = "SUPPORT_INITIATOR_DIPLOMATIC_PLAY_TOOLTIP"
+							onclick = "[PopupManager.AskConfirmation(DiplomaticPlay.SupportInitiator(GetPlayer))]"
 							onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
 						}
 					}
@@ -137,7 +154,7 @@ types sway_country_types
 					visible = "[DiplomaticPlay.IsTarget(SwayCountryPanel.GetCountry)]"
 
 					direct_support_button = {
-						visible = "[DiplomaticPlay.IsUndecidedParticipant(GetPlayer)]"
+						visible = "[And(DiplomaticPlay.IsUndecidedParticipant(GetPlayer), Not(GetPlayer.HasAnyAllianceLikeTreatiesWith(DiplomaticPlay.GetInitiator)))]"
 
 						blockoverride "button_properties" {
 							enabled = "[DiplomaticPlay.CanSupportTarget(GetPlayer)]"
@@ -148,12 +165,23 @@ types sway_country_types
 					}
 
 					direct_support_button = {
+						visible = "[And(DiplomaticPlay.IsUndecidedParticipant(GetPlayer), GetPlayer.HasAnyAllianceLikeTreatiesWith(DiplomaticPlay.GetInitiator))]"
+
+						blockoverride "button_properties" {
+							enabled = "[DiplomaticPlay.CanSupportTarget(GetPlayer)]"
+							tooltip = "SUPPORT_TARGET_DIPLOMATIC_PLAY_TOOLTIP"
+							onclick = "[PopupManager.AskConfirmation(DiplomaticPlay.SupportTarget(GetPlayer))]"
+							onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+						}
+					}
+
+					direct_support_button = {
 						visible = "[DiplomaticPlay.IsBacker(GetPlayer)]"
 
 						blockoverride "button_properties" {
-							enabled = "[DiplomaticPlay.CanSupportInitiator(GetPlayer)]"
-							tooltip = "SUPPORT_INITIATOR_DIPLOMATIC_PLAY_TOOLTIP"
-							onclick = "[PopupManager.AskConfirmation(DiplomaticPlay.SupportInitiator(GetPlayer))]"
+							enabled = "[DiplomaticPlay.CanSupportTarget(GetPlayer)]"
+							tooltip = "SUPPORT_TARGET_DIPLOMATIC_PLAY_TOOLTIP"
+							onclick = "[PopupManager.AskConfirmation(DiplomaticPlay.SupportTarget(GetPlayer))]"
 							onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
 						}
 					}

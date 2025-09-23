@@ -1,0 +1,2664 @@
+﻿namespace = montenegrin_raiding
+
+#Ottomans Fight back if you raid too much, the first time.
+montenegrin_raiding.1 = {
+	type = country_event
+	placement = ROOT
+
+	title = montenegrin_raiding.1.t
+	desc = montenegrin_raiding.1.d
+	flavor = montenegrin_raiding.1.f
+
+	event_image = {
+		video = "ep1_redcoats"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	duration = 3
+
+	dlc = dlc014
+
+	# cooldown = Only fires once due to var Njegos_brother_dead
+
+	trigger = {
+		NOR = {
+			has_variable = Njegos_brother_dead
+			c:TUR ?= {
+				OR = {
+					is_at_war = yes
+					is_diplomatic_play_committed_participant = yes
+				}
+			}
+			ROOT = {
+				OR = {
+					is_at_war = yes
+					is_diplomatic_play_committed_participant = yes
+					is_diplomatic_play_undecided_participant = yes
+				}
+			}
+		}
+	}
+
+	cancellation_trigger = { #super edgecase, keep QA happy
+		NOT = {
+			exists = c:TUR
+		}
+	}
+
+	immediate = {
+		c:TUR ?= {
+			save_scope_as = ottoman
+		}
+		set_variable = {
+			name = mon_was_raided
+			days = long_modifier_time
+		}
+		set_variable = Njegos_brother_dead
+	}
+
+	after = {
+		custom_tooltip = {
+			text = no_more_raids_for_a_while
+		}
+	}
+
+	option = { # legitamacy add
+		name = montenegrin_raiding.1.a
+		default_option = yes
+		add_modifier = {
+			name = modifier_mon_mourn_together
+			years = 3
+		}
+		kill_population_percent = {
+			pop_type = soldiers
+			percent = 0.20
+		}
+		destroy_barracks = yes
+		c:RUS ?= {
+			change_relations = {
+				country = c:TUR
+				value = -30
+			}
+			create_diplomatic_catalyst = {
+				type = catalyst_event_negative
+				target = c:TUR
+			}
+		}
+	}
+
+	option = { # construction add
+		name = montenegrin_raiding.1.b
+		add_modifier = {
+			name = modifier_mon_rebuild
+			years = 3
+		}
+		kill_population_percent = {
+			pop_type = soldiers
+			percent = 0.20
+		}
+		destroy_barracks = yes
+ 		c:RUS ?= {
+			change_relations = {
+				country = c:TUR
+				value = -30
+			}
+			create_diplomatic_catalyst = {
+				type = catalyst_event_negative
+				target = c:TUR
+			}
+		}
+	}
+}
+
+
+#Ottomans Fight back if you raid too much, repeatable version.
+montenegrin_raiding.2 = {
+	type = country_event
+	placement = ROOT
+
+	title = montenegrin_raiding.2.t
+	desc = montenegrin_raiding.2.d
+	flavor = montenegrin_raiding.2.f
+
+	event_image = {
+		video = "ip3_angry_mob_raiding_minorities"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	duration = 3
+
+	dlc = dlc014
+
+	cooldown = { days = long_modifier_time }
+
+	trigger = {
+		has_variable = Njegos_brother_dead
+		NOR = {
+			c:TUR ?= {
+				OR = {
+					is_at_war = yes
+					is_diplomatic_play_committed_participant = yes
+				}
+			}
+			ROOT = {
+				OR = {
+					is_at_war = yes
+					is_diplomatic_play_committed_participant = yes
+					is_diplomatic_play_undecided_participant = yes
+				}
+			}
+			has_variable = mon_was_raided #stops this event happening too soon after first massacre.
+		}
+
+	}
+
+	cancellation_trigger = { #super edgecase, keep QA happy
+		NOT = {
+			exists = c:TUR
+		}
+	}
+
+	immediate = {
+		c:TUR ?= {
+			save_scope_as = ottoman
+		}
+	}
+
+	after = {
+		custom_tooltip = {
+			text = no_more_raids_for_a_while
+		}
+	}
+
+	option = { # fight back
+		name = montenegrin_raiding.2.a
+		kill_population_percent = {
+			pop_type = soldiers
+			percent = 0.12
+		}
+		destroy_barracks = yes
+		c:RUS ?= {
+			change_relations = {
+				country = c:TUR
+				value = -30
+			}
+			create_diplomatic_catalyst = {
+				type = catalyst_event_negative
+				target = c:TUR
+			}
+		}
+	}
+
+	option = { # construction add
+		name = montenegrin_raiding.2.b
+		default_option = yes
+		kill_population_percent = {
+			pop_type = soldiers
+			percent = 0.08
+		}
+		s:STATE_MONTENEGRO = {
+			add_devastation = 35
+		}
+		destroy_barracks = yes
+		c:RUS ?= {
+			change_relations = {
+				country = c:TUR
+				value = -30
+			}
+			create_diplomatic_catalyst = {
+				type = catalyst_event_negative
+				target = c:TUR
+			}
+		}
+	}
+	option = { # give up
+		name = montenegrin_raiding.2.c
+		c:TUR ?= {
+			create_diplomatic_pact = {
+				country = ROOT
+				type = protectorate
+  	 		}
+  		}
+  	}
+}
+
+namespace = mon_state_formation
+
+#Rebels to Nation Journal entry success event
+mon_state_formation.1 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.1.t
+	desc = mon_state_formation.1.d
+	flavor = mon_state_formation.1.f
+
+	event_image = {
+		video = "ep1_cossacks"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	duration = 9
+
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = { #fired by JE success
+	}
+
+	immediate = {
+		c:TUR ?= {
+			save_scope_as = ottoman
+		}
+	}
+
+	option = { # take the deal
+		name = mon_state_formation.1.a
+		default_option = yes
+		trigger = {
+			exists = c:TUR
+		}
+		if = {
+			limit = {
+				p:xA12F82 = {
+					OR = {
+						c:TUR ?= state.owner
+						c:AUS ?= state.owner
+					}
+				}
+				p:xF5F6C2 = {
+					OR = {
+						c:TUR ?= state.owner
+						c:AUS ?= state.owner
+					}
+				}
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						OR = {
+							p:xA12F82 = { c:TUR ?= state.owner }
+							p:xF5F6C2 = { c:TUR ?= state.owner }
+						}
+					}
+					
+					s:STATE_MONTENEGRO = {
+						region_state:TUR?={
+							add_radicals_in_state = {
+								value = -1
+							}
+						}
+					}					
+				}
+				if = {
+					limit = {
+						OR = {
+							p:xA12F82 = { c:AUS ?= state.owner }
+							p:xF5F6C2 = { c:AUS ?= state.owner }
+						}
+					}
+					
+					s:STATE_MONTENEGRO = {
+						region_state:AUS?={
+							add_radicals_in_state = {
+								value = -1
+							}
+						}
+					}					
+				}				
+			}		
+			s:STATE_MONTENEGRO = {
+				set_owner_of_provinces = {
+					country = ROOT
+					provinces = { xA12F82 xF5F6C2 }
+				}
+			}
+		}
+		else = {
+			random_neighbouring_state = {
+				limit = {
+	                owner = c:TUR
+	            }
+	            set_state_owner = root
+			}
+		}
+		add_loyalists = {
+			value = large_radicals
+		}		
+		custom_tooltip = {
+			text = mon_stop_raiding_deal_tt
+			set_variable = {
+				name = mon_stop_raiding_deal
+			}
+		}
+		custom_tooltip = {
+			text = mon_stop_aid_deal_tt
+			remove_modifier = modifier_montenegrin_aid
+			add_modifier = { 
+				name = modifier_montenegrin_aid_plus
+			}
+		}
+		add_modifier = {
+			name = modifier_mon_gold_reserves_plus
+		}
+	}
+
+	option = { # fight to the death
+		name = mon_state_formation.1.b
+		custom_tooltip = {
+			text = mon_stop_aid_nodeal_tt
+			remove_modifier = modifier_montenegrin_aid
+		}
+		c:RUS ?= {
+			change_relations = {
+				country = root
+				value = -30
+			}
+		}
+		add_loyalists = {
+			value = huge_radicals
+		}		
+		add_modifier = {
+				name = modifier_mon_to_the_death
+				days = very_long_modifier_time
+				is_decaying = yes
+		}
+	}
+
+	option = { # sly liars
+		name = mon_state_formation.1.c
+		trigger = {
+			exists = c:TUR
+			any_neighbouring_state = {
+				owner = c:TUR
+			}
+		}
+		if = {
+			limit = {
+				p:xA12F82 = {
+					OR = {
+						c:TUR ?= state.owner
+						c:AUS ?= state.owner
+					}
+				}
+				p:xF5F6C2 = {
+					OR = {
+						c:TUR ?= state.owner
+						c:AUS ?= state.owner
+					}
+				}
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						OR = {
+							p:xA12F82 = { c:TUR ?= state.owner }
+							p:xF5F6C2 = { c:TUR ?= state.owner }
+						}
+					}
+					
+					s:STATE_MONTENEGRO = {
+						region_state:TUR?={
+							add_radicals_in_state = {
+								value = -1
+							}
+						}
+					}					
+				}
+				if = {
+					limit = {
+						OR = {
+							p:xA12F82 = { c:AUS ?= state.owner }
+							p:xF5F6C2 = { c:AUS ?= state.owner }
+						}
+					}
+					
+					s:STATE_MONTENEGRO = {
+						region_state:AUS?={
+							add_radicals_in_state = {
+								value = -1
+							}
+						}
+					}					
+				}				
+			}
+			s:STATE_MONTENEGRO = {
+				set_owner_of_provinces = {
+					country = ROOT
+					provinces = { xA12F82 xF5F6C2 }
+				}
+			}			
+		}
+		else = {
+			random_neighbouring_state = {
+				limit = {
+	                owner = c:TUR
+	            }
+	            set_state_owner = root
+			}
+		}
+		add_loyalists = {
+			value = very_large_radicals
+		}		
+		custom_tooltip = {
+			text = mon_stop_aid_liars_tt
+		}
+		custom_tooltip = {
+			text = mon_stop_aid_nodeal_tt
+			remove_modifier = modifier_montenegrin_aid
+		}
+		c:RUS ?= {
+			change_relations = {
+				country = root
+				value = -30
+			}
+		}
+		russia_breaks_independence_pact = yes
+		change_infamy = 15
+	}
+}
+
+#Russian Visit Event
+mon_state_formation.2 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.2.t
+	desc = mon_state_formation.2.d
+	flavor = mon_state_formation.2.f
+
+	event_image = {
+		video = "unspecific_ruler_speaking_to_people"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	duration = 3
+
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		ruler ?= {
+			has_variable = is_away
+		}
+	}
+
+	cancellation_trigger = {
+		ruler ?= { 
+			NOT = {
+				has_variable = is_away
+			}
+		}
+	}
+
+	immediate = {
+	}
+
+	option = { # Pure Relations
+		name = mon_state_formation.2.a
+		default_option = yes
+		c:RUS ?= {
+			change_relations = {
+				country = root
+				value = 40
+			}
+		}
+		hidden_effect = {
+			remove_modifier = modifier_mon_no_passing_laws
+			ruler ?= {
+				remove_variable = is_away
+			}
+		}
+	}
+
+	option = { # Visit the Cathedrals too
+		name = mon_state_formation.2.b
+		c:RUS ?= {
+			change_relations = {
+				country = root
+				value = 30
+			}
+		}
+		ig:ig_devout ?= {
+			add_modifier = {
+				name = modifier_visited_st_basils
+				days = long_modifier_time
+			}
+		}
+		hidden_effect = {
+			remove_modifier = modifier_mon_no_passing_laws
+			ruler ?= {
+				remove_variable = is_away
+			}
+		}
+	}
+}
+
+#Canonize Petar I event
+mon_state_formation.3 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.3.t
+	desc = mon_state_formation.3.d
+	flavor = mon_state_formation.3.f
+
+	event_image = {
+		video = "southamerica_christianity"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/tutorial_icon.dds"
+
+	duration = 3
+
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+	}
+
+	immediate = {
+		set_variable = mon_saint_made
+		ruler = {
+			save_scope_as = ruler_scope
+		}
+	}
+
+	cancellation_trigger = {
+		scope:ruler_scope = {
+			is_character_alive = no
+		}
+	}
+
+	option = { # Loyalists from the masses
+		name = mon_state_formation.3.a
+		default_option = yes
+		add_loyalists = {
+			value = 0.75
+			interest_group = ig:ig_devout
+		}
+		add_loyalists = {
+			value = 0.25
+			strata = lower
+		}
+		add_loyalists = {
+			value = 0.10
+			strata = middle
+		}
+		ig:ig_devout ?= {
+			add_modifier = {
+				name = modifier_mon_pilgrims
+				days = long_modifier_time
+			}
+		}
+	}
+
+	option = { # IG and Less Radicals
+		name = mon_state_formation.3.b
+		add_loyalists = {
+			value = 0.2
+			interest_group = ig:ig_devout
+		}
+		add_modifier = {
+			name = modifier_mon_vision
+			days = long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = { # Moral
+		name = mon_state_formation.3.c
+		add_loyalists = {
+			value = 0.1
+			interest_group = ig:ig_devout
+		}
+		add_loyalists = {
+			value = 0.2
+			interest_group = ig:ig_armed_forces
+		}
+		add_loyalists = {
+			value = 0.3
+			pop_type = soldiers
+		}
+		add_modifier = {
+			name = modifier_mon_military_saints
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+}
+
+#Ditch Russia and side with Austria to gain port.
+mon_state_formation.4 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.4.t
+	desc = mon_state_formation.4.d
+	flavor = mon_state_formation.4.f
+
+	event_image = {
+		video = "unspecific_steam_ship"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	duration = 3
+
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+	}
+
+	immediate = {
+		c:AUS ?= {
+				save_scope_as = Austria
+		}
+	}
+
+	option = { # Trade boost
+		name = mon_state_formation.4.a
+		default_option = yes
+		add_modifier = {
+			name = modifier_mon_trade
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = { # Further this alliance
+		name = mon_state_formation.4.b
+		c:AUS ?= {
+			change_relations = {
+				country = root
+				value = 30
+			}
+			create_diplomatic_catalyst = {
+				type = catalyst_event_positive
+				target = root
+			}
+		}
+	}
+
+	option = { # Rifles
+		name = mon_state_formation.4.c
+		add_modifier = {
+			name = modifier_mon_aus_military
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+}
+
+#Serbia and Montenegro unite.
+mon_state_formation.5 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.5.t
+	desc = mon_state_formation.5.d
+	flavor = mon_state_formation.5.f
+
+	event_image = {
+		video = "southamerica_factory_opening"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		c:SER ?= {
+			exists = yes
+		}
+		c:MON ?= {
+			exists = yes
+		}
+	}
+
+	cancellation_trigger = { #This trigger now works, QA modified!
+		OR = {
+        	NOT = { exists = c:SER }
+        	NOT = { exists = c:MON }
+    	}
+	}
+
+	immediate = {
+		c:SER ?= {
+				save_scope_as = serbia
+		}
+		c:MON ?= {
+				save_scope_as = montenegro
+		}
+	}
+
+	option = { # Montenegro
+		name = mon_state_formation.5.a
+		custom_tooltip = {
+			text = mon_annexes_ser_tt
+			if = {
+				limit = {
+					ROOT = c:SER
+				}
+				play_as = c:MON
+			}
+			c:MON ?= {
+				annex = c:SER
+			}
+		}
+		add_modifier = {
+			name = modifier_mon_ser_united
+		}
+	}
+
+	option = { # Serbia
+		name = mon_state_formation.5.b
+		default_option = yes
+		custom_tooltip = {
+			text = ser_annexes_mon_tt
+			if = {
+				limit = {
+					ROOT = c:MON
+				}
+				play_as = c:SER
+			}
+			c:SER ?= {
+				annex = c:MON
+			}
+		}
+		c:SER = {
+			add_modifier = {
+				name = modifier_mon_ser_united
+			}
+		}
+	}
+
+	option = { # Montenegro and Serbia
+		name = mon_state_formation.5.c
+		custom_tooltip = {
+			text = mon_annexes_ser_mon_tt
+			if = {
+				limit = {
+					ROOT = c:MON
+				}
+				annex = c:SER
+			}
+			else_if = {
+				limit = {
+					ROOT = c:SER
+				}
+				annex = c:MON
+			}
+			set_variable = serbian_montenegro
+		}
+		add_modifier = {
+				name = modifier_mon_ser_united
+		}
+	}
+
+	option = { # No join
+		name = mon_state_formation.5.e
+		custom_tooltip = {
+			text = mon_annexes_not_tt
+		}
+		c:SER = {
+			add_modifier = {
+				name = modifier_mon_ser_united
+				multiplier = 0.5
+			}
+		}
+		c:MON = {
+			add_modifier = {
+				name = modifier_mon_ser_united
+				multiplier = 0.5
+			}
+		}
+	}
+}
+
+#Petar II dies of Tuberculosis. Danilo takes throne.
+mon_state_formation.6 = {
+	type = country_event
+	placement = ROOT
+	title = mon_state_formation.6.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = mon_state_formation.6.d
+				trigger = {
+					scope:betrayer ?= {
+						is_character_alive = yes
+					}
+					c:MON ?= {
+						has_variable = petar_died_tuberculosis
+					}
+				}
+			}
+			triggered_desc = {
+				desc = mon_state_formation.6.d2
+				trigger = {
+					scope:betrayer ?= {
+						is_character_alive = yes
+					}
+				}
+			}
+			triggered_desc = {
+				desc = mon_state_formation.6.d3
+				trigger = {
+					c:MON ?= {
+						has_variable = petar_died_tuberculosis
+					}
+				}
+			}
+			triggered_desc = {
+				desc = mon_state_formation.6.d4
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+
+	flavor = mon_state_formation.6.f
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:danilo
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = { #Triggers checked in on_actions. This event fires if the ruler dies. The ruler will be killed by Tuberculosis eventually if not. 
+		c:MON ?= {
+			NOT = {
+				has_variable = mon_state_formation_6_fired
+			}
+		}
+	}
+
+	immediate = {
+		c:MON ?= {
+			set_variable = mon_state_formation_6_fired
+			random_scope_character = {
+				limit = {
+					has_template = mon_petar_II_petrovic_njegos
+				}
+				save_scope_as = petar
+			}
+			random_scope_character = {
+				limit = {
+					has_template = mon_danilo_petrovic_njegos
+				}
+				save_scope_as = danilo
+				set_character_busy_and_immortal = yes
+			}
+			create_character = {
+				template = mon_nikola_petrovic_njegos
+				save_scope_as = nikola
+				on_created = {
+					place_character_in_void = 12
+				}
+			}
+			random_scope_character ?= {
+				limit = {
+					has_template = mon_dordije_petrovic_njegos
+				}
+				save_scope_as ?= betrayer
+				set_character_immortal ?= yes
+			}
+		}
+		if = { #set character to display
+			limit = {
+				scope:petar = {
+					is_character_alive = yes
+				}
+			}
+			scope:petar = {
+				save_scope_as = viewchar
+			}
+		}
+		else = {
+			scope:danilo = {
+				save_scope_as = viewchar
+			}
+		}
+		c:RUS ?= {
+			save_scope_as = russia
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			exists = scope:viewchar
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				exists = scope:petar
+			}
+			scope:petar = {
+				kill_character = yes
+			}
+		}
+		c:MON ?= {
+			set_heir = scope:nikola
+		}
+		hidden_effect = {
+			scope:nikola = {
+				free_character_from_void = yes
+			}
+			scope:danilo = {
+				set_character_busy_and_immortal = no
+			}
+		}
+	}
+
+	option = { # Go Theology. Make Saint
+		name = mon_state_formation.6.a
+		trigger = {
+			c:MON ?= {
+				has_law_or_variant = law_type:law_theocracy
+				gold_reserves > 15000
+			}
+		}
+		c:MON ?= {
+			add_modifier = {
+				name = mon_saint_nephew_ii
+				days = long_modifier_time
+				is_decaying = yes
+			}
+			ig:ig_devout ?= {
+				add_modifier = {
+					name = modifier_another_saint
+					days = long_modifier_time
+					is_decaying = yes
+				}
+			}
+			add_treasury = -15000
+		}
+		c:RUS ?= {
+			change_relations = {
+				country = c:MON
+				value = 20
+			}
+		}
+		if = {
+			limit = {
+				scope:betrayer ?= {
+					is_character_alive = yes
+				}
+			}
+			custom_tooltip = {
+				text = forgive_betrayer_tt
+				scope:betrayer = {
+					set_character_immortal = no
+				}
+			}
+		}
+	}
+
+	option = { # Go Monarchy
+		name = mon_state_formation.6.b
+		default_option = yes
+		trigger = {
+			c:MON ?= {
+				NOT = {
+					has_law_or_variant = law_type:law_monarchy
+				}
+			}
+		}
+		c:MON ?= {
+			custom_tooltip = {
+				text = danilo_dresses_like_a_prince_tt
+				set_variable = danilo_dresses_like_a_prince
+			}
+			if = {
+				limit = {
+					scope:betrayer ?= {
+						is_character_alive = yes
+					}
+				}
+				add_modifier = {
+					name = mon_no_dissidents
+					days = long_modifier_time
+					is_decaying = yes
+				}
+				scope:betrayer = {
+					exile_character = yes
+				}
+			}
+			ig:ig_devout ?= {
+				add_modifier = {
+					name = mon_danilo_monarch
+					days = long_modifier_time
+				}
+			}
+		}
+	}
+
+	option = { # Already have Monarchy, forgive betrayer
+		name = mon_state_formation.6.c
+		trigger = {
+			c:MON ?= {
+				has_law_or_variant = law_type:law_monarchy
+			}
+		}
+		c:MON ?= {
+			if = {
+				limit = {
+					scope:betrayer ?= {
+						is_character_alive = yes
+					}
+				}
+				custom_tooltip = {
+					text = forgive_betrayer_tt
+					scope:betrayer = {
+						set_character_immortal = no
+					}
+				}
+			}
+			add_loyalists = {
+				value = 0.4
+				interest_group = ig:ig_landowners
+			}
+			add_loyalists = {
+				value = 0.1
+			}
+		}
+	}
+
+	option = { # Already have monarchy, kill betrayer
+		name = mon_state_formation.6.e
+		default_option = yes
+		trigger = {
+			c:MON ?= {
+				has_law_or_variant = law_type:law_monarchy
+			}
+		}
+		c:MON ?= {
+			if = {
+				limit = {
+					scope:betrayer ?= {
+						is_character_alive = yes
+					}
+				}
+				scope:betrayer = {
+					exile_character = yes
+				}
+			}
+			add_modifier = {
+				name = mon_no_dissidents
+				days = long_modifier_time
+				is_decaying = yes
+			}
+			add_loyalists = {
+				value = 0.4
+				interest_group = ig:ig_armed_forces
+			}
+		}
+	}
+}
+
+#Danilo helps pass monarchy as promised above
+mon_state_formation.7 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.7.t
+	desc = mon_state_formation.7.d
+	flavor = mon_state_formation.7.f
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:danilo
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	duration = 6
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		THIS ?= c:MON
+		has_variable = danilo_dresses_like_a_prince
+		ruler ?= {
+			has_template = mon_danilo_petrovic_njegos
+			is_character_alive = yes
+		}
+		NOT = {
+			has_law = law_type:law_monarchy
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			has_law = law_type:law_monarchy
+			NOT = {
+				ruler ?= {
+					has_template = mon_danilo_petrovic_njegos
+				}
+			}
+		}
+	}
+
+	immediate = {
+		ruler ?= {
+			save_scope_as = danilo
+			set_character_busy_and_immortal = yes
+		}
+		c:RUS ?= {
+			save_scope_as = russia
+		}
+		ig:ig_devout ?= {
+			save_scope_as = devout
+		}
+	}
+
+	option = { # Vestments
+		name = mon_state_formation.7.a
+		hidden_effect = {
+			scope:danilo = {
+				set_character_busy_and_immortal = no
+			}
+		}
+		add_enactment_modifier = {
+			name = mon_monarchy_enact_1
+		}
+	}
+
+	option = { # Marriage
+		name = mon_state_formation.7.b
+		default_option = yes
+		hidden_effect = {
+			scope:danilo = {
+				set_character_busy_and_immortal = no
+			}
+		}
+		add_enactment_modifier = {
+			name = mon_monarchy_enact_2
+		}
+		custom_tooltip = {
+			text = danilo_will_get_married_tt
+			trigger_event = {
+				id = mon_state_formation.8
+				months = 2
+				popup = yes
+			}
+			set_variable = wedding_announced #affects loc in wedding
+		}
+		scope:devout = {
+			add_modifier = {
+				name = mon_devout_angry_2
+				days = long_modifier_time
+				is_decaying = yes
+			}
+		}
+	}
+
+	option = { # "working women"
+		name = mon_state_formation.7.c
+		hidden_effect = {
+			scope:danilo = {
+				set_character_busy_and_immortal = no
+			}
+		}
+		add_enactment_modifier = {
+			name = mon_monarchy_enact_3
+		}
+		scope:devout = {
+			add_modifier = {
+				name = mon_devout_angry_3
+				days = long_modifier_time
+				is_decaying = yes
+			}
+		}
+	}
+
+	option = { # "drinking blood"
+		name = mon_state_formation.7.e
+		trigger = {
+			has_journal_entry = je_montenegrin_raiding
+		}
+		hidden_effect = {
+			scope:danilo = {
+				set_character_busy_and_immortal = no
+			}
+		}
+		scope:danilo = {
+			add_trait = ruthless
+		}
+		add_enactment_modifier = {
+			name = mon_monarchy_enact_4
+		}
+		scope:devout = {
+			add_modifier = {
+				name = mon_devout_angry_4
+				days = long_modifier_time
+				is_decaying = yes
+			}
+		}
+		increase_raiding = yes
+		change_infamy = 5
+	}
+
+	option = { # "all of the above"
+		name = mon_state_formation.7.g
+		trigger = {
+			has_journal_entry = je_montenegrin_raiding
+		}
+		hidden_effect = {
+			scope:danilo = {
+				set_character_busy_and_immortal = no
+			}
+		}
+		activate_law = law_type:law_monarchy
+		scope:danilo = {
+			add_trait = ruthless
+		}
+		scope:devout = {
+			add_modifier = {
+				name = mon_devout_angry_5
+				days = long_modifier_time
+				is_decaying = yes
+			}
+		}
+		increase_raiding = yes
+		change_infamy = 10
+		custom_tooltip = {
+			text = danilo_will_get_married_tt
+			trigger_event = {
+				id = mon_state_formation.8
+				months = 2
+				popup = yes
+			}
+			set_variable = wedding_announced #affects loc in wedding
+			set_variable = { #affects loc in wedding
+				name = will_drink_blood_at_wedding
+				months = 60
+			}
+		}
+	}
+}
+
+#Danilo's wedding
+mon_state_formation.8 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.8.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = mon_state_formation.8.d
+				trigger = {
+					has_variable = wedding_announced
+				}
+			}
+			triggered_desc = {
+				desc = mon_state_formation.8.d2
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+
+	flavor = {
+		first_valid = {
+			triggered_desc = {
+				desc = mon_state_formation.8.f2
+				trigger = {
+					has_variable = will_drink_blood_at_wedding
+				}
+			}
+			triggered_desc = {
+				desc = mon_state_formation.8.f
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+
+	event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	duration = 6
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	after = {
+		hidden_effect = {
+			ruler ?= {
+				set_variable = married_man
+				set_character_busy_and_immortal = no
+			}
+		}
+	}
+
+	trigger = { #can be triggered after passing Monarchy, no matter the monarch. 
+		exists = ruler
+		ruler ?= {
+			NOT = {
+				has_variable = is_away
+			}
+			is_immortal = no
+		}
+		c:MON ?= THIS
+		NOT = {
+			has_variable = mon_state_formation_8_fired
+		}
+		has_law_or_variant = law_type:law_monarchy
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			exists = ruler
+			has_law_or_variant = law_type:law_monarchy
+		}
+	}
+
+	immediate = {
+		c:SER ?= {
+			save_scope_as = serbia
+		}
+		c:RUS ?= {
+			save_scope_as = russia
+		}
+		c:AUS ?= {
+			save_scope_as = austria
+		}
+		c:MON ?= {
+			save_scope_as = montenegro
+		}
+		ruler ?= {
+			save_scope_as = danilo
+		}
+		set_variable = mon_state_formation_8_fired
+		ruler ?= {
+			set_character_busy_and_immortal = yes
+		}
+	}
+
+	option = { # Marry Princess Kleopatra Karadjordević from Serbia for duty
+		name = mon_state_formation.8.a
+		c:SER ?= {
+			create_diplomatic_catalyst = {
+				type = catalyst_event_positive
+				target = ROOT
+			}
+			change_relations = {
+				country = ROOT
+				value = 50
+			}
+		}
+		c:RUS ?= {
+			change_relations = {
+				country = ROOT
+				value = 30
+			}
+		}
+		s:STATE_WESTERN_SERBIA = {
+			if = {
+				limit = {
+					any_state = {
+						NOT = {
+							has_claim_by = ROOT
+						}
+					}
+				}
+				add_claim = ROOT
+			}
+		}
+	}
+
+	option = { #Marry Baroness Anastasia von Sina from Vienna for money
+		name = mon_state_formation.8.b
+		c:AUS ?= {
+			change_relations = {
+				country = ROOT
+				value = 30
+			}
+		}
+		add_modifier = {
+			name = mon_wealthy_in_laws
+			days = very_long_modifier_time
+			multiplier = 250
+		}
+	}
+
+	option = { # Marry Darinka Kvekić from Trieste for love
+		name = mon_state_formation.8.c
+		default_option = yes
+		scope:danilo = {
+			add_trait = romantic
+		}
+	}
+}
+
+#Build the Biljarda, triggered by Decision
+mon_state_formation.9 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.9.t
+	desc = mon_state_formation.9.d
+	flavor = mon_state_formation.9.f
+	event_image = {
+		video = "ip3_official_reading_dictate"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = { # Have some strong me carry a billiards table up from the sea.
+		name = mon_state_formation.9.a
+		default_option = yes
+		add_modifier = {
+			name = biljarda_table #helps a lot with mitigating Raiding
+			days = stupidly_long_modifier_time
+			is_decaying = yes 
+		}
+	}
+
+	option = { #Bless the chapel with a fragment of St Haralambos's skull
+		name = mon_state_formation.9.b
+		add_modifier = {
+			name = biljarda_relic
+			days = stupidly_long_modifier_time 
+			is_decaying = yes 
+		}
+		ig:ig_devout ?= {
+			add_modifier = {
+				name = modifier_saints_skull
+				days = stupidly_long_modifier_time 
+				is_decaying = yes 
+			}
+		}
+	}
+
+	option = { # More heads
+		name = mon_state_formation.9.c
+		trigger = {
+			has_journal_entry = je_montenegrin_raiding
+		}
+		add_modifier = {
+			name = biljarda_heads
+			days = stupidly_long_modifier_time 
+			is_decaying = yes
+		}
+		increase_raiding = yes
+	}
+}
+
+#Danilo's Assassinationd
+mon_state_formation.10 = {
+type = country_event
+	placement = ROOT
+	title = mon_state_formation.10.t
+	desc = mon_state_formation.10.d
+	flavor = mon_state_formation.10.f
+	event_image = {
+		video ="southamerica_public_figure_assassination"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		game_date >= 1860.08.13
+		THIS ?= c:MON
+		ruler ?= {
+			has_template = mon_danilo_petrovic_njegos
+			NOR = {
+				has_variable = is_away
+				is_immortal = yes
+			}
+		}
+		heir ?= {
+			NOR = {
+				has_variable = is_away
+				is_immortal = yes
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			exists = ruler
+			exists = heir 
+		}
+	}
+
+	immediate = {
+		set_variable = mon_state_formation_10_fired
+		ruler ?= {
+			save_scope_as = danilo
+			set_character_busy_and_immortal = yes
+		}
+		heir = {
+			save_scope_as = nikola
+			set_character_busy_and_immortal = yes
+		}
+		c:RUS ?= {
+			save_scope_as = russia
+		}
+		c:AUS ?= {
+			save_scope_as = austria
+		}
+	}
+
+	after = {
+		scope:danilo = {
+			hidden_effect = {
+				set_character_busy_and_immortal = no
+			}
+			kill_character = yes
+		}
+		scope:nikola = {
+			set_character_busy_and_immortal = no
+		}
+	}
+
+	option = { # Default We must not let the turks take advantage
+		name = mon_state_formation.10.a
+		default_option = yes
+		add_loyalists = {
+			value = 0.50
+			interest_group = ig:ig_armed_forces
+		}
+		add_loyalists = {
+			value = 0.10
+			strata = lower
+		}
+	}
+
+	option = { #Blame Austria
+		name = mon_state_formation.10.b
+		trigger = {
+			exists = c:AUS
+			s:STATE_DALMATIA = {
+				any_scope_state = {
+					NOT = {
+						has_claim_by = ROOT
+					}
+				}
+			}
+		}
+		c:AUS = {
+			change_relations = {
+				country = root
+				value = -40
+			}
+		}
+		s:STATE_DALMATIA = {
+			add_claim = ROOT
+		}
+	}
+
+	option = { # More heads
+		name = mon_state_formation.10.c
+		trigger = {
+			has_variable = mon_state_formation_8_fired
+		}
+		scope:nikola = {
+			add_trait = pious
+		}
+	}
+}
+
+#First School
+mon_state_formation.11 = {
+type = country_event
+	placement = ROOT
+	title = mon_state_formation.11.t
+	desc = mon_state_formation.11.d
+	flavor = mon_state_formation.11.f
+	event_image = {
+		video = "ip3_village_school"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/tutorial_icon.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = { #Triggered by law_enactment
+		THIS ?= c:MON
+		NOT = {
+			has_variable = mon_state_formation_11_fired
+		}
+	}
+
+	immediate = {
+		set_variable = mon_state_formation_11_fired
+	}
+
+	option = { # Option decrease bureaucracy required
+		name = mon_state_formation.11.a
+		add_modifier = {
+			name = mon_founded_schools
+			days = stupidly_long_modifier_time
+		}
+	}
+
+	option = { # Option increase education access
+		name = mon_state_formation.11.b
+		default_option = yes
+		add_modifier = {
+			name = mon_trained_teachers
+			days = stupidly_long_modifier_time
+		}
+		custom_tooltip = {
+			text = "mon_school_helper"
+		}
+	}
+
+	option = { # Option teach them war tactics
+		name = mon_state_formation.11.c
+		add_modifier = {
+			name = mon_trained_fighters
+			days = stupidly_long_modifier_time
+		}
+	}
+}
+
+#Rage over Taxes
+mon_state_formation.12 = {
+type = country_event
+	placement = ROOT
+	title = mon_state_formation.12.t
+	desc = mon_state_formation.12.d
+	flavor = mon_state_formation.12.f
+	event_image = {
+		video = "unspecific_vandalized_storefront"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = { #Triggered by law_enactment_started
+		NOT = {
+			has_variable = mon_state_formation_12_fired
+		}
+	}
+
+	immediate = {
+		set_variable = mon_state_formation_12_fired
+		ruler ?= {
+			save_scope_as = ruler
+		}
+	}
+
+	option = { # Ease Taxes
+		name = mon_state_formation.12.a
+		default_option = yes
+		add_modifier = {
+			name = mon_ease_taxes
+			days = long_modifier_time
+			is_decaying = yes
+		}
+		add_enactment_modifier = {
+			name = mon_convinced
+		}
+		add_radicals = {
+			value = small_radicals
+		}
+	}
+
+	option = { # Option to increase for
+		name = mon_state_formation.12.b
+		add_enactment_modifier = {
+			name = mon_slow_taxes
+		}
+		add_radicals = {
+			value = medium_radicals
+		}
+	}
+
+	option = { # Option to threaten them to pass law
+		name = mon_state_formation.12.c
+		add_enactment_modifier = {
+			name = mon_threatened
+		}
+		add_radicals = {
+			value = large_radicals
+		}
+	}
+
+	option = { # Option to all but scrap the law
+		name = mon_state_formation.12.e
+		add_enactment_modifier = {
+			name = mon_changed_mind
+		}
+		add_modifier = {
+			name = mon_axes
+			days = long_modifier_time
+			is_decaying = yes
+		}
+		scope:ruler = {
+			add_modifier = {
+				name = mon_nice_save
+				days = long_modifier_time
+			}
+		}
+	}
+}
+
+#first arms
+mon_state_formation.13 = {
+type = country_event
+	placement = ROOT
+	title = mon_state_formation.13.t
+	desc = mon_state_formation.13.d
+	flavor = mon_state_formation.13.f
+	event_image = {
+		video = "southamerica_factory_opening"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_fire.dds"
+
+	duration = 6
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = { # triggered by building
+		NOT = {
+			has_variable = mon_state_formation_13_fired
+		}
+		any_scope_state = {
+			has_active_building = building_arms_industry
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			any_scope_state = {
+				has_active_building = building_arms_industry
+			}
+		}
+	}
+
+	immediate = {
+		set_variable = mon_state_formation_13_fired
+		random_scope_state = {
+			limit = {
+				has_active_building = building_arms_industry
+			}
+			b:building_arms_industry = {
+				save_scope_as = arms
+			}
+		}
+	}
+
+	option = { #Make good guns, Offense and Defense plus
+		name = mon_state_formation.13.a
+		default_option = yes
+		add_modifier = {
+			name = mon_good_guns
+			days = stupidly_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = { # Make cheap guns, military goods little cheaper
+		name = mon_state_formation.13.b
+		add_modifier = {
+			name = mon_cheap_guns
+			days = stupidly_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = { # Make lots of guns, output increase lots
+		name = mon_state_formation.13.c
+		add_modifier = {
+			name = mon_many_guns
+			days = stupidly_long_modifier_time
+			is_decaying = yes
+		}
+	}
+}
+
+#ottomon counter JE complete event
+mon_state_formation.14 = {
+type = country_event
+	placement = ROOT
+	title = mon_state_formation.14.t
+	desc = mon_state_formation.14.d
+	flavor = mon_state_formation.14.f
+	event_image = {
+		video = "ip3_angry_mob_raiding_minorities"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	duration = 6
+	
+	dlc = dlc014
+
+	cooldown = { years = 5 } 
+
+	trigger = { #triggered by JE
+	}
+
+	cancellation_trigger = {
+	}
+
+	immediate = {
+		c:RUS ?= {
+			save_scope_as = russia
+		}
+		c:TUR ?= {
+			save_scope_as = ottoman
+		}
+		c:MON ?= {
+			save_scope_as = montenegro
+		}
+		c:SER ?= {
+			save_scope_as = serbia
+		}
+		cu:serb = {
+			save_scope_as = serbian
+		}
+		random_primary_culture = {
+			save_scope_as = turk
+		}
+	}
+
+	option = { #punish rebels
+		name = mon_state_formation.14.a
+		default_option = yes
+		add_modifier = {
+			name = put_down_rebels_savage
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = { #punish Serbs, add loyalists
+		name = mon_state_formation.14.b
+		add_culture_acceptance_modifier = {
+			culture = scope:serbian
+			multiplier = -20
+		}
+		add_loyalists = {
+			culture = scope:turk
+			value = 0.05
+		}
+	}
+
+	option = { # forgive
+		name = mon_state_formation.14.c
+		add_loyalists = {
+			culture = scope:serbian
+			value = 0.10
+		}
+	}
+}
+
+#intro event
+mon_state_formation.15 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.15.t
+	desc = mon_state_formation.15.d
+	flavor = mon_state_formation.15.f
+
+	event_image = {
+		video = "europenorthamerica_russian_serfs"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = short_modifier_time }
+
+	trigger = { #Triggered at gamestart
+		c:MON ?= ROOT
+	}
+
+	cancellation_trigger = {
+	}
+
+	immediate = {
+		c:TUR ?= {
+			save_scope_as = ottoman
+		}
+	}
+
+	option = { # Shake the world
+		name = mon_state_formation.15.a
+		default_option = yes
+		custom_tooltip = {
+			text = law_women_in_the_fields_is_in_effect_tt 
+		}
+		show_as_tooltip = {
+			add_modifier = {
+				name = modifier_women_work_men_fight
+				days = stupidly_long_modifier_time
+				is_decaying = yes
+			}
+			add_modifier = {
+				name = modifier_lonely_mountain
+				years = 30
+				is_decaying = yes
+			}
+			add_modifier = {
+				name = modifier_no_minting
+				days = stupidly_long_modifier_time
+			}
+			add_modifier = {
+				name = mon_taxes_what_are
+				days = very_long_modifier_time
+				is_decaying = yes
+			}
+			random_scope_state = {
+				add_modifier = {
+					name = mon_strong_backs
+					years = 40
+					is_decaying = yes
+				}
+			}
+		}
+	}
+}
+
+#failure event for Rebels to Nation if too aggressive
+mon_state_formation.16 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.16.t
+	desc = mon_state_formation.16.d
+	flavor = mon_state_formation.16.f
+
+	event_image = {
+		video = "middleeast_courtroom_upheaval"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = short_modifier_time }
+
+	trigger = { #Triggered by failing From Rebels to Nation
+		c:MON ?= ROOT
+	}
+
+	cancellation_trigger = {
+	}
+
+	immediate = {
+		c:TUR ?= {
+			save_scope_as = ottoman
+		}
+		c:AUS ?= {
+			save_scope_as = austria
+		}
+		set_variable = mon_are_barbarians
+	}
+
+	option = { # 
+		name = mon_state_formation.16.a
+		default_option = yes
+		add_modifier = {
+			name = mon_solo 
+			days = very_long_modifier_time
+		}
+	}
+
+	option = { # If relations with Russia fell, but war was not declared, then chance with Austria. 
+		name = mon_state_formation.16.b
+		trigger = {
+			exists = c:AUS
+			s:STATE_MONTENEGRO = {
+				any_scope_state = {
+					owner = c:AUS
+				}
+			}
+			NOR = {
+				is_in_same_power_bloc = c:RUS
+				is_subject_of = c:RUS
+				is_subject_of = c:TUR
+				has_war_with = c:AUS
+				any_diplomatic_play = {
+					initiator_is = root
+				}
+			}
+		}
+		add_journal_entry = { type = je_mon_austria_alliance }
+	}
+}
+
+#failure event for Rebels to Nation if made a subject
+mon_state_formation.17 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.17.t
+	desc = mon_state_formation.17.d
+	flavor = mon_state_formation.17.f
+
+	event_image = {
+		video = "middleeast_courtroom_upheaval"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = long_modifier_time }
+
+	trigger = { #Triggered by failing Mon JEs and being subject
+		c:MON ?= ROOT
+		c:MON = {
+			is_country_alive = yes
+			is_subject = yes
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			is_subject = yes
+		}
+	}
+
+	immediate = {
+		overlord = {
+			save_scope_as = overlord
+		}
+		c:TUR ?= {
+			save_scope_as = ottoman
+		}
+		c:AUS ?= {
+			save_scope_as = austria
+		}
+		s:STATE_MONTENEGRO = {
+			save_scope_as = state
+		}
+		ruler ?= { #Prepare to kill ruler if possible, keep him alive until the execution. Take him back from holidays.
+			if = {
+				limit = {
+					is_immortal = no
+				}
+				save_scope_as = ruler
+				if = { #will cancel visit moscow event 
+					limit = {
+						has_variable = is_away
+					}
+					remove_variable = is_away 
+				}
+				set_character_busy_and_immortal = yes
+			}
+		}
+		if = { # create ali_pasha_rizvanbegovic if he's not too old
+			limit = {
+				game_date < 1863.01.01 
+			}
+			create_character = {
+				template = mon_ali_pasha_rizvanbegovic
+				save_scope_as = pasha
+				on_created = {
+					place_character_in_void = 12
+				}
+			}
+		}
+	}
+
+	after = {
+		if = {#since not raiding, default income can return. It's fine if this is invisible as the red text makes it look confusing. 
+			limit = {
+				has_modifier = modifier_no_minting
+			}
+			remove_modifier = modifier_no_minting 
+		}
+	}
+
+	option = { # appeal to other nations
+		name = mon_state_formation.17.a
+		add_modifier = {
+			name = mon_appeals
+			days = stupidly_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = { # all hail the overlords 
+		name = mon_state_formation.17.b
+		trigger = {
+			exists = c:TUR
+			has_subject_relation_with = c:TUR
+		}
+		default_option = yes
+		
+		#The o.g. Montengrins are pissed off. 
+		add_radicals = {
+			value = 0.5
+			interest_group = ig:ig_armed_forces
+		}
+		add_radicals = {
+			value = 0.95
+			interest_group = ig:ig_devout
+		}
+
+		if = { #Give some Mon homelands to this new vassal to make it playable. This seems historically viable if the Ottomans had subjugated Montenegro and put a Pasha in charge. 
+			limit = {
+				c:TUR = {
+					is_player = no
+				}
+				s:STATE_MONTENEGRO = {
+					any_scope_state = {
+						owner = c:TUR
+					}
+				}
+			}
+			custom_tooltip = { #To make clear why state is tranferring.
+				text = mon_get_back_land
+			}
+			transfer_state = {
+				STATE = s:STATE_MONTENEGRO
+				GIVER = c:TUR
+				TAKER = root
+			}
+		}
+
+		#relations hurt by turncoat
+		c:RUS ?= {
+			change_relations = {
+				country = root
+				value = -30
+			}
+		}
+		c:AUS ?= {
+			change_relations = {
+				country = root
+				value = -20
+			}
+		}
+		c:SER ?= {
+			change_relations = {
+				country = root
+				value = -80
+			}
+		}
+
+		#Become Ottoman
+		set_state_religion = rel:sunni
+		add_primary_culture = cu:turkish
+		
+		if = { #if he's not too old, this pasha takes control.
+			limit = {
+				exists = scope:pasha
+			}
+			add_primary_culture = cu:bosniak
+			scope:pasha = {
+				set_character_as_ruler = yes
+				hidden_effect = {
+					free_character_from_void = yes
+				}
+			}
+		}
+
+		if = { #kill ruler
+			limit = {
+				exists = scope:ruler
+			}
+			scope:ruler = {
+				hidden_effect = {
+					set_character_busy_and_immortal = no
+				}
+				kill_character = yes
+			}
+		}
+
+		if = { #kill heir
+			limit = {
+				exists = heir
+			}
+			heir = {
+				if = {
+					limit = {
+						is_immortal = yes
+					}
+					place_character_in_void = 12
+				}
+				else = {
+					kill_character = yes
+				}
+			}
+		}
+
+		ig:ig_devout ?= {
+			set_interest_group_name = ig_sunni_madrasahs
+			leader = {
+				place_character_in_void = 6
+			}
+			hidden_effect = {
+			remove_ideology = ideology_montenegrin_moralist
+			remove_ideology = ideology_orthodox_patriarch
+			add_ideology = ideology_moralist
+			add_ideology = ideology_patriarchal
+			set_ig_trait = ig_trait:ig_trait_pious_fiction
+			set_ig_trait = ig_trait:ig_trait_mecelle
+			set_ig_trait = ig_trait:ig_trait_da_wat
+			} 
+		}
+
+		#Orthodox in the new lands are also pissed off. 
+		add_radicals = {
+			value = huge_radicals
+			religion = rel:orthodox
+		}
+	}
+}
+
+#Danilo's Wife objects to all the heads
+mon_state_formation.18 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.18.t
+	desc = mon_state_formation.18.d
+	flavor = mon_state_formation.18.f
+	event_image = {
+		video = "ip3_official_reading_dictate"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = { # triggered in montenegro_half_yearly_events
+		c:MON ?= this
+		has_variable = biljarda_built
+		ruler ?= {
+			has_variable = married_man
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			c:MON ?= this
+			ruler ?= {
+				has_variable = married_man
+			}
+		}
+	}
+
+
+	immediate = {
+		c:MON ?= {
+			save_scope_as = montenegro
+		}
+		ruler ?= {
+			set_character_busy_and_immortal = yes
+			save_scope_as = danilo
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			ruler ?= {
+				set_character_busy_and_immortal = no
+			}
+		}
+	}
+
+	option = { # Agree with her
+		name = mon_state_formation.18.a
+		default_option = yes
+		add_modifier = {
+			name = mon_can_fix_him
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = { #She should know her place
+		name = mon_state_formation.18.b
+		ruler ?= {
+			add_modifier = {
+				name = mon_boiz
+			}
+		}
+		every_interest_group = {
+			limit = {
+				law_enactment_stance = {
+					law = law_type:law_women_own_property
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = mon_status_quo_confidence
+				days = long_modifier_time
+			}
+		}
+	}
+
+	option = { #More Heads
+		name = mon_state_formation.18.c
+		trigger = {
+			has_journal_entry = je_montenegrin_raiding
+		}
+		add_modifier = {
+			name = biljarda_more_heads
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+		increase_raiding = yes
+	}
+}
+
+#Ottomans Destroyed
+mon_state_formation.19 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.19.t
+	desc = mon_state_formation.19.d
+	flavor = mon_state_formation.19.f
+	event_image = {
+		video = "ip3_official_reading_dictate"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	duration = 3
+	
+	dlc = dlc014
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = { # triggered by Ottomans no longer existing. Serves as completion event to JE_Raiding, but will fire even without this JE
+		c:MON ?= this
+		NOT = {
+			exists = c:TUR
+			has_variable = mon_state_formation_19_fired
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			c:MON ?= this
+		}
+	}
+
+
+	immediate = {
+		c:MON ?= {
+			save_scope_as = montenegro
+		}
+		set_variable = mon_state_formation_19_fired
+	}
+
+	option = { # Paradise
+		name = mon_state_formation.19.a
+		default_option = yes
+		add_modifier = {
+			name = mon_paradise
+		}
+	}
+
+	option = { #Freedom for all nations 
+		name = mon_state_formation.19.b
+		add_modifier = {
+			name = mon_freedom_all
+		}
+		custom_tooltip = {
+			text = all_nations_freedom_tt
+			every_country = {
+				limit = {
+					is_subject = yes
+				}
+				add_modifier = {
+					name = mon_freedom
+				}
+			}
+		}
+	}
+
+	option = { #War Forever
+		name = mon_state_formation.19.c
+		trigger = { #only if player kept the JE the whole time, very hard. 
+			has_variable = je_montenegrin_raiding_won
+		}
+		add_modifier = {
+			name = mon_war_forever
+		}
+	}
+}
+
+#Mon becomes a proper Monarchy
+mon_state_formation.20 = {
+	type = country_event
+	placement = ROOT
+
+	title = mon_state_formation.20.t
+	desc = mon_state_formation.20.d
+	flavor = mon_state_formation.20.f
+	
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:ruler
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/2Characters"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+	
+	dlc = dlc014
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = { # triggered by on actions after 1910.08.27
+		c:MON ?= this
+		NOT = {
+			is_subject = yes
+			has_variable = mon_state_formation_20_fired
+		}
+		has_law_or_variant = law_type:law_monarchy
+		ruler ?= {
+			is_busy = no
+		}
+	}
+
+	immediate = {
+		c:MON ?= {
+			save_scope_as = montenegro
+		}
+		set_variable = mon_state_formation_20_fired
+		ruler ?= {
+			save_scope_as = ruler
+			set_character_busy_and_immortal = yes
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			ruler ?= {
+				set_character_busy_and_immortal = no
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		is_subject = yes
+		NOT = {
+			c:MON ?= this
+			has_law_or_variant = law_type:law_monarchy
+			ruler ?= scope:ruler
+		}
+	}
+
+	option = { # King sounds better Internal
+		name = mon_state_formation.20.a
+		default_option = yes
+		custom_tooltip = { #should trigger title change
+			text = mon_change_to_kingdom
+			set_variable = king_sounds_better 
+		}
+		add_modifier = {
+			name = mon_new_king_legit
+			days = long_modifier_time
+			multiplier = 2
+		}
+		scope:ruler = {
+			add_modifier = {
+				name = mon_new_king
+				days = long_modifier_time
+			}
+		}
+	}
+
+	option = { #Let all the other Nations Know
+		name = mon_state_formation.20.b
+		custom_tooltip = { #should trigger title change
+			text = mon_change_to_kingdom
+			set_variable = king_sounds_better 
+		}
+		add_modifier = {
+			name = mon_new_king_legit
+			days = long_modifier_time
+		}
+		add_modifier = {
+			name = mon_new_king_prestige
+			days = long_modifier_time
+		}
+	}
+
+	option = { #Let the soldiers know
+		name = mon_state_formation.20.c
+		custom_tooltip = { #should trigger title change
+			text = mon_change_to_kingdom
+			set_variable = king_sounds_better 
+		}
+		add_modifier = {
+			name = mon_new_king_legit
+			days = long_modifier_time
+		}
+		add_modifier = {
+			name = mon_new_king_morale
+			days = long_modifier_time
+		}
+	}
+
+	option = { #Let no one know
+		name = mon_state_formation.20.e
+		custom_tooltip = mon_no_change_tt
+		add_modifier = {
+			name = mon_disobedient_court
+			days = long_modifier_time
+		}
+	}
+}

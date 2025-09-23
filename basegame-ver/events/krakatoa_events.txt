@@ -187,11 +187,37 @@ krakatoa.5 = { #krakatoa erupts but youre not the owner
 		add_modifier = {
 			name = krakatoa_cost_modifier
 			days = short_modifier_time
-			multiplier = money_amount_multiplier_small
+			multiplier = money_amount_multiplier_very_small
 		}
 		show_as_tooltip = {
 			add_journal_entry = {
 				type = je_krakatoa
+			}
+		}
+		if = {
+			limit = {
+				scope:krakatoa_country ?= {
+					is_subject_of = root
+				}
+			}
+			add_liberty_desire = -30
+			scope:krakatoa_country ?= {
+				add_loyalists = {
+					value = 0.2
+				}
+			}
+		}
+
+		ai_chance = {
+			base = 5
+
+			modifier = {
+				trigger = {
+					scope:krakatoa_country = {
+						is_subject_of = root
+					}
+				}
+				add = 200
 			}
 		}
 	}
@@ -199,14 +225,51 @@ krakatoa.5 = { #krakatoa erupts but youre not the owner
 	option = { #it doesn't affect us that much
 		name = krakatoa.5.b
 		default_option = yes
+		trigger = {
+			NOT = {
+				any_scope_state = {
+					state_region = {
+						has_harvest_condition = tsunami
+					}
+				}
+			}
+		}
+
 		change_relations = {
 			country = scope:krakatoa_country
-			value = -30
+			value = -15
 		}
 		show_as_tooltip = {
 			add_journal_entry = {
 				type = je_krakatoa
 			}
+		}
+
+		ai_chance = {
+			base = 100
+		}
+	}
+
+	option = { # we have nothing to spare
+		name = krakatoa.5.c
+		default_option = yes
+		highlighted_option = yes
+		trigger = {
+			any_scope_state = {
+				state_region = {
+					has_harvest_condition = tsunami
+				}
+			}
+		}
+
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_krakatoa
+			}
+		}
+
+		ai_chance = {
+			base = 100
 		}
 	}
 }
@@ -578,6 +641,21 @@ krakatoa.3 = { #crop failure
 
 		ai_chance = {
 			base = 100
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			NOT = {
+				exists = scope:farm_state
+			}
+			scope:farm_state ?= {
+				state_region = {
+					NOT = {
+						has_harvest_condition = disease_outbreak
+					}
+				}
+			}
 		}
 	}
 }

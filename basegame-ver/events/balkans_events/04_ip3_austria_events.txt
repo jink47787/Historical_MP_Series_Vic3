@@ -1,0 +1,272 @@
+﻿namespace = austria_events
+
+# For c:AUS, Austria
+
+# Austrian Army chuds out
+austria_events.40 = {
+	type = country_event
+	placement = root
+	title = austria_events.40.t
+	desc = austria_events.40.d
+	flavor = austria_events.40.f
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	event_image = {
+		video = "ip3_police_raid"
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	duration = 3
+
+	dlc = dlc014
+
+	trigger = {
+		has_dlc_feature = ip3_content
+		c:AUS ?= this
+		has_law_or_variant = law_type:law_monarchy
+		OR = {
+			AND = {
+				has_law_or_variant = law_type:law_census_voting
+				radical_fraction = {
+					value >= 0.15
+				}
+			}
+			has_law_or_variant = law_type:law_universal_suffrage
+		}
+		ig:ig_armed_forces ?= {
+			is_marginal = no
+			NOR = {
+				interest_group_has_liberal_ideology = yes
+				interest_group_has_progressive_ideology = yes
+				interest_group_has_socialist_ideology = yes
+			}
+		}
+		NOT = {
+			has_variable = military_absolutism_var
+		}
+	}
+
+	immediate = {
+		ig:ig_armed_forces ?= {
+			save_scope_as = armed_forces_ig
+		}
+		set_variable = military_absolutism_var
+	}
+
+	cancellation_trigger = {
+	}
+
+	option = {
+		name = austria_events.40.a
+		default_option = yes
+		ig:ig_armed_forces ?= {
+			remove_ideology = ideology_patriotic
+			add_ideology = ideology_military_absolutist
+		}
+		add_radicals = {
+			value = large_radicals
+			pop_type = officers
+		}
+	}
+
+	option = {
+		name = austria_events.40.b
+		ig:ig_armed_forces ?= {
+			remove_ideology = ideology_patriotic
+			add_ideology = ideology_military_absolutist
+			add_modifier = {
+				name = modifier_military_absolutist_bonus
+				days = normal_modifier_time
+			}
+		}
+	}
+}
+
+namespace = austrian_fascism
+
+# Initialisation event
+austrian_fascism.1 = {
+	type = country_event
+	placement = root
+	title = austrian_fascism.1.t
+	desc = austrian_fascism.1.d
+	flavor = austrian_fascism.1.f
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	event_image = {
+		video = "ip3_agitator_reading_manifesto"
+	}
+
+	duration = 3
+
+	dlc = dlc014
+
+	trigger = {
+		# Triggered by the Standestaat journal entry
+	}
+
+	immediate = {
+		# corporatist_movement_scope is inherited from the JE
+	}
+
+	cancellation_trigger = {
+	}
+
+	option = {
+		name = austrian_fascism.1.a
+		default_option = yes
+		je:je_standestaat = {
+			add_modifier = {
+				name = modifier_corporatist_consolidation
+				days = normal_modifier_time
+				is_decaying = yes
+			}
+		}
+	}
+
+	option = {
+		name = austrian_fascism.1.b
+		je:je_standestaat = {
+			add_modifier = {
+				name = modifier_corporatist_consolidation
+				multiplier = 0.5
+				days = normal_modifier_time
+				is_decaying = yes
+			}
+		}
+		random_interest_group = {
+			limit = {
+				OR = {
+					has_ideology = ideology:ideology_corporatist
+					leader = {
+						has_ideology = ideology:ideology_corporatist_leader
+					}
+				}
+			}
+			add_modifier = {
+				name = modifier_corporatists_countered
+				days = normal_modifier_time
+			}
+		}
+	}
+}
+
+# Completion Event
+austrian_fascism.2 = {
+	type = country_event
+	placement = root
+	title = austrian_fascism.2.t
+	desc = austrian_fascism.2.d
+	flavor = austrian_fascism.2.f
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	event_image = {
+		video = "ip3_officer_inspecting_peasant_conscripts"
+	}
+
+	duration = 3
+
+	dlc = dlc014
+
+	trigger = {
+		# Triggered by the Standestaat journal entry
+	}
+
+	immediate = {
+		ruler = {
+			save_scope_as = ruler_scope
+		}
+		random_active_party = {
+			save_scope_as = fascist_party_scope
+		}
+		generate_1_common_name = {
+			CULTURE_1 = primary_culture
+		}
+	}
+
+	cancellation_trigger = {
+	}
+
+	option = {
+		name = austrian_fascism.2.a
+		default_option = yes
+		clear_generated_names = yes
+		add_modifier = {
+			name = modifier_austria_corporate_state
+			days = long_modifier_time
+		}
+		add_loyalists = {
+			value = large_radicals
+			strata = middle
+		}
+	}
+
+	option = {
+		name = austrian_fascism.2.b
+		clear_generated_names = yes
+		add_modifier = {
+			name = modifier_austria_corporate_state_vigilance
+			days = long_modifier_time
+		}
+	}
+}
+
+# Failure Event
+austrian_fascism.3 = {
+	type = country_event
+	placement = root
+	title = austrian_fascism.3.t
+	desc = austrian_fascism.3.d
+	flavor = austrian_fascism.3.f
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	event_image = {
+		video = "unspecific_ruler_speaking_to_people"
+	}
+
+	duration = 3
+
+	dlc = dlc014
+
+	trigger = {
+		# Triggered by the Standestaat journal entry
+	}
+
+	immediate = {
+		generate_2_common_name = {
+			CULTURE_1 = primary_culture
+			CULTURE_2 = primary_culture
+		}
+	}
+
+	cancellation_trigger = {
+	}
+
+	option = {
+		name = austrian_fascism.3.a
+		default_option = yes
+		add_loyalists = {
+			value = medium_radicals
+			strata = lower
+		}
+		clear_generated_names = yes
+	}
+
+	option = {
+		name = austrian_fascism.3.b
+		add_modifier = {
+			name = modifier_resurgent_labor_movement
+			days = long_modifier_time
+		}
+		clear_generated_names = yes
+	}
+}

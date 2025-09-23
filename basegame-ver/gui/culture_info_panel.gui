@@ -95,7 +95,7 @@ types culture_info_panel_types
 					widget = {
 						name = "portraits_and_info"
 						parentanchor = left
-						size = { @panel_width_plus_14 230 }
+						size = { @panel_width_plus_14 330 }
 
 						background = {
 							texture = "gfx/interface/illustrations/top_illus/top_illu_cultures.dds"
@@ -109,7 +109,7 @@ types culture_info_panel_types
 
 						### Portraits global
 						widget = {
-							parentanchor = left|bottom
+							parentanchor = left|vcenter
 							size = { 270 @portrait_box_height }
 
 							hbox = {
@@ -184,6 +184,8 @@ types culture_info_panel_types
 
 							#TURMOIL
 							culture_or_religion_labeled_value_flowcontainer = {
+								tooltip = CULTURAL_TURMOIL_TOOLTIP
+								
 								blockoverride "label"
 								{	
 									text = "TURMOIL"
@@ -192,7 +194,6 @@ types culture_info_panel_types
 								blockoverride "value"
 								{
 									raw_text = "[Culture.GetTurmoil|-0%]"
-									tooltip = CULTURAL_TURMOIL_TOOLTIP
 								}
 							}
 							
@@ -212,6 +213,42 @@ types culture_info_panel_types
 									raw_text = "[Culture.GetMigrationTargetsDesc]"
 								}
 							}
+
+							divider_clean = {
+								size = { 150 2 }
+							}
+
+							#FERVOR
+							culture_or_religion_labeled_value_flowcontainer = {
+								tooltip = "CULTURE_FERVOR_TOOLTIP"
+								
+								blockoverride "label"
+								{	
+									text = "FERVOR"
+								}
+
+								blockoverride "value"
+								{
+									raw_text = "CULTURE_FERVOR_AND_TARGET"
+								}
+							}
+
+							divider_clean = {
+								size = { 150 2 }
+							}
+
+							#CASUALTIES
+							culture_or_religion_labeled_value_flowcontainer = {
+								blockoverride "label"
+								{	
+									text = "FERVOR_CASUALTIES"
+								}
+
+								blockoverride "value"
+								{
+									raw_text = "[Culture.GetCasualtiesFromWars|K]"
+								}
+							}
 						}
 					}
 
@@ -229,17 +266,75 @@ types culture_info_panel_types
 							margin = { 10 10 }
 							spacing = 5
 
+							### HERITAGE
 							culture_or_religion_labeled_value_flowcontainer = {
 								blockoverride "label"
 								{	
-									text = "CULTURAL_TRAITS"
+									text = "HERITAGE_TRAIT"
 								}
 
 								blockoverride "value"
 								{
-									raw_text = "[Culture.GetCulturalTraitsDesc]"
+									raw_text = "[Culture.GetHeritageTrait.GetName]"
 								}
-							}							
+							}
+
+							### LANGUAGE
+							culture_or_religion_labeled_value_flowcontainer = {
+								blockoverride "label"
+								{	
+									text = "LANGUAGE_TRAIT"
+								}
+
+								blockoverride "value"
+								{
+									raw_text = "[Culture.GetLanguageTrait.GetName]"
+								}
+							}
+
+							### TRADITIONS
+							culture_or_religion_labeled_value_flowcontainer = {
+								blockoverride "label"
+								{	
+									text = "TRADITION_TRAITS"
+								}
+
+								blockoverride "all_values"
+								{
+									flowcontainer = {
+										visible = "[Not(IsDataModelEmpty(Culture.GetTraditionTraits))]"
+										wrap_count = 2
+										spacing = 5
+										datamodel = "[Culture.GetTraditionTraits]"
+
+										item = {
+											flowcontainer = {
+												margin = { 7 5 }
+
+												background = {
+													using = entry_bg_simple
+												}
+
+												textbox = {
+													autoresize = yes
+													max_width = 115
+													using = elide_fontsize_min
+													align = nobaseline
+													text = "[DiscriminationTrait.GetName]"
+												}
+											}
+										}
+									}
+
+									textbox = {
+										visible = "[IsDataModelEmpty(Culture.GetTraditionTraits)]"
+										autoresize = yes
+										align = nobaseline
+										alpha = 0.3
+										text = "NONE"
+									}
+								}
+							}
 						}
 
 						### RIGHT INFO
@@ -444,7 +539,11 @@ types culture_info_panel_types
 					blockoverride "value"
 					{
 						text = "[Culture.GetAcceptanceIn(GetPlayer)|=]"
-						tooltip = ACCEPTANCE_OF_CULTURE_TOOLTIP
+					}
+
+					blockoverride "culture_or_religion_acceptance_tooltip" {
+						tooltip = "ACCEPTANCE_OF_CULTURE_TOOLTIP"
+						using = tooltip_se
 					}
 
 					blockoverride "law_datacontext"
@@ -610,29 +709,31 @@ types culture_info_panel_types
 
 			elide = right
 			fontsize_min = 14
-			max_width = 260
+			max_width = 220
 		}
 
-		textbox = {
-			block "value"
-			{
-				raw_text = "?"
-			}
+		block "all_values"
+		{
+			textbox = {
+				block "value"
+				{
+					raw_text = "?"
+				}
 
-			autoresize = yes
-			multiline = yes
-			max_width = @panel_width
-			
-			default_format = "#variable"
-			align = nobaseline
+				autoresize = yes
+				max_width = 220
+				margin_right = 5
+				using = elide_fontsize_min
+				default_format = "#variable"
+				align = nobaseline
+			}
 		}
 	}
 
-	type culture_or_religion_labeled_value_center = flowcontainer {
+	type culture_or_religion_labeled_value_left = flowcontainer {
 		direction = vertical
 		
 		textbox = {
-			parentanchor = hcenter
 			autoresize = yes
 			block "label"
 			{
@@ -644,11 +745,10 @@ types culture_info_panel_types
 
 			elide = right
 			fontsize_min = 14
-			max_width = 260
+			max_width = 250
 		}
 
 		textbox = {
-			parentanchor = hcenter
 			block "value"
 			{
 				raw_text = "?"
@@ -681,13 +781,19 @@ types culture_info_panel_types
 
 		flowcontainer = {
 			parentanchor = hcenter
-			spacing = 20
+			spacing = 10
 			margin = { 7 0 }
 
-			culture_or_religion_labeled_value_center = {
-				minimumsize = { 250 -1 }
-				margin = { 0 10 }
+			culture_or_religion_labeled_value_left = {
+				minimumsize = { 270 -1 }
+				margin = { 10 7 }
 				parentanchor = vcenter
+
+				block "culture_or_religion_acceptance_tooltip" {}
+
+				background = {
+					using = entry_bg_simple
+				}
 
 				# blockoverride "label" <- use this to set label
 			}
@@ -707,6 +813,11 @@ types culture_info_panel_types
 			direction = vertical
 			parentanchor = hcenter
 			spacing = 10
+			margin = { 10 10 }
+
+			background = {
+				using = entry_bg_simple
+			}
 
 			block "acceptance_status_distribution_visible"
 			{

@@ -1,0 +1,535 @@
+﻿namespace = eastern_question_austria
+
+eastern_question_austria.1 = {
+	type = country_event
+	placement = root
+
+	title = eastern_question_austria.1.t
+	desc = eastern_question_austria.1.d
+	flavor = eastern_question_austria.1.f
+
+	dlc = dlc014
+
+	duration = 3
+
+	event_image = {
+		video = "ep1_clandestine_meeting"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	trigger = {
+		has_dlc_feature = ip3_content
+		c:AUS ?= this
+		c:TUR ?= {
+			OR = {
+				owns_entire_state_region = STATE_BOSNIA
+				any_subject_or_below = {
+					owns_entire_state_region = STATE_BOSNIA
+				}
+			}
+		}
+		OR = {
+			c:RUS ?= {
+				is_diplomatic_play_enemy_of = c:TUR
+			}
+			c:UKR ?= {
+				is_diplomatic_play_enemy_of = c:TUR
+			}
+		}
+		any_political_lobby = {
+			is_political_lobby_type = lobby_anti_country
+			target = {
+				OR = {
+					c:RUS ?= this
+					c:UKR ?= this
+				}
+			}
+		}
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	immediate = {
+		random_political_lobby = {
+			limit = {
+				is_political_lobby_type = lobby_anti_country
+				target = {
+					OR = {
+						c:RUS ?= this
+						c:UKR ?= this
+					}
+				}
+			}
+			save_scope_as = relevant_lobby
+			target = {
+				save_scope_as = relevant_country
+				random_primary_culture = {
+					save_scope_as = relevant_country_culture
+				}
+			}
+			random_lobby_member = {
+				leader = {
+					save_scope_as = lobby_politician_scope
+					set_character_immortal = yes
+				}
+			}
+		}
+		random_diplomatically_relevant_country = {
+			limit = {
+				owns_entire_state_region = STATE_BOSNIA
+			}
+			if = {
+				limit = {
+					is_subject = yes
+				}
+				top_overlord = {
+					save_scope_as = bosnia_owner_scope
+				}
+			}
+			else = {
+				save_scope_as = bosnia_owner_scope
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			NOT = {
+				exists = scope:bosnia_owner_scope
+			}
+			NOT = {
+				exists = scope:relevant_country
+			}	
+			scope:bosnia_owner_scope ?= {
+				is_country_alive = no
+			}
+		}
+	}
+
+	option = {
+		name = eastern_question_austria.1.a
+		default_option = yes
+		ai_chance = {
+			base = 4
+		}
+		s:STATE_BOSNIA = {
+			add_claim = ROOT
+		}
+		set_secret_goal = {
+			country = scope:bosnia_owner_scope
+			secret_goal = conquer
+		}
+		add_journal_entry = {
+			type = je_eastern_question_austria
+		}
+		hidden_effect = {
+			scope:lobby_politician_scope = {
+				set_character_immortal = no
+			}
+		}
+	}
+
+	option = {
+		name = eastern_question_austria.1.b
+		ai_chance = {
+			base = 1
+		}
+		scope:relevant_lobby ?= {
+			change_appeasement = {
+				amount = -5
+				factor = appeasement_lobby_request_failed
+			}
+		}
+		clear_anti_lobby_vars = yes
+		hidden_effect = {
+			scope:lobby_politician_scope = {
+				set_character_immortal = no
+			}
+		}
+	}
+}
+
+eastern_question_austria.2 = {
+	type = country_event
+	placement = root
+
+	title = eastern_question_austria.2.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					exists = scope:bosnia_owner_scope
+				}
+				desc = eastern_question_austria.2.d
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = {
+						exists = scope:bosnia_owner_scope
+					}
+				}
+				desc = eastern_question_austria.2.d_2
+			}
+		}
+	}
+	flavor = eastern_question_austria.2.f
+
+	dlc = dlc014
+
+	duration = 3
+
+	event_image = {
+		video = "ip3_official_reading_dictate"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	trigger = {
+		# Triggered by JE completion
+	}
+
+	cooldown = { days = normal_modifier_time }
+
+	immediate = {
+		cu:bosniak = {
+			save_scope_as = bosniak_culture
+		}
+		random_subject_or_below = {
+			limit = {
+				has_variable = triune_kingdom_var
+			}
+			save_scope_as = croatia_scope
+		}
+		random_state = {
+			limit = {
+				state_region = s:STATE_BOSNIA
+			}
+			save_scope_as = bosnia_state_scope
+		}
+		generate_3_noble_name = {
+			CULTURE_1 = primary_culture
+			CULTURE_2 = primary_culture
+			CULTURE_3 = primary_culture
+		}
+	}
+
+	cancellation_trigger = {
+		NOR = {
+			owns_entire_state_region = STATE_BOSNIA
+			any_subject_or_below = {
+				owns_entire_state_region = STATE_BOSNIA
+			}
+			trigger_if = {
+				limit = {
+					is_power_bloc_leader = yes
+				}
+				scope:power_bloc ?= {
+					any_power_bloc_member = {
+						owns_entire_state_region = STATE_BOSNIA
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = eastern_question_austria.2.a
+		default_option = yes
+		custom_tooltip = {
+			text = bosnian_protectorate_tt
+			create_country = {
+				origin = root
+				tag = BOS
+				state = s:STATE_BOSNIA.region_state:AUS
+				on_created = {
+					activate_law = law_type:law_national_supremacy
+					activate_law = law_type:law_total_separation
+					c:AUS ?= {
+						create_diplomatic_pact = {
+							country = PREV
+							type = protectorate
+						}
+					}
+				}
+			}
+		}
+		clear_generated_names = yes
+	}
+
+	option = {
+		name = eastern_question_austria.2.b
+		trigger = {
+			NOT = {
+				any_subject_or_below = {
+					has_variable = transleithania_var
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = scope:bosnia_owner_scope
+			}
+			create_incident = {
+				value = 15
+				country = scope:bosnia_owner_scope
+			}
+		}
+		else = {
+			change_infamy = 15
+		}
+		clear_generated_names = yes
+	}
+
+	option = {
+		name = eastern_question_austria.2.c
+		trigger = {
+			any_subject_or_below = {
+				has_variable = transleithania_var
+			}
+		}
+		custom_tooltip = {
+			text = bosnian_puppet_tt
+			create_country = {
+				origin = root
+				tag = BOS
+				state = s:STATE_BOSNIA.region_state:AUS
+				on_created = {
+					activate_law = law_type:law_national_supremacy
+					activate_law = law_type:law_total_separation
+					c:AUS ?= {
+						create_diplomatic_pact = {
+							country = PREV
+							type = puppet
+						}
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				exists = scope:bosnia_owner_scope
+			}
+			create_incident = {
+				value = 10
+				country = scope:bosnia_owner_scope
+			}
+		}
+		else = {
+			change_infamy = 10
+		}
+		clear_generated_names = yes
+	}
+
+	option = {
+		name = eastern_question_austria.2.e
+		trigger = {
+			exists = scope:croatia_scope
+		}
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_BOSNIA
+			}
+			set_state_owner = scope:croatia_scope
+		}
+		if = {
+			limit = {
+				exists = scope:bosnia_owner_scope
+			}
+			create_incident = {
+				value = 10
+				country = scope:bosnia_owner_scope
+			}
+		}
+		else = {
+			change_infamy = 10
+		}
+		if = {
+			limit = {
+				any_subject_or_below = {
+					has_variable = transleithania_var
+				}
+			}
+			random_subject_or_below = {
+				limit = {
+					has_variable = transleithania_var
+				}
+				add_liberty_desire = 15
+				change_relations = { country = ROOT value = -20 }
+			}
+		}
+		clear_generated_names = yes
+	}
+}
+
+namespace = eastern_question_russia
+
+eastern_question_russia.1 = {
+	type = country_event
+	placement = root
+
+	title = {
+		first_valid = {
+			triggered_desc = {
+				desc = eastern_question_russia.1.t
+				trigger = {
+					OR = {
+						has_journal_entry = je_eastern_question_russia
+						has_variable = russia_eastern_question_victory
+					}
+				}
+			}
+			triggered_desc = {
+				desc = eastern_question_russia.1.t2
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = eastern_question_russia.1.d
+				trigger = {
+					has_variable = russia_eastern_question_victory
+				}
+			}
+			triggered_desc = {
+				desc = eastern_question_russia.1.d2
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+	flavor = eastern_question_russia.1.f
+
+	dlc = dlc014
+
+	duration = 3
+
+	event_image = {
+		video = "ip3_official_reading_dictate"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	trigger = {
+		# Fired by JE
+	}
+
+	cooldown = { days = normal_modifier_time }
+
+	immediate = {
+		random_diplomatically_relevant_country = {
+			limit = {
+				country_has_primary_culture = cu:bulgarian
+			}
+			save_scope_as = bulgaria_scope
+		}
+		generate_1_noble_name = {
+			CULTURE_1 = primary_culture
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			exists = scope:bulgaria_scope
+		}
+	}
+
+	option = {
+		name = eastern_question_russia.1.a
+		default_option = yes
+		trigger = {
+			has_variable = russia_eastern_question_victory
+		}
+		add_modifier = {
+			name = modifier_protector_of_the_south_slavs
+			days = long_modifier_time
+			multiplier = 2
+			is_decaying = yes
+		}
+		scope:bulgaria_scope ?= {
+			ROOT.power_bloc ?= {
+				add_leverage = { target = PREV value = 1000 }
+			}
+			change_relations = {
+				country = ROOT
+				value = 25
+			}
+		}
+		clear_generated_names = yes
+	}
+
+	option = {
+		name = eastern_question_russia.1.b
+		trigger = {
+			has_variable = russia_eastern_question_victory
+		}
+		add_modifier = {
+			name = modifier_protector_of_the_south_slavs
+			days = long_modifier_time
+			is_decaying = yes
+		}
+		every_diplomatically_relevant_country = {
+			limit = {
+				OR = {
+					capital.region = sr:region_danubia
+					capital.region = sr:region_balkans
+				}
+				country_has_state_religion = rel:orthodox
+				any_primary_culture = {
+					has_discrimination_trait = heritage_south_slavic
+				}
+			}
+			ROOT.power_bloc ?= {
+				add_leverage = { target = PREV value = 750 }
+			}
+			change_relations = {
+				country = ROOT
+				value = 10
+			}
+		}
+		clear_generated_names = yes
+	}
+
+	option = {
+		name = eastern_question_russia.1.c
+		default_option = yes
+		trigger = {
+			NOT = {
+				has_variable = russia_eastern_question_victory
+			}
+		}
+		scope:bulgaria_scope ?= {
+			ROOT.power_bloc ?= {
+				add_leverage = { target = PREV value = 500 }
+			}
+			change_relations = {
+				country = ROOT
+				value = 10
+			}
+		}
+		clear_generated_names = yes
+	}
+
+	option = {
+		name = eastern_question_russia.1.e
+		trigger = {
+			is_player = yes
+		}
+		play_as = scope:bulgaria_scope
+		clear_generated_names = yes
+	}
+}

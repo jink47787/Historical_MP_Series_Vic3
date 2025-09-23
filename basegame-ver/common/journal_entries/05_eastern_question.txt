@@ -1,0 +1,271 @@
+﻿je_eastern_question_russia = {
+	group = je_group_crises
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	scripted_progress_bar = control_eastern_crisis_bar
+
+	is_shown_when_inactive = {
+		has_dlc_feature = ip3_content
+		OR = {
+			c:RUS ?= this
+			c:UKR ?= this
+		}
+		NOT = {
+			exists = c:BUL
+		}
+		c:TUR ?= {
+			has_strategic_adjacency = ROOT
+		}
+	}
+
+	possible = {
+		c:TUR ?= {
+			has_journal_entry = je_great_eastern_crisis
+		}
+	}
+
+	modifiers_while_active = {
+		positive_crisis_influence
+	}
+
+	immediate = {
+		trigger_event = { id = eastern_crisis.1 popup = yes }
+		c:TUR ?= {
+			save_scope_as = ottoman_scope
+		}
+		ROOT = {
+			save_scope_as = root_scope
+		}
+		if = {
+			limit = {
+				c:TUR ?= {
+					any_scope_state = {
+						state_region = s:STATE_KARS
+					}
+				}
+			}
+			set_variable = ottomans_own_kars_at_start
+		}
+		if = {
+			limit = {
+				c:TUR ?= {
+					any_scope_state = {
+						state_region = s:STATE_DOBRUDJA
+					}
+				}
+			}
+			set_variable = ottomans_own_dobrudja_at_start
+		}
+	}
+
+	complete = {
+		any_diplomatically_relevant_country = {
+			country_has_primary_culture = cu:bulgarian
+			NOR = {
+				is_diplomatic_play_enemy_of = c:TUR
+				has_war_with = c:TUR
+			}
+		}
+		trigger_if = {
+			limit = {
+				has_variable = ottomans_own_kars_at_start
+			}
+			owns_entire_state_region = STATE_KARS
+		}
+		trigger_if = {
+			limit = {
+				has_variable = ottomans_own_dobrudja_at_start
+			}
+			custom_tooltip = {
+				text = ottomans_not_owns_dobruja_tt
+				s:STATE_DOBRUDJA = {
+					NOT = {
+						any_scope_state = {
+							c:TUR ?= owner
+						}
+					}
+				}
+			}
+		}
+	}
+
+	on_complete = {
+		set_variable = russia_eastern_question_victory
+		trigger_event = { id = eastern_question_russia.1 popup = yes }
+	}
+	
+	event_outcome_completed_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = event_effects_eastern_question_russia.1_tt
+			}
+		}
+	}
+
+	timeout = 3650 # 10 years
+
+	fail = {
+		custom_tooltip = {
+			text = bulgaria_is_not_free_tt
+			NOT = {
+				exists = c:BUL
+			}
+		}
+		c:TUR ?= {
+			NOT = {
+				has_journal_entry = je_great_eastern_crisis
+			}
+		}
+	}
+
+	invalid = {
+		NOT = {
+			exists = c:TUR
+		}
+	}
+
+	should_be_pinned_by_default = yes
+	weight = 100
+	transferable = no
+
+}
+
+je_eastern_question_austria = {
+	should_be_pinned_by_default = yes
+	icon = "gfx/interface/icons/relations_icons/hostile.dds"
+
+	scripted_progress_bar = control_eastern_crisis_bar
+
+	group = je_group_crises
+
+	timeout = 3650
+
+	modifiers_while_active = {
+		positive_crisis_influence
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				c:TUR ?= {
+					has_journal_entry = je_great_eastern_crisis
+				}
+			}
+			trigger_event = { id = eastern_crisis.1 }
+		}
+		random_political_lobby = {
+			limit = {
+				target = {
+					OR = {
+						c:RUS ?= this
+						c:UKR ?= this
+					}
+				}
+				is_political_lobby_type = lobby_anti_country
+			}
+			save_scope_as = relevant_lobby
+			target = {
+				save_scope_as = relevant_country
+			}
+		}
+		random_diplomatically_relevant_country = {
+			limit = {
+				owns_entire_state_region = STATE_BOSNIA
+			}
+			if = {
+				limit = {
+					is_subject = yes
+				}
+				top_overlord = {
+					save_scope_as = bosnia_owner_scope
+				}
+			}
+			else = {
+				save_scope_as = bosnia_owner_scope
+			}
+		}
+		ROOT = {
+			set_variable = { name = anti_lobby_demand_target value = scope:relevant_country }
+		}
+	}
+
+	complete = {
+		OR = {
+			owns_entire_state_region = STATE_BOSNIA
+			any_subject_or_below = {
+				owns_entire_state_region = STATE_BOSNIA
+			}
+			trigger_if = {
+				limit = {
+					is_power_bloc_leader = yes
+				}
+				scope:power_bloc ?= {
+					any_power_bloc_member = {
+						owns_entire_state_region = STATE_BOSNIA
+					}
+				}
+			}
+		}
+	}
+	
+	event_outcome_completed_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = event_effects_eastern_question_austria.2_tt
+			}
+		}
+	}
+
+	invalid = {
+		NOR = {
+			owns_entire_state_region = STATE_BOSNIA
+			any_subject_or_below = {
+				owns_entire_state_region = STATE_BOSNIA
+			}
+			trigger_if = {
+				limit = {
+					is_power_bloc_leader = yes
+				}
+				scope:power_bloc ?= {
+					any_power_bloc_member = {
+						owns_entire_state_region = STATE_BOSNIA
+					}
+				}
+			}
+			scope:bosnia_owner_scope ?= {
+				owns_entire_state_region = STATE_BOSNIA
+			}
+		}
+	}
+
+	fail = {
+		c:TUR ?= {
+			NOT = {
+				has_journal_entry = je_great_eastern_crisis
+			}
+		}
+	}
+
+	on_complete = {
+		scope:relevant_lobby = {
+			change_appeasement = {
+				amount = 3
+				factor = appeasement_lobby_request_accepted
+			}
+		}
+		trigger_event = { id = eastern_question_austria.2 popup = yes }
+		clear_anti_lobby_vars = yes
+	}
+
+	on_timeout = {
+		scope:relevant_lobby = {
+			change_appeasement = {
+				amount = -5
+				factor = appeasement_lobby_request_ignored
+			}
+		}
+		clear_anti_lobby_vars = yes
+	}
+
+	weight = 1000
+}

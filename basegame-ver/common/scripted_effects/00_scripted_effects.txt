@@ -222,8 +222,8 @@ warlord_setup_effect = {
 			if = {
 				limit = {
 					OR = {
-						has_law = law_type:law_ethnostate
-						has_law = law_type:law_national_supremacy
+						has_law_or_variant = law_type:law_ethnostate
+						has_law_or_variant = law_type:law_national_supremacy
 					}
 				}
 				remove_primary_culture = cu:uighur
@@ -267,23 +267,6 @@ scripted_effect_parties_disappearence = {
 	deactivate_parties = yes
 }
 
-liberate_slaves = {
-	every_scope_pop = {
-		limit = {
-			is_pop_type = slaves
-		}
-		if = {
-			limit = {
-				is_employed = yes
-			}
-			change_poptype = workplace.type.slaves_role
-		}
-		else = {
-			change_poptype = pop_type:laborers
-		}
-	}
-}
-
 enslave_discriminated_farm_workers = {
 	every_scope_pop = {
 		limit = {
@@ -299,12 +282,10 @@ enslave_discriminated_farm_workers = {
 	}
 }
 
-save_revolution_scopes = {
-	random_civil_war = {
-		save_scope_as = ongoing_revolution
-		political_movement = {
-			save_scope_as = ongoing_revolution_movement
-		}
+civil_war_save_scopes = {
+	save_scope_as = ongoing_revolution
+	political_movement = {
+		save_scope_as = ongoing_revolution_movement
 	}
 }
 
@@ -941,5 +922,370 @@ unification_claims_effect = {
 		add_loyalists = {
 			value = 0.05
 		}
+	}
+}
+
+remove_subject_diplomatic_pact = {
+	root.power_bloc ?= {
+		add_leverage = { target = prev value = -500 }
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = protectorate
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = protectorate
+			}
+		}
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = puppet
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = puppet
+			}
+		}
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = tributary
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = tributary
+			}
+		}
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = vassal
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = vassal
+			}
+		}
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = chartered_company
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = chartered_company
+			}
+		}
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = dominion
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = dominion
+			}
+		}
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = colony
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = colony
+			}
+		}
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = personal_union
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = personal_union
+			}
+		}
+	}
+	if = {
+		limit = {
+			this = {
+				has_diplomatic_pact = {
+					who = root
+					type = crown_land
+				}
+			}
+		}
+		this = {
+			remove_diplomatic_pact = {
+				country = root
+				type = crown_land
+			}
+		}
+	}
+}
+
+accepted_cultural_minority_selector_owner_scope_save_scope_as_minority_culture = {
+	random_scope_state = {
+		limit = {
+			any_scope_culture = {
+				OR = {
+					has_homeland = prev
+					culture_has_community_in_state = prev
+				}
+				prev = {
+					OR  = {
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_national_supremacy }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_5
+							}
+						}
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_racial_segregation }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_4
+							}
+						}
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_subjecthood }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_4
+							}
+						}
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_cultural_exclusion }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_3
+							}
+						}
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_multicultural }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_2
+							}
+						}
+					}
+				}
+				NOT = { is_primary_culture_of = ROOT.owner }
+			}
+		}
+		random_scope_culture = {
+			limit = {
+				OR = {
+					has_homeland = prev
+					culture_has_community_in_state = prev
+				}
+				prev = {
+					OR  = {
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_national_supremacy }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_4
+							}
+						}
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_racial_segregation }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_3
+							}
+						}
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_cultural_exclusion }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_2
+							}
+						}
+						AND = {
+							ROOT.owner = { has_law_or_variant = law_type:law_multicultural }
+							state_cultural_acceptance = {
+								target = prev
+								value >= acceptance_status_1
+							}
+						}
+					}
+				}
+				NOT = { is_primary_culture_of = ROOT.owner }
+			}
+			save_scope_as = minority_culture
+		}
+	}
+}
+
+spoils_of_war_initiation_gre = { # If there are any states in the Balkans that are Greek homelands, and not ours, and if there is at least one country who completed the Balkan League JE besides us.
+	if = {
+		limit = {
+			exists = c:GRE
+			this = c:GRE
+			is_subject = no
+			sr:region_balkans = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:greek
+					}
+					owner = root
+					count < 7
+				}
+			}
+			has_variable = first_balkan_war_successful
+	   	}
+		add_journal_entry = {
+			type = je_spoils_of_war
+		}
+	}
+}
+
+spoils_of_war_initiation_mon = { # If there are any states in the Balkans that are Serbian homelands, and not ours, and if there is at least one country who completed the Balkan League JE besides us.
+    if = {
+		limit = {
+			exists = c:MON
+			this = c:MON
+			is_subject = no
+			sr:region_balkans = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:serb
+					}
+					owner = root
+					count < 5
+				}
+			}
+			has_variable = first_balkan_war_successful
+    	}
+		add_journal_entry = {
+			type = je_spoils_of_war
+		}
+    }
+}
+
+spoils_of_war_initiation_bul = { # If there are any states in the Balkans that are Romanian homelands, and not ours, and if there is at least one country who completed the Balkan League JE besides us.
+    if = {
+		limit = {
+			exists = c:BUL
+			this = c:BUL
+			is_subject = no
+			sr:region_balkans = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:bulgarian
+					}
+					owner = root
+					count < 4
+				}
+			}
+			has_variable = first_balkan_war_successful
+    	}
+		add_journal_entry = {
+			type = je_spoils_of_war
+		}
+    }
+}
+
+spoils_of_war_initiation_ser = { # If there are any states in the Balkans that are Serbian homelands, and not ours, and if there is at least one country who completed the Balkan League JE besides us.
+	if = {
+		limit = {
+			exists = c:SER
+			this = c:SER
+			is_subject = no
+			sr:region_balkans = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:serb
+					}
+					owner = root
+					count < 5
+				}
+			}
+			has_variable = first_balkan_war_successful
+    	}
+		add_journal_entry = {
+			type = je_spoils_of_war
+		}
+    }
+}
+
+spoils_of_war_initiation_wal = { # If there are any states in the Danubia region that are romanian homelands, and not ours, and if there is at least one country who completed the Balkan League JE.
+	if = {
+		limit = {
+			exists = c:WAL
+			is_subject = no
+			sr:region_danubia = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:romanian
+					}
+					owner = root
+					count < 3
+				}
+			}
+    	}
+		add_journal_entry = {
+			type = je_spoils_of_war
+		}
+    }
+}
+
+the_balkan_league_activated_modifier_cleanser = { #removes all activated modifiers when they're not logically applicable anymore.
+	hidden_effect = {
+		remove_modifier = balkan_wars_military_tech_boost_mod
+		remove_modifier = balkan_wars_military_industry_overworked_mod
 	}
 }
