@@ -14,19 +14,31 @@ zionism.1 = {
 	}
 	
 	trigger = {
-		any_scope_pop = {
-			culture = cu:ashkenazi
-			size >= 1000
+		OR = {
+			any_scope_pop = {
+				culture = cu:ashkenazi
+				size >= 1000
+			}
+			any_scope_pop = {
+				culture = cu:sephardic
+				size >= 1000
+			}
 		}
+		NOT = { has_variable = ashkenazi_expulsion_stall }
+		has_global_variable = zionism_allowed
 	}
 	
 	immediate = {
 		random_scope_state = {
             limit = {
-                #region = sr:region_caucasus
-                any_scope_pop = {
-                    culture = cu:ashkenazi
-                }
+				OR = {
+					any_scope_pop = {
+						culture = cu:sephardic
+					}
+				    any_scope_pop = {
+                    	culture = cu:ashkenazi
+                	}
+				}
             }
         	save_scope_as = ashkenazi_origin_state
         }
@@ -48,17 +60,18 @@ zionism.1 = {
                 save_scope_as = ashkenazi_destination_state
             }
         }
-        cu:circassian = {
+        cu:ashkenazi = {
             save_scope_as = ashkenazi_culture
         }
         set_variable = {
             name = ashkenazi_expulsion_stall
-            months = 3
+            months = 18
         }
 	}
 	
-	option = {
+	option = { #allow movement
 		name = zionism.1.a
+		default_option = yes
 		scope:ashkenazi_origin_state = {
             #text = three_pops_deported_tt
             random_scope_pop = {
@@ -91,7 +104,108 @@ zionism.1 = {
 					population_ratio =  0.5
 				}
             }
+			random_scope_pop = {
+                limit = {
+                    culture = cu:sephardic
+                    strata = lower
+                }
+                move_partial_pop = {
+					state = scope:ashkenazi_destination_state 
+					population_ratio =  0.5
+				}
+            }
+            random_scope_pop = {
+                limit = {
+                    culture = cu:sephardic
+                    strata = middle
+                }
+                move_partial_pop = {
+					state = scope:ashkenazi_destination_state 
+					population_ratio =  0.5
+				}
+            }
+            random_scope_pop = {
+                limit = {
+                    culture = cu:sephardic
+                    strata = upper
+                }
+                move_partial_pop = {
+					state = scope:ashkenazi_destination_state 
+					population_ratio =  0.5
+				}
+            }
         }
-     }
+    }
+
+	option = { #stop movement
+		name = zionism.1.b
+		scope:ashkenazi_origin_state = {
+			add_radicals_in_state = {
+				value = 0.1
+				culture = cu:ashkenazi
+			}
+			add_radicals_in_state = {
+				value = 0.1
+				culture = cu:sephardic
+			}
+		}
+	}
 }
 
+zionism.2 = {
+	type = country_event
+	placement = ROOT
+	title = zionism.2.t
+	desc = zionism.2.d
+	flavor = zionism.2.f
+	
+	duration = 3
+	
+	event_image = {
+		video = "europenorthamerica_capitalists_meeting"
+	}
+	
+	trigger = { #triggers for the owner of jordan after someone researches political agitation, triggers once
+		any_scope_state = {
+			state_region = s:STATE_TRANSJORDAN
+		}
+		NOT = {
+			OR = {
+				has_global_variable = zionism_allowed
+				has_global_variable = zionism_denied
+			}
+		}
+		any_country = {
+			has_technology_researched = political_agitation
+		}
+	}
+
+	immediate = {
+		
+	}
+
+	option = { #allow settlement
+		name = zionism.2.a
+		set_global_variable = zionism_allowed
+		s:STATE_TRANSJORDAN = {
+			add_homeland = cu:ashkenazi
+			add_homeland = cu:sephardic
+		}
+		add_radicals = {
+			value = 0.10
+			culture = cu:mashriqi
+		}
+	}
+
+	option = { #disallow settlement
+		name = zionism.2.b
+		add_radicals = {
+			value = 0.10
+			religion = rel:jewish
+		}
+		custom_tooltip = {
+			text = zionism.2.b.tt
+			set_global_variable = zionism_denied
+		}
+	}
+}
