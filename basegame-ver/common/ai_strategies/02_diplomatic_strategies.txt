@@ -308,7 +308,7 @@ ai_strategy_territorial_expansion = {
 				exists = c:FRA
 				c:FRA = this
 				ruler = {
-					has_variable = bonapartist_leader
+					has_variable = house_bonaparte
 				}
 			}
 			add = 5
@@ -341,7 +341,7 @@ ai_strategy_territorial_expansion = {
 		}
 
 		if = {
-			limit = { country_is_in_europe = yes }
+			limit = { is_in_geographic_region = geographic_region_europe }
 			multiply = 0.25
 		}
 
@@ -468,7 +468,7 @@ ai_strategy_colonial_expansion = {
 					limit = {
 						has_journal_entry = je_scramble_for_africa
 						scope:target_country = {
-							country_is_in_africa = yes
+							is_in_geographic_region = geographic_region_africa
 						}
 					}
 					add = 10
@@ -572,7 +572,7 @@ ai_strategy_colonial_expansion = {
 						limit = {
 							has_journal_entry = je_scramble_for_africa
 							scope:target_country = {
-								country_is_in_africa = yes
+								is_in_geographic_region = geographic_region_africa
 							}
 						}
 						add = 600
@@ -613,7 +613,7 @@ ai_strategy_colonial_expansion = {
 						limit = {
 							has_journal_entry = je_scramble_for_africa
 							scope:target_country = {
-								country_is_in_africa = yes
+								is_in_geographic_region = geographic_region_africa
 							}
 						}
 						add = 600
@@ -660,7 +660,7 @@ ai_strategy_colonial_expansion = {
 				exists = c:FRA
 				c:FRA = this
 				ruler = {
-					has_variable = bonapartist_leader
+					has_variable = house_bonaparte
 				}
 			}
 			add = 10
@@ -713,6 +713,13 @@ ai_strategy_colonial_expansion = {
 				power_bloc ?= { has_principle_group = principle_group:principle_group_colonial_offices }
 			}
 			multiply = 1.5
+		}
+
+		if = {
+			limit = {
+				has_journal_entry = je_hispanoamerica
+			}
+			multiply = 0.5
 		}
 
 		if = {
@@ -990,7 +997,7 @@ ai_strategy_economic_imperialism = {
 				navy_size >= 25
 				scope:target_country = {
 					exists = c:JAP
-					this = c:JAP
+					c:JAP ?= THIS
 					has_law_or_variant = law_type:law_isolationism
 					gdp >= 5000000
 				}
@@ -1052,7 +1059,7 @@ ai_strategy_economic_imperialism = {
 			if = {
 				limit = {
 					exists = c:JAP
-					c:JAP = { has_law_or_variant = law_type:law_isolationism }
+					c:JAP ?= { has_law_or_variant = law_type:law_isolationism }
 					country_rank = rank_value:great_power
 					navy_size >= 25
 				}
@@ -1202,7 +1209,7 @@ ai_strategy_economic_imperialism = {
 						limit = {
 							scope:target_country = {
 								exists = c:JAP
-								this = c:JAP
+								c:JAP ?= THIS
 								has_law_or_variant = law_type:law_isolationism
 							}
 						}
@@ -1235,7 +1242,7 @@ ai_strategy_economic_imperialism = {
 						limit = {
 							scope:target_country = {
 								exists = c:JAP
-								this = c:JAP
+								c:JAP ?= THIS
 								has_law_or_variant = law_type:law_isolationism
 							}
 						}
@@ -1271,8 +1278,8 @@ ai_strategy_economic_imperialism = {
 				c:FRA = this
 				ruler = {
 					OR = {
-						has_variable = bonapartist_leader
-						has_variable = orleanist_leader
+						has_variable = house_bonaparte
+						has_variable = house_orleans
 					}
 				}
 			}
@@ -1293,7 +1300,7 @@ ai_strategy_economic_imperialism = {
 			limit = {
 				exists = c:JAP
 				has_strategic_adjacency = c:JAP
-				c:JAP = { has_law_or_variant = law_type:law_isolationism }
+				c:JAP ?= { has_law_or_variant = law_type:law_isolationism }
 			}
 			multiply = 2.0
 		}
@@ -1450,9 +1457,7 @@ ai_strategy_unify_germany = {
 
 	building_group_weights = {
 		bg_army = 1.5
-		bg_artillery_foundaries = 1.5
-		bg_arms_industries = 1.5
-		bg_munition_plants = 1.5
+		bg_military_industry = 1.5
 	}
 
 	state_value = {
@@ -1512,7 +1517,7 @@ ai_strategy_unify_germany = {
 							}
 						}
 					}
-					multiply = 2 # Maximum 220 if Pan-National, 60 if not
+					multiply = 1.5 # Maximum 155 if Pan-National, 45 if not
 				}
 				else_if = {
 					limit = {
@@ -1523,7 +1528,7 @@ ai_strategy_unify_germany = {
 							}
 						}
 					}
-					multiply = 5 # Maximum 550 if Pan-National, 150 if not
+					multiply = 2.5 # Maximum 275 if Pan-National, 75 if not
 				}
 			}
 			if = {
@@ -1631,7 +1636,7 @@ ai_strategy_unify_germany = {
 						}
 					}
 				}
-				multiply = 2 # Maximum 220 if Pan-National, 60 if not
+				multiply = 1.5 # Maximum 155 if Pan-National, 45 if not
 			}
 			else_if = {
 				limit = {
@@ -1642,7 +1647,7 @@ ai_strategy_unify_germany = {
 						}
 					}
 				}
-				multiply = 5 # Maximum 550 if Pan-National, 150 if not
+				multiply = 2.5 # Maximum 275 if Pan-National, 75 if not
 			}
 		}
 		if = {
@@ -1766,7 +1771,64 @@ ai_strategy_unify_italy = {
 
 	wargoal_scores = {
 		unification_leadership = {
-			value = 1000
+			value = 5
+			if = { # Fervour
+				limit = {
+					has_technology_researched = pan-nationalism
+				}
+				add = {
+					value = country_fervor_primary_culture
+					divide = 2
+				}
+			}
+			else = {
+				add = {
+					value = country_fervor_primary_culture
+					divide = 10
+				}
+			}
+			if = { # At this point - up to 55 if Pan-National, 15 if not
+				limit = {
+					any_political_movement ?= {
+						is_political_movement_type = movement_italian_national
+						save_temporary_scope_as = italian_national_movement
+					}
+				}
+				scope:italian_national_movement ?= {
+					multiply = {
+						value = 1
+						add = this.political_movement_radicalism # At this point - maximum 110 [if Pan-National] to 30 [if not]
+					}
+				}
+				if = {
+					limit = {
+						scope:italian_national_movement ?= {
+							any_influenced_interest_group = {
+								is_in_government = yes
+								is_powerful = no
+							}
+						}
+					}
+					multiply = 1.5 # Maximum 155 if Pan-National, 45 if not
+				}
+				else_if = {
+					limit = {
+						scope:italian_national_movement ?= {
+							any_influenced_interest_group = {
+								is_in_government = yes
+								is_powerful = yes
+							}
+						}
+					}
+					multiply = 2.5 # Maximum 275 if Pan-National, 75 if not
+				}
+			}
+			if = {
+				limit = {
+					has_law = law_type:law_subjecthood
+				}
+				multiply = 0.1
+			}
 		}
 	}
 
@@ -1866,7 +1928,7 @@ ai_strategy_unify_italy = {
 						}
 					}
 				}
-				multiply = 5 # Maximum 550 if Pan-National, 150 if not
+				multiply = 1.5 # Maximum 155 if Pan-National, 45 if not
 			}
 			else_if = {
 				limit = {
@@ -1877,7 +1939,7 @@ ai_strategy_unify_italy = {
 						}
 					}
 				}
-				multiply = 10 # Maximum 1100 if Pan-National, 300 if not
+				multiply = 2.5 # Maximum 275 if Pan-National, 75 if not
 			}
 		}
 		if = {
@@ -2722,7 +2784,7 @@ ai_strategy_anti_imperialism = {
 		if = {
 			limit = {
 				scope:target_country = {
-					is_country_type = colonial
+					country_is_colonial_or_company = yes
 				}
 			}
 			multiply = 2
@@ -2811,7 +2873,7 @@ ai_strategy_anti_imperialism = {
 				if = {
 					limit = {
 						NOT = { scope:target_country = { is_subject_of = root } }
-						is_country_type = colonial
+						scope:target_country ?= { country_is_colonial_or_company = yes }
 					}
 					add = 25
 				}
@@ -3043,7 +3105,7 @@ ai_strategy_restore_natural_borders = {
 				is_country_type = unrecognized
 				OR = {
 					country_rank >= rank_value:unrecognized_regional_power
-					country_is_in_africa = yes
+					is_in_geographic_region = geographic_region_africa
 				}
 			}
 			add = 25
@@ -3054,7 +3116,7 @@ ai_strategy_restore_natural_borders = {
 				exists = c:FRA
 				c:FRA = this
 				ruler = {
-					has_variable = bonapartist_leader
+					has_variable = house_bonaparte
 				}
 			}
 			add = 5
@@ -3202,7 +3264,7 @@ ai_strategy_prussia_of_the_balkans = {
 						}
 					}
 				}
-				add = 5.0
+				add = 5
 			}
 		}
 
@@ -3229,9 +3291,7 @@ ai_strategy_prussia_of_the_balkans = {
 
 	building_group_weights = {
 		bg_army = 1.5
-		bg_artillery_foundaries = 1.5
-		bg_arms_industries = 1.5
-		bg_munition_plants = 1.5
+		bg_military_industry = 1.5
 	}
 
 	state_value = {
@@ -3254,7 +3314,7 @@ ai_strategy_prussia_of_the_balkans = {
 		}
 		return_state = {
 			add = 1000
-		}
+	}
 		conquer_state = {
 			if = {
 				limit = {
@@ -3316,13 +3376,13 @@ ai_strategy_prussia_of_the_balkans = {
 					AND = {
 						has_variable = bul_pursued_greater_yugoslavism
 						OR = {
-							scope:target_country = {
-								is_unification_candidate = YUG
-							}
+				scope:target_country = {
+					is_unification_candidate = YUG
+				}
 							AND = {
 								NOT = {
 									can_form_nation = YUG
-								}
+			}
 								any_scope_state = {
 									state_region = {
 										OR = {

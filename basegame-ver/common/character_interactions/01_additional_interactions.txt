@@ -19,12 +19,13 @@ arrange_accident = {
 		is_in_exile_pool = no
 		is_in_void = no
 		is_ruler = no
-		is_heir = no
 		OR = {
+			is_heir = yes
 			has_role = general
 			has_role = admiral
 			has_role = politician
 			has_role = agitator
+			has_role = executive
 		}
 		is_immortal = no
 	}
@@ -35,13 +36,35 @@ arrange_accident = {
 		owner ?= {
 			has_law_or_variant = law_type:law_secret_police
 		}
-		interest_group = {
-			is_marginal = no
+		interest_group ?= {
+			ig_counts_as_marginal = no
+		}
+		custom_tooltip = {
+			text = pending_coup_event_tt
+			NOT = {
+				owner = {
+					has_variable = coup_event_active
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				OR = {
+					has_dlc_feature = voice_of_the_people_content
+					has_dlc_feature = ip4_content
+				}
+			}
+			custom_tooltip = {
+				text = doing_coup_for_player_tt
+				NOT = {
+					has_variable = commander_doing_coup_on_player_behalf
+				}
+			}
 		}
 	}
 
 	effect = {
-		this.interest_group = {
+		this.interest_group ?= {
 			save_scope_as = relevant_ig
 		}
 		this = {
@@ -135,6 +158,19 @@ arrange_accident = {
 					}
 					if = {
 						limit = {
+							owner = {
+								has_journal_entry = je_ip4_coup
+							}
+							root = {
+								has_variable = golpista_var
+							}
+						}
+						owner = {
+							character_execute_immediate_coup = yes
+						}
+					}
+					if = {
+						limit = {
 							character_supports_political_movement = yes
 						}
 						this.political_movement = {
@@ -147,7 +183,7 @@ arrange_accident = {
 					else_if = {
 						limit = {
 							has_role = politician
-							THIS.interest_group = {
+							THIS.interest_group ?= {
 								interest_group_supports_political_movement = yes
 							}
 						}
@@ -189,6 +225,19 @@ arrange_accident = {
 					}
 					if = {
 						limit = {
+							owner = {
+								has_journal_entry = je_ip4_coup
+							}
+							root = {
+								has_variable = golpista_var
+							}
+						}
+						owner = {
+							character_execute_immediate_coup = yes
+						}
+					}
+					if = {
+						limit = {
 							character_supports_political_movement = yes
 						}
 						this.political_movement = {
@@ -201,7 +250,7 @@ arrange_accident = {
 					else_if = {
 						limit = {
 							has_role = politician
-							THIS.interest_group = {
+							THIS.interest_group ?= {
 								interest_group_supports_political_movement = yes
 							}
 						}
@@ -231,7 +280,7 @@ arrange_accident = {
 		value = -50
 		if = {
 			limit = {
-				interest_group = {
+				interest_group ?= {
 					ig_approval <= -5
 				}
 			}
@@ -239,7 +288,7 @@ arrange_accident = {
 		}
 		if = {
 			limit = {
-				interest_group = {
+				interest_group ?= {
 					ig_approval <= -10
 				}
 			}
@@ -323,6 +372,12 @@ arrange_accident = {
 			}
 			add = 10
 		}
+		if = {
+			limit = {
+				is_heir = yes # The AI won't kill its own heirs
+			}
+			add = -100
+		}
 	}
 }
 
@@ -336,7 +391,7 @@ resign_from_office = {
 		is_immortal = no
 		owner ?= {
 			NOR = {
-				has_law_or_variant = law_type:law_monarchy
+				has_law = law_type:law_monarchy
 				has_law_or_variant = law_type:law_theocracy
 			}
 		}
@@ -344,11 +399,11 @@ resign_from_office = {
 
 	possible = {
 		OR = {
-			interest_group = {
+			interest_group ?= {
 				ig_approval <= angry
 			}
-			interest_group = {
-				is_marginal = yes
+			interest_group ?= {
+				ig_counts_as_marginal = yes
 			}
 			popularity <= -50
 			OR = {
@@ -440,7 +495,7 @@ resign_from_office = {
 		if = {
 			limit = {
 				interest_group = {
-					is_marginal = yes
+					ig_counts_as_marginal = yes
 				}
 			}
 			add = 25
@@ -499,6 +554,28 @@ send_to_jail = {
 		owner ?= {
 			NOT = {
 				has_law_or_variant = law_type:law_guaranteed_liberties
+			}
+		}
+		custom_tooltip = {
+			text = pending_coup_event_tt
+			NOT = {
+				owner = {
+					has_variable = coup_event_active
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				OR = {
+					has_dlc_feature = voice_of_the_people_content
+					has_dlc_feature = ip4_content
+				}
+			}
+			custom_tooltip = {
+				text = doing_coup_for_player_tt
+				NOT = {
+					has_variable = commander_doing_coup_on_player_behalf
+				}
 			}
 		}
 	}

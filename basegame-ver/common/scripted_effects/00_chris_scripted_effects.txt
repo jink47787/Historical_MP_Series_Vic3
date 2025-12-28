@@ -1,4 +1,56 @@
-﻿end_raiding_cleanup = { #Used to cleanup effects of je_montenegrin_raiding
+﻿cuba_annex_effects = {
+	active_law:lawgroup_slavery = {
+		type = {
+			save_temporary_scope_as = current_slave_law
+		}
+	}
+	overlord ?= {
+        save_temporary_scope_as = boss
+        annex = c:CUB
+        activate_law = scope:current_slave_law
+        add_primary_culture = cu:caribeno
+    }
+    play_as = scope:boss
+}
+
+reapply_raiding_state_modifier = {
+	remove_global_variable = mon_raid_state
+	every_neighbouring_state = {
+		limit = {
+			has_modifier = raid_target 
+		}
+		remove_modifier = raid_target
+	}
+	random_neighbouring_state = {
+		limit = {
+			owner ?= c:TUR
+		}
+		save_scope_as = raid_target
+		if = {
+			limit = {
+				raiding_level >= 2
+			}
+			add_modifier = {
+				name = raid_target
+				multiplier = raiding_level
+				days = short_modifier_time
+			}
+			set_global_variable = {
+				name = mon_raid_state
+				value = scope:raid_target
+			}
+		}
+		add_radicals_in_state = {
+			value = {
+				add = 0.015
+				multiply = raiding_level
+			}
+		}
+	}
+}
+
+
+end_raiding_cleanup = { #Used to #cleanup effects of je_montenegrin_raiding
 	custom_tooltip = {
 		text = montenegrin_raiding_stop_tt
 		remove_modifier = modifier_montenegrin_raiding
@@ -20,13 +72,20 @@
 	}
 	hidden_effect = {
 		every_neighbouring_state = {
-			if = {
+			limit = {
+				has_modifier = raid_target
+			}
+			remove_modifier = raid_target
+		}
+		c:TUR ?= {
+			every_scope_state = {
 				limit = {
 					has_modifier = raid_target
 				}
 				remove_modifier = raid_target
 			}
 		}
+		remove_global_variable = mon_raid_state
 	}
 }
 
@@ -42,7 +101,7 @@ mon_failure_events = {
 		}
 		else_if = {
 			limit = {
-				has_variable = mon_are_barbarians 
+				has_variable = mon_are_barbarians
 			}
 			post_notification = je_mon_austria_alliance_fail
 		}
@@ -127,7 +186,7 @@ generate_ottoman_side_list = {
 			every_country = { #add allies
 				limit = {
 					NOT = {
-						this = c:TUR
+						c:TUR ?= THIS
 					}
 					OR = {
 						is_subject_of = c:TUR
@@ -143,27 +202,27 @@ generate_ottoman_side_list = {
 					}
 				}
 				save_temporary_scope_as = potential_tur_ally
-				##extra checks, this not also allied to Balkan League. 
+				##extra checks, this not also allied to Balkan League.
 				if = {
 					limit = {
-						NOT = {	#checking no already on list		
+						NOT = {	#checking no already on list
 							is_target_in_global_variable_list = {
 								name = ottoman_side_list
 								target = scope:potential_tur_ally
 							}
 						}
-						NOT = {	#checking not on Balkan list		
+						NOT = {	#checking not on Balkan list
 							is_target_in_global_variable_list = {
 								name = balkan_league_side_list
 								target = scope:potential_tur_ally
 							}
 						}
 						NOT = { #not Balkan ally
-							any_in_global_list = { 
+							any_in_global_list = {
 								variable = balkan_league_side_list
 								save_temporary_scope_as = balkan_league_member
 								any_scope_treaty = {
-									binds = scope:potential_tur_ally 
+									binds = scope:potential_tur_ally
 									any_scope_article = {
 										OR = {
 											has_type = alliance
@@ -185,7 +244,7 @@ generate_ottoman_side_list = {
 			}
 		}
 	}
-}	
+}
 
 generate_balkan_league_side_list = {
 	clear_global_variable_list = balkan_league_side_list
@@ -207,7 +266,7 @@ generate_balkan_league_side_list = {
 				name = balkan_league_side_list
 				target = THIS
 			}
-		} 
+		}
 		every_country = {
 			limit = {
 				NOR = { #not above, not already counted
@@ -238,8 +297,8 @@ generate_balkan_league_side_list = {
 								has_type = defensive_pact
 							}
 						}
-					} 
-				} 
+					}
+				}
 			}
 			add_to_global_variable_list = {
 				name = balkan_league_side_list
@@ -308,7 +367,7 @@ balkan_war_give_tech = { # if c:TUR has $TECH$, and root doesn't, instant resear
 			set_variable = {
 				name = balkan_got_tech_cooldown
 				years = 5
-			} 
+			}
 		}
 	}
 }
@@ -411,9 +470,9 @@ destroy_barracks = { #Used to destroy and rebuild barracks in montenegrin_raidin
 			limit = {
 				state_region = s:STATE_MONTENEGRO
 			}
-			remove_building = building_barracks
+			remove_building = building_barrack
 			create_building = {
-				building = "building_barracks"
+				building = "building_barrack"
 				level = scope:barracks_amount
 					reserves = 1
 			}

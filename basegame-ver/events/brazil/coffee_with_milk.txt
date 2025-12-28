@@ -72,7 +72,7 @@ coffee_with_milk.2 = {
 
 	icon = "gfx/interface/icons/event_icons/event_industry.dds"
 
-	cooldown = { days = short_modifier_time }
+	cooldown = { days = long_modifier_time }
 
 	trigger = {
 		any_scope_state = {
@@ -112,6 +112,8 @@ coffee_with_milk.2 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = reinvestment_state
 		}
 	}
@@ -163,7 +165,7 @@ coffee_with_milk.3 = {
 
 	icon = "gfx/interface/icons/event_icons/event_trade.dds"
 
-	cooldown = { days = normal_modifier_time }
+	cooldown = { days = long_modifier_time }
 
 	trigger = {
 		any_scope_state = {
@@ -209,6 +211,8 @@ coffee_with_milk.3 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = population_state
 			random_scope_building = {
 				limit = {
@@ -326,6 +330,8 @@ coffee_with_milk.4 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -490,6 +496,8 @@ coffee_with_milk.6 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		exists = scope:milk_state
+		exists = scope:coffee_state
 		NOR = {
 			scope:milk_state = {
 				is_brazil_northeast_state = yes
@@ -523,6 +531,8 @@ coffee_with_milk.6 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -535,6 +545,8 @@ coffee_with_milk.6 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -620,13 +632,19 @@ coffee_with_milk.7 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		has_journal_entry = je_coffee_with_milk
 		in_election_campaign = yes
 		ig:ig_landowners ?= {
 			has_party = yes
 		}
+		modifier:country_forbid_electoral_fraud_bool = no
 	}
 
 	immediate = {
+		handle_possible_absent_caciquismo_variables = yes
+		active_law:lawgroup_distribution_of_power ?={
+			save_scope_as = election_law_scope
+		}
 		ig:ig_landowners ?= {
 			save_scope_as = landowners_scope
 			party = {
@@ -641,6 +659,8 @@ coffee_with_milk.7 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -653,6 +673,8 @@ coffee_with_milk.7 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -660,8 +682,25 @@ coffee_with_milk.7 = {
 	option = {
 		name = coffee_with_milk.7.a
 		default_option = yes
-		scope:republicans_scope = {
-			add_momentum = momentum_very_large
+		scope:republicans_scope ?= {
+			add_momentum = momentum_utterly_fraudulent
+		}
+		every_active_party = {
+			limit = {
+				party_has_members = yes
+				NOT = {
+					scope:republicans_scope ?= this
+				}
+			}
+			add_momentum = momentum_very_large_decrease
+		}
+		add_caciquismo_effect = yes
+		custom_tooltip = {
+			text = mutes_all_election_events_tt
+			set_variable = {
+				name = mute_election_events
+				months = 12
+			}
 		}
 	}
 
@@ -675,6 +714,15 @@ coffee_with_milk.7 = {
 		highlighted_option = yes
 		scope:republicans_scope = {
 			add_momentum = momentum_medium
+		}
+		if = {
+			limit = {
+				var:electoral_fraud_abolish_var < 5
+			}
+			subtract_caciquismo_effect = yes
+		}
+		else = {
+			remove_electoral_fraud_effect = yes
 		}
 	}
 }
@@ -705,11 +753,12 @@ coffee_with_milk.8 = {
 	trigger = {
 		# Triggered by JE
 		NOT = {
-			has_law_or_variant = law_type:law_monarchy
+			has_law = law_type:law_monarchy
 		}
 		NOT = {
 			has_variable = governors_policy_decision
 		}
+		country_has_voting_franchise = yes
 	}
 
 	immediate = {
@@ -724,6 +773,8 @@ coffee_with_milk.8 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -736,6 +787,8 @@ coffee_with_milk.8 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -819,6 +872,8 @@ coffee_with_milk.9 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -831,6 +886,8 @@ coffee_with_milk.9 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -1019,6 +1076,8 @@ coffee_with_milk.10 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -1031,6 +1090,8 @@ coffee_with_milk.10 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -1184,6 +1245,8 @@ coffee_with_milk.11 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -1196,6 +1259,8 @@ coffee_with_milk.11 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -1269,6 +1334,8 @@ coffee_with_milk.12 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -1281,6 +1348,8 @@ coffee_with_milk.12 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -1383,6 +1452,8 @@ coffee_with_milk.13 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -1395,6 +1466,8 @@ coffee_with_milk.13 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}
@@ -1472,6 +1545,8 @@ coffee_with_milk.14 = {
 				is_incorporated = yes
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = milk_state
 		}
 		ordered_scope_state = {
@@ -1484,6 +1559,8 @@ coffee_with_milk.14 = {
 				}
 			}
 			order_by = gdp
+			position = 0
+			check_range_bounds = no
 			save_scope_as = coffee_state
 		}
 	}

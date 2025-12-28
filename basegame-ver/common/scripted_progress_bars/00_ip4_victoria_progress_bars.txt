@@ -1,0 +1,104 @@
+﻿# For je_ip4_coup
+
+je_ip4_coup_progress_bar = {
+	name = "je_ip4_coup_progress_bar"
+	desc = "je_ip4_coup_progress_bar_desc"
+
+	default = yes
+
+	weekly_progress = {
+		owner = {
+			if = { # Does the general actually want to coup the government?
+				limit = {
+					any_interest_group = {
+						has_variable = golpista_ig_var
+						ig_approval > 0
+					}
+				}
+				subtract = {
+					desc = "appeased_golpista_igs_tt"
+					every_interest_group = {
+						limit = {
+							has_variable = golpista_ig_var
+							ig_approval > 0
+						}
+						value = ig_approval
+					}
+				}
+			}
+			add = {
+				desc = "commander_coup_strength_tt"
+				every_scope_character = {
+					limit = {
+						has_variable = golpista_var
+					}
+					value = commander_coup_strength
+				}
+			}
+			subtract = {
+				desc = "country_coup_resistance_tt"
+				value = owner.country_coup_resistance
+			}
+		}
+	}
+	start_value = 10
+	min_value = 0
+	max_value = 120
+}
+
+je_two_spains_progress_bar = { # Drift factors are defined in ip4_je_values.txt
+	name = "je_two_spains_progress_bar"
+	desc = "je_two_spains_progress_bar_left_desc"
+ 	second_desc = "je_two_spains_progress_bar_right_desc"
+
+	double_sided_two_spains = yes
+
+	monthly_progress = { # 1 = 1%
+		if = {
+			limit = {
+				owner = {
+					has_variable = two_spains_pivot_var
+					has_variable = two_spains_current_var
+				}
+			}
+			add = {
+				desc = "two_spains_progress_bar_moderating_factor_tt"
+				value = owner.var:two_spains_pivot_var
+				subtract = owner.var:two_spains_current_var
+				multiply = 0.05 # How aggressively this will chase the pivot value. Higher = more aggressive.
+			}
+		}
+	}
+	start_value = 50
+	min_value = 0
+	max_value = 100
+}
+
+je_two_spains_tension_bar = {  # Drift factors are defined in ip4_je_values.txt
+	name = "je_two_spains_tension_bar"
+	desc = "je_two_spains_tension_bar_desc"
+
+	default_bad = yes
+	is_inverted = yes
+
+	monthly_progress = {
+		if = {
+			limit = {
+				owner = {
+					exists = two_spains_tension_pivot
+					has_variable = two_spains_tension_current_var
+				}
+			}
+			add = {
+				desc = "two_spains_tension_bar_moderating_factor_tt"
+				value = owner.two_spains_tension_pivot
+				multiply = 100 # The pivot value is a percentage
+				subtract = owner.var:two_spains_tension_current_var
+				multiply = 0.10 # How aggressively this will chase the pivot value. Higher = more aggressive.
+			}
+		}
+	}
+	start_value = 50
+	min_value = 0
+	max_value = 100
+}

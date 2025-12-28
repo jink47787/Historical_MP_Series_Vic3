@@ -53,7 +53,7 @@ corporate_state.1 = {
 					has_ideology = ideology:ideology_radical
 				}
 			}
-			is_marginal = no
+			ig_counts_as_marginal = no
 			ig_approval > 0
 		}
 	}
@@ -173,12 +173,36 @@ corporate_state.2 = {
 			has_law = law_type:law_oligarchy
 			has_law = law_type:law_technocracy
 		}
+		any_interest_group = {
+			law_stance = {
+				law = law_type:law_corporate_state
+				value > neutral
+			}
+		}
+		NOT = {
+			currently_enacting_law = {
+				OR = {
+					has_amendment = amendment_type:amendment_industrial_socialization
+					has_amendment = amendment_type:amendment_shop_councils
+					has_amendment = amendment_type:amendment_foreign_investment_seizures
+				}
+			}
+		}
 	}
 
 	immediate = {
 		currently_enacting_law = {
     		save_scope_as = current_law_scope
     	}
+		random_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_corporate_state
+					value > neutral
+				}
+			}
+			save_scope_as = corporatist_ig
+		}
 	}
 
 	cancellation_trigger = {
@@ -191,7 +215,14 @@ corporate_state.2 = {
 			pop_type = capitalists
 			value = large_radicals
 		}
-		ig:ig_industrialists = {
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_industrial_socialization
+				sponsor = scope:corporatist_ig
+				cooldown = 120
+			}
+		}
+		ig:ig_industrialists ?= {
 			add_modifier = {
 				name = modifier_corporate_state_harmed_by_socialisation
 				days = normal_modifier_time
@@ -208,6 +239,13 @@ corporate_state.2 = {
 		add_radicals = {
 			pop_type = shopkeepers
 			value = medium_radicals
+		}
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_shop_councils
+				sponsor = scope:corporatist_ig
+				cooldown = 120
+			}
 		}
 		ig:ig_petty_bourgeoisie ?= {
 			add_modifier = {
@@ -238,6 +276,13 @@ corporate_state.2 = {
 					country = ROOT
 					value = -15
 				}
+			}
+		}
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_foreign_investment_seizures
+				sponsor = scope:corporatist_ig
+				cooldown = 120
 			}
 		}
 		add_enactment_modifier = {
@@ -344,7 +389,7 @@ corporate_state.3 = {
 	option = {
 		name = corporate_state.3.a
 		default_option = yes
-		ig:ig_industrialists = {
+		ig:ig_industrialists ?= {
 			add_modifier = {
 				name = modifier_corporate_state_legal_prosecution
 				days = normal_modifier_time
@@ -475,6 +520,15 @@ corporate_state.5 = {
 		any_scope_building = {
 			is_building_type = building_university
 		}
+		NOT = {
+			currently_enacting_law = {
+				OR = {
+					has_amendment = amendment_type:amendment_corporate_state_nominating_body_tu
+					has_amendment = amendment_type:amendment_corporate_state_nominating_body_id
+					has_amendment = amendment_type:amendment_corporate_state_nominating_body_it
+				}
+			}
+		}
 	}
 
 	immediate = {
@@ -484,7 +538,7 @@ corporate_state.5 = {
 		ig:ig_trade_unions ?= {
 			save_scope_as = trade_unions_ig
 		}
-		ig:ig_industrialists = {
+		ig:ig_industrialists ?= {
 			save_scope_as = industrialists_ig
 		}
 		ig:ig_intelligentsia ?= {
@@ -498,17 +552,20 @@ corporate_state.5 = {
 
 	option = {
 		name = corporate_state.5.a
-		custom_tooltip = {
-			text = on_enactment_trade_unions_bonus_tt
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_corporate_state_nominating_body_tu
+				sponsor = scope:trade_unions_ig
+				cooldown = 120
+			}
 		}
-		set_variable = { name = corporatist_nominating_body_var value = 1 }
 		ig:ig_trade_unions ?= {
 			add_modifier = {
 				name = modifier_corporate_state_favoured_in_nominating_bodies
 				days = normal_modifier_time
 			}
 		}
-		ig:ig_industrialists = {
+		ig:ig_industrialists ?= {
 			add_modifier = {
 				name = modifier_corporate_state_disfavoured_in_nominating_bodies
 				days = normal_modifier_time
@@ -524,11 +581,14 @@ corporate_state.5 = {
 
 	option = {
 		name = corporate_state.5.b
-		custom_tooltip = {
-			text = on_enactment_industrialists_bonus_tt
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_corporate_state_nominating_body_id
+				sponsor = scope:industrialists_ig
+				cooldown = 120
+			}
 		}
-		set_variable = { name = corporatist_nominating_body_var value = 2 }
-		ig:ig_industrialists = {
+		ig:ig_industrialists ?= {
 			add_modifier = {
 				name = modifier_corporate_state_favoured_in_nominating_bodies
 				days = normal_modifier_time
@@ -550,17 +610,20 @@ corporate_state.5 = {
 
 	option = {
 		name = corporate_state.5.c
-		custom_tooltip = {
-			text = on_enactment_intelligentsia_bonus_tt
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_corporate_state_nominating_body_it
+				sponsor = scope:intelligentsia_ig
+				cooldown = 120
+			}
 		}
-		set_variable = { name = corporatist_nominating_body_var value = 3 }
 		ig:ig_intelligentsia ?= {
 			add_modifier = {
 				name = modifier_corporate_state_favoured_in_nominating_bodies
 				days = normal_modifier_time
 			}
 		}
-		ig:ig_industrialists = {
+		ig:ig_industrialists ?= {
 			add_modifier = {
 				name = modifier_corporate_state_disfavoured_in_nominating_bodies
 				days = normal_modifier_time
@@ -615,7 +678,7 @@ corporate_state.6 = {
 				is_interest_group_type = ig_petty_bourgeoisie
 			}
 			ig_approval < 0
-			is_marginal = no
+			ig_counts_as_marginal = no
 		}
 	}
 
@@ -631,7 +694,7 @@ corporate_state.6 = {
 					is_interest_group_type = ig_petty_bourgeoisie
 				}
 				ig_approval < 0
-				is_marginal = no
+				ig_counts_as_marginal = no
 			}
 			save_scope_as = relevant_ig
 		}

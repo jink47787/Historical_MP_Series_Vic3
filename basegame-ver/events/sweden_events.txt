@@ -71,11 +71,17 @@ sweden_monarchy.2 = { #Accession of Charles XV and heir Oscar II
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
-		# triggered by on_action
+		country_has_primary_culture = cu:swedish
+		game_date >= 1859.6.29
+		ruler ?= {
+			has_template = swe_oscar_bernadotte_template
+		}
+		heir ?= {
+			has_template = swe_charles_bernadotte_template
+		}
     }
 
 	immediate = {
-		set_variable = charles_xv_ruler_var
 		random_scope_character = {
 			limit = {
 				has_template = swe_oscar_bernadotte_template
@@ -140,7 +146,14 @@ sweden_monarchy.3 = { #Accession of Oscar II and heir Gustaf V
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
-		# triggered by on_action
+		country_has_primary_culture = cu:swedish
+		game_date >= 1872.9.29
+		ruler ?= {
+			has_template = swe_charles_bernadotte_template
+		}
+		heir ?= {
+			has_template = swe_oscar_ii_bernadotte_template
+		}
     }
 
 	immediate = {
@@ -159,7 +172,6 @@ sweden_monarchy.3 = { #Accession of Oscar II and heir Gustaf V
 		root = {
 			save_scope_as = sweden_scope
 		}
-		set_variable = oscar_ii_ruler_var
 	}
 
 	option = {
@@ -181,6 +193,185 @@ sweden_monarchy.3 = { #Accession of Oscar II and heir Gustaf V
 				template = swe_gustaf_v_bernadotte_template
 				heir = yes
 			}
+		}
+	}
+}
+
+namespace = sweden_migration
+
+# Swedish Migration
+sweden_migration.1 = {
+	type = country_event
+	placement = scope:migration_target_state
+
+	title = sweden_migration.1.t
+	desc = sweden_migration.1.d
+	flavor = sweden_migration.1.f
+
+	event_image = {
+		video = "asia_westerners_arriving"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	duration = 3
+
+	trigger = {
+		# triggered by on_monthly_pulse_country
+		c:SWE ?= THIS
+		NOT = { has_variable = sweden_migration_var }
+		game_date >= 1850.1.1
+		c:USA ?= {
+			save_temporary_scope_as = america_scope
+			average_sol >= root.average_sol
+			ROOT = {
+				any_primary_culture = {
+					culture_can_have_mass_migration_to_country = scope:america_scope
+				}
+			}
+			any_scope_state = {
+				state_region = s:STATE_NEW_YORK
+				state_is_eligible_as_mass_migration_target = yes
+			}
+			any_scope_state = {
+				state_region = s:STATE_MINNESOTA
+				state_is_eligible_as_mass_migration_target = yes
+			}
+		}
+	}
+
+	immediate = {
+		set_variable = sweden_migration_var
+		c:SWE ?= {
+			save_scope_as = migration_country
+		}
+		cu:swedish = {
+			save_scope_as = migration_culture
+		}
+		c:USA ?= {
+			random_scope_state = {
+				limit = {
+					state_region = s:STATE_NEW_YORK
+					state_is_eligible_as_mass_migration_target = yes
+				}
+			save_scope_as = migration_target_state_two
+			}
+			random_scope_state = {
+				limit = {
+					state_region = s:STATE_MINNESOTA
+					state_is_eligible_as_mass_migration_target = yes
+				}
+			save_scope_as = migration_target_state
+			}
+		}
+	}
+
+	option = {
+		name = sweden_migration.1.a
+		default_option = yes
+		scope:migration_target_state = {
+			create_mass_migration = {
+				origin = scope:migration_country
+				culture = scope:migration_culture
+			}
+			add_modifier = {
+				name = sweden_migration
+				days = stupidly_long_modifier_time
+			}
+		}
+		ai_chance = {
+			base = 1
+		}
+	}
+	option = {
+		name = sweden_migration.1.b
+		scope:migration_target_state_two = {
+			create_mass_migration = {
+				origin = scope:migration_country
+				culture = scope:migration_culture
+			}
+			add_modifier = {
+				name = sweden_migration
+				days = stupidly_long_modifier_time
+			}
+		}
+		ai_chance = {
+			base = 0
+		}
+	}
+}
+
+namespace = sweden_law
+
+sweden_law.1 = {
+	type = country_event
+	placement = root
+
+	title = sweden_law.1.t
+	desc = sweden_law.1.d
+	flavor = sweden_law.1.f
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	duration = 3
+
+	trigger = {
+		# triggered by on_monthly_pulse_country
+		c:SWE ?= THIS
+		NOT = { has_variable = sweden_law_var }
+		game_date >= 1922.1.1
+		OR = {
+			has_law_or_variant = law_type:law_national_supremacy
+			has_law_or_variant = law_type:law_racial_segregation
+			has_law_or_variant = law_type:law_ethnostate
+		}
+		has_technology_researched = central_planning
+	}
+
+	immediate = {
+		set_variable = sweden_law_var
+		c:SWE ?= {
+			save_scope_as = sweden_law_country
+		}
+		cu:sami = {
+			save_scope_as = sweden_law_culture
+		}
+		capital = {
+			save_scope_as = sweden_law_target_state
+		}
+	}
+
+	option = {
+		name = sweden_law.1.a
+		default_option = yes
+		scope:sweden_law_country = {
+			add_modifier = {
+				name = sweden_law_birth
+				days = very_long_modifier_time
+			}
+		}
+		ai_chance = {
+			base = 1
+		}
+	}
+	option = {
+		name = sweden_law.1.b
+		scope:sweden_law_country = {
+			add_modifier = {
+				name = sweden_law_birth_two
+				days = very_long_modifier_time
+			}
+		}
+		ai_chance = {
+			base = 0
 		}
 	}
 }

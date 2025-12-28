@@ -1,0 +1,123 @@
+﻿je_la_trinitaria = {
+	group = je_group_historical_content
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+    is_shown_in_lobby = {
+        c:HAI ?= this
+        has_dlc_feature = ip4_content
+    }
+
+    is_shown_when_inactive = {
+    	c:HAI ?= this
+    	has_dlc_feature = ip4_content
+    	NOT = {
+    		has_variable = je_la_trinitaria_happened_var
+    	}
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = dominican_movement_tt
+			any_political_movement = {
+				is_political_movement_type = movement_dominican_national
+				political_movement_radicalism >= define:NPolitics|RADICALISM_AGITATING_THRESHOLD
+			}
+		}
+		game_date > 1838.1.1
+	}
+
+	modifiers_while_active = {
+		modifier_a_marriage_at_gunpoint
+	}
+
+	immediate = {
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_HAITI
+			}
+			save_scope_as = haiti_state_scope
+		}
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_SANTO_DOMINGO
+			}
+			save_scope_as = santo_domingo_state_scope
+		}
+		set_variable = je_la_trinitaria_happened_var
+		trigger_event = { 
+			id = dominican_events.1
+			popup = yes 
+		}
+	}
+
+	fail = {
+		custom_tooltip = {
+			text = dominican_secession_tt
+			c:DOM ?= {
+				is_diplomatic_play_enemy_of = root
+			}
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = dominican_movement_suppressed_tt
+			NOT = {
+				any_political_movement = {
+					is_political_movement_type = movement_dominican_national
+					political_movement_radicalism >= define:NPolitics|RADICALISM_AGITATING_THRESHOLD
+				}
+			}
+		}
+		any_scope_state = {
+			state_region = s:STATE_SANTO_DOMINGO
+			is_incorporated = yes
+			turmoil < 0.1
+		}
+	}
+
+	on_complete = {
+		trigger_event = { 
+			id = dominican_events.3
+			popup = yes 
+		}
+		show_as_tooltip = {
+			add_primary_culture = cu:afro_caribeno
+			s:STATE_SANTO_DOMINGO = {
+				add_homeland = cu:afro_antillean
+			}
+		}
+	}
+
+	on_fail = {
+		trigger_event = { 
+			id = dominican_events.2
+			popup = yes 
+		}
+		show_as_tooltip = {
+			add_modifier = {
+				name = modifier_dominican_mutinies
+				days = short_modifier_time
+			}
+		}
+	}
+
+	invalid = {
+		NOT = {
+			any_scope_state = {
+				state_region = s:STATE_SANTO_DOMINGO
+			}
+		}
+		AND = {
+			exists = c:DOM
+			NOT = {
+				is_diplomatic_play_enemy_of = c:DOM
+			}
+		}
+	}
+
+	weight = 10000
+
+	should_be_pinned_by_default = yes
+}
+

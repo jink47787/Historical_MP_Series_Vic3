@@ -3,23 +3,33 @@
 	desc = "je_montenegrin_raiding_increase_button_desc"
 
 	ai_chance = {
+		value = -10
 		if = {
 			limit = {
-				var:raiding_intensity < 50
-				c:RUS ?= {
-					relations:root > 30
-				}
+				exists = c:RUS
 			}
-			value = 100
+			add = {
+				value = "c:RUS.relations(root)"
+			}
 		}
-		else_if = {
+		if = {
 			limit = {
-				var:raiding_intensity < 25
+				ROOT.scaled_debt > 0
 			}
-			value = 100
+			add = {
+				value = ROOT.scaled_debt
+				multiply = 100
+			}
 		}
-		else = {
-			value = 0
+		subtract = {
+			value = var:raiding_intensity
+			divide = 4
+		}
+		if = { # Decreases chance to do this if it has just done less raiding
+			limit = {
+				has_variable = mon_less_raiding
+			}
+			add = -25
 		}
 	}
 
@@ -93,30 +103,67 @@ je_montenegrin_raiding_decrease_button = {
 	}
 
 	ai_chance = {
+		value = -10
 		if = {
 			limit = {
-				var:raiding_intensity < 25
-				c:RUS ?= {
-					relations:root < 0
-				}
+				exists = c:RUS
 			}
-			value = 100
+			add = {
+				value = 0 # Chance increases as Russian relations decrease
+				subtract = "c:RUS.relations(root)"
+			}
+		}
+		if = {
+			limit = {
+				ROOT.scaled_debt = 0
+				net_fixed_income >= 0
+			}
+			add = 15
+		}
+		add = {
+			value = var:raiding_intensity
+			divide = 4
+		}
+		### Hard brake - if Russian relations get too low, will always use this
+		if = {
+			limit = {
+				c:RUS ?= {
+					relations:root < -25
+				}
+				ROOT.scaled_debt < 0.25
+			}
+			add = 200
 		}
 		else_if = {
 			limit = {
-				var:raiding_intensity > 50
+				c:RUS ?= {
+					relations:root < -25
+				}
+				ROOT.scaled_debt < 0.5
 			}
-			value = 100
+			add = 100
 		}
-		else = {
-			value = 0
+		else_if = { # Will not do this if it has just increased raiding
+			limit = {
+				c:RUS ?= {
+					relations:root > 10
+				}
+				ROOT.gold_reserves > 0
+			}
+			multiply = 0
+		}
+		if = { # Decreases chance to do this if it has just done more raiding
+			limit = {
+				has_variable = mon_more_raiding
+			}
+			add = -25
 		}
 	}
 
 	cooldown = { months = 6 }
 
 	possible = {
-		hidden_trigger = { 
+		hidden_trigger = {
 			var:raiding_intensity >= 25
 		}
 		NOT = {
@@ -145,13 +192,13 @@ je_montenegrin_raiding_decrease_button = {
 				multiplier = var:raiding_intensity
 			}
 		}
-		c:RUS = {
+		c:RUS ?= {
 			change_relations = {
 				country = root
 				value = 5
 			}
 		}
-		c:TUR = {
+		c:TUR ?= {
 			change_relations = {
 				country = root
 				value = 15
@@ -173,6 +220,24 @@ je_montenegrin_raiding_decrease_button = {
 je_montenegrin_visit_moscow = {
 	name = "je_montenegrin_visit_moscow"
 	desc = "je_montenegrin_visit_moscow_desc"
+
+	ai_chance = {
+		value = 2
+		if = { # Will always do this if relations with Russia get too low
+			limit = {
+				"c:RUS.relations(root)" < -10
+			}
+			add = 100
+		}
+		if = { # Will never do this if it has too many radicals
+			limit = {
+				radical_fraction = {
+					value <= 0.20
+				}
+			}
+			add = -100
+		}
+	}
 
 	visible = {
 		exists = c:RUS
@@ -206,7 +271,7 @@ je_montenegrin_visit_moscow = {
 			months = 25
 		}
 		ROOT.Ruler = {
-			set_variable = is_away #stops certain events, but character can still die in Moscow. 
+			set_variable = is_away #stops certain events, but character can still die in Moscow.
 			set_variable = {
 				name = mon_visited_moscow
 				months = 120
@@ -224,6 +289,14 @@ je_montenegrin_visit_moscow = {
 je_montenegrin_make_saint = {
 	name = "je_montenegrin_make_saint"
 	desc = "je_montenegrin_make_saint_desc"
+
+	ai_chance = {
+		value = -3 # Token amount to make Montenegro wait a bit before doing this
+		add = {
+			value = gold_reserves
+			divide = 10000
+		}
+	}
 
 	visible = {
 		NOT = {
@@ -298,7 +371,7 @@ je_montenegrin_tur_raid_back = {
 				has_variable = counterraided_recently
 			}
 			is_at_war = yes
-			is_diplomatic_play_committed_participant = yes  
+			is_diplomatic_play_committed_participant = yes
 		}
 		c:MON ?= {
 			NOR = {
@@ -310,7 +383,7 @@ je_montenegrin_tur_raid_back = {
 		}
 		custom_tooltip = {
 			text = je_montenegrin_tur_raid_back_condition_tt
-			c:MON ?= { 
+			c:MON ?= {
 				is_country_alive = yes
 				raiding_income > 0
 			}
@@ -343,6 +416,7 @@ je_montenegrin_tur_raid_back = {
 				has_modifier = raid_target
 			}
 			remove_modifier = raid_target
+			remove_global_variable = mon_raid_state
 		}
 		hidden_effect = {
 			set_variable = {

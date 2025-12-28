@@ -1,6 +1,20 @@
 ﻿je_grunderzeit = {
-	group = je_group_historical_content
 	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+
+	group = je_group_global_international_situations
+
+	should_be_involved = {
+		country_is_in_german_confederation = yes
+	}
+
+	should_show_when_not_involved = {
+		OR = {
+			is_in_geographic_region = geographic_region_europe
+            top_overlord ?= {
+                country_is_in_german_confederation = yes
+            }
+		}
+	}
 
 	should_be_pinned_by_default = yes
 	weight = 10000
@@ -13,14 +27,16 @@
 				desc = grunderzeit_status_desc_default_key
 				trigger = {
 					NOT = {
-						has_variable = grunderzeit_started_var
+						scope:journal_entry = {
+							has_variable = grunderzeit_started_var
+						}
 					}
 				}
 			}
 			triggered_desc = {
 				desc = grunderzeit_status_desc_key_1 # very low
 				trigger = {
-					je:je_grunderzeit ?= {
+					scope:journal_entry ?= {
 						"scripted_bar_progress(grunderzeit_progress_bar)" = 1
 					}
 				}
@@ -28,7 +44,7 @@
 			triggered_desc = {
 				desc = grunderzeit_status_desc_key_2 # low
 				trigger = {
-					je:je_grunderzeit ?= {
+					scope:journal_entry ?= {
 						"scripted_bar_progress(grunderzeit_progress_bar)" = 2
 					}
 				}
@@ -36,7 +52,7 @@
 			triggered_desc = {
 				desc = grunderzeit_status_desc_key_3 # high
 				trigger = {
-					je:je_grunderzeit ?= {
+					scope:journal_entry ?= {
 						"scripted_bar_progress(grunderzeit_progress_bar)" = 3
 					}
 				}
@@ -44,7 +60,7 @@
 			triggered_desc = {
 				desc = grunderzeit_status_desc_key_4 # very high
 				trigger = {
-					je:je_grunderzeit ?= {
+					scope:journal_entry ?= {
 						"scripted_bar_progress(grunderzeit_progress_bar)" = 4
 					}
 				}
@@ -52,7 +68,7 @@
 			triggered_desc = {
 				desc = grunderzeit_status_desc_key_0 # very high
 				trigger = {
-					je:je_grunderzeit ?= {
+					scope:journal_entry ?= {
 						"scripted_bar_progress(grunderzeit_progress_bar)" = 0
 					}
 				}
@@ -62,11 +78,9 @@
 
 	is_shown_when_inactive = {
 		has_dlc_feature = ip3_content
-		NOR = {
-			has_variable = grunderzeit_started_var
+		NOT = {
 			has_global_variable = grunderzeit_happened_global_var
 		}
-		country_is_in_german_confederation = yes
 	}
 
 	modifiers_while_active = {
@@ -90,18 +104,18 @@
 		#}
 	}
 
-	immediate = {
+	immediate_all_involved = {
 		# Startup Effects
-		set_variable = grunderzeit_started_var
-		set_variable = grunderzeit_quarterly_count_1
-		set_global_variable = grunderzeit_ongoing_global_var
-		trigger_event = { id = grunderzeit.3 popup = yes }
-		hidden_effect = {
-			every_in_global_list = {
-				variable = german_confederation_country_list
-				set_strategy = ai_strategy_industrial_expansion # To make the AI get the picture
-			}
+		scope:journal_entry = {
+			set_variable = grunderzeit_started_var
+			set_variable = grunderzeit_quarterly_count_1
 		}
+		trigger_event = { id = grunderzeit.3 popup = yes }
+		set_strategy = ai_strategy_industrial_expansion # To make the AI get the picture
+	}
+
+	immediate = {
+		set_global_variable = grunderzeit_ongoing_global_var
 		# Baseline German GDP
 		if = {
 			limit = {
@@ -111,19 +125,15 @@
 			}
 			set_global_variable = { # Creates the baseline German GDP variable
 				name = grunderzeit_combined_gdp_global_var_baseline
-				value = root.gdp
+				value = 0
+			}
+			every_country_in_german_confederation = {
+				change_global_variable = { # Combines all German GDPs into the baseline
+					name = grunderzeit_combined_gdp_global_var_baseline
+					add = this.gdp
+				}
 			}
 		}
-		else_if = {
-			limit = {
-				exists = global_var:grunderzeit_combined_gdp_global_var_baseline
-			}
-			change_global_variable = { # Combines all German GDPs into the baseline
-				name = grunderzeit_combined_gdp_global_var_baseline
-				add = root.gdp
-			}
-		}
-		# Initial Actual German GDP (initially same as baseline) - Global variable only used in immediate / for the first month. Is replaced by grunderzeit_actual_gdp_script_value after that
 		if = {
 			limit = {
 				NOT = {
@@ -132,16 +142,13 @@
 			}
 			set_global_variable = { # Creates the baseline German GDP variable
 				name = grunderzeit_combined_gdp_global_var_actual
-				value = root.gdp
+				value = 0
 			}
-		}
-		else_if = {
-			limit = {
-				exists = global_var:grunderzeit_combined_gdp_global_var_actual
-			}
-			change_global_variable = { # Combines all German GDPs into the baseline
-				name = grunderzeit_combined_gdp_global_var_actual
-				add = root.gdp
+			every_country_in_german_confederation = {
+				change_global_variable = { # Combines all German GDPs into the baseline
+					name = grunderzeit_combined_gdp_global_var_actual
+					add = this.gdp
+				}
 			}
 		}
 		# Initial German GDP goal
@@ -149,78 +156,69 @@
 			name = grunderzeit_combined_gdp_global_var_goal
 			value = {
 				value = global_var:grunderzeit_combined_gdp_global_var_baseline
-				multiply = 1.025 # Revenues will be increased by 2.5% for each financial quarterly, or I will lop off your mother's feet before you can even say as much as Donaudampfschifffahrtselektrizitätenhauptbetriebswerkbauunterbeamtengesellschaft
+				multiply = 1.02 # Revenues will be increased by 2% for each financial quarterly, or I will lop off your mother's feet before you can even say as much as Donaudampfschifffahrtselektrizitätenhauptbetriebswerkbauunterbeamtengesellschaft
 			}
 		}
 	}
 
 	on_monthly_pulse = {
 		effect = {
-			if = { # In the absence of an 'on_every_three_month_pulse'
-				limit = {
-					has_variable = grunderzeit_quarterly_count_1
+			scope:journal_entry = {
+				if = { # In the absence of an 'on_every_three_month_pulse'
+					limit = {
+						has_variable = grunderzeit_quarterly_count_1
+					}
+					remove_variable = grunderzeit_quarterly_count_1
+					set_variable = grunderzeit_quarterly_count_2
 				}
-				remove_variable = grunderzeit_quarterly_count_1
-				set_variable = grunderzeit_quarterly_count_2
-			}
-			else_if = {
-				limit = {
-					has_variable = grunderzeit_quarterly_count_2
+				else_if = {
+					limit = {
+						has_variable = grunderzeit_quarterly_count_2
+					}
+					remove_variable = grunderzeit_quarterly_count_2
+					set_variable = grunderzeit_quarterly_count_3
 				}
-				remove_variable = grunderzeit_quarterly_count_2
-				set_variable = grunderzeit_quarterly_count_3
-			}
-			else_if = { # All effects are ran every three months
-				limit = {
-					has_variable = grunderzeit_quarterly_count_3
-				}
-				remove_variable = grunderzeit_quarterly_count_3
-				set_variable = grunderzeit_quarterly_count_1
+				else_if = { # All effects are ran every three months
+					limit = {
+						has_variable = grunderzeit_quarterly_count_3
+					}
+					remove_variable = grunderzeit_quarterly_count_3
+					set_variable = grunderzeit_quarterly_count_1
 
-				# Check to see whether or not you've reached the goal: i.e. if actual is higher than or equal to goal or not
-				if = { # Advances progress bar by 1 if you have met the goal (cannot exceed 4)
-					limit = {
-						grunderzeit_actual_gdp_script_value >= global_var:grunderzeit_combined_gdp_global_var_goal
-					}
-					if = {
+					# Check to see whether or not you've reached the goal: i.e. if actual is higher than or equal to goal or not
+					if = { # Advances progress bar by 1 if you have met the goal (cannot exceed 4)
 						limit = {
+							grunderzeit_actual_gdp_script_value >= global_var:grunderzeit_combined_gdp_global_var_goal
+						}
+						if = {
+							limit = {
+								scope:journal_entry = {
+									"scripted_bar_progress(grunderzeit_progress_bar)" < 4
+								}
+							}
 							scope:journal_entry = {
-								"scripted_bar_progress(grunderzeit_progress_bar)" < 4
-							}
-						}
-						scope:journal_entry = {
-							add_progress = {
-								value = 1
-								name = grunderzeit_progress_bar
+								add_progress = {
+									value = 1
+									name = grunderzeit_progress_bar
+								}
 							}
 						}
 					}
-				}
-				else_if = { # Depletes the progress bar by 1 if you failed to meet the goal
-					limit = {
-						grunderzeit_actual_gdp_script_value < global_var:grunderzeit_combined_gdp_global_var_goal
-					}
-					if = {
+					else_if = { # Depletes the progress bar by 1 if you failed to meet the goal
 						limit = {
+							grunderzeit_actual_gdp_script_value < global_var:grunderzeit_combined_gdp_global_var_goal
+						}
+						if = {
+							limit = {
+								scope:journal_entry = {
+									"scripted_bar_progress(grunderzeit_progress_bar)" > 0
+								}
+							}
 							scope:journal_entry = {
-								"scripted_bar_progress(grunderzeit_progress_bar)" > 0
-							}
-						}
-						scope:journal_entry = {
-							add_progress = {
-								value = -1
-								name = grunderzeit_progress_bar
-							}
-						}
-					}
-				}
-
-				if = {
-					limit = {
-						NOT = {
-							any_in_global_list = {
-								variable = german_confederation_country_list
-								has_variable = grunderzeit_quarterly_count_3 # The last country to execute these effects will update the targets
+								add_progress = {
+									value = -1
+									name = grunderzeit_progress_bar
+								}
 							}
 						}
 					}
@@ -244,7 +242,7 @@
 							name = grunderzeit_combined_gdp_global_var_goal
 							value = {
 								value = global_var:grunderzeit_combined_gdp_global_var_baseline
-								multiply = 1.025 # Revenues will be increased by 2.5% for each financial quarterly, or I will lop off your mother's feet before you can even say as much as Donaudampfschifffahrtselektrizitätenhauptbetriebswerkbauunterbeamtengesellschaft
+								multiply = 1.02 # Revenues will be increased by 2% for each financial quarterly, or I will lop off your mother's feet before you can even say as much as Donaudampfschifffahrtselektrizitätenhauptbetriebswerkbauunterbeamtengesellschaft
 							}
 						}
 					}
@@ -252,6 +250,8 @@
 			}
 		}
 	}
+
+	custom_failure_header = je_grunderzeit_fail_header
 
 	fail = {
 		custom_tooltip = {
@@ -262,16 +262,40 @@
 		}
 	}
 
+	custom_on_failure_header = je_grunderzeit_on_fail_header
+
 	on_fail = {
-		grunderzeit_variable_cleanup = yes
 		set_global_variable = grunderzeit_happened_global_var # To ensure no wonkiness
+	}
+
+	on_fail_all_involved = {
+		grunderzeit_variable_cleanup = yes
 		trigger_event = { id = grunderzeit.1 popup = yes }
 	}
 
 	event_outcome_failed_desc = {
 		first_valid = {
 			triggered_desc = {
-				desc = event_effects_grunderzeit.1_tt
+				trigger = {
+					scope:journal_entry ?= {
+						any_scope_je_involved = {
+							is_player = yes
+							has_variable = grunderzeit_participant_low_var
+						}
+					}
+				}
+				desc = grunderzeit.1_low_commitment_effects_string
+			}
+			triggered_desc = {
+				trigger = {
+					scope:journal_entry ?= {
+						any_scope_je_involved = {
+							is_player = yes
+							NOT = { has_variable = grunderzeit_participant_low_var }
+						}
+					}
+				}
+				desc = grunderzeit.1_high_commitment_effects_string
 			}
 		}
 	}
@@ -279,15 +303,37 @@
 	timeout = 10950
 
 	on_timeout = {
-		grunderzeit_variable_cleanup = yes
 		set_global_variable = grunderzeit_happened_global_var # To ensure no wonkiness
+	}
+
+	on_timeout_all_involved = {
+		grunderzeit_variable_cleanup = yes
 		trigger_event = { id = grunderzeit.2 popup = yes }
 	}
 
 	event_outcome_timeout_desc = {
 		first_valid = {
 			triggered_desc = {
-				desc = event_effects_grunderzeit.2_tt
+				trigger = {
+					scope:journal_entry ?= {
+						any_scope_je_involved = {
+							is_player = yes
+							has_variable = grunderzeit_participant_low_var
+						}
+					}
+				}
+				desc = grunderzeit.2_low_commitment_effects_string
+			}
+			triggered_desc = {
+				trigger = {
+					scope:journal_entry ?= {
+						any_scope_je_involved = {
+							is_player = yes
+							NOT = { has_variable = grunderzeit_participant_low_var }
+						}
+					}
+				}
+				desc = grunderzeit.2_high_commitment_effects_string
 			}
 		}
 	}

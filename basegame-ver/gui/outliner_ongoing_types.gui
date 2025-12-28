@@ -362,6 +362,8 @@ types ongoing_outliner_items {
 
 			enactment_button = {}
 
+			outliner_law_negotiation_events = {}
+
 			outliner_law_enactment_events = {}
 		}
 
@@ -372,7 +374,7 @@ types ongoing_outliner_items {
 		}
 	}
 
-	### LAW ENACTMENT EVENTS LIST
+	### LAW ENACTMENT EVENTS LIST - OUTLINER
 	type outliner_law_enactment_events = flowcontainer {
 		direction = vertical
 		parentanchor = right
@@ -406,7 +408,7 @@ types ongoing_outliner_items {
 		}
 	}
 
-	### LAW ENACTMENT EVENTS LIST
+	### LAW ENACTMENT EVENTS LIST - VBOX
 	type law_enactment_events_vbox = vbox {
 		layoutpolicy_horizontal = expanding
 		spacing = 5
@@ -434,199 +436,124 @@ types ongoing_outliner_items {
 		}
 	}
 
-	type enactment_button = button {
+	### LAW NEGOTIATION EVENTS LIST - OUTLINER
+	type outliner_law_negotiation_events = flowcontainer {
+		direction = vertical
+		parentanchor = right
 
-		block "size" {
-			size = { 350 125 }
+		datamodel = "[AccessPlayer.GetEventsByCategory('negotiation')]"
+
+		item = {
+			event_item = {
+				blockoverride "datacontext" {}
+
+				blockoverride "button_size" {
+					size = { 100% 100%}
+				}
+
+				blockoverride "highlight_visibility" {
+					visible = yes
+				}
+
+				blockoverride "additional_widgets" {
+					icon = {
+						size = { 28 28 }
+						texture = "[GetPlayer.GetNegotiatingInterestGroup.GetTexture]"
+					}
+				}
+
+				blockoverride "right_text" {
+					text = "LAW_EVENT_REMAINING_DAYS"
+				}
+			}
 		}
-		
-		onclick = "[InformationPanelBar.OpenChangeLaw(Law.AccessSelf)]"
-		using = default_button_primary
-		tooltip = "[GetPlayer.GetLawEnactmentProgressDesc]"
+	}
 
-		vbox = {
-			layoutpolicy_horizontal = expanding
-			layoutpolicy_vertical = expanding
-			margin_top = 5
-			spacing = 1
+	### LAW NEGOTIATION EVENTS LIST - VBOX
+	type law_negotiation_events_vbox = vbox {
+		layoutpolicy_horizontal = expanding
+		spacing = 5
 
-			hbox = {
-				layoutpolicy_horizontal = expanding
-				margin_left = 12
-				margin_right = 2
+		datamodel = "[AccessPlayer.GetEventsByCategory('negotiation')]"
 
-				icon = {
-					size = { 54 54 }
-					texture = "gfx/interface/backgrounds/round_button_bg.dds"
+		item = {
+			event_item_hbox = {
+				blockoverride "highlight_visibility" {
+					visible = yes
+				}
 
-					round_progress_default = {
-						visible = "[GetPlayer.HasProgressingLawEnactment]"
-						size = { 80% 80% }
-						parentanchor = center
-						datacontext = "[GetPlayer.GetLawBeingEnacted]"
-						value = "[FixedPointToFloat(GetPlayer.GetLawEnactmentProgress)]"
-					}
-
-					round_progress_bad = {
-						visible = "[Not(GetPlayer.HasProgressingLawEnactment)]"
-						size = { 80% 80% }
-						parentanchor = center
-						datacontext = "[GetPlayer.GetLawBeingEnacted]"
-						value = "[FixedPointToFloat(GetPlayer.GetLawEnactmentProgress)]"
-					}
-
-					law_icon = {
-						alpha = "[TransparentIfTrue(Not(GetPlayer.HasProgressingLawEnactment))]"
-						size = { 38 38 }
-						parentanchor = center
-					}
-
-					paused_icon_bad = {
-						visible = "[Not(GetPlayer.HasProgressingLawEnactment)]"
-						parentanchor = center
+				blockoverride "additional_widgets" {
+					icon = {
+						visible = "[GetPlayer.GetNegotiatingInterestGroup.IsValid]"
+						size = { 28 28 }
+						texture = "[GetPlayer.GetNegotiatingInterestGroup.GetTexture]"
 					}
 				}
 
-				vbox = {
-					spacing = 4
-					layoutpolicy_horizontal = expanding
-					min_width = 200
-
-					textbox = {
-						layoutpolicy_horizontal = expanding
-						size = { 0 20 }
-						align = center|nobaseline
-						elide = right
-						fontsize_min = 14
-						text = "ENACTING_TO_LAW"
-						
-						background = {
-							using = default_header_bg
-							alpha = 1
-							margin_bottom = 5
-							margin_top = 5
-							
-							modify_texture = {
-								texture = "gfx/interface/masks/fade_horizontal_center.dds"
-								blend_mode = alphamultiply
-							}
-						}
-					}
-
-					hbox = {
-						layoutpolicy_horizontal = expanding
-						spacing = 10
-
-						textbox = {
-							layoutpolicy_horizontal = expanding
-							size = { 0 20 }
-							align = right|nobaseline
-							elide = right
-							fontsize_min = 14
-							text = "OUTCOME_SUCCESS_SHORT"
-						}
-
-						textbox = {
-							layoutpolicy_horizontal = expanding
-							size = { 0 20 }
-							align = left|nobaseline
-							elide = right
-							fontsize_min = 14
-							text = "OUTCOME_STALL"
-						}
-					}
-				}
-
-				expand = {
-					layoutpolicy_horizontal = expanding
+				blockoverride "right_text" {
+					text = "LAW_EVENT_REMAINING_DAYS"
 				}
 			}
+		}
+	}
 
-			hbox = {
-				max_width = 330
-				layoutpolicy_horizontal = preferred
-				spacing = 1
+	type enactment_button = widget {
+		block "size" {
+			size = { 350 130 }
+		}
 
-				# Successes
-				#Phase 0
-				enactment_phase = {
-					blockoverride "past_phase_parentanchor" {
-						parentanchor = vcenter|right
-					}
+		# Negotiate & Setbacks
+		widget = {
+			parentanchor = bottom|hcenter
+			size = { 330 38 }
 
-					blockoverride "past_phase_text_max_width" {
-						max_width = 90
-					}
-
-					blockoverride "checkmark_position" {}
-				}
-
-				#Phase 1
-				enactment_phase = {
-					blockoverride "current_phase_visibility" {
-						visible = "[EqualTo_int32(Law.GetEnactmentPhase, '(int32)1')]"
-					}
-
-					blockoverride "past_phase_visibility" {
-						visible = "[GreaterThan_int32(Law.GetEnactmentPhase, '(int32)1')]"
-					}
-
-					blockoverride "not_reached_phase_visibility" {
-						visible = "[LessThan_int32(Law.GetEnactmentPhase, '(int32)1')]"
-					}
-
-					blockoverride "phase_name" {
-						text = "[Law.GetCountry.GetCustom('enactment_phase_1')]"
-					}
-
-					blockoverride "past_phase_parentanchor" {
-						parentanchor = vcenter|right
-					}
-
-					blockoverride "past_phase_text_max_width" {
-						max_width = 90
-					}
-
-					blockoverride "checkmark_position" {}
-				}
-
-				#Phase 2
-				enactment_phase = {
-					blockoverride "current_phase_visibility" {
-						visible = "[EqualTo_int32(Law.GetEnactmentPhase, '(int32)2')]"
-					}
-
-					blockoverride "past_phase_visibility" {
-						visible = "[GreaterThan_int32(Law.GetEnactmentPhase, '(int32)2')]"
-					}
-
-					blockoverride "not_reached_phase_visibility" {
-						visible = "[LessThan_int32(Law.GetEnactmentPhase, '(int32)2')]"
-					}
-
-					blockoverride "phase_name" {
-						text = "[Law.GetCountry.GetCustom('enactment_phase_2')]"
-					}
-
-					blockoverride "past_phase_parentanchor" {
-						parentanchor = vcenter|right
-					}
-
-					blockoverride "past_phase_text_max_width" {
-						max_width = 90
-					}
-
-					blockoverride "checkmark_position" {}
-				}
+			background = {
+				using = entry_bg_simple_solid
+				margin_top = 10
 			}
 
-			# Setbacks
 			hbox = {
 				visible = "[GreaterThan_int32(GetPlayer.GetMaxLawEnactmentSetbacks, '(int32)0')]"
 				layoutpolicy_horizontal = preferred
 				layoutpolicy_vertical = preferred
 				spacing = 2
 				max_width = 330
+
+				widget = {
+					size = { 2 2 }
+				}
+
+				# NEGOTIATE
+				button = {
+					size = { 120 30 }
+					using = default_button
+					onclick = "[RightClickMenuManager.ToggleNegotiationIGSelect(AccessPlayer.AccessSelf, Law.Self, PdxGuiWidget.AccessSelf, 'negotiation_ig_select_right_click_menu')]"
+					tooltip = "NEGOTIATE_BUTTON_TOOLTIP"
+					using = tooltip_ne
+
+					hbox = {
+						spacing = 2
+
+						expand = {}
+
+						textbox = {
+							align = nobaseline
+							autoresize = yes
+							using = elide_fontsize_min
+							max_width = 85
+							text = "NEGOTIATE"
+						}
+
+						expand = {}
+					}
+
+					available_options_number = {
+						blockoverride "text" {
+							raw_text = "#b [GetPlayer.GetNumAvailableNegotiations|0+]#!"
+						}
+					}
+				}
+
 				expand = {}
 
 				hbox = {
@@ -708,6 +635,194 @@ types ongoing_outliner_items {
 				expand = {}
 			}
 		}
+
+		button = {
+			block "button_size" {
+				size = { 350 95 }
+			}
+
+			onclick = "[InformationPanelBar.OpenChangeLaw(Law.GetGroup)]"
+			using = default_button_primary
+			tooltip = "[GetPlayer.GetLawEnactmentProgressDesc]"
+
+			vbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				margin_top = 5
+				spacing = 1
+
+				hbox = {
+					layoutpolicy_horizontal = expanding
+					margin_left = 12
+					margin_right = 2
+
+					icon = {
+						size = { 54 54 }
+						texture = "gfx/interface/backgrounds/round_button_bg.dds"
+
+						round_progress_default = {
+							visible = "[GetPlayer.HasProgressingLawEnactment]"
+							size = { 80% 80% }
+							parentanchor = center
+							datacontext = "[GetPlayer.GetLawBeingEnacted]"
+							value = "[FixedPointToFloat(GetPlayer.GetLawEnactmentProgress)]"
+						}
+
+						round_progress_bad = {
+							visible = "[Not(GetPlayer.HasProgressingLawEnactment)]"
+							size = { 80% 80% }
+							parentanchor = center
+							datacontext = "[GetPlayer.GetLawBeingEnacted]"
+							value = "[FixedPointToFloat(GetPlayer.GetLawEnactmentProgress)]"
+						}
+
+						law_icon = {
+							alpha = "[TransparentIfTrue(Not(GetPlayer.HasProgressingLawEnactment))]"
+							size = { 38 38 }
+							parentanchor = center
+						}
+
+						paused_icon_bad = {
+							visible = "[Not(GetPlayer.HasProgressingLawEnactment)]"
+							parentanchor = center
+						}
+					}
+
+					vbox = {
+						spacing = 4
+						layoutpolicy_horizontal = expanding
+						min_width = 200
+
+						textbox = {
+							layoutpolicy_horizontal = expanding
+							size = { 0 20 }
+							align = center|nobaseline
+							elide = right
+							fontsize_min = 14
+							text = "ENACTING_TO_LAW"
+
+							background = {
+								using = default_header_bg
+								alpha = 1
+								margin_bottom = 5
+								margin_top = 5
+
+								modify_texture = {
+									texture = "gfx/interface/masks/fade_horizontal_center.dds"
+									blend_mode = alphamultiply
+								}
+							}
+						}
+
+						hbox = {
+							layoutpolicy_horizontal = expanding
+							spacing = 10
+
+							textbox = {
+								layoutpolicy_horizontal = expanding
+								size = { 0 20 }
+								align = right|nobaseline
+								elide = right
+								fontsize_min = 14
+								text = "OUTCOME_SUCCESS_SHORT"
+							}
+
+							textbox = {
+								layoutpolicy_horizontal = expanding
+								size = { 0 20 }
+								align = left|nobaseline
+								elide = right
+								fontsize_min = 14
+								text = "OUTCOME_STALL"
+							}
+						}
+					}
+
+					expand = {
+						layoutpolicy_horizontal = expanding
+					}
+				}
+
+				hbox = {
+					max_width = 330
+					layoutpolicy_horizontal = preferred
+					spacing = 1
+					margin_bottom = 5
+
+					# Successes
+					#Phase 0
+					enactment_phase = {
+						blockoverride "past_phase_parentanchor" {
+							parentanchor = vcenter|right
+						}
+
+						blockoverride "past_phase_text_max_width" {
+							max_width = 90
+						}
+
+						blockoverride "checkmark_position" {}
+					}
+
+					#Phase 1
+					enactment_phase = {
+						blockoverride "current_phase_visibility" {
+							visible = "[EqualTo_int32(Law.GetEnactmentPhase, '(int32)1')]"
+						}
+
+						blockoverride "past_phase_visibility" {
+							visible = "[GreaterThan_int32(Law.GetEnactmentPhase, '(int32)1')]"
+						}
+
+						blockoverride "not_reached_phase_visibility" {
+							visible = "[LessThan_int32(Law.GetEnactmentPhase, '(int32)1')]"
+						}
+
+						blockoverride "phase_name" {
+							text = "[Law.GetCountry.GetCustom('enactment_phase_1')]"
+						}
+
+						blockoverride "past_phase_parentanchor" {
+							parentanchor = vcenter|right
+						}
+
+						blockoverride "past_phase_text_max_width" {
+							max_width = 90
+						}
+
+						blockoverride "checkmark_position" {}
+					}
+
+					#Phase 2
+					enactment_phase = {
+						blockoverride "current_phase_visibility" {
+							visible = "[EqualTo_int32(Law.GetEnactmentPhase, '(int32)2')]"
+						}
+
+						blockoverride "past_phase_visibility" {
+							visible = "[GreaterThan_int32(Law.GetEnactmentPhase, '(int32)2')]"
+						}
+
+						blockoverride "not_reached_phase_visibility" {
+							visible = "[LessThan_int32(Law.GetEnactmentPhase, '(int32)2')]"
+						}
+
+						blockoverride "phase_name" {
+							text = "[Law.GetCountry.GetCustom('enactment_phase_2')]"
+						}
+
+						blockoverride "past_phase_parentanchor" {
+							parentanchor = vcenter|right
+						}
+
+						blockoverride "past_phase_text_max_width" {
+							max_width = 90
+						}
+
+						blockoverride "checkmark_position" {}
+					}
+				}
+			}
+		}
 	}
 
 	type enactment_setback = widget {
@@ -740,14 +855,14 @@ types ongoing_outliner_items {
 		layoutpolicy_vertical = preferred
 		
 		block "max_width" {
-			max_width = 360
+			max_width = 420
 		}
 
 		# Is Current phase
 		widget = {
 
 			block "active_size" {
-				size = { 110 28 }
+				size = { 110 30 }
 			}
 
 			block "current_phase_visibility" {
@@ -767,8 +882,7 @@ types ongoing_outliner_items {
 				align = nobaseline
 				default_format = "#v"
 				autoresize = yes
-				fontsize_min = 14
-				elide = right
+				using = elide_fontsize_min
 
 				block "text_max_width" {
 					max_width = 110
@@ -783,7 +897,7 @@ types ongoing_outliner_items {
 		# Past phase
 		widget = {
 			block "past_size" {
-				size = { 110 28 }
+				size = { 110 24 }
 			}
 
 			alpha = 0.8
@@ -821,9 +935,11 @@ types ongoing_outliner_items {
 				}
 
 				autoresize = yes
-				fontsize_min = 14
-				elide = right
-				position = { -4 0 }
+				using = elide_fontsize_min
+
+				block "past_phase_position" {
+					position = { -4 0 }
+				}
 
 				block "past_phase_text_max_width" {
 					max_width = 110
@@ -838,7 +954,7 @@ types ongoing_outliner_items {
 		# Not reached phase
 		widget = {
 			block "not_reached_size" {
-				size = { 110 28 }
+				size = { 110 24 }
 			}
 
 			alpha = 0.3
@@ -855,8 +971,7 @@ types ongoing_outliner_items {
 				parentanchor = vcenter|hcenter
 				align = nobaseline
 				autoresize = yes
-				fontsize_min = 14
-				elide = right
+				using = elide_fontsize_min
 
 				block "text_max_width" {
 					max_width = 110
@@ -1204,6 +1319,8 @@ types ongoing_outliner_items {
 				margin = { 5 0 }
 			}
 
+			block "additional_widgets" {}
+
 			textbox = {
 				autoresize = yes
 				block "right_text_size" {
@@ -1308,6 +1425,8 @@ types ongoing_outliner_items {
 					elide = right
 					margin = { 5 0 }
 				}
+
+				block "additional_widgets" {}
 
 				textbox = {
 					autoresize = yes
@@ -1550,14 +1669,6 @@ types ongoing_outliner_items {
 			FancyTooltip_PoliticalMovement = {}
 		}
 
-		state = {
-			name = _show
-			
-			start_sound = {
-				soundeffect = "event:/SFX/DLC/1.3_ip1/UI/item_revolutionary_movt"
-			}
-		}
-
 		widget = {
 			size = { 350 120 }
 			parentanchor = top
@@ -1654,7 +1765,7 @@ types ongoing_outliner_items {
 						}
 
 						widget = {
-							size = { 100 100 }
+							size = { 90 90 }
 
 							widget = {
 								name = revolution_clock
@@ -1673,7 +1784,7 @@ types ongoing_outliner_items {
 
 								state = {
 									name = 2
-									size = { 100 100 }
+									size = { 90 90 }
 									delay = 0.05
 									duration = 0.1
 									using = Animation_Curve_EaseOut
@@ -1739,6 +1850,7 @@ types ongoing_outliner_items {
 								textbox = {
 									layoutpolicy_horizontal = expanding
 									size = { 0 20 }
+									margin_right = 10
 									align = right|nobaseline
 									elide = right
 									fontsize_min = 12
@@ -1750,63 +1862,59 @@ types ongoing_outliner_items {
 								layoutpolicy_horizontal = expanding
 								spacing = 2
 
-								widget = {
-									size = { 30 30 }
-									visible = "[IsDataModelEmpty(PoliticalMovement.GetTopSupportingCharacters)]"
-								}
-
 								hbox = {
 									layoutpolicy_horizontal = expanding
-									spacing = 2
 
 									expand = {}
 									
 									icon = {
-										size = { 30 30 }
+										size = { 24 24 }
 										texture = "gfx/interface/icons/generic_icons/battalions.dds"
 									}
 
 									textbox = {
-										autoresize = yes
+										size = { 40 30 }
+										using = elide_fontsize_min
 										align = nobaseline
-										elide = right
-										fontsize_min = 12
 										default_format = "#v"
 										text = "[PoliticalMovement.GetCivilWar.GetNumUprisingBattalions]"
 									}
 
-									widget = {
-										size = { 5 5 }
-									}									
+									icon = {
+										size = { 24 24 }
+										texture = "gfx/interface/icons/generic_icons/conscripts.dds"
+									}
+
+									textbox = {
+										size = { 40 30 }
+										using = elide_fontsize_min
+										align = nobaseline
+										default_format = "#v"
+										text = "[PoliticalMovement.GetCivilWar.GetNumUprisingPotentialConscripts]"
+									}
 
 									icon = {
-										size = { 30 30 }
+										size = { 24 24 }
 										texture = "gfx/interface/icons/generic_icons/flotillas.dds"
 									}
 
 									textbox = {
-										autoresize = yes
+										size = { 40 30 }
+										using = elide_fontsize_min
 										align = nobaseline
-										elide = right
-										fontsize_min = 12
 										default_format = "#v"
 										text = "[PoliticalMovement.GetCivilWar.GetNumUprisingFlotillas]"
-									}	
-
-									widget = {
-										size = { 5 5 }
-									}									
+									}
 
 									icon = {
-										size = { 30 30 }
+										size = { 24 24 }
 										texture = "gfx/interface/icons/generic_icons/state.dds"
 									}
 
 									textbox = {
-										autoresize = yes
-										align = nobaseline
-										elide = right
+										size = { 26 30 }
 										fontsize_min = 12
+										align = nobaseline
 										default_format = "#v"
 										text = "[PoliticalMovement.GetCivilWar.GetNumUprisingStates]"
 									}
@@ -1816,7 +1924,6 @@ types ongoing_outliner_items {
 					}
 				}
 			}
-
 			
 			### Interest Groups
 			flowcontainer = {

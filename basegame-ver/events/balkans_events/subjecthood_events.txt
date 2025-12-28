@@ -60,12 +60,12 @@ subjecthood_events.1 = { # Stall - Minorities are cross
 				is_primary_culture_of = ROOT
 			}
 			ROOT = { # Between 40 and 80 acceptance
-				country_average_cultural_acceptance = {
-					target = prev
+				country_average_culture_pop_acceptance = {
+					culture = prev
 					value >= acceptance_status_2
 				}
-				country_average_cultural_acceptance = {
-					target = prev
+				country_average_culture_pop_acceptance = {
+					culture = prev
 					value <= acceptance_status_4
 				}
 			}
@@ -109,12 +109,12 @@ subjecthood_events.1 = { # Stall - Minorities are cross
 					is_primary_culture_of = ROOT
 				}
 				ROOT = { # Between 40 and 80 acceptance
-					country_average_cultural_acceptance = {
-						target = prev
+					country_average_culture_pop_acceptance = {
+						culture = prev
 						value >= acceptance_status_2
 					}
-					country_average_cultural_acceptance = {
-						target = prev
+					country_average_culture_pop_acceptance = {
+						culture = prev
 						value <= acceptance_status_4
 					}
 				}
@@ -242,6 +242,8 @@ subjecthood_events.2 = { # Debate - What is a citizen?
 				has_building = building_urban_center
 			}
 			order_by = b:building_urban_center.level
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_state
 		}
 		currently_enacting_law = {
@@ -333,10 +335,20 @@ subjecthood_events.3 = { # Advance - Emperor of the [X]
 
 	trigger = {
 		is_abolishing_subjecthood = yes
-		has_law_or_variant =  law_type:law_monarchy
+		has_law = law_type:law_monarchy
 		ruler ?= {
 			NOT = { age < define:NCharacters|ADULT_AGE }
 			has_reactionary_ideology = no
+			save_temporary_scope_as = ruler_scope
+		}
+		any_primary_culture = {
+			shares_heritage_trait_group_with_culture = scope:ruler_scope.culture
+			shares_language_trait_group_with_culture = scope:ruler_scope.culture
+		}
+		NOT = {
+			currently_enacting_law = {
+				has_amendment = amendment_type:amendment_sovereign_of_the_nation
+			}
 		}
 	}
 
@@ -347,17 +359,28 @@ subjecthood_events.3 = { # Advance - Emperor of the [X]
 	}
 
 	immediate = {
+		ruler = {
+			save_scope_as = ruler_scope
+		}
 		random_primary_culture = {
+			limit = {
+				shares_heritage_trait_group_with_culture = scope:ruler_scope.culture
+				shares_language_trait_group_with_culture = scope:ruler_scope.culture
+			}
 			save_scope_as = relevant_primary_culture
 		}
 		if = {
 			limit = {
 				any_primary_culture = {
+					shares_heritage_trait_group_with_culture = scope:ruler_scope.culture
+					shares_language_trait_group_with_culture = scope:ruler_scope.culture
 					count > 1
 				}
 			}
 			random_primary_culture = {
 				limit = {
+					shares_heritage_trait_group_with_culture = scope:ruler_scope.culture
+					shares_language_trait_group_with_culture = scope:ruler_scope.culture
 					NOT = {
 						scope:relevant_primary_culture ?= this
 					}
@@ -365,8 +388,8 @@ subjecthood_events.3 = { # Advance - Emperor of the [X]
 				save_scope_as = relevant_primary_culture_2
 			}
 		}
-		ruler = {
-			save_scope_as = ruler_scope
+		ig:ig_petty_bourgeoisie ?= {
+			save_scope_as = petty_bourgeoisie_ig
 		}
 		currently_enacting_law = {
     		save_scope_as = current_law_scope
@@ -378,6 +401,13 @@ subjecthood_events.3 = { # Advance - Emperor of the [X]
 		default_option = yes
 		add_enactment_modifier = {
 			name = modifier_empire_of_the_nation
+		}
+		active_law:lawgroup_governance_principles ?= {
+			add_amendment = {
+				type = amendment_sovereign_of_the_nation
+				sponsor = scope:petty_bourgeoisie_ig
+				cooldown = 120
+			}
 		}
 		scope:ruler_scope = {
 			add_modifier = {

@@ -18,7 +18,7 @@
 coa_monarchy_trigger = {
 	OR = {
 		has_law_or_variant = law_type:law_chiefdom
-		has_law_or_variant = law_type:law_monarchy
+		has_law = law_type:law_monarchy
 	}
 }
 
@@ -43,6 +43,10 @@ coa_republic_trigger = {
 		has_law_or_variant = law_type:law_parliamentary_republic
 		has_law_or_variant = law_type:law_council_republic
 	}
+}
+
+coa_corporate_state_trigger = {
+	has_law_or_variant = law_type:law_corporate_state
 }
 
 coa_dictatorship_trigger = {
@@ -132,7 +136,7 @@ coa_nihilist_trigger = {
 	has_law_or_variant = law_type:law_state_atheism
 	NOR = {
 		has_law_or_variant = law_type:law_theocracy
-		has_law_or_variant = law_type:law_monarchy
+		has_law = law_type:law_monarchy
 		has_law_or_variant = law_type:law_council_republic
 	}
 	ruler ?= {
@@ -160,11 +164,13 @@ coa_def_independent_trigger = {
 }
 
 coa_def_subject_trigger = {
+	NOT = { has_game_rule = no_subject_flags }
 	exists = scope:actor
 	scope:actor ?= { is_subject = yes }
 }
 
 coa_def_lesser_subject_trigger = {
+	NOT = { has_game_rule = no_subject_flags }
 	OR = {
 		NOT = { exists = scope:actor }
 		AND = {
@@ -175,6 +181,23 @@ coa_def_lesser_subject_trigger = {
 					is_subject_type = subject_type_puppet
 					is_subject_type = subject_type_vassal
 				}
+			}
+		}
+	}
+}
+
+coa_def_independence_war_trigger = { #checks if subject is in Independence diplomatic play/war
+	exists = scope:actor
+	scope:actor ?= {
+		is_subject = yes
+		OR = {
+			play_participant_has_war_goal_of_type_against = {
+				type = independence
+				target = overlord
+			}
+			war_participant_has_war_goal_of_type_against = {
+				type = independence
+				target = overlord
 			}
 		}
 	}
@@ -200,6 +223,11 @@ coa_def_undemocratic_monarchy_flag_trigger = {
 coa_def_republic_flag_trigger = {
 	exists = scope:actor
 	scope:actor ?= { coa_republic_trigger = yes }
+}
+
+coa_def_corporate_state_flag_trigger = {
+	exists = scope:actor
+	scope:actor ?= { coa_corporate_state_trigger = yes }
 }
 
 coa_def_theocracy_flag_trigger = {
@@ -424,17 +452,15 @@ coa_def_netherlands_ensign_trigger = {
 }
 
 coa_def_colonial_ensign_trigger = {
-	OR = {
-		coa_def_british_ensign_trigger = yes
-		coa_def_french_ensign_trigger = yes
-		coa_def_german_ensign_trigger = yes
-		coa_def_spanish_ensign_trigger = yes
-		coa_def_american_ensign_trigger = yes
-		coa_def_austrian_ensign_trigger = yes
-		coa_def_russian_ensign_trigger = yes
-		coa_def_swedish_ensign_trigger = yes
-		coa_def_danish_ensign_trigger = yes
-		coa_def_netherlands_ensign_trigger = yes
+	NOT = { has_game_rule = no_subject_flags }
+	scope:actor ?= {
+		exists = scope:overlord
+		NOT = {
+			is_country_type = recognized
+		}
+		any_overlord_or_above = {
+			is_country_type = recognized
+		}
 	}
 }
 
@@ -616,7 +642,55 @@ coa_def_catholic_trigger = {
 coa_def_kalmar_flag_trigger = {
 	exists = scope:actor
 	scope:actor ?= {
-		has_law_or_variant = law_type:law_monarchy
+		has_law = law_type:law_monarchy
 		was_formed_from = DEN
+	}
+}
+
+coa_def_hohenzollern_trigger = {
+	scope:actor ?= {
+		ruler ?= {
+			has_variable = house_hohenzollern
+		}
+	}
+}
+
+coa_def_braganca_trigger = {
+	scope:actor ?= {
+		ruler ?= {
+			has_variable = house_braganca
+		}
+	}
+}
+
+coa_def_espartero_trigger = {
+	scope:actor ?= {
+		ruler ?= {
+			has_variable = house_espartero
+		}
+	}
+}
+
+coa_def_bourbon_trigger = {
+	scope:actor ?= {
+		ruler ?= {
+			has_variable = house_bourbon
+		}
+	}
+}
+
+coa_def_bonaparte_trigger = {
+	scope:actor ?= {
+		ruler ?= {
+			has_variable = house_bonaparte
+		}
+	}
+}
+
+coa_def_savoy_trigger = {
+	scope:actor ?= {
+		ruler ?= {
+			has_variable = house_savoy
+		}
 	}
 }

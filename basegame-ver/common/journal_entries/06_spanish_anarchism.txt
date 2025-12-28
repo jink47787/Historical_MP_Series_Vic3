@@ -1,0 +1,165 @@
+﻿je_spanish_anarchism = { # I am in Spain, but only in a purely geographic sense.
+	icon = "gfx/interface/icons/invention_icons/anarchy.dds"
+
+	group = je_group_historical_content
+
+    is_shown_when_inactive = {
+        has_dlc_feature = ip4_content
+		country_has_primary_culture = cu:spanish
+        has_technology_researched = egalitarianism
+	}
+
+	possible = {
+		country_has_primary_culture = cu:spanish
+        has_technology_researched = anarchism
+        any_political_movement = {
+            is_political_movement_type = movement_anarchist
+			political_movement_support >= define:NPolitics|SUPPORT_RELEVANT_THRESHOLD
+			political_movement_radicalism >= define:NPolitics|RADICALISM_AGITATING_THRESHOLD
+        }
+	}
+
+	immediate = {
+		set_variable = { name = anarchist_movement_stamped_out value = 0 }
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_anarchist
+				political_movement_radicalism >= define:NPolitics|RADICALISM_AGITATING_THRESHOLD
+			}
+			save_scope_as = anarchist_movement_scope
+		}
+		ordered_scope_state = {
+			limit = {
+				is_capital = no
+				has_building = building_urban_center
+			}
+			order_by = b:building_urban_center.level
+			position = 0
+			check_range_bounds = no
+			save_scope_as = relevant_urban_state
+		}
+		trigger_event = { id = anarchism_events.7 popup = yes }
+	}
+
+	on_monthly_pulse = {
+        effect = {
+			if = {
+				limit = {
+					OR = {
+						NOT = {
+							any_political_movement = {
+								is_political_movement_type = movement_anarchist
+							}
+						}
+						any_political_movement = {
+							is_political_movement_type = movement_anarchist
+							political_movement_support < define:NPolitics|SUPPORT_RELEVANT_THRESHOLD
+						}
+					}
+				}
+				change_variable = { name = anarchist_movement_stamped_out add = 1 }
+			}
+			else = {
+				set_variable = { name = anarchist_movement_stamped_out value = 0 }
+			}
+        }
+		random_events = {
+			100 = 0
+			5 = anarchism_events.1 # Also in 00_on_actions_half_yearly
+			5 = anarchism_events.2
+			1 = anarchism_events.3
+			25 = anarchism_events.4
+		}
+	}
+
+	# Government victory
+
+	custom_completion_header = je_spanish_anarchism_government_victory
+
+	complete = {
+		AND = {
+			custom_tooltip = {
+				text = anarchists_marginal_tt
+				OR = {
+					NOT = {
+						any_political_movement = {
+							is_political_movement_type = movement_anarchist
+						}
+					}
+					any_political_movement = {
+						is_political_movement_type = movement_anarchist
+						political_movement_support < define:NPolitics|SUPPORT_RELEVANT_THRESHOLD
+					}
+				}
+			}
+			trigger_if = {
+				limit = {
+					has_variable = anarchist_movement_stamped_out
+				}
+				custom_tooltip = {
+					text = anarchists_marginal_for_5_years_tt
+					var:anarchist_movement_stamped_out >= 60
+				}
+			}
+		}
+	}
+
+	custom_on_completion_header = je_spanish_anarchism_on_government_victory
+
+	on_complete = {
+		trigger_event = { id = anarchism_events.6 popup = yes }
+	}
+
+	event_outcome_completed_effect_desc = {
+        header = anarchism_events.6.a
+        effect = {
+            add_loyalists = {
+				culture = cu:spanish
+				value = medium_radicals
+			}
+        }
+    }
+	event_outcome_completed_effect_desc = {
+        header = anarchism_events.6.b
+        effect = {
+            add_loyalists = {
+				culture = cu:spanish
+				value = small_radicals
+			}
+			add_modifier = {
+				name = modifier_anarchism_depoliticisation
+				days = normal_modifier_time
+			}
+        }
+    }
+
+	custom_failure_header = je_spanish_anarchism_anarchist_victory
+
+	# Anarchist victory
+    fail = {
+		has_civil_war_from_movement_type = movement_type:movement_anarchist
+    }
+
+	custom_on_failure_header = je_spanish_anarchism_on_anarchist_victory
+
+	on_fail = {
+		trigger_event = { id = anarchism_events.5 popup = yes }
+	}
+
+	event_outcome_failed_effect_desc = {
+        header = anarchism_events.5.a
+        effect = {
+        	custom_tooltip = side_with_national_government_tt
+        }
+    }
+	event_outcome_failed_effect_desc = {
+        header = anarchism_events.5.b
+        effect = {
+           	custom_tooltip = side_with_anarchists_noscopes_tt
+        }
+    }
+
+	weight = 5000
+
+    should_be_pinned_by_default = yes
+}

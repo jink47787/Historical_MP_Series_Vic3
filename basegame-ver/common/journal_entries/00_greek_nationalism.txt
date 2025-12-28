@@ -40,10 +40,7 @@
             triggered_desc = {
                 desc = greek_nationalism_status_loc
                 trigger = {
-                    NOR = {
-                    	has_variable = embrace_megali_idea_var
-                    	has_variable = embrace_ambitious_agenda_var
-                    }
+                    has_variable = no_megali_idea_var
                 }
             }
             triggered_desc = {
@@ -62,8 +59,9 @@
     }
 
 	immediate = {
+		set_variable = { name = greek_homeland_states_owned_var value = 0 }
+		set_variable = { name = byzantium_states_owned_var value = 0 }
 		trigger_event = { id = greece.1 }
-
 		if = {
 			limit = {
 				NOT = {
@@ -76,27 +74,37 @@
 
 	on_monthly_pulse = {
 		effect = {
-		}
-	}
-
-	on_yearly_pulse = {
-		effect = {
-			if = {
+			set_variable = { name = greek_homeland_states_owned_var value = 0 }
+			if = { # counts how many relevant states are owned
 				limit = {
-					NOT = { has_variable = embrace_ambitious_agenda_var }
-					has_variable = embrace_megali_idea_var
-					any_scope_state = {
-						state_region = s:STATE_IONIAN_ISLANDS
-					}
-					NOT = { has_game_rule = plausible_formable_nations }
-					has_law_or_variant = law_type:law_monarchy
-					government_legitimacy >= 75
+					has_variable = greek_homeland_states_owned_var
 				}
-				random_list = {
-					90 = { trigger_event = { id = greece.2 days = 7 popup = yes } } # For Taking the The Great Idea™ Too Far
-					10 = { } # nothing happens this year
+				every_scope_state = {
+					limit = {
+						is_greek_homeland = yes
+					}
+					ROOT = {
+						change_variable = { name = greek_homeland_states_owned_var add = 1 }
+					}
 				}
 			}
+			set_variable = { name = byzantium_states_owned_var value = 0 }
+			if = { # counts how many relevant states are owned
+				limit = {
+					has_variable = byzantium_states_owned_var
+				}
+				every_scope_state = {
+					limit = {
+						is_byzantium_state_region = yes
+					}
+					ROOT = {
+						change_variable = { name = byzantium_states_owned_var add = 1 }
+					}
+				}
+			}
+		}
+		events = {
+			greece.2
 		}
 	}
 
@@ -105,10 +113,16 @@
 		is_subject = no
 		country_rank >= rank_value:minor_power
 		gold_reserves > 0
-		trigger_if = {
+		hidden_trigger = {
+			OR = {
+				has_variable = no_megali_idea_var
+				has_variable = embrace_megali_idea_var
+				has_variable = embrace_ambitious_agenda_var
+			}
+		}
+		trigger_if = { # triggers if greece.1.b was selected and alters the completion conditions
 			limit = {
-				NOT = { has_variable = embrace_ambitious_agenda_var }
-				NOT = { has_variable = embrace_megali_idea_var }
+				has_variable = no_megali_idea_var
 			}
 			custom_tooltip = {
 				text = greek_state_complete_tt
@@ -146,7 +160,7 @@
 				has_variable = embrace_ambitious_agenda_var
 				NOT = { has_game_rule = plausible_formable_nations }
 			}
-			has_law_or_variant = law_type:law_monarchy
+			has_law = law_type:law_monarchy
 			custom_tooltip = {
 				text = greek_state_complete_tt_3
 				any_scope_state = {
@@ -172,8 +186,7 @@
 		first_valid = {
 			triggered_desc = {
 				trigger = {
-					NOT = { has_variable = embrace_ambitious_agenda_var }
-					NOT = { has_variable = embrace_megali_idea_var }
+					has_variable = no_megali_idea_var
 				}
 				desc = event_effects_greece.4_tt_1
 			}
@@ -212,8 +225,7 @@
 		first_valid = {
 			triggered_desc = {
 				trigger = {
-					NOT = { has_variable = embrace_ambitious_agenda_var }
-					NOT = { has_variable = embrace_megali_idea_var }
+					has_variable = no_megali_idea_var
 				}
 				desc = event_effects_greece.5_tt_1
 			}

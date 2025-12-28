@@ -48,17 +48,54 @@
 	}
 
 	fail = {
-		custom_tooltip = {
-			text = communism_progress_bar_at_full_tt
-			scope:journal_entry = {
-				"scripted_bar_progress(communism_1_progress_bar)" >= 100
+		OR = {
+			custom_tooltip = {
+				text = communism_progress_bar_at_full_tt
+				scope:journal_entry = {
+					"scripted_bar_progress(communism_1_progress_bar)" >= 100
+				}
 			}
+			has_law_or_variant = law_type:law_council_republic
 		}
 	}
 
 	on_fail = {
 		set_variable = communism_1_done
-		trigger_event = { id = communism.1 popup = yes }
+		if = {
+			limit = {
+				NOT = {
+					has_law_or_variant = law_type:law_council_republic
+				}
+			}
+			trigger_event = { id = communism.1 popup = yes }
+		}
+		else = { # Mirrors effects of communism.1, skips je_communism_2
+			if = {
+				limit = {
+					any_interest_group = {
+						law_stance = {
+							law = law_type:law_council_republic
+							value > neutral
+						}
+					}
+				}
+				random_interest_group = {
+					limit = {
+						law_stance = {
+							law = law_type:law_council_republic
+							value > neutral
+						}
+					}
+					set_variable = communist_ig_var
+				}
+			}
+			else = {
+				ig:ig_trade_unions ?= {
+					set_variable = communist_ig_var
+				}
+			}
+			trigger_event = { id = communism.2 popup = yes }
+		}
 		custom_tooltip = communism_je_1_fail_tt
 	}
 

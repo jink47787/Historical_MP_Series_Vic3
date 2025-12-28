@@ -1099,6 +1099,33 @@ types treaty_draft_panel_types
 					}
 				}
 
+				### FREE TEXT
+				button = {
+					visible = "[ArticleDraft.RequiresInput('text')]"
+					tooltip = "ARTICLE_DRAFT_CLICK_TO_CHANGE"
+					enabled = "[ArticleDraft.CanBeModified]"
+					size = { 220 100 }
+					using = default_button
+
+					block "right_click_menu_onclick" {
+						onclick = "[RightClickMenuManager.Close]"
+						onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
+					}
+
+					textbox = {
+						resizeparent = yes
+						parentanchor = vcenter
+						autoresize = yes
+						align = nobaseline
+						multiline = yes
+						maxcharacters = 3000
+						max_width = 220
+						margin = { 10 10 }
+						using = elide_fontsize_min
+						text = "TREATY_DRAFT_SELECTED_TEXT_INPUT"
+					}
+				}
+
 				### STATE INPUT
 				button = {
 					visible = "[ArticleDraft.RequiresInput('state')]"
@@ -1124,6 +1151,35 @@ types treaty_draft_panel_types
 							max_width = 110
 							using = elide_fontsize_min
 							raw_text = "[State.GetCountry.GetFlagTextIcon] [State.GetNameNoFormatting]"
+						}
+					}
+				}
+
+				### COUNTRY INPUT
+				button = {
+					visible = "[ArticleDraft.RequiresInput('country')]"
+					tooltip = "ARTICLE_DRAFT_CLICK_TO_CHANGE"
+					enabled = "[ArticleDraft.CanBeModified]"
+					size = { 130 30 }
+					# Do not add ArticleDraft.GetCountry as a datacontext here as it might conflict with other Country contexts
+					using = default_button
+
+					block "right_click_menu_onclick" {
+						onclick = "[RightClickMenuManager.Close]"
+						onclick = "[RightClickMenuManager.ToggleArticleDraftInput(TreatyDraft.Self, ArticleDraft.Self, Country.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_left')]"
+					}
+
+					flowcontainer = {
+						parentanchor = center
+						spacing = 5
+
+						textbox = {
+							parentanchor = vcenter
+							autoresize = yes
+							align = nobaseline
+							max_width = 110
+							using = elide_fontsize_min
+							raw_text = "[ArticleDraft.GetCountry.GetFlagTextIcon] [ArticleDraft.GetCountry.GetNameNoFormatting]"
 						}
 					}
 				}
@@ -1375,7 +1431,7 @@ types treaty_draft_panel_types
 
 					### INFLUENCE COST AND ICONS - DIRECTED
 					hbox = {
-						visible = "[ArticleDraft.HasKind('directed')]"
+						visible = "[And( ArticleDraft.HasKind('directed'), Not(ArticleDraft.HasType('free_text')) )]"
 						layoutpolicy_horizontal = expanding
 
 						expand = {}
@@ -1387,7 +1443,7 @@ types treaty_draft_panel_types
 
 					### INFLUENCE COSTS AND ICONS - MUTUAL
 					hbox = {
-						visible = "[ArticleDraft.HasKind('mutual')]"
+						visible = "[And( ArticleDraft.HasKind('mutual'), Not(ArticleDraft.HasType('free_text')) )]"
 						layoutpolicy_horizontal = expanding
 						spacing = 25
 
@@ -1413,7 +1469,7 @@ types treaty_draft_panel_types
 					}
 
 					hbox = {
-						visible = "[TreatyDraft.GetRightCountry.IsAI]"
+						visible = "[And( TreatyDraft.GetRightCountry.IsAI, Not(ArticleDraft.HasType('free_text')) )]"
 						layoutpolicy_horizontal = expanding
 
 						expand = {}
@@ -1848,18 +1904,11 @@ types treaty_draft_panel_types
 			}
 
 			### Number of this Article's input options
-			textbox = {
-				visible = "[Not( ArticleType.HasFlag('is_money_transfer') )]"
-				parentanchor = right
-				position = { -5 -2 }
-				autoresize = yes
-				align = right|nobaseline
-				using = fontsize_small
-				raw_text = "#b [TreatyDraft.GetNumAvailableInputOptions(ArticleType.Self, Country.Self)|+]#!"
+			available_options_number = {
+				visible = "[And( Not( ArticleType.HasFlag('is_money_transfer') ), Not( ArticleType.HasType('free_text') ) )]"
 
-				background = {
-					using = default_background
-					margin = { 8 4 }
+				blockoverride "text" {
+					raw_text = "#b [TreatyDraft.GetNumAvailableInputOptions(ArticleType.Self, Country.Self)|+]#!"
 				}
 			}
 
@@ -1993,6 +2042,23 @@ types treaty_draft_panel_types
 					}
 				}
 			}
+		}
+	}
+
+	type available_options_number = textbox {
+		parentanchor = right
+		position = { -5 -2 }
+		autoresize = yes
+		align = right|nobaseline
+		using = fontsize_small
+
+		block "text" {
+			raw_text = "#b 999#!"
+		}
+
+		background = {
+			using = default_background
+			margin = { 8 4 }
 		}
 	}
 

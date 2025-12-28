@@ -1,0 +1,994 @@
+﻿namespace = spanish_africa
+
+spanish_africa.1 = { # Initiation for Al Rif
+	type = country_event
+	placement = scope:al_rif_state_scope
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.1.t
+	desc = spanish_africa.1.d
+	flavor = spanish_africa.1.f
+
+	event_image = {
+		video = "ep1_cossacks"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+		OR = {
+			c:SPA ?= this
+			c:IBE ?= this
+		}
+		NOT = {
+			has_variable = spanish_africa_1_fired
+		}
+		s:STATE_AL_RIF = {
+			AND = {
+				any_scope_state = {
+					OR = {
+						owner ?= ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				any_scope_state = {
+					owner ?= {
+						OR = {
+							c:MOR ?= this
+							country_has_primary_culture = cu:maghrebi
+							country_has_primary_culture = cu:berber
+						}
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		s:STATE_AL_RIF = {
+			save_scope_as = al_rif_scope
+			random_scope_state = {
+				limit = {
+					owner ?= {
+						OR = {
+							c:MOR ?= this
+							country_has_primary_culture = cu:maghrebi
+							country_has_primary_culture = cu:berber
+						}
+					}
+				}
+				save_scope_as = al_rif_state_scope
+				owner = {
+					save_scope_as = rif_enemy_scope
+				}
+			}
+		}
+		ig:ig_armed_forces = {
+			save_scope_as = armed_forces_scope
+		}
+		set_variable = spanish_africa_1_fired
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	cancellation_trigger = {
+
+	}
+
+	option = {
+		name = spanish_africa.1.a
+		default_option = yes
+		add_journal_entry = {
+			type = je_conquest_of_tetouan
+		}
+		show_as_tooltip = {
+			add_modifier = {
+				name = modifier_african_adventure
+				days = long_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_claim = s:STATE_AL_RIF
+				}
+			}
+			s:STATE_AL_RIF = {
+				add_claim = root
+			}
+		}
+		if = {
+			limit = {
+				is_player = no
+				exists = scope:rif_enemy_scope
+			}
+			set_secret_goal = {
+				country = scope:rif_enemy_scope
+				secret_goal = conquer
+			}
+		}
+		custom_tooltip = spanish_africa.1.a_tt
+	}
+	option = {
+		name = spanish_africa.1.b
+		add_modifier = {
+			name = failed_retaliation_modifier
+			days = normal_modifier_time
+		}
+		if = {
+			limit = {
+				has_claim = s:STATE_AL_RIF
+			}
+			s:STATE_AL_RIF = {
+				remove_claim = root
+			}
+		}
+	}
+}
+
+spanish_africa.2 = { # Al Rif conquered, now Western Sahara
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.2.t
+	desc = spanish_africa.2.d
+	flavor = spanish_africa.2.f
+
+	event_image = {
+		video = "votp_french_algeria"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+		OR = {
+			c:SPA ?= this
+			c:IBE ?= this
+		}
+		owns_entire_state_region = STATE_AL_RIF
+		has_technology_researched = civilizing_mission
+		NOR = {
+			has_law = law_type:law_no_colonial_affairs
+			has_variable = spanish_africa_2_fired
+		}
+		is_at_war = no
+		is_diplomatic_play_committed_participant = no
+	}
+
+	immediate = {
+		s:STATE_AL_RIF = {
+			save_scope_as = al_rif_scope
+		}
+		s:STATE_WEST_SAHARA = {
+			random_scope_state = {
+				save_scope_as = west_sahara_state_scope
+			}
+		}
+		ig:ig_armed_forces = {
+			save_scope_as = armed_forces_scope
+		}
+		s:STATE_WEST_SAHARA = {
+			save_scope_as = west_sahara_scope
+		}
+	}
+
+	cancellation_trigger = {
+		country_or_subject_owns_entire_state_region = STATE_WEST_SAHARA
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	option = {
+		name = spanish_africa.2.a
+		default_option = yes
+		add_journal_entry = {
+			type = je_western_saharan_conquest
+		}
+		add_modifier = {
+			name = successful_retaliation_modifier
+			days = normal_modifier_time
+		}
+		show_as_tooltip = {
+			add_modifier = {
+				name = modifier_african_adventure
+				multiplier = 2
+				days = long_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_claim = s:STATE_WEST_SAHARA
+				}
+			}
+			s:STATE_WEST_SAHARA = {
+				add_claim = root
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_claim = s:STATE_INNER_MOROCCO
+				}
+			}
+			s:STATE_INNER_MOROCCO = {
+				add_claim = root
+			}
+		}
+		custom_tooltip = spanish_africa.2.a_tt
+		set_variable = spanish_africa_2_fired
+	}
+	option = {
+		name = spanish_africa.2.b
+		add_modifier = {
+			name = stalled_african_ambitions_modifier
+			days = normal_modifier_time
+		}
+		if = {
+			limit = {
+				has_claim = s:STATE_WEST_SAHARA
+			}
+			s:STATE_WEST_SAHARA = {
+				remove_claim = root
+			}
+		}
+		set_variable = spanish_africa_2_fired
+	}
+}
+
+spanish_africa.3 = { # Western Sahara conquered, now Guinea
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.3.t
+	desc = spanish_africa.3.d
+	flavor = spanish_africa.3.f
+
+	event_image = {
+		video = "africa_desert_expedition"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+		OR = {
+			c:SPA ?= this
+			c:IBE ?= this
+		}
+		owns_entire_state_region = STATE_AL_RIF
+		owns_entire_state_region = STATE_WEST_SAHARA
+		has_technology_researched = civilizing_mission
+		NOR = {
+			has_law = law_type:law_no_colonial_affairs
+			has_variable = spanish_africa_3_fired
+		}
+		is_at_war = no
+		is_diplomatic_play_committed_participant = no
+	}
+
+	immediate = {
+		s:STATE_WEST_SAHARA = {
+			random_scope_state = {
+				save_scope_as = west_sahara_scope
+			}
+		}
+		ig:ig_armed_forces = {
+			save_scope_as = armed_forces_scope
+		}
+		sr:region_senegal = {
+			save_scope_as = senegal_region_scope
+		}
+		sr:region_niger = {
+			save_scope_as = niger_region_scope
+		}
+		sr:region_congo = {
+			save_scope_as = congo_region_scope
+		}
+	}
+
+	cancellation_trigger = {
+		any_state_in_subsaharan_africa = {
+			owner ?= {
+				OR = {
+					this = ROOT
+					AND = {
+						country_is_colonial_or_company = yes
+						is_subject_of = ROOT
+					}
+				}
+			}
+			count >= 3
+		}
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	option = {
+		name = spanish_africa.3.a
+		default_option = yes
+		add_journal_entry = {
+			type = je_guinean_conquest
+		}
+		show_as_tooltip = {
+			add_modifier = {
+				name = modifier_african_adventure
+				multiplier = 3
+				days = long_modifier_time
+			}
+		}
+		add_modifier = {
+			name = successful_saharan_ambitions_modifier
+			days = normal_modifier_time
+		}
+		custom_tooltip = spanish_africa.3.a_tt
+		set_variable = spanish_africa_3_fired
+	}
+
+	option = {
+		name = spanish_africa.3.b
+		add_modifier = {
+			name = abandoned_equatorial_campaign_modifier
+			days = normal_modifier_time
+		}
+		set_variable = spanish_africa_3_fired
+	}
+}
+
+spanish_africa.4 = { # Guinea conquered, now Morocco
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.4.t
+	desc = spanish_africa.4.d
+	flavor = spanish_africa.4.f
+
+	event_image = {
+		video = "africa_construction_colony"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	trigger = {
+		OR = {
+			c:SPA ?= this
+			c:IBE ?= this
+		}
+		owns_entire_state_region = STATE_AL_RIF
+		owns_entire_state_region = STATE_WEST_SAHARA
+		any_state_in_subsaharan_africa = {
+			owner ?= {
+				OR = {
+					this = ROOT
+					AND = {
+						country_is_colonial_or_company = yes
+						is_subject_of = ROOT
+					}
+				}
+			}
+			count >= 3
+		}
+		has_technology_researched = civilizing_mission
+		NOR = {
+			has_law = law_type:law_no_colonial_affairs
+			has_variable = spanish_africa_4_fired
+		}
+		is_at_war = no
+		is_diplomatic_play_committed_participant = no
+	}
+
+	immediate = {
+		s:STATE_WEST_SAHARA = {
+			random_scope_state = {
+				save_scope_as = west_sahara_scope
+			}
+		}
+		s:STATE_AL_RIF = {
+			save_scope_as = al_rif_scope
+		}
+		s:STATE_FEZ = {
+			save_scope_as = fez_scope
+		}
+		s:STATE_INNER_MOROCCO = {
+			save_scope_as = inner_morocco_scope
+		}
+		s:STATE_MARRAKECH = {
+			save_scope_as = marrakech_scope
+		}
+		c:MOR ?= {
+			save_scope_as = morocco_scope
+		}
+		ig:ig_armed_forces = {
+			save_scope_as = armed_forces_scope
+		}
+	}
+
+	cancellation_trigger = {
+		country_or_subject_owns_entire_state_region = STATE_AL_RIF
+		country_or_subject_owns_entire_state_region = STATE_FEZ
+		country_or_subject_owns_entire_state_region = STATE_INNER_MOROCCO
+		country_or_subject_owns_entire_state_region = STATE_MARRAKECH
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	option = {
+		name = spanish_africa.4.a
+		default_option = yes
+		add_journal_entry = {
+			type = je_moroccan_conquest
+		}
+		show_as_tooltip = {
+			add_modifier = {
+				name = modifier_african_adventure
+				multiplier = 4
+				days = long_modifier_time
+			}
+		}
+		custom_tooltip = spanish_africa.4.a_tt
+		if = {
+			limit = {
+				NOR = {
+					country_or_subject_owns_entire_state_region = STATE_AL_RIF
+					has_claim = s:STATE_AL_RIF
+				}
+			}
+			s:STATE_AL_RIF = {
+				add_claim = root
+			}
+		}
+		if = {
+			limit = {
+				NOR = {
+					country_or_subject_owns_entire_state_region = STATE_FEZ
+					has_claim = s:STATE_FEZ
+				}
+			}
+			s:STATE_FEZ = {
+				add_claim = root
+			}
+		}
+		if = {
+			limit = {
+				NOR = {
+					country_or_subject_owns_entire_state_region = STATE_INNER_MOROCCO
+					has_claim = s:STATE_INNER_MOROCCO
+				}
+			}
+			s:STATE_INNER_MOROCCO = {
+				add_claim = root
+			}
+		}
+		if = {
+			limit = {
+				NOR = {
+					country_or_subject_owns_entire_state_region = STATE_MARRAKECH
+					has_claim = s:STATE_MARRAKECH
+				}
+			}
+			s:STATE_MARRAKECH = {
+				add_claim = root
+			}
+		}
+		set_variable = spanish_africa_4_fired
+	}
+
+	option = {
+		name = spanish_africa.4.b
+		trigger_event = spanish_africa.9
+		add_modifier = {
+			name = rejected_conquest_demand_modifier
+			days = normal_modifier_time
+		}
+		if = {
+			limit = {
+				has_claim = s:STATE_AL_RIF
+			}
+			s:STATE_AL_RIF = {
+				remove_claim = root
+			}
+		}
+		if = {
+			limit = {
+				has_claim = s:STATE_FEZ
+			}
+			s:STATE_FEZ = {
+				remove_claim = root
+			}
+		}
+		if = {
+			limit = {
+				has_claim = s:STATE_INNER_MOROCCO
+			}
+			s:STATE_INNER_MOROCCO = {
+				remove_claim = root
+			}
+		}
+		if = {
+			limit = {
+				has_claim = s:STATE_MARRAKECH
+			}
+			s:STATE_MARRAKECH = {
+				remove_claim = root
+			}
+		}
+		set_variable = spanish_africa_4_fired
+	}
+}
+
+spanish_africa.5 = { # Gibraltar owned completely, "The Pillars of Hercules"
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.5.t
+	desc = spanish_africa.5.d
+	flavor = spanish_africa.5.f
+
+	event_image = {
+		video = "africa_construction_colony"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	trigger = {
+		OR = {
+			c:SPA ?= this
+			c:IBE ?= this
+		}
+		owns_entire_state_region = STATE_AL_RIF
+		owns_entire_state_region = STATE_LOWER_ANDALUSIA
+		owns_entire_state_region = STATE_UPPER_ANDALUSIA
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	immediate = {
+		s:STATE_STRAIT_OF_GIBRALTAR = {
+			save_scope_as = gibraltar_scope
+		}
+		c:SPA ?= {
+			save_scope_as = spain_scope
+		}
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	option = {
+		name = spanish_africa.5.a
+		default_option = yes
+		add_modifier = {
+			name = conquest_of_gibraltar_modifier
+			days = very_long_modifier_time
+		}
+		add_loyalists = {
+			value = small_radicals
+			culture = cu:spanish
+		}
+	}
+}
+
+spanish_africa.6 = { # revoke_fernando_po decision: Revoke request for the lease of Fernando Po
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.6.t
+	desc = spanish_africa.6.d
+	flavor = spanish_africa.6.f
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	immediate = {
+		s:STATE_SOUTH_CAMEROON = {
+			p:x902089.state = {
+				save_scope_as = fernando_po_scope
+			}
+		}
+		c:SPA ?= {
+			save_scope_as = spain_scope
+		}
+		capital = {
+			save_scope_as = gbr_capital_scope
+		}
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	option = {
+		name = spanish_africa.6.a
+		default_option = yes
+		ai_chance = {
+			base = 9
+			modifier = {
+				trigger = {
+					c:SPA ?= {
+						has_law = law_type:law_autocracy # Carlist victory
+					}
+				}
+				add = -2
+			}
+			modifier = {
+				trigger = {
+					"c:SPA.relations:root" <= relations_threshold:poor
+				}
+				add = -3
+			}
+			modifier = {
+				trigger = {
+					"c:SPA.relations:root" <= relations_threshold:cold
+				}
+				add = -3
+			}
+		}
+		custom_tooltip = spanish_africa.6.a_tt
+		hidden_effect = {
+			c:SPA ?= {
+				trigger_event = {
+					id = spanish_africa.7
+				}
+			}
+		}
+		show_as_tooltip = {
+			change_relations = {
+				country = c:SPA
+				value = 15
+			}
+		}
+	}
+
+	option = {
+		name = spanish_africa.6.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					c:SPA ?= {
+						has_law = law_type:law_autocracy # Carlist victory
+					}
+				}
+				add = 2
+			}
+			modifier = {
+				trigger = {
+					"c:SPA.relations:root" <= relations_threshold:poor
+				}
+				add = 3
+			}
+			modifier = {
+				trigger = {
+					"c:SPA.relations:root" <= relations_threshold:cold
+				}
+				add = 3
+			}
+		}
+		custom_tooltip =  spanish_africa.6.b_tt
+		hidden_effect = {
+			c:SPA ?= {
+				trigger_event = {
+					id = spanish_africa.8
+				}
+			}
+		}
+		create_incident = {
+			value = 10
+			country = c:SPA
+		}
+		show_as_tooltip = {
+			change_relations = {
+				country = c:SPA
+				value = -25
+			}
+		}
+	}
+}
+
+spanish_africa.7 = { # revoke_fernando_po decision: Britain accepts
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.7.t
+	desc = spanish_africa.7.d
+	flavor = spanish_africa.7.f
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	immediate = {
+		s:STATE_SOUTH_CAMEROON = {
+			p:x902089.state = {
+				save_scope_as = fernando_po_scope
+			}
+		}
+		c:GBR ?= {
+			save_scope_as = gbr_scope
+		}
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	option = {
+		name = spanish_africa.7.a
+		default_option = yes
+		s:STATE_SOUTH_CAMEROON = {
+			set_owner_of_provinces = {
+				country = c:SPA
+				provinces = { x902089 }
+			}
+		}
+		change_relations = {
+			country = c:GBR
+			value = 15
+		}
+	}
+}
+
+spanish_africa.8 = { # revoke_fernando_po decision: Britain rejects
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.8.t
+	desc = spanish_africa.8.d
+	flavor = spanish_africa.8.f
+
+	event_image = {
+		video = "ep1_redcoats"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	immediate = {
+		s:STATE_SOUTH_CAMEROON = {
+			p:x902089.state = {
+				save_scope_as = fernando_po_scope
+			}
+		}
+		c:GBR ?= {
+			save_scope_as = gbr_scope
+		}
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	option = {
+		name = spanish_africa.8.a
+		default_option = yes
+		show_as_tooltip = {
+			c:GBR ?= {
+				add_modifier = {
+					name = rejected_lease_revocation_of_fernando_po_modifier
+					days = normal_modifier_time
+				}
+				create_incident = {
+					value = 10
+					country = c:SPA
+				}
+			}
+		}
+		change_relations = {
+			country = c:GBR
+			value = -25
+		}
+	}
+}
+
+spanish_africa.9 = { # Final Event: Return to Glory
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.9.t
+	desc = spanish_africa.9.d
+	flavor = spanish_africa.9.f
+
+	event_image = {
+		video = "africa_city_center"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	immediate = {
+		c:SPA ?= {
+			save_scope_as = spain_scope
+		}
+		ig:ig_armed_forces = {
+			save_scope_as = armed_forces_scope
+		}
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	option = {
+		name = spanish_africa.9.a
+		default_option = yes
+		add_modifier = {
+			name = successful_spanish_african_campaign_modifier
+			days = very_long_modifier_time
+		}
+	}
+	option = {
+		name = spanish_africa.9.b
+		add_modifier = {
+			name = successful_spanish_african_campaign_only_prestige_modifier
+			days = long_modifier_time
+		}
+		every_interest_group = {
+			limit = {
+				OR = {
+					law_stance = {
+						law = law_type:law_frontier_colonization
+						value > neutral
+					}
+					law_stance = {
+						law = law_type:law_colonial_resettlement
+						value > neutral
+					}
+					law_stance = {
+						law = law_type:law_colonial_exploitation
+						value > neutral
+					}
+					law_stance = {
+						law = law_type:law_colonial_slavery
+						value > neutral
+					}
+				}
+			}
+			add_modifier = {
+				name = successful_spanish_african_campaign_ig_approval_modifier
+				days = long_modifier_time
+			}
+		}
+	}
+	option = {
+		name = spanish_africa.9.c
+		add_loyalists = {
+			culture = cu:spanish
+			value = large_radicals
+		}
+	}
+}
+
+spanish_africa.10 = { # Timeout (fail) Event: Outraged Soldiers
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spanish_africa.10.t
+	desc = spanish_africa.10.d
+	flavor = spanish_africa.10.f
+
+	event_image = {
+		video = "ep1_ca_mountain_pass_military"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	immediate = {
+		ig:ig_armed_forces = {
+			save_scope_as = armed_forces_scope
+		}
+	}
+
+	option = {
+		name = spanish_africa.10.a
+		default_option = yes
+		add_modifier = {
+			name = failed_african_campaign
+			days = normal_modifier_time
+		}
+		add_radicals = {
+			value = 0.25
+			pop_type = soldiers
+		}
+		add_radicals = {
+			value = 0.25
+			pop_type = officers
+		}
+	}
+	option = {
+		name = spanish_africa.10.b
+		if = {
+			limit = {
+				ig:ig_armed_forces = {
+					is_in_government = no
+				}
+			}
+			ig:ig_armed_forces = {
+				add_ruling_interest_group = yes
+			}
+		}
+		add_modifier = {
+			name = compromised_failed_african_campaign
+			days = long_modifier_time
+		}
+		add_radicals = {
+			value = 0.10
+			pop_type = soldiers
+		}
+		add_radicals = {
+			value = 0.10
+			pop_type = officers
+		}
+	}
+}

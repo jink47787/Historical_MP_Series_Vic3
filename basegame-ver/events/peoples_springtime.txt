@@ -177,7 +177,7 @@ peoples_springtime.2 = {
 	immediate = {
 		random_interest_group = {
 			limit = {
-				is_marginal = no
+				ig_counts_as_marginal = no
 				OR = {
 					is_interest_group_type = ig_rural_folk
 					is_interest_group_type = ig_intelligentsia
@@ -686,6 +686,48 @@ peoples_springtime.8 = {
 
 	duration = 3
 
+	trigger = {
+		OR = {
+			has_variable = red_summer_the_revolution_vanquished
+			AND = {
+				var:springtime_timer_var >= 12
+				any_political_movement = {
+					OR = {
+						is_political_movement_type = movement_german_national
+						is_political_movement_type = movement_italian_national
+						is_political_movement_type = movement_radical
+					}
+					political_movement_support <= 0.10
+					is_being_suppressed = yes
+				}
+				NOT = {
+					any_scope_character = {
+						OR = {
+							has_role = politician
+							has_role = agitator
+						}
+						has_ideology = ideology:ideology_radical
+					}
+				}
+				NOT = {
+					has_variable = completed_peoples_springtime
+				}
+			}
+		}
+	}
+
+	immediate = {
+		set_variable = {
+			name = completed_peoples_springtime
+		}
+		if = {
+			limit = {
+				has_variable = red_summer_the_revolution_vanquished
+			}
+			remove_variable = red_summer_the_revolution_vanquished
+		}
+	}
+
 	option = {
 		name = peoples_springtime.8.a
 		add_modifier = {
@@ -703,6 +745,9 @@ peoples_springtime.8 = {
 	}
 
 	after = {
+		je:je_springtime_of_the_peoples ?= {
+			remove_involved_country = ROOT
+		}
 		hidden_effect = {
 			set_strategy = ai_strategy_conservative_agenda
 		}
@@ -769,7 +814,13 @@ peoples_springtime.9 = {
 			is_insurrectionary = yes
 		}
 		capital = {
-			turmoil >= 0.10
+			is_in_revolt = yes
+		}
+		NOT = {
+			has_variable = had_springtime_revolution
+		}
+		NOT = {
+			has_journal_entry = je_divided_monarchists # french_pretenders.6 happens instead
 		}
 	}
 
@@ -781,6 +832,10 @@ peoples_springtime.9 = {
 		ruler = {
 			save_scope_as = ruler_scope
 		}
+	}
+
+	cancellation_trigger = {
+		has_variable = had_springtime_revolution # Cannot fire twice
 	}
 
 	option = {
@@ -836,6 +891,8 @@ peoples_springtime.9 = {
 					}
 				}
 				order_by = ig_clout
+				position = 0
+				check_range_bounds = no
 				add_modifier = { #TODO PRCAL-14137 replace with the modifier that makes revolution impossible
 					name = modifier_springtime_kick_out_of_insurrection
 					days = 75
@@ -881,6 +938,8 @@ peoples_springtime.9 = {
 					}
 				}
 				order_by = ig_clout
+				position = 0
+				check_range_bounds = no
 				abandon_revolution = yes
 				add_ruling_interest_group = yes
 			}
@@ -946,6 +1005,8 @@ peoples_springtime.9 = {
 					}
 				}
 				order_by = ig_clout
+				position = 0
+				check_range_bounds = no
 				add_modifier = {  #TODO PRCAL-14137 replace with the modifier that makes revolution impossible
 					name = modifier_springtime_kick_out_of_insurrection
 					days = 75
@@ -991,6 +1052,8 @@ peoples_springtime.9 = {
 					}
 				}
 				order_by = ig_clout
+				position = 0
+				check_range_bounds = no
 				abandon_revolution = yes
 				add_ruling_interest_group = yes
 			}
@@ -1041,6 +1104,8 @@ peoples_springtime.91 = {
 				}
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			abandon_revolution = yes
 			add_ruling_interest_group = yes
 		}
@@ -1072,6 +1137,7 @@ peoples_springtime.91 = {
 				}
 				every_active_party = { # Hidden effect to benefit liberals
 					limit = {
+						party_has_members = yes
 						OR = {
 							is_party_type = liberal_party
 							is_party_type = radical_party
@@ -1103,6 +1169,28 @@ peoples_springtime.10 = {
 
 	duration = 3
 
+	trigger = {
+		AND = {
+			OR = {
+				has_variable = had_springtime_revolution
+				any_interest_group = {
+					is_in_government = yes
+					OR = {
+						has_ideology = ideology:ideology_liberal
+						leader = { has_ideology = ideology:ideology_radical }
+					}
+				}
+			}
+			OR = {
+				has_law_or_variant = law_type:law_census_voting
+				has_law_or_variant = law_type:law_universal_suffrage
+			}
+		}
+		NOT = {
+			has_variable = completed_peoples_springtime
+		}
+	}
+
 	immediate = {
 		if = {
 			limit = {
@@ -1133,6 +1221,9 @@ peoples_springtime.10 = {
 				month < 11
 			}
 			set_variable = red_autumn
+		}
+		set_variable = {
+			name = completed_peoples_springtime
 		}
 	}
 

@@ -139,19 +139,31 @@ citizenship_laws.2 = {
 			}
 		}
 		any_scope_state = {
-			has_building = building_arts_academy
+			has_building = building_art_academy
 			any_scope_pop = {
 				state = {
-					state_cultural_acceptance = {
-						target = PREV.culture
+					state_average_culture_pop_acceptance = {
+						culture = PREV.culture
 						value >= acceptance_status_4
 					}
 				}
 				will_be_accepted_culture = no
 			}
 		}
+		any_interest_group = {
+			ig_counts_as_marginal = no
+			law_enactment_stance = {
+				law = currently_enacting_law.type
+				value > neutral
+			}
+		}
 		NOT = { has_modifier = rejected_cultural_contributions }
 		NOT = { has_modifier = embraced_cultural_contributions }
+		NOT = {
+			currently_enacting_law = {
+				has_amendment = amendment_type:amendment_degenerate_art
+			}
+		}
 	}
 
 	immediate = {
@@ -160,11 +172,11 @@ citizenship_laws.2 = {
 		}
 		random_scope_state = {
 			limit = {
-				has_building = building_arts_academy
+				has_building = building_art_academy
 				any_scope_pop = {
 					state = {
-						state_cultural_acceptance = {
-							target = PREV.culture
+						state_average_culture_pop_acceptance = {
+							culture = PREV.culture
 							value >= acceptance_status_4
 						}
 					}
@@ -175,8 +187,8 @@ citizenship_laws.2 = {
 			random_scope_pop = {
 				limit = {
 					state = {
-						state_cultural_acceptance = {
-							target = PREV.culture
+						state_average_culture_pop_acceptance = {
+							culture = PREV.culture
 							value >= acceptance_status_4
 						}
 					}
@@ -184,6 +196,16 @@ citizenship_laws.2 = {
 				}
 				culture = { save_scope_as = degenerate_art_pop }
 			}
+		}
+		random_interest_group = {
+			limit = {
+				ig_counts_as_marginal = no
+				law_enactment_stance = {
+					law = currently_enacting_law.type
+					value > neutral
+				}
+			}
+			save_scope_as = censorship_ig
 		}
 	}
 
@@ -196,9 +218,12 @@ citizenship_laws.2 = {
 		add_enactment_modifier = {
 			name = rejected_cultural_contributions
 		}
-		add_modifier = {
-			name = banned_degenerate_art
-			days = normal_modifier_time
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_degenerate_art
+				sponsor = scope:censorship_ig
+				cooldown = 120
+			}
 		}
 		add_radicals = {
 			value = large_radicals
@@ -264,8 +289,8 @@ citizenship_laws.3 = {
 		}
 		any_scope_pop = {
 			state = {
-				state_cultural_acceptance = {
-					target = PREV.culture
+				state_average_culture_pop_acceptance = {
+					culture = PREV.culture
 					value >= acceptance_status_4
 				}
 			}
@@ -282,8 +307,8 @@ citizenship_laws.3 = {
 		random_scope_pop = {
 			limit = {
 				state = {
-					state_cultural_acceptance = {
-						target = PREV.culture
+					state_average_culture_pop_acceptance = {
+						culture = PREV.culture
 						value >= acceptance_status_4
 					}
 				}
@@ -365,8 +390,8 @@ citizenship_laws.4 = {
 		}
 		any_scope_pop = {
 			state = {
-				state_cultural_acceptance = {
-					target = PREV.culture
+				state_average_culture_pop_acceptance = {
+					culture = PREV.culture
 					value < acceptance_status_4
 				}
 			}
@@ -391,8 +416,8 @@ citizenship_laws.4 = {
 		random_scope_pop = {
 			limit = {
 				state = {
-					state_cultural_acceptance = {
-						target = PREV.culture
+					state_average_culture_pop_acceptance = {
+						culture = PREV.culture
 						value < acceptance_status_4
 					}
 				}
@@ -426,6 +451,7 @@ citizenship_laws.4 = {
 			ig_leader = yes
 			interest_group = scope:supporting_ig
 			culture = scope:future_accepted_pop
+			ideology = ideology_sovereignist_leader
 		}
 	}
 
@@ -440,6 +466,7 @@ citizenship_laws.4 = {
 			is_agitator = yes
 			interest_group = scope:supporting_ig
 			culture = scope:future_accepted_pop
+			ideology = ideology_sovereignist_leader
 		}
 	}
 }
@@ -492,17 +519,21 @@ citizenship_laws.5 = {
 		}
 		any_scope_pop = {
 			state = {
-				state_cultural_acceptance = {
-					target = PREV.culture
+				state_average_culture_pop_acceptance = {
+					culture = PREV.culture
 					value < acceptance_status_4
 				}
 			}
 			will_be_accepted_culture = yes
+			save_temporary_scope_as = will_be_accepted_pop_temp
 		}
 		any_political_movement = {
 			law_stance = {
 				law = owner.currently_enacting_law.type
 				value < neutral
+			}
+			NOT = {
+				culture ?= scope:will_be_accepted_pop_temp.culture
 			}
 		}
 		NOT = { has_modifier = unity_campaign }
@@ -516,8 +547,8 @@ citizenship_laws.5 = {
 		random_scope_pop = {
 			limit = {
 				state = {
-					state_cultural_acceptance = {
-						target = PREV.culture
+					state_average_culture_pop_acceptance = {
+						culture = PREV.culture
 						value < acceptance_status_4
 					}
 				}
@@ -530,6 +561,9 @@ citizenship_laws.5 = {
 				law_stance = {
 					law = owner.currently_enacting_law.type
 					value < neutral
+				}
+				NOT = {
+					culture ?= scope:future_accepted_pop
 				}
 			}
 			save_scope_as = discrimination_movement
@@ -611,8 +645,8 @@ citizenship_laws.6 = {
 		}
 		any_scope_pop = {
 			state = {
-				state_cultural_acceptance = {
-					target = PREV.culture
+				state_average_culture_pop_acceptance = {
+					culture = PREV.culture
 					value < acceptance_status_4
 				}
 			}
@@ -633,8 +667,8 @@ citizenship_laws.6 = {
 		random_scope_pop = {
 			limit = {
 				state = {
-					state_cultural_acceptance = {
-						target = PREV.culture
+					state_average_culture_pop_acceptance = {
+						culture = PREV.culture
 						value < acceptance_status_4
 					}
 				}

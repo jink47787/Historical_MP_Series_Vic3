@@ -1,0 +1,301 @@
+﻿namespace = lusofonia
+
+lusofonia.1 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = lusofonia.1.t
+	desc = lusofonia.1.d
+	flavor = lusofonia.1.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	trigger = {
+		# Triggered by Journal Entry
+	}
+
+	cancellation_trigger = {
+		NOR = {
+			exists = scope:relevant_treaty_scope
+			exists = scope:brazil_scope
+		}
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	immediate = {
+		ruler = {
+			save_scope_as = portuguese_monarch_scope
+			set_character_immortal = yes
+		}
+		random_scope_treaty = {
+			limit = {
+				binds = ROOT
+				any_scope_article = {
+					has_type = amend_succession
+				}
+			}
+			save_scope_as = relevant_treaty_scope
+		}
+		c:BRZ ?= {
+			save_scope_as = brazil_scope
+			ruler = {
+				save_scope_as = brazil_monarch_scope
+			}
+		}
+		set_variable = lusofonia_1_fired
+	}
+
+	option = {
+		name = lusofonia.1.a
+		default_option = yes
+		c:BRZ ?= {
+			if = {
+				limit = {
+					exists = heir
+				}
+				hidden_effect = {
+					heir ?= {
+						set_variable = brazil_spurned_heir
+						place_character_in_void = 10000
+					}
+				}
+			}
+			set_heir = scope:portuguese_monarch_scope
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			scope:portuguese_monarch_scope ?= {
+				set_character_immortal = no
+			}
+		}
+	}
+}
+
+lusofonia.2 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = lusofonia.2.t
+	desc = lusofonia.2.d
+	flavor = lusofonia.2.f
+
+    event_image = {
+		video = "ep1_clandestine_meeting"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	trigger = {
+		# Triggered by Journal Entry
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	cancellation_trigger = {
+		NOR = {
+			exists = scope:portugal_scope
+			exists = scope:brazil_scope
+			exists = scope:pedro_scope
+		}
+	}
+
+	immediate = {
+		c:POR ?= {
+			save_scope_as = portugal_scope
+		}
+		c:BRZ ?= {
+			save_scope_as = brazil_scope
+		}
+		ruler = {
+			save_scope_as = pedro_scope
+		}
+	}
+
+	option = {
+		name = lusofonia.2.a
+		default_option = yes
+		ai_chance = {
+			base = 5
+			modifier = {
+				trigger = {
+					"c:BRZ.relations(scope:portugal_scope)" >= relations_threshold:friendly
+				}
+				add = 5
+			}
+			modifier = {
+				trigger = {
+					has_strategy = ai_strategy_conservative_agenda
+				}
+				add = 5
+			}
+		}
+		add_pedropoint_effect_2 = yes
+		random_scope_character = {
+			limit = {
+				has_template = BRZ_emperor_pedro_02
+			}
+			add_modifier = { name = modifier_portuguese_diplomatic_assistance days = long_modifier_time }
+		}
+		set_owes_obligation_to = {
+			country = scope:portugal_scope
+			setting = yes
+		}
+		scope:portugal_scope ?= {
+			post_notification = brazil_accepts_portuguese_assistance
+		}
+	}
+
+	option = {
+		name = lusofonia.2.b
+		ai_chance = {
+			base = 5
+		}
+		change_relations = {
+			country = scope:portugal_scope
+			value = -25
+		}
+		cu:brazilian ?= {
+			add_fervor = 10
+		}
+		scope:portugal_scope ?= {
+			post_notification = brazil_rejects_portuguese_assistance
+		}
+	}
+}
+
+lusofonia.3 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = lusofonia.3.t
+	desc = lusofonia.3.d
+	flavor = lusofonia.3.f
+
+    event_image = {
+		video = "rp1_brazilian_city"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	trigger = {
+		# Triggered by Journal Entry
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	cancellation_trigger = {
+
+	}
+
+	immediate = {
+		c:POR ?= {
+			save_scope_as = portugal_scope
+		}
+		c:BRZ ?= {
+			save_scope_as = brazil_scope
+		}
+		ruler = {
+			save_scope_as = ruler_scope
+		}
+	}
+
+	option = {
+		name = lusofonia.3.a
+		default_option = yes
+		add_modifier = {
+			name = modifier_portugal_transoceanic_empire
+			days = long_modifier_time
+		}
+		cu:brazilian = {
+			add_tradition_trait = tradition_lusitanian
+		}
+		cu:portuguese = {
+			add_tradition_trait = tradition_lusitanian
+		}
+		c:BRZ ?= {
+			add_modifier = {
+				name = modifier_brazil_transoceanic_empire
+				days = long_modifier_time
+			}
+		}
+	}
+
+	option = {
+		name = lusofonia.3.b
+		set_variable = quinto_imperio_var
+		add_modifier = {
+			name = modifier_portugal_fifth_empire
+			days = long_modifier_time
+		}
+		if = {
+			limit = {
+				is_power_bloc_leader = yes
+			}
+			power_bloc = {
+				add_modifier = {
+					name = modifier_portugal_fifth_empire_pb
+					days = long_modifier_time
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				is_in_power_bloc = no
+				country_rank >= rank_value:major_power
+			}
+			create_power_bloc = {
+				name = QUINTO_IMPERIO
+				map_color = { 16 63 76 }
+
+				founding_date = 1415.8.21 # Conquest of Ceuta and beginning of the Portuguese Empire
+				identity = identity_cultural
+				principle = principle_shared_canon_2
+
+				# subjects are automatically part of the bloc
+			}
+			if = {
+				limit = {
+					has_dlc_feature = power_bloc_features
+				}
+				power_bloc ?= {
+					add_principle = principle_sacred_civics_1
+				}
+			}
+			power_bloc ?= {
+				add_modifier = {
+					name = modifier_portugal_fifth_empire_pb
+					days = long_modifier_time
+				}
+			}
+		}
+		c:BRZ ?= {
+			add_primary_culture = cu:portuguese
+		}
+	}
+}
+

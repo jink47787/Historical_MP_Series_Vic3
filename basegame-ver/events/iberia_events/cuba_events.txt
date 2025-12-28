@@ -1,0 +1,289 @@
+﻿namespace = cuba_events
+
+cuba_events.1 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_events.1.t
+	desc = cuba_events.1.d
+	flavor = cuba_events.1.f
+
+	event_image = {
+		video = "votp_gunboat_diplomacy"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	duration = 3
+
+	dlc = dlc016
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ip4_content
+	}
+
+	immediate = {
+		root.overlord = {
+			save_scope_as = boss
+		}
+	}
+
+	option = { # Keep good times flowing
+		name = cuba_events.1.a
+		trigger = {
+			has_law_or_variant = law_type:law_slave_trade
+		}
+		
+        if = {
+            limit = {
+                has_law_or_variant = law_type:law_slave_trade
+            }
+            add_modifier = {
+				name = slavery_continues
+				days = even_longer_modifier_time
+				is_decaying = yes
+			}
+			random_political_movement = {
+				limit = {
+					is_political_movement_type = movement_slave_revolt
+				}
+				add_modifier = {
+					name = slave_revolt_risk
+				}
+			}
+        }
+    }
+
+    option = { # good should be shared
+		name = cuba_events.1.c
+		trigger = {
+			has_law_or_variant = law_type:law_slavery_banned
+		}
+		if = {
+ 			limit = {
+ 				any_scope_pop = {
+ 					culture = cu:afro_caribeno
+ 				}
+ 			}
+ 			ROOT = {
+ 				add_culture_acceptance_modifier = {
+					culture = cu:afro_caribeno
+					multiplier = 20
+				}
+			}
+ 		}
+		add_modifier = {
+			name = cuba_share_success
+			days = even_longer_modifier_time
+			is_decaying = yes
+		}
+	  	if = {
+            limit = {
+                NOT = {
+                    has_law_or_variant = law_type:law_right_to_associate
+                }
+            }
+            activate_law = law_type:law_right_to_associate
+        }
+	}
+
+
+    option = { # time to modernise
+		name = cuba_events.1.b
+		add_modifier = {
+			name = cuba_success_modernise
+			days = even_longer_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = { # Pro Independence
+		name = cuba_events.1.independence
+		default_option = yes
+		trigger = {
+			is_subject = yes
+		}
+		add_modifier = {
+			name = cuba_libre_from_trade
+			days = stupidly_long_modifier_time
+		}
+	}
+}
+
+cuba_events.2 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_events.2.t
+	desc = cuba_events.2.d
+	flavor = cuba_events.2.f
+
+	event_image = {
+		video = "ip4_colonial_exploitation_going_well"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	duration = 3
+
+	dlc = dlc016
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ip4_content
+	}
+
+	cancellation_trigger = {
+		NOR = { #Kill if no longer subject or overlord is not Iberian
+			is_subject = yes
+			overlord = {
+                capital = {
+                    region = sr:region_iberia
+                }
+            }
+        }
+	}
+
+	immediate = {
+		ig:ig_landowners ?= {
+			save_scope_as = landholders
+		}
+	}
+
+	option = { # Viva Espana
+		name = cuba_events.2.a
+		default_option = yes
+		trigger = {
+			c:SPA ?= root.overlord
+			c:SPA ?= {
+				is_player = no
+			}
+		}
+		cuba_annex_effects = yes
+    }
+
+    option = { # Viva Whoever you are, backup if overlord isn't Spain but is still Iberia, otherwise JE becomes invalid.
+		name = cuba_events.2.b
+		default_option = yes
+		trigger = {
+			OR = {
+				NOT = {
+					exists = c:SPA
+				}
+				c:SPA != root.overlord
+			}
+			root.overlord ?= {
+				is_player = no
+			}
+		}
+		cuba_annex_effects = yes
+    }
+
+    option = { # become dominion
+		name = cuba_events.2.c
+		change_subject_type = subject_type_dominion
+	}
+
+
+    option = { # this is a terrible idea
+		name = cuba_events.2.e
+		add_liberty_desire = 30
+		add_modifier = {
+			name = cuba_libre_from_trade
+			days = normal_modifier_time
+		}
+	}
+}
+
+cuba_events.3 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_events.3.t
+	desc = cuba_events.3.d
+	flavor = cuba_events.3.f
+
+	event_image = {
+		video = "europenorthamerica_political_extremism"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	duration = 3
+
+	dlc = dlc016
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ip4_content
+	}
+
+	cancellation_trigger = {
+		NOR = { #Kill if no longer subject or overlord is not Iberian
+			is_subject = yes
+			overlord = {
+                capital = {
+                    region = sr:region_iberia
+                }
+            }
+        }
+	}
+
+	immediate = {
+		ig:ig_landowners ?= {
+			save_scope_as = landholders
+		}
+		cu:afro_caribeno = {
+			save_scope_as = afro_caribeno
+		}
+	}
+
+	option = { # Viva Cuba
+		name = cuba_events.3.a
+		add_modifier = {
+			name = reformists_gone_pro_cuba
+			days = long_modifier_time
+			is_decaying = yes
+		}
+		add_liberty_desire = 10
+    }
+
+    option = { # We can't let this effect business.
+		name = cuba_events.3.b
+		default_option = yes
+		add_modifier = {
+			name = cuba_dont_hurt_business
+			days = long_modifier_time
+		}
+	}
+
+
+    option = { # Now is the time for the slaves to rise up
+		name = cuba_events.3.c
+		trigger = {
+			any_political_movement = {
+				is_political_movement_type = movement_slave_revolt
+			}
+		}
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_slave_revolt
+			}
+			add_modifier = {
+				name = slave_revolt_risk
+				multiplier = 4
+				days = normal_modifier_time
+			}
+		}
+	}
+}

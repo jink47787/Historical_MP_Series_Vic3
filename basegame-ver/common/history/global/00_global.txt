@@ -1,5 +1,9 @@
 ﻿# This is executed last among all history
 GLOBAL = {
+	add_contextless_journal_entry = je_uneasy_raj
+	add_contextless_journal_entry = je_peru_bolivia
+	add_contextless_journal_entry = je_the_first_carlist_war
+
 	every_country = {
 		limit = { NOT = { has_law_or_variant = law_type:law_slavery_banned } }
 		if = {
@@ -15,25 +19,186 @@ GLOBAL = {
 
 	every_country = {
 		limit = {
-			has_law_or_variant = law_type:law_monarchy
+			has_law = law_type:law_monarchy
 			has_law_or_variant = law_type:law_autocracy
 		}
 		set_variable = king_in_parliament_possible
 	}
 
-	c:BRZ ?= {
-		set_variable = {
-			name = pedropoints
-			value = 5
+	every_country = {
+		limit = {
+			is_historical_spanish_american_colony = yes
+			NOT = {
+				any_overlord_or_above = {
+					c:SPA ?= this
+				}
+			}
+		}
+		add_treasury = { # Heavy debt from wars of independence
+			value = yearly_gross_income
+			multiply = -0.5 # 1.5
+		}
+		if = {
+			limit = {
+				has_dlc_feature = ip4_content
+			}
+			add_modifier = { # Spain does not formally recognize her former colonies in America at game-start
+				name = modifier_not_recognized_by_spain
+			}
+			add_journal_entry = {
+				type = je_spanish_american_independence
+			}
 		}
 	}
 
-	### Debt
-
-	c:HAI = {
+	c:HAI ?= {
 		add_treasury = {
 			value = gold_reserves_limit
-			multiply = -1.0
+			multiply = -0.75
+		}
+		every_scope_state = { # Haiti and Santo Domingo
+			add_radicals_in_state = {
+				culture = cu:spanish
+				value = 0.30
+			}
+			add_radicals_in_state = {
+				culture = cu:caribeno
+				value = 0.20
+			}
+			add_radicals_in_state = {
+				culture = cu:afro_caribeno
+				value = 0.10
+			}
+		}
+	}
+
+	c:POR ?= {
+		capital = {
+			add_radicals_in_state = {
+				value = 0.25
+			}
+		}
+		every_scope_state = {
+			limit = {
+				is_capital = no
+				is_incorporated = yes
+			}
+			add_radicals_in_state = {
+				value = 0.10
+			}
+		}
+		s:STATE_ALENTEJO = { # Active insurrection at the time
+			random_scope_state = {
+				add_radicals_in_state = {
+					value = 0.10
+				}
+			}
+		}
+	}
+
+	c:SPA ?= {
+		capital = {
+			add_radicals_in_state = {
+				value = 0.15
+			}
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					OR = {
+						is_homeland = cu:basque
+						is_homeland = cu:catalan
+						s:STATE_ARAGON ?= this
+					}
+				}
+			}
+			add_radicals_in_state = {
+				value = 0.25
+			}
+		}
+		every_scope_state = {
+			limit = {
+				NOR = {
+					state_region = {
+						OR = {
+							is_homeland = cu:basque
+							is_homeland = cu:catalan
+							s:STATE_ARAGON ?= this
+						}
+					}
+					is_capital = yes
+				}
+			}
+			add_radicals_in_state = {
+				value = 0.07
+			}
+		}
+		add_modifier = {
+			name = national_guard_preoccupied
+		}
+	}
+	
+	# Debt - to compensate for our relatively low credit limits, all debts are ~3x lighter than they were historically. Capped out at a -2.5x modifier.
+	c:SPA ?= { # Spain was broke, with a "B" emoji. Historically 22:1 ratio of debt to revenue.
+		add_treasury = {
+			value = yearly_gross_income
+			multiply = -1 # 2.0 - should be -7.3, but this is literally unplayable.
+		}
+	}
+
+	c:POR ?= { # Portugal defaulted over and over again on foreign loans around game start. Historically 3:1 ratio of debt to revenue.
+		add_treasury = {
+			value = yearly_gross_income
+			multiply = -1.5
+		}
+	}	
+
+	c:SPC ?= {
+		add_modifier = {
+			name = captured_royal_arsenals
+			days = normal_modifier_time
+			is_decaying = yes
+			multiplier = 15
+		}
+		add_treasury = {
+			value = gold_reserves_limit
+		}
+		every_scope_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_ARAGON
+					state_region = s:STATE_CATALONIA
+					state_region = s:STATE_BASQUE_COUNTRY
+				}
+			}
+			add_modifier = {
+				name = spc_raided_grain_storages
+				days = normal_modifier_time
+			}
+			if = {
+				limit = {
+					state_region = s:STATE_ARAGON
+				}
+				add_modifier = {
+					name = ad_hoc_manufacturing
+					days = normal_modifier_time
+					multiplier = 3
+				}
+			}
+			else_if = {
+				limit = {
+					state_region = s:STATE_BASQUE_COUNTRY
+				}
+				add_modifier = {
+					name = ad_hoc_manufacturing_negative
+					days = normal_modifier_time
+					multiplier = 3
+				}
+				add_modifier = {
+					name = pyrenean_smuggling
+					days = normal_modifier_time
+				}
+			}
 		}
 	}
 
@@ -59,69 +224,356 @@ GLOBAL = {
 		}
 		add_treasury = { # EIC was slightly in debt at game start
 			value = gold_reserves_limit
-			multiply = -0.6
+			multiply = -0.2
 		}
-	}
+	}	
 
-	c:BEL ?= { # Historically 9.5:1 ratio of debt to yearly revenue
-		add_treasury = {
-			value = gold_reserves_limit
-			multiply = -2.85
-		}
-	}
+	# Starting debts - commented out for now until we can do more budget balancing
+	# We'll bring this back in a later version
+	
+	#every_country = { # Other Balkan countries - none should be too "rich"
+	#	limit = {
+	#		OR = {
+	#			c:SER ?= this
+	#			c:WAL ?= this
+	#			c:MOL ?= this
+	#			c:GRE ?= this
+	#			c:HUN ?= this
+	#			c:CRO ?= this
+	#			c:TRS ?= this
+	#		}
+	#	}
+	#	add_treasury = {
+	#		value = gold_reserves_limit
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:CHI ?= { # Recently had a strong trade surplus
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = 0.1
+	#	}
+	#}
+	#
+	#c:BEL ?= { # Historically 9.5:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -2
+	#	}
+	#}
+	#
+	#c:NET ?= { # Historically 3.2:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.67
+	#	}
+	#}
+	#
+	#c:GBR ?= { # Historically 12:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -2 # The AI can't handle anything more
+	#	}
+	#}
+	#
+	#c:FRA ?= { # Historically 5:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.17
+	#	}
+	#}
+	#
+	#c:DEN ?= { # Historically 6.8:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.77
+	#	}
+	#}
+	#
+	#c:SWE ?= { # Historically 4.7:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.07
+	#	}
+	#}
+	#
+	#c:NOR ?= { # Historically 4.7:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.07
+	#	}
+	#}
+	#
+	#c:RUS ?= { # Historically 3.15:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.55
+	#	}
+	#}
 
-	c:NET ?= { # Historically 3.2:1 ratio of debt to yearly revenue
-		add_treasury = {
-			value = gold_reserves_limit
-			multiply = -0.96
-		}
-	}
+	### German states
 
-	c:AUS ?= { # Historically 5.33:1 ratio of debt to yearly revenue
-		add_treasury = {
-			value = gold_reserves_limit
-			multiply = -1.59
-		}
-	}
-
-	c:PRU ?= { # Historically 3.8:1 ratio of debt to yearly revenue
-		add_treasury = {
-			value = gold_reserves_limit
-			multiply = -1.14
-		}
-	}
-
-	c:TUR ?= { # Historically had no foreign debt prior to 1854
-		add_treasury = {
-			value = gold_reserves_limit
-			multiply = -0.5
-		}
-	}
-
-	c:MON ?= { # Were not wealthy, their gold_reserves limit is inflated, but we give the player a little time to figure themselves out.
-		add_treasury = {
-			value = gold_reserves_limit
-			multiply = -0.40
-		}
-	}
-
-	every_country = { # Other Balkan countries - none should be too "rich"
-		limit = {
-			OR = {
-				c:SER ?= this
-				c:WAL ?= this
-				c:MOL ?= this
-				c:GRE ?= this
-				c:HUN ?= this
-				c:CRO ?= this
-				c:TRS ?= this
-			}
-		}
-		add_treasury = {
-			value = gold_reserves_limit
-			multiply = -0.5
-		}
-	}
+	#c:AUS ?= { # Austria - Historically 5.33:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.27
+	#	}
+	#}
+	#
+	#c:PRU ?= { # Prussia - Historically 3.8:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.77
+	#	}
+	#}
+	#
+	#c:BAV ?= { # Bavaria - Historically 3.9:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.8
+	#	}
+	#}
+	#
+	#c:WUR ?= { # Wurttemburg - Historically 3:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.5
+	#	}
+	#}
+	#
+	#c:BAD ?= { # Baden - Historically 1.96:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.15
+	#	}
+	#}
+	#
+	#c:HAN ?= { # Hannover - Historically 2.37:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.29
+	#	}
+	#}
+	#
+	#c:SAX ?= { # Saxony - Historically 2.4:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.3
+	#	}
+	#}
+	#
+	#c:HEK ?= { # Hesse-Kassel - Historically 2.14:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.21
+	#	}
+	#}
+	#
+	#c:HES ?= { # Hesse - Historically 0.46:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:WEI ?= { # Saxe-Weimar - Historically 3.26:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.69
+	#	}
+	#}
+	#
+	#c:MEC ?= { # Mecklenburg - Historically 1.96:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.15
+	#	}
+	#}
+	#
+	#c:MST ?= { # Mecklenburg-Strelitz - Historically 3.26:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.59
+	#	}
+	#}
+	#
+	#c:HOL ?= { # Holstein - Historically 0.79:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:NAS ?= { # Nassau - Historically 1.35:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.1
+	#	}
+	#}
+	#
+	#c:BRA ?= { # Brunswick - Historically 1.75:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.08
+	#	}
+	#}
+	#
+	#c:COB ?= { # Saxe-Coburg-Gotha - Historically 4.7:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.07
+	#	}
+	#}
+	#
+	#c:MEI ?= { # Saxe-Meiningen - Historically 1.76:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.09
+	#	}
+	#}
+	#
+	#c:ANH ?= { # Anhalt - Historically 1.1:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:SCW ?= { # Schwarzburg - Historically 0.83:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:LIP ?= { # Lippe - Historically unknown ratio of debt to yearly revenue, this is a guess
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:LIP ?= { # Schaummburg-Lippe - Historically 1.17:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:WLD ?= { # Waldeck - Historically 1.94:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.15
+	#	}
+	#}
+	#
+	#c:HOH ?= { # Hohenzollern - Historically 2.95:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.98
+	#	}
+	#}
+	#
+	#c:FRM ?= { # Frankfurt - Historically 10.5:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -2
+	#	}
+	#}
+	#
+	#c:BRE ?= { # Bremen - Historically 5.33:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.28
+	#	}
+	#}
+	#
+	#c:HAM ?= { # Hamburg - Historically 7.4:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.97
+	#	}
+	#}
+	#
+	#c:LUB ?= { # Lubeck - Historically 8.25:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -2
+	#	}
+	#}
+	#
+	#c:OLD ?= { # Oldenburg - Historically 1.96:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.15
+	#	}
+	#}
+	#
+	#### Italian states
+	#
+	#c:SIC ?= { # Two Sicilies - Historically 5.97:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1.49
+	#	}
+	#}
+	#
+	#c:PAP ?= { # Papal States - Historically 7.8:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -2
+	#	}
+	#}
+	#
+	#c:SAR ?= { # Sardinia-Piedmont - Historically 1.42:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.08
+	#	}
+	#}
+	#
+	#c:PAR ?= { # Parma - Historically 1.86:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.12
+	#	}
+	#}
+	#
+	#c:MOD ?= { # Modena - Historically 0.31:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:LUC ?= { # Lucca - Historically 0.62:1 ratio of debt to yearly revenue
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:TUS ?= { # Tuscany - Historically unknown ratio of debt to yearly revenue, this is a guess
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -0.05
+	#	}
+	#}
+	#
+	#c:BRZ ?= { # Brazil was in poor shape financially, but had powerful exports
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = -1
+	#	}
+	#}
+	#
+	#c:TUR ?= { # Famously had never gone into debt
+	#	add_treasury = {
+	#		value = yearly_gross_income
+	#		multiply = 0.25
+	#	}
+	#}
 
 	every_country = {
 		limit = {
@@ -144,6 +596,10 @@ GLOBAL = {
 		}
 	}
 
+	set_global_variable = { name = num_coups value = 0 }
+	set_global_variable = { name = failed_coups value = 0 }
+	set_global_variable = { name = successful_coups value = 0 }
+
 ###ACHIEVEMENT VARIABLES###
 
 	#Serf's Up
@@ -156,7 +612,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:PRU
-			this = c:PRU
+			c:PRU ?= THIS
 		}
 		set_variable = the_berlin_conference_ach_possible
 	}
@@ -165,7 +621,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:EGY
-			this = c:EGY
+			c:EGY ?= THIS
 		}
 		set_variable = muhammed_alis_ambition_ach_possible
 	}
@@ -190,7 +646,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:GBR
-			this = c:GBR
+			c:GBR ?= THIS
 		}
 		set_variable = we_are_not_amused_ach_possible
 	}
@@ -199,7 +655,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:USA
-			this = c:USA
+			c:USA ?= THIS
 		}
 		set_variable = star_swarmed_banner_ach_possible
 	}
@@ -208,7 +664,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:BIC
-			this = c:BIC
+			c:BIC ?= THIS
 		}
 		set_variable = peccavi_ach_possible
 	}
@@ -217,7 +673,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:FIN
-			this = c:FIN
+			c:FIN ?= THIS
 		}
 		set_variable = perkeletankki_ach_possible
 	}
@@ -226,7 +682,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:LUX
-			this = c:LUX
+			c:LUX ?= THIS
 		}
 		set_variable = luxurious_luxembourg_ach_possible
 	}
@@ -235,7 +691,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:GBR
-			this = c:GBR
+			c:GBR ?= THIS
 		}
 		set_variable = anarchy_in_the_uk_ach_possible
 	}
@@ -244,7 +700,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:PAN
-			this = c:PAN
+			c:PAN ?= THIS
 		}
 		set_variable = an_empire_under_the_pun_ach_possible
 	}
@@ -253,7 +709,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:BRZ
-			this = c:BRZ
+			c:BRZ ?= THIS
 		}
 		set_variable = i_didnt_vote_for_pedro_ach_possible
 	}
@@ -262,7 +718,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:USA
-			this = c:USA
+			c:USA ?= THIS
 		}
 		set_variable = go_west_young_man_ach_possible
 	}
@@ -271,7 +727,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:CHI
-			this = c:CHI
+			c:CHI ?= THIS
 		}
 		set_variable = the_western_protectorate_ach_possible
 	}
@@ -280,7 +736,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:FRA
-			this = c:FRA
+			c:FRA ?= THIS
 		}
 		set_variable = the_paris_commune_ach_possible
 	}
@@ -302,7 +758,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:LAN
-			this = c:LAN
+			c:LAN ?= THIS
 		}
 		set_variable = miners_and_minors_ach_possible
 	}
@@ -311,7 +767,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:TUR
-			this = c:TUR
+			c:TUR ?= THIS
 		}
 		set_variable = healthy_man_of_europe_ach_possible
 	}
@@ -320,7 +776,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:AUS
-			this = c:AUS
+			c:AUS ?= THIS
 		}
 		set_variable = habsburg_resurgence_ach_possible
 	}
@@ -329,7 +785,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:RUS
-			this = c:RUS
+			c:RUS ?= THIS
 		}
 		set_variable = great_game_ach_possible
 	}
@@ -338,7 +794,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:SPA
-			this = c:SPA
+			c:SPA ?= THIS
 		}
 		set_variable = bourbon_for_everyone_ach_possible
 	}
@@ -347,7 +803,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:SEQ
-			this = c:SEQ
+			c:SEQ ?= THIS
 		}
 		set_variable = american_territory_ach_possible
 	}
@@ -356,7 +812,7 @@ GLOBAL = {
 	every_country = {
 		limit = {
 			exists = c:FRA
-			this = c:FRA
+			c:FRA ?= THIS
 		}
 		set_variable = belle_epoque_ach_possible
 	}
@@ -424,6 +880,14 @@ GLOBAL = {
 			is_subject = yes
 		}
 		set_variable = declaration_of_independence_ach_possible
+	}
+
+	# Full Circle
+	every_country = {
+		limit = {
+			c:SPA ?= this
+		}
+		set_variable = full_circle_ach_possible
 	}
 
 	#Event Variables
@@ -658,7 +1122,7 @@ GLOBAL = {
 				}
 			}
 			add_radicals_in_state = {
-                value = large_radicals
+                value = 0.15
                 culture = cu:north_italian
             }
 		}

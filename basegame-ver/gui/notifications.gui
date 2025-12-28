@@ -47,6 +47,42 @@ types notifications {
 		}
 	}
 
+	type message_feed_go_to_text_area_button = button {
+		using = default_button
+		size = { @message_feed_width @message_feed_height }
+
+		text_multi = {
+			layoutpolicy_vertical = growing
+			layoutpolicy_horizontal = expanding
+			autoresize = yes
+			resizeparent = yes
+			alwaystransparent = yes
+			minimumsize = { @message_feed_width -1 }
+			maximumsize = { @message_feed_width @message_feed_height }
+			elide = right
+			fontsize_min = 12
+			margin = { 15 5 }
+			text = "[PlayerMessageItem.GetDescription]"
+		}
+	}
+
+	type message_feed_go_to_button = button_icon_round {
+		size = { 32 32 }
+		tooltip = "GO_TO_BUTTON"
+		using = clickthrough_blocker
+
+		block "tooltip_placement" {
+			using = tooltip_ws
+		}
+
+		blockoverride "icon" {
+			texture = "[PlayerMessageItem.GetTexture]"
+		}
+
+		blockoverride "icon_size" {
+			size = { 24 24 }
+		}
+	}
 
 	type message_feed_widget_inner = widget {
 		size = { @message_feed_width 0 }
@@ -63,8 +99,8 @@ types notifications {
 					layoutpolicy_vertical = growing
 					layoutpolicy_horizontal = expanding
 					datacontext = "[FeedMessageItem.GetPlayerMessageItem]"
-					alwaystransparent = no
-					filter_mouse = all
+					using = clickthrough_blocker
+					allow_outside = yes
 
 					state = {
 						name = "mark_to_delete"
@@ -88,25 +124,21 @@ types notifications {
 						layoutpolicy_horizontal = expanding
 						size = { 0 32 }
 						onclick = "[FeedMessageItem.Expand]"
+						using = shimmer_notification
+						using = situation_entry_parent_hover_states
+						using = expand_button_bg
+						using = ui_pointer_over
+						color = "[PlayerMessageItem.GetColor]"
 
 						datacontext_from_model = {
 						    datamodel = "[FeedMessageItem.GetTimeoutTimer.GetSlicesInverted]"
 						    index = 0
 						}
-
-						using = shimmer_notification
 						
 						rightclick_modifiers = {
 							ondefault = "[FeedMessageItem.MarkToDelete]"
 							onshift = "[MessageFeedHandler.MarkAllForDelete]"
 						}
-						tooltip = "MESSAGE_CLICK_TOOLTIP"
-
-						using = situation_entry_parent_hover_states
-						using = expand_button_bg
-						using = ui_pointer_over
-
-						color = "[PlayerMessageItem.GetColor]"
 
 						state = {
 							name = _mouse_hierarchy_enter
@@ -124,16 +156,9 @@ types notifications {
 
 						hbox = {
 							margin_right = 3
-							margin_left = 3
-							spacing = 3
-
-							icon = {
-								name = "message_type"
-								size = { 28 28 }
-								texture = "[PlayerMessageItem.GetTexture]"
-								tooltip = "[PlayerMessageItem.GetTooltip]"
-								using = tooltip_ws
-							}
+							spacing = 2
+							tooltip = "MESSAGE_CLICK_TOOLTIP"
+							using = notification_icon_go_to
 
 							text_single = {
 								name = "title"
@@ -144,6 +169,8 @@ types notifications {
 								fontsize_min = 14
 								alwaystransparent = yes
 							}
+
+							expand = {}
 
 							hbox = {
 								vbox = {
@@ -230,7 +257,6 @@ types notifications {
 										tooltip = "MESSAGE_SETTINGS"
 									}
 								}
-
 							}
 
 							### TIMER PROGRESS
@@ -258,6 +284,7 @@ types notifications {
 							parentanchor = vcenter
 							size = { 100% 80% }
 							using = default_fade_in_out
+							alwaystransparent = yes
 
 							block "highlight_visibility" {
 								visible = "[LessThan_float(PieTimerSlice.GetValue, '(float)0.2')]"
@@ -270,6 +297,7 @@ types notifications {
 						layoutpolicy_horizontal = expanding
 						size = { @message_feed_width 0 }
 						scissor = yes
+						allow_outside = yes
 
 						state = {
 							name = "hide_text_2"
@@ -317,23 +345,16 @@ types notifications {
 							size = { @message_feed_width @message_feed_height }
 						}
 
-						hbox = {
-							name = "text_and_icons"
+						vbox = {
+							layoutpolicy_vertical = expanding
+							layoutpolicy_horizontal = expanding
 
-							text_multi = {
-								layoutpolicy_vertical = growing
-								layoutpolicy_horizontal = expanding
-
-								name = "effect"
-								autoresize = yes
-								maximumsize = { @message_feed_width @message_feed_height }
-								elide = right
-								fontsize_min = 12
-
-								margin = { 15 5 }
-
-								text = "[PlayerMessageItem.GetDescription]"
+							hbox = {
+								name = "text_and_icons"
+								using = notification_icon_go_to_text_area
 							}
+
+							expand = {}
 						}
 					}
 				}
@@ -497,16 +518,34 @@ types notifications {
 					}
 				}
 
-				text_multi = {
-					name = "title"
+				flowcontainer = {
 					parentanchor = hcenter
-					autoresize = yes
-					multiline = yes
-					margin = { 5 5 }
-					align = hcenter|nobaseline
-					max_width = 500
-					using = fontsize_large
-					raw_text = "[PlayerMessageItem.GetName]"
+					spacing = 5
+
+					text_multi = {
+						name = "title"
+						autoresize = yes
+						multiline = yes
+						margin = { 5 5 }
+						align = hcenter|nobaseline
+						max_width = 468
+						using = fontsize_large
+						raw_text = "[PlayerMessageItem.GetName]"
+					}
+
+					widget = {
+						parentanchor = vcenter
+						size = { 32 32 }
+						using = notification_icon_go_to
+
+						blockoverride "tooltip_placement" {
+							using = tooltip_ne
+						}
+
+						blockoverride "icon" {
+							texture = "gfx/interface/buttons/button_icons/goto.dds"
+						}
+					}
 				}
 			}
 
@@ -595,6 +634,526 @@ template situation_entry_parent_hover_states
 	state = {
 		name = _mouse_hierarchy_leave
 		on_start = "[PdxGuiWidget.FindChild('button_dismiss').TriggerAnimation('hover_leave')]"
+	}
+}
+
+template notification_icon_go_to 
+{
+	datacontext = "[PlayerMessageItem.GetTopScope.GetRootScope]"
+	datacontext = "[PlayerMessageItem.GetTopScope]"
+
+	hbox = {
+		using = notification_go_to_visibility
+
+		### Spacer to match the icon on notifications with go-to buttons
+		widget = {
+			size = { 4 0 }
+		}
+
+		icon = {
+			name = "message_type"
+			size = { 24 24 }
+			texture = "[PlayerMessageItem.GetTexture]"
+		}
+
+		### Spacer to match the text on notifications with go-to buttons
+		widget = {
+			size = { 4 0 }
+		}
+	}
+
+	# Treaty
+	message_feed_go_to_button = {
+		visible = "[And(Scope.GetTreaty.IsValid, Not(Scope.GetTreaty.IsDraft))]"
+		datacontext = "[Scope.GetTreaty]"
+		tooltip = "GO_TO_TREATY"
+		onclick = "[InformationPanelBar.OpenTreatyPanel(Treaty.Self)]"
+	}
+
+	# Political Movement
+	message_feed_go_to_button = {
+		visible = "[Scope.GetPoliticalMovement.IsValid]"
+		datacontext = "[Scope.GetPoliticalMovement]"
+		tooltip = "GO_TO_BUTTON_MOVEMENT"
+		onclick = "[InformationPanelBar.OpenPoliticalMovementPanel(PoliticalMovement.AccessSelf)]"
+	}
+
+	# Journal Entry
+	message_feed_go_to_button = {
+		visible = "[Scope.GetJournalEntry.IsValid]"
+		datacontext = "[Scope.GetJournalEntry]"
+		tooltip = "GO_TO_BUTTON_JOURNAL_ENTRY"
+		onclick = "[InformationPanelBar.OpenJournalEntryPanel(JournalEntry.AccessSelf)]"
+	}
+
+	# Political Lobby
+	message_feed_go_to_button = {
+		visible = "[TopScope.sPoliticalLobby('political_lobby').IsValid]"
+		datacontext = "[TopScope.sPoliticalLobby('political_lobby')]"
+		tooltip = "GO_TO_BUTTON_LOBBY"
+		onclick = "[InformationPanelBar.OpenPoliticalLobbyPanel(PoliticalLobby.AccessSelf)]"
+	}
+
+	# Technology
+	message_feed_go_to_button = {
+		visible = "[PlayerMessageItem.GetScopeTechnology.IsValid]"
+		tooltip = "GO_TO_BUTTON_TECH_TREE"
+		onclick = "[InformationPanelBar.OpenPanelTab('tech_tree', PlayerMessageItem.GetScopeTechnology.GetCategoryKey)]"
+	}
+
+	# Interest Group
+	message_feed_go_to_button = {
+		visible = "[Scope.GetInterestGroup.IsValid]"
+		datacontext = "[Scope.GetInterestGroup]"
+		tooltip = "GO_TO_BUTTON_INTEREST_GROUP"
+		onclick = "[InformationPanelBar.OpenInterestGroupPanel(InterestGroup.AccessSelf)]"
+	}
+
+	# Character
+	message_feed_go_to_button = {
+		visible = "[Scope.GetCharacter.IsValid]"
+		datacontext = "[Scope.GetCharacter]"
+		tooltip = "GO_TO_BUTTON_CHARACTER"
+		enabled = "[Not(Character.IsRetired)]"
+		onclick = "[InformationPanelBar.OpenCommanderPanel(Character.AccessSelf)]"
+	}
+
+	# Exiled Character
+	message_feed_go_to_button = {
+		visible = "[TopScope.sCharacter('exile_scope').IsValid]"
+		datacontext = "[TopScope.sCharacter('exile_scope')]"
+		tooltip = "GO_TO_BUTTON_CHARACTER"
+		enabled = "[Not(Character.IsRetired)]"
+		onclick = "[InformationPanelBar.OpenCommanderPanel(Character.AccessSelf)]"
+	}
+
+	# State
+	message_feed_go_to_button = {
+		visible = "[Scope.GetState.IsValid]"
+		datacontext = "[Scope.GetState]"
+		tooltip = "GO_TO_BUTTON_STATE"
+		onclick = "[InformationPanelBar.OpenStatePanel(State.AccessSelf)]"
+	}
+
+	# Diplomatic Action with State
+	message_feed_go_to_button = {
+		visible = "[Scope.GetDiplomaticAction.GetFirstState.IsValid]"
+		datacontext = "[Scope.GetDiplomaticAction]"
+		datacontext = "[Scope.GetDiplomaticAction.GetFirstState]"
+		tooltip = "GO_TO_BUTTON_STATE"
+		onclick = "[InformationPanelBar.OpenStatePanel(State.AccessSelf)]"
+	}
+
+	# Diplomatic Play weird scope
+	message_feed_go_to_button = {
+		visible = "[PlayerMessageItem.GetScopeDiploPlay.IsValid]"
+		datacontext = "[PlayerMessageItem.GetScopeDiploPlay]"
+		tooltip = "GO_TO_BUTTON_DIPLOMATIC_PLAY"
+		onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+	}
+
+	# Diplomatic Play
+	message_feed_go_to_button = {
+		visible = "[Scope.GetDiplomaticPlay.IsValid]"
+		datacontext = "[Scope.GetDiplomaticPlay]"
+		tooltip = "GO_TO_BUTTON_DIPLOMATIC_PLAY"
+		onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+	}
+
+	# War
+	message_feed_go_to_button = {
+		visible = "[Scope.GetWar.IsValid]"
+		datacontext = "[Scope.GetWar]"
+		tooltip = "GO_TO_BUTTON_WAR"
+		onclick = "[WarManager.ToggleWarPanel( War.AccessSelf )]"
+	}
+
+	# Harvest Condition Area
+	message_feed_go_to_button = {
+		visible = "[TopScope.sHarvestConditionArea('area').IsValid]"
+		datacontext = "[TopScope.sHarvestConditionArea('area')]"
+		tooltip = "GO_TO_BUTTON_HARVEST_CONDITION"
+		onclick = "[InformationPanelBar.OpenMarketPanelTab(GetPlayer.GetMarket.Self, 'food_security')]"
+	}
+
+	# Culture
+	message_feed_go_to_button = {
+		visible = "[Scope.GetCulture.IsValid]"
+		datacontext = "[Scope.GetCulture]"
+		tooltip = "GO_TO_BUTTON_CULTURE"
+		onclick = "[InformationPanelBar.OpenCultureInfoPanel(Culture.AccessSelf)]"
+	}
+
+	# Culture TopScope
+	message_feed_go_to_button = {
+		visible = "[TopScope.sCulture('culture').IsValid]"
+		datacontext = "[TopScope.sCulture('culture')]"
+		tooltip = "GO_TO_BUTTON_CULTURE"
+		onclick = "[InformationPanelBar.OpenCultureInfoPanel(Culture.AccessSelf)]"
+	}
+
+	# Law
+	message_feed_go_to_button = {
+		visible = "[Scope.GetLaw.IsValid]"
+		datacontext = "[Scope.GetLaw]"
+		tooltip = "GO_TO_BUTTON_LAW"
+		onclick = "[InformationPanelBar.OpenChangeLaw(Law.GetGroup)]"
+	}
+
+	# Front
+	message_feed_go_to_button = {
+		visible = "[Scope.GetFront.IsValid]"
+		datacontext = "[Scope.GetFront]"
+		tooltip = "GO_TO_BUTTON_FRONT"
+		onclick = "[InformationPanelBar.OpenFrontPanel(Front.Self)]"
+	}
+
+	# Goods
+	hbox = {
+		visible = "[Scope.GetGoods.IsValid]"
+		datacontext = "[Scope.GetGoods]"
+
+		message_feed_go_to_button = {
+			visible = "[Goods.IsLocal]"
+			tooltip = "GO_TO_BUTTON_GOODS"
+			onclick = "[InformationPanelBar.OpenGoodsLocalPricesPanel(Goods.Self)]"
+		}
+
+		message_feed_go_to_button = {
+			visible = "[And(Goods.HasStateContext, Not(Goods.IsLocal))]"
+			tooltip = "GO_TO_BUTTON_GOODS"
+			onclick = "[InformationPanelBar.OpenGoodsStatePanel(Goods.GetState, Goods.Self)]"
+		}
+
+		message_feed_go_to_button = {
+			visible = "[And(Goods.HasMarketContext, Not(Or(Goods.HasStateContext, Goods.IsLocal)))]"
+			tooltip = "GO_TO_BUTTON_GOODS"
+			onclick = "[InformationPanelBar.OpenGoodsPanel(Goods.GetMarket, Goods.Self)]"
+		}
+
+		message_feed_go_to_button = {
+			visible = "[Not(Or(Or(Goods.HasMarketContext, Goods.HasStateContext), Goods.IsLocal))]"
+			tooltip = "GO_TO_BUTTON_GOODS"
+			onclick = "[InformationPanelBar.OpenGoodsPanel(GetPlayer.GetMarket.Self, Goods.Self)]"
+		}
+	}
+
+	# Military Formation
+	message_feed_go_to_button = {
+		visible = "[Scope.GetMilitaryFormation.IsValid]"
+		datacontext = "[Scope.GetMilitaryFormation]"
+		tooltip = "GO_TO_BUTTON_MILITARY_FORMATION"
+		onclick = "[InformationPanelBar.OpenMilitaryFormationPanelTab( MilitaryFormation.Self, 'default' )]"
+	}
+
+	# Power Bloc
+	message_feed_go_to_button = {
+		visible = "[Scope.GetPowerBloc.IsValid]"
+		datacontext = "[Scope.GetPowerBloc]"
+		tooltip = "GO_TO_BUTTON_POWER_BLOC"
+		onclick = "[InformationPanelBar.OpenPowerBlocPanelTab( PowerBloc.Self, 'default' )]"
+	}
+
+	# Battle
+	message_feed_go_to_button = {
+		visible = "[Scope.GetBattle.IsValid]"
+		datacontext = "[Scope.GetBattle]"
+		tooltip = "GO_TO_BUTTON_BATTLE"
+		onclick = "[InformationPanelBar.OpenBattlePanelTab(Battle.AccessSelf, 'default')]"
+	}
+
+	# Religion
+	message_feed_go_to_button = {
+		visible = "[Scope.GetReligion.IsValid]"
+		datacontext = "[Scope.GetReligion]"
+		tooltip = "GO_TO_BUTTON_RELIGION"
+		onclick = "[InformationPanelBar.OpenReligionInfoPanel(Religion.AccessSelf)]"
+	}
+
+	# Religion TopScope
+	message_feed_go_to_button = {
+		visible = "[TopScope.sReligion('religion').IsValid]"
+		datacontext = "[TopScope.sReligion('religion')]"
+		tooltip = "GO_TO_BUTTON_RELIGION"
+		onclick = "[InformationPanelBar.OpenReligionInfoPanel(Religion.AccessSelf)]"
+	}
+
+	# Pop
+	message_feed_go_to_button = {
+		visible = "[Scope.GetPop.IsValid]"
+		datacontext = "[Scope.GetPop]"
+		tooltip = "GO_TO_BUTTON_POP"
+		onclick = "[InformationPanelBar.OpenPopDetailsPanel(Pop.AccessSelf)]"
+	}
+
+	# Company
+	message_feed_go_to_button = {
+		visible = "[Scope.GetCompany.IsValid]"
+		datacontext = "[Scope.GetCompany]"
+		tooltip = "GO_TO_BUTTON_COMPANY"
+		onclick = "[InformationPanelBar.OpenCompanyPanel(Company.Self)]"
+	}
+
+	# Institution
+	message_feed_go_to_button = {
+		visible = "[Scope.GetInstitution.IsValid]"
+		tooltip = "GO_TO_BUTTON_POLITICS_INSTITUTIONS"
+		onclick = "[InformationPanelBar.OpenPanelTab('politics', 'institutions')]"
+	}
+}
+
+template notification_go_to_visibility 
+{
+	visible = "[Not(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Scope.GetTreaty.IsValid, Scope.GetPoliticalMovement.IsValid), Scope.GetJournalEntry.IsValid), TopScope.sPoliticalLobby('political_lobby').IsValid), PlayerMessageItem.GetScopeTechnology.IsValid), PlayerMessageItem.GetScopeDiploPlay.IsValid), Scope.GetDiplomaticPlay.IsValid), Scope.GetWar.IsValid), Scope.GetInterestGroup.IsValid), Scope.GetCharacter.IsValid), TopScope.sCharacter('exile_scope').IsValid), Scope.GetState.IsValid), Scope.GetDiplomaticAction.GetFirstState.IsValid), TopScope.sHarvestConditionArea('area').IsValid), Scope.GetCulture.IsValid), TopScope.sCulture('culture').IsValid), Scope.GetLaw.IsValid), Scope.GetFront.IsValid), Scope.GetGoods.IsValid), Scope.GetMilitaryFormation.IsValid), Scope.GetPowerBloc.IsValid), Scope.GetBattle.IsValid), Scope.GetReligion.IsValid), TopScope.sReligion('religion').IsValid), Scope.GetPop.IsValid), Scope.GetCompany.IsValid), Scope.GetInstitution.IsValid))]"
+}
+
+template notification_icon_go_to_text_area
+{
+	datacontext = "[PlayerMessageItem.GetTopScope.GetRootScope]"
+	datacontext = "[PlayerMessageItem.GetTopScope]"
+
+	# Treaty
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetTreaty.IsValid]"
+		datacontext = "[Scope.GetTreaty]"
+		tooltip = "GO_TO_TREATY"
+		onclick = "[InformationPanelBar.OpenTreatyPanel(Treaty.Self)]"
+	}
+
+	# Political Movement
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetPoliticalMovement.IsValid]"
+		datacontext = "[Scope.GetPoliticalMovement]"
+		tooltip = "GO_TO_BUTTON_MOVEMENT"
+		onclick = "[InformationPanelBar.OpenPoliticalMovementPanel(PoliticalMovement.AccessSelf)]"
+	}
+
+	# Journal Entry
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetJournalEntry.IsValid]"
+		datacontext = "[Scope.GetJournalEntry]"
+		tooltip = "GO_TO_BUTTON_JOURNAL_ENTRY"
+		onclick = "[InformationPanelBar.OpenJournalEntryPanel(JournalEntry.AccessSelf)]"
+	}
+
+	# Political Lobby
+	message_feed_go_to_text_area_button = {
+		visible = "[TopScope.sPoliticalLobby('political_lobby').IsValid]"
+		datacontext = "[TopScope.sPoliticalLobby('political_lobby')]"
+		tooltip = "GO_TO_BUTTON_LOBBY"
+		onclick = "[InformationPanelBar.OpenPoliticalLobbyPanel(PoliticalLobby.AccessSelf)]"
+	}
+
+	# Technology
+	message_feed_go_to_text_area_button = {
+		visible = "[PlayerMessageItem.GetScopeTechnology.IsValid]"
+		tooltip = "GO_TO_BUTTON_TECH_TREE"
+		onclick = "[InformationPanelBar.OpenPanelTab('tech_tree', PlayerMessageItem.GetScopeTechnology.GetCategoryKey)]"
+	}
+
+	# Interest Group
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetInterestGroup.IsValid]"
+		datacontext = "[Scope.GetInterestGroup]"
+		tooltip = "GO_TO_BUTTON_INTEREST_GROUP"
+		onclick = "[InformationPanelBar.OpenInterestGroupPanel(InterestGroup.AccessSelf)]"
+	}
+
+	# Character
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetCharacter.IsValid]"
+		datacontext = "[Scope.GetCharacter]"
+		tooltip = "GO_TO_BUTTON_CHARACTER"
+		enabled = "[Not(Character.IsRetired)]"
+		onclick = "[InformationPanelBar.OpenCommanderPanel(Character.AccessSelf)]"
+	}
+
+	# Exiled Character
+	message_feed_go_to_text_area_button = {
+		visible = "[TopScope.sCharacter('exile_scope').IsValid]"
+		datacontext = "[TopScope.sCharacter('exile_scope')]"
+		tooltip = "GO_TO_BUTTON_CHARACTER"
+		enabled = "[Not(Character.IsRetired)]"
+		onclick = "[InformationPanelBar.OpenCommanderPanel(Character.AccessSelf)]"
+	}
+
+	# State
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetState.IsValid]"
+		datacontext = "[Scope.GetState]"
+		tooltip = "GO_TO_BUTTON_STATE"
+		onclick = "[InformationPanelBar.OpenStatePanel(State.AccessSelf)]"
+	}
+
+	# Diplomatic Action with State
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetDiplomaticAction.GetFirstState.IsValid]"
+		datacontext = "[Scope.GetDiplomaticAction]"
+		datacontext = "[Scope.GetDiplomaticAction.GetFirstState]"
+		tooltip = "GO_TO_BUTTON_STATE"
+		onclick = "[InformationPanelBar.OpenStatePanel(State.AccessSelf)]"
+	}
+
+	# Diplomatic Play weird scope
+	message_feed_go_to_text_area_button = {
+		visible = "[PlayerMessageItem.GetScopeDiploPlay.IsValid]"
+		datacontext = "[PlayerMessageItem.GetScopeDiploPlay]"
+		tooltip = "GO_TO_BUTTON_DIPLOMATIC_PLAY"
+		onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+	}
+
+	# Diplomatic Play
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetDiplomaticPlay.IsValid]"
+		datacontext = "[Scope.GetDiplomaticPlay]"
+		tooltip = "GO_TO_BUTTON_DIPLOMATIC_PLAY"
+		onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+	}
+
+	# Harvest Condition Area
+	message_feed_go_to_text_area_button = {
+		visible = "[TopScope.sHarvestConditionArea('area').IsValid]"
+		datacontext = "[TopScope.sHarvestConditionArea('area')]"
+		tooltip = "GO_TO_BUTTON_HARVEST_CONDITION"
+		onclick = "[InformationPanelBar.OpenMarketPanelTab(GetPlayer.GetMarket.Self, 'food_security')]"
+	}
+
+	# Culture
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetCulture.IsValid]"
+		datacontext = "[Scope.GetCulture]"
+		tooltip = "GO_TO_BUTTON_CULTURE"
+		onclick = "[InformationPanelBar.OpenCultureInfoPanel(Culture.AccessSelf)]"
+	}
+
+	# Culture TopScope
+	message_feed_go_to_text_area_button = {
+		visible = "[TopScope.sCulture('culture').IsValid]"
+		datacontext = "[TopScope.sCulture('culture')]"
+		tooltip = "GO_TO_BUTTON_CULTURE"
+		onclick = "[InformationPanelBar.OpenCultureInfoPanel(Culture.AccessSelf)]"
+	}
+
+	# Law
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetLaw.IsValid]"
+		datacontext = "[Scope.GetLaw]"
+		tooltip = "GO_TO_BUTTON_LAW"
+		onclick = "[InformationPanelBar.OpenChangeLaw(Law.GetGroup)]"
+	}
+
+	# Front
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetFront.IsValid]"
+		datacontext = "[Scope.GetFront]"
+		tooltip = "GO_TO_BUTTON_FRONT"
+		onclick = "[InformationPanelBar.OpenFrontPanel(Front.Self)]"
+	}
+
+	# Goods
+	hbox = {
+		visible = "[Scope.GetGoods.IsValid]"
+		datacontext = "[Scope.GetGoods]"
+
+		message_feed_go_to_text_area_button = {
+			visible = "[Goods.IsLocal]"
+			tooltip = "GO_TO_BUTTON_GOODS"
+			onclick = "[InformationPanelBar.OpenGoodsLocalPricesPanel(Goods.Self)]"
+		}
+
+		message_feed_go_to_text_area_button = {
+			visible = "[And(Goods.HasStateContext, Not(Goods.IsLocal))]"
+			tooltip = "GO_TO_BUTTON_GOODS"
+			onclick = "[InformationPanelBar.OpenGoodsStatePanel(Goods.GetState, Goods.Self)]"
+		}
+
+		message_feed_go_to_text_area_button = {
+			visible = "[And(Goods.HasMarketContext, Not(Or(Goods.HasStateContext, Goods.IsLocal)))]"
+			tooltip = "GO_TO_BUTTON_GOODS"
+			onclick = "[InformationPanelBar.OpenGoodsPanel(Goods.GetMarket, Goods.Self)]"
+		}
+
+		message_feed_go_to_text_area_button = {
+			visible = "[Not(Or(Or(Goods.HasMarketContext, Goods.HasStateContext), Goods.IsLocal))]"
+			tooltip = "GO_TO_BUTTON_GOODS"
+			onclick = "[InformationPanelBar.OpenGoodsPanel(GetPlayer.GetMarket.Self, Goods.Self)]"
+		}
+	}
+
+	# Military Formation
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetMilitaryFormation.IsValid]"
+		datacontext = "[Scope.GetMilitaryFormation]"
+		tooltip = "GO_TO_BUTTON_MILITARY_FORMATION"
+		onclick = "[InformationPanelBar.OpenMilitaryFormationPanelTab( MilitaryFormation.Self, 'default' )]"
+	}
+
+	# Power Bloc
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetPowerBloc.IsValid]"
+		datacontext = "[Scope.GetPowerBloc]"
+		tooltip = "GO_TO_BUTTON_POWER_BLOC"
+		onclick = "[InformationPanelBar.OpenPowerBlocPanelTab( PowerBloc.Self, 'default' )]"
+	}
+
+	# Battle
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetBattle.IsValid]"
+		datacontext = "[Scope.GetBattle]"
+		tooltip = "GO_TO_BUTTON_BATTLE"
+		onclick = "[InformationPanelBar.OpenBattlePanelTab(Battle.AccessSelf, 'default')]"
+	}
+
+	# Religion
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetReligion.IsValid]"
+		datacontext = "[Scope.GetReligion]"
+		tooltip = "GO_TO_BUTTON_RELIGION"
+		onclick = "[InformationPanelBar.OpenReligionInfoPanel(Religion.AccessSelf)]"
+	}
+
+	# Religion TopScope
+	message_feed_go_to_text_area_button = {
+		visible = "[TopScope.sReligion('religion').IsValid]"
+		datacontext = "[TopScope.sReligion('religion')]"
+		tooltip = "GO_TO_BUTTON_RELIGION"
+		onclick = "[InformationPanelBar.OpenReligionInfoPanel(Religion.AccessSelf)]"
+	}
+
+	# Pop
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetPop.IsValid]"
+		datacontext = "[Scope.GetPop]"
+		tooltip = "GO_TO_BUTTON_POP"
+		onclick = "[InformationPanelBar.OpenPopDetailsPanel(Pop.AccessSelf)]"
+	}
+
+	# Company
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetCompany.IsValid]"
+		datacontext = "[Scope.GetCompany]"
+		tooltip = "GO_TO_BUTTON_COMPANY"
+		onclick = "[InformationPanelBar.OpenCompanyPanel(Company.Self)]"
+	}
+
+	# Institution
+	message_feed_go_to_text_area_button = {
+		visible = "[Scope.GetInstitution.IsValid]"
+		tooltip = "GO_TO_BUTTON_POLITICS_INSTITUTIONS"
+		onclick = "[InformationPanelBar.OpenPanelTab('politics', 'institutions')]"
+	}
+
+	text_multi = {
+		using = notification_go_to_visibility
+		name = "effect"
+		layoutpolicy_vertical = growing
+		layoutpolicy_horizontal = expanding
+		minimumsize = { @message_feed_width -1 }
+		size = { @message_feed_width @message_feed_height }
+		elide = right
+		fontsize_min = 12
+		margin = { 15 5 }
+		text = "[PlayerMessageItem.GetDescription]"
 	}
 }
 

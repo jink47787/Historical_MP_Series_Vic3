@@ -262,6 +262,10 @@ slave_revolt.3 = {
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
 	trigger = {
+		any_political_movement = {
+			is_political_movement_type = movement_slave_revolt
+			political_movement_radicalism >= define:NPolitics|RADICALISM_PROTESTING_THRESHOLD
+		}
 		NOT = { has_law_or_variant = law_type:law_slavery_banned }
 		any_scope_state = {
 			any_scope_pop = {
@@ -279,12 +283,16 @@ slave_revolt.3 = {
 			}
 			save_scope_as = slave_insurrection_state
 		}
+		random_political_movement ={
+			limit = {
+				is_political_movement_type = movement_slave_revolt
+			}
+			save_scope_as = slave_revolt_movement_scope
+		}
 	}
 
 	option = {
 		name = slave_revolt.3.a # Negotiate a deal with the slaves' leaders
-
-
 		scope:slave_insurrection_state = {
 			add_radicals_in_state = {
 				value = 0.1
@@ -309,19 +317,23 @@ slave_revolt.3 = {
 				days = normal_modifier_time
 			}
 		}
+		scope:slave_revolt_movement_scope ?= {
+			add_modifier = {
+				name = modifier_negotiated_with_slave_insurrection
+				days = normal_modifier_time
+			}
+		}
 	}
 
 	option = {
 		name = slave_revolt.3.b # We do not negotiate with insurrectionists
 		default_option = yes
-
 		scope:slave_insurrection_state = {
 			add_radicals_in_state = {
 				value = 0.6
 				pop_type = slaves
 			}
 		}
-
 		every_interest_group = {
 			limit = {
 				OR = {
@@ -333,6 +345,12 @@ slave_revolt.3 = {
 
 			add_modifier = {
 				name = tough_approach_to_slaves
+				days = normal_modifier_time
+			}
+		}
+		scope:slave_revolt_movement_scope ?= {
+			add_modifier = {
+				name = modifier_crushed_slave_insurrection
 				days = normal_modifier_time
 			}
 		}
@@ -381,6 +399,8 @@ slave_revolt.4 = {
 				}
 			}
 			order_by = "pop_type_percent_state(pop_type:slaves)"
+			position = 0
+			check_range_bounds = no
 			save_scope_as = fleeing_slaves_state
 		}
 		random_scope_state = {
@@ -404,7 +424,7 @@ slave_revolt.4 = {
 		name = slave_revolt.4.a # Oh, well.
 		scope:fleeing_slaves_state = {
 			add_radicals_in_state = {
-				value = 0.1
+				value = 0.25
 				culture = scope:primary_culture_scope
 			}
 		}
@@ -431,6 +451,10 @@ slave_revolt.4 = {
 			add_radicals_in_state = {
 				value = 0.25
 				pop_type = slaves
+			}
+			add_modifier = {
+				name = modifier_one_way_out_slave_revolt_state
+				days = normal_modifier_time
 			}
 		}
 		every_interest_group = {
@@ -461,6 +485,17 @@ slave_revolt.4 = {
 			}
 			add_modifier = {
 				name = modifier_deported_slaves
+				days = normal_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				any_political_movement = {
+					is_political_movement_type = movement_slave_revolt
+				}
+			}
+			add_modifier = {
+				name = modifier_one_way_out_slave_revolt
 				days = normal_modifier_time
 			}
 		}

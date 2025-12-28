@@ -1,0 +1,543 @@
+﻿namespace = cuba_independencia
+
+# Startup event
+cuba_independencia.1 = {
+	type = country_event
+	placement = root
+
+	duration = 1
+
+	dlc = dlc016
+
+	title = cuba_independencia.1.t
+	desc = cuba_independencia.1.d
+	flavor = cuba_independencia.1.f
+	
+    event_image = {
+		video = "ip4_colonial_exploitation_going_well"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	trigger = {
+		# Triggered by Journal Entry
+	}
+	
+	immediate = {
+	}
+	
+	option = {
+		name = cuba_independencia.1.a
+		default_option = yes
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_cuba_espanol
+			}
+			add_journal_entry = {
+				type = je_cuba_la_vida_dulce
+			}
+			add_journal_entry = {
+				type = je_cuba_independencia
+			}
+		}
+	}
+}
+
+# Opening Negotiations
+cuba_independencia.2 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_independencia.2.t
+	desc = cuba_independencia.2.d
+	flavor = cuba_independencia.2.f
+
+	duration = 3
+
+	event_image = {
+		video = "southamerica_aristocrats"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	immediate = {
+		root = {
+			save_scope_as = cuba
+		}
+		overlord = {
+			save_scope_as = cuba_overlord
+		}
+		if = {
+			limit = {
+				c:CSA ?= {
+					any_scope_state = {
+						state_region = s:STATE_FLORIDA
+					}
+				}
+			}
+			c:CSA ?= {
+				save_scope_as = cuba_buyer
+			}
+		}
+		else = {
+			c:USA ?= {
+				save_scope_as = cuba_buyer
+			}
+		}
+	}
+
+	option = {
+		name = cuba_independencia.2.a
+		default_option = yes
+
+		scope:cuba_buyer = {
+			trigger_event = {
+				id = cuba_independencia.3
+				days = 0
+			}
+		}
+
+		ai_chance = {
+			base = 1
+		}
+	}
+
+	option = {
+		name = cuba_independencia.2.b
+
+		custom_tooltip = {
+			text = cuba_negotiation_warning_tt
+
+			set_variable = {
+				name = cuban_offer_on_cooldown
+				years = 3
+			}
+		}
+
+		ai_chance = {
+			base = 0
+		}
+	}
+}
+
+# Cubans suggest a purchase
+cuba_independencia.3 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_independencia.3.t
+	desc = cuba_independencia.3.d
+	flavor = cuba_independencia.3.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+
+	# Yes, let's go for it
+	option = {
+		name = cuba_independencia.3.a
+		default_option = yes
+
+		custom_tooltip = if_spain_accepts_purchase_tt
+		show_as_tooltip = {
+			add_modifier = {
+				name = cuban_purchase
+				days = long_modifier_time
+				is_decaying = yes
+				multiplier = je_cuba_join_usa_price
+			}
+		}
+
+		scope:cuba_overlord = {
+			trigger_event = {
+				id = cuba_independencia.4
+			}
+		}
+
+		ai_chance = {
+			base = 75
+		}
+	}
+
+	# Nej tack
+	option = {
+		name = cuba_independencia.3.b
+
+		change_relations = {
+			country = scope:cuba
+			value = -10
+		}
+
+		ai_chance = {
+			base = 0
+		}
+	}
+}
+
+# Americans offer to buy Cuba
+cuba_independencia.4 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_independencia.4.t
+	desc = cuba_independencia.4.d
+	flavor = cuba_independencia.4.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	# Sure, we like money now more than Cuba for however much longer
+	option = {
+		name = cuba_independencia.4.a
+		default_option = yes
+
+		custom_tooltip = if_we_accept_purchase_tt
+		add_modifier = {
+			name = cuban_sale
+			days = long_modifier_time
+			is_decaying = yes
+			multiplier = je_cuba_join_usa_price
+		}
+
+		hidden_effect = {
+			scope:cuba = {
+				trigger_event = {
+					id = cuba_independencia.6
+					popup = yes
+				}
+			}
+
+			scope:cuba_buyer = {
+				set_variable = {
+					name = cubas_last_gdp
+					value = scope:cuba.gdp
+				}
+			}
+		}
+		show_as_tooltip = {
+			scope:cuba_buyer = {
+				trigger_event = {
+					id = cuba_independencia.7
+					popup = yes
+				}
+
+				add_modifier = {
+					name = cuban_purchase
+					days = long_modifier_time
+					is_decaying = yes
+					multiplier = je_cuba_join_usa_price
+				}
+			}
+		}
+
+		ai_chance = {
+			base = 1
+
+			modifier = {
+				trigger = {
+					taking_loans = yes
+				}
+				factor = 2
+			}
+		}
+	}
+
+	# Cuba is not for sale!
+	option = {
+		name = cuba_independencia.4.b
+
+		scope:cuba_buyer = {
+			trigger_event = {
+				id = cuba_independencia.5
+				popup = yes
+			}
+		}
+
+		ai_chance = {
+			base = 1
+
+			modifier = {
+				trigger = {
+					country_rank >= rank_value:great_power
+				}
+				factor = 0.5
+			}
+
+			modifier = {
+				trigger = {
+					any_rival_country = {
+						scope:cuba_buyer = this
+					}
+				}
+				factor = 0
+			}
+		}
+	}
+}
+
+# Failed Cuba Purchase
+cuba_independencia.5 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_independencia.5.t
+	desc = cuba_independencia.5.d
+	flavor = cuba_independencia.5.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_politicians_arguing"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	option = {
+		name = cuba_independencia.5.a
+		default_option = yes
+		change_relations = {
+			country = scope:cuba_overlord
+			value = -10
+		}
+
+		ai_chance = {
+			base = 1
+
+			modifier = {
+				trigger = {
+					ruler ?= {
+						OR = {
+							has_trait = tactful
+							has_trait = cautious
+							has_trait = reserved
+							has_ideology = ideology:ideology_pacifist
+						}
+					}
+				}
+				add = -1
+			}
+		}
+	}
+	option = {
+		name = cuba_independencia.5.b
+
+		s:STATE_WESTERN_CUBA = {
+			add_claim = ROOT
+		}
+		s:STATE_CENTRAL_CUBA = {
+			add_claim = ROOT
+		}
+		s:STATE_EASTERN_CUBA = {
+			add_claim = ROOT
+		}
+		change_relations = {
+			country = scope:cuba_overlord
+			value = -20
+		}
+
+		ai_chance = {
+			base = 1
+
+			modifier = {
+				trigger = {
+					OR = {
+						any_rival_country = {
+							scope:cuba_overlord = this
+						}
+						ruler ?= {
+							OR = {
+								has_trait = ambitious
+								has_trait = reckless
+								has_ideology = ideology:ideology_jingoist
+							}
+						}
+					}
+				}
+				factor = 10
+			}
+		}
+	}
+}
+
+# Successful Cuba purchase - Cuba player
+cuba_independencia.6 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_independencia.6.t
+	desc = cuba_independencia.6.d
+	flavor = cuba_independencia.6.f
+
+	duration = 3
+
+	event_image = {
+		video = "ep1_transfer_of_authority"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	# If Cuba is a player and the USA/CSA isn't, CUB player switches to buyer country and annexes CUB. If CUB is player and so is USA/CSA, then USA/CSA puppets CUB. If neither are players, USA/CSA annexes CUB.
+	option = {
+		name = cuba_independencia.6.a
+		default_option = yes
+
+		scope:cuba_buyer = {
+			hidden_effect = {
+				add_modifier = {
+					name = cuban_purchase
+					days = long_modifier_time
+					is_decaying = yes
+					multiplier = je_cuba_join_usa_price
+				}
+			}
+
+			trigger_event = {
+				id = cuba_independencia.7
+				popup = yes
+			}
+		}
+
+		if = {
+			limit = {
+				is_player = yes
+				scope:cuba_buyer = {
+					is_player = no
+				}
+			}
+			play_as = scope:cuba_buyer
+
+			scope:cuba_buyer = {
+				annex = scope:cuba
+			}
+		}
+		else_if = {
+			limit = {
+				is_player = yes
+				scope:cuba_buyer = {
+					is_player = yes
+				}
+			}
+			scope:cuba_buyer = {
+				transfer_subject = root
+			}
+			if = {
+				limit = {
+					NOT = { is_subject_type = subject_type_dominion }
+				}
+				change_subject_type = subject_type_dominion
+			}
+		}
+		else_if = {
+			limit = {
+				exists = c:ATL
+				c:ATL = { was_formed_from = CUB }
+			}
+			annex = c:ATL
+		}
+		else = {
+			scope:cuba_buyer = {
+				annex = c:CUB
+			}
+		}
+	}
+
+	# Triggered option for being just a US puppet, which only appears if Option A didn't already default to Cuba becoming a puppet due to specific circumstances
+	option = {
+		name = cuba_independencia.6.b
+		trigger = {
+			NOT = {
+				is_player = yes
+				scope:cuba_buyer = {
+					is_player = yes
+				}
+			}
+		}
+
+		scope:cuba_buyer = {
+			hidden_effect = {
+				add_modifier = {
+					name = cuban_purchase
+					days = long_modifier_time
+					is_decaying = yes
+					multiplier = je_cuba_join_usa_price
+				}
+			}
+
+			transfer_subject = root
+
+			trigger_event = {
+				id = cuba_independencia.7
+				popup = yes
+			}
+		}
+		hidden_effect = {
+			if = {
+				limit = {
+					NOT = { is_subject_type = subject_type_dominion }
+				}
+				change_subject_type = subject_type_dominion
+			}
+		}
+	}
+}
+
+# Successful Cuba Purchase
+cuba_independencia.7 = {
+	type = country_event
+	placement = ROOT
+
+	title = cuba_independencia.7.t
+	desc = cuba_independencia.7.d
+	flavor = cuba_independencia.7.f
+
+	duration = 3
+
+	event_image = {
+		video = "ip4_colonial_exploitation_going_well"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = cuba_independencia.7.a
+		default_option = yes
+
+		show_as_tooltip = {
+			add_modifier = {
+				name = cuban_purchase
+				days = long_modifier_time
+				is_decaying = yes
+				multiplier = je_cuba_join_usa_price
+			}
+		}
+	}
+}

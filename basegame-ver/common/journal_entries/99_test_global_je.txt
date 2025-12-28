@@ -1,0 +1,138 @@
+﻿# Sample JE for global journal entries
+
+je_global_test = {
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	group = je_group_global_test
+
+	is_shown_when_inactive = {
+		always = no
+		#always = yes
+	}
+	
+	modifiers_while_active = {
+		lippe_crisis_ongoing
+	}
+
+	scripted_button = je_global_test_button
+	scripted_button = je_global_test_button_2
+	
+	should_be_involved = {
+		OR = {
+			country_rank >= rank_value:great_power
+			country_definition = cd:LIP
+			country_definition = cd:SCM
+		}		
+	}
+	
+	should_show_when_not_involved = {
+		OR = {
+			country_rank >= rank_value:major_power
+			country_definition = cd:LIP
+			country_definition = cd:SCM
+		}	
+	}	
+
+	possible = {
+		always = no
+		#any_country = {
+		#	count >= 2
+		#	OR = {
+		#		country_definition = cd:LIP
+		#		country_definition = cd:SCM
+		#	}
+		#}
+	}
+
+	complete = {
+		any_country = {
+			count < 1
+			OR = {
+				country_definition = cd:LIP
+				country_definition = cd:SCM
+			}
+		}
+	}
+
+	fail = {
+		any_country = {
+			count > 2
+			OR = {
+				country_definition = cd:LIP
+				country_definition = cd:SCM
+			}
+		}
+	}
+	
+	immediate_all_involved = {
+		if = {
+			limit = { exists = c:LIP }
+			change_relations = { country = c:LIP value = -10 }
+		}
+		if = {
+			limit = { exists = c:SCM }
+			change_relations = { country = c:SCM value = -10 }
+		}
+	}	
+
+	on_become_involved_after_activation = {
+		if = {
+			limit = { exists = c:LIP }
+			change_relations = { country = c:LIP value = -10 }
+		}
+		if = {
+			limit = { exists = c:SCM }
+			change_relations = { country = c:SCM value = -10 }
+		}
+	}
+
+	on_no_longer_involved = {
+		if = {
+			limit = { exists = c:LIP }
+			change_relations = { country = c:LIP value = 10 }
+		}
+		if = {
+			limit = { exists = c:SCM }
+			change_relations = { country = c:SCM value = 10 }
+		}
+	}
+
+	on_complete_all_involved = {
+		add_modifier = { name = lippe_crisis_averted years = 10 }
+	}
+	
+	on_fail_all_involved = {
+		add_modifier = { name = lippe_crisis years = 10 }
+	}
+	
+	on_timeout_all_involved = {
+		add_modifier = { name = lippe_crisis years = 10 }
+	}
+	
+	on_weekly_pulse = {
+		effect = {
+			scope:journal_entry = {
+				every_scope_je_involved = {
+					limit = {
+						NOR = {
+							country_rank >= rank_value:great_power
+							country_definition = cd:LIP
+							country_definition = cd:SCM
+						}					
+					}
+					
+					scope:journal_entry = { remove_involved_country = prev }
+				}		
+			}
+
+			scope:journal_entry = { remove_involved_country = c:FRA }
+			scope:journal_entry = { add_involved_country = c:ARG }
+		}
+	}
+
+	weight = 1000
+	
+	timeout = 1825
+
+	should_be_pinned_by_default = yes
+}

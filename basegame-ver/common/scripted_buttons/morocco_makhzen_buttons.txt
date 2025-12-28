@@ -1,0 +1,173 @@
+﻿# Harka start button
+je_lands_of_anarchy_harka_activate_button = {
+	name = "je_lands_of_anarchy_harka_activate_button"
+	desc = "je_lands_of_anarchy_harka_activate_button_desc"
+
+	cooldown = { years = 2 }
+
+	visible = {
+		NOT = {
+			has_modifier = lands_of_anarchy_harka_mod
+		}
+	}
+
+	possible = {
+		NOT = {
+			has_modifier = lands_of_anarchy_harka_mod
+		}
+		government_legitimacy > 95
+	}
+
+	effect = {
+		add_modifier = {
+			name = lands_of_anarchy_harka_mod
+		}
+		ruler = {
+			add_modifier = lands_of_anarchy_harka_popularity_mod
+		}
+		custom_tooltip = lands_of_anarchy_on_harka_button_tt
+	}
+
+	ai_chance = {
+		value = 0
+
+
+		if = {
+			limit = {
+				scaled_debt <= 0.1
+			}
+			add = 100
+		}
+		else_if = {
+			limit = {
+				scaled_debt >= 0.33
+			}
+			multiply = 0
+		}
+	}
+}
+
+# Harka stop button
+je_lands_of_anarchy_harka_deactivate_button = {
+	name = "je_lands_of_anarchy_harka_deactivate_button"
+	desc = "je_lands_of_anarchy_harka_deactivate_button_desc"
+
+	visible = {
+		has_modifier = lands_of_anarchy_harka_mod
+	}
+
+	possible = {
+		has_modifier = lands_of_anarchy_harka_mod
+	}
+
+	effect = {
+		remove_modifier = lands_of_anarchy_harka_mod
+		ruler = {
+			remove_modifier = lands_of_anarchy_harka_popularity_mod
+		}
+	}
+
+	ai_chance = {
+		value = 0
+
+		if = {
+			limit = {
+				scaled_debt >= 0.33
+			}
+			add = 100
+		}
+	}
+}
+
+je_lands_of_anarchy_colonize_sahara_button = {
+	name = "je_lands_of_anarchy_colonize_sahara_button"
+	desc = "je_lands_of_anarchy_colonize_sahara_button_desc"
+
+	cooldown = { years = 5 }
+
+	visible = {
+		always = yes
+	}
+
+	possible = {
+		has_technology_researched = colonization
+		any_neighbouring_state = {
+			owner = {
+				is_country_type = decentralized
+			}
+		}
+	}
+
+	effect = {
+		custom_tooltip = {
+			text = lands_of_anarchy_colonize_sahara_reduce_progress_tt
+			je:je_lands_of_anarchy ?= {
+				add_progress = { value = -20 name = lands_of_anarchy_tribes_of_marrakech_bar }
+				add_progress = { value = -20 name = lands_of_anarchy_tribes_of_al_rif_bar }
+				add_progress = { value = -20 name = lands_of_anarchy_tribes_of_inner_morocco_bar }
+			}
+		}
+		if = {
+			limit = {
+				has_law = law_type:law_no_colonial_affairs
+			}
+			activate_law = law_type:law_frontier_colonization
+		}
+		add_modifier = {
+			name = lands_of_anarchy_colonize_sahara_mod
+			days = normal_modifier_time
+		}
+		if = {
+			limit = {
+				c:TEK ?= {
+					is_adjacent_to_country = root
+					is_country_type = decentralized
+					NOT = {
+						has_diplomatic_pact = {
+							who = root
+							type = colonization_rights
+						}
+					}
+				}
+			}
+			create_diplomatic_pact = {
+				country = c:TEK
+				type = colonization_rights
+			}
+			create_bidirectional_truce = { country = c:TEK months = 60 }
+		}
+		if = {
+			limit = {
+				c:TUA ?= {
+					is_adjacent_to_country = root
+					is_country_type = decentralized
+					NOT = {
+						has_diplomatic_pact = {
+							who = root
+							type = colonization_rights
+						}
+					}
+				}
+			}
+			create_diplomatic_pact = {
+				country = c:TUA
+				type = colonization_rights
+			}
+			create_bidirectional_truce = { country = c:TUA months = 60 }
+		}
+	}
+
+	ai_chance = {
+		value = 0
+
+		if = {
+			limit = {
+				relative_bureaucracy >= 0.25
+				NOT = {
+					has_law_or_variant = law_type:law_frontier_colonization
+				}
+			}
+			add = 5
+		}
+	}
+}

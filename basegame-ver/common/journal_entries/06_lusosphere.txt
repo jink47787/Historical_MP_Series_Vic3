@@ -1,0 +1,202 @@
+﻿je_portugal_and_brazil = {
+	icon = "gfx/interface/icons/invention_icons/navigation.dds"
+
+	group = je_group_historical_content
+
+	scripted_button = je_portugal_and_brazil_pedro_button
+	scripted_button = je_portugal_and_brazil_pursue_united_kingdom_button
+
+	is_shown_when_inactive = {
+        has_dlc_feature = ip4_content
+		c:POR ?= this
+		exists = c:BRZ
+	}
+
+	immediate = {
+		c:BRZ ?= {
+			save_scope_as = brazil_scope
+		}
+	}
+
+	custom_completion_header = je_portugal_and_brazil_complete_header
+
+	complete = {
+		OR = {
+			trigger_if = {
+				limit = {
+					has_variable = je_portugal_and_brazil_pursue_united_kingdom_button_var
+				}
+				custom_tooltip = {
+					text = has_completed_uk_je_tt
+					c:BRZ ?= {
+						is_subject_of = ROOT
+						is_subject_type = subject_type_personal_union
+					}
+				}
+			}
+			trigger_if = {
+				limit = {
+					exists = scope:brazil_scope
+				}
+				OR = {
+					ROOT = {
+						has_diplomats_expelled = scope:brazil_scope
+					}
+					scope:brazil_scope ?= {
+						has_diplomats_expelled = ROOT
+					}
+				}
+			}
+			trigger_else = {
+				custom_tooltip = {
+					text = has_expelled_brazilian_diplomats_tt
+					OR = {
+						ROOT = {
+							has_diplomats_expelled = c:BRZ
+						}
+						c:BRZ ?= {
+							has_diplomats_expelled = ROOT
+						}
+					}
+				}
+			}
+		}
+	}
+
+	possible = {
+		has_interest_marker_in_region = region_brazil
+		"relations(c:BRZ)" > 10
+	}
+
+	on_monthly_pulse = {
+
+	}
+
+	modifiers_while_active = {
+
+	}
+
+	invalid = {
+		OR = {
+			NOT = {
+				exists = scope:brazil_scope
+			}
+			has_variable = failed_uk_var
+		}
+	}
+
+	weight = 5000
+
+    should_be_pinned_by_default = yes
+}
+
+je_portugal_united_kingdom = {
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	group = je_group_historical_content
+
+	status_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = portugal_ruler_is_ruler_tt
+				trigger = {
+					c:BRZ.ruler ?= c:POR.ruler
+				}
+			}
+			triggered_desc = {
+				desc = portugal_ruler_in_line_nominal_tt
+				trigger = {
+					has_dlc_feature = rp1_content
+					exists = c:BRZ.heir
+					c:BRZ.heir ?= c:POR.ruler
+					c:BRZ.var:pedropoints <= 5
+				}
+			}
+			triggered_desc = {
+				desc = portugal_ruler_in_line_securely_tt
+				trigger = {
+					has_dlc_feature = rp1_content
+					exists = c:BRZ.heir
+					c:BRZ.heir ?= c:POR.ruler
+					c:BRZ.var:pedropoints > 5
+				}
+			}
+			triggered_desc = {
+				desc = portugal_ruler_in_line_tt
+				trigger = {
+					NOT = { has_dlc_feature = rp1_content }
+					exists = c:BRZ.heir
+					c:BRZ.heir ?= c:POR.ruler
+				}
+			}
+			triggered_desc = {
+				desc = portugal_ruler_not_in_line_tt
+				trigger = {
+					NOT = {
+						c:BRZ.heir ?= c:POR.ruler
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		c:BRZ ?= {
+			save_scope_as = brazil_scope
+		}
+	}
+
+	on_monthly_pulse = {
+
+	}
+
+	modifiers_while_active = {
+
+	}
+
+	complete = {
+		c:BRZ ?= {
+			has_diplomatic_pact = {
+				who = ROOT
+				type = personal_union
+				is_initiator = no
+			}
+			trigger_if = {
+				limit = {
+					has_dlc_feature = rp1_content
+				}
+				NOT = {
+					has_journal_entry = je_pedro_brazil
+				}
+			}
+		}
+	}
+
+	on_complete = {
+		trigger_event = {
+			id = lusofonia.3
+		}
+	}
+
+    fail = {
+		OR = {
+			NOT = { has_law = law_type:law_monarchy }
+			c:BRZ ?= { NOT = { has_law = law_type:law_monarchy } }
+			NOT = { has_journal_entry = je_portugal_and_brazil }
+		}
+    }
+
+	invalid = {
+		NOT = {
+			exists = c:BRZ
+		}
+	}
+
+	on_fail = {
+		set_variable = { name = failed_uk_var days = short_modifier_time }
+	}
+
+	weight = 5000
+
+    should_be_pinned_by_default = yes
+}

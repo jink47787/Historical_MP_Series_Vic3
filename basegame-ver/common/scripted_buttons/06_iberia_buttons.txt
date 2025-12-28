@@ -1,0 +1,322 @@
+﻿je_iberia_union_button = {
+	name = je_iberia_union_button
+	desc = je_iberia_union_button_desc
+
+	visible = {
+		is_involved_in_journal_entry = je_iberia
+	}
+
+	possible = {
+		NOR = {
+			is_subject = yes
+			is_at_war = yes
+			is_diplomatic_play_committed_participant = yes
+		}
+		custom_tooltip = {
+			text = iberia_all_countries_involved_tt
+			any_country_in_iberia = {
+				is_involved_in_journal_entry = je_iberia
+				count = all
+			}
+		}
+		custom_tooltip = {
+			text = iberia_shared_governance_principles_laws_tt
+			any_country_in_iberia = {
+				is_involved_in_journal_entry = je_iberia
+				active_law:lawgroup_governance_principles ?= {
+					any_country_in_iberia = {
+						filter = {
+							is_involved_in_journal_entry = je_iberia
+						}
+						has_law = prev.type
+						count = all
+					}
+				}
+			}
+		}
+		custom_tooltip = {
+			text = iberia_sufficient_shared_laws_tt
+			global_var:iberia_shared_laws_var >= iberia_shared_law_requirement
+		}
+		trigger_if = {
+			limit = {
+				any_country_in_iberia = {
+					is_involved_in_journal_entry = je_iberia
+					is_subject_of = ROOT
+				}
+			}
+			custom_tooltip = {
+				text = all_iberian_subjects_below_75_ld_tt
+				any_country_in_iberia = {
+					filter = {
+						is_subject_of = ROOT
+					}
+					liberty_desire < 75
+					count = all
+				}
+			}
+		}
+		trigger_if = {
+			limit = {
+				any_country_in_iberia = {
+					is_involved_in_journal_entry = je_iberia
+					NOT = { this = ROOT }
+					NOT = { is_subject_of = ROOT }
+				}
+			}
+			custom_tooltip = {
+				text = all_independent_iberian_countries_above_50_relations_tt
+				any_country_in_iberia = {
+					filter = {
+						NOT = { is_subject_of = ROOT }
+					}
+					liberty_desire < define:NDiplomacy|RELATIONS_THRESHOLD_AMICABLE
+					count = all
+				}
+			}
+		}
+		custom_tooltip = {
+			text = not_already_used_this_interaction_tt
+			NOT = { c:IBE ?= this }
+		}
+	}
+
+	selected = {
+	}
+
+	effect = {
+		hidden_effect = {
+			ordered_country_in_iberia = {
+				limit = {
+					is_involved_in_journal_entry = je_iberia
+					is_subject = no
+				}
+				order_by = prestige
+				position = 0
+				save_scope_as = iberia_root_country
+				change_tag = IBE
+				if = {
+					limit = {
+						NOT = {
+							country_has_primary_culture = cu:spanish
+						}
+					}
+					add_primary_culture = cu:spanish
+				}
+				if = {
+					limit = {
+						NOT = {
+							country_has_primary_culture = cu:portuguese
+						}
+					}
+					add_primary_culture = cu:portuguese
+				}
+				if = {
+					limit = {
+						any_country_in_iberia = {
+							has_variable_list = spain_accepted_cultures
+						}
+					}
+					random_country_in_iberia = {
+						limit = {
+							has_variable_list = spain_accepted_cultures
+						}
+						every_in_list = {
+							variable = spain_accepted_cultures
+							if = {
+								limit = {
+									NOT = {
+										is_primary_culture_of = prev # Refers to random_country_in_iberia
+									}
+								}
+								c:IBE ?= {
+									add_primary_culture = prev
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		custom_tooltip = {
+			text = create_iberia_tt
+			every_country_in_iberia = {
+				limit = {
+					NOT = { this = scope:iberia_root_country }
+					is_involved_in_journal_entry = je_iberia
+				}
+				if = {
+					limit = {
+						is_player = yes
+					}
+					play_as = scope:iberia_root_country
+				}
+				scope:iberia_root_country = {
+					annex = prev
+				}
+			}
+		}
+		custom_tooltip = iberia_laws_origin_tt
+	}
+
+	ai_chance = {
+		value = 1
+		if = { # The AI will let the player take the lead
+			limit = {
+				any_country_in_iberia = {
+					is_player = yes
+					is_involved_in_journal_entry = je_iberia
+				}
+			}
+			add = -10000
+		}
+	}
+}
+
+je_iberia_preserve_union_button = {
+	name = je_iberia_preserve_union_button
+	desc = je_iberia_preserve_union_button_desc
+
+	visible = {
+		is_involved_in_journal_entry = je_iberia
+		any_country_in_iberia = {
+			has_diplomatic_pact = {
+				who = ROOT
+				type = personal_union
+			}
+		}
+	}
+
+	possible = {
+		any_country_in_iberia = {
+			is_subject_of = ROOT
+			has_diplomatic_pact = {
+				who = ROOT
+				type = personal_union
+			}
+		}
+		custom_tooltip = {
+			text = not_already_used_this_interaction_tt
+			NOT = { has_variable = iberia_permanent_personal_union }
+		}
+	}
+
+	selected = {
+	}
+
+	effect = {
+		set_variable = iberia_permanent_personal_union
+		every_country_in_iberia = {
+			limit = {
+				is_involved_in_journal_entry = je_iberia
+				is_subject_type = subject_type_personal_union
+			}
+			change_relations = { country = this.overlord value = 25 }
+			add_liberty_desire = -30
+			set_variable = iberia_permanent_personal_union
+		}
+		custom_tooltip = end_iberia_je_tt
+	}
+
+	ai_chance = {
+		value = 1
+		if = { # The AI will let the player take the lead
+			limit = {
+				any_country_in_iberia = {
+					is_player = yes
+					is_involved_in_journal_entry = je_iberia
+				}
+			}
+			add = -10000
+		}
+	}
+}
+
+je_iberia_adopt_esperanto_language = {
+	name = je_iberia_adopt_esperanto_language
+	desc = je_iberia_adopt_esperanto_language_desc
+
+	visible = {
+		is_involved_in_journal_entry = je_iberia
+		has_law_or_variant = law_type:law_council_republic
+		game_date > 1887.1.1
+	}
+
+	possible = {
+		has_law_or_variant = law_type:law_council_republic
+		OR = {
+			has_law_or_variant = law_type:law_multicultural
+			has_law_or_variant = law_type:law_cultural_exclusion
+		}
+		custom_tooltip = {
+			text = not_already_used_this_interaction_tt
+			NOT = { scope:journal_entry = { has_variable = esperanto_var } }
+		}
+	}
+
+	selected = {
+		scope:journal_entry = {
+			has_variable = esperanto_var
+		}
+	}
+
+	effect = {
+		custom_tooltip = iberia_adopts_esperanto_tt
+		custom_tooltip = gain_variable_radicals_tt
+		scope:journal_entry = {
+			set_variable = { name = esperanto_var value = 1 } # Will always have at least the minimal effect
+		}
+		trigger_event = { id = iberia.3 }
+	}
+
+	ai_chance = {
+		value = 1
+		if = {  # The AI will let the player take the lead
+			limit = {
+				any_country_in_iberia = {
+					is_player = yes
+					is_involved_in_journal_entry = je_iberia
+				}
+			}
+			add = -10000
+		}
+	}
+}
+
+je_iberia_forsake_unification = {
+	name = je_iberia_forsake_unification
+	desc = je_iberia_forsake_unification_desc
+
+	visible = {
+		is_involved_in_journal_entry = je_iberia
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = je_active_for_more_than_five_years_tt
+			scope:journal_entry.journal_entry_age > 1825
+		}
+	}
+
+	selected = {
+		has_variable = against_iberian_unification
+	}
+
+	effect = {
+		set_variable = against_iberian_unification
+		scope:journal_entry = { remove_involved_country = ROOT }
+	}
+
+	ai_chance = {
+		value = 0.5
+		if = {  # The AI will let the player take the lead
+			limit = {
+				any_country_in_iberia = {
+					is_player = yes
+					is_involved_in_journal_entry = je_iberia
+				}
+			}
+			add = -10000
+		}
+	}
+}

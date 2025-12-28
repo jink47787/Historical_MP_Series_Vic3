@@ -54,10 +54,6 @@ pedro.1 = {
 		custom_tooltip = {
 			text = pedro_regency_party_tt
 		}
-		add_modifier = {
-			name = brz_regency
-			days = long_modifier_time
-		}
 	}
 }
 
@@ -143,7 +139,7 @@ pedro.3 = {
 
 	gui_window = event_window_1char_tabloid
 
-	left_icon = root.ruler
+	left_icon = scope:pedro_scope
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
@@ -154,17 +150,19 @@ pedro.3 = {
 	dlc = dlc008
 
 	trigger = {
-		 # triggered by je_pedro_brazil
-		 NOT = { has_variable = pedro_of_age_var }
-		 ruler = {
-		 	age >= 14
-		 }
+		has_dlc_feature = rp1_content
+		heir ?= {
+			has_template = BRZ_emperor_pedro_02
+			age >= 14
+		}
+		NOT = { has_variable = pedro_of_age_var }
 	}
 
 	immediate = {
 		set_variable = pedro_of_age_var
-		ruler = {
+		heir ?= {
 			save_scope_as = pedro_scope
+			set_variable = regency_complete
 		}
 		random_interest_group = {
 			limit = {
@@ -177,10 +175,16 @@ pedro.3 = {
 	option = {
 		name = pedro.3.a
 		default_option = yes
-		remove_modifier = brz_regency
-		scope:pedro_scope = {
+		scope:pedro_scope ?= {
 			remove_trait = trait_child
 			add_trait = charismatic
+			set_character_as_ruler = yes
+		}
+		remove_regency_modifier = yes
+		add_journal_entry = { type = je_pedro_brazil }
+		set_variable = {
+			name = pedropoints
+			value = 5
 		}
 		add_pedropoint_effect = yes
 	}
@@ -277,13 +281,13 @@ pedro.5 = {
 			AND = {
 				NOT = { has_variable = pedro_lo_marginal_var }
 				ig:ig_landowners ?= {
-					is_marginal = yes
+					ig_counts_as_marginal = yes
 				}
 			}
 			AND = {
 				NOT = { has_variable = pedro_af_marginal_var }
 				ig:ig_armed_forces ?= {
-					is_marginal = yes
+					ig_counts_as_marginal = yes
 				}
 			}
 
@@ -295,7 +299,7 @@ pedro.5 = {
 			limit = {
 				NOT = { has_variable = pedro_lo_marginal_var }
 				ig:ig_landowners ?= {
-					is_marginal = yes
+					ig_counts_as_marginal = yes
 				}
 			}
 			set_variable = pedro_lo_marginal_var
@@ -490,7 +494,7 @@ pedro.7 = {
 		}
 		if = {
 			limit = {
-				cultural_acceptance_base = { target = cu:afro_brazilian value >= acceptance_status_4 }
+				country_average_culture_pop_acceptance = { culture = cu:afro_brazilian value >= acceptance_status_4 }
 			}
 			add_loyalists = {
 				value = large_radicals
@@ -560,7 +564,7 @@ pedro.8 = {
 			limit = {
 				ig:ig_landowners ?= {
 					is_in_government = no
-					is_marginal = no
+					ig_counts_as_marginal = no
 				}
 			}
 			ig:ig_landowners ?= {
@@ -571,7 +575,7 @@ pedro.8 = {
 			limit = {
 				ig:ig_armed_forces ?= {
 					is_in_government = no
-					is_marginal = no
+					ig_counts_as_marginal = no
 				}
 			}
 			ig:ig_armed_forces ?= {
@@ -581,7 +585,7 @@ pedro.8 = {
 		if = {
 			limit = {
 				ig:ig_armed_forces ?= {
-					is_marginal = no
+					ig_counts_as_marginal = no
 				}
 			}
 			ig:ig_armed_forces ?= {
@@ -860,8 +864,9 @@ pedro.12 = {
 	trigger = {
 		NOT = { has_variable = pedro_heir_death }
 		year > 1849
-		any_scope_character = {
-			is_heir = yes
+		exists = heir
+		heir ?= {
+			culture = cu:brazilian # Will not fire if Portugal has restored the United Kingdom
 		}
 	}
 

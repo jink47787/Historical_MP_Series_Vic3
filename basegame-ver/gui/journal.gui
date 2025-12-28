@@ -126,7 +126,7 @@ types journal
 						blockoverride "visible" {
 							 visible = "[And(IsDataModelEmpty(AccessPlayer.AccessActivePlayerObjectiveJournalEntries), GetPlayer.HasObjective)]"
 						}
-						
+
 						blockoverride "text" {
 							text = "[AccessPlayer.GetObjective.GetObjectiveType.GetIdleHeader]"
 						}
@@ -239,19 +239,19 @@ types journal
 				flowcontainer = {
 					visible = "[InformationPanel.IsTabSelected('inactive_journal_entries')]"
 					using = default_list_position
-					direction = vertical
 					using = default_content_fade
-
+					direction = vertical
 					spacing = 10
 					parentanchor = hcenter
 					datamodel = "[AccessPlayer.GetGroupsForInActiveJournalEntries]"
 
-
 					empty_state = {
 						parentanchor = vcenter
+
 						blockoverride "visible" {
 							visible = "[IsDataModelEmpty(AccessPlayer.GetGroupsForInActiveJournalEntries)]"
 						}
+
 						blockoverride "text" {
 							text = "NO_INACTIVE_JOURNAL_ENTRIES"
 						}
@@ -260,24 +260,33 @@ types journal
 					item = {
 						flowcontainer = {
 							direction = vertical
+
 							textbox = {
 								text = "[JournalEntryGroup.GetName]"
 								autoresize = yes
 								align = nobaseline
 								default_format = "#title"
 								margin_left = 3
-							}							
+							}
+
 							flowcontainer = {
 								direction = vertical
 								datamodel = "[JournalEntryGroup.GetInactiveJournalEntryTypes(GetPlayer.Self)]"
 								spacing = 2
+
 								item = {
 									journal_entry = {
 										datacontext = "[AccessPlayer.GetJournalEntry(JournalEntryType.Self)]"
 										alpha = 0.75
+
 										blockoverride "fontsize" {}
+
 										blockoverride "iconsize" {
 											size = { 35 35 }
+										}
+
+										blockoverride "scripted_progress_bars_visibility" {
+											visible = no
 										}
 									}
 								}
@@ -473,11 +482,14 @@ types journal
 				
 				# scripted progress bars
 				flowcontainer = {
-					visible = "[Not( IsDataModelEmpty( JournalEntry.GetScriptedProgressBars ) )]"
 					datamodel = "[JournalEntry.GetScriptedProgressBars]"
 					margin = { 0 10 }
 					direction = vertical
 					spacing = 10
+					
+					block "scripted_progress_bars_visibility" {
+						visible = "[Not( IsDataModelEmpty( JournalEntry.GetScriptedProgressBars ) )]"
+					}
 
 					item = {
 						container = {
@@ -566,22 +578,69 @@ types journal
 										}
 										marker = {
 
-											widget = {
-												size = { 50 50 }
-												icon = {
-													size = { 35 35 }
-													widgetanchor = center
-													position = { 0 5 }
-
-													block "progress_icon" {
-														texture = "[JournalEntry.GetIcon]"
-													}
-												}
+											icon = {
+												size = { 40 20 }
+												parentanchor = vcenter
+												widgetanchor = center
+												texture = "gfx/interface/progressbar/progressbar_marker.dds"
+												using = shimmer
 											}
 										}
 									}
 								}
+							}
 
+							# double sided spain
+							gold_progressbar_horizontal = {
+								visible = "[ScriptedProgressBar.IsDoubleSidedSpain]"
+								block "progressbar_size" {
+									size = { 420 10 }
+								}
+								tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
+
+								blockoverride "noprogresstexture" {
+									noprogresstexture = "gfx/interface/progressbar/progressbar_default.dds"
+								}
+
+								blockoverride "values" {
+									value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
+									min = 0
+									max = 1
+								}
+
+								#this is hack to get an extra marker on top of the frame (progressbar properties are copied)
+								blockoverride "on_top_of_the_progressbar" {
+									progressbar = {
+										noprogresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
+										progresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
+										size = { 100% 100% }
+										spriteType = Corneredtiled
+										spriteborder = { 4 4 }
+										texture_density = 2
+										skip_initial_animation = yes
+
+										block "values" {}
+										block "direction" {
+											direction = horizontal
+										}
+										block "progress_changed_animation" {
+											using = progressbar_changed_animation
+										}
+										block "animate_negative_change" {
+											animate_negative_changes = yes
+										}
+										marker = {
+
+											icon = {
+												size = { 40 20 }
+												parentanchor = vcenter
+												widgetanchor = center
+												texture = "gfx/interface/progressbar/progressbar_marker.dds"
+												using = shimmer
+											}
+										}
+									}
+								}
 							}
 
 							# Double sided gold
@@ -709,8 +768,24 @@ types journal
 		maximumsize = { @panel_width_minus_30 -1 }
 		minimumsize = { @panel_width_minus_30 -1 }
 		
+		button_checkbox_label = {
+			position = { -10 9 }
+			tooltip = "[SelectLocalization(GetPlayer.IsIgnoringDecision(Decision.Self),'TOGGLE_DECISION_NOTIFICATION_DISABLED_TOOLTIP','TOGGLE_DECISION_NOTIFICATION_ENABLED_TOOLTIP')]"
+			onclick = "[Execute(GetPlayer.ToggleIgnoreDecision(Decision.Self))]"
+			enabled = "[IsValid(GetPlayer.ToggleIgnoreDecision(Decision.Self))]"
+
+			blockoverride "checkbox"
+			{
+				checked = "[Not(GetPlayer.IsIgnoringDecision(Decision.Self))]"
+			}
+
+			blockoverride "text"
+			{
+			}
+		}
+
 		flowcontainer = {
-			margin = { 20 10 }
+			margin = { 30 10 }
 			direction = vertical 
 
 			textbox = {

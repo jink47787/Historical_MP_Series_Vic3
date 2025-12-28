@@ -16,6 +16,22 @@
 	}
 	creation_weight = {
 		value = 100
+		if = {
+			limit = {
+				owner ?= {
+					any_political_movement = {
+						OR = {
+							is_political_movement_type = movement_legitimist
+							is_political_movement_type = movement_carlist
+							is_political_movement_type = movement_miguelist
+						}
+					}
+				}
+			}
+			multiply = {
+				value = 0.05
+			}
+		}
 	}
 	on_created = {}
 
@@ -167,11 +183,18 @@
 			}
 		}
 
-		add = { # Weakened by increasing literacy rates
-			desc = "POP_LITERACY"
-			this = {
-				value = literacy_rate
-				multiply = -2
+		if = {
+			limit = {
+				NOT = {
+					is_pop_type = clergymen
+				}
+			}
+			add = { # Weakened by increasing literacy rates
+				desc = "POP_LITERACY"
+				this = {
+					value = literacy_rate
+					multiply = -2
+				}
 			}
 		}
 
@@ -203,12 +226,16 @@
 			limit = {
 				owner ?= {
 					any_political_movement = {
-						is_political_movement_type = movement_legitimist
+						OR = {
+							is_political_movement_type = movement_legitimist
+							is_political_movement_type = movement_carlist
+							is_political_movement_type = movement_miguelist
+						}
 					}
 				}
 			}
 			multiply = {
-				value = 0.25
+				value = 0.05
 			}
 		}
 	}
@@ -216,6 +243,10 @@
 	revolution = {
 		weight = {
 			value = 100
+		}
+
+		interest_group_can_join = {
+			leader = { religion = scope:political_movement.religion }
 		}
 
 		state_weight = {
@@ -268,6 +299,10 @@
 
 		weight = {
 			value = 1000
+		}
+
+		interest_group_can_join = {
+			leader = { religion = scope:political_movement.religion }
 		}
 
 		state_weight = {
@@ -605,11 +640,18 @@ movement_religious_minority = {
 			}
 		}
 
-		add = { # Weakened by increasing literacy rates
-			desc = "POP_LITERACY"
-			this = {
-				value = literacy_rate
-				multiply = -2
+		if = {
+			limit = {
+				NOT = {
+					is_pop_type = clergymen
+				}
+			}
+			add = { # Weakened by increasing literacy rates
+				desc = "POP_LITERACY"
+				this = {
+					value = literacy_rate
+					multiply = -2
+				}
 			}
 		}
 
@@ -617,7 +659,7 @@ movement_religious_minority = {
 			limit = {
 				owner ?= {
 					OR = {
-						c:RUS ?= this
+					c:RUS ?= this
 						c:PRU ?= this
 						c:AUS ?= this
 					}
@@ -712,49 +754,33 @@ movement_religious_minority = {
 			value = 1000
 		}
 
+		interest_group_can_join = {
+			leader = { religion = scope:political_movement.religion }
+		}
+
 		state_weight = {
 			value = 0
 
 			if = {
 				limit = {
 					is_capital = no
-				}
-
-				if = {
-					limit = {
 						religion_percent_state = {
 							target = scope:political_movement.religion
-							value >= 0.75
+						value >= 0.05
 						}
 					}
-					add = 250
+				add = { # These three values must add up to more than 1 - 5 x Obstinance, 1/2 Turmoil, percent of pops of this religion
+					value = -1
+					add = "this.religion_percent_state(scope:political_movement.religion)"
+					add = {
+						value = this.turmoil
+						multiply = 0.5
 				}
-				else_if = {
-					limit = {
-						religion_percent_state = {
-							target = scope:political_movement.religion
-							value >= 0.5
+					add = {
+						value = this.obstinance
+						multiply = 5
 						}
-					}
-					add = 150
-				}
-				else_if = {
-					limit = {
-						religion_percent_state = {
-							target = scope:political_movement.religion
-							value >= 0.25
-						}
-					}
-					add = 50
-				}
-				else_if = {
-					limit = {
-						religion_percent_state = {
-							target = scope:political_movement.religion
-							value >= 0.1
-						}
-					}
-					add = 10
+					multiply = 100
 				}
 			}
 		}
@@ -815,7 +841,7 @@ movement_religious_minority = {
 				}
 			}
 			add = {
-				desc = "INSURRECTIONARY_MOVEMENTS"
+				desc = "SIMULTANEOUS_INSURRECTIONARY_MOVEMENTS"
 				owner = {
 					every_political_movement = {
 						limit = {

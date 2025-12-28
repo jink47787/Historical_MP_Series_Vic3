@@ -33,11 +33,21 @@ distribution_of_power_laws.1 = {
 		ruler.popularity >= 25
 		NOT = { has_modifier = seizing_power }
 		NOT = { has_modifier = building_support }
+		NOT = {
+			currently_enacting_law = {
+					has_amendment = amendment_type:amendment_cult_of_personality
+			}
+		}
 	}
 
 	immediate = {
 		currently_enacting_law = {
 			save_scope_as = current_law_scope
+		}
+		ruler = {
+			interest_group = {
+				save_scope_as = ruler_ig
+			}
 		}
 	}
 
@@ -49,6 +59,13 @@ distribution_of_power_laws.1 = {
 		name = distribution_of_power_laws.1.a
 		add_enactment_modifier = {
 			name = seizing_power
+		}
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_cult_of_personality
+				sponsor = scope:ruler_ig
+				cooldown = 120
+			}
 		}
 	}
 
@@ -737,14 +754,64 @@ distribution_of_power_laws.8 = {
 				value < neutral
 			}
 		}
+		any_interest_group = {
+			ig_counts_as_marginal = no
+			law_stance = {
+				law = law_type:law_universal_suffrage
+				value > neutral
+			}
+			save_temporary_scope_as = universal_suffrage_ig
+		}
+		any_interest_group = {
+			ig_counts_as_marginal = no
+			NOT = {
+				scope:universal_suffrage_ig ?= this
+			}
+			law_stance = {
+				law = law_type:law_census_voting
+				value >  neutral
+			}
+		}
 		NOT = { has_modifier = voting_age_25 }
 		NOT = { has_modifier = voting_age_21_compromise }
 		NOT = { has_modifier = voting_age_18 }
+		NOT = {
+			currently_enacting_law = {
+				OR = {
+					has_amendment = amendment_type:amendment_voting_age_18
+					has_amendment = amendment_type:amendment_voting_age_21
+					has_amendment = amendment_type:amendment_voting_age_25
+				}
+			}
+		}
 	}
 
 	immediate = {
 		currently_enacting_law = {
 			save_scope_as = current_law_scope
+		}
+		random_interest_group = {
+			limit = {
+				ig_counts_as_marginal = no
+				law_stance = {
+					law = law_type:law_universal_suffrage
+					value > neutral
+				}
+			}
+			save_scope_as = universal_voting_ig
+		}
+		random_interest_group = {
+			limit = {
+				ig_counts_as_marginal = no
+				NOT = {
+					scope:universal_suffrage_ig ?= this
+				}
+				law_stance = {
+					law = law_type:law_census_voting
+					value >  neutral
+				}
+			}
+			save_scope_as = census_voting_ig
 		}
 		random_political_movement = {
 			limit = {
@@ -766,6 +833,13 @@ distribution_of_power_laws.8 = {
 		add_enactment_modifier = {
 			name = voting_age_25
 		}
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_voting_age_25
+				sponsor = scope:census_voting_ig
+				cooldown = 120
+			}
+		}
 		add_radicals = {
 			value = medium_radicals
 			pop_type = academics
@@ -782,12 +856,26 @@ distribution_of_power_laws.8 = {
 		add_enactment_modifier = {
 			name = voting_age_21_compromise
 		}
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_voting_age_21
+				sponsor = scope:universal_voting_ig
+				cooldown = 120
+			}
+		}
 	}
 
 	option = {
 		name = distribution_of_power_laws.8.c
 		add_enactment_modifier = {
 			name = voting_age_18
+		}
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_voting_age_18
+				sponsor = scope:universal_voting_ig
+				cooldown = 120
+			}
 		}
 		scope:anti_voting_movement = {
 			add_modifier = {
@@ -1030,7 +1118,7 @@ distribution_of_power_laws.11 = {
 				law = law_type:law_universal_suffrage
 				value > neutral
 			}
-			is_marginal = no
+			ig_counts_as_marginal = no
 		}
 		NOT = { has_modifier = current_election_focus }
 	}

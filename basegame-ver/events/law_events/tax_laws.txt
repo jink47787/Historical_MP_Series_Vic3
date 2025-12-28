@@ -35,7 +35,18 @@ tax.1 = {
 				value < neutral
 			}
 		}
+		any_interest_group = {
+			law_stance = {
+				law = owner.currently_enacting_law.type
+				value < neutral
+			}
+		}
 		NOT = { has_modifier = taxation_is_theft }
+		NOT = {
+			currently_enacting_law = {
+				has_amendment = amendment_type:amendment_short_term_tax_cuts
+			}
+		}
 	}
 
 	immediate = {
@@ -47,6 +58,15 @@ tax.1 = {
 				}
 			}
 			save_scope_as = antitax_rebels
+		}
+		random_interest_group = {
+			limit = {
+				law_stance = {
+					law = owner.currently_enacting_law.type
+					value < neutral
+				}
+			}
+			save_scope_as = antitax_ig
 		}
 		currently_enacting_law = {
 			save_scope_as = current_law_scope
@@ -65,7 +85,7 @@ tax.1 = {
 		# lose success chance
 		add_enactment_modifier = {
 			name = taxation_is_theft
-			multiplier = 2
+			multiplier = 3
 		}
 		# movement gets angrier
 		scope:antitax_rebels = {
@@ -81,9 +101,12 @@ tax.1 = {
 		add_enactment_modifier = {
 			name = taxation_is_theft
 		}
-		add_modifier = {
-			name = promised_to_lower_taxes
-			days = normal_modifier_time
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_short_term_tax_cuts
+				sponsor = scope:antitax_ig
+				cooldown = 30
+			}
 		}
 	}
 }
@@ -571,10 +594,11 @@ tax.6 = {
 			strata = middle
 			pop_acceptance >= acceptance_status_4
 		}
-		NOT = { has_modifier = temporary_tax_cut_land_based }
-		NOT = { has_modifier = temporary_tax_cut_per_capita }
-		NOT = { has_modifier = temporary_tax_cut_graduated }
-		NOT = { has_modifier = temporary_tax_cut_proportional }
+		NOT = {
+			currently_enacting_law = {
+				has_amendment = amendment_type:amendment_short_term_tax_cuts
+			}
+		}
 	}
 
 	immediate = {
@@ -589,6 +613,9 @@ tax.6 = {
     		}
     		save_scope_as = middle_class_pop
     	}
+		ig:ig_petty_bourgeoisie ?= {
+			save_scope_as = pb_ig
+		}
 	}
 
 	cancellation_trigger = {
@@ -618,40 +645,11 @@ tax.6 = {
 		add_enactment_modifier = {
 			name = temporary_embarrassment
 		}
-		if = {
-			limit = {
-				has_law = law_type:law_land_based_taxation
-			}
-			add_modifier = {
-				name = temporary_tax_cut_land_based
-				days = short_modifier_time
-			}
-		}
-		else_if = {
-			limit = {
-				has_law = law_type:law_per_capita_based_taxation
-			}
-			add_modifier = {
-				name = temporary_tax_cut_per_capita
-				days = short_modifier_time
-			}
-		}
-		else_if = {
-			limit = {
-				has_law = law_type:law_graduated_taxation
-			}
-			add_modifier = {
-				name = temporary_tax_cut_graduated
-				days = short_modifier_time
-			}
-		}
-		else_if = {
-			limit = {
-				has_law = law_type:law_proportional_taxation
-			}
-			add_modifier = {
-				name = temporary_tax_cut_proportional
-				days = short_modifier_time
+		currently_enacting_law = {
+			add_amendment = {
+				type = amendment_short_term_tax_cuts
+				sponsor = scope:pb_ig
+				cooldown = 30
 			}
 		}
 	}
