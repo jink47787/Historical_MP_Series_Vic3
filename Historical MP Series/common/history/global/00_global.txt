@@ -1,6 +1,9 @@
 ﻿# This is executed last among all history
 GLOBAL = {
-	
+	add_contextless_journal_entry = je_uneasy_raj
+	add_contextless_journal_entry = je_peru_bolivia
+	add_contextless_journal_entry = je_the_first_carlist_war
+
 	#make_strategic_region_list = yes
 	
 	every_country = {
@@ -503,10 +506,180 @@ GLOBAL = {
 		activate_law = law_type:law_no_migration_controls
 	}
 	
-	c:HAI = {
+	every_country = {
+		limit = {
+			is_historical_spanish_american_colony = yes
+			NOT = {
+				any_overlord_or_above = {
+					c:SPA ?= this
+				}
+			}
+		}
+		add_treasury = { # Heavy debt from wars of independence
+			value = yearly_gross_income
+			multiply = -0.5 # 1.5
+		}
+		if = {
+			limit = {
+				has_dlc_feature = ip4_content
+			}
+			add_modifier = { # Spain does not formally recognize her former colonies in America at game-start
+				name = modifier_not_recognized_by_spain
+			}
+			add_journal_entry = {
+				type = je_spanish_american_independence
+			}
+		}
+	}
+
+	c:HAI ?= {
 		add_treasury = {
 			value = gold_reserves_limit
-			multiply = -1.0
+			multiply = -0.75
+		}
+		every_scope_state = { # Haiti and Santo Domingo
+			add_radicals_in_state = {
+				culture = cu:spanish
+				value = 0.30
+			}
+			add_radicals_in_state = {
+				culture = cu:caribeno
+				value = 0.20
+			}
+			add_radicals_in_state = {
+				culture = cu:afro_caribeno
+				value = 0.10
+			}
+		}
+	}
+
+	c:POR ?= {
+		capital = {
+			add_radicals_in_state = {
+				value = 0.25
+			}
+		}
+		every_scope_state = {
+			limit = {
+				is_capital = no
+				is_incorporated = yes
+			}
+			add_radicals_in_state = {
+				value = 0.10
+			}
+		}
+		s:STATE_ALENTEJO = { # Active insurrection at the time
+			random_scope_state = {
+				add_radicals_in_state = {
+					value = 0.10
+				}
+			}
+		}
+	}
+
+	c:SPA ?= {
+		capital = {
+			add_radicals_in_state = {
+				value = 0.15
+			}
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					OR = {
+						is_homeland = cu:basque
+						is_homeland = cu:catalan
+						s:STATE_ARAGON ?= this
+					}
+				}
+			}
+			add_radicals_in_state = {
+				value = 0.25
+			}
+		}
+		every_scope_state = {
+			limit = {
+				NOR = {
+					state_region = {
+						OR = {
+							is_homeland = cu:basque
+							is_homeland = cu:catalan
+							s:STATE_ARAGON ?= this
+						}
+					}
+					is_capital = yes
+				}
+			}
+			add_radicals_in_state = {
+				value = 0.07
+			}
+		}
+		add_modifier = {
+			name = national_guard_preoccupied
+		}
+	}
+	
+	# Debt - to compensate for our relatively low credit limits, all debts are ~3x lighter than they were historically. Capped out at a -2.5x modifier.
+	c:SPA ?= { # Spain was broke, with a "B" emoji. Historically 22:1 ratio of debt to revenue.
+		add_treasury = {
+			value = yearly_gross_income
+			multiply = -1 # 2.0 - should be -7.3, but this is literally unplayable.
+		}
+	}
+
+	c:POR ?= { # Portugal defaulted over and over again on foreign loans around game start. Historically 3:1 ratio of debt to revenue.
+		add_treasury = {
+			value = yearly_gross_income
+			multiply = -1.5
+		}
+	}	
+
+	c:SPC ?= {
+		add_modifier = {
+			name = captured_royal_arsenals
+			days = normal_modifier_time
+			is_decaying = yes
+			multiplier = 15
+		}
+		add_treasury = {
+			value = gold_reserves_limit
+		}
+		every_scope_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_ARAGON
+					state_region = s:STATE_CATALONIA
+					state_region = s:STATE_BASQUE_COUNTRY
+				}
+			}
+			add_modifier = {
+				name = spc_raided_grain_storages
+				days = normal_modifier_time
+			}
+			if = {
+				limit = {
+					state_region = s:STATE_ARAGON
+				}
+				add_modifier = {
+					name = ad_hoc_manufacturing
+					days = normal_modifier_time
+					multiplier = 3
+				}
+			}
+			else_if = {
+				limit = {
+					state_region = s:STATE_BASQUE_COUNTRY
+				}
+				add_modifier = {
+					name = ad_hoc_manufacturing_negative
+					days = normal_modifier_time
+					multiplier = 3
+				}
+				add_modifier = {
+					name = pyrenean_smuggling
+					days = normal_modifier_time
+				}
+			}
 		}
 	}
 
@@ -1032,6 +1205,136 @@ GLOBAL = {
 		add_radicals = {
 			value = 0.025
 			culture = cu:han
+		}
+	}
+
+	
+	s:STATE_LAOS.region_state:DAI = {
+		add_modifier = {
+			name = recently_conquered_state
+			is_decaying = yes
+			months = 60
+		}
+	}
+
+	c:AUS ?= {
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_AUSTRIA
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+				strata = middle
+            }
+			add_radicals_in_state = {
+                value = small_radicals
+				strata = lower
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:czech
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:czech
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:polish
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:polish
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:north_italian
+				}
+			}
+			add_radicals_in_state = {
+                value = 0.15
+                culture = cu:north_italian
+            }
+		}
+	}
+
+	c:HUN ?= {
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:slovak
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:slovak
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:serb
+				}
+			}
+			add_radicals_in_state = {
+                value = medium_radicals
+                culture = cu:serb
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:hungarian
+				}
+			}
+			add_radicals_in_state = {
+                value = medium_radicals
+                culture = cu:hungarian
+            }
+		}
+	}
+
+	c:TUR ?= {
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:bosniak
+				}
+			}
+			add_radicals_in_state = {
+                value = very_large_radicals
+                culture = cu:bosniak
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:serb
+				}
+			}
+			add_radicals_in_state = {
+                value = large_radicals
+                culture = cu:serb
+            }
+		}
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:bulgarian
+				}
+			}
+			add_radicals_in_state = {
+                value = medium_radicals
+                culture = cu:bulgarian
+            }
 		}
 	}
 }
