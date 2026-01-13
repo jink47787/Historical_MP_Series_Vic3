@@ -47,12 +47,13 @@ NCountry = {
 	CONSTRUCTION_QUEUE_INCREMENT_CONTROL = 10 # Increment/Decrement used for buildings construction queue when holding down Ctrl
 	WEEKS_TO_STORE_LOYALIST_RADICAL_STATISTICS = 52 # Number of weeks of statistics for loyalists/radicals that is stored and shown
 	INCORPORATION_TIME_SAME_CULTURE = 4				# Years if the state is a Homeland of one of the country's primary cultures
-	INCORPORATION_TIME_SAME_HERITAGE = 8			# Years if the state is a Homeland of a culture that matches of one of the country's primary cultures' Heritage traits
-	INCORPORATION_TIME_SAME_TRAIT = 12				# Years if the state is a Homeland of a culture with any trait in common with a country's primary cultures
+	INCORPORATION_TIME_SAME_HERITAGE_AND_LANGUAGE = 8			# Years if the state is a Homeland of a culture that matches of one of the country's primary cultures' Heritage and Language traits
+	INCORPORATION_TIME_SAME_HERITAGE_OR_LANGUAGE = 12			# Years if the state is a Homeland of a culture that matches of one of the country's primary cultures' Heritage or Language traits
+	INCORPORATION_TIME_SAME_TRAIT_GROUP = 18				# Years if the state is a Homeland of a culture with any trait in common with a country's primary cultures
 	INCORPORATION_TIME_NO_MATCH = 24				# Years if the state's Homeland cultures have nothing in common with the country's primary cultures
 	INCORPORATION_TIME_MIN_MULTIPLIER = 0.1			# Incorporation speed cannot be reduced below this by modifiers
-	JOURNAL_ENTRY_UPDATE_ACTIVE = 8					# Number of ticks between each update of Active (Possible) Journal Entries, can be overriden on journal entry type
-	JOURNAL_ENTRY_UPDATE_INACTIVE = 28				# Number of ticks between each update of Inactive Journal Entries, can be overriden on journal entry type
+	JOURNAL_ENTRY_UPDATE_ACTIVE = 8					# Number of days between each update of Active (Possible) Journal Entries, can be overriden on journal entry type
+	JOURNAL_ENTRY_UPDATE_INACTIVE = 28				# Number of days between each update of Inactive Journal Entries, can be overriden on journal entry type
 	MAX_TRADITION_TRAITS_PER_CULTURE = 4			# How many tradition traits a culture is allowed to have at most
 }
 
@@ -158,7 +159,7 @@ NPolitics = {
 	LAW_ENACTMENT_COOLDOWN_DAYS = 730		# When an enactment fails, or is manually stopped after at least one checkpoint, that law can't be tried to be enacted for this many days [>=0]
 	LAW_ENACTMENT_ADVANCE_FACTOR = 2		# The _base_ advance chance is the success chance multiplied by this factor [>=1]
 	LAW_ENACTMENT_RULER_IDEOLOGY_EFFECT = 0.05 # Ruler ideology has this impact on a law's chance to pass or stall depending on relative approval
-	LAW_ENACTMENT_LAW_COMMITMENT_EFFECT = 0.05 # Committing to enacting a law via treaty adds this much to pass chance
+	LAW_ENACTMENT_LAW_COMMITMENT_EFFECT = 0.05 # Committing to enacting a law via treaty adds this much to pass chance, scaled by the number of ranks the country the comittee has on the committer
 	LAW_ENACTMENT_MOVEMENT_SUPPORT_PASS_EFFECT = 1.0 # Movement support has this impact on a law's chance to pass
 	LAW_ENACTMENT_MOVEMENT_SUPPORT_STALL_EFFECT = 1.0 # Movement support has this impact on a law's chance to stall
 	LAW_ENACTMENT_IG_CLOUT_STALL_EFFECT = 1.0 # Opposing IG clout has this base impact on a law's chance to stall
@@ -180,6 +181,14 @@ NPolitics = {
 	MARGINAL_IG_THRESHOLD = 0.05		# Interest Groups with Clout above this value are considered relevant while those below are marginal (if not also In Government)
 	MARGINAL_IG_CUTOFF = 0.04			# Interest Groups who are already relevant will only become marginal again if they drop below this value.
 
+	MARGINAL_IG_JOIN_PARTY_POPULATION_THRESHOLD = 0.025 # Marginal IGs that are supported by at least this % of the population are able to join parties and become non-marginal
+
+	MIN_AMENABILITY = 0
+	MAX_AMENABILITY = 100
+	MIN_AMENABILITY_TENSE_NEGOTIATION = 25
+	MIN_AMENABILITY_NORMAL_NEGOTIATION = 50
+	MIN_AMENABILITY_FRIENDLY_NEGOTIATION = 75
+
 	RECENT_PARTY_DAYS = 14				# Party is considered recently formed if activated within RECENT_PARTY_DAYS days range
 
 	MAX_GOVERNMENT_ALTERNATIVES_TO_CONSIDER_AI = 64					# When evaluating government reform options (for AI), only consider this many constellations (sorted by average clout, descending) [>=1]
@@ -190,11 +199,11 @@ NPolitics = {
 	DEFAULT_LAW_ACTIVATION_DATE = "1836.1.1"
 	
 	CIVIL_WAR_COOLDOWN_MONTHS = 6									# After a civil war concludes, it takes this long before another one can start
+	FAILED_CIVIL_WAR_START_COOLDOWN_MONTHS = 3						# If a movement fails to get any supporting states or (for revolutions) supporting army units when trying to start a civil war, wait this long before trying again
 	
 	# If there are multiple civil wars that could start, and the current active one has lower activism, it can potentially be replaced by a more viable civil war
 	# This is the minimum delta required for another civil war to replace the active one
 	MIN_ACTIVISM_DELTA_TO_REPLACE_OTHER_CIVIL_WAR = 0.1 
-
 	
 	# The values below are used to calculate the target number of states that rise up when a civil war without an explicit target_fraction_of_states begins
 	# This is just a target value - the end result may end up different based on state weights defined in the civil war scripting
@@ -277,6 +286,11 @@ NPolitics = {
 	ELECTION_INTERVAL_YEARS = 4							# How many years normally pass between elections
 	CAMPAIGN_PERIOD_MONTHS = 6							# How long the Campaign Period before the election is
 
+	MIN_AFFILIATION_TO_STAY_IN_PARTY = 0				# An IG must have this much affiliation with a party to want to stay in it
+	MIN_AFFILIATION_TO_JOIN_PARTY = 1					# An IG must have this much affiliation with a party to want to join it
+	MAX_ELECTORAL_CONFIDENCE = 1.0						# Electoral confidence can never be higher than this
+	INITIAL_ELECTORAL_CONFIDENCE = 1.0					# Starting electoral confidence at start of game or when elections are first introduced
+
 	REFORM_GOVERNMENT_PERIOD = 6 						# How many months after election you can reform government for free
 	REFORM_GOVERNMENT_RADICALIZATION_RATE = 0.50 		# How many percent of a IG's supporters that will get radicalized when removed from government. #HMPS CHANGED TO 0.5 FROM 0.25 EILMER CHANGE
 
@@ -290,7 +304,6 @@ NPolitics = {
 	SUPPORT_UNIVERSAL_THRESHOLD = 0.75
 	
 	INCOHERENCE_FACTOR = 5								# The amount to multiply the approval value with to get an incoherence score for legitimacy
-	INCOHERENCE_FROM_SECONDARY_PARTY_MEMBERS = 0.25		# The amount to multiply the approval value with if the interest group is in a party but is not the party whip
 	LEGITIMACY_PENALTY_FOR_EACH_EXCESS_ENTITY = 20		# How much Legitimacy is lost for each group in government above the allowance determined by country_legitimacy_govt_size_add
 
 	SHOW_CONFIRMATION_BELOW_LEGITIMACY = 25
@@ -338,7 +351,11 @@ NEconomy = {
 
 	COUNTRY_GDP_MODIFIER_DIVISOR = 1000					# Scale the country_gdp static modifier by this divisor
 	COUNTRY_GDP_MODIFIER_MAX_MULTIPLIER = 200000		# The country_gdp modifier multiplier cannot be higher than this
-	
+	COUNTRY_GDP_CONSTRUCTION_MODIFIER_DIVISOR = 2000000	# Scale the country_gdp_construction static modifier by this GDP divisor
+	COUNTRY_GDP_CONSTRUCTION_MODIFIER_BASE_MULTIPLIER = 0.2	# Always added to the country_gdp_construction multiplier, regardless of GDP
+	COUNTRY_GDP_CONSTRUCTION_MODIFIER_SCALED_MULTIPLIER = 0.8	# The country_gdp_construction modifier multiplier is scaled against this
+	COUNTRY_GDP_CONSTRUCTION_MODIFIER_MAX_MULTIPLIER = 1.0	# The country_gdp_construction modifier multiplier cannot be higher than this
+
 	ECONOMY_OF_SCALE_START_LEVEL = 11					# Level at which buildings start getting economy of scale bonuses. Levels lower than this value provide no bonus [>=1]
 	USE_NATIONALIZED_ECONOMY_OF_SCALE_PENALTY = yes 	# Whether ECONOMY_OF_SCALE_NATIONALIZED_FRACTION_MULT should be applied to economy of scale modifier for buildings with nationalized levels
 	ECONOMY_OF_SCALE_NATIONALIZED_FRACTION_MULT = 0.33	# Non-government building economy of scale modifier if multiplied by (1 - the fraction of nationalized levels * this)
@@ -377,6 +394,10 @@ NEconomy = {
 
 	GOODS_LEADERBOARD_SIZE = 10					# How many spots there are on each goods leaderboard
 	MIN_SPOT_PRESTIGE_AWARD = 3					# How many spots on the goods leaderboard get awarded Prestige
+
+	GOODS_LEADERBOARD_GLOBAL_GDP_SCALING = 10000000000	# At this amount of global yearly GDP, max scaling to top goods producer prestige is applied
+	GOODS_LEADERBOARD_PRESTIGE_BASE = 0.25		# This multiplier of prestige from being top goods producer is always awarded
+	GOODS_LEADERBOARD_PRESTIGE_SCALED = 2.75	# This multiplier of prestige from being top goods producer is scaled against global GDP
 
 	MIN_GOODS_PRICE	= 1							# A good cannot have a lower base price than this
 	PRICE_RANGE = 0.75							# min price of a good is base * (1 - PRICE_RANGE), Max price is base * (1 + PRICE_RANGE), PRICE_RANGE is locked to [0-1]
@@ -421,9 +442,10 @@ NEconomy = {
 	TRADE_CENTER_ADVANTAGE_TREATY_PORT_FACTOR = 200 						# Trade Centers get this amount of export/import advantage, scaled against % of opposite-direction trade from Treaty Ports owned by their parent country
 	
 	# Only one of the penalties below is ever applied, in the following priority order: Embargo, War, Lack of Interest
-	TRADE_CENTER_ADVANTAGE_NO_INTEREST_FACTOR = -50 						# Trade Centers lose this amount of export/import advantage, scaled against % of opposite-direction trade is from markets where the owner has no interest
-	TRADE_CENTER_ADVANTAGE_AT_WAR_FACTOR = -75 								# Trade Centers lose this amount of export/import advantage, scaled against % of opposite-direction trade is from markets where the owner is at war with the market controller
 	TRADE_CENTER_ADVANTAGE_EMBARGO_FACTOR = -100							# Trade Centers lose this amount of export/import advantage, scaled against % of opposite-direction trade is from markets where the owner is embargoed by the market controller
+	TRADE_CENTER_ADVANTAGE_AT_WAR_FACTOR = -75 								# Trade Centers lose this amount of export/import advantage, scaled against % of opposite-direction trade is from markets where the owner is at war with the market controller
+	TRADE_CENTER_ADVANTAGE_NO_INTEREST_FACTOR_EXPORTS = -50 				# Trade Centers lose this amount of export advantage, scaled against % of opposite-direction trade is from markets where the owner has no interest
+	TRADE_CENTER_ADVANTAGE_NO_INTEREST_FACTOR_IMPORTS = 0 					# Trade Centers lose this amount of	import advantage, scaled against % of opposite-direction trade is from markets where the owner has no interest
 
 	# Weights for Trade Center preference in importing/exporting to other specific Trade Centers
 	TRADE_CENTER_PREFERENCE_BASE = 1										# Base weight in preference for each other Trade Center
@@ -450,11 +472,15 @@ NEconomy = {
 	HIRING_RANGE_WEEKLY_CHANGE = 0.01 			# Weekly hiring range of a building is decreased or increased by this based on whether it is failing to hire at its current rate or not
 	EMPLOYMENT_PROPORTIONALITY_LIMIT = 0.1		# A building cannot have a difference of ratio of full employment between any two professions greater than this limit
 	MINIMUM_EMPLOYEES = 10						# If a building has fewer employees than this, it will always attempt to hire
-	BUILDING_RAISE_WAGES_DIVIDEND_INCOME_FACTOR = 0.5 # A pop with dividend income has its wealth multiplied by 1 - ( the fraction of their income that is dividends * this ) to ensure buildings don't start wage dumping just because all employees are getting dividends
-	BUILDING_RAISE_WAGES_OWNERSHIP_BUILDING_FACTOR = 0.5 # Buildings that own other buildings multiply their target wages by this to ensure profitability
-	BUILDING_RAISE_WAGES_MIN_RELEVANT_POP_SIZE = 50 # Pops with less workforce than this are ignored when checking whether a profitable building should raise wages because of radicalizing workers
-	BUILDING_RAISE_WAGES_TARGET_WEALTH_MULT = 0.66 # Profitable buildings only care to raise wages for discriminated pops if their wealth to expected SoL ratio is less than this
-	BUILDING_LOWER_WAGES_TARGET_WEALTH_MULT = 1.2 # Buildings will consider lowering wages if all significant pops working in them have this * the target wealth to expected SoL ratio
+	BUILDING_WAGES_DIVIDEND_INCOME_FACTOR = 0.5 # A pop with dividend income has its wealth multiplied by 1 - ( the fraction of their income that is dividends * this ) to ensure buildings don't start wage dumping just because all employees are getting dividends
+	BUILDING_WAGES_WELFARE_INCOME_FACTOR = 0.8 # A pop with welfare income has its wealth multiplied by 1 - ( the fraction of their income that is welfare * this ) to ensure buildings don't start wage dumping just because all employees are getting welfare
+	BUILDING_WAGES_OWNERSHIP_BUILDING_FACTOR = 0.5 # Buildings that own other buildings multiply their target wages by this to ensure profitability
+	BUILDING_WAGES_MIN_RELEVANT_POP_SIZE = 50 # Pops with less workforce than this are ignored when checking whether a profitable building should raise wages because of radicalizing workers
+	BUILDING_RAISE_WAGES_TARGET_WEALTH_MULT = 0.66 # Buildings will consider raising wages if any significant pops working in them have this or lower * the target wealth to expected SoL ratio
+	BUILDING_LOWER_WAGES_TARGET_WEALTH_MULT = 1.2 # Buildings will consider lowering wages if all significant pops working in them have this or higher * the target wealth to expected SoL ratio
+	BUILDING_WAGES_AVERAGE_PRODUCTIVITY_THRESHOLD = 0.5 # At which ratio to average productivity does BUILDING_WAGES_AVERAGE_PRODUCTIVITY_FACTOR start kicking in (average tends to be high due to ownership buildings & trade centers, so this value should be fairly low)
+	BUILDING_WAGES_AVERAGE_PRODUCTIVITY_FACTOR = 0.5 # How much more generous will buildings with high productivity compared to average for the building type be about wages, so long as they are turning an OK profit
+	BUILDING_WAGES_AVERAGE_PRODUCTIVITY_FACTOR_MAX = 2.5 # Beyond this ratio of productivity compared to average, the effects of BUILDING_WAGES_AVERAGE_PRODUCTIVITY_FACTOR will be capped
 	BUILDING_PREFER_LAYOFFS_TARGET_WEALTH_MULT = 0.66 # Buildings will prefer laying off pops if any significant pops working in them have this * the target wealth to expected SoL ratio or below
 	BUILDING_FOREIGN_OWNERSHIP_WAGE_FACTOR = -0.25	# Buildings with foreign owners will have their wage targets adjusted by this amount (multiplied by foreign owned fraction), as the owners are less likely to care about radicals generated by low wages
 	BUILDING_DEFAULT_MIN_EARNINGS_TO_HIRE_EMPLOYEES = 3  # Non-subsidized buildings will not hire if it would result in their annual earnings/employee falling below this threshold (default value, can be overridden for building group)
@@ -473,6 +499,7 @@ NEconomy = {
 	BUILDING_WEEKS_BETWEEN_PAY_CHANGES = 0		# Cooldown between changes in pay, so buildings don't overcompensate for a temporary change in circumstances. If the building is unprofitable it uses BUILDING_WEEKS_BETWEEN_PAY_CHANGES_WHEN_UNPROFITABLE instead.
 	BUILDING_WEEKS_BETWEEN_PAY_CHANGES_WHEN_UNPROFITABLE = 0 # Cooldown between changes in pay, so buildings don't overcompensate for a temporary change in circumstances. Only used when unprofitable.
 	MIN_RAISE_TO_HIRE = 0.10					# The minimum required increase in wages for an employee to switch jobs (1.0 = +100% = x2)
+	MIN_JOB_ATTRACTIVENESS = 0.10				# Job attractiveness cannot be lower than this from stacking modifiers
 	BASE_RESOURCE_DISCOVER_CHANCE = 0.02 		# Per day (1.0 = 1%)
 	EMPLOYMENT_RESOURCE_DEPLETE_CHANCE = 0.005	# Multiplied by number of fully employed levels of the building
 	RESOURCE_DISCOVER_MIN_FRACTION = 0.2		# Min fraction of resources that will be discovered for each successful roll
@@ -527,10 +554,10 @@ NEconomy = {
 	COLONIAL_SLAVERY_MAX_STATE_SLAVE_FRACTION = 0.25				# If more than this % of a state's population are slaves, do not enslave any more pops under colonial slavery
 	COLONIAL_SLAVERY_ACCEPTANCE_THRESHOLD = 20						# Pops with this or more acceptance in their state do not get enslaved under colonial slavery
 
-	DEBT_SLAVERY_ENSLAVEMENT_RATE = 0.005						# Under debt slavery up to this much of a state's populace can be enslaved for their debts each week
-	DEBT_SLAVERY_ENSLAVEMENT_RATE_PER_POP = 0.1					# No more than this fraction of a single pop can be enslaved each week
-	DEBT_SLAVERY_ENSLAVEMENT_RATE_DROP_OFF_PER_WEALTH = 0.01	# Each point of wealth reduces max enslavement rate on a pop by this
-	DEBT_SLAVERY_MAX_STATE_SLAVE_FRACTION = 0.15				# If more than this % of a state's population are slaves, do not enslave any more pops under debt slavery
+	DEBT_SLAVERY_ENSLAVEMENT_RATE = 0.005							# Under debt slavery up to this much of a state's populace can be enslaved for their debts each week
+	DEBT_SLAVERY_ENSLAVEMENT_RATE_PER_POP = 0.1						# No more than this fraction of a single pop can be enslaved each week
+	DEBT_SLAVERY_ENSLAVEMENT_RATE_DROP_OFF_PER_WEALTH = 0.01		# Each point of wealth reduces max enslavement rate on a pop by this
+	DEBT_SLAVERY_MAX_STATE_SLAVE_FRACTION = 0.15					# If more than this % of a state's population are slaves, do not enslave any more pops under debt slavery
 
 	SLAVE_TRADE_MIN_VACANCIES_NEEDED_TO_IMPORT = 500 # There needs to be at least this many (non-subsistence) vacancies in buildings that can be filled by slaves in order for slave import to happen
 	SLAVE_TRADE_MIN_POPULATION_TO_EXPORT = 100000	 # There needs to be at least this many people in the state in order for it to be selected, or remain valid, as a slave import target
@@ -598,8 +625,6 @@ NEconomy = {
 	SUBVENTION_LEVEL_EFFECT_HIGH = 0.5					# The fraction of subvention rate applied at high level
 	SUBVENTION_LEVEL_EFFECT_MAXIMUM = 1.0				# The fraction of subvention rate applied at maximum level
 
-	REINVESTMENT_EFFICIENCY_MAX = 1.0					# Maximum conversion of reinvestment to investment pool
-	REINVESTMENT_BASE_EFFICIENCY_THRESHOLD = 50000000	# Below this amount of GDP, increase reinvestment multiplier on a linear scale up to REINVESTMENT_EFFICIENCY_MAX at 0
 	REINVESTMENT_SUBSISTENCE_FRACTION_REDUCTION = 0.5	# Reinvestment from pops in ownership buildings is multiplied by ( 1 - this * the share of levels owned that are subsistence buildings )
 
 	COMPANY_OVER_LIMIT_BONUS_PENALTY_MIN = 0.33			# If the number of companies in the country exceeds the limit, all company bonuses get penalty. The penalty is scaled proportionally to the limit (exceeding the limit by 100% reduces bonuses by 100%) and the minimum value is this
@@ -639,7 +664,7 @@ NEconomy = {
 	COLLECTIVIZATION_DEBT_RATIO = 0.5					# Ratio of the country max debt can be used for collectivizing
 	MIN_COLLECTIVIZATION_BUDGET = 1000000				# Min size of a collectivizing budget	
 	DYNAMIC_INDUSTRY_CHARTER = no						# Do we want to use dynamic industry charter instead of scripted ones
-	COMPANY_INFLUENCE_LEVEL_STEPS = { 25 50 100 250 500 1000 }
+	COMPANY_INFLUENCE_LEVEL_STEPS = { 25 50 100 250 500 1000 1500 2500 5000 10000 }
 	COMPANY_CHARTER_AUTHORITY_COST = 100				# Cost of establishing a company charter
 
 	# Currently only used in loc, not logic
@@ -654,6 +679,7 @@ NEconomy = {
 	MONOPOLY_PRICE_IMPACT = 0.2							# The price of a good is increased by this multiplier based on how much of its supply is considered to be under a monopoly
 
 	PRIVATIZATION_DISCOUNT_MONOPOLY = 0.2				# The cost of privatizing a building is multiplied by this for companies with a monopoly on that building type
+	PRIVATIZATION_DISCOUNT_COMPANY_ONLY = 0.1 			# The cost of a company privatizing a building is multiplied by this when non company privatization is forbidden (cumulative with PRIVATIZATION_DISCOUNT_MONOPOLY)
 
 	PRESTIGE_GOODS_INPUT_THROUGHPUT_BONUS = 0.2			# Bonus to throughput, scaled against proportion of input goods base value that is prestige goods
 }
@@ -772,7 +798,8 @@ NMilitary = {
 	BASECAMP_NUM_PROVINCES_SCORE = 0.05				# The more provinces around basecamp the higher the score
 
 	# Defines below control how much blockade strength is required to fully blockade a state
-	BLOCKADE_TARGET_STRENGTH_BASE = 10						# Base value for each coastal state
+	# The base target strength is equal to the state_blockade_resistance_add modifier
+	BLOCKADE_TARGET_STRENGTH_MAXIMUM = 100000				# Required blockade strength cannot be higher than this
 	BLOCKADE_TARGET_STRENGTH_PER_TRADED_UNIT = 1			# Each unit of imports/exports in the market area increases required blockade strength by this (only for world market hubs)
 	BLOCKADE_TARGET_STRENGTH_PER_PRODUCED_UNIT = 1			# Each unit of goods produced in buildings affected by blockades (such as fisheries and shipyards) increases required blockade strength by this
 	BLOCKADE_TARGET_STRENGTH_PER_CONVOY = 1					# Each convoy passing through the state's port increases required blockade strength by this
@@ -915,6 +942,19 @@ NDiplomacy = {
 	INCREASE_AUTONOMY_OF_SUBJECT_ACTION_NAME = "da_increase_autonomy_of_subject"
 	DECREASE_AUTONOMY_OF_SUBJECT_ACTION_NAME = "da_decrease_autonomy"
 
+	WAR_GOAL_TRANSFER_SUBJECT_TYPE = "transfer_subject"
+	WAR_GOAL_UNIFICATION_TYPE = "unification"
+	WAR_GOAL_CONTAIN_THREAT_TYPE = "contain_threat"
+	WAR_GOAL_INDEPENDENCE_TYPE = "independence"
+	WAR_GOAL_HUMILIATION_TYPE = "humiliation"
+	WAR_GOAL_ENFORCE_TREATY_ARTICLE_TYPE = "enforce_treaty_article"
+	WAR_GOAL_CONQUER_STATE_TYPE = "conquer_state"
+	WAR_GOAL_REVOKE_ALL_CLAIMS_TYPE = "revoke_all_claims"
+	WAR_GOAL_RETURN_STATE_TYPE = "return_state"
+	WAR_GOAL_OPEN_MARKET_TYPE = "open_market"
+	WAR_GOAL_FOREIGN_INVESTMENT_RIGHTS_TYPE = "foreign_investment_rights"
+	WAR_GOAL_JOIN_POWER_BLOC_TYPE = "join_power_bloc"
+
 	WAR_GOAL_REPARATIONS_MONTHS = 60	# [>= 0]
 	WAR_GOAL_COLONIZATION_RIGHTS_PACT_TYPE = "colonization_rights"
 	WAR_GOAL_COLONIZATION_RIGHTS_MONTHS = 60	# [>= 0]
@@ -932,7 +972,7 @@ NDiplomacy = {
 	WAR_GOAL_REGIME_CHANGE_MONTHS = 60 # Government in country with forced regime change is locked in for this number of months [>= 0]
 	WAR_GOAL_REGIME_CHANGE_MAX_IDEOLOGICAL_OPINION = -0.01 # If ideological opinion is above this, regime change can't be used
 	WAR_GOAL_REGIME_CHANGE_MIN_LAW_PROGRESSIVENESS_DIFFERENCE = 0 # If the difference between the target wargoal holder's laws in a law group are not at least this, don't change it as part of regime change
-	WAR_GOAL_REGIME_CHANGE_NUM_TIMES_TO_LOOP_THROUGH_LAWS = 100	# How many times do we loop through the laws to check what to change? This is done more than once in order to allow laws that are unlocked by other laws to be changed
+	#WAR_GOAL_REGIME_CHANGE_NUM_TIMES_TO_LOOP_THROUGH_LAWS = 100	# How many times do we loop through the laws to check what to change? This is done more than once in order to allow laws that are unlocked by other laws to be changed
 	WAR_GOAL_INCREASE_AUTONOMY_MIN_LIBERTY_DESIRE = 75 # A subject must have at least this much LD to use the increase autonomy wargoal
 	WAR_GOAL_INDEPENDENCE_MIN_LIBERTY_DESIRE = 90 # A subject must have at least this much LD to use the independence wargoal
 	
@@ -963,44 +1003,6 @@ NDiplomacy = {
 	WAR_GOAL_INFAMY_DIPLO_PLAY_BACKER_REFUND = -1.00 	# Refund of infamy for war goals that are dropped for backers in a diplo play (due to play not escalating to war or backer switching sides)
 	WAR_GOAL_INFAMY_PEACE_REFUND = -0.5 				# Refund of infamy for war goals that are dropped due to a country capitulating or negotating peace without enforcing their wargoal
 	WAR_GOAL_INFAMY_REDUCTION_FOR_TARGET = -0.5 		# This much of a war goal's infamy value is removed from the target when target has it enforced on them
-
-	# Higher priority wargoals are executed first
-	WAR_GOAL_EXECUTION_PRIORITY_UNIFICATION = 200
-
-	WAR_GOAL_EXECUTION_PRIORITY_INDEPENDENCE = 100
-	WAR_GOAL_EXECUTION_PRIORITY_SECESSION = 99
-	WAR_GOAL_EXECUTION_PRIORITY_LEAVE_POWER_BLOC = 98
-	
-	WAR_GOAL_EXECUTION_PRIORITY_LIBERATE_COUNTRY = 90
-	
-	WAR_GOAL_EXECUTION_PRIORITY_ANNEX_COUNTRY = 80
-	
-	WAR_GOAL_EXECUTION_PRIORITY_RETURN_STATE = 70
-	WAR_GOAL_EXECUTION_PRIORITY_CONQUER_STATE = 69
-	
-	WAR_GOAL_EXECUTION_PRIORITY_CONTAIN_THREAT = 60
-	WAR_GOAL_EXECUTION_PRIORITY_TRANSFER_SUBJECT = 59
-	WAR_GOAL_EXECUTION_PRIORITY_LIBERATE_SUBJECT = 58
-	
-	WAR_GOAL_EXECUTION_PRIORITY_REVOKE_ALL_CLAIMS = 50
-	WAR_GOAL_EXECUTION_PRIORITY_REVOKE_CLAIM = 49
-	
-	WAR_GOAL_EXECUTION_PRIORITY_INCREASE_AUTONOMY = 40
-	WAR_GOAL_EXECUTION_PRIORITY_REDUCE_AUTONOMY = 39
-	
-	WAR_GOAL_EXECUTION_PRIORITY_JOIN_POWER_BLOC = 30
-	WAR_GOAL_EXECUTION_PRIORITY_UNIFICATION_LEADERSHIP = 29
-	
-	WAR_GOAL_EXECUTION_PRIORITY_REGIME_CHANGE = 20
-	WAR_GOAL_EXECUTION_PRIORITY_OPEN_MARKET = 19
-	WAR_GOAL_EXECUTION_PRIORITY_HUMILIATION = 18
-	WAR_GOAL_EXECUTION_PRIORITY_FORCE_NATIONALIZATION = 17
-	WAR_GOAL_EXECUTION_PRIORITY_FOREIGN_INVESTMENT_RIGHTS = 16
-	WAR_GOAL_EXECUTION_PRIORITY_COLONIZATION_RIGHTS = 15
-	
-	WAR_GOAL_EXECUTION_PRIORITY_MAKE_DOMINION = 14
-	WAR_GOAL_EXECUTION_PRIORITY_MAKE_TRIBUTARY = 13
-	WAR_GOAL_EXECUTION_PRIORITY_MAKE_PROTECTORATE = 12
 
 	DIPLOMATIC_PLAY_ABANDON_SUPPORT_RELATIONS_IMPACT = 50
 	DIPLOMATIC_PLAY_ESCALATION_DAILY = 1
@@ -1121,8 +1123,8 @@ NDiplomacy = {
 	ECONOMIC_DEPENDENCE_GDP_RATIO_BY_OTHER_FACTOR = 5				# Ex. if you own 15% of the other country's GDP, that works out to +0.75
 	ECONOMIC_DEPENDENCE_GDP_RATIO_BY_OTHER_MIN = 0
 	ECONOMIC_DEPENDENCE_GDP_RATIO_BY_OTHER_MAX = 5
-	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_FACTOR = 1
-	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_MIN = 0
+	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_FACTOR = 1 #More embarrassing if your subjects own your stuff than the other way round.
+	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_MIN = 0 #This value is negative
 	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_MAX = 1
 	ECONOMIC_DEPENDENCE_GDP_PERCENTAGE_FACTOR = 1
 	ECONOMIC_DEPENDENCE_GDP_PERCENTAGE_MIN = 0
@@ -1208,6 +1210,7 @@ NPops = {
 
 	DEFAULT_POP_TYPE = "laborers"				# Used by: create_pop effects; migration; injured military leaving their outposts; slaves default employment role; etc.
 	SLAVE_POP_TYPE = "slaves"					# This is the type of pop that debtors will become
+	ACADEMICS_POP_TYPE = "academics"			# Academic pops
 	OFFICERS_POP_TYPE = "officers"					# This is the type of pop that is considered military officers
 	SERVICEMEN_POP_TYPE = "soldiers"					# This is the type of pop that is considered military servicemen
 
@@ -1238,7 +1241,9 @@ NPops = {
 	RADICALS_MAX_FROM_STARVATION_SEVERE = 0.75 # Food Security = 0
 	
 	ALLOW_ASSIMILATION_IN_HOMELANDS = yes		# Can pops assimilate when living in their homelands?
-	ALLOW_ASSIMILATION_ACROSS_HERITAGES = yes 	# Can pops assimilate into pops of a different heritage?
+	ALLOW_ASSIMILATION_REQUIRE_HERITAGE_GROUP = yes		# Can pops assimilate into pops of a different heritage group (weaker condition)
+	ALLOW_ASSIMILATION_REQUIRE_HERITAGE_TRAIT = no		# Can pops assimilate into pops of a different heritage trait (stronger condition)
+	#in case if both are allowed, heritage trait requirement takes precedence
 
 	ASSIMILATION_RATE = 0.0004					# Percentage of pops who will Assimilate into a different Culture each month, if eligible
 	MIN_ASSIMILATION = 1						# If there is any assmiliation at least this many people will assimilate
@@ -1279,7 +1284,7 @@ NPops = {
 
 	LITERACY_DIEOFF_BIAS = 0.7					# Percentage of literate pops who die of old age compared to the current literacy rate, the higher this value the faster the population becomes illiterate when literacy suffers
 
-	DEFAULT_SOL_CHANGE_IMPACT_FACTOR = 0.03			# How large part of a pop become more loyalist or radical as a result of a change in standard of living
+	DEFAULT_SOL_CHANGE_IMPACT_FACTOR = 0.03		# How large part of a pop become more loyalist or radical as a result of a change in standard of living, can be overriden on specific pop types
 	SOL_CHANGE_IMPACT_FACTOR_REDUCTION_START = 20	# Above amount of SoL, we start scaling down loyalists/radicals from SoL changes
 	SOL_CHANGE_IMPACT_FACTOR_REDUCTION_END = 30 	# At this amount of SoL, we apply maximum scaling down of loyalists/radicals from SoL changes
 	SOL_CHANGE_IMPACT_FACTOR_REDUCTION_SCALE = 1 	# Loyalists/radicals from SoL changes is divided by ( 1 + this ) at maximum scaling
@@ -1352,7 +1357,7 @@ NPops = {
 	CULTURAL_FERVOR_NATIONAL_AWAKENING_DEFAULT_LENGTH_MONTHS = 120				# The default length of a national awakening in months
 
 	CULTURAL_FERVOR_ASSIMILATIOM_EFFECT = 0.01									# The effect cultural fervor has on assimilation, it makes it this much harder to assimilate with higher fervor
-	CULTURAL_FERVOR_WAR_SUPPORT_EFFECT = 0									# The effect cultural fervor has on war support
+	CULTURAL_FERVOR_WAR_SUPPORT_EFFECT = 0										# The effect cultural fervor has on war support
 	CULTURAL_FERVOR_CONQUEST_RADICILIZATION_IMPACT = -0.005						# This modifies the radicialization of pops in a state when it is conquered by a country with a primary culture the same as the pops
 
 	# Slavery #
@@ -1368,11 +1373,11 @@ NPops = {
 ## Migration Attraction ##
 	MIGRATION_PULL_EMPTY_STATE = 100											# If a state has no pops at all, give it a huge migration pull
 	MIGRATION_PULL_FROM_LIVING_STANDARD = 2										# Migration pull from each point of average living standard in target state
-	MIGRATION_PULL_FROM_AVAILABLE_EMPLOYMENT = 3								# Migration pull is increased by for each 10k available non subsistence jobs
+	MIGRATION_PULL_FROM_AVAILABLE_EMPLOYMENT = 30								# Migration pull is increased by the % of available non subsistence jobs compared to employed non subsistence pops, multiplied by this
 	MIGRATION_PULL_FROM_AVAILABLE_EMPLOYMENT_MAX = 30							# Migration pull from available non subsistence jobs cannot exceed this
-	MIGRATION_PULL_FROM_AVAILABLE_SUBSISTENCE_EMPLOYMENT = 0.7					# Migration pull is increased by the % of available subsistence jobs compared to employed non subsistence pops, multiplied by this
+	MIGRATION_PULL_FROM_AVAILABLE_SUBSISTENCE_EMPLOYMENT = 2					# Migration pull is increased by the % of available subsistence jobs compared to employed non subsistence pops, multiplied by this
 	MIGRATION_PULL_FROM_AVAILABLE_SUBSISTENCE_EMPLOYMENT_MAX = 20				# Migration pull from available subsistence jobs cannot exceed this
-	MIGRATION_PULL_REDUCTION_FROM_UNEMPLOYMENT = 1								# Migration pull is reduced by this for each 10k unemployed pops
+	MIGRATION_PULL_REDUCTION_FROM_UNEMPLOYMENT = 50								# Migration pull is reduced by the % of unemployed pops compared to employed pops, multiplied by this
 	MIGRATION_PULL_REDUCTION_FROM_UNEMPLOYMENT_MAX = 50							# Migration pull reduction from unemployment cannot exceed this
 
 ## Market Migrations ##
@@ -1411,14 +1416,14 @@ NPops = {
 	MIGRATION_PULL_MULT_FROM_MASS_MIGRATION_TARGET = 1.5						# Migration pull multiplied by this from target state being a mass migration target
 	MIGRATION_PULL_MULT_FROM_MASS_MIGRATION_TARGET_ADJACENCY = 1.1				# Migration pull multiplied by this from target state being next to a mass migration target
 	MIGRATION_MAX_PER_STATE_MASS_EMIGRATION_MULT = 2.4							# Weekly emigration caps are multiplied by this amount by this for mass migrations (after clamping from MIGRATION_MAX_EMIGRATION_AS_POPULATION_FRACTION)
-	MIGRATION_MAX_PER_STATE_MASS_IMMIGRATION_MULT = 4.0						# Weekly immigration caps are multiplied by this amount by this for mass migrations (after clamping from MIGRATION_MAX_EMIGRATION_AS_POPULATION_FRACTION)
+	MIGRATION_MAX_PER_STATE_MASS_IMMIGRATION_MULT = 4.0							# Weekly immigration caps are multiplied by this amount by this for mass migrations (after clamping from MIGRATION_MAX_EMIGRATION_AS_POPULATION_FRACTION)
 	MASS_MIGRATION_NEIGHBORING_TARGET_STATE_LIMIT_FRACTION = 0.5				# Fraction of the limit a neighboring state gets compared to the main target state in a mass migration 
 
 ##### End Migration #####
 
 	COLONIZATION_RIGHTS_GROWTH_MULTIPLIER = 2.5			# Colonial growth AND max colonial growth are multiplied by this if you have colonization rights
-	COMPANY_COLONIZATION_GROWTH_MULTIPLIER = 2		# Colonial growth AND max colonial growth are multiplied by this if you have company colonization rights
-	COLONIAL_GROWTH_BASE_FACTOR = 0.00002				# Colonial growth generated by a state is ( total pops / 1000 ) * this * modifier from institution
+	COMPANY_COLONIZATION_GROWTH_MULTIPLIER = 2			# Colonial growth AND max colonial growth are multiplied by this if you have company colonization rights
+	COLONIAL_GROWTH_BASE_FACTOR = 0.00002				# Colonial growth generated by a state is this amount per 1000 population, multiplied by the Colonial Growth modifier in the state
 	MIN_BASE_COLONIAL_GROWTH = 0.020					# Country base colonial growth from population cannot be lower than this
 	MAX_BASE_COLONIAL_GROWTH = 0.030					# Country base colonial growth from population cannot be higher than this
 	MAX_COLONIAL_GROWTH = 0.1							# Colonies can grow by this much at most per day 
@@ -1444,8 +1449,8 @@ NPops = {
 	JOB_SATISFACTION_PER_PERCENT_WAGE_RATE_ABOVE_NORMAL = 1		# Job satisfaction gained per pound of workplace wage rate (weekly wage of 10k laborers) above country normal
 	JOB_SATISFACTION_FROM_CAN_AFFORD_EXPENSES = 1000			# Job satisfaction gained from being able to afford your bug package (and taxes)
 	JOB_SATISFACTION_FROM_CANNOT_AFFORD_EXPENSES = -100			# Job satisfaction gained from not being able to afford your bug package (and taxes)
-	JOB_SATISFACTION_PER_PERCENT_HIGHER_SOL_QUALIFICATION = -1 	# Job satisfaction gained per percent of workforce qualified for a higher strata. Note that qualifications are assumed to overlap and the largest qualification is used in this calculation
-	JOB_SATISFACTION_FROM_EMPLOYMENT = 100						# Job satisfaction gained from having a job
+	JOB_SATISFACTION_PER_PERCENT_HIGHER_SOL_QUALIFICATION = -1 	# Job satisfaction gained per percent of workforce qualified for a job with a higher base standard of living. Note that qualifications are assumed to overlap and the largest qualification is used in this calculation
+	JOB_SATISFACTION_FROM_JOB_ATTRACTIVENESS = 100				# Job satisfaction when employed, multiplied by job attractiveness
 	JOB_SATISFACTION_DIVIDENDS_MAX_MULT = 5						# Max multiplier from the ratio between pop dividends and wages
 	JOB_SATISFACTION_DIVIDENDS_BASE = 50						# Base value to be multiplied by the ratio between dividends and wages
 	JOB_SATISFACTION_LOSSES_MIN_MULT = -5						# Min multiplier from the ratio between pop losses and wages (or if you will, max magnitude)
@@ -1488,6 +1493,15 @@ NPops = {
 	WORKFORCE_RATIO_MAX_UNEMPLOYMENT_FACTOR_MAX_CONSOLIDATION = 1
 	POP_MERGE_START_POPS = 50000
 	POP_MERGE_MAX_TARGET_POPS = 100000
+
+	### Pop Weights for Dependents Distribution
+	# Format: { lower strata, middle strata, upper strata }
+	# These impact the weight assigned to potential target pops for receiving dependents as a result of battlefield injuries
+	# For example, we want injuried and widowed soldier pop individuals to be mostly merged to lower strata pops
+	DEFAULT_DEPENDENTS_DISTRIBUTION_WEIGHTS = { 1.0 0.5 0.1 } # For when merging small pops
+	LOWER_STRATA_CASUALTY_DEPENDENTS_DISTRIBUTION_WEIGHTS = { 1.0 0.1 0.0 } # For when soldiers are wounded
+	MIDDLE_STRATA_CASUALTY_DEPENDENTS_DISTRIBUTION_WEIGHTS = { 0.25 1.0 0.1 } # For when officers are wounded
+	UPPER_STRATA_CASUALTY_DEPENDENTS_DISTRIBUTION_WEIGHTS = { 1.0 0.5 0.1 } # Not used, for modding, enjoy
 }
 
 ### Pop Growth Constants
@@ -1599,6 +1613,8 @@ NTechnology = {
 
 NCharacters = {
 	NUM_RANDOM_NAME_TRIES_FOR_UNIQUENESS = 3	# When generating random names for characters, try this many times to find a unique name within the country [>=1]
+	SET_RULER_NUM_OPTIONS = 3 					# The number of potential rulers to generate for a country at game start
+	SET_RULER_POOL_SIZE = 7 					# The max number of potential rulers to generate for a country at game start
 	RULER_MIN_AGE_FOR_HEIR = 20 				# Before this age, don't randomly generate heirs for rulers
 	RULER_AGE_FOR_HEIR_CHANCE_BOOST = 30 		# A year after this age start boosting chance of heir generation
 	RULER_HEIR_GENERATION_CHANCE = 0.001 		# Per day
