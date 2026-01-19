@@ -14,6 +14,17 @@ law_slavery_banned = {
 			limit = { has_variable = slavery_recently_enacted }
 			remove_variable = slavery_recently_enacted			
 		}	
+
+		if = {
+			limit = {
+				has_variable = slaves_work_with_independence_movement
+			}
+			add_loyalists = {
+				value = medium_radicals # Not too many, though. Freedom from slavery is sort of the bare minimum
+				culture = cu:afro_caribeno
+			}
+		}
+
 		set_variable = {
 			name = slavery_recently_abolished
 			value = yes
@@ -52,12 +63,58 @@ law_slavery_banned = {
 		}		
 	}
 	
-	ai_enact_weight_modifier = { #Petitions
+	ai_enact_weight_modifier = {
 		value = 0
-		
+		# Brazilian AI is less likely to pursue slavery banned if there are no abolitionists in power.
+		if = {
+			limit = {
+				c:BRZ ?= this
+				has_law_or_variant = law_type:law_slave_trade
+				NOR = {
+					any_interest_group = {
+						is_in_government = yes
+						leader = {
+							has_ideology = ideology:ideology_abolitionist
+						}
+					}
+					ruler ?= { has_ideology = ideology:ideology_abolitionist }
+					heir ?= { has_ideology = ideology:ideology_abolitionist }
+				}
+				scope:law.type = law_type:law_slavery_banned
+			}
+			add = -250
+		}
+		#Petitions
 		if = {
 			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
 			add = 750
+		}
+		
+		# This was funny while it lasted.
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_council_republic
+			}
+			add = 750
+		}
+
+		# Strong tendency towards abolitionism in the late game
+		if = {
+			limit = {
+				has_technology_researched = human_rights
+				NOT = { has_strategy = ai_strategy_reactionary_agenda }
+				OR = {
+					NOT = { has_strategy = ai_strategy_conservative_agenda }
+					any_political_movement = {
+						law_enactment_stance = {
+							law = law_type:law_slavery_banned
+							value > neutral
+						}
+						political_movement_support >= 0.10
+					}
+				}
+			}
+			add = 1000
 		}
 	}
 }
@@ -103,6 +160,7 @@ law_legacy_slavery = {
 	
 	modifier = {
 		interest_group_ig_landowners_pol_str_mult = 0.3
+		country_influence_mult = -0.10 #Balance for all the economic benefits coming with slavery PMs (vanilla, remove as you see fit)
 	}
 	
 	ai_enact_weight_modifier = { #Petitions
@@ -172,7 +230,7 @@ law_colonial_slavery = {
 					ruler ?= { has_ideology = ideology:ideology_abolitionist }
 					heir ?= { has_ideology = ideology:ideology_abolitionist }
 				}
-				scope:law = law_type:law_colonial_slavery
+				scope:law.type = law_type:law_colonial_slavery
 			}
 			add = 250
 		}
@@ -182,7 +240,7 @@ law_colonial_slavery = {
 				c:BRZ ?= this
 				has_law_or_variant = law_type:law_slave_trade
 				has_modifier = aberdeen_act_enforced_brz
-				scope:law = law_type:law_colonial_slavery
+				scope:law.type = law_type:law_colonial_slavery
 			}
 			add = 250
 		}
@@ -315,6 +373,7 @@ law_slave_trade = {
 	
 	modifier = {
 		interest_group_ig_landowners_pol_str_mult = 0.6
+		country_influence_mult = -0.25 #Balance for all the economic benefits coming with slavery PMs (vanilla, remove as you see fit)
 	}
 	
 	ai_will_do = {

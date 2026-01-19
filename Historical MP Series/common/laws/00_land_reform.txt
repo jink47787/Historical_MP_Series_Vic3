@@ -55,9 +55,9 @@
 		
 		state_peasants_internal_migration_disallowed_bool = yes
 		state_peasants_mass_migration_disallowed_bool = yes
-		
+		state_minimum_incorporated_subsistence_arable_land_add = 0.75
+		building_minimum_incorporated_subsistence_employment_add = 0.5
 		state_market_access_price_impact = -0.05
-
 	}
 	
 	# AI should never try to bring back serfdom
@@ -122,9 +122,9 @@ law_manorialism = {
 
 	modifier = {
 		interest_group_ig_landowners_pol_str_mult = 0.35
-
+		state_minimum_incorporated_subsistence_arable_land_add = 0.5
+		building_minimum_incorporated_subsistence_employment_add = 0.5
 		state_market_access_price_impact = -0.05
-
 	}
 
 	# AI should never try to bring back serfdom
@@ -195,12 +195,48 @@ law_tenant_farmers = {
 			add = 750
 		}
 		
+		# Once the AI gets to a certain society tech level they should try to ditch Serfdom for Tenant Farmers
 		if = {
-			limit = { 
-				has_journal_entry = je_meiji_main
-				has_law = law_type:law_serfdom
+			limit = {
+				OR = {
+					has_technology_researched = civilizing_mission
+					has_technology_researched = human_rights
+					has_technology_researched = pan-nationalism
+				}
+				has_law_or_variant = law_type:law_serfdom
 			}
-			add = 10000 # Top priority for Meiji AI is to get out of Serfdom
+
+			add = 1000
+		}
+		
+		if = {
+			limit = {
+				 OR = {
+					has_journal_entry = je_meiji_main
+					has_journal_entry = je_great_reforms_serfdom
+				}
+				has_law_or_variant = law_type:law_serfdom
+			}
+			add = 10000 # Top priority for Meiji AI is to get out of Serfdom, likewise for Great Reforms
+		}
+
+		# AI should really try to get out of Serfdom under the right circumstances
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_serfdom
+				NOT = { has_strategy = ai_strategy_reactionary_agenda }
+				OR = {
+					NOT = { has_strategy = ai_strategy_conservative_agenda }
+					any_political_movement = {
+						law_enactment_stance = {
+							law = law_type:law_tenant_farmers
+							value > neutral
+						}
+						political_movement_support >= 0.10
+					}
+				}
+			}
+			add = 1000
 		}		
 	}
 }
@@ -320,9 +356,7 @@ law_homesteading = {
 		custom_tooltip = {
 			text = capital_in_americas_tt
 			OR = {
-				country_is_in_north_america = yes
-				country_is_in_central_america = yes
-				country_is_in_south_america = yes
+				is_in_geographic_region = geographic_region_americas
 				AND = {
 					exists = capital
 					capital = {
@@ -341,9 +375,7 @@ law_homesteading = {
 	
 	is_visible = {
 		OR = {
-			country_is_in_north_america = yes
-			country_is_in_central_america = yes
-			country_is_in_south_america = yes
+			is_in_geographic_region = geographic_region_americas
 			AND = {
 				exists = capital
 				capital = {
@@ -400,6 +432,41 @@ law_homesteading = {
 		if = {
 			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
 			add = 750
+		}
+
+		# AI should really try to get out of Serfdom under the right circumstances
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_serfdom
+				NOT = { has_strategy = ai_strategy_reactionary_agenda }
+				OR = {
+					NOT = { has_strategy = ai_strategy_conservative_agenda }
+					any_political_movement = {
+						law_stance = {
+							law = law_type:law_homesteading
+							value > neutral
+						}
+						political_movement_support >= 0.10
+					}
+				}
+			}
+			add = 1000
+		}
+
+		if = {
+			limit = {
+				NOT = {
+					has_variable = is_carlist_spain
+				}
+				OR = {
+					has_journal_entry = je_portugal_regeneration_agriculture
+					has_journal_entry = je_spa_economic_regeneration_land_reform
+				}
+				NOT = {
+					has_law = law_type:law_commercialized_agriculture
+				}
+			}
+			add = 1000
 		}
 	}
 }
