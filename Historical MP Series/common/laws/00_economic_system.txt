@@ -13,8 +13,8 @@ law_traditionalism = {
 		NAND = {
 			is_subject = yes
 			OR = {
-				has_law = law_type:law_extraction_economy
-				has_law = law_type:law_the_company
+				has_law_or_variant = law_type:law_extraction_economy
+				has_law_or_variant = law_type:law_the_company
 			}
 		}
 	}
@@ -26,7 +26,7 @@ law_traditionalism = {
 	on_activate = {
 		if = {
 			limit = {
-				has_law = law_type:law_no_poll_taxes
+				has_law_or_variant = law_type:law_no_poll_taxes
 			}
 			activate_law = law_type:law_land_based_taxation
 		}
@@ -88,14 +88,15 @@ law_agrarianism = {
 		NAND = {
 			is_subject = yes
 			OR = {
-				has_law = law_type:law_extraction_economy
-				has_law = law_type:law_the_company
+				has_law_or_variant = law_type:law_extraction_economy
+				has_law_or_variant = law_type:law_the_company
 			}
 		}
 	}
 	
 	disallowing_laws = {
 		law_anarchy
+		law_factory_councils
 		law_women_in_the_fields
 	}	
 	
@@ -136,7 +137,7 @@ law_agrarianism = {
 		
 	ai_will_do = {
 		OR = {
-			has_law = law_type:law_traditionalism
+			has_law_or_variant = law_type:law_traditionalism
 			literacy_rate < 0.4
 		}
 	}
@@ -148,14 +149,54 @@ law_agrarianism = {
 			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
 			add = 750
 		}
+
+		# Once the AI gets to a certain society tech level they should try to ditch Traditionalism for either Agrarianism or Interventionism
+		if = {
+			limit = {
+				OR = {
+					has_technology_researched = civilizing_mission
+					has_technology_researched = human_rights
+					has_technology_researched = pan-nationalism
+				}
+				has_law_or_variant = law_type:law_traditionalism
+			}
+
+			add = 1000
+		}
 		
 		if = {
 			limit = { 
 				has_journal_entry = je_sick_man_bureaucracy
-				has_law = law_type:law_traditionalism
+				has_law_or_variant = law_type:law_traditionalism
 			}
 			add = 10000 # Top priority for Tanzimat AI is to get out of Traditionalism
-		}			
+		}	
+		
+		if = {
+			limit = {
+				has_journal_entry = je_great_reforms_serfdom
+			}
+			add = 1000 # Less preferred than either laissez-faire or interventionism
+		}
+
+		# AI should really try to get out of Traditionalism under the right circumstances
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_traditionalism
+				NOT = { has_strategy = ai_strategy_reactionary_agenda }
+				OR = {
+					NOT = { has_strategy = ai_strategy_conservative_agenda }
+					any_political_movement = {
+						law_enactment_stance = {
+							law = law_type:law_agrarianism
+							value > neutral
+						}
+						political_movement_support >= 0.10
+					}
+				}
+			}
+			add = 1000
+		}		
 	}
 }
 
@@ -170,8 +211,8 @@ law_interventionism = {
 		NAND = {
 			is_subject = yes
 			OR = {
-				has_law = law_type:law_extraction_economy
-				has_law = law_type:law_the_company
+				has_law_or_variant = law_type:law_extraction_economy
+				has_law_or_variant = law_type:law_the_company
 			}
 		}
 	}
@@ -228,7 +269,7 @@ law_interventionism = {
 					has_journal_entry = je_great_reforms_serfdom
 					has_journal_entry = je_hawaii
 				}
-				has_law = law_type:law_traditionalism
+				has_law_or_variant = law_type:law_traditionalism
 			}
 			add = 10000 # Top priority for Tanzimat/Meiji AI is to get out of Traditionalism
 		}			
@@ -246,8 +287,8 @@ law_laissez_faire = {
 		NAND = {
 			is_subject = yes
 			OR = {
-				has_law = law_type:law_extraction_economy
-				has_law = law_type:law_the_company
+				has_law_or_variant = law_type:law_extraction_economy
+				has_law_or_variant = law_type:law_the_company
 			}
 		}
 	}
@@ -257,6 +298,7 @@ law_laissez_faire = {
 		law_isolationism
 		law_anarchy
 		law_guild_system
+		law_factory_councils
 		law_women_in_the_fields
 	}
 	
@@ -267,7 +309,7 @@ law_laissez_faire = {
 	on_activate = {
 		if = {
 			limit = {
-				has_law = law_type:law_collectivized_agriculture
+				has_law_or_variant = law_type:law_collectivized_agriculture
 			}
 			activate_law = law_type:law_commercialized_agriculture
 		}
@@ -312,13 +354,35 @@ law_laissez_faire = {
 		
 		if = {
 			limit = { 
+				OR = {
 				has_modifier = shogun_ig_forced_to_open_market
 				has_journal_entry = je_meiji_main
-				has_law = law_type:law_traditionalism
-				has_journal_entry = je_hawaii
+					has_journal_entry = je_great_reforms_serfdom
+					has_journal_entry = je_hawaii
+				}
+				has_law_or_variant = law_type:law_traditionalism
 			}
 			add = 10000 # Top priority for Tanzimat/Meiji AI is to get out of Traditionalism
 		}		
+
+		# AI should really try to get out of Traditionalism under the right circumstances
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_traditionalism
+				NOT = { has_strategy = ai_strategy_reactionary_agenda }
+				OR = {
+					NOT = { has_strategy = ai_strategy_conservative_agenda }
+					any_political_movement = {
+						law_enactment_stance = {
+							law = law_type:law_laissez_faire
+							value > neutral
+						}
+						political_movement_support >= 0.10
+					}
+				}
+			}
+			add = 1000
+		}
 	}
 }
 
@@ -379,6 +443,7 @@ law_cooperative_ownership = {
 		state_farmers_investment_pool_efficiency_mult = 0.25
 		country_private_construction_allocation_mult = 0.35
 		country_government_dividends_reinvestment_add = 1.0
+		building_company_worker_dividends_add = 0.75
 		country_free_charters_add = 1
 		
 		building_group_bg_manufacturing_allowed_collectivization_add = 1.0
@@ -416,8 +481,8 @@ law_command_economy = {
 		NAND = {
 			is_subject = yes
 			OR = {
-				has_law = law_type:law_extraction_economy
-				has_law = law_type:law_the_company
+				has_law_or_variant = law_type:law_extraction_economy
+				has_law_or_variant = law_type:law_the_company
 			}
 		}
 	}
@@ -428,7 +493,7 @@ law_command_economy = {
 		#law_independent_executive
 		law_dual_executive
 		law_parliamentary_system
-	law_women_in_the_fields
+		law_women_in_the_fields
 	}
 	
 	unlocking_technologies = {
@@ -436,12 +501,12 @@ law_command_economy = {
 	}
 	
 	unlocking_laws = {
-		#law_vanguardism
 		law_autocracy
 		law_neo_absolutism
 		law_oligarchy
 		law_organic_regulation
 		law_single_party_state
+		law_technocracy
 	}	
 	
 	on_activate = {
@@ -454,8 +519,8 @@ law_command_economy = {
 		if = {
 			limit = {
 				OR = {
-					has_law = law_type:law_mercantilism
-					has_law = law_type:law_free_trade
+					has_law_or_variant = law_type:law_mercantilism
+					has_law_or_variant = law_type:law_free_trade
 				}
 			}
 			activate_law = law_type:law_protectionism
@@ -484,6 +549,7 @@ law_command_economy = {
 		building_nationalization_cost_mult = -0.90
 		building_nationalization_radicals_mult = -0.75
 		country_government_dividends_efficiency_add = 0.7
+		building_company_government_dividends_add = 0.75
 		
 		country_leverage_resistance_mult = 0.25
 		country_private_construction_allocation_mult = 0.1
@@ -495,7 +561,7 @@ law_command_economy = {
 	ai_will_do = {
 		OR = {
 			has_law_or_variant = law_type:law_technocracy
-			has_law = law_type:law_council_republic
+			has_law_or_variant = law_type:law_council_republic
 			AND = {
 				exists = ruler
 				ruler = {
@@ -528,22 +594,23 @@ law_extraction_economy = {
 	disallowing_laws = {
 		law_anarchy
 		law_women_in_the_fields
+		law_factory_councils
 	}
 
 	can_enact = {
-		has_law = law_type:law_extraction_economy
+		has_law_or_variant = law_type:law_extraction_economy
 	}
 	
 	is_visible = {
-		has_law = law_type:law_extraction_economy
+		has_law_or_variant = law_type:law_extraction_economy
 	}
 
 	on_activate = {
 		if = {
 			limit = {
-				has_law = law_type:law_isolationism
+				has_law_or_variant = law_type:law_isolationism
 			}
-			activate_law = law_type:law_mercantilism
+			activate_law_or_variant = law_type:law_mercantilism
 		}
 	}
 
@@ -604,19 +671,19 @@ law_the_company = {
 	}
 	
 	can_enact = {
-		has_law = law_type:law_the_company
+		has_law_or_variant = law_type:law_the_company
 	}
 	
 	is_visible = {
-		has_law = law_type:law_the_company
+		has_law_or_variant = law_type:law_the_company
 	}
 
 	on_activate = {
 		if = {
 			limit = {
-				has_law = law_type:law_isolationism
+				has_law_or_variant = law_type:law_isolationism
 			}
-			activate_law = law_type:law_mercantilism
+			activate_law_or_variant = law_type:law_mercantilism
 		}
 	}
 
