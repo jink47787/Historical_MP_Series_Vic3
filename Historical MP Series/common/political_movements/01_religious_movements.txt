@@ -16,6 +16,22 @@
 	}
 	creation_weight = {
 		value = 100
+		if = {
+			limit = {
+				owner ?= {
+					any_political_movement = {
+						OR = {
+							is_political_movement_type = movement_legitimist
+							is_political_movement_type = movement_carlist
+							is_political_movement_type = movement_miguelist
+						}
+					}
+				}
+			}
+			multiply = {
+				value = 0.05
+			}
+		}
 	}
 	on_created = {}
 
@@ -210,7 +226,11 @@
 			limit = {
 				owner ?= {
 					any_political_movement = {
+						OR = {
 						is_political_movement_type = movement_legitimist
+							is_political_movement_type = movement_carlist
+							is_political_movement_type = movement_miguelist
+						}
 					}
 				}
 			}
@@ -223,6 +243,10 @@
 	revolution = {
 		weight = {
 			value = 100
+		}
+
+		interest_group_can_join = {
+			leader = { religion = scope:political_movement.religion }
 		}
 
 		state_weight = {
@@ -275,6 +299,10 @@
 
 		weight = {
 			value = 1000
+		}
+
+		interest_group_can_join = {
+			leader = { religion = scope:political_movement.religion }
 		}
 
 		state_weight = {
@@ -413,13 +441,13 @@ movement_religious_minority = {
 					has_technology_researched = pan-nationalism
 					NOT = {
 						any_political_movement = {
-						    is_political_movement_type = movement_muslim_nationalist
+						    is_political_movement_type = movement_hindu_nationalist
 						}
 					}
 				}
 			}
 			owner ?= {
-				create_political_movement = { type = movement_muslim_nationalist }
+				create_political_movement = { type = movement_hindu_nationalist }
 			}
 		}
 		if = {
@@ -429,13 +457,13 @@ movement_religious_minority = {
 					has_technology_researched = pan-nationalism
 					NOT = {
 						any_political_movement = {
-						    is_political_movement_type = movement_hindu_nationalist
+						    is_political_movement_type = movement_muslim_nationalist
 						}
 					}
 				}
 			}
 			owner ?= {
-				create_political_movement = { type = movement_hindu_nationalist }
+				create_political_movement = { type = movement_muslim_nationalist }
 			}
 		}
 	}
@@ -653,11 +681,17 @@ movement_religious_minority = {
 					}
 				}
 			}
-			multiply = {
+			add = { # From +2 at 80 to +10 at 0
 				desc = "POP_RELIGIOUS_DISCRIMINATION"
 				value = 100
 				subtract = pop_acceptance
-				divide = 25 # Maxes out at 4x at 0% acceptance, starts being a liability at 75% acceptance
+				divide = 10
+			}
+		}
+		else = { # Non-discriminated pops are less likely to form separatist movements
+			multiply = {
+				desc = "POP_ACCEPTANCE"
+				value = 0.25
 			}
 		}
 
@@ -719,6 +753,10 @@ movement_religious_minority = {
 
 		weight = {
 			value = 1000
+		}
+
+		interest_group_can_join = {
+			leader = { religion = scope:political_movement.religion }
 		}
 
 		state_weight = {

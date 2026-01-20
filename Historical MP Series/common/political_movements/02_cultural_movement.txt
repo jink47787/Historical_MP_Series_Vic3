@@ -32,6 +32,7 @@
 			}
 		}
 	}
+
 	creation_weight = {
 		value = 100
 	}
@@ -45,6 +46,9 @@
 			has_ideology = ideology:ideology_fascist
 			has_ideology = ideology:ideology_jingoist_leader		
 			has_ideology = ideology:ideology_ethno_nationalist
+		}
+		NOT = {
+			has_variable = anti_nationalist_var
 		}
 	}
 	character_support_weight = {
@@ -633,6 +637,9 @@ movement_cultural_minority = {
 			has_ideology = ideology:ideology_sovereignist_leader			
 			has_ideology = ideology:ideology_reformer		
 		}		
+		NOT = {
+			has_variable = anti_nationalist_var # Please stop becoming a Polish nationalist, Rosa.
+		}
 	}
 	character_support_weight = {
 		value = 200
@@ -654,6 +661,14 @@ movement_cultural_minority = {
 			}
 			multiply = {
 				value = 2
+			}
+		}
+		else_if = {
+			limit = {
+				has_socialist_ideology = yes
+			}
+			multiply = {
+				value = 0.5
 			}
 		}
 	}
@@ -722,12 +737,15 @@ movement_cultural_minority = {
 			}
 			if = {
 				limit = {
-					culture = cu:polish
 					is_pop_type = aristocrats
-					state ?= {
-						OR = {
-							has_variable = lingering_plc_resistance
-							has_variable = christ_of_nations_target
+				}
+				if = {
+					limit = {
+						culture = cu:polish
+						state ?= {
+							OR = {
+								has_variable = lingering_plc_resistance
+								has_variable = christ_of_nations_target
 						}
 					}
 				}
@@ -739,7 +757,6 @@ movement_cultural_minority = {
 			else_if = {
 				limit = {
 					culture = cu:hungarian
-					is_pop_type = aristocrats
 					owner ?= {
 						has_journal_entry = je_dual_monarchy
 					}
@@ -750,8 +767,17 @@ movement_cultural_minority = {
 				}
 			}
 			else = {
-				value = 6
-				desc = "UPPER_NO_ICON"
+					add = {
+						value = 8
+						desc = "POP_ARISTOCRATS"
+				}
+			}
+			}
+			else = {
+				add = {
+					value = 18
+					desc = "UPPER_NO_ICON"
+				}
 			}
 		}
 		else_if = {
@@ -771,6 +797,12 @@ movement_cultural_minority = {
 				limit = {
 					is_pop_type = clergymen
 				}
+				if = {
+					limit = {
+						NOT = {
+							this.religion = owner.religion
+						}
+				}
 				add = {
 					value = 25
 					desc = "POP_CLERGYMEN"
@@ -778,7 +810,32 @@ movement_cultural_minority = {
 			}
 			else = {
 				add = {
-					value = 10
+						value = 15
+						desc = "POP_CLERGYMEN"
+					}
+				}
+			}
+			if = {
+				limit = {
+					is_pop_type = shopkeepers
+				}
+				add = {
+					value = 25
+					desc = "POP_SHOPKEEPERS"
+				}
+			}
+			else_if = {
+				limit = {
+					is_pop_type = soldiers
+				}
+				add = {
+					value = 20
+					desc = "POP_OFFICERS"
+				}
+			}
+			else = {
+				add = {
+					value = 15
 					desc = "MIDDLE_NO_ICON"
 				}
 			}
@@ -803,6 +860,15 @@ movement_cultural_minority = {
 				add = {
 					value = 9
 					desc = "POP_SOLDIERS"
+				}
+			}
+			else_if = {
+				limit = {
+					is_pop_type = peasants
+				}
+				add = {
+					value = 5
+					desc = "POP_PEASANTS"
 				}
 			}
 			else = {
@@ -834,12 +900,11 @@ movement_cultural_minority = {
 					}	
 				}
 			}
-			
-			multiply = {
+			add = { # From +2 at 80 to +10 at 0
 				desc = "POP_DISCRIMINATED"	
 				value = 100
 				subtract = pop_acceptance			
-				divide = 25	
+				divide = 10
 			}			
 		}
 		else = { # Non-discriminated pops are less likely to form separatist movements
@@ -1348,6 +1413,7 @@ movement_minority_rights = {
 				}
 			}
 		}
+
 		add = {
 			value = 10
 			desc = "POP_BASE_SUPPORT"
@@ -1440,12 +1506,12 @@ movement_minority_rights = {
 					}
 				}
 			}
-
-			multiply = {
+			multiply = { # From 1.21x at 79 to 2x at 0
 				desc = "POP_DISCRIMINATED"
 				value = 100
 				subtract = pop_acceptance
-				divide = 25
+				divide = 100
+				add = 1
 			}
 		}
 		else = { # Non-discriminated pops are less likely to form separatist movements
@@ -1455,13 +1521,11 @@ movement_minority_rights = {
 			}
 		}
 
-
 		multiply = { # Illiterate pops participate at 1/8 the rate of fully literate pops
 			desc = "POP_LITERACY"
 			value = literacy_rate
 			add = 0.15
 		}
-
 
 		if = { # If a more radical movement exists, it'll poach radicals from this one.
 			limit = {
