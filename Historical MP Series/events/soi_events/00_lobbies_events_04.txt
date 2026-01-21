@@ -7,7 +7,6 @@ lobby_core.1 = { #core event for testing
 	dlc = dlc010
 
 	duration = 3
-
 	orphan = yes
 
 	event_image = {
@@ -178,6 +177,7 @@ lobby_proposal.1 = { # Pro-Lobby Demand
 		}
 		any_pro_lobby_demand_is_valid = yes
 	}
+
 
 	
 	cancellation_trigger = {
@@ -700,7 +700,7 @@ lobby_proposal.4 = { # Anti-Lobby Opportunity
 				OR = {
 					has_variable = anti_lobby_proposal_defensive_pact
 					has_variable = anti_lobby_proposal_alliance
-					has_variable = anti_lobby_proposal_trade_agreement
+					has_variable = anti_lobby_proposal_trade_privilege
 					has_variable = anti_lobby_proposal_power_bloc
 					has_variable = anti_lobby_proposal_power_bloc_invite
 					has_variable = anti_lobby_proposal_investment_agreement
@@ -945,6 +945,8 @@ lobby_events.1 = {
 				is_member_of_any_lobby = no
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 		}
 	}
@@ -978,7 +980,7 @@ lobby_events.1 = {
 	
 	option = {
 		name = lobby_events.1.c
-		scope:relevant_ig = {
+		scope:relevant_ig ?= {
 			add_modifier = {
 				name = modifier_lobby_attempt_failed
 				days = normal_modifier_time
@@ -1115,6 +1117,9 @@ lobby_events.2 = {
 	trigger = {
 		has_dlc_feature = lobbies
 		is_revolutionary = no
+		NOT = {
+			country_has_state_religion = rel:atheist
+		}
 		any_interest_group = {
 			ig_counts_as_marginal = no
 			is_member_of_any_lobby = no
@@ -1131,8 +1136,12 @@ lobby_events.2 = {
 		OR = {
 			any_political_lobby = {
 				is_political_lobby_type = lobby_anti_country
-				target.capital = {
-					state_religious_acceptance = {  
+				target = {
+					religion_percent_country = {
+						target = ROOT.religion
+						value > 0
+					}
+					country_average_religious_acceptance = {
 						target = ROOT.religion
 						value < religious_acceptance_very_low 
 					}
@@ -1144,11 +1153,13 @@ lobby_events.2 = {
 			}
 			any_diplomatically_relevant_country = {
 				is_valid_lobby_target = yes
-				capital = {
-					state_religious_acceptance = {  
+				religion_percent_country = {
+					target = ROOT.religion
+					value > 0
+				}
+				country_average_religious_acceptance = {
 						target = ROOT.religion
 						value < religious_acceptance_very_low
-					}
 				}
 				custom_tooltip = {
 					text = religion_is_discriminated_tt
@@ -1157,14 +1168,12 @@ lobby_events.2 = {
 		}
 	}
 	
-	
 	cancellation_trigger = {
 		NOR = {
 			exists = scope:relevant_country
 			exists = scope:relevant_ig
 		}
 	}
-
 	
 	immediate = {
 		religion = {
@@ -1174,9 +1183,13 @@ lobby_events.2 = {
 			limit = {
 				any_political_lobby = {
 					is_political_lobby_type = lobby_anti_country
-					target.capital = {
-						state_religious_acceptance = {  
-							target = ROOT.religion
+					target = {
+						religion_percent_country = {
+							target = scope:relevant_religion
+							value > 0
+						}
+						country_average_religious_acceptance = {
+							target = scope:relevant_religion
 							value < religious_acceptance_very_low
 						}
 					}
@@ -1185,9 +1198,13 @@ lobby_events.2 = {
 			random_political_lobby = {
 				limit = {
 					is_political_lobby_type = lobby_anti_country
-					target.capital = {
-						state_religious_acceptance = {  
-							target = ROOT.religion
+					target = {
+						religion_percent_country = {
+							target = scope:relevant_religion
+							value > 0
+						}
+						country_average_religious_acceptance = {
+							target = scope:relevant_religion
 							value < religious_acceptance_very_low 
 						}
 					}
@@ -1202,11 +1219,13 @@ lobby_events.2 = {
 			random_diplomatically_relevant_country = {
 				limit = {
 					is_valid_lobby_target = yes
-					capital = {
-						state_religious_acceptance = {  
-							target = ROOT.religion
+					religion_percent_country = {
+						target = scope:relevant_religion
+						value > 0
+					}
+					country_average_religious_acceptance = {
+						target = scope:relevant_religion
 							value < religious_acceptance_very_low 
-						}
 					}
 				}
 				save_scope_as = relevant_country
@@ -1227,6 +1246,8 @@ lobby_events.2 = {
 				}
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 		}
 	}
@@ -1249,6 +1270,7 @@ lobby_events.2 = {
 			NOT = {
 				exists = scope:relevant_lobby
 			}
+			exists = scope:relevant_ig
 		}
 		create_political_lobby = {  
 			type = lobby_anti_country  
@@ -1341,13 +1363,9 @@ lobby_events.3 = {
 	}
 
 	cancellation_trigger = {
-		OR = {
-			NOT = {
+		NOR = {
 				exists = scope:relevant_ig
-			}
-			NOT = {
 				exists = scope:relevant_country
-			}
 		}
 	}
 	
@@ -1402,6 +1420,8 @@ lobby_events.3 = {
 				ig_counts_as_marginal = no
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 		}
 	}
@@ -1424,6 +1444,7 @@ lobby_events.3 = {
 			NOT = {
 				exists = scope:relevant_lobby
 			}
+			exists = scope:relevant_ig
 		}
 		create_political_lobby = {  
 			type = lobby_pro_country  
@@ -1435,7 +1456,7 @@ lobby_events.3 = {
 
 	option = {
 		name = lobby_events.3.c
-		scope:relevant_ig = {
+		scope:relevant_ig ?= {
 			add_modifier = {
 				name = modifier_lobby_attempt_failed
 				days = normal_modifier_time
@@ -1678,7 +1699,6 @@ lobby_events.5 = {
 			exists = scope:relevant_goods
 		}
 	}
-
 	
 	immediate = {
 		random_interest_group = {
@@ -1747,6 +1767,8 @@ lobby_events.5 = {
 						market_goods_imports > 0
 					}
 					order_by = market_goods_imports
+					position = 0
+					check_range_bounds = no
 					goods = {
 						save_scope_as = relevant_goods
 					}
@@ -1793,7 +1815,7 @@ lobby_events.5 = {
 
 	option = {
 		name = lobby_events.5.c
-		scope:relevant_ig = {
+		scope:relevant_ig ?= {
 			add_modifier = {
 				name = modifier_lobby_attempt_failed
 				days = normal_modifier_time
@@ -1851,7 +1873,6 @@ lobby_events.6 = {
 		}
 	}
 
-	
 	immediate = {
 		random_political_lobby = {
 			limit = {
@@ -1872,6 +1893,8 @@ lobby_events.6 = {
 					}
 				}
 				order_by = ig_clout
+				position = 0
+				check_range_bounds = no
 				save_scope_as = relevant_ig
 			}
 		}
@@ -1995,7 +2018,6 @@ lobby_events.7 = {
 		}
 	}
 
-	
 	immediate = {
 		ordered_country = {
 			limit = {
@@ -2003,12 +2025,14 @@ lobby_events.7 = {
 				has_law_or_variant = law_type:law_council_republic
 			}
 			order_by = country_rank
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_country
 		}
 		random_political_lobby = {
 			limit = {
 				is_political_lobby_type = lobby_pro_country
-				target = scope:relevant_country
+				scope:relevant_country ?= target
 			}
 			save_scope_as = relevant_lobby
 		}
@@ -2027,6 +2051,8 @@ lobby_events.7 = {
 				}
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 			if = {
 				limit = {
@@ -2149,7 +2175,7 @@ lobby_events.7 = {
 				lobby_formation_reason = ideology
 			}
 		}
-		scope:relevant_ig = {
+		scope:relevant_ig ?= {
 			add_modifier = {
 				name = modifier_disparaged_lobby
 				days = normal_modifier_time
@@ -2185,6 +2211,7 @@ lobby_events.8 = {
 		has_dlc_feature = lobbies
 		is_revolutionary = no
 		any_active_party = {
+			party_has_members = yes
 			any_member = {
 				is_member_of_any_lobby = yes
 				save_temporary_scope_as = first_member
@@ -2209,11 +2236,11 @@ lobby_events.8 = {
 			exists = scope:relevant_country
 		}
 	}
-
 	
 	immediate = {
 		random_active_party = {
 			limit = {
+				party_has_members = yes
 				any_member = {
 					is_member_of_any_lobby = yes
 					save_temporary_scope_as = first_member
@@ -2234,6 +2261,8 @@ lobby_events.8 = {
 					is_member_of_any_lobby = yes
 				}
 				order_by = ig_clout
+				position = 0
+				check_range_bounds = no
 				save_scope_as = first_party_member
 				random_political_lobby = {
 					save_scope_as = relevant_lobby
@@ -2433,7 +2462,6 @@ lobby_events.9 = {
 			exists = scope:relevant_country
 		}
 	}
-
 	
 	immediate = {
 		if = {
@@ -2585,6 +2613,8 @@ lobby_events.9 = {
 				ig_counts_as_marginal = no
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 		}
 		if = {
@@ -2673,7 +2703,7 @@ lobby_events.9 = {
 	option = {
 		name = lobby_events.9.c
 		remove_variable = impressive_miltech
-		scope:relevant_ig = {
+		scope:relevant_ig ?= {
 			add_modifier = {
 				name = modifier_rejected_military_support
 				days = normal_modifier_time
@@ -2829,6 +2859,8 @@ lobby_events.10 = {
 				ig_counts_as_marginal = no
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 		}
 	}
@@ -2870,7 +2902,7 @@ lobby_events.10 = {
 
 	option = {
 		name = lobby_events.10.c
-		scope:relevant_ig = {
+		scope:relevant_ig ?= {
 			add_modifier = {
 				name = modifier_rejected_western_ties
 				days = normal_modifier_time
@@ -2896,7 +2928,7 @@ lobby_events.11 = {
 				trigger = {
 					scope:relevant_ig ?= {
 						any_political_lobby = {
-							target = scope:relevant_country
+							scope:relevant_country ?= target
 							is_political_lobby_type = lobby_pro_country
 						}
 					}
@@ -2908,11 +2940,11 @@ lobby_events.11 = {
 					NOT = {
 						scope:relevant_ig ?= {
 							any_political_lobby = {
-								target = scope:relevant_country
+								scope:relevant_country ?= target
 							}
 						}
 						any_political_lobby = {
-							target = scope:relevant_country
+							scope:relevant_country ?= target
 							is_political_lobby_type = lobby_anti_country
 						}
 					}
@@ -2950,7 +2982,7 @@ lobby_events.11 = {
 		has_dlc_feature = lobbies
 		is_revolutionary = no
 		is_country_type = recognized
-		country_is_in_europe = yes
+		is_in_geographic_region = geographic_region_europe
 		any_interest_group = {
 			OR = {
 				is_interest_group_type = ig_landowners
@@ -2971,11 +3003,11 @@ lobby_events.11 = {
 		OR = {
 			any_political_lobby = {
 				target = {
-					country_is_in_europe = yes
+					is_in_geographic_region = geographic_region_europe
 					is_at_war = yes
 					is_diplomatic_play_initiator = yes
 					any_enemy_in_war = {
-						country_is_in_europe = yes
+						is_in_geographic_region = geographic_region_europe
 						NOT = {
 							THIS = ROOT
 						}
@@ -2988,11 +3020,11 @@ lobby_events.11 = {
 			}
 			any_diplomatically_relevant_country = {
 				is_valid_lobby_target = yes
-				country_is_in_europe = yes
+				is_in_geographic_region = geographic_region_europe
 				is_at_war = yes
 				is_diplomatic_play_initiator = yes
 				any_enemy_in_war = {
-					country_is_in_europe = yes
+					is_in_geographic_region = geographic_region_europe
 					NOT = {
 						THIS = ROOT
 					}
@@ -3017,11 +3049,11 @@ lobby_events.11 = {
 			limit = {
 				any_political_lobby = {
 					target = {
-						country_is_in_europe = yes
+						is_in_geographic_region = geographic_region_europe
 						is_at_war = yes
 						is_diplomatic_play_initiator = yes
 						any_enemy_in_war = {
-							country_is_in_europe = yes
+							is_in_geographic_region = geographic_region_europe
 							NOT = {
 								THIS = ROOT
 							}
@@ -3033,11 +3065,11 @@ lobby_events.11 = {
 			random_political_lobby = {
 				limit = {
 					target = {
-						country_is_in_europe = yes
+						is_in_geographic_region = geographic_region_europe
 						is_at_war = yes
 						is_diplomatic_play_initiator = yes
 						any_enemy_in_war = {
-							country_is_in_europe = yes
+							is_in_geographic_region = geographic_region_europe
 							NOT = {
 								THIS = ROOT
 							}
@@ -3055,11 +3087,11 @@ lobby_events.11 = {
 			random_diplomatically_relevant_country = {
 				limit = {
 					is_valid_lobby_target = yes
-					country_is_in_europe = yes
+					is_in_geographic_region = geographic_region_europe
 					is_at_war = yes
 					is_diplomatic_play_initiator = yes
 					any_enemy_in_war = {
-						country_is_in_europe = yes
+						is_in_geographic_region = geographic_region_europe
 						NOT = {
 							THIS = ROOT
 						}
@@ -3088,6 +3120,8 @@ lobby_events.11 = {
 				}
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 		}
 	}
@@ -3097,15 +3131,15 @@ lobby_events.11 = {
 		default_option = yes
 		trigger = {
 			OR = {
-				scope:relevant_ig = {
+				scope:relevant_ig ?= {
 					any_political_lobby = {
 						is_political_lobby_type = lobby_pro_country
-						target = scope:relevant_country
+						scope:relevant_country ?= target
 					}
 				}
 				any_political_lobby = {
 					is_political_lobby_type = lobby_anti_country
-					target = scope:relevant_country
+					scope:relevant_country ?= target
 					NOT = {
 						any_lobby_member = {
 							this = scope:relevant_ig
@@ -3143,11 +3177,11 @@ lobby_events.11 = {
 				scope:relevant_ig ?= {
 					any_political_lobby = {
 						is_political_lobby_type = lobby_pro_country
-						target = scope:relevant_country
+						scope:relevant_country ?= target
 					}
 				}
 				any_political_lobby = {
-					target = scope:relevant_country
+					scope:relevant_country ?= target
 					is_political_lobby_type = lobby_anti_country
 				}
 			}
@@ -3165,7 +3199,7 @@ lobby_events.11 = {
 		trigger = {
 			scope:relevant_ig ?= {
 				any_political_lobby = {
-					target = scope:relevant_country
+					scope:relevant_country ?= target
 					is_political_lobby_type = lobby_pro_country
 				}
 			}
@@ -3188,7 +3222,7 @@ lobby_events.11 = {
 			NOT = {
 				scope:relevant_ig ?= {
 					any_political_lobby = {
-						target = scope:relevant_country
+						scope:relevant_country ?= target
 						is_political_lobby_type = lobby_pro_country
 					}
 				}
@@ -3753,7 +3787,6 @@ lobby_events.14 = {
 			exists = scope:relevant_goods
 		}
 	}
-
 	
 	immediate = {
 		market_capital.market = {
@@ -3762,6 +3795,8 @@ lobby_events.14 = {
 					market_goods_exports > 0
 				}
 				order_by = market_goods_exports
+				position = 0
+				check_range_bounds = no
 				goods = {
 					save_scope_as = relevant_goods
 				}
@@ -3808,7 +3843,7 @@ lobby_events.14 = {
 				scope:relevant_goods = {
 					goods_is_industrial = yes
 				}
-				ig:ig_industrialists = {
+				ig:ig_industrialists ?= {
 					ig_counts_as_marginal = no
 					NOT = {
 						any_political_lobby = {
@@ -3817,7 +3852,7 @@ lobby_events.14 = {
 					}
 				}
 			}
-			ig:ig_industrialists = {
+			ig:ig_industrialists ?= {
 				save_scope_as = relevant_ig
 			}
 		}
@@ -3992,6 +4027,7 @@ lobby_events.15 = {
 			is_member_of_any_lobby = no
 			OR = {
 				has_ideology = ideology:ideology_patriotic
+				has_ideology = ideology:ideology_military_absolutist
 				has_ideology = ideology:ideology_isolationist
 				leader = {
 					OR = {
@@ -4104,6 +4140,8 @@ lobby_events.15 = {
 				}
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 		}
 	}
@@ -4305,7 +4343,6 @@ lobby_events.17 = {
 			exists = scope:relevant_lobby
 		}
 	}
-
 	
 	immediate = {
 		random_political_lobby = {
@@ -4470,6 +4507,8 @@ lobby_events.18 = {
 					is_homeland_of_country_cultures = ROOT
 				}
 				order_by = gdp
+				position = 0
+				check_range_bounds = no
 				save_scope_as = revanchist_state
 			}
 		}
@@ -4495,6 +4534,8 @@ lobby_events.18 = {
 				ig_counts_as_marginal = no
 			}
 			order_by = ig_clout
+			position = 0
+			check_range_bounds = no
 			save_scope_as = relevant_ig
 		}
 	}
@@ -4983,7 +5024,6 @@ lobby_events.20 = {
 			exists = scope:relevant_ig
 		}
 	}
-
 	
 	option = {
 		name = lobby_events.20.a 
@@ -5035,6 +5075,7 @@ fund_lobbies_events.1 = { # Foreign funds in the country causes heightened tensi
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
 	
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
@@ -5078,13 +5119,14 @@ fund_lobbies_events.1 = { # Foreign funds in the country causes heightened tensi
 		}
 		if = {
 			limit = {
+				exists = scope:relevant_country
 				any_interest_group = {
 					any_political_lobby = {
 						OR = {
 							is_political_lobby_type = lobby_pro_country
 							is_political_lobby_type = lobby_pro_overlord
 						}
-						target = scope:relevant_country
+						scope:relevant_country ?= target
 					}
 				}
 			}
@@ -5095,7 +5137,7 @@ fund_lobbies_events.1 = { # Foreign funds in the country causes heightened tensi
 							is_political_lobby_type = lobby_pro_country
 							is_political_lobby_type = lobby_pro_overlord
 						}
-						target = scope:relevant_country
+						scope:relevant_country ?= target
 					}
 				}
 				add_modifier = {
@@ -5138,6 +5180,7 @@ fund_lobbies_events.2 = { # Polemic released against an IG that is benefiting fr
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
 	
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
@@ -5267,6 +5310,7 @@ fund_lobbies_events.3 = { # Anti-lobby outraged by foreign funding from their en
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
 	trigger = {
@@ -5357,6 +5401,7 @@ fund_lobbies_events.4 = { # Politician implicated in improperly spending foreign
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
 	
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
@@ -5458,7 +5503,6 @@ fund_lobbies_events.4 = { # Politician implicated in improperly spending foreign
 			exists = scope:relevant_character
 		}
 	}
-
 	
 	option = {
 		name = fund_lobbies_events.4.a 
@@ -5553,6 +5597,7 @@ fund_lobbies_events.5 = { # New IG joins a bolstered lobby
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
 	
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
