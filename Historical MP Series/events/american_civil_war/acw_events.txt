@@ -180,7 +180,21 @@ acw_events.2 = {
 	option = {
 		name = acw_events.2.a
         default_option = yes
-
+		if = {
+			limit = {
+				active_law:lawgroup_slavery ?= {
+					NOT = {
+						has_amendment = amendment_type:amendment_american_fugitive_slaves_act
+					}
+				}
+			}
+			active_law:lawgroup_slavery ?= {
+				add_amendment = {
+					type = amendment_american_fugitive_slaves_act
+					sponsor = PREV.ig:ig_landowners
+				}
+			}
+		}
 		every_interest_group = {
 			limit = {
 				OR = {
@@ -209,7 +223,18 @@ acw_events.2 = {
 	}
 	option = {
 		name = acw_events.2.b
-
+		if = {
+			limit = {
+				active_law:lawgroup_slavery ?= {
+					has_amendment = amendment_type:amendment_american_fugitive_slaves_act
+				}
+			}
+			active_law:lawgroup_slavery ?= {
+				random_scope_amendment = {
+					remove_amendment = yes # TODO make this more targeted once we have the requisite support
+				}
+			}
+		}
 		every_interest_group = {
 			limit = {
 				OR = {
@@ -499,18 +524,31 @@ acw_events.5 = {
 					is_slave_state = yes
 				}
 				order_by = state_population
+				position = 0
+				check_range_bounds = no
 				ordered_scope_pop = {
 					limit = {
 						is_pop_type = slaves
 					}
+					save_temporary_scope_as = relevant_pop
 					order_by = total_size
+					position = 0
+					check_range_bounds = no
 					move_partial_pop = {
 						state = scope:bleeding_kansas
 						population = {
 							# move in at most 5% of the target state's population, max 5000, or the max size of the pop, whichever is smaller
 							add = scope:bleeding_kansas.state_population
 							multiply = 0.05
+							if = {
+								limit = {
+									scope:relevant_pop.total_size >= 5000
+								}
 							max = 5000
+							}
+							else = {
+								max = scope:relevant_pop.total_size
+							}
 						}
 					}
 				}
@@ -687,7 +725,7 @@ acw_events.7 = { # Free State of [x]
 
 	trigger = {
 		exists = c:USA
-		c:USA = {
+		c:USA ?= {
 			has_journal_entry = je_acw_war
 		}
 		OR = {
@@ -706,7 +744,7 @@ acw_events.7 = { # Free State of [x]
 		random_scope_state = {
 			save_scope_as = free_state_of_county
 		}
-		c:USA = {
+		c:USA ?= {
 			save_scope_as = unionist_usa
 		}
 	}
@@ -923,7 +961,7 @@ acw_events.9 = {
 			limit = {
 				exists = c:USA
 			}
-			c:USA = {
+			c:USA ?= {
 				capital = {
 					save_scope_as = acw_victory_capital_scope
 				}
