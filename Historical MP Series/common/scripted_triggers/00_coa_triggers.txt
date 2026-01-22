@@ -18,7 +18,7 @@
 coa_monarchy_trigger = {
 	OR = {
 		has_law_or_variant = law_type:law_chiefdom
-		has_law = law_type:law_monarchy
+		has_law_or_variant = law_type:law_monarchy
 	}
 }
 
@@ -39,9 +39,11 @@ coa_undemocratic_monarchy_trigger = {
 coa_republic_trigger = {
 	has_law_or_variant = law_type:law_republic
 }
+
 coa_federal_republic_trigger = {
 	coa_republic_trigger = yes
 	has_law_or_variant = law_type:law_elected_bureaucrats
+	has_law_or_variant = law_type:law_republic
 }
 
 coa_dictatorship_trigger = {
@@ -55,6 +57,7 @@ coa_oligarchy_trigger = {
 		has_law_or_variant = law_type:law_oligarchy
 		has_law_or_variant = law_type:law_technocracy
 	}
+	has_law_or_variant = law_type:law_oligarchy
 }
 
 coa_theocracy_trigger = {
@@ -68,7 +71,7 @@ coa_multicultural_trigger = {
 coa_autocracy_trigger = {
 	OR = {
 		has_law_or_variant = law_type:law_autocracy
-		has_law_or_variant = law_type:law_single_party_state  
+		has_law_or_variant = law_type:law_single_party_state
 	}
 }
 
@@ -78,9 +81,17 @@ coa_anarchy_trigger = {
 
 coa_communist_trigger = {
 	has_law_or_variant = law_type:law_republic
-	has_law_or_variant = law_type:law_single_party_state
-	has_law_or_variant = law_type:law_vanguardism
-	has_law_or_variant = law_type:law_command_economy
+	OR = {
+		has_law_or_variant = law_type:law_cooperative_ownership
+		has_law_or_variant = law_type:law_command_economy
+	}
+}
+
+coa_military_trigger = {
+	OR = {
+		has_government_type = gov_military_dictatorship
+		has_government_type = gov_junta
+	}
 }
 
 coa_controls_part_of_ireland = {
@@ -117,45 +128,22 @@ coa_fascist_trigger = {
 	}
 }
 
+coa_nihilist_trigger = {
+	has_law_or_variant = law_type:law_state_atheism
+	NOR = {
+		has_law_or_variant = law_type:law_theocracy
+		has_law = law_type:law_monarchy
+		has_law_or_variant = law_type:law_republic
+	}
+	ruler ?= {
+		has_ideology = ideology:ideology_nihilist
+    }
+}
+
 coa_secessionist_or_revolutionary_trigger = {
 	OR = {
 		is_secessionist = yes
 		is_revolutionary = yes
-	}
-}
-
-coa_chartered_company_trigger = {
-	is_subject_type = subject_type_chartered_company
-}
-
-
-### scope is COUNTRY DEFINITION ###
-
-coa_def_independent_trigger = {
-	exists = scope:actor
-	scope:actor ?= { is_subject = no }
-}
-
-coa_def_subject_trigger = {
-	NOT = { has_game_rule = no_subject_flags }
-	exists = scope:actor
-	scope:actor ?= { is_subject = yes }
-}
-
-coa_def_lesser_subject_trigger = {
-	NOT = { has_game_rule = no_subject_flags }
-	OR = {
-		NOT = { exists = scope:actor }
-		AND = {
-			exists = scope:actor
-			scope:actor ?= {
-				OR = {
-					is_subject_type = subject_type_colony
-					is_subject_type = subject_type_puppet
-					is_subject_type = subject_type_vassal
-				}
-			}
-		}
 	}
 }
 
@@ -199,6 +187,40 @@ coa_UFB_trigger = {
 	}
 }
 
+coa_chartered_company_trigger = {
+	is_subject_type = subject_type_chartered_company
+}
+
+
+### scope is COUNTRY DEFINITION ###
+
+coa_def_independent_trigger = {
+	exists = scope:actor
+	scope:actor ?= { is_subject = no }
+}
+
+coa_def_subject_trigger = {
+	NOT = { has_game_rule = no_subject_flags }
+	exists = scope:actor
+	scope:actor ?= { is_subject = yes }
+}
+
+coa_def_lesser_subject_trigger = {
+	NOT = { has_game_rule = no_subject_flags }
+	OR = {
+		NOT = { exists = scope:actor }
+		AND = {
+			exists = scope:actor
+			scope:actor ?= {
+				OR = {
+					is_subject_type = subject_type_colony
+					is_subject_type = subject_type_puppet
+					is_subject_type = subject_type_vassal
+				}
+			}
+		}
+	}
+}
 
 coa_def_independence_war_trigger = { #checks if subject is in Independence diplomatic play/war
 	exists = scope:actor
@@ -254,6 +276,7 @@ coa_def_federal_republic_trigger = {
 	scope:actor ?= { coa_federal_republic_trigger = yes }
 }
 
+
 coa_def_theocracy_flag_trigger = {
 	exists = scope:actor
 	scope:actor ?= { coa_theocracy_trigger = yes }
@@ -299,10 +322,21 @@ coa_def_egalitarian_flag_trigger = {
 	scope:actor ?= { has_law_or_variant = law_type:law_multicultural }
 }
 
+coa_def_military_junta_flag_trigger = {
+	exists = scope:actor
+	scope:actor ?= { coa_military_trigger = yes }
+}
+
 coa_def_fascist_flag_trigger = {
 	exists = scope:actor
 	scope:actor ?= { coa_fascist_trigger = yes }
 }
+
+coa_def_nihilist_flag_trigger = {
+	exists = scope:actor
+	scope:actor ?= { coa_nihilist_trigger = yes }
+}
+
 coa_def_chartered_company_trigger = {
 	scope:actor ?= {
 		coa_chartered_company_trigger = yes
@@ -314,12 +348,12 @@ coa_def_chartered_company_trigger = {
 coa_def_ensign_trigger = {
 	NOT = { has_game_rule = no_subject_flags }
 	exists = scope:overlord
-	scope:overlord = {
+	scope:overlord ?= {
 		OR = {
 			this = scope:custom_overlord
-			any_overlord_or_above = {
+			any_overlord_or_above ?= {
 				this = scope:custom_overlord
-			} 
+			}
 		}
 	}
 }
@@ -347,55 +381,55 @@ coa_def_british_ensign_trigger = {
 
 coa_def_british_india_trigger = {
 	exists = c:BIC
-	c:BIC = { save_temporary_scope_as = custom_overlord }
+	c:BIC ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_finnish_ensign_trigger = {
 	exists = c:FIN
-	c:FIN = { save_temporary_scope_as = custom_overlord }
+	c:FIN ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_french_ensign_trigger = {
 	exists = c:FRA
-	c:FRA = { save_temporary_scope_as = custom_overlord }
+	c:FRA ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_german_ensign_trigger = {
 	exists = c:GER
-	c:GER = { save_temporary_scope_as = custom_overlord }
+	c:GER ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_prussian_ensign_trigger = {
 	exists = c:PRU
-	c:PRU = { save_temporary_scope_as = custom_overlord }
+	c:PRU ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_spanish_ensign_trigger = {
 	exists = c:SPA
-	c:SPA = { save_temporary_scope_as = custom_overlord }
+	c:SPA ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_mexican_ensign_trigger = {
 	exists = c:MEX
-	c:MEX = { save_temporary_scope_as = custom_overlord }
+	c:MEX ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_swedish_ensign_trigger = {
 	exists = c:SWE
-	c:SWE = { save_temporary_scope_as = custom_overlord }
+	c:SWE ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
 coa_def_danish_ensign_trigger = {
 	exists = c:DEN
-	c:DEN = { save_temporary_scope_as = custom_overlord }
+	c:DEN ?= { save_temporary_scope_as = custom_overlord }
 	coa_def_ensign_trigger = yes
 }
 
@@ -412,13 +446,13 @@ coa_def_dominant_scotland_trigger = {
 						}
 					}
 				}
-			}			
+			}
 		}
 		AND = {
 			exists = c:SCO
 			c:SCO ?= { save_temporary_scope_as = custom_overlord }
 			coa_def_ensign_trigger = yes
-		}		
+		}
 	}
 }
 
@@ -488,7 +522,7 @@ coa_def_african_trigger = {
 coa_def_west_african_trigger = {
     any_primary_culture = {
         has_discrimination_trait_group = heritage_group_african
-        has_discrimination_trait = west_african_culture_group		
+        has_discrimination_trait = heritage_guinean
     }
 }
 
@@ -500,25 +534,25 @@ coa_def_native_american_trigger = {
 
 coa_def_cross_trigger = {
     religion ?= {
-    	has_discrimination_trait = christian
+    	has_discrimination_trait = heritage_christian
     }
 }
 
 coa_def_crescent_trigger = {
     religion ?= {
-		has_discrimination_trait = muslim
+		has_discrimination_trait = heritage_islamic
     }
 }
 
 coa_def_buddhist_trigger = {
     religion ?= {
-        has_discrimination_trait = buddhist
+        has_discrimination_trait = heritage_dharmic
     }
 }
 
 coa_def_nordic_cross_trigger = {
     any_primary_culture = {
-        has_discrimination_trait = scandinavian_culture_group
+        has_discrimination_trait = heritage_nordic
     }
 	coa_def_cross_trigger = yes
 }
@@ -531,44 +565,44 @@ coa_def_oceanic_trigger = {
 
 coa_def_german_trigger = {
     any_primary_culture = {
-        has_discrimination_trait = german_speaking
+        has_discrimination_trait = heritage_germanic
         has_discrimination_trait_group = heritage_group_european
     }
 }
 
 coa_def_italian_trigger = {
     any_primary_culture = {
-        has_discrimination_trait = italophone
+        has_discrimination_trait = heritage_italic
         has_discrimination_trait_group = heritage_group_european
     }
 }
 
 coa_def_iberian_trigger = {
     any_primary_culture = {
-        has_discrimination_trait = iberian_culture_group
+        has_discrimination_trait = heritage_iberian
         has_discrimination_trait_group = heritage_group_european
     }
 }
 
 coa_def_turkic_trigger = {
     any_primary_culture = {
-        has_discrimination_trait = turkic
+        has_discrimination_trait_group = language_group_turkic
     }
 }
 
 coa_def_hispanic_american_trigger = {
     any_primary_culture = {
-    	has_discrimination_trait = hispanophone
+    	has_discrimination_trait = language_hispanophone
     	has_discrimination_trait_group = heritage_group_european
 	    NOT = {
-	    	has_discrimination_trait = iberian_culture_group
+	    	has_discrimination_trait = heritage_iberian
 	    }
     }
 }
 
 coa_SWE_use_norway_canton_trigger = {
 	exists = c:NOR
-	c:NOR ?= { 
+	c:NOR ?= {
 		is_subject_of = scope:target
 	}
 }
