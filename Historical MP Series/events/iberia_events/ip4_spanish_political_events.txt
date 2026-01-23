@@ -1,0 +1,1688 @@
+﻿namespace = spain_politics
+
+# Death of Pedro Inguanzo
+spain_politics.1 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_politics.1.t
+	desc = spain_politics.1.d
+	flavor = spain_politics.1.f
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:pedro_inguanzo_scope
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/2Characters"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		# Fired by history file
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			exists = scope:pedro_inguanzo_scope
+		}
+	}
+
+	immediate = {
+		ig:ig_devout = {
+			leader = {
+				save_scope_as = pedro_inguanzo_scope
+			}
+		}
+		generate_2_common_name = {
+			CULTURE_1 = primary_culture
+			CULTURE_2 = primary_culture
+		}
+		create_character = {
+			template = SPA_pedro_gonzalez_vallejo
+			on_created = {
+				set_variable = vallejo_var
+				place_character_in_void = 3
+				add_character_role = politician # To avoid them instantly vapourising the sitting leader
+			}
+		}
+		create_character = {
+			template = SPA_judas_jose_romo_y_gamboa
+			on_created = {
+				set_variable = gamboa_var
+				place_character_in_void = 3
+				add_character_role = politician  # To avoid them instantly vapourising the sitting leader
+			}
+		}
+		random_character_in_void = {
+			limit = {
+				has_variable = vallejo_var
+			}
+			save_scope_as = vallejo_scope
+		}
+		random_character_in_void = {
+			limit = {
+				has_variable = gamboa_var
+			}
+			save_scope_as = gamboa_scope
+		}
+	}
+
+	# The most liberal candidate
+	option = {
+		name = spain_politics.1.a
+		default_option = yes
+		scope:pedro_inguanzo_scope = {
+			hidden_effect = { set_character_immortal = no }
+			kill_character = yes
+		}
+		custom_tooltip = {
+			text = vallejo_devout_leader_tt
+			scope:vallejo_scope ?= {
+				free_character_from_void = yes
+				set_as_interest_group_leader = yes
+			}
+		}
+		set_variable = { name = spanish_archbishop_choice value = 1 }
+		add_radicals = {
+			value = very_large_radicals
+			pop_type = clergymen
+		}
+		c:PAP ?= {
+			trigger_event = { id = spain_politics.101 days = 7 }
+		}
+		clear_generated_names = yes
+	}
+
+	# Back off a little
+	option = {
+		name = spain_politics.1.b
+		default_option = yes
+		set_variable = { name = spanish_archbishop_choice value = 2 }
+		scope:pedro_inguanzo_scope = {
+			hidden_effect = { set_character_immortal = no }
+			kill_character = yes
+		}
+		custom_tooltip = {
+			text = gamboa_devout_leader_tt
+			scope:gamboa_scope ?= {
+				free_character_from_void = yes
+				set_as_interest_group_leader = yes
+			}
+		}
+		add_radicals = {
+			value = small_radicals
+			pop_type = clergymen
+		}
+		c:PAP ?= {
+			trigger_event = { id = spain_politics.101 days = 7 }
+		}
+		clear_generated_names = yes
+	}
+}
+
+# Death of Pedro Inguanzo - Papal States
+spain_politics.101 = {
+	type = country_event
+	placement = scope:spain_scope.capital
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_politics.101.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = spain_politics.101.d_1
+				trigger = {
+					c:SPA ?= {
+						var:spanish_archbishop_choice = 1
+					}
+				}
+			}
+			triggered_desc = {
+				desc = spain_politics.101.d_2
+				trigger = {
+					c:SPA ?= {
+						var:spanish_archbishop_choice = 2
+					}
+				}
+			}
+		}
+	}
+	flavor = spain_politics.101.f
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:spanish_archbishop_scope
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/2Characters"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		# Fired by spain_politics.1
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			exists = scope:spanish_archbishop_scope
+		}
+	}
+
+	immediate = {
+		save_scope_as = papacy_scope
+		c:SPA ?= {
+			save_scope_as = spain_scope
+			ig:ig_devout ?= {
+				leader = {
+					save_scope_as = spanish_archbishop_scope
+				}
+			}
+			heir = {
+				save_scope_as = spanish_queen_scope
+			}
+		}
+		c:SPC ?= {
+			save_scope_as = carlist_spain_scope
+		}
+	}
+
+	# We will not recognise this appointment
+	option = {
+		name = spain_politics.101.a
+		default_option = yes
+		ai_chance = {
+			base = 50
+			modifier = {
+				trigger = {
+					scope:spain_scope ?= {
+						var:spanish_archbishop_choice = 1
+					}
+				}
+				add = 15
+			}
+			modifier = {
+				trigger = {
+					scope:spain_scope ?= {
+						var:spanish_archbishop_choice = 2
+					}
+				}
+				add = -5
+			}
+			modifier = {
+				trigger = {
+					scope:spain_scope ?= {
+						relations:root > -20
+					}
+				}
+				add = -10
+			}
+			modifier = {
+				trigger = {
+					scope:carlist_spain_scope ?= {
+						relations:root < 20
+					}
+				}
+				add = -10
+			}
+		}
+		change_relations = {
+			country = scope:spain_scope
+			value = -10
+		}
+		change_relations = {
+			country = scope:carlist_spain_scope
+			value = 10
+		}
+		scope:spanish_archbishop_scope ?= {
+			add_modifier = {
+				name = modifier_pretender_archbishop
+				days = very_long_modifier_time
+			}
+		}
+		scope:spain_scope ?= {
+			post_notification = pope_rejects_archbishop_of_toledo
+		}
+		scope:carlist_spain_scope ?= {
+			post_notification = pope_rejects_archbishop_of_toledo
+		}
+	}
+
+	# Recognise the appointment
+	option = {
+		name = spain_politics.101.b
+		ai_chance = {
+			base = 25
+			modifier = {
+				trigger = {
+					scope:spain_scope ?= {
+						var:spanish_archbishop_choice = 1
+					}
+				}
+				add = -15
+			}
+			modifier = {
+				trigger = {
+					scope:spain_scope ?= {
+						var:spanish_archbishop_choice = 2
+					}
+				}
+				add = 5
+			}
+		}
+		change_relations = {
+			country = scope:spain_scope
+			value = 30
+		}
+		change_relations = {
+			country = scope:carlist_spain_scope
+			value = -50
+		}
+		scope:spanish_archbishop_scope ?= {
+			set_variable = cardinal_var
+		}
+		scope:spain_scope ?= {
+			post_notification = pope_confirms_archbishop_of_toledo
+		}
+		scope:carlist_spain_scope ?= {
+			post_notification = pope_confirms_archbishop_of_toledo
+		}
+	}
+
+	# Demand the Archbishop refuse the appointment
+	option = {
+		name = spain_politics.101.c
+		ai_chance = {
+			base = 10
+			modifier = {
+				trigger = {
+					scope:spain_scope ?= {
+						var:spanish_archbishop_choice = 1
+					}
+				}
+				add = 5
+			}
+			modifier = {
+				trigger = {
+					scope:spain_scope ?= {
+						var:spanish_archbishop_choice = 2
+					}
+				}
+				add = -10
+			}
+			modifier = {
+				trigger = {
+					scope:spain_scope ?= {
+						relations:root > -20
+					}
+				}
+				add = -5
+			}
+			modifier = {
+				trigger = {
+					scope:carlist_spain_scope ?= {
+						relations:root < 20
+					}
+				}
+				add = -5
+			}
+		}
+		change_relations = {
+			country = scope:spain_scope
+			value = -30
+		}
+		change_relations = {
+			country = scope:carlist_spain_scope
+			value = 30
+		}
+		scope:spanish_archbishop_scope ?= {
+			custom_tooltip = {
+				text = archbishop_resign_post_tt
+				kill_character = {
+					hidden = yes
+				}
+			}
+		}
+		scope:spain_scope ?= {
+			post_notification = pope_super_rejects_archbishop_of_toledo
+		}
+		scope:carlist_spain_scope ?= {
+			post_notification = pope_super_rejects_archbishop_of_toledo
+		}
+	}
+}
+
+spain_politics.2 = { # The Republican Flag
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = spain_politics.2.t
+	desc = spain_politics.2.d
+	flavor = spain_politics.2.f
+
+    event_image = {
+		video = "ep1_transfer_of_authority"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	trigger = {
+		c:SPA ?= this
+		has_law_or_variant = law_type:law_republic
+	}
+
+	cancellation_trigger = {
+		has_law_or_variant = law_type:law_republic
+	}
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	option = { # Red-yellow-purple
+		default_option = yes
+		name = spain_politics.2.a
+		custom_tooltip = spain_red_yellow_purple_tt
+		set_variable = spain_republic_2
+	}
+
+	option = { # Red-white-purple
+		name = spain_politics.2.b
+		custom_tooltip = spain_red_white_purple_tt
+		set_variable = spain_republic_3
+	}
+
+	option = { # Keep the provisional flag
+		name = spain_politics.2.c
+		custom_tooltip = spain_provisional_flag_tt
+	}
+}
+
+### Provisional Government
+
+namespace = spain_provisional_government
+
+spain_provisional_government.1 = { # For Portugal
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.1.t
+	desc = spain_provisional_government.1.d
+	flavor = spain_provisional_government.1.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			c:SPA ?= {
+				has_law = law_type:law_monarchy
+			}
+		}
+	}
+
+	immediate = {
+		save_scope_as = portugal_scope
+		c:SPA ?= { save_scope_as = spain_scope }
+	}
+
+	# The sitting monarch
+	option = {
+		name = spain_provisional_government.1.a
+		default_option = yes
+		ai_chance = {
+			base = 2
+			modifier = {
+				trigger = {
+					"relations(scope:spain_scope)" >= relations_threshold:cordial
+				}
+				add = 2
+			}
+			modifier = {
+				trigger = {
+					"relations(scope:spain_scope)" >= relations_threshold:amicable
+				}
+				add = 2
+			}
+			modifier = {
+				trigger = { # tilt the balance just a bit
+					AND = {
+						"relations(scope:spain_scope)" >= relations_threshold:cordial
+						c:SPA ?= {
+							is_player = yes
+						}
+					}
+				}
+				add = 2
+			}
+			modifier = { # Free subject
+				trigger = {
+					ROOT.prestige > scope:spain_scope.prestige
+				}
+				add = 10
+			}
+		}
+		show_as_tooltip = {
+			create_diplomatic_pact = {
+				country = c:SPA
+				type = personal_union
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_country_in_iberia = {
+						has_technology_researched = pan-nationalism
+					}
+				}
+			}
+			set_variable = pursued_iberian_unification
+			custom_tooltip = upon_researching_pan_nationalism_iberia_tt
+		}
+		else_if = {
+			limit = {
+				any_country_in_iberia = {
+					has_technology_researched = pan-nationalism
+				}
+				NOT = {
+					any_country_in_iberia = {
+						has_variable = pursued_iberian_unification
+					}
+				}
+			}
+			set_variable = pursued_iberian_unification
+			custom_tooltip = je_iberia_activate_tt
+		}
+		c:SPA ?= {
+			set_variable = spain_provisional_government_1_a
+			trigger_event = {
+				id = spain_provisional_government.11
+			}
+		}
+	}
+
+	# Farm off some secondary figure
+	option = {
+		name = spain_provisional_government.1.b
+		trigger = {
+			game_date <= 1919.1.1
+		}
+		ai_chance = {
+			base = 4
+			modifier = {
+				trigger = {
+					"relations(scope:spain_scope)" >= relations_threshold:cordial
+				}
+				add = 2
+			}
+			modifier = {
+				trigger = {
+					"relations(scope:spain_scope)" >= relations_threshold:amicable
+				}
+				add = 2
+			}
+			modifier = {
+				trigger = { # tilt the balance just a bit
+					AND = {
+						"relations(scope:spain_scope)" >= relations_threshold:cordial
+						c:SPA ?= {
+							is_player = yes
+						}
+					}
+				}
+				add = 2
+			}
+			modifier = { # Free subject
+				trigger = {
+					ROOT.prestige > scope:spain_scope.prestige
+				}
+				add = 10
+			}
+		}
+		show_as_tooltip = {
+			c:SPA ?= {
+				country_generate_peripheral_braganza_ruler_display = yes
+			}
+		}
+		c:SPA ?= {
+			set_variable = spain_provisional_government_1_b
+			trigger_event = {
+				id = spain_provisional_government.11
+			}
+		}
+	}
+
+	# No
+	option = {
+		name = spain_provisional_government.1.c
+		ai_chance = {
+			base = 4
+			modifier = {
+				trigger = {
+					"relations(scope:spain_scope)" < relations_threshold:cordial
+				}
+				add = 2
+			}
+		}
+		c:SPA ?= {
+			remove_variable = king_searching_var
+			post_notification = no_portuguese_monarch_available
+		}
+	}
+}
+
+spain_provisional_government.11 = { # For Spain
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.11.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = spain_provisional_government.11.d_1
+				trigger = {
+					has_variable = spain_provisional_government_1_a
+				}
+			}
+			triggered_desc = {
+				desc = spain_provisional_government.11.d_2
+				trigger = {
+					has_variable = spain_provisional_government_1_b
+				}
+			}
+		}
+	}
+	flavor = spain_provisional_government.11.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_law = law_type:law_monarchy
+		}
+	}
+
+	immediate = {
+
+	}
+
+	# The sitting monarch - response
+	option = {
+		name = spain_provisional_government.11.a
+		trigger = {
+			has_variable = spain_provisional_government_1_a
+		}
+		ai_chance = {
+			base = 1
+			modifier = {
+				c:POR ?= { # If you've got this far as Portugal, then it'd be mean to ruin it here
+					is_player = yes
+				}
+				add = 100
+			}
+		}
+		c:POR ?= {
+			create_diplomatic_pact = {
+				country = c:SPA
+				type = personal_union
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					any_country_in_iberia = {
+						has_technology_researched = pan-nationalism
+					}
+				}
+			}
+			set_variable = pursued_iberian_unification
+			custom_tooltip = upon_researching_pan_nationalism_iberia_tt
+		}
+		else_if = {
+			limit = {
+				any_country_in_iberia = {
+					has_technology_researched = pan-nationalism
+				}
+				NOT = {
+					any_country_in_iberia = {
+						has_variable = pursued_iberian_unification
+					}
+				}
+			}
+			set_variable = pursued_iberian_unification
+			custom_tooltip = je_iberia_activate_tt
+		}
+		remove_variable = spain_provisional_government_1_a
+		ig:ig_petty_bourgeoisie ?= {
+			add_modifier = {
+				name = modifier_enthroned_preferred_candidate
+				days = normal_modifier_time
+			}
+		}
+		remove_regency_modifier = yes
+	}
+
+	# Farm off some secondary figure - response
+	option = {
+		name = spain_provisional_government.11.b
+		trigger = {
+			has_variable = spain_provisional_government_1_b
+		}
+		ai_chance = {
+			base = 2
+			modifier = {
+				c:POR ?= { # If you've got this far as Portugal, then it'd be mean to ruin it here
+					is_player = yes
+				}
+				add = 50
+			}
+		}
+		country_generate_peripheral_braganza_ruler = yes
+		remove_variable = spain_provisional_government_1_b
+		ig:ig_petty_bourgeoisie ?= {
+			add_modifier = {
+				name = modifier_enthroned_preferred_candidate
+				days = normal_modifier_time
+			}
+		}
+		remove_regency_modifier = yes
+	}
+
+	# No
+	option = {
+		name = spain_provisional_government.11.c
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		change_relations = {
+			country = c:POR
+			value = -10
+		}
+		c:POR ?= {
+			post_notification = spain_would_rather_not_appoint_a_braganca_king
+		}
+		remove_variable = king_searching_var
+		custom_tooltip = continue_search_for_king_tt
+	}
+}
+
+spain_provisional_government.2 = { # Espartero
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.2.t
+	desc = spain_provisional_government.2.d
+	flavor = spain_provisional_government.2.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_law = law_type:law_monarchy
+		}
+	}
+
+	immediate = {
+		c:SPA ?= { save_scope_as = spain_scope }
+		if = {
+			limit = {
+				any_character = {
+					has_template = SPA_baldomero_espartero
+				}
+			}
+			random_character = {
+				limit = {
+					has_template = SPA_baldomero_espartero
+				}
+				save_scope_as = espartero_scope
+			}
+		}
+	}
+
+	# King Espartero
+	option = {
+		name = spain_provisional_government.2.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		scope:espartero_scope ?= {
+			if = {
+				limit = {
+					is_in_void = yes
+				}
+				free_character_from_void = yes
+			}
+			if = {
+				limit = {
+					is_in_exile_pool = yes
+				}
+				transfer_character = ROOT
+				set_variable = exile_to_ruler_var
+				set_variable = {
+					name = memento_mori_immunity
+					months = 60
+				}
+				hidden_effect = {
+					free_from_exile_effect = yes
+				}
+			}
+			if = {
+				limit = {
+					NOT = { owner ?= ROOT }
+				}
+				transfer_character = ROOT
+			}
+			# Espartero becomes monarch
+			if = {
+				limit = {
+					owner = ROOT
+					is_ruler = yes
+				}
+                custom_tooltip = espartero_becomes_monarch_tt
+			}
+			else = {
+				set_character_as_ruler = yes
+			}
+		}
+		ig:ig_petty_bourgeoisie ?= {
+			add_modifier = {
+				name = modifier_enthroned_preferred_candidate
+				days = normal_modifier_time
+			}
+		}
+		remove_regency_modifier = yes
+	}
+}
+
+spain_provisional_government.3 = { # Hohenzollern
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.3.t
+	desc = spain_provisional_government.3.d
+	flavor = spain_provisional_government.3.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		# Triggered for some German state by je_spain_provisional_government_hohenzollern_button
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			c:SPA ?= {
+				has_law = law_type:law_monarchy
+			}
+		}
+	}
+
+	immediate = {
+		c:SPA ?= { save_scope_as = spain_scope }
+		save_scope_as = hohenzollern_scope
+	}
+
+	# I consent
+	option = {
+		name = spain_provisional_government.3.a
+		ai_chance = {
+			base = 10
+		}
+		if = {
+			limit = {
+				scope:france_scope ?= {
+					country_rank >= rank_value:major_power
+				}
+			}
+			scope:france_scope ?= {
+				trigger_event = { id = spain_provisional_government.31 }
+			}
+		}
+		else = {
+			scope:spain_scope ?= {
+				trigger_event = {
+					id = spain_provisional_government.32
+					days = 3
+				}
+			}
+		}
+	}
+
+	# Let's not
+	option = {
+		name = spain_provisional_government.3.b
+		default_option = yes
+		ai_chance = {
+			base = 3
+		}
+		scope:spain_scope ?= {
+			remove_variable = king_searching_var
+			post_notification = no_german_monarch_available
+		}
+	}
+}
+
+spain_provisional_government.31 = { # Hohenzollern - France
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.31.t
+	desc = spain_provisional_government.31.d
+	flavor = spain_provisional_government.31.f
+
+    event_image = {
+		video = "unspecific_politicians_arguing"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		# Triggered for France by spain_provisional_government.3
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			c:SPA ?= {
+				has_law = law_type:law_monarchy
+			}
+		}
+	}
+
+	immediate = {
+
+	}
+
+	# I don't!
+	option = {
+		name = spain_provisional_government.31.a
+		default_option = yes
+		ai_chance = {
+			base = 25
+			modifier = {
+				trigger = {
+					scope:france_scope = { country_rank < rank_value:great_power }
+				}
+				add = -15
+			}
+		}
+		change_relations = {
+			value = -50
+			country = scope:hohenzollern_scope
+		}
+		create_diplomatic_catalyst = {
+			type = catalyst_event_negative
+			target = scope:hohenzollern_scope
+		}
+		scope:spain_scope ?= {
+			set_variable = { name = france_objected_to_hohenzollern years = 1 }
+			trigger_event = {
+				id = spain_provisional_government.32
+				days = 3
+			}
+		}
+	}
+
+	# Why not?
+	option = {
+		name = spain_provisional_government.31.b
+		ai_chance = {
+			base = 5
+		}
+		scope:spain_scope ?= {
+			trigger_event = {
+				id = spain_provisional_government.32
+				days = 3
+			}
+		}
+	}
+}
+
+spain_provisional_government.32 = { # Hohenzollern - Spain
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.32.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = spain_provisional_government.32.d_1
+				trigger = {
+					has_variable = france_objected_to_hohenzollern
+				}
+			}
+			triggered_desc = {
+				desc = spain_provisional_government.32.d_2
+				trigger = {
+					NOT = {
+						has_variable = france_objected_to_hohenzollern
+					}
+				}
+			}
+		}
+	}
+	flavor = spain_provisional_government.32.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_law = law_type:law_monarchy
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				any_character = {
+					has_template = HOH_leopold_von_hohenzollern
+				}
+			}
+			random_character = {
+				limit = {
+					has_template = HOH_leopold_von_hohenzollern
+				}
+				save_scope_as = leopold_von_hohenzollern_scope
+			}
+		}
+	}
+
+	# Let's get a Hohenzollern
+	option = {
+		name = spain_provisional_government.32.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		if = {
+			limit = {
+				exists = scope:leopold_von_hohenzollern_scope
+			}
+			scope:leopold_von_hohenzollern_scope ?= {
+				hidden_effect = {
+					disinherit_character = yes
+				}
+				transfer_character = ROOT
+				set_character_as_ruler = yes
+			}
+			scope:hohenzollern_scope ?= {
+				post_notification = leopold_becomes_king_of_spain
+				change_relations = {
+					country = ROOT
+					value = 30
+				}
+				create_diplomatic_catalyst = {
+					type = catalyst_event_positive
+					target = root
+				}
+			}
+		}
+		else = {
+			custom_tooltip = {
+				text = guillermo_von_hohenzollern_tt
+				create_character = {
+					first_name = "Guillermo"
+					last_name = "von_Hohenzollern"
+					culture = cu:north_german
+					interest_group = ig_armed_forces
+					ruler = yes
+					ideology = ideology_moderate
+					on_created = {
+						set_variable = house_hohenzollern
+					}
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_variable = france_objected_to_hohenzollern
+			}
+			change_relations = {
+				value = -50
+				country = scope:france_scope
+			}
+			create_incident = {
+				value = 10
+				country = scope:france_scope
+			}
+			create_diplomatic_catalyst = {
+				type = catalyst_event_negative
+				target = c:FRA
+			}
+		}
+		else = {
+			change_relations = {
+				value = -20
+				country = scope:france_scope
+			}
+		}
+		ig:ig_armed_forces ?= {
+			add_modifier = {
+				name = modifier_enthroned_preferred_candidate
+				days = normal_modifier_time
+			}
+		}
+		remove_regency_modifier = yes
+	}
+
+	# Back down
+	option = {
+		name = spain_provisional_government.32.b
+		ai_chance = {
+			base = 1
+		}
+		remove_variable = king_searching_var
+		if = {
+			limit = {
+				has_variable = france_objected_to_hohenzollern
+			}
+			change_relations = {
+				value = -25
+				country = scope:hohenzollern_scope
+			}
+			create_incident = {
+				value = 5
+				country = scope:hohenzollern_scope
+			}
+		}
+		else = {
+			change_relations = {
+				value = -10
+				country = scope:hohenzollern_scope
+			}
+		}
+		custom_tooltip = continue_search_for_king_tt
+	}
+}
+
+spain_provisional_government.4 = { # Amadeo
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.4.t
+	desc = spain_provisional_government.4.d
+	flavor = spain_provisional_government.4.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			c:SPA ?= {
+				has_law = law_type:law_monarchy
+			}
+		}
+	}
+
+	immediate = {
+		c:SPA ?= { save_scope_as = spain_scope }
+		save_scope_as = savoy_scope
+	}
+
+	# King Amadeo
+	option = {
+		name = spain_provisional_government.4.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		scope:spain_scope ?= {
+			trigger_event = {
+				id = spain_provisional_government.41
+				days = 3
+			}
+		}
+	}
+
+	# Noh
+	option = {
+		name = spain_provisional_government.4.b
+		ai_chance = {
+			base = 1
+		}
+		scope:spain_scope ?= {
+			remove_variable = king_searching_var
+			post_notification = no_italian_monarch_available
+		}
+	}
+}
+
+spain_provisional_government.41 = { # Amadeo - Spain
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.41.t
+	desc = spain_provisional_government.41.d
+	flavor = spain_provisional_government.41.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_law = law_type:law_monarchy
+		}
+	}
+
+	immediate = {
+		c:SPA ?= { save_scope_as = spain_scope }
+	}
+
+	# King Amadeo
+	option = {
+		name = spain_provisional_government.41.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		if = {
+			limit = {
+				game_date > 1863.1.1
+				game_date < 1890.1.1
+			}
+			custom_tooltip = {
+				text = amadeo_de_savoy_tt
+				create_character = {
+					template = spa_amadeo_i_de_savoy_template
+					on_created = {
+						set_character_as_ruler = yes
+					}
+				}
+			}
+		}
+		else = {
+			custom_tooltip = {
+				text = victor_de_savoy_tt
+				create_character = {
+					first_name = "VI_ctor"
+					last_name = "Savoy"
+					culture = cu:north_italian
+					interest_group = ig_intelligentsia
+					ruler = yes
+					ideology = ideology_reformer
+					on_created = {
+						set_variable = house_savoy
+					}
+				}
+			}
+		}
+		ig:ig_intelligentsia ?= {
+			add_modifier = {
+				name = modifier_enthroned_preferred_candidate
+				days = normal_modifier_time
+			}
+		}
+		remove_regency_modifier = yes
+	}
+}
+
+spain_provisional_government.5 = { # Isabelist
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.5.t
+	desc = spain_provisional_government.5.d
+	flavor = spain_provisional_government.5.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_law = law_type:law_monarchy
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				any_character_in_void = {
+					has_variable = deposed_spanish_heir
+				}
+			}
+			random_character_in_void = {
+				limit = {
+					has_variable = deposed_spanish_heir
+				}
+				hidden_effect = {
+					free_character_from_void = yes
+				}
+				set_character_as_ruler = yes
+			}
+		}
+		else = {
+			country_generate_constitutional_spain_ruler = yes
+		}
+		c:SPA ?= { save_scope_as = spain_scope }
+	}
+
+	# King Whoever Whatever de Borbón
+	option = {
+		name = spain_provisional_government.5.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		show_as_tooltip = {
+			if = {
+				limit = {
+					any_character_in_void = {
+						has_variable = deposed_spanish_heir
+					}
+				}
+				random_character_in_void = {
+					limit = {
+						has_variable = deposed_spanish_heir
+					}
+					hidden_effect = {
+						free_character_from_void = yes
+					}
+					set_character_as_ruler = yes
+				}
+			}
+			else = {
+				country_generate_constitutional_spain_ruler = yes
+			}
+		}
+		add_radicals = {
+			value = medium_radicals
+		}
+		remove_regency_modifier = yes
+	}
+}
+
+spain_provisional_government.6 = { # Carlist
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.6.t
+	desc = spain_provisional_government.6.d
+	flavor = spain_provisional_government.6.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_law = law_type:law_monarchy
+		}
+	}
+
+	immediate = {
+		c:SPA ?= { save_scope_as = spain_scope }
+		country_generate_carlist_spain_ruler = yes
+	}
+
+	# King Whoever Whatever de Borbón but Carlist
+	option = {
+		name = spain_provisional_government.6.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		show_as_tooltip = {
+			country_generate_carlist_spain_ruler = yes
+		}
+		ig:ig_landowners ?= {
+			add_modifier = {
+				name = modifier_enthroned_preferred_candidate
+				days = normal_modifier_time
+			}
+		}
+		remove_regency_modifier = yes
+	}
+}
+
+spain_provisional_government.7 = { # Bonaparte??? (insanity)
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.7.t
+	desc = spain_provisional_government.7.d
+	flavor = spain_provisional_government.7.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			c:SPA ?= {
+				has_law = law_type:law_monarchy
+			}
+		}
+	}
+
+	immediate = {
+		c:SPA ?= { save_scope_as = spain_scope }
+		c:FRA ?= { save_scope_as = france_scope }
+	}
+
+	# King Bonaparte
+	option = {
+		name = spain_provisional_government.7.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		scope:spain_scope ?= {
+			trigger_event = {
+				id = spain_provisional_government.71
+			}
+		}
+	}
+
+	# Nah
+	option = {
+		name = spain_provisional_government.7.b
+		ai_chance = {
+			base = 1
+		}
+		scope:spain_scope ?= {
+			remove_variable = king_searching_var
+			post_notification = no_french_monarch_available
+		}
+	}
+}
+
+spain_provisional_government.71 = { # Bonaparte??? - Spain
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.71.t
+	desc = spain_provisional_government.71.d
+	flavor = spain_provisional_government.71.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_law = law_type:law_monarchy
+		}
+	}
+
+	immediate = {
+		c:SPA ?= { save_scope_as = spain_scope }
+	}
+
+	# King Bonaparte
+	option = {
+		name = spain_provisional_government.71.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		custom_tooltip = {
+			text = napoleon_bonaparte_tt
+			create_character = {
+				first_name = "NapoleO_n"
+				last_name = "Bonaparte"
+				culture = cu:french
+				interest_group = ig_petty_bourgeoisie
+				ruler = yes
+				ideology = ideology_bonapartist
+				on_created = {
+					set_variable = house_bonaparte
+				}
+			}
+		}
+		add_radicals = {
+			value = large_radicals
+		}
+		remove_regency_modifier = yes
+	}
+}
+
+spain_provisional_government.8 = { # The Republic
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc016
+
+	title = spain_provisional_government.8.t
+	desc = spain_provisional_government.8.d
+	flavor = spain_provisional_government.8.f
+
+    event_image = {
+		video = "votp_agitator_speaking"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = normal_modifier_time }
+
+	trigger = {
+		# Fired by JE
+	}
+
+	immediate = {
+		c:SPA ?= { save_scope_as = spain_scope }
+	}
+
+	# The Republic
+	option = {
+		name = spain_provisional_government.8.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+		}
+		activate_law = law_type:law_republic
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_republic
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = modifier_declared_republic_negative
+				days = normal_modifier_time
+				is_decaying = yes
+			}
+		}
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_republic
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = modifier_declared_republic_positive
+				days = normal_modifier_time
+				is_decaying = yes
+			}
+		}
+		remove_regency_modifier = yes
+	}
+}
