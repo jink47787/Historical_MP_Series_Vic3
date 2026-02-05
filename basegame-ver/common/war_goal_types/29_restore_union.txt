@@ -1,17 +1,15 @@
-﻿make_protectorate = {
-	icon = "gfx/interface/icons/war_goals/make_protectorate.dds"
+﻿restore_union = {
+	icon = "gfx/interface/icons/war_goals/enforce_treaty_article.dds"
 
-	kind = make_protectorate
+	kind = custom
 
 	settings = {
 		require_target_be_part_of_war
 		turns_into_subject
-		can_add_for_other_country
 		requires_interest
 
 		# Validation
 		conflicts_with_make_subject
-		validate_subject_relation
 		validate_conflicts_make_subject
 	}
 
@@ -24,11 +22,25 @@
 	possible = {
 		# trigger to determine if a goal with its target data is listed when selecting a war goal in the diplo play panel
 		# scopes: root = holder, creator_country, diplomatic_play, target_country, target_state, stakeholder, target_region, article_options
+		ROOT = {
+			has_law = law_type:law_monarchy
+			has_variable = por_seeking_restore_union_var
+		}
+		scope:target_country ?= {
+			c:BRZ ?= this
+		}
 	}
 
 	valid = {
 		# trigger in addition to some basic validation code-side
 		# scopes: root = holder, creator_country, diplomatic_play, target_country, target_state, stakeholder, target_region, article_options
+		ROOT = {
+			has_law = law_type:law_monarchy
+			has_variable = por_seeking_restore_union_var
+		}
+		scope:target_country ?= {
+			c:BRZ ?= this
+		}
 	}
 
 	maneuvers = {
@@ -55,7 +67,7 @@
 
 		add = {
 			desc = "INFAMY_BASE_VALUE"
-			value = 2
+			value = 0.5
 		}
 
 		scope:target_country = {
@@ -68,20 +80,11 @@
 							divide = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_FACTOR
 							multiply = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_MULTIPLIER
 							multiply = {
-								value = 1
-								if = {
-									limit = {
-										is_homeland_of_country_cultures = root
-									}
-									add = define:NDiplomacy|WAR_GOAL_INFAMY_HOMELAND_FACTOR
-								}
-							}
-							multiply = {
-								value = 1
 								if = {
 									limit = {
 										is_incorporated = no
 									}
+									value = 1
 									add = define:NDiplomacy|WAR_GOAL_INFAMY_UNINCORPORATED_FACTOR
 								}
 							}
@@ -94,59 +97,6 @@
 			}
 		}
 
-		multiply = {
-			desc = "country_infamy_generation_against_unrecognized_mult"
-			value = 1
-			if = {
-				limit = {
-					NOR = {
-						is_country_type = unrecognized
-						is_country_type = decentralized
-					}
-					scope:target_country = {
-						OR = {
-							is_country_type = unrecognized
-							is_country_type = decentralized
-						}
-					}
-				}
-				add = modifier:country_infamy_generation_against_unrecognized_mult
-			}
-		}
-
-		multiply = {
-			desc = "INFAMY_FROM_LOYAL_SUBJECT"
-			value = 1
-
-			if = {
-				limit = {
-					scope:target_country = {
-						is_subject_of = root
-						liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
-					}
-				}
-				multiply = define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_SUBJECT_MULT
-			}
-		}
-
-		multiply = {
-			desc = "INFAMY_FROM_REBELLIOUS_SUBJECT" # Rebellious as in they are the aggressor in the play
-			value = 1
-
-			if = {
-				limit = {
-					scope:target_country = {
-						is_subject_of = root
-						is_diplomatic_play_enemy_of = root
-						scope:diplomatic_play ?= {
-							initiator_is = scope:target_country
-						}
-					}
-				}
-				multiply = define:NDiplomacy|WAR_GOAL_INFAMY_REBELLING_SUBJECT_MULT
-			}
-		}
-
 		min = {
 			desc = "INFAMY_MINIMUM_VALUE"
 			value = 2
@@ -155,6 +105,15 @@
 
 	on_enforced = {
 		# script effect on top of the predefined code effect
+		scope:target_country ?= {
+			activate_law = law_type:law_monarchy
+		}
+		ROOT = {
+			create_diplomatic_pact = {
+				country = scope:target_country
+				type = personal_union
+			}
+		}
 	}
 
 	ai = {
