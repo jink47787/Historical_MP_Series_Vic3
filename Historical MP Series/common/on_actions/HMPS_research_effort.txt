@@ -1,0 +1,111 @@
+﻿on_monthly_pulse_country = {
+	on_actions = {
+		HMPS_handle_research_effort
+	}
+}
+
+HMPS_handle_research_effort = { #Country Scope
+	effect = {
+		set_variable = {
+			name = incorporated_population
+			value = 0
+		}
+		every_scope_state = {
+			limit = {
+				is_incorporated = yes
+			}
+			ROOT = {
+				change_variable = {
+					name = incorporated_population
+					add = PREV.state_population
+				}
+			}
+		}
+	
+		set_variable = {
+			name = scaled_effort
+			value = modifier:country_research_effort_add
+		} 
+		change_variable = {
+			name = scaled_effort
+			multiply = 2000000#x1000000 for the per million part, x2 for hocus pocus triangle numbers formula
+		}
+		change_variable = {
+			name = scaled_effort
+			divide = { 
+				value = var:incorporated_population
+				add = 5000000
+			}
+		}
+		change_variable = {
+			name = scaled_effort
+			add = 0.25
+		}
+	
+		if = {
+			limit = { var:scaled_effort < 1 }
+			set_variable = { name = current_guess value = 0.32 }
+		}
+		else_if = {
+			limit = { var:scaled_effort < 100 }
+			set_variable = { name = current_guess value = 3.2 }
+		}
+		else_if = {
+			limit = { var:scaled_effort < 10000 }
+			set_variable = { name = current_guess value = 32 }
+		}
+		else_if = {
+			limit = { var:scaled_effort < 1000000 }
+			set_variable = { name = current_guess value = 320 }
+		}
+		else = {
+			set_variable = { name = current_guess value = 3200 }
+		}
+	
+		### Newton itterations to find square root
+		change_variable = {
+			name = current_guess
+			add = {
+				value = var:scaled_effort
+				divide = var:current_guess
+			}
+		}
+		change_variable = { name = current_guess divide = 2 }
+		change_variable = {
+			name = current_guess
+			add = {
+				value = var:scaled_effort
+				divide = var:current_guess
+			}
+		}
+		change_variable = { name = current_guess divide = 2 }
+		change_variable = {
+			name = current_guess
+			add = {
+				value = var:scaled_effort
+				divide = var:current_guess
+			}
+		}
+		change_variable = { name = current_guess divide = 2 }
+		change_variable = {
+			name = current_guess
+			add = {
+				value = var:scaled_effort
+				divide = var:current_guess
+			}
+		}
+		change_variable = { name = current_guess divide = 2 }
+		change_variable = { name = current_guess subtract = 0.5 }
+		change_variable = { name = current_guess multiply = 10 }
+		if = {
+			limit = {
+				has_modifier = modifier_country_innovation_from_research_effort
+			}
+			remove_modifier = modifier_country_innovation_from_research_effort
+		}
+		add_modifier = {
+			name = modifier_country_innovation_from_research_effort
+			multiplier = var:current_guess
+		}	
+	}
+}
