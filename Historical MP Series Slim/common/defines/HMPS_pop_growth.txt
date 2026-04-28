@@ -1,0 +1,79 @@
+﻿### Pop Growth Constants
+
+#### START OF COPY VALUES FROM DESMOS https://www.desmos.com/calculator/vwvfu5yggm
+
+@sol_A = 5
+@sol_B = 10
+@sol_C = 16
+@sol_D = 35
+
+@birthrate_at_0 = 4.21		#birth_rate_at_sol_0
+@birthrate_at_B = 5.11		#birth_rate_at_sol_B
+@birthrate_at_D = 1.67		#birth_rate_at_sol_D
+
+@mortality_at_0 = 6.66		#mortality_rate_at_sol_0
+@mortality_at_A = 4.71		#mortality_rate_at_sol_A
+@mortality_at_C = 2.55		#mortality_rate_at_sol_C
+@mortality_at_D = 1.13		#mortality_rate_at_sol_D
+
+#### END OF COPY VALUES FROM DESMOS
+
+@months_in_100_years = 1200
+@b0 = @[birthrate_at_0/months_in_100_years]	#0.0035083333333333		in vanilla this is 0.00450 but applies as the max birthrate at sol 0 and dosent get better
+@bB = @[birthrate_at_B/months_in_100_years]	#0.0042583333333333		in vanilla this value doesnt exist since the birthrate is a smooth transition from b0 to bC
+@bD = @[birthrate_at_D/months_in_100_years]	#0.0013916666666667		in vanilla this applies at bC not bD, the value is 0.00060
+@m0 = @[mortality_at_0/months_in_100_years]	#0.00555			    in vanilla this is 0.00550 (all mortality values again follow linear transition)
+@mA = @[mortality_at_A/months_in_100_years]	#0.0039258333333333		
+@mC = @[mortality_at_C/months_in_100_years] #0.002125
+@mD = @[mortality_at_D/months_in_100_years] #0.0009416666666667		in vanilla this is 0.00045
+
+
+### Pseudo algorithm to determine base Mortality / Birthrate
+## Mortality
+# if (sol < POP_GROWTH_EQUILIBRIUM_SOL)
+# { mortality = sol * POP_GROWTH_MORTALITY_STARVING_SLOPE + POP_GROWTH_MAX_MORTALITY }
+# else if (sol < POP_GROWTH_MAX_SOL)
+# { mortality = sol * POP_GROWTH_MORTALITY_EQUILIBRIUM_TO_GROWTH_MAX_SLOPE + POP_GROWTH_MORTALITY_EQUILIBRIUM_TO_GROWTH_MAX_INTERCEPT }
+# else if (sol < POP_GROWTH_STABLE_SOL)
+# { mortality = sol * POP_GROWTH_MORTALITY_GROWTH_MAX_TO_STABLE_SLOPE + POP_GROWTH_MORTALITY_GROWTH_MAX_TO_STABLE_INTERCEPT }
+# else { mortality = POP_GROWTH_MIN_MORTALITY }
+
+## Birthrate
+# if (sol < POP_GROWTH_EQUILIBRIUM_SOL)
+# { birthrate = (sol * POP_GROWTH_BIRTHRATE_PRETRANSITION_SLOPE + POP_GROWTH_MAX_BIRTHRATE) * (1 - malnourishment * (POP_GROWTH_EQUILIBRIUM_SOL - sol)) }
+# else if (sol < POP_GROWTH_TRANSITION_SOL)
+# { birthrate = sol * POP_GROWTH_BIRTHRATE_PRETRANSITION_SLOPE + POP_GROWTH_MAX_BIRTHRATE }
+# else if (sol < POP_GROWTH_STABLE_SOL)
+# { birthrate = sol * POP_GROWTH_BIRTHRATE_TRANSITION_SLOPE + POP_GROWTH_BIRTHRATE_TRANSITION_INTERCEPT }
+# else { birthrate = POP_GROWTH_MIN_BIRTHRATE }
+
+
+
+
+NPops = {
+	## Birthrate
+	POP_GROWTH_BIRTHRATE_PRETRANSITION_SLOPE = @[(bB-b0)/(sol_B)]
+	POP_GROWTH_BIRTHRATE_TRANSITION_SLOPE = @[(bD-bB)/(sol_D-sol_B)]
+	POP_GROWTH_BIRTHRATE_TRANSITION_INTERCEPT = @[bD-sol_D*(bD-bB)/(sol_D-sol_B)]
+
+	## Mortality
+	POP_GROWTH_MORTALITY_STARVING_SLOPE = @[(mA-m0)/(sol_A)]
+	POP_GROWTH_MORTALITY_EQUILIBRIUM_TO_GROWTH_MAX_SLOPE = @[(mC-mA)/(sol_C-sol_A)]
+	POP_GROWTH_MORTALITY_EQUILIBRIUM_TO_GROWTH_MAX_INTERCEPT = @[mC-sol_C*(mC-mA)/(sol_C-sol_A)]
+	POP_GROWTH_MORTALITY_GROWTH_MAX_TO_STABLE_SLOPE = @[(mD-mC)/(sol_D-sol_C)]
+	POP_GROWTH_MORTALITY_GROWTH_MAX_TO_STABLE_INTERCEPT = @[mD-sol_D*(mD-mC)/(sol_D-sol_C)]
+
+	## Base Values
+	POP_GROWTH_MIN_BIRTHRATE = @bD					# Minimum base birthrate per month (at POP_GROWTH_STABLE_SOL)
+	POP_GROWTH_MAX_BIRTHRATE = @b0					# Maximum base birthrate per month (at SOL = 0 if not modified by malnourishment)
+	POP_GROWTH_MIN_MORTALITY = @mD					# Minimum base mortality per month (at POP_GROWTH_STABLE_SOL)
+	POP_GROWTH_MAX_MORTALITY = @m0					# Maximum base mortality per month (at SOL = 0 if not modified by malnourishment)
+
+	## SoL Thresholds
+	POP_GROWTH_EQUILIBRIUM_SOL = @sol_A	# Equilibrium is pops stop starving and where growth first becomes positive
+	POP_GROWTH_TRANSITION_SOL = @sol_B		# Transition determines how long birthrate "lags" behind mortality before starting to drop. Setting to same as equilibrium leads to no "lag" (only matters for birthrate)
+	POP_GROWTH_MAX_SOL = @sol_C					# Growth Max is where net growth generally is at it's highest (only matters for mortality)
+	POP_GROWTH_STABLE_SOL = @sol_D				# Stable is where birthrate and mortality stop changing and hit their minimum values
+}
+
+### End Pop Growth Constant defines

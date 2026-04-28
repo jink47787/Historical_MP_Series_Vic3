@@ -1,0 +1,164 @@
+﻿namespace = usa_politics
+
+usa_politics.1 = { #Andrew Jackson could stay in politics...
+	type = country_event
+	placement = root
+
+	title = usa_politics.1.t
+	desc = usa_politics.1.d
+	flavor = usa_politics.1.f
+
+	gui_window = event_window_1char_tabloid
+	
+	left_icon = scope:usa_president_scope
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/law_icons/presidential_republic.dds"
+
+	duration = 3
+
+	trigger = {
+		exists = c:USA # this checks if a country with the tag "USA" exists
+		this = c:USA # this checks if a country with the tag "USA" is the current scoped country
+	}
+
+	immediate = {
+		ruler = {
+			save_scope_as = usa_president_scope
+			save_scope_as = ruler_scope
+		}
+		root = {
+			save_scope_as = usa_scope
+			set_next_election_date = 1836.12.7
+		}			
+	}
+
+	option = { #He does not run for re-election
+		name = usa_politics.1.a
+		default_option = yes
+		custom_tooltip = {
+			text = andrew_jackson_two_terms_only
+		}
+		custom_tooltip = {
+			text = retire_ruler
+			ruler = {
+				remove_as_interest_group_leader = yes
+			}
+		}
+		add_modifier = { #Gives rural folk enough power for Martin Van Buren to get the Presidency
+			name = jackson_ensures_var_buren_nominee
+			months = 15
+		}
+		add_loyalists = {
+			pop_type = farmers
+			value = 0.1
+		}
+		add_radicals = {
+			pop_type = aristocrats
+			value = 0.1
+		}
+	}
+	option = { #This is the questionable path, you're betting that you can get a lot of a dying man
+		name = usa_politics.1.b
+		custom_tooltip = {
+			text = andrew_jackson_god_king
+		}
+		ruler = {
+			add_trait = jacksonianism_never_ends
+		}
+		add_radicals = {
+			value = 0.15
+			culture = cu:yankee
+		}
+		add_radicals = {
+			value = 0.15
+			culture = cu:dixie
+		}
+		add_loyalists = {
+			pop_type = farmers
+			value = 0.4
+		}
+		add_radicals = {
+			pop_type = aristocrats
+			value = 0.1
+		}
+	}
+}
+
+usa_politics.2 = { #California Genocide of Natives
+	type = country_event
+	
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+	event_image = {
+		video = "europenorthamerica_native_american"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	
+	duration = 6
+	
+	title = usa_politics.2.t
+	desc = usa_politics.2.d
+	flavor = usa_politics.2.f
+
+	trigger = {
+		exists = c:USA # this checks if a country with the tag "USA" exists
+		this = c:USA # this checks if a country with the tag "USA" is the current scoped country
+	}
+	
+	immediate = {
+		s:STATE_CALIFORNIA = {
+			random_scope_state = {
+				limit = {
+					owner = {
+						OR = {
+							c:USA = THIS
+							is_subject_of = c:USA
+						}
+					}
+				}
+				save_scope_as = cali_scope
+			}
+		}
+	}
+	
+	option = { # Unrestricted settlement which kills the natives
+		name = usa_politics.2.a
+		default_option = yes
+		scope:cali_scope = {
+			kill_population_percent_in_state = {
+				percent = 0.3
+				culture = cu:hokan
+			}
+			add_modifier = { # hokan sol
+				name = unrestricted_californian_colonization
+				years = 20
+				is_decaying = yes
+			}
+		}
+	}
+	option = { # Restrict settlement which avoids killing the natives
+		name = usa_politics.2.b
+		add_radicals = {
+			value = 0.01
+			culture = cu:yankee
+		}
+		scope:cali_scope = {
+			kill_population_percent_in_state = {
+				percent = 0.025
+				culture = cu:hokan
+			}
+			add_modifier = { # hokan sol
+				name = restricted_californian_colonization
+				years = 20
+				is_decaying = yes
+			}
+		}
+		add_modifier = {
+			name = USA_paying_removal_costs
+			multiplier = money_amount_multiplier_very_small
+			days = short_modifier_time
+		}
+	}
+}

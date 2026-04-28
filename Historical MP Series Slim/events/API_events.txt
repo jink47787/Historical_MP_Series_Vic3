@@ -1,0 +1,118 @@
+﻿# This event only exists because for *some reason*, trying to set and use a local variable in a character interaction
+# causes an error, but having it fire an event that sets and uses the same local variable is perfectly fine.
+# It also works fine if the character interaction sets the variable and only the event uses it.
+# Least bizarre Clausewitz behavior
+
+namespace = api_ev
+
+# Update authority cost
+api_ev.1 = {
+    type = country_event
+    hidden = yes
+    
+    immediate = {
+        api_update_authority_use_with_checking = { auth_cost = local_var:auth_cost }
+    }
+}
+
+# Character bolster authority cost handling
+api_ev.2 = {
+    type = country_event
+    hidden = yes
+    
+    immediate = {
+        if = {
+            limit = {
+                NOT = {
+                    has_variable = api_character_bolster_qty
+                }
+            }
+            set_variable = {
+                name  = api_character_bolster_qty
+                value = 0
+            }
+        }
+        change_variable = {
+            name = api_character_bolster_qty
+            add  = local_var:qty_delta
+        }
+        
+        if = {
+            limit = {
+                has_modifier = api_bolstering_career
+            }
+            remove_modifier = api_bolstering_career
+        }
+        if = {
+            limit = {
+                var:api_character_bolster_qty > 0
+            }
+            add_modifier = {
+                name       = api_bolstering_career
+                multiplier = var:api_character_bolster_qty
+            }
+        }
+        
+        set_local_variable = {
+            name  = auth_cost
+            value = {
+                add      = 50
+                multiply = local_var:qty_delta
+            }
+        }
+        trigger_event = {
+            id = api_ev.1
+        }
+    }
+}
+
+# Character suppress authority cost handling
+api_ev.3 = {
+    type = country_event
+    hidden = yes
+    
+    immediate = {
+        if = {
+            limit = {
+                NOT = {
+                    has_variable = api_character_suppress_qty
+                }
+            }
+            set_variable = {
+                name  = api_character_suppress_qty
+                value = 0
+            }
+        }
+        change_variable = {
+            name = api_character_suppress_qty
+            add  = local_var:qty_delta
+        }
+        
+        if = {
+            limit = {
+                has_modifier = api_suppressing_career
+            }
+            remove_modifier = api_suppressing_career
+        }
+        if = {
+            limit = {
+                var:api_character_suppress_qty > 0
+            }
+            add_modifier = {
+                name       = api_suppressing_career
+                multiplier = var:api_character_suppress_qty
+            }
+        }
+        
+        set_local_variable = {
+            name  = auth_cost
+            value = {
+                add      = 50
+                multiply = local_var:qty_delta
+            }
+        }
+        trigger_event = {
+            id = api_ev.1
+        }
+    }
+}

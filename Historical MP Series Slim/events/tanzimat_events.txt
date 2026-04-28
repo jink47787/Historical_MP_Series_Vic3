@@ -1,0 +1,93 @@
+﻿
+namespace = tanzimat_events
+
+# Tax Farming
+tanzimat_events.1 = {
+	type = country_event
+	placement = root
+	title = tanzimat_events.1.t
+	desc = tanzimat_events.1.d
+	flavor = tanzimat_events.1.f
+
+	event_image = {
+		video = "asia_politician_parliament_motion"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_scales.dds"
+	
+	duration = 3
+
+	trigger = {
+		has_variable = sick_man_var
+		NOT = { 
+			has_variable = tanzimat_taxfarm 
+		}
+		AND = {
+			has_law_or_variant = law_type:law_land_based_taxation
+			OR = {
+				is_enacting_law = law_type:law_per_capita_based_taxation
+				is_enacting_law = law_type:law_no_poll_taxes
+			}
+		}
+	}
+	immediate = {
+		currently_enacting_law = {
+			save_scope_as = current_law_scope
+		}
+		ig:ig_landowners ?= { 
+			save_scope_as = governors 
+		}
+		set_variable = tanzimat_taxfarm
+	}
+	option = { # Abolish tax farming, but leave the governors in positions of power
+		name = tanzimat_events.1.a						
+        default_option = yes
+		add_modifier = {
+			name = new_system_old_faces
+			days = very_long_modifier_time
+		}
+		add_enactment_modifier = {
+			name = governors_pleased
+		}
+
+		ai_chance = {
+			base = 50
+		}		
+	}
+	option = { # Leave the system in place
+		name = tanzimat_events.1.b
+		ig:ig_landowners ?= {
+			add_modifier = {
+				name = retained_taxation_rights
+				days = long_modifier_time
+			}
+		}
+		add_enactment_modifier = {
+			name = governors_satisfied
+		}
+
+		ai_chance = {
+			base = 50
+		}		
+	}
+	option = { # Fully abolish the system
+		name = tanzimat_events.1.c 
+		add_enactment_phase = 1
+		add_modifier = {
+			name = iltizam_abolished
+			days = very_long_modifier_time
+		}
+		ig:ig_landowners ?= {
+			add_modifier = {
+				name = rescinded_taxation_rights
+				days = long_modifier_time
+			}
+		}
+
+		ai_chance = {
+			base = 100
+		}		
+	}
+}

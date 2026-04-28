@@ -1,0 +1,119 @@
+﻿je_decembrist_sympathizers = {
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+	
+	group = je_group_historical_content
+	
+	immediate = {
+		set_variable = {
+			name = decembrist_elimination
+			value = 0
+		}
+	}
+	
+	complete = {
+		scope:journal_entry = {
+			is_goal_complete = yes
+		}
+		NOT = { has_law_or_variant = law_type:law_no_police }
+		OR = {
+			has_law_or_variant = law_type:law_censorship
+			has_law_or_variant = law_type:law_outlawed_dissent
+		}
+		NOT = {
+			any_interest_group = {
+				NOT = { has_ideology = ideology:ideology_liberal }
+				ig_counts_as_marginal = no
+				leader = {
+					OR = {
+						has_ideology = ideology:ideology_radical
+						has_ideology = ideology:ideology_republican_leader
+						has_ideology = ideology:ideology_reformer
+					}
+				}
+			}
+		}
+		NOT = {
+			any_scope_character = { 
+				OR = {
+					has_role = general
+					has_role = admiral
+					has_role = agitator
+				}
+				OR = {
+					has_ideology = ideology:ideology_radical
+					has_ideology = ideology:ideology_republican_leader
+					has_ideology = ideology:ideology_reformer
+				}
+			}
+		}
+	}
+
+	on_complete = {
+		custom_tooltip = {
+			text = liberals_fail_tt
+		}
+		add_modifier = {
+			name = decembrist_suppression_success
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	fail = {
+		OR = {
+			NOT = { has_law_or_variant = law_type:law_monarchy }
+			NOT = { has_law_or_variant = law_type:law_autocracy }
+		}
+	}
+	
+	on_fail = {
+		add_modifier = {
+			name = decembrist_suppression_failure
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+	
+	on_monthly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					NOT = { has_law_or_variant = law_type:law_no_police }
+					OR = {
+						has_law_or_variant = law_type:law_censorship
+						has_law_or_variant = law_type:law_outlawed_dissent
+					}
+				}
+				change_variable = {
+					name = decembrist_elimination
+					add = 1
+				}
+			}
+		}
+	}
+	
+	timeout = 5475
+	
+	on_timeout = {
+		add_modifier = {
+			name = decembrist_suppression_failure
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+	
+	current_value = {
+		value = root.var:decembrist_elimination
+	}
+
+	goal_add_value = {
+		value = 60
+	}
+	
+	progressbar = yes
+	
+	can_revolution_inherit = yes
+
+	weight = 5000
+	should_be_pinned_by_default = yes
+}
