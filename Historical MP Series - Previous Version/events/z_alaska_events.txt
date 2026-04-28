@@ -1,0 +1,88 @@
+﻿namespace = alaska
+
+# The Alaska Purchase
+alaska.2 = {
+	type = country_event
+	placement = ROOT
+
+	title = alaska.2.t
+	desc = alaska.2.d
+	flavor = alaska.2.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	trigger = {
+	}
+
+	immediate = {
+		# Scopes set in alaska.4
+	}
+
+	option = {
+		name = alaska.2.a
+		default_option = yes
+		add_modifier = {
+			name = alaska_usa_big_money
+			months = 12
+		}
+		scope:alaska_seller = {
+			set_variable = successful_sale_of_alaska
+		}
+		if = {
+			limit = {
+				exists = c:ALK
+				c:ALK ?= {
+					is_subject_of = scope:alaska_seller
+				}
+			}
+			scope:alaska_buyer = {
+				annex = c:ALK
+			}
+		}
+		else = {
+			random_state = {
+				limit = {
+					state_region = s:STATE_ALASKA
+					owner = {
+						OR = {
+							this = scope:alaska_seller
+							is_subject_of = scope:alaska_seller
+						}
+					}
+				}
+				state_region = {
+					remove_claim = scope:alaska_seller
+					add_claim = scope:alaska_buyer
+					if = { 	#Below is only change
+						limit = {
+							c:USA ?= root
+						}
+						add_homeland = cu:yankee
+					}
+					if = {
+						limit = {
+							OR = {
+								c:GBR ?= root
+								c:CAN ?= root
+							}
+						}
+						add_homeland = cu:anglo_canadian
+					}
+				}
+				set_state_owner = scope:alaska_buyer
+			}
+		}
+		change_relations = {
+			country = scope:alaska_seller
+			value = 10
+		}
+	}
+}

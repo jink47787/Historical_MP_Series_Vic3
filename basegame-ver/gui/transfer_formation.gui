@@ -8,7 +8,7 @@ default_popup = {
 	blockoverride "header_close_button_visibility" {}
 
 	blockoverride "window_header_name" {
-		text = "TRANSFER_POPUP_HEADER"
+		text = "[SelectLocalization(TransferFormationPopup.HasArmyContext, 'TRANSFER_POPUP_HEADER', 'TRANSFER_FLEET_POPUP_HEADER')]"
 	}
 
 	blockoverride "scrollarea_content"
@@ -128,131 +128,19 @@ default_popup = {
 						}
 
 						### LEFT SIDE - EXPECTED UNIT NUMBERS FOR FORMATION IF TRANSFER IS CONFIRMED
-						widget = {
-							visible = "[TransferFormationPopup.CanReset]"
-							size = { 150 80 }
-							datacontext = "[TransferFormationPopup.GetLeftStagedFormation]"
-							tooltip = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_UNITS_TOOLTIP"
-							using = tooltip_below
-							parentanchor = vcenter
-
-							background = {
-								using = entry_bg_simple
-							}
-
-							flowcontainer = {
-								direction = vertical
-								parentanchor = center
-								spacing = 10
-
-								flowcontainer = {
-									spacing = 5
-									parentanchor = hcenter
-
-									### ARMY ICON
-									icon = {
-										visible = "[TransferFormationPopup.HasArmyContext]"
-										size = { 30 30 }
-										parentanchor = vcenter
-										using = look_at_me_animation
-										texture = "gfx/interface/icons/generic_icons/battalions.dds"
-									}
-
-									### FLEET ICON
-									icon = {
-										visible = "[TransferFormationPopup.HasFleetContext]"
-										size = { 30 30 }
-										parentanchor = vcenter
-										using = look_at_me_animation
-										texture = "gfx/interface/icons/generic_icons/flotillas.dds"
-									}
-
-									### CHANGES TO NUMBER OF UNITS
-									textbox = {
-										parentanchor = vcenter
-										autoresize = yes
-										align = hcenter|nobaseline
-										using = fontsize_large
-										using = look_at_me_text_animation
-										text = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_UNITS"
-									}
-
-									icon = {
-										visible = "[LessThan_int32(StagedFormation.GetCommandLimitRawIfTransferred, StagedFormation.GetNumCombatUnitsIfTransferred)]"
-										size = { 30 30 }
-										parentanchor = vcenter
-										using = look_at_me_animation
-										texture = "gfx/interface/icons/generic_icons/warning.dds"
-									}
-								}
-
-								textbox = {
-									visible = "[And( StagedFormation.HasValidFormation, And(IsDataModelEmpty(StagedFormation.GetCommanders), EqualTo_int32(StagedFormation.GetNumCombatUnitsIfTransferred, '(int32)0')))]"
-									parentanchor = hcenter
-									align = nobaseline
-									autoresize = yes
-									using = fontsize_large
-									max_width = 140
-									elide = right
-									fontsize_min = 14
-									text = "TRANSFER_FORMATION_WILL_DISBAND"
-								}
-							}
+						expected_formation_size = {
+							visible = "[And(TransferFormationPopup.CanReset, TransferFormationPopup.HasArmyContext)]"
 						}
-					}
+						
+						expected_formation_size = {
+							visible = "[And(TransferFormationPopup.CanReset, TransferFormationPopup.HasFleetContext)]"
 
-					### LEFT SIDE - COMMANDERS
-					flowcontainer = {
-						parentanchor = hcenter
-						minimumsize = { 650 100  }
-						maximumsize = { 650 -1  }
-						direction = vertical
-						margin_top = 5
-
-						# LEFT SIDE - EMPTY STATE FOR NO FORMATION SELECTED
-						empty_state = {
-							parentanchor = hcenter
-							minimumsize = { -1 90 }
-
-							blockoverride "visible" {
-								visible = "[And(Not(StagedFormation.HasValidFormation), Not(GetVariableSystem.Exists(Concatenate(StagedFormation.GetIDString, '_new_formation'))))]"
+							blockoverride "tooltip" {
+								tooltip = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_SHIPS_TOOLTIP"
 							}
 
 							blockoverride "text" {
-								text = "NO_FORMATION_SELECTED"
-							}
-						}
-
-						dynamicgridbox = {
-							visible = "[Not(IsDataModelEmpty(StagedFormation.GetCommanders))]"
-							datamodel = "[StagedFormation.GetCommanders]"
-							parentanchor = hcenter
-							datamodel_wrap = 6
-							flipdirection = yes
-
-							item = {
-								flowcontainer = {
-									margin = { 5 0 }
-
-									transfer_formation_commander_left_side = {
-										datacontext = "[StagedCommanderTransfer.GetCommander]"
-									}
-								}
-							}
-						}
-
-
-						# LEFT SIDE - EMPTY STATE FOR NO COMMANDER IN ORIGIN FORMATION
-						empty_state = {
-							parentanchor = hcenter
-							minimumsize = { -1 90 }
-
-							blockoverride "visible" {
-								visible = "[And(Or(StagedFormation.HasValidFormation, GetVariableSystem.Exists(Concatenate(StagedFormation.GetIDString, '_new_formation'))), IsDataModelEmpty(StagedFormation.GetCommanders))]"
-							}
-
-							blockoverride "text" {
-								text = "NO_FORMATION_COMMANDERS"
+								text = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_SHIPS"
 							}
 						}
 					}
@@ -261,13 +149,14 @@ default_popup = {
 
 					### LEFT SIDE - UNIT TYPES
 					flowcontainer = {
-						minimumsize = { 650 -1  }
-						maximumsize = { 650 -1  }
+						visible = "[TransferFormationPopup.HasArmyContext]"
+						minimumsize = { 650 -1 }
+						maximumsize = { 650 -1 }
 						direction = vertical
 						margin = { 0 10 }
 
 						background = {
-							visible = "[Or(StagedFormation.HasValidFormation, GetVariableSystem.Exists(Concatenate(StagedFormation.GetIDString, '_new_formation')))]"
+							visible = "[Or(Not(IsDataModelEmpty(StagedFormation.GetUnitTypes)), And(StagedFormation.HasValidFormation, IsDataModelEmpty(StagedFormation.GetUnitTypes)))]"
 							using = dark_area
 							alpha = 0.2
 						}
@@ -284,9 +173,8 @@ default_popup = {
 							item = {
 								flowcontainer = {
 									unit_type_selection_with_arrow_button = {
-
 										# Keep this visible as long as there are available units to be transferred
-										visible = "[Or(GreaterThan_int32(StagedUnitsWithType.GetNumRegulars, '(int32)0'), GreaterThan_int32(StagedUnitsWithType.GetNumConscripts, '(int32)0'))]"
+										visible = "[Or(GreaterThanZero(StagedUnitsWithType.GetNumRegulars), GreaterThanZero(StagedUnitsWithType.GetNumConscripts))]"
 
 										datacontext = "[StagedFormation.GetMilitaryFormation]"
 										datacontext = "[StagedUnitsWithType.GetUnitType]"
@@ -311,6 +199,59 @@ default_popup = {
 							}
 						}
 					}
+
+					### LEFT SIDE - SHIP TYPES
+					flowcontainer = {
+						visible = "[TransferFormationPopup.HasFleetContext]"
+						minimumsize = { 650 -1 }
+						maximumsize = { 650 -1 }
+						direction = vertical
+						margin = { 0 10 }
+
+						background = {
+							visible = "[Or(Not(IsDataModelEmpty(StagedFormation.GetShipTypes)), And(StagedFormation.HasValidFormation, IsDataModelEmpty(StagedFormation.GetShipTypes)))]"
+							using = dark_area
+							alpha = 0.2
+						}
+
+						# LEFT SIDE - SHIP TYPES FROM SELECTED ORIGIN FORMATION
+						flowcontainer = {
+							visible = "[Not(IsDataModelEmpty(StagedFormation.GetShipTypes))]"
+							datamodel = "[StagedFormation.GetShipTypes]"
+
+							parentanchor = hcenter
+							direction = vertical
+							spacing = 10
+
+							item = {
+								flowcontainer = {
+									ship_type_selection_with_arrow_button = {
+										# Keep this visible as long as there are available ships to be transferred
+										visible = "[GreaterThanZero(StagedShipsWithType.GetNumShips)]"
+
+										datacontext = "[StagedFormation.GetMilitaryFormation]"
+										datacontext = "[StagedShipsWithType.GetShipType]"
+
+										blockoverride "right_side_arrow_buttons" {}
+									}
+								}
+							}
+						}
+
+						# LEFT SIDE - EMPTY STATE FOR NO SHIPS IN MILITARY FORMATION
+						empty_state = {
+							parentanchor = hcenter
+							minimumsize = { -1 100 }
+
+							blockoverride "visible" {
+								visible = "[And(StagedFormation.HasValidFormation, IsDataModelEmpty(StagedFormation.GetShipTypes))]"
+							}
+
+							blockoverride "text" {
+								text = "NO_SHIPS_IN_MILITARY_FORMATION"
+							}
+						}
+					}
 				}
 
 				vertical_divider_stronger_full = {}
@@ -328,76 +269,19 @@ default_popup = {
 						spacing = 10
 
 						### RIGHT SIDE - EXPECTED UNIT NUMBERS FOR FORMATION IF TRANSFER IS CONFIRMED
-						widget = {
-							visible = "[TransferFormationPopup.CanReset]"
-							size = { 150 80 }
-							datacontext = "[TransferFormationPopup.GetRightStagedFormation]"
-							tooltip = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_UNITS_TOOLTIP"
-							using = tooltip_below
-							parentanchor = vcenter
+						expected_formation_size = {
+							visible = "[And(TransferFormationPopup.CanReset, TransferFormationPopup.HasArmyContext)]"
+						}
+						
+						expected_formation_size = {
+							visible = "[And(TransferFormationPopup.CanReset, TransferFormationPopup.HasFleetContext)]"
 
-							background = {
-								using = entry_bg_simple
-								alpha = 0.5
+							blockoverride "tooltip" {
+								tooltip = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_SHIPS_TOOLTIP"
 							}
 
-							flowcontainer = {
-								direction = vertical
-								parentanchor = center
-								spacing = 10
-
-								flowcontainer = {
-									spacing = 5
-									parentanchor = hcenter
-
-									### ARMY ICON
-									icon = {
-										visible = "[TransferFormationPopup.HasArmyContext]"
-										size = { 30 30 }
-										parentanchor = vcenter
-										using = look_at_me_animation
-										texture = "gfx/interface/icons/generic_icons/battalions.dds"
-									}
-
-									### FLEET ICON
-									icon = {
-										visible = "[TransferFormationPopup.HasFleetContext]"
-										size = { 30 30 }
-										parentanchor = vcenter
-										using = look_at_me_animation
-										texture = "gfx/interface/icons/generic_icons/flotillas.dds"
-									}
-
-									### CHANGES TO NUMBER OF UNITS
-									textbox = {
-										parentanchor = vcenter
-										autoresize = yes
-										align = hcenter|nobaseline
-										using = fontsize_large
-										using = look_at_me_text_animation
-										text = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_UNITS"
-									}
-
-									icon = {
-										visible = "[LessThan_int32(StagedFormation.GetCommandLimitRawIfTransferred, StagedFormation.GetNumCombatUnitsIfTransferred)]"
-										size = { 30 30 }
-										parentanchor = vcenter
-										using = look_at_me_animation
-										texture = "gfx/interface/icons/generic_icons/warning.dds"
-									}
-								}
-
-								textbox = {
-									visible = "[And( StagedFormation.HasValidFormation, And(IsDataModelEmpty(StagedFormation.GetCommanders), EqualTo_int32(StagedFormation.GetNumCombatUnitsIfTransferred, '(int32)0')))]"
-									parentanchor = hcenter
-									align = nobaseline
-									autoresize = yes
-									using = fontsize_large
-									max_width = 140
-									elide = right
-									fontsize_min = 14
-									text = "TRANSFER_FORMATION_WILL_DISBAND"
-								}
+							blockoverride "text" {
+								text = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_SHIPS"
 							}
 						}
 
@@ -483,70 +367,18 @@ default_popup = {
 						}
 					}
 
-					### RIGHT SIDE - COMMANDERS
-					flowcontainer = {
-						parentanchor = hcenter
-						minimumsize = { 650 100  }
-						maximumsize = { 650 -1  }
-						direction = vertical
-						margin_top = 5
-
-						# RIGHT SIDE - EMPTY STATE FOR NO FORMATION SELECTED
-						empty_state = {
-							parentanchor = hcenter
-							minimumsize = { -1 90 }
-
-							blockoverride "visible" {
-								visible = "[And(Not(StagedFormation.HasValidFormation), Not(GetVariableSystem.Exists(Concatenate(StagedFormation.GetIDString, '_new_formation'))))]"
-							}
-
-							blockoverride "text" {
-								text = "NO_FORMATION_SELECTED"
-							}
-						}
-
-						dynamicgridbox = {
-							visible = "[Not(IsDataModelEmpty(StagedFormation.GetCommanders))]"
-							datamodel = "[StagedFormation.GetCommanders]"
-							parentanchor = hcenter
-							datamodel_wrap = 6
-							flipdirection = yes
-
-							item = {
-								
-								transfer_formation_commander_right_side = {
-									datacontext = "[StagedCommanderTransfer.GetCommander]"
-								}
-							}
-						}
-
-
-						# RIGHT SIDE - EMPTY STATE FOR NO COMMANDER IN TARGET FORMATION
-						empty_state = {
-							parentanchor = hcenter
-							minimumsize = { -1 90 }
-
-							blockoverride "visible" {
-								visible = "[And(Or(StagedFormation.HasValidFormation, GetVariableSystem.Exists(Concatenate(StagedFormation.GetIDString, '_new_formation'))), IsDataModelEmpty(StagedFormation.GetCommanders))]"
-							}
-
-							blockoverride "text" {
-								text = "NO_FORMATION_COMMANDERS"
-							}
-						}
-					}
-
 					quick_select_menu = {}
 
 					### RIGHT SIDE - UNIT TYPES
 					flowcontainer = {
-						minimumsize = { 650 -1  }
-						maximumsize = { 650 -1  }
+						visible = "[TransferFormationPopup.HasArmyContext]"
+						minimumsize = { 650 -1 }
+						maximumsize = { 650 -1 }
 						direction = vertical
 						margin = { 0 10 }
-
+						
 						background = {
-							visible = "[Or(StagedFormation.HasValidFormation, GetVariableSystem.Exists(Concatenate(StagedFormation.GetIDString, '_new_formation')))]"
+							visible = "[Or(Not(IsDataModelEmpty(StagedFormation.GetUnitTypes)), And(StagedFormation.HasValidFormation, IsDataModelEmpty(StagedFormation.GetUnitTypes)))]"
 							using = dark_area
 						}
 
@@ -562,9 +394,8 @@ default_popup = {
 							item = {
 								flowcontainer = {
 									unit_type_selection_with_arrow_button = {
-
 										# Keep this visible as long as there are available units to be transferred
-										visible = "[Or(GreaterThan_int32(StagedUnitsWithType.GetNumRegulars, '(int32)0'), GreaterThan_int32(StagedUnitsWithType.GetNumConscripts, '(int32)0'))]"
+										visible = "[Or(GreaterThanZero(StagedUnitsWithType.GetNumRegulars), GreaterThanZero(StagedUnitsWithType.GetNumConscripts))]"
 
 										datacontext = "[StagedFormation.GetMilitaryFormation]"
 										datacontext = "[StagedUnitsWithType.GetUnitType]"
@@ -586,6 +417,58 @@ default_popup = {
 
 							blockoverride "text" {
 								text = "NO_UNITS_IN_MILITARY_FORMATION"
+							}
+						}
+					}
+					
+					### RIGHT SIDE - SHIP TYPES
+					flowcontainer = {
+						visible = "[TransferFormationPopup.HasFleetContext]"
+						minimumsize = { 650 -1 }
+						maximumsize = { 650 -1 }
+						direction = vertical
+						margin = { 0 10 }
+
+						background = {
+							visible = "[Or(Not(IsDataModelEmpty(StagedFormation.GetShipTypes)), And(StagedFormation.HasValidFormation, IsDataModelEmpty(StagedFormation.GetShipTypes)))]"
+							using = dark_area
+						}
+
+						# RIGHT SIDE - SHIP TYPES FROM SELECTED TARGET FORMATION
+						flowcontainer = {
+							visible = "[Not(IsDataModelEmpty(StagedFormation.GetShipTypes))]"
+							datamodel = "[StagedFormation.GetShipTypes]"
+
+							parentanchor = hcenter
+							direction = vertical
+							spacing = 10
+
+							item = {
+								flowcontainer = {
+									ship_type_selection_with_arrow_button = {
+										# Keep this visible as long as there are available ships to be transferred
+										visible = "[GreaterThanZero(StagedShipsWithType.GetNumShips)]"
+
+										datacontext = "[StagedFormation.GetMilitaryFormation]"
+										datacontext = "[StagedShipsWithType.GetShipType]"
+
+										blockoverride "left_side_arrow_buttons" {}
+									}
+								}
+							}
+						}
+
+						# RIGHT SIDE - EMPTY STATE FOR NO SHIPS IN MILITARY FORMATION
+						empty_state = {
+							parentanchor = hcenter
+							minimumsize = { -1 100 }
+
+							blockoverride "visible" {
+								visible = "[And(StagedFormation.HasValidFormation, IsDataModelEmpty(StagedFormation.GetShipTypes))]"
+							}
+
+							blockoverride "text" {
+								text = "NO_SHIPS_IN_MILITARY_FORMATION"
 							}
 						}
 					}
@@ -665,9 +548,9 @@ default_popup = {
 				button = {
 					size = { 100 40 }
 					using = default_button_action
-					tooltip = "LEFT_SIDE_MOVE_ALL_TOOLTIP"
+					tooltip = "[SelectLocalization(TransferFormationPopup.HasArmyContext, 'LEFT_SIDE_MOVE_ALL_TOOLTIP', 'LEFT_SIDE_MOVE_ALL_FLEET_TOOLTIP')]"
 					text = "LEFT_SIDE_MOVE_ALL"
-					enabled = "[Not( And( IsDataModelEmpty(StagedFormation.GetCommanders), EqualTo_int32(StagedFormation.GetNumCombatUnitsIfTransferred, '(int32)0') ) )]"
+					enabled = "[Not(And(IsZero(StagedFormation.GetNumCombatUnitsIfTransferred), IsZero(StagedFormation.GetNumShipsIfTransferred)))]"
 					onclick = "[TransferFormationPopup.MovePercentageRight('(int32)100')]"
 					using = tooltip_ws
 				}
@@ -675,9 +558,9 @@ default_popup = {
 				button = {
 					size = { 100 40 }
 					using = default_button_action
-					tooltip = "LEFT_SIDE_MOVE_HALF_TOOLTIP"
+					tooltip = "[SelectLocalization(TransferFormationPopup.HasArmyContext, 'LEFT_SIDE_MOVE_HALF_TOOLTIP', 'LEFT_SIDE_MOVE_HALF_FLEET_TOOLTIP')]"
 					text = "LEFT_SIDE_MOVE_HALF"
-					enabled = "[Not(And(LessThan_int32(GetDataModelSize(StagedFormation.GetCommanders), '(int32)2'), LessThan_int32(StagedFormation.GetNumCombatUnitsIfTransferred, '(int32)2')))]"
+					enabled = "[Not(And(LessThan_int32(StagedFormation.GetNumCombatUnitsIfTransferred, '(int32)2'), LessThan_int32(StagedFormation.GetNumShipsIfTransferred, '(int32)2')))]"
 					onclick = "[TransferFormationPopup.MovePercentageRight('(int32)50')]"
 					using = tooltip_ws
 				}
@@ -699,18 +582,18 @@ default_popup = {
 				button = {
 					size = { 100 40 }
 					using = default_button_action
-					tooltip = "RIGHT_SIDE_MOVE_ALL_TOOLTIP"
+					tooltip = "[SelectLocalization(TransferFormationPopup.HasArmyContext, 'RIGHT_SIDE_MOVE_ALL_TOOLTIP', 'RIGHT_SIDE_MOVE_ALL_FLEET_TOOLTIP')]"
 					text = "RIGHT_SIDE_MOVE_ALL"
-					enabled = "[Not( And( IsDataModelEmpty(StagedFormation.GetCommanders), EqualTo_int32(StagedFormation.GetNumCombatUnitsIfTransferred, '(int32)0') ) )]"
+					enabled = "[Not(And(IsZero(StagedFormation.GetNumCombatUnitsIfTransferred), IsZero(StagedFormation.GetNumShipsIfTransferred)))]"
 					onclick = "[TransferFormationPopup.MovePercentageLeft('(int32)100')]"
 				}
 
 				button = {
 					size = { 100 40 }
 					using = default_button_action
-					tooltip = "RIGHT_SIDE_MOVE_HALF_TOOLTIP"
+					tooltip = "[SelectLocalization(TransferFormationPopup.HasArmyContext, 'RIGHT_SIDE_MOVE_HALF_TOOLTIP', 'RIGHT_SIDE_MOVE_HALF_FLEET_TOOLTIP')]"
 					text = "RIGHT_SIDE_MOVE_HALF"
-					enabled = "[Not(And(LessThan_int32(GetDataModelSize(StagedFormation.GetCommanders), '(int32)2'), LessThan_int32(StagedFormation.GetNumCombatUnitsIfTransferred, '(int32)2')))]"
+					enabled = "[Not(And(LessThan_int32(StagedFormation.GetNumCombatUnitsIfTransferred, '(int32)2'), LessThan_int32(StagedFormation.GetNumShipsIfTransferred, '(int32)2')))]"
 					onclick = "[TransferFormationPopup.MovePercentageLeft('(int32)50')]"
 				}
 			}
@@ -851,130 +734,81 @@ default_popup = {
 
 types transfer_formation_types
 {	
-	type transfer_formation_commander_left_side = widget {
-		size = { 140 90 }
+	type expected_formation_size = widget {
+		size = { 150 80 }
 
-		widget = {
-			size = { 135 100% }
-
-			background = {
-				using = entry_bg
-			}
+		block "tooltip" {
+			tooltip = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_UNITS_TOOLTIP"
+			using = tooltip_below
 		}
+
+		using = tooltip_below
+		parentanchor = vcenter
 
 		background = {
-			visible = "[StagedCommanderTransfer.HasMoved]"
-			using = rounded_background_blue
-			alpha = 0.7
+			using = entry_bg_simple
+			alpha = 0.5
 		}
 
-		icon = {
-			visible = "[StagedCommanderTransfer.HasMoved]"
-			using = highlighted_square_selection
-		}
+		flowcontainer = {
+			direction = vertical
+			parentanchor = center
+			spacing = 10
 
-		### LEFT SIDE - COMMANDER
-		military_formation_commander = {
-			parentanchor = vcenter
-			size = { 80 80 }
-			position = { 10 0 }
+			flowcontainer = {
+				spacing = 5
+				parentanchor = hcenter
 
-			datacontext = "[StagedCommanderTransfer.GetCommander]"
+				### ARMY ICON
+				icon = {
+					visible = "[TransferFormationPopup.HasArmyContext]"
+					size = { 30 30 }
+					parentanchor = vcenter
+					using = look_at_me_animation
+					texture = "gfx/interface/icons/generic_icons/battalions.dds"
+				}
 
-			blockoverride "portrait" {
-				character_portrait_medium = {
-					parentanchor = center
-					using = tooltip_above
+				### FLEET ICON
+				icon = {
+					visible = "[TransferFormationPopup.HasFleetContext]"
+					size = { 30 30 }
+					parentanchor = vcenter
+					using = look_at_me_animation
+					texture = "gfx/interface/icons/generic_icons/flotillas.dds"
+				}
 
-					blockoverride "highlight" {}
+				### CHANGES TO NUMBER OF UNITS
+				textbox = {
+					parentanchor = vcenter
+					autoresize = yes
+					align = hcenter|nobaseline
+					using = fontsize_large
+					using = look_at_me_text_animation
+
+					block "text" {
+						text = "TRANSFER_FORMATION_CHANGES_TO_TOTAL_NUMBER_OF_UNITS"
+					}
+				}
+
+				icon = {
+					visible = "[Or(LessThan_int32(StagedFormation.GetCommandLimitRaw, StagedFormation.GetNumCombatUnitsIfTransferred), LessThan_int32(StagedFormation.GetCommandLimitRaw, StagedFormation.GetNumShipsIfTransferred))]"
+					size = { 30 30 }
+					parentanchor = vcenter
+					using = look_at_me_animation
+					texture = "gfx/interface/icons/generic_icons/warning.dds"
 				}
 			}
 
-			blockoverride "orders_visibility" {
-				visible = no
-			}
-		}
-
-		### LEFT SIDE - COMMANDER MOVE BUTTON
-		button_icon_move_right = {
-			parentanchor = vcenter|right
-			position = { -10 0 }
-			size = { 35 60 }
-			onclick = "[TransferFormationPopup.MoveCommander(StagedCommanderTransfer.AccessSelf)]"
-
-			onclick = "[GetVariableSystem.SetIf( 'transfer_formation_new_formation', 'true', Not(TransferFormationPopup.HasRightFormation) )]"
-			onclick = "[GetVariableSystem.SetIf( Concatenate( TransferFormationPopup.GetRightStagedFormation.GetIDString, '_new_formation'), 'true', Not(TransferFormationPopup.HasRightFormation) )]"
-
-			enabled = "[TransferFormationPopup.CanMoveCommander(StagedCommanderTransfer.AccessSelf)]"
-			tooltip = "TRANSFER_FORMATION_MOVE_COMMANDER_TOOLTIP"
-			using = tooltip_above
-			
-			blockoverride "icon_size" {
-				size = { 35 75% }
-			}
-		}
-	}
-
-	type transfer_formation_commander_right_side = widget {
-		size = { 140 90 }
-
-		widget = {
-			size = { 135 100% }
-
-			background = {
-				using = entry_bg
-			}
-		}
-
-		background = {
-			visible = "[StagedCommanderTransfer.HasMoved]"
-			using = rounded_background_blue
-			alpha = 0.7
-		}
-
-		icon = {
-			visible = "[StagedCommanderTransfer.HasMoved]"
-			using = highlighted_square_selection
-		}
-
-		### RIGHT SIDE - COMMANDER
-		military_formation_commander = {
-			parentanchor = vcenter|right
-			size = { 80 80 }
-			position = { -12 0 }
-
-			datacontext = "[StagedCommanderTransfer.GetCommander]"
-
-			blockoverride "portrait" {
-				character_portrait_medium = {
-					parentanchor = center
-					using = tooltip_above
-
-					blockoverride "highlight" {}
-				}
-			}
-
-			blockoverride "orders_visibility" {
-				visible = no
-			}
-		}
-
-		### RIGHT SIDE - COMMANDER MOVE BUTTON
-		button_icon_move_left = {
-			parentanchor = vcenter
-			position = { 10 0 }
-			size = { 35 60 }
-			onclick = "[TransferFormationPopup.MoveCommander(StagedCommanderTransfer.AccessSelf)]"
-			
-			onclick = "[GetVariableSystem.SetIf( 'transfer_formation_new_formation', 'true', Not(TransferFormationPopup.HasLeftFormation))]"
-			onclick = "[GetVariableSystem.SetIf( Concatenate( TransferFormationPopup.GetLeftStagedFormation.GetIDString, '_new_formation'), 'true', Not(TransferFormationPopup.HasLeftFormation))]"
-
-            enabled = "[TransferFormationPopup.CanMoveCommander(StagedCommanderTransfer.AccessSelf)]"
-			tooltip = "TRANSFER_FORMATION_MOVE_COMMANDER_TOOLTIP"
-			using = tooltip_above
-			
-			blockoverride "icon_size" {
-				size = { 35 75% }
+			textbox = {
+				visible = "[And3(StagedFormation.HasValidFormation, IsZero(StagedFormation.GetNumCombatUnitsIfTransferred), IsZero(StagedFormation.GetNumShipsIfTransferred))]"
+				parentanchor = hcenter
+				align = nobaseline
+				autoresize = yes
+				using = fontsize_large
+				max_width = 140
+				elide = right
+				fontsize_min = 14
+				text = "TRANSFER_FORMATION_WILL_DISBAND"
 			}
 		}
 	}
@@ -1072,16 +906,6 @@ types transfer_formation_types
 							spacing = 10
 
 							textbox = {
-								visible = "[TransferFormationPopup.HasFleetContext]"
-								parentanchor = vcenter
-								autoresize = yes
-								align = nobaseline
-								raw_text = "[TransferFormationPopup.GetContextualUnitTypeIcon] #v [StagedUnitsWithType.GetNumRegulars]#!"
-								tooltip = "UNIT_TYPE_FLOTILLAS_TOOLTIP_FOR_GUI"
-							}
-
-							textbox = {
-								visible = "[TransferFormationPopup.HasArmyContext]"
 								parentanchor = vcenter
 								autoresize = yes
 								align = nobaseline
@@ -1089,12 +913,9 @@ types transfer_formation_types
 								tooltip = "UNIT_TYPE_BATTALIONS_TOOLTIP_FOR_GUI"
 							}
 
-							vertical_divider = {
-								visible = "[TransferFormationPopup.HasArmyContext]"
-							}
+							vertical_divider = {}
 
 							textbox = {
-								visible = "[TransferFormationPopup.HasArmyContext]"
 								alpha = "[TransparentIfZero_int32(StagedUnitsWithType.GetNumConscripts)]"
 								parentanchor = vcenter
 								autoresize = yes
@@ -1126,7 +947,7 @@ types transfer_formation_types
 						parentanchor = vcenter
 						spacing = 5
 
-						### RIGHT SIDE - MOVE BUTTON - FLOTILLAS/REGULARS
+						### RIGHT SIDE - MOVE BUTTON - REGULARS
 						block "right_side_arrow_buttons" {
 							### MOVE BUTTON
 							button_icon_move_left = {
@@ -1171,19 +992,10 @@ types transfer_formation_types
 									}
 
 									icon = {
-										visible = "[TransferFormationPopup.HasArmyContext]"
 										parentanchor = vcenter
 										position = { 5 0 }
 										size = { 30 30 }
 										texture = "gfx/interface/icons/generic_icons/battalions.dds"
-									}
-
-									icon = {
-										visible = "[TransferFormationPopup.HasFleetContext]"
-										parentanchor = vcenter
-										position = { 5 0 }
-										size = { 30 30 }
-										texture = "gfx/interface/icons/generic_icons/flotillas.dds"
 									}
 
 									text = "[StagedUnitsWithType.GetNumSelectedRegulars]"
@@ -1229,7 +1041,7 @@ types transfer_formation_types
 							}
 						}
 
-						### LEFT SIDE - MOVE BUTTON - FLOTILLAS/REGULARS
+						### LEFT SIDE - MOVE BUTTON - REGULARS
 						block "left_side_arrow_buttons" {
 							### MOVE BUTTON
 							button_icon_move_right = {
@@ -1252,13 +1064,10 @@ types transfer_formation_types
 						}
 					}
 
-					vertical_divider = {
-						visible = "[TransferFormationPopup.HasArmyContext]"
-					}
+					vertical_divider = {}
 
 					### CONSCRIPTS NUMBER & BUTTONS
 					flowcontainer = {
-						visible = "[TransferFormationPopup.HasArmyContext]"
 						parentanchor = vcenter
 						spacing = 5
 
@@ -1448,6 +1257,260 @@ types transfer_formation_types
 		}
 	}
 
+	type ship_type_selection_with_arrow_button = flowcontainer {
+		direction = vertical
+		margin = { 0 10 }
+		datacontext = "[StagedShipsWithType.GetShipType]"
+		datacontext = "[ShipType.GetGroup]"
+
+		background = {
+			visible = "[StagedShipsWithType.HasMoved]"
+			using = rounded_background_blue
+			alpha = 0.7
+		}
+
+		background = {
+			using = dark_area
+			alpha = 0.4
+
+			modify_texture = {
+				texture = "gfx/interface/masks/fade_horizontal_right.dds"
+				blend_mode = alphamultiply
+				alpha = 1
+			}
+		}
+
+		background = {
+			using = fade_right_entry_fancy_header_colored
+			color = "[ShipGroup.GetUIColor]"
+			alpha = 0.12
+		}
+
+		background = {
+			using = simple_frame
+		}
+
+		flowcontainer = {
+			spacing = 10
+			margin_left = 10
+			margin_right = 10
+			margin_bottom = 5
+
+			flowcontainer = {
+				direction = vertical
+				parentanchor = vcenter
+				spacing = 5
+
+				section_header_button = {					
+					using = default_fade_in_out
+					parentanchor = hcenter
+
+					block "section_header_size" {
+						size = { 584 40 }
+					}
+
+					blockoverride "arrow_position" {
+						position = { 2 0 }
+						parentanchor = left|vcenter
+					}
+
+					blockoverride "left_textbox_margin_left" {
+						margin_left = 30
+					}
+
+					blockoverride "left_text" {
+						text = "TRANSFER_SHIP_TYPE_NAME"
+						tooltipwidget = {
+							FancyTooltip_ShipType = {}
+						}
+					}
+
+					blockoverride "right_text" {
+						flowcontainer = {
+							margin = { 10 0 }
+							spacing = 10
+
+							textbox = {
+								parentanchor = vcenter
+								autoresize = yes
+								align = nobaseline
+								raw_text = "@ships![Nbsp][StagedShipsWithType.GetNumShips|v]"
+								tooltip = "SHIP_TYPE_TOOLTIP_FOR_GUI"
+							}
+						}
+					}
+					
+					blockoverride "onclick" {
+						onclick = "[GetVariableSystem.Toggle(Concatenate3('transfer_', StagedFormation.GetIDString, ToString_int32(StagedShipsWithType.GetShipType.GetID)))]"
+					}
+
+					blockoverride "onclick_showmore" {
+						visible = "[Not(GetVariableSystem.Exists(Concatenate3('transfer_', StagedFormation.GetIDString, ToString_int32(StagedShipsWithType.GetShipType.GetID))))]"
+					}
+
+					blockoverride "onclick_showless" {
+						visible = "[GetVariableSystem.Exists(Concatenate3('transfer_', StagedFormation.GetIDString, ToString_int32(StagedShipsWithType.GetShipType.GetID)))]"
+					}
+				}
+
+				flowcontainer = {
+					spacing = 10
+
+					### RIGHT SIDE - MOVE BUTTON
+					block "right_side_arrow_buttons" {
+						button_icon_move_left = {
+							parentanchor = vcenter
+							size = { 35 60 }
+							onclick = "[TransferFormationPopup.MoveShips(StagedShipsWithType.AccessSelf)]"
+							onclick = "[GetVariableSystem.SetIf('transfer_formation_new_formation', 'true', Not(TransferFormationPopup.HasLeftFormation))]"
+							onclick = "[GetVariableSystem.SetIf(Concatenate(TransferFormationPopup.GetLeftStagedFormation.GetIDString, '_new_formation'), 'true', Not(TransferFormationPopup.HasLeftFormation))]"
+
+							enabled = "[GreaterThanZero(StagedShipsWithType.GetNumShipsSelected)]"
+							tooltip = "TRANSFER_FORMATION_MOVE_SHIPS_TOOLTIP"
+							using = tooltip_above
+							
+							blockoverride "icon_size" {
+								size = { 35 75% }
+							}
+						}
+					}
+
+					icon = {
+						size = { 220 75 }
+
+						background = {
+							fittype = center
+							texture = "[StagedShipsWithType.GetShipType.GetProfileTexture]"
+						}
+					}
+
+					### SHIP NUMBERS & BUTTONS
+					flowcontainer = {
+						parentanchor = vcenter
+						spacing = 5
+
+						flowcontainer = {
+							direction = vertical
+							spacing = 5
+							margin = { 5 5 }
+							min_width = 180
+
+							background = {
+								using = entry_bg
+								alpha = 0.4
+							}
+
+							flowcontainer = {
+								parentanchor = hcenter
+								spacing = 5
+
+								# Set number of units to send
+								editbox = {
+									background = {
+										using = text_edit_bg
+									}
+
+									icon = {
+										parentanchor = vcenter
+										position = { 5 0 }
+										size = { 30 30 }
+										texture = "gfx/interface/icons/generic_icons/flotillas.dds"
+									}
+
+									text = "[StagedShipsWithType.GetNumShipsSelected]"
+									ontextedited = "[StagedShipsWithType.OnEditboxValueChanged]"
+
+									size = { 130 40 }
+									margin_left = 40
+									align = left|nobaseline
+
+									maxcharacters = 6
+									alwaystransparent = no
+								}
+							}
+
+							scrollbar = {
+								direction = horizontal
+								size = { 170 20 }
+								value = "[StagedShipsWithType.GetNumShipsSelected]"
+
+								min = 0.0
+								max = "[IntToFixedPoint(StagedShipsWithType.GetNumShips)]"
+								step = 1.0
+								wheelstep = 1.0
+
+								onvaluechanged = "[StagedShipsWithType.OnSliderValueChanged]"
+								track = {
+									using = SettingsValueTrack
+								}
+
+								slider = {
+									using = SettingsValueSlider
+								}
+
+								dec_button = {
+									using = SettingsValueDecButton
+								}
+
+								inc_button = {
+									using = SettingsValueIncButton
+								}
+							}
+						}
+
+						### LEFT SIDE - MOVE BUTTON
+						block "left_side_arrow_buttons" {
+							button_icon_move_right = {
+								parentanchor = vcenter
+								size = { 35 60 }
+								onclick = "[TransferFormationPopup.MoveShips(StagedShipsWithType.AccessSelf)]"
+								onclick = "[GetVariableSystem.SetIf('transfer_formation_new_formation', 'true', Not(TransferFormationPopup.HasRightFormation))]"
+								onclick = "[GetVariableSystem.SetIf(Concatenate(TransferFormationPopup.GetRightStagedFormation.GetIDString, '_new_formation'), 'true', Not(TransferFormationPopup.HasRightFormation))]"
+
+								enabled = "[GreaterThanZero(StagedShipsWithType.GetNumShipsSelected)]"
+								tooltip = "TRANSFER_FORMATION_MOVE_SHIPS_TOOLTIP"
+								using = tooltip_above
+
+								blockoverride "icon_size" {
+									size = { 35 75% }
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		widget = {
+			visible = "[GetVariableSystem.Exists(Concatenate3('transfer_', StagedFormation.GetIDString, ToString_int32(StagedShipsWithType.GetShipType.GetID)))]"
+			
+			size = { 10 10 } 
+		}
+
+		divider_clean = {
+			visible = "[GetVariableSystem.Exists(Concatenate3('transfer_', StagedFormation.GetIDString, ToString_int32(StagedShipsWithType.GetShipType.GetID)))]"
+		}
+
+		fixedgridbox = {
+			visible = "[GetVariableSystem.Exists(Concatenate3('transfer_', StagedFormation.GetIDString, ToString_int32(StagedShipsWithType.GetShipType.GetID)))]"
+			datamodel = "[StagedShipsWithType.GetShips]"
+			
+			parentanchor = hcenter
+			datamodel_wrap = 2
+			addcolumn = 298
+			addrow = 42
+			flipdirection = yes
+			
+			background = {
+				using = dark_area
+			}
+
+			item = {
+				small_ship_with_checkbox = {}
+			}
+		}
+	}
+
 	type transfer_unit_filters = flowcontainer {
 		visible = "[GetVariableSystem.Exists(Concatenate('transfer_', StagedFormation.GetIDStringForUnitType( StagedUnitsWithType.Self )))]"
 
@@ -1568,21 +1631,10 @@ types transfer_formation_types
 				size = { 248 30 }
 
 				textbox = {
-					visible = "[TransferFormationPopup.HasArmyContext]"
 					parentanchor = vcenter
 					autoresize = yes
 					maximumsize = { 130 -1 }
 					raw_text = "@battalions! [CombatUnit.GetName]"
-					elide = right
-					align = left|nobaseline
-				}
-
-				textbox = {
-					visible = "[TransferFormationPopup.HasFleetContext]"
-					parentanchor = vcenter
-					autoresize = yes
-					maximumsize = { 130 -1 }
-					raw_text = "@flotillas! [CombatUnit.GetName]"
 					elide = right
 					align = left|nobaseline
 				}
@@ -1620,6 +1672,91 @@ types transfer_formation_types
 					position = { -5 0 }
 					texture = "[CombatUnit.GetCurrentVeterancyLevelIcon]"
 					tooltip = "COMBAT_UNIT_VETERANCY_TOOLTIP"
+				}
+			}
+		}
+	}
+
+	type small_ship_with_checkbox = margin_widget {
+		tooltipwidget = {
+			FancyTooltip_Ship = {}
+		}
+
+		using = tooltip_above
+
+		size = { 294 42 }
+		margin = { 0 2 }
+
+		icon = {
+			visible = "[Not(StagedShipsWithType.IsShipSelected(Ship.Self))]"
+			using = entry_bg_unit
+			alpha = 0.5
+			position = { 2 2 }
+			size = { 291 100% }
+		}
+		
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = fixed
+			margin = { 6 6 }
+			spacing = 5
+
+			background = {
+				visible = "[StagedShipsWithType.IsShipSelected(Ship.Self)]"
+				using = paper_bg
+			}
+
+			background = {
+				visible = "[StagedShipsWithType.IsShipSelected(Ship.Self)]"
+				using = highlighted_square_selection
+			}
+
+			button_checkbox = {
+				size = { 30 30 }
+				using = check_button_sound
+				tooltip = "SELECT_SHIP_TO_TRANSFER"
+				using = tooltip_above
+
+				checked = "[StagedShipsWithType.IsShipSelected(Ship.Self)]"
+				onclick = "[StagedShipsWithType.ToggleShipSelected(Ship.Self)]"
+			}
+
+			margin_widget = {
+				size = { 248 30 }
+
+				textbox = {
+					parentanchor = vcenter
+					autoresize = yes
+					maximumsize = { 130 -1 }
+					raw_text = "@ships![Nbsp][Ship.GetName]"
+					elide = right
+					align = left|nobaseline
+				}
+
+				# Crew
+				textbox = {
+					parentanchor = vcenter
+					position = { 140 0 }
+					autoresize = yes
+					text = "SHIP_CREW"
+					tooltip = "SHIP_CREW_TOOLTIP"
+					using = tooltip_above
+					align = left|nobaseline
+				}
+
+				# Morale
+				morale_bar = {
+					parentanchor = vcenter|right
+					position = { -10 0 }
+					tooltip = "MILITARY_FORMATION_HIT_POINTS_TOOLTIP"
+					using = tooltip_above
+					
+					blockoverride "morale_value" {
+						value = "[FixedPointToFloat(Ship.GetHitPointsPercentage)]"
+					}
+					blockoverride "morale_color" {
+						color = "[GetMoraleColorVec(Ship.GetHitPointsPercentage)]"
+					}
 				}
 			}
 		}

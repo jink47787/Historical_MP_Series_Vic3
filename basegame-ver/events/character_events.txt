@@ -85,7 +85,7 @@ character_events.2 = { #Rich industrialist wants to build a university
  				reserves=1
  			}
 		}
-		scope:university_benefactor.interest_group = {
+		scope:university_benefactor.interest_group ?= {
 			add_modifier = {
 				name = modifier_university_built
 				days = normal_modifier_time
@@ -95,7 +95,7 @@ character_events.2 = { #Rich industrialist wants to build a university
 
 	option = {
 		name = character_events.2.b
-		scope:university_benefactor.interest_group = {
+		scope:university_benefactor.interest_group ?= {
 			add_modifier = {
 				name = modifier_blocked_building_university
 				days = normal_modifier_time
@@ -130,11 +130,11 @@ character_events.3 = { #The duel
 		NOT = { has_variable = duels_banned }
 		any_scope_character = {
 			is_busy = yes
-			is_ruler = no
+			is_ruler_of_own_country = no
+			character_is_valid_for_events = yes
 			NOT = {
 				has_trait = cautious
 			}
-			age >= 18
 			count >= 2
 		}
 	}
@@ -143,12 +143,12 @@ character_events.3 = { #The duel
 		random_scope_character = {
 			limit = {
 				is_busy = no
-				is_ruler = no
+				is_ruler_of_own_country = no
+				character_is_valid_for_events = yes
 				NOT = {
 					has_trait = cautious
 				}
 				is_immortal = no
-				age >= 18
 			}
 			save_scope_as = duel_participant_1
 		}
@@ -156,13 +156,13 @@ character_events.3 = { #The duel
 		random_scope_character = {
 			limit = {
 				is_busy = no
-				is_ruler = no
+				is_ruler_of_own_country = no
+				character_is_valid_for_events = yes
 				NOT = { this = scope:duel_participant_1 }
 				NOT = {
 					has_trait = cautious
 				}
 				is_immortal = no
-				age >= 18
 			}
 			save_scope_as = duel_participant_2
 		}
@@ -246,7 +246,7 @@ character_events.3 = { #The duel
 					if = {
 						limit = {
 							scope:duel_participant_1 = {
-								has_role = general
+								has_role_of_type = general
 							}
 						}
 						add = -5
@@ -329,7 +329,7 @@ character_events.3 = { #The duel
 					if = {
 						limit = {
 							scope:duel_participant_1 = {
-								has_role = general
+								has_role_of_type = general
 							}
 						}
 						add = 10
@@ -337,7 +337,7 @@ character_events.3 = { #The duel
 					if = {
 						limit = {
 							scope:duel_participant_1 = {
-								has_role = admiral
+								has_role_of_type = admiral
 							}
 						}
 						add = 10
@@ -427,11 +427,12 @@ character_events.4 = { #Devout leader sleeping with a nun
 
 	trigger = {
 		any_scope_character = {
-			has_role = politician
-			is_ruler = no
+			has_role_of_type = politician
+			is_ruler_of_own_country = no
+			character_is_valid_for_events = yes
 			age > 18
 			is_busy = no
-			interest_group = {
+			interest_group ?= {
 				ig_counts_as_marginal = no
 				is_interest_group_type = ig_devout
 			}
@@ -441,11 +442,12 @@ character_events.4 = { #Devout leader sleeping with a nun
 	immediate = {
 		random_scope_character = {
 			limit = {
-				has_role = politician
-				is_ruler = no
+				has_role_of_type = politician
+				is_ruler_of_own_country = no
+				character_is_valid_for_events = yes
 				age > 18
 				is_busy = no
-				interest_group = {
+				interest_group ?= {
 					ig_counts_as_marginal = no
 					is_interest_group_type = ig_devout
 				}
@@ -464,7 +466,7 @@ character_events.4 = { #Devout leader sleeping with a nun
 		custom_tooltip = character_events.4.a.tt
 		hidden_effect = {
 			scope:devout_scandal = {
-                kill_character = {
+                retire_character = {
                     hidden = yes
                 }
 			}
@@ -512,6 +514,7 @@ character_events.5 = { #A statue made of the king
 			NOT = { has_variable = ruler_statue_var }
 		}
 		NOT = { has_variable = ruler_statue_cooldown }
+		NOT = { has_gov_regency = yes }
 		NOT = {
 			ruler = {
 				has_trait = trait_child
@@ -520,8 +523,18 @@ character_events.5 = { #A statue made of the king
 	}
 
 	immediate = {
-		ruler = {
-			save_scope_as = statue_ruler
+		if = {
+			limit = {
+				has_law = law_type:law_bakufu
+			}
+			var:emperor_var ?= {
+				save_scope_as = statue_ruler
+			}
+		}
+		else = {
+			ruler = {
+				save_scope_as = statue_ruler
+			}
 		}
 		random_scope_state = {
 			limit = {

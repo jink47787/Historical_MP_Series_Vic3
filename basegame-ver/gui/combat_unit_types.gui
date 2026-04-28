@@ -1,3 +1,19 @@
+# COPY-PASTED FOR NOW
+@panel_width_minus_30 = 510
+@panel_width_minus_20 = 520			# used to be 450
+@panel_width_minus_10 = 530			# used to be 450
+@panel_width = 540  				# used to be 460
+@panel_width_half = 270				# used to be 230
+@panel_width_plus_10 = 550  		# used to be 470
+@panel_width_plus_14 = 554			# used to be 474
+@panel_width_plus_14_half = 277		# used to be 237
+@panel_width_plus_20 = 560			# used to be 480
+@panel_width_plus_30 = 570			# used to be 490
+@panel_width_plus_70 = 610			# used to be 530
+@ship_item_width = 255
+@ship_queue_item_width = 540
+@ship_queue_item_height = 40
+
 types combat_unit_types
 {
 	# Combat unit list item
@@ -159,29 +175,23 @@ types combat_unit_types
 
 						textbox = {
 							autoresize = yes
-							visible = "[And( CombatUnit.IsArmyUnit, Not( Or( CombatUnit.IsMobilizing, CombatUnit.IsFullyMobilized )))]"
+							visible = "[Not( Or( CombatUnit.IsMobilizing, CombatUnit.IsFullyMobilized ))]"
 							text = "COMBAT_UNIT_MOBILIZATION_STATUS_DEMOBILIZED"
 							tooltip = "COMBAT_UNIT_MOBILIZATION_STATUS_DEMOBILIZED_TOOLTIP"
 							align = left|nobaseline
 						}
 						textbox = {
 							autoresize = yes
-							visible = "[And( CombatUnit.IsArmyUnit, CombatUnit.IsMobilizing )]"
+							visible = "[CombatUnit.IsMobilizing]"
 							text = "COMBAT_UNIT_MOBILIZATION_STATUS_MOBILIZING"
 							tooltip = "COMBAT_UNIT_MOBILIZATION_STATUS_MOBILIZING_TOOLTIP"
 							align = left|nobaseline
 						}
 						textbox = {
 							autoresize = yes
-							visible = "[And( CombatUnit.IsArmyUnit, CombatUnit.IsFullyMobilized)]"
+							visible = "[CombatUnit.IsFullyMobilized]"
 							text = "COMBAT_UNIT_MOBILIZATION_STATUS_MOBILIZED"
 							tooltip = "COMBAT_UNIT_MOBILIZATION_STATUS_MOBILIZED_TOOLTIP"
-							align = left|nobaseline
-						}
-						textbox = {
-							autoresize = yes
-							visible = "[Not(CombatUnit.IsArmyUnit)]"
-							text = "combat_unit_flotilla"
 							align = left|nobaseline
 						}
 					}
@@ -302,29 +312,23 @@ types combat_unit_types
 
 						textbox = {
 							autoresize = yes
-							visible = "[And( CombatUnit.IsArmyUnit, Not( Or( CombatUnit.IsMobilizing, CombatUnit.IsFullyMobilized )))]"
+							visible = "[Not( Or( CombatUnit.IsMobilizing, CombatUnit.IsFullyMobilized ))]"
 							text = "COMBAT_UNIT_MOBILIZATION_STATUS_DEMOBILIZED"
 							tooltip = "COMBAT_UNIT_MOBILIZATION_STATUS_DEMOBILIZED_TOOLTIP"
 							align = left|nobaseline
 						}
 						textbox = {
 							autoresize = yes
-							visible = "[And( CombatUnit.IsArmyUnit, CombatUnit.IsMobilizing )]"
+							visible = "[CombatUnit.IsMobilizing]"
 							text = "COMBAT_UNIT_MOBILIZATION_STATUS_MOBILIZING"
 							tooltip = "COMBAT_UNIT_MOBILIZATION_STATUS_MOBILIZING_TOOLTIP"
 							align = left|nobaseline
 						}
 						textbox = {
 							autoresize = yes
-							visible = "[And( CombatUnit.IsArmyUnit, CombatUnit.IsFullyMobilized)]"
+							visible = "[CombatUnit.IsFullyMobilized]"
 							text = "COMBAT_UNIT_MOBILIZATION_STATUS_MOBILIZED"
 							tooltip = "COMBAT_UNIT_MOBILIZATION_STATUS_MOBILIZED_TOOLTIP"
-							align = left|nobaseline
-						}
-						textbox = {
-							autoresize = yes
-							visible = "[Not(CombatUnit.IsArmyUnit)]"
-							text = "combat_unit_flotilla"
 							align = left|nobaseline
 						}
 					}
@@ -417,6 +421,1321 @@ types combat_unit_types
 
 		item = {
 			combat_unit_simple_item = {}
+		}
+	}
+
+	type ship_group = flowcontainer {
+		direction = vertical
+		datacontext = "[Country.GetShipList]"
+
+		background = {
+			using = entry_bg
+		}
+
+		background = {
+			visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+			using = dropdown_background
+			using = frame_small_mask
+			margin = { 0 -2 }
+		}
+
+		# COUNTRY LEVEL HAS SHIPS
+		widget = {
+			size = { 540 90 }
+
+			tooltipwidget = {
+				FancyTooltip_ShipGroup = {}
+			}
+
+			flowcontainer = {
+
+				# SHIPS DROPDOWN BUTTON - when closed
+				section_header_button = {
+					visible = "[Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')))]"
+
+					blockoverride "left_text" {
+						text = "[ShipGroup.GetNameNoFormatting]"
+					}
+
+					blockoverride "layout" {
+						size = { 380 38 }
+					}
+
+					blockoverride "onclick" {
+						enabled = "[NotZero(ShipList.GetNumShipsOfGroup(ShipGroup.Self))]"
+
+						### Open the drodown
+						button = {
+							visible = "[Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')))]"
+							size = { 100% 100% }
+							enabled = "[Not(IsDataModelEmpty(Country.GetShipList.GetShipsOfGroup(ShipGroup.Self)))]"
+							onclick = "[GetVariableSystem.Toggle(Concatenate(ShipGroup.GetKey, '_construction'))]"
+						}
+
+						### Close the dropdown & clear the edit mode (if active)
+						button = {
+							visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+							size = { 100% 100% }
+							enabled = "[Not(IsDataModelEmpty(Country.GetShipList.GetShipsOfGroup(ShipGroup.Self)))]"
+							onclick = "[GetVariableSystem.Toggle(Concatenate(ShipGroup.GetKey, '_construction'))]"
+							onclick = "[GetVariableSystem.Clear(Concatenate(ShipGroup.GetKey, 'edit_ships'))]"
+						}
+					}
+					
+					blockoverride "onclick_showmore" {
+						visible = "[Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')))]"
+					}
+
+					blockoverride "onclick_showless" {
+						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+					}
+				}
+
+				# SHIPS DROPDOWN BUTTON - when open
+				section_header_button = {
+					visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+
+					blockoverride "left_text" {
+						text = "[ShipGroup.GetNameNoFormatting]"
+					}
+
+					blockoverride "layout" {
+						size = { 380 38 }
+					}
+
+					blockoverride "onclick" {
+						enabled = "[Not(IsDataModelEmpty(Country.GetShipList.GetShipsOfGroup(ShipGroup.Self)))]"
+						onclick = "[GetVariableSystem.Toggle(Concatenate(ShipGroup.GetKey, '_construction'))]"
+						onclick = "[Country.GetShipList.DeactivateEditMode]"
+					}
+					
+					blockoverride "onclick_showmore" {
+						visible = "[Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')))]"
+					}
+
+					blockoverride "onclick_showless" {
+						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+					}
+				}
+
+				flowcontainer = {
+					datacontext = "[Country.GetShipList]"
+					parentanchor = vcenter
+					spacing = 5
+
+					### Has outdated ships
+					icon = {
+						visible = "[ShipList.HasAnyShipOutdatedOfGroup(ShipGroup.Self)]"
+						parentanchor = vcenter
+						size = { 25 25 }
+						using = tooltip_ne
+						tooltip = "NUM_SHIPS_OUTDATED_OF_GROUP"
+						texture = "gfx/interface/icons/formation_order_icons/upgrade.dds"
+					}
+
+					### This widget is only here to retain space
+					widget = {
+						visible = "[Not(ShipList.HasAnyShipOutdatedOfGroup(ShipGroup.Self))]"
+						size = { 25 25 }
+					}
+
+					textbox = {
+						parentanchor = vcenter
+						margin = { 5 2 }
+						align = hcenter|nobaseline
+						min_width = 90
+						max_width = 90
+						using = elide_fontsize_min
+						autoresize = yes
+						text = "SHIP_GROUP_NUMBER"
+
+						background = {
+							using = entry_bg
+						}
+					}
+				
+					### Add to construction queue button
+					button_icon_round = {
+						parentanchor = vcenter
+						size = { 30 30 }
+						tooltip = "BUILD_GROUP_SHIPS_TOOLTIP"
+						using = tooltip_ne
+					
+						block "queue_construction_button" {
+							onclick = "[RightClickMenuManager.ToggleBuildShipTypeOfGroup(ShipGroup.Self, Country.Self, PdxGuiWidget.AccessSelf, 'build_ship_type_of_group')]"
+						}
+					
+						blockoverride "icon" {
+							texture = "gfx/interface/buttons/button_icons/plus.dds"
+						}
+					}
+				}
+			}
+
+			flowcontainer = {
+				parentanchor = bottom
+				position = { 10 -5 }
+				margin_bottom = 3
+				datacontext = "[Country.GetShipList]"
+
+				flowcontainer = {
+					spacing = 5
+
+					### Top 4 Ship Templates with most ships in this group - Closed Dropdown
+					flowcontainer = {
+						visible = "[And(Not(IsDataModelEmpty(ShipList.GetShipTemplates)), Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))))]"
+						datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+						spacing = 5
+						datamodel = "[DataModelFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3')]"
+
+						item = {
+							compact_ship_template = {
+								size = { 110 40 }
+
+								background = {
+									using = dark_area
+									alpha = 0.01
+								}
+							}
+						}
+					}
+
+					### Top 3 Ship Templates with most ships in this group - Open Dropdown
+					flowcontainer = {
+						visible = "[And(Not(IsDataModelEmpty(ShipList.GetShipTemplates)), GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')))]"
+						datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+						spacing = 5
+						datamodel = "[DataModelFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3')]"
+
+						item = {
+							compact_ship_template = {
+								size = { 110 40 }
+
+								background = {
+									using = dark_area
+									alpha = 0.01
+								}
+
+								blockoverride "button_visibility" {
+									visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+								}
+
+								blockoverride "highlight_visibility" {
+									visible = "[And(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')), ShipFilter.IsFilterSelected(ShipTemplate.Self))]"
+								}
+							}
+						}
+					}
+
+					### Additional Ship Templates number - Closed dropdown
+					textbox = {
+						visible = "[And(GreaterThan_int32(GetDataModelSize(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self)), '(int32)3'), Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))))]"
+						parentanchor = vcenter
+						autoresize = yes
+						align = nobaseline
+						raw_text = "#b [GetDataModelSize(DataModelSkipFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3'))|=]#!"
+
+						tooltipwidget = {
+							RegularTooltip_AdditionalShipTypes = {}
+						}
+					}
+
+					### All Ship Templates filter
+					button_all_ships_filter = {
+						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+						datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+					}
+				}
+			}
+
+			textbox = {
+				visible = "[IsZero(ShipList.GetNumShipsOfGroup(ShipGroup.Self))]"
+				parentanchor = bottom
+				position = { 20 -15 }
+				autoresize = yes
+				align = nobaseline
+				using = fontsize_large
+				using = empty_state_text_properties
+				text = "NONE"
+			}
+
+			### Edit mode button
+			button_edit_ships = {
+				visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+			}
+		}
+
+		### Additional Ship Templates - Open dropdown
+		flowcontainer = {
+			visible = "[And(GreaterThan_int32(GetDataModelSize(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self)), '(int32)3'), GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')))]"
+			datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+			spacing = 5
+			margin_bottom = 10
+			margin_left = 10
+			wrap_count = 4
+			datamodel = "[DataModelSkipFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3')]"
+
+			item = {
+				compact_ship_template = {
+					size = { 110 40 }
+
+					background = {
+						using = dark_area
+						alpha = 0.01
+					}
+
+					blockoverride "button_visibility" {
+						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+					}
+
+					blockoverride "highlight_visibility" {
+						visible = "[And(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')), ShipFilter.IsFilterSelected(ShipTemplate.Self))]"
+					}
+				}
+			}
+		}
+
+		divider_clean = {
+			visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+		}
+
+		ship_bulk_change_buttons = {
+			visible = "[And(ShipList.IsEditModeActiveForGroup(ShipGroup.Self), GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')))]"
+			datacontext = "[ShipList.GetActiveSelection]"
+		}
+
+		### Divider - Only when in edit mode
+		divider_clean = {
+			visible = "[And(ShipList.IsEditModeActiveForGroup(ShipGroup.Self), GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction')))]"
+		}
+
+		### SHIPS
+		flowcontainer = {
+			visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
+			parentanchor = hcenter
+			direction = vertical
+			margin = { 5 5 }
+			margin_bottom = 10
+
+			datacontext = "[Country.GetShipList.GetFilterOfGroup(ShipGroup.Self)]"
+
+			fixedgridbox = {
+				visible = "[And(Not(IsDataModelEmpty(ShipFilter.GetShipsFiltered)), Not(GetVariableSystem.Exists(Concatenate('ship_group_construction_', ShipGroup.GetKey))))]"
+				addcolumn = 260
+				addrow = 105
+				flipdirection = yes
+				datamodel_wrap = 2
+				datamodel = "[ShipFilter.GetShipsFiltered]"
+
+				item = {
+					widget = {
+						size = { 260 105 }
+
+						ship_item = {}
+					}
+				}
+			}
+		}
+	}
+
+	type ship_group_fleet = flowcontainer {
+		direction = vertical
+		datacontext = "[MilitaryFormation.GetShipList]"
+		parentanchor = vcenter
+		margin = { 0 5 }
+
+		background = {
+			using = entry_bg
+		}
+
+		background = {
+			visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+			using = dropdown_background
+			using = frame_small_mask
+			margin = { 0 -2 }
+		}
+
+		# FLEET HAS SHIPS
+		widget = {
+			block "top_widget_size" {
+				size = { 540 90 }
+			}
+
+			tooltipwidget = {
+				FancyTooltip_ShipGroup = {}
+			}
+
+			flowcontainer = {
+
+				# SHIPS DROPDOWN BUTTON - when closed
+				section_header_button = {
+					visible = "[Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)))]"
+
+					blockoverride "left_text" {
+						text = "[ShipGroup.GetNameNoFormatting]"
+					}
+
+					blockoverride "layout" {
+						block "section_header_size" {
+							size = { 380 38 }
+						}
+					}
+
+					blockoverride "onclick" {
+						enabled = "[NotZero(ShipList.GetNumShipsOfGroup(ShipGroup.Self))]"
+
+						### Open the drodown
+						button = {
+							visible = "[Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)))]"
+							size = { 100% 100% }
+							enabled = "[Not(IsDataModelEmpty(ShipList.GetShipsOfGroup(ShipGroup.Self)))]"
+							onclick = "[GetVariableSystem.Toggle(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+						}
+
+						### Close the dropdown & clear the edit mode (if active)
+						button = {
+							visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+							size = { 100% 100% }
+							enabled = "[Not(IsDataModelEmpty(ShipList.GetShipsOfGroup(ShipGroup.Self)))]"
+							onclick = "[GetVariableSystem.Toggle(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+							onclick = "[GetVariableSystem.Clear(Concatenate(ShipGroup.GetKey, 'edit_ships'))]"
+						}
+					}
+					
+					blockoverride "onclick_showmore" {
+						visible = "[Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)))]"
+					}
+
+					blockoverride "onclick_showless" {
+						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+					}
+				}
+
+				# SHIPS DROPDOWN BUTTON - when open
+				section_header_button = {
+					visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+
+					blockoverride "left_text" {
+						text = "[ShipGroup.GetNameNoFormatting]"
+					}
+
+					blockoverride "layout" {
+						block "section_header_size" {
+							size = { 380 38 }
+						}
+					}
+
+					blockoverride "onclick" {
+						### Close the dropdown & clear the edit mode (if active)
+						enabled = "[Not(IsDataModelEmpty(ShipList.GetShipsOfGroup(ShipGroup.Self)))]"
+						onclick = "[GetVariableSystem.Toggle(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+						onclick = "[ShipList.DeactivateEditMode]"
+					}
+					
+					blockoverride "onclick_showmore" {
+						visible = "[Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)))]"
+					}
+
+					blockoverride "onclick_showless" {
+						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+					}
+				}
+
+				flowcontainer = {
+					datacontext = "[MilitaryFormation.GetShipList]"
+					parentanchor = vcenter
+					spacing = 5
+
+					### Has outdated ships
+					icon = {
+						visible = "[ShipList.HasAnyShipOutdatedOfGroup(ShipGroup.Self)]"
+						parentanchor = vcenter
+						size = { 25 25 }
+						using = tooltip_ne
+						alwaystransparent = yes
+						tooltip = "NUM_SHIPS_OUTDATED_OF_GROUP"
+						texture = "gfx/interface/icons/formation_order_icons/upgrade.dds"
+					}
+
+					### This widget is only here to retain space
+					widget = {
+						visible = "[Not(ShipList.HasAnyShipOutdatedOfGroup(ShipGroup.Self))]"
+						size = { 25 25 }
+					}
+
+					textbox = {
+						parentanchor = vcenter
+						margin = { 5 2 }
+						align = hcenter|nobaseline
+						min_width = 90
+						max_width = 90
+						using = elide_fontsize_min
+						autoresize = yes
+						text = "FLEET_SHIP_GROUP_NUMBER"
+
+						background = {
+							using = entry_bg
+						}
+					}
+				
+					### Add to construction queue button
+					button_icon_round = {
+						parentanchor = vcenter
+						size = { 30 30 }
+						tooltip = "BUILD_GROUP_SHIPS_TOOLTIP"
+						using = tooltip_ne
+						visible = "[MilitaryFormation.GetCountry.IsLocalPlayer]"
+					
+						block "queue_construction_button" {
+							onclick = "[RightClickMenuManager.ToggleBuildShipTypeOfGroupForFleet(ShipGroup.Self, MilitaryFormation.Self, PdxGuiWidget.AccessSelf, 'build_ship_type_of_group_to_fleet')]"
+						}
+					
+						blockoverride "icon" {
+							texture = "gfx/interface/buttons/button_icons/plus.dds"
+						}
+					}
+				}
+			}
+
+			textbox = {
+				visible = "[IsZero(ShipList.GetNumShipsOfGroup(ShipGroup.Self))]"
+				parentanchor = bottom
+				position = { 20 -15 }
+				autoresize = yes
+				align = nobaseline
+				using = fontsize_large
+				using = empty_state_text_properties
+				text = "NONE"
+			}
+
+			flowcontainer = {
+				parentanchor = bottom
+				position = { 10 -5 }
+				margin_bottom = 3
+
+				flowcontainer = {
+					spacing = 5
+
+					### Top 3 Ship Templates with most ships in this group - Closed Dropdown
+					flowcontainer = {
+						visible = "[And(Not(IsDataModelEmpty(ShipList.GetShipTemplates)), Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))))]"
+						datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+						spacing = 5
+						datamodel = "[DataModelFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3')]"
+
+						item = {
+							compact_ship_template = {
+								size = { 110 40 }
+
+								background = {
+									using = dark_area
+									alpha = 0.01
+								}
+							}
+						}
+					}
+
+					### Top 3 Ship Templates with most ships in this group - Open Dropdown
+					flowcontainer = {
+						visible = "[And(Not(IsDataModelEmpty(ShipList.GetShipTemplates)), GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)))]"
+						datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+						spacing = 5
+						datamodel = "[DataModelFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3')]"
+
+						item = {
+							compact_ship_template = {
+								size = { 110 40 }
+
+								background = {
+									using = dark_area
+									alpha = 0.01
+								}
+
+								blockoverride "button_visibility" {
+									visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+								}
+
+								blockoverride "highlight_visibility" {
+									visible = "[And(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)), ShipFilter.IsFilterSelected(ShipTemplate.Self))]"
+								}
+							}
+						}
+					}
+
+					### Additional Ship Templates number - Closed dropdown
+					textbox = {
+						visible = "[And(GreaterThan_int32(GetDataModelSize(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self)), '(int32)3'), Not(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))))]"
+						parentanchor = vcenter
+						autoresize = yes
+						align = nobaseline
+						raw_text = "#b [GetDataModelSize(DataModelSkipFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3'))|=]#!"
+
+						tooltipwidget = {
+							RegularTooltip_AdditionalShipTypes = {
+								blockoverride "datamodel" {
+									datamodel = "[DataModelSkipFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3')]"
+								}
+
+								blockoverride "header_text" {
+									text = "MORE_SHIP_TEMPLATES_IN_GROUP_TOOLTIP_FLEET_SHIP_GROUPS"
+								}
+							}
+						}
+					}
+
+					### All Ship Templates filter
+					button_all_ships_filter = {
+						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+						datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+					}
+				}
+			}
+
+			### Edit mode button
+			button_edit_ships = {
+				visible = "[And(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)), MilitaryFormation.GetCountry.IsLocalPlayer)]"
+			}
+		}
+
+		### Additional Ship Templates - Open dropdown
+		flowcontainer = {
+			visible = "[And(GreaterThan_int32(GetDataModelSize(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self)), '(int32)2'), GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)))]"
+			datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+			spacing = 5
+			margin_bottom = 10
+			margin_left = 10
+			wrap_count = 4
+			datamodel = "[DataModelSkipFirst(ShipList.GetShipTemplatesOfGroup(ShipGroup.Self), '(int32)3')]"
+
+			item = {
+				compact_ship_template = {
+					size = { 110 40 }
+
+					background = {
+						using = dark_area
+						alpha = 0.01
+					}
+
+					blockoverride "button_visibility" {
+						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+					}
+
+					blockoverride "highlight_visibility" {
+						visible = "[And(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)), ShipFilter.IsFilterSelected(ShipTemplate.Self))]"
+					}
+				}
+			}
+		}
+
+		divider_clean = {
+			visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString))]"
+		}
+
+		### Bulk change buttons - Retrofit / Decommission / Change Template
+		ship_bulk_change_buttons = {
+			visible = "[And(ShipList.IsEditModeActiveForGroup(ShipGroup.Self), GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)))]"
+			datacontext = "[ShipList.GetActiveSelection]"
+		}
+
+		### Divider - Only when in edit mode
+		divider_clean = {
+			visible = "[And(ShipList.IsEditModeActiveForGroup(ShipGroup.Self), GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)))]"
+		}
+
+		### SHIPS
+		flowcontainer = {
+			visible = "[And(GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, MilitaryFormation.GetIDString)), Not(GetVariableSystem.Exists(Concatenate('ship_group_construction_', ShipGroup.GetKey))))]"
+			parentanchor = hcenter
+			direction = vertical
+			margin = { 5 5 }
+			margin_bottom = 10
+			spacing = 5
+
+			fixedgridbox = {
+				datacontext = "[ShipList.GetFilterOfGroup(ShipGroup.Self)]"
+				visible = "[Not(IsDataModelEmpty(ShipFilter.GetShipsFiltered))]"
+				parentanchor = hcenter
+				addrow = 105
+				flipdirection = yes
+				datamodel_wrap = 2
+				datamodel = "[ShipFilter.GetShipsFiltered]"
+
+				block "ship_item_column_size" {
+					addcolumn = 260
+				}
+
+				item = {
+					widget = {
+						block "ship_item_widget_size" {
+							size = { 260 105 }
+						}
+
+						ship_item = {
+							parentanchor = center
+						}
+					}
+				}
+			}
+		}
+	}
+
+	### Edit buttons - Retrofit / Change / Delete
+	type ship_bulk_change_buttons = flowcontainer {
+		direction = vertical
+		parentanchor = hcenter
+		margin = { 10 5 }
+
+		background = {
+			using = dark_area
+		}
+
+		flowcontainer = {
+			spacing = 5
+			parentanchor = hcenter
+			margin = { 10 5 }
+			margin_right = 5
+
+			background = {
+				using = entry_bg_simple
+			}
+
+			textbox = {
+				parentanchor = vcenter
+				size = { 155 40 }
+				margin_left = 20
+				align = nobaseline
+				using = elide_fontsize_min
+				text = "NUMBER_OF_SHIPS_SELECTED"
+			}
+
+			button = {
+				parentanchor = vcenter
+				size = { 160 40 }
+				using = default_button
+				using = tooltip_ne
+				tooltip = "DESELECT_ALL_SHIPS_TOOLTIP"
+				text = "RESET"
+				onclick = "[ShipSelection.ResetSelection]"
+			}
+
+			button = {
+				parentanchor = vcenter
+				size = { 160 40 }
+				using = default_button
+				using = tooltip_ne
+				tooltip = "SELECT_ALL_SHIPS_TOOLTIP"
+				text = "SELECT_ALL"
+				onclick = "[ShipSelection.SelectFiltered]"
+			}
+		}
+
+		flowcontainer = {
+			parentanchor = hcenter
+			margin = { 0 5 }
+			spacing = 5
+
+			button = {
+				size = { 160 40 }
+				using = default_button_action
+				using = tooltip_ne
+				tooltip = "DELETE_SELECTED_TOOLTIP"
+				text = "DELETE_SELECTED"
+				enabled = "[IsValid(ShipSelection.Decommission)]"
+				onclick = "[PopupManager.AskConfirmationWithSound(ShipSelection.Decommission, 'event:/SFX/UI/FleetPanel/fleetpanel_ship_decommission')]"
+			}
+
+			button = {
+				size = { 160 40 }
+				using = default_button_action
+				using = tooltip_ne
+				tooltip = "RETROFIT_SELECTED_TOOLTIP"
+				text = "RETROFIT_SELECTED"
+				enabled = "[IsValid(ShipSelection.Retrofit)]"
+				onclick = "[PopupManager.AskConfirmationWithSound(ShipSelection.Retrofit, 'event:/SFX/UI/FleetPanel/fleetpanel_send_to_retrofit')]"
+			}
+			
+			button = {
+				size = { 160 40 }
+				using = default_button
+				using = tooltip_ne
+				tooltip = "CHANGE_SELECTED_TOOLTIP"
+				text = "CHANGE_TEMPLATE"
+				enabled = "[ShipSelection.CanChangeTemplate]"
+				onclick = "[RightClickMenuManager.ToggleBulkChangeTemplateActions(ShipList.AccessSelf, ShipSelection.AccessSelf, PdxGuiWidget.AccessSelf)]"
+
+				action_selection_number = {
+					parentanchor = right
+
+					blockoverride "position" {
+				        position = { 0 0 }
+				    }
+
+					blockoverride "text" {
+						text = "[ShipSelection.GetNumTemplatesAvailable|+]"
+					}
+				}
+			}
+		}
+	}
+
+	type button_all_ships_filter = widget {
+		size = { 60 40 }
+		parentanchor = vcenter
+
+		background = {
+			visible = "[ShipFilter.IsUnfiltered]"
+			using = paper_bg
+		}
+
+		button = {
+			visible = "[Not(ShipFilter.IsUnfiltered)]"
+			size = { 100% 100% }
+			using = default_button
+			onclick = "[ShipFilter.ResetFilters]"
+		}
+
+		textbox = {
+			parentanchor = center
+			autoresize = yes
+			align = hcenter|nobaseline
+			max_width = 65
+			using = elide_fontsize_min
+			text = "ALL"
+		}
+
+		icon = {
+			visible = "[ShipFilter.IsUnfiltered]"
+			using = highlighted_square_selection
+		}
+	}
+
+	type button_edit_ships = widget {
+		size = { 90 40 }
+		parentanchor = bottom|right
+		position = { -5 -8 }
+
+		button = {
+			size = { 100% 100% }
+			using = default_button
+			onclick = "[ShipList.ToggleEditMode(ShipGroup.Self)]"
+
+			textbox = {
+				parentanchor = center
+				autoresize = yes
+				align = hcenter|nobaseline
+				max_width = 65
+				using = elide_fontsize_min
+				text = "EDIT"
+			}
+		}
+
+		icon = {
+			visible = "[ShipList.IsEditModeActiveForGroup(ShipGroup.Self)]"
+			using = highlighted_active_square_selection
+		}
+	}
+
+	type ship_silhouette_for_tooltips = widget {
+		size = { 190 70 }
+
+		background = {
+			using = entry_bg_simple
+		}
+
+		tooltipwidget = {
+			FancyTooltip_ShipType = {}
+		}
+
+		widget = {
+			size = { 100% 30 }
+
+			background = {
+				using = dark_area
+			}
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				margin = { 10 0 }
+				spacing = 5
+
+				textbox = {
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					align = nobaseline
+					max_width = 150
+					using = elide_fontsize_min
+
+					block "ship_type_name" {
+						raw_text = "[ShipType.GetNameNoFormatting]"
+					}
+				}
+
+				expand = {}
+
+				textbox = {
+					autoresize = yes
+					align = nobaseline
+					using = elide_fontsize_min
+
+					block "ship_templates_number" {
+						raw_text = "[GetDataModelSize(AccessPlayer.GetShipList.GetShipTemplatesOfType(ShipType.Self))]"
+					}
+				}
+			}
+		}
+
+		ship_type_silhouette = {
+			parentanchor = bottom
+			position = { 10 -7 }
+		}
+	}
+
+	type ship_type_silhouette = icon {
+		block "silhouettesize" {
+			size = { 170 30 }
+		}
+
+		background = {
+			texture = "[ShipType.GetProfileTexture]"
+
+			block "direction" {}
+
+			block "alpha" {}
+			
+			block "fittype" {
+				fittype = center
+			}
+		}
+	}
+
+	type compact_ship_template = widget {
+		size = { 110 40 }
+		using = tooltip_se
+
+		block "widget_datacontext" {
+			datacontext = "[ShipTemplate.GetType]"
+		}
+
+		block "tooltip" {
+			tooltip = "COMPACT_SHIP_TEMPLATE_TOOLTIP"
+		}
+
+		background = {
+			using = dark_area
+			alpha = 0.25
+		}
+
+		background = {
+			block "highlight_visibility" {
+				visible = no
+			}
+
+			using = paper_bg
+		}
+
+		widget = {
+			size = { 100% 100% }
+
+			block "button_visibility" {
+				visible = no
+			}
+
+			button = {
+				size = { 100% 100% }
+				using = default_button
+
+				block "onclick" {
+					onclick = "[ShipFilter.ToggleFilter(ShipTemplate.Self)]"
+				}
+			}
+		}
+
+		button = {
+			parentanchor = right|vcenter
+			size = { 90% 66% }
+			alwaystransparent = yes
+
+			background = {
+				fittype = center
+				texture = "[ShipType.GetProfileTexture]"
+			}
+		}
+
+		textbox = {
+			parentanchor = bottom
+			margin = { 5 0 }
+			autoresize = yes
+			align = nobaseline
+			using = fontsize_small
+
+			block "ship_number" {
+				text = "FLEET_SHIP_TEMPLATE_NUMBER"
+			}
+			
+			block "number_minimumsize" {
+				minimumsize = { -1 40 }
+			}
+
+			background = {
+				using = dark_area
+				alpha = 0.5
+				margin = { -2 -2 }
+			}
+		}
+
+		icon = {
+			using = highlighted_square_selection
+			
+			block "highlight_visibility" {
+				visible = no
+			}
+		}
+	}
+
+	type ship_item = widget {
+		parentanchor = center
+
+		block "ship_item_size" {
+			size = { @ship_item_width 100 }
+		}
+
+		background = {
+			using = dark_area
+			alpha = 0.3
+		}
+
+		background = {
+			using = simple_frame
+			alpha = 0.4
+		}
+
+		tooltipwidget = {
+			FancyTooltip_Ship = {}
+		}
+
+		# Name and info header
+		widget = {
+			size = { 100% 44 }
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				margin = { 2 2 }
+
+				### Checkbox to select ship in edit mode
+				hbox = {
+					visible = "[And(PdxGuiWidget.HasContext('ShipList'), ShipList.IsEditModeActiveForGroup(ShipGroup.Self))]"
+					margin_left = 5
+
+					checkbutton = {
+						datacontext = "[ShipList.GetActiveSelection]"
+						using = check_button
+						size = { 30 30 }
+						using = tooltip_ne
+						tooltip = "SELECT_SHIP"
+						onclick = "[ShipSelection.ToggleSelection(Ship.Self)]"
+						checked = "[ShipSelection.IsSelected(Ship.Self)]"
+					}
+				}
+
+				### Ship name without button - Edit mode
+				button = {
+					visible = "[And(PdxGuiWidget.HasContext('ShipList'), ShipList.IsEditModeActiveForGroup(ShipGroup.Self))]"
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+
+					background = {
+						using = fade_top_entry_header_colored
+						color = "[Country.GetMapColor]"
+					}
+
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+
+						textbox = {
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+							margin = { 10 2 }
+							margin_right = 5
+							elide = right
+							align = nobaseline
+							raw_text = "[JoinText(Nbsp, AddLocalizationIf(Ship.IsFlagship, '@flagship!'), Ship.GetNameNoFormatting)]"
+						}
+
+						flowcontainer = {
+							datacontext = "[Ship.GetTemplate]"
+							spacing = 2
+							margin_right = 10
+							datamodel = "[ShipTemplate.GetModifications]"
+
+							item = {
+								icon = {
+									size = { 24 24 }
+									texture = "[ShipModificationType.GetIcon]"
+								}
+							}
+						}
+					}
+				}
+
+
+				### Ship name with button - Not edit mode
+				button = {
+					visible = "[Not(And(PdxGuiWidget.HasContext('ShipList'), ShipList.IsEditModeActiveForGroup(ShipGroup.Self)))]"
+					layoutpolicy_horizontal = expanding
+					layoutpolicy_vertical = expanding
+					using = default_button
+					using = tooltip_ne
+					tooltip = "GO_TO_BUTTON_SHIP"
+					onclick = "[InformationPanelBar.OpenShipPanel(Ship.Self)]"
+
+					background = {
+						using = fade_top_entry_header_colored
+						color = "[Country.GetMapColor]"
+					}
+
+					hbox = {
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+
+						textbox = {
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
+							margin = { 10 2 }
+							margin_right = 5
+							elide = right
+							align = nobaseline
+							raw_text = "[JoinText(Nbsp, AddLocalizationIf(Ship.IsFlagship, '@flagship!'), Ship.GetNameNoFormatting)]"
+						}
+
+						flowcontainer = {
+							datacontext = "[Ship.GetTemplate]"
+							spacing = 2
+							margin_right = 10
+							datamodel = "[ShipTemplate.GetModifications]"
+
+							item = {
+								icon = {
+									size = { 24 24 }
+									texture = "[ShipModificationType.GetIcon]"
+								}
+							}
+						}
+					}
+				}
+
+				expand = {}
+
+				hbox = {
+					visible = "[Or(Ship.IsOutdated, Ship.IsToRetrofit)]"
+					margin_left = 2
+					margin_right = 5
+
+					### Retrofit ship
+					retrofit_ship_button = {}
+
+					### Cancel retrofit or cancel change
+					cancel_retrofit_ship_button = {}
+				}
+
+				### Battle icon button
+				button_icon_round = {
+					visible = "[Ship.IsInBattle]"
+					datacontext = "[Ship.GetNavalBattle]"
+					size = { 40 40 }
+					tooltip = "[NavalBattle.GetStatusString]"
+					onclick = "[InformationPanelBar.OpenNavalBattlePanel(NavalBattle.AccessSelf)]"
+
+					blockoverride "icon" {
+						texture = "[NavalBattle.GetBattleIcon]"
+					}
+
+					blockoverride "icon_size" {
+						size = { 75% 75% }
+					}
+				}
+			}
+		}
+
+		compact_ship_info_and_silhouette = {}
+	}
+
+	type compact_ship_info_and_silhouette = widget {
+		parentanchor = bottom
+		size = { 100% 60 }
+		alpha = "[TransparentIfTrue(Ship.IsToRetrofit)]"
+
+		flowcontainer = {
+			parentanchor = vcenter
+			position = { 10 0 }
+			wrap_count = 2
+			direction = vertical
+			spacing = 2
+
+			block "small_header_grid_items" {
+
+				### ARMOR
+				small_header_grid_item = {
+					size = { 80 24 }
+					tooltip = "SHIP_ARMOR_TOOLTIP"
+					using = tooltip_es
+
+					blockoverride "icon_size" {
+						size = { 24 24 }
+					}
+
+					blockoverride "icon_widget_size" {
+						size = { 24 24 }
+					}
+
+					blockoverride "text" {
+						raw_text = "#v [Ship.GetArmor|0]#!"
+					}
+
+					blockoverride "icon" {
+						texture = "gfx/interface/icons/military_icons/navy_icons/armor_navy.dds"
+					}
+				}
+
+				### AVERAGE ATTACK DAMAGE
+				small_header_grid_item = {
+					datacontext = "[Ship.GetModifier]"
+					tooltip = "SHIP_TEMPLATE_ATTACK_DAMAGE_TOOLTIP"
+					size = { 80 24 }
+					using = tooltip_es
+
+					blockoverride "icon_size" {
+						size = { 24 24 }
+					}
+
+					blockoverride "icon_widget_size" {
+						size = { 24 24 }
+					}
+
+					blockoverride "text" {
+						raw_text = "#v [Ship.GetAverageAttackDamage|0]#!"
+					}
+
+					blockoverride "icon" {
+						texture = "gfx/interface/icons/military_icons/navy_icons/average_damage_navy.dds"
+					}
+				}
+
+				block "more_grid_items" {}
+			}
+		}
+
+		flowcontainer = {
+			parentanchor = vcenter|right
+			#position = { -10 0 }
+			direction = vertical
+			spacing = 2
+
+			ship_type_silhouette = {
+				datacontext = "[Ship.GetType]"
+				size = { 163 30 }
+			}
+
+			bar_horizontal_with_background = {
+				parentanchor = hcenter
+				size = { 140 14 }
+
+				blockoverride "values" {
+					min = 0
+					max = "[Ship.GetHitPointsMax]"
+					value = "[Ship.GetHitPoints]"
+				}
+
+				blockoverride "color" {
+					using = color_green_approval
+				}
+
+				blockoverride "frame_texture_density" {
+					texture_density = 3
+				}
+
+				flowcontainer = {
+					parentanchor = vcenter
+					position = { 5 0 }
+
+					textbox = {
+						parentanchor = vcenter
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_small
+						raw_text = "#b [Ship.GetHitPoints|0]#!/[Ship.GetHitPointsMax]"
+					}
+				}
+			}
+		}
+	}
+
+	type retrofit_ship_button = button_icon_round_action {
+		visible = "[And(Ship.IsOutdated, Not(Ship.IsToRetrofit))]"
+		size = { 30 30 }
+		blockoverride "icon_size" { size = { 75% 75% } }
+		using = action_send_ship_to_retrofit
+		enabled = "[IsValid(Ship.Retrofit)]"
+		onclick = "[Execute(Ship.Retrofit)]"
+
+		tooltipwidget = {
+			RegularTooltip_RetrofitShip = {}
+		}
+
+		blockoverride "icon" {
+			texture = "gfx/interface/icons/formation_order_icons/upgrade.dds"
+		}
+	}
+
+	type cancel_retrofit_ship_button = widget {
+		visible = "[Ship.IsToRetrofit]"
+		size = { 30 30 }
+
+		icon = {
+			parentanchor = center
+			size = { 150% 150% }
+			using = rotate_glow_animation
+			alpha = 0.6
+		}
+
+		button_icon_round_action = {
+			size = { 100% 100% }
+			blockoverride "icon_size" { size = { 75% 75% } }
+			using = tooltip_ne
+			using = fleet_panel_construction_template_build_cancel
+			enabled = "[IsValid(Ship.CancelRetrofit)]"
+			onclick = "[Execute(Ship.CancelRetrofit)]"
+			tooltip = "RETROFIT_SHIP_CANCEL_BUTTON_TOOLTIP"
+
+			blockoverride "icon" {
+				texture = "gfx/interface/icons/formation_order_icons/upgrade.dds"
+			}
+			
+			icon = {
+				using = highlighted_circle_selection_small
+			}
+		}
+	}
+
+	type ships_list = fixedgridbox {
+		parentanchor = hcenter
+
+		block "wrap" {
+			datamodel_wrap = 1
+		}
+
+		addrow = 67
+		addcolumn = 255
+		flipdirection = yes
+
+		item = {
+			widget = {
+				size = { 255 67 }
+
+				ship_item = {}
+			}
 		}
 	}
 }

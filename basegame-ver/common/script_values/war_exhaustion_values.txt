@@ -181,14 +181,6 @@ war_exhaustion = {
 	}
 
 	if = {
-		limit = { scope:temp_war_support_from_fervor <= -0.01 }
-		add = {
-			add = scope:temp_war_support_from_fervor
-			desc = "WAR_SUPPORT_FROM_FERVOR"
-		}
-	}
-
-	if = {
 		limit = { scope:temp_war_exhaustion_from_country_turmoil >= 0.01 }
 		add = {
 			add = scope:temp_war_exhaustion_from_country_turmoil
@@ -203,19 +195,37 @@ war_exhaustion = {
 			desc = "WAR_OPPOSITION_FROM_LOBBIES"
 		}
 	}
+	
+	add = {
+		add = "additional_war_exhaustion(scope:war.diplomatic_play)"
+		desc = "WAR_EXHAUSTION_FROM_EVENTS"
+	}	
 
+	# Cap reductions so we always have some declining support
+	save_temporary_value_as = value_before_fervor_and_lobbies
 	if = {
 		limit = { scope:temp_war_support_from_lobby_clout <= -0.01 }
 		add = {
 			add = scope:temp_war_support_from_lobby_clout
 			desc = "WAR_SUPPORT_FROM_LOBBIES"
+			min = { # Fervor cannot cause war support to grow positively
+				value = scope:value_before_fervor_and_lobbies
+				multiply = -0.25
+			}			
 		}
 	}
-
-	add = {
-		add = "additional_war_exhaustion(scope:war.diplomatic_play)"
-		desc = "WAR_EXHAUSTION_FROM_EVENTS"
-	}
+	
+	if = {
+		limit = { scope:temp_war_support_from_fervor <= -0.01 }
+		add = {
+			desc = "WAR_SUPPORT_FROM_FERVOR"
+			value = scope:temp_war_support_from_fervor
+			min = { # Fervor cannot cause war support to grow positively
+				value = scope:value_before_fervor_and_lobbies
+				multiply = -0.50
+			}
+		}
+	}	
 
 	max = define:NWar|WAR_EXHAUSTION_MAX
 	min = define:NWar|WAR_EXHAUSTION_MIN

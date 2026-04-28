@@ -22,27 +22,16 @@ types sea_region_panel_types
 			raw_text = "#BOLD [Province.GetStateRegion.GetName]#!"
 		}
 
+		blockoverride "map_modes_button" {
+			map_modes_single_button_minimized = {
+				datacontext = "[SeaRegionPanel.GetMapModeList]"
+				using = map_modes_button_position
+			}
+		}
+
 		### TOP PART
 		blockoverride "fixed_top"
 		{
-			top_illu = {
-				datacontext = "[GetPlayer]"
-
-				blockoverride "illu" {
-					texture = "gfx/interface/illustrations/top_illus/top_illu_searoutes.dds"
-				}
-
-				textbox = {
-					visible = "[And(Not(Country.HasDamagedConvoys), GetMetaPlayer.GetPlayedOrObservedCountry.IsValid)]"
-					parentanchor = center
-					using = fontsize_mega
-					autoresize = yes
-					align = center|nobaseline
-					text = "NUM_CONVOYS_NO_DAMAGE_NUMBER"
-					tooltip = "NUM_CONVOYS_TOOLTIP_EXTENDED"
-				}
-			}
-
 			#TABS
 			tab_buttons = {
 				blockoverride "first_button" {
@@ -158,207 +147,231 @@ types sea_region_panel_types
 		}
 		
 		blockoverride "scrollarea_content_vbox" {
+
+			vbox = {
+				layoutpolicy_horizontal = preferred
+				layoutpolicy_vertical = expanding
 		
-			vbox = {
-				layoutpolicy_horizontal = preferred
-				visible = "[InformationPanel.IsTabSelected('trade')]"
-				using = default_content_fade
-				margin_top = 10
-				
-				textbox = {
-					margin_top = 100
-					layoutpolicy_vertical = preferred
-					visible = "[IsDataModelEmpty(SeaRegionPanel.GetWorldMarketTradedGoods)]"
-					autoresize = yes
-					align = center|nobaseline
-					using = fontsize_xxl
-					text = "WORLD_MARKET_NO_SEA_REGION_TRADE"
-					using = empty_state_text_properties
-				}	
+				vbox = {
+					layoutpolicy_horizontal = preferred
+					visible = "[InformationPanel.IsTabSelected('trade')]"
+					using = default_content_fade
+					margin_top = 10
 
-				flowcontainer = {
-					visible = "[Not(IsDataModelEmpty(SeaRegionPanel.GetWorldMarketTradedGoods))]"
-					direction = vertical
-					datamodel = "[SeaRegionPanel.GetWorldMarketTradedGoods]"
+					state = {
+						name = _show
+						on_start = "[SeaRegionPanel.GetMapModeList.SelectByKey('mm_trade')]"
+					}	
 					
-					item = {
-						world_market_traded_goods_item = {}
-					}						
-				}	
-				
-				expand = {}			
-			}
+					textbox = {
+						margin_top = 100
+						layoutpolicy_vertical = preferred
+						visible = "[IsDataModelEmpty(SeaRegionPanel.GetWorldMarketTradedGoods)]"
+						autoresize = yes
+						align = center|nobaseline
+						using = fontsize_xxl
+						text = "WORLD_MARKET_NO_SEA_REGION_TRADE"
+						using = empty_state_text_properties
+					}	
 
-			vbox = {
-				layoutpolicy_horizontal = preferred
-				visible = "[InformationPanel.IsTabSelected('default')]"
-				using = default_content_fade
-				spacing = 10
-				margin_top = 10				
-
-				textbox = {
-					margin_top = 100
-					layoutpolicy_vertical = preferred
-					visible = "[IsDataModelEmpty(SeaRegionPanel.AccessCountriesWithShippingLanes)]"
-					autoresize = yes
-					align = center|nobaseline
-					using = fontsize_xxl
-					text = "NO_SUPPLY_NETWORK"
-					using = empty_state_text_properties
+					flowcontainer = {
+						visible = "[Not(IsDataModelEmpty(SeaRegionPanel.GetWorldMarketTradedGoods))]"
+						direction = vertical
+						datamodel = "[SeaRegionPanel.GetWorldMarketTradedGoods]"
+						
+						item = {
+							world_market_traded_goods_item = {}
+						}						
+					}	
+					
+					expand = {}			
 				}
 
 				vbox = {
-					layoutpolicy_horizontal = expanding
-
+					layoutpolicy_horizontal = preferred
+					visible = "[InformationPanel.IsTabSelected('default')]"
+					using = default_content_fade
 					spacing = 10
+					margin_top = 10
 
-					datamodel = "[SeaRegionPanel.AccessCountriesWithShippingLanes]"
+					state = {
+						name = _show
+						on_start = "[SeaRegionPanel.GetMapModeList.SelectByKey('mm_trade')]"
+					}		
 
-					item = {
-						country_shipping_lanes = {}
+					textbox = {
+						margin_top = 100
+						layoutpolicy_vertical = preferred
+						visible = "[IsDataModelEmpty(SeaRegionPanel.AccessCountriesWithShippingLanes)]"
+						autoresize = yes
+						align = center|nobaseline
+						using = fontsize_xxl
+						text = "NO_SUPPLY_NETWORK"
+						using = empty_state_text_properties
+					}
+
+					vbox = {
+						layoutpolicy_horizontal = expanding
+
+						spacing = 10
+
+						datamodel = "[SeaRegionPanel.AccessCountriesWithShippingLanes]"
+
+						item = {
+							country_shipping_lanes = {}
+						}
+					}
+
+					expand = {}
+				}
+
+				flowcontainer = {
+					visible = "[InformationPanel.IsTabSelected('navy')]"
+					using = default_content_fade
+					direction = vertical
+
+					state = {
+						name = _show
+						on_start = "[SeaRegionPanel.GetMapModeList.SelectByKey('mm_military')]"
+					}
+
+					flowcontainer = {
+						visible = "[Not(IsDataModelEmpty(SeaRegionPanel.GetPlayerSeaRegionWars))]"
+						parentanchor = hcenter
+						direction = vertical
+						datamodel = "[SeaRegionPanel.GetPlayerSeaRegionWars]"
+
+						item = {
+							sea_region_war_formation_list = {}
+						}
+					}
+
+					widget = { size = { 10 10 } }
+
+					### Neutral Fleets
+					flowcontainer = {
+						direction = vertical
+						parentanchor = hcenter
+						margin_bottom = 5
+
+						default_header = {
+							blockoverride = "text" {
+								text = "NEUTRAL_FLEETS_HEADER"
+							}
+							blockoverride = "size" {
+								size = { @panel_width_plus_14 38 }
+							}
+						}
+
+						dynamicgridbox = {
+							parentanchor = hcenter
+							datamodel = "[SeaRegionPanel.GetPresentNeutralFleets]"
+							datamodel_wrap = 2
+							flipdirection = yes
+
+							item = {
+								flowcontainer = {
+									margin = { 5 5 }
+
+									sea_region_fleet_list_item = {}
+								}
+							}
+						}
+
+						empty_state = {
+							parentanchor = hcenter
+							blockoverride "visible" {
+								visible = "[IsDataModelEmpty(SeaRegionPanel.GetPresentNeutralFleets)]"
+							}
+							blockoverride "text" {
+								text = "SEA_REGION_PANEL_NO_PRESENT_NEUTRAL_FLEETS"
+							}
+						}
+					}
+
+					widget = { size = { 10 10 } }
+
+					flowcontainer = {
+						using = default_list_position
+						direction = vertical
+
+						default_header = {
+							parentanchor = hcenter
+							
+							blockoverride "text"
+							{
+								text = "ACTIVE_NAVAL_BATTLES_HEADER"
+							}
+						}
+
+						widget = { size = { 5 5 } }
+
+						dynamicgridbox = {
+							visible = "[Not(IsDataModelEmpty(SeaRegionPanel.AccessActiveBattles))]"
+							datamodel = "[SeaRegionPanel.AccessActiveBattles]"
+							parentanchor = hcenter
+
+							item = {
+								naval_battle_item = {}
+							}
+						}
+
+						empty_state = {
+							parentanchor = hcenter
+
+							blockoverride "visible" {
+								visible = "[IsDataModelEmpty(SeaRegionPanel.AccessActiveBattles)]"
+							}
+
+							blockoverride "text" {
+								text = "NO_ACTIVE_NAVAL_BATTLES"
+							}
+						}
+
+						widget = { size = { 5 5 } }
+					}
+
+					flowcontainer = {
+						using = default_list_position
+						direction = vertical
+
+						default_header = {
+							parentanchor = hcenter
+
+							blockoverride "text"
+							{
+								text = "ENDED_NAVAL_BATTLES_HEADER"
+							}
+						}
+
+						widget = { size = { 5 5 } }
+
+						
+						dynamicgridbox = {
+							visible = "[Not(IsDataModelEmpty(SeaRegionPanel.AccessEndedBattles))]"
+							datamodel = "[SeaRegionPanel.AccessEndedBattles]"
+							parentanchor = hcenter
+							item = {
+								ended_naval_battle_item = {}
+							}
+						}
+
+						empty_state = {
+							parentanchor = hcenter
+							blockoverride "visible" {
+								visible = "[IsDataModelEmpty(SeaRegionPanel.AccessEndedBattles)]"
+							}
+							blockoverride "text" {
+								text = "NO_ENDED_NAVAL_BATTLES"
+							}
+						}
+
+						widget = { size = { 5 5 } }
 					}
 				}
 
 				expand = {}
 			}
-
-			flowcontainer = {
-				visible = "[InformationPanel.IsTabSelected('navy')]"
-				using = default_content_fade
-				direction = vertical
-
-				flowcontainer = {
-					visible = "[Not(IsDataModelEmpty(SeaRegionPanel.GetPlayerSeaRegionWars))]"
-					parentanchor = hcenter
-					direction = vertical
-					datamodel = "[SeaRegionPanel.GetPlayerSeaRegionWars]"
-
-					item = {
-						sea_region_war_formation_list = {}
-					}
-				}
-
-				widget = { size = { 10 10 } }
-
-				### Neutral Fleets
-				flowcontainer = {
-					direction = vertical
-					parentanchor = hcenter
-					margin_bottom = 5
-
-					default_header = {
-						blockoverride = "text" {
-							text = "NEUTRAL_FLEETS_HEADER"
-						}
-						blockoverride = "size" {
-							size = { @panel_width_plus_14 38 }
-						}
-					}
-
-					dynamicgridbox = {
-						parentanchor = hcenter
-						datamodel = "[SeaRegionPanel.GetPresentNeutralFleets]"
-						datamodel_wrap = 2
-						flipdirection = yes
-
-						item = {
-							flowcontainer = {
-								margin = { 5 5 }
-
-								sea_region_fleet_list_item = {}
-							}
-						}
-					}
-
-					empty_state = {
-						parentanchor = hcenter
-						blockoverride "visible" {
-							visible = "[IsDataModelEmpty(SeaRegionPanel.GetPresentNeutralFleets)]"
-						}
-						blockoverride "text" {
-							text = "SEA_REGION_PANEL_NO_PRESENT_NEUTRAL_FLEETS"
-						}
-					}
-				}
-
-				widget = { size = { 10 10 } }
-
-				flowcontainer = {
-					using = default_list_position
-					direction = vertical
-
-					default_header = {
-						parentanchor = hcenter
-						blockoverride "text"
-						{
-							text = "ACTIVE_NAVAL_BATTLES_HEADER"
-						}
-					}
-
-					widget = { size = { 5 5 } }
-
-					dynamicgridbox = {
-						visible = "[Not(IsDataModelEmpty(SeaRegionPanel.AccessActiveBattles))]"
-						datamodel = "[SeaRegionPanel.AccessActiveBattles]"
-						parentanchor = hcenter
-						item = {
-							battle_item = {}
-						}
-					}
-
-					empty_state = {
-						parentanchor = hcenter
-						blockoverride "visible" {
-							visible = "[IsDataModelEmpty(SeaRegionPanel.AccessActiveBattles)]"
-						}
-						blockoverride "text" {
-							text = "NO_ACTIVE_NAVAL_BATTLES"
-						}
-					}
-
-					widget = { size = { 5 5 } }
-				}
-
-				flowcontainer = {
-					using = default_list_position
-					direction = vertical
-
-					default_header = {
-						parentanchor = hcenter
-
-						blockoverride "text"
-						{
-							text = "ENDED_NAVAL_BATTLES_HEADER"
-						}
-					}
-
-					widget = { size = { 5 5 } }
-
-					
-					dynamicgridbox = {
-						visible = "[Not(IsDataModelEmpty(SeaRegionPanel.AccessEndedBattles))]"
-						datamodel = "[SeaRegionPanel.AccessEndedBattles]"
-						parentanchor = hcenter
-						item = {
-							ended_battle_item = {}
-						}
-					}
-
-					empty_state = {
-						parentanchor = hcenter
-						blockoverride "visible" {
-							visible = "[IsDataModelEmpty(SeaRegionPanel.AccessEndedBattles)]"
-						}
-						blockoverride "text" {
-							text = "NO_ENDED_NAVAL_BATTLES"
-						}
-					}
-
-					widget = { size = { 5 5 } }
-				}
-			}
-
-			expand = {}
 		}
 	}
 
@@ -649,30 +662,33 @@ types sea_region_panel_types
 			}
 
 			flowcontainer = {
+				spacing = 5
 				margin = { 15 5 }
 
-				dynamicgridbox = {
-					visible = "[Not(IsDataModelEmpty(MilitaryFormation.GetCommanders))]"
-					datamodel = "[MilitaryFormation.GetCommanders]"
-					maxhorizontalslots = 5
-					flipdirection = yes
+				widget = {
+					visible = "[MilitaryFormation.HasCommander]"
+					datacontext = "[MilitaryFormation.GetCommander]"
+					size = { 40 40 }
 
-					item = {
-						widget = {
-							size = { 40 40 }
-
-							character_portrait_small = {}
-						}
-					}
+					character_portrait_small = {}
 				}
 
 				textbox = {
-					visible = "[IsDataModelEmpty(MilitaryFormation.GetCommanders)]"
+					visible = "[Not(MilitaryFormation.HasCommander)]"
 					autoresize = yes
 					using = empty_state_text_properties
 					align = nobaseline
 					text = "NO_ADMIRALS"
 				}
+
+				icon = {
+					visible = "[MilitaryFormation.HasNavalMission]"
+					datacontext = "[MilitaryFormation.GetNavalMission.GetType]"
+					size = { 35 35 }
+					parentanchor = vcenter
+					texture = "[NavalMissionType.GetIcon]"
+					tooltip = "FLEET_NAVAL_MISSION_BUTTON_TOOLTIP"
+				}				
 			}
 
 			flowcontainer = {
@@ -689,6 +705,7 @@ types sea_region_panel_types
 				flowcontainer = {
 					spacing = 4
 					parentanchor = vcenter
+					
 					icon = {
 						visible = "[MilitaryFormation.IsArmy]"
 						size = { 23 23 }
@@ -716,10 +733,10 @@ types sea_region_panel_types
 					}
 				}
 
-				# Offense
+				# Average Hull Damage
 				textbox = {
-					raw_text = "@unit_offense! [MilitaryFormation.GetAverageOffenseExcludeUnavailableManpower|0v]"
-					tooltip = "MILITARY_FORMATION_OFFENSE_TOOLTIP"
+					raw_text = "@hull_attack_damage! #v [MilitaryFormation.GetShipList.GetHullDamageAverage|0]#!"
+					tooltip = "MILITARY_FORMATION_DAMAGE_TOOLTIP"
 					autoresize = yes
 					align = nobaseline
 					parentanchor = vcenter
@@ -728,8 +745,8 @@ types sea_region_panel_types
 
 				# Defense
 				textbox = {
-					raw_text = "@unit_defense! [MilitaryFormation.GetAverageDefenseExcludeUnavailableManpower|0v]"
-					tooltip = "MILITARY_FORMATION_DEFENSE_TOOLTIP"
+					raw_text = "@ship_armor! #v [MilitaryFormation.GetShipList.GetArmorAverage|0]#!"
+					tooltip = "MILITARY_FORMATION_ARMOR_TOOLTIP"
 					autoresize = yes
 					align = nobaseline
 					parentanchor = vcenter
@@ -741,23 +758,9 @@ types sea_region_panel_types
 					parentanchor = vcenter
 					spacing = 7
 
-					# Morale
-					morale_bar = {
-						parentanchor = vcenter
-						tooltip = "MILITARY_FORMATION_MORALE_TOOLTIP"
-						
-						blockoverride "morale_value" {
-							value = "[FixedPointToFloat( MilitaryFormation.GetMorale )]"
-						}
-						blockoverride "morale_color" {
-							color = "[GetMoraleColorVec( MilitaryFormation.GetMorale )]"
-						}
-					}
-
 					# Organization
 					organization_bar = {
 						tooltip = "MILITARY_FORMATION_ORGANIZATION_TOOLTIP"
-						visible = "[LessThan_CFixedPoint(MilitaryFormation.GetOrganizationPercentage, '(CFixedPoint)1')]"
 						parentanchor = vcenter
 						
 						blockoverride "organization_value" {
@@ -932,8 +935,8 @@ types sea_region_panel_types
 				elide = right
 				align = right|nobaseline
 				autoresize = yes
-				tooltip = "ORIGIN_STATE_TOTAL_CONVOYS_USED_TOOLTIP"
-				text = "ORIGIN_STATE_TOTAL_CONVOYS_USED"
+				tooltip = "ORIGIN_STATE_TOTAL_MERCHANT_MARINE_DEMAND_TOOLTIP"
+				text = "ORIGIN_STATE_TOTAL_MERCHANT_MARINE_DEMAND"
 			}
 		}
 
@@ -973,15 +976,14 @@ types sea_region_panel_types
 					position = { 45 0 }
 
 					fixedgridbox = {
-						datamodel = "[DataModelFirst(State.AccessShippingLanesOnlySupplyRoutesFromThisState(SeaRegionPanel.GetProvince.Self), '(int32)4')]"
+						datamodel = "[DataModelFirst(State.AccessMilitaryFormationsSuppliedFromThisState(SeaRegionPanel.GetProvince.Self), '(int32)4')]"
 						size = { 120 30 }
 						addrow = 30
 						addcolumn = 30
 						flipdirection = yes
-						
+
 						item = {
 							military_formation_shipping_lane_button = {
-								datacontext = "[ShippingLane.GetMilitaryFormation]"
 								blockoverride "size" {
 									size = { 30 30 }
 								}
@@ -1010,29 +1012,28 @@ types sea_region_panel_types
 				using = dropdown_background
 			}
 
+			### MILITARY FORMATIONS WITH SUPPLY ROUTES
 			fixedgridbox = {
 				addcolumn = 510
 				addrow = 35
-				datamodel = "[State.AccessShippingLanesOnlySupplyRoutesFromThisState(SeaRegionPanel.GetProvince.Self)]"
-				
+				datamodel = "[State.AccessMilitaryFormationsSuppliedFromThisState(SeaRegionPanel.GetProvince.Self)]"
+
 				item = {
 					widget = {
-						tooltip = "SHIPPING_LANE_TOOLTIP"
-						datacontext = "[ShippingLane.GetMilitaryFormation]"
+						tooltip = "MILITARY_FORMATION_SUPPLY_TOOLTIP"
 						size = { 510 35 }
 
 						divider_clean = {
 							size = { 510 1 }
 						}
-						
+
 						### Supply Route
 						hbox = {
 							minimumsize = { -1 35 }
 							margin = { 10 0 }
 							spacing = 5
-							layoutpolicy_vertical = expanding 
+							layoutpolicy_vertical = expanding
 							layoutpolicy_horizontal = expanding
-
 
 							military_formation_shipping_lane_button = {
 								min_width = 35
@@ -1064,22 +1065,8 @@ types sea_region_panel_types
 									align = left|nobaseline
 									elide = right
 									fontsize_min = 12
-									text = "SHIPPING_LANE_SUPPLIED_STATE"
+									text = "[MilitaryFormation.GetSupplyHub.GetName]"
 								}
-
-								tiny_flag = {
-									visible = "[ShippingLane.GetEndState.IsValid]"
-									datacontext = "[ShippingLane.GetEndState.GetCountry]"
-								}
-							}
-
-							textbox = {
-								layoutstretchfactor_horizontal = 3.5
-								layoutpolicy_horizontal = expanding
-								alpha = "[TransparentIfTrue(EqualTo_CFixedPoint(ShippingLane.GetEffectivenessRaw,'(CFixedPoint)1'))]"
-								align = right|nobaseline
-								elide = right
-								text = "[ShippingLane.GetEffectivenessFormatted]"
 							}
 
 							textbox = {
@@ -1088,7 +1075,7 @@ types sea_region_panel_types
 								align = right|nobaseline
 								elide = right
 								fontsize_min = 12
-								text = "[ShippingLane.GetConvoyCostFormattedShort]"
+								text = "[MilitaryFormation.GetDistanceToHomePortFormatted]"
 							}
 						}
 					}
@@ -1165,8 +1152,8 @@ types sea_region_panel_types
 								align = right|nobaseline
 								elide = right
 								fontsize_min = 12
-								text = "[ShippingLane.GetConvoyCostFormattedShort]"
-								alpha = "[TransparentIfZero_int32(ShippingLane.GetConvoyCostRaw)]"
+								text = "[ShippingLane.GetMerchantMarineDemandFormatted]"
+								alpha = "[TransparentIfZero(ShippingLane.GetMerchantMarineDemandRaw)]"
 							}
 						}
 					}
@@ -1242,8 +1229,8 @@ types sea_region_panel_types
 								align = right|nobaseline
 								elide = right
 								fontsize_min = 12
-								text = "[ShippingLane.GetConvoyCostFormattedShort]"
-								alpha = "[TransparentIfZero_int32(ShippingLane.GetConvoyCostRaw)]"
+								text = "[ShippingLane.GetMerchantMarineDemandFormatted]"
+								alpha = "[TransparentIfZero(ShippingLane.GetMerchantMarineDemandRaw)]"
 							}
 						}
 					}

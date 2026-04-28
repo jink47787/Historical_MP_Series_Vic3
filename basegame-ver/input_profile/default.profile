@@ -363,6 +363,12 @@ input_context={
 	}
 
 	input_action = {
+		name = "dismiss_toast"
+		text = "SETTING_INPUT_ACTION_DISMISS_TOAST"
+		scancode = 41			# Escape
+	}
+
+	input_action = {
 		name = "current_situation"
 		text = "SETTING_INPUT_ACTION_CURRENT_SITUATION"
 		scancode = 8 			# E

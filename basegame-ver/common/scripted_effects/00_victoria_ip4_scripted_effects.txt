@@ -2,7 +2,7 @@
 	if = {
 		limit = {
 			scope:golpista_general ?= {
-				has_role = general
+				has_role_of_type = general
 			}
 		}
 		if = {
@@ -38,22 +38,22 @@
 	else_if = {
 		limit = {
 			scope:golpista_general ?= {
-				has_role = admiral
+				has_role_of_type = admiral
 			}
 		}
 		if = {
 			limit = {
 				any_scope_state = {
 					owner = ROOT
-					has_building = building_naval_base
+					has_building = building_naval_administration
 				}
 			}
 			ordered_scope_state = {
 				limit = {
 					owner = ROOT
-					has_building = building_naval_base
+					has_building = building_naval_administration
 				}
-				order_by = b:building_naval_base.level
+				order_by = b:building_naval_administration.level
 				position = 0
 				check_range_bounds = no
 				save_scope_as = pronunciamento_state
@@ -77,7 +77,7 @@ ip4_coup_get_unowned_pronunciamento_state = {
 	if = {
 		limit = {
 			scope:golpista_general ?= {
-				has_role = general
+				has_role_of_type = general
 			}
 		}
 		if = {
@@ -108,20 +108,20 @@ ip4_coup_get_unowned_pronunciamento_state = {
 	else_if = {
 		limit = {
 			scope:golpista_general ?= {
-				has_role = admiral
+				has_role_of_type = admiral
 			}
 		}
 		if = {
 			limit = {
 				any_scope_state = {
-					has_building = building_naval_base
+					has_building = building_naval_administration
 				}
 			}
 			ordered_scope_state = {
 				limit = {
-					has_building = building_naval_base
+					has_building = building_naval_administration
 				}
-				order_by = b:building_naval_base.level
+				order_by = b:building_naval_administration.level
 				position = 0
 				check_range_bounds = no
 				save_scope_as = pronunciamento_state
@@ -142,7 +142,7 @@ ip4_coup_get_allied_pronunciamento_state = {
 	if = {
 		limit = {
 			scope:golpista_general ?= {
-				has_role = general
+				has_role_of_type = general
 			}
 		}
 		if = {
@@ -184,7 +184,7 @@ ip4_coup_get_allied_pronunciamento_state = {
 	else_if = {
 		limit = {
 			scope:golpista_general ?= {
-				has_role = admiral
+				has_role_of_type = admiral
 			}
 		}
 		if = {
@@ -193,7 +193,7 @@ ip4_coup_get_allied_pronunciamento_state = {
 					owner = {
 						is_diplomatic_play_ally_of = ROOT
 					}
-					has_building = building_naval_base
+					has_building = building_naval_administration
 				}
 			}
 			ordered_scope_state = {
@@ -201,9 +201,9 @@ ip4_coup_get_allied_pronunciamento_state = {
 					owner = {
 						is_diplomatic_play_ally_of = ROOT
 					}
-					has_building = building_naval_base
+					has_building = building_naval_administration
 				}
-				order_by = b:building_naval_base.level
+				order_by = b:building_naval_administration.level
 				position = 0
 				check_range_bounds = no
 				save_scope_as = pronunciamento_state
@@ -588,8 +588,17 @@ ip4_coup_victory_technical_effects = {
 	every_diplomatically_relevant_country = {
 		limit = {
 			has_overlapping_interests = ROOT
+			NOT = {
+				ROOT.var:coup_sponsor ?= this
+			}
 		}
 		post_notification = successful_coup_in_country
+	}
+	every_diplomatically_relevant_country = {
+		limit = {
+			ROOT.var:coup_sponsor ?= this
+		}
+		post_notification = successful_orchestrated_coup_in_country
 	}
 	if = {
 		limit = {
@@ -605,21 +614,25 @@ ip4_coup_victory_technical_effects = {
 			var:coup_sponsor ?= {
 				is_country_alive = yes
 			}
+			var:coup_sponsor ?= {
+				has_diplomatic_pact = {
+					who = ROOT.owner
+					type = orchestrate_coup
+				}
+			}
+		}
+		create_diplomatic_catalyst = {
+			type = catalyst_orchestrate_coup_successful
+			target = var:coup_sponsor
 		}
 		set_owes_obligation_to = {
 			country = var:coup_sponsor
 			setting = yes
 		}
-		remove_variable = coup_sponsor
-	}
-	if = {
-		limit = {
-			scope:golpista_general ?= {
-				has_variable = commander_doing_coup_on_player_behalf
+		var:coup_sponsor ?= {
+			power_bloc ?= {
+				add_leverage = { target = ROOT value = 500 }
 			}
-		}
-		scope:golpista_general ?= {
-			remove_variable = commander_doing_coup_on_player_behalf
 		}
 	}
 	set_variable = { name = recent_coup_or_revolution_var value = 0 }
@@ -824,6 +837,118 @@ ip4_coup_victory_effect_interaction_display = {
 			}
 		}
 	}
+	if = {
+		limit = {
+			owner = {
+				has_variable = coup_sponsor
+				var:coup_sponsor ?= {
+					is_country_alive = yes
+				}
+				var:coup_sponsor ?= {
+					has_diplomatic_pact = {
+						who = ROOT.owner
+						type = orchestrate_coup
+					}
+				}
+			}
+		}
+		owner = {
+			set_owes_obligation_to = {
+				country = var:coup_sponsor
+				setting = yes
+			}
+			create_diplomatic_catalyst = {
+				type = catalyst_orchestrate_coup_successful
+				target = var:coup_sponsor
+			}
+			var:coup_sponsor ?= {
+				power_bloc ?= {
+					add_leverage = { target = ROOT value = 500 }
+				}
+			}
+		}
+	}
+}
+
+ip4_coup_cleanup_effects = {
+	set_variable = { name = coup_cooldown_var days = short_modifier_time }
+	if = {
+		limit = {
+			has_variable = coup_event_active
+		}
+		remove_variable = coup_event_active
+	}
+	every_political_lobby = {
+		limit = {
+			has_variable = coup_lobby
+		}
+		remove_variable = coup_lobby
+	}
+	every_interest_group = {
+		limit = {
+			has_variable = golpista_ig_var
+		}
+		remove_variable = golpista_ig_var
+	}
+	if = {
+		limit = {
+			has_variable = coup_sponsor
+		}
+		if = {
+			limit = {
+				var:coup_sponsor ?= {
+					has_diplomatic_pact = {
+						who = ROOT
+						type = orchestrate_coup
+					}
+				}
+			}
+			hidden_effect = {
+				var:coup_sponsor ?= {
+					remove_diplomatic_pact = {
+						country = root
+						type = orchestrate_coup
+					}
+				}
+			}
+		}
+		remove_variable = coup_sponsor
+	}
+	if = {
+		limit = {
+			has_variable = orchestrate_coup_aborted
+		}
+		remove_variable = orchestrate_coup_aborted
+	}
+	if = {
+		limit = {
+			has_variable = coup_reason_var
+		}
+		remove_variable = coup_reason_var
+	}
+	scope:golpista_general ?= {
+		remove_variable = golpista_var
+	}
+	if = {
+		limit = {
+			scope:golpista_general ?= {
+				has_variable = commander_doing_coup_on_player_behalf
+			}
+		}
+		scope:golpista_general ?= {
+			remove_variable = commander_doing_coup_on_player_behalf
+		}
+	}
+	if = {
+		limit = {
+			scope:golpista_general ?= {
+				has_modifier = modifier_dynastic_coup
+			}
+		}
+		scope:golpista_general ?= {
+			remove_modifier = modifier_dynastic_coup
+		}
+	}
 }
 
 create_coup_from_character = { # Takes scope golpista_character
@@ -836,14 +961,40 @@ create_coup_from_character = { # Takes scope golpista_character
 	$CHARACTER$ = {
 		set_variable = golpista_var
 		save_scope_as = golpista_general
-		interest_group = {
+		interest_group ?= {
 			set_variable = golpista_ig_var
 			save_scope_as = golpista_ig
 		}
 		set_variable = { name = monthly_cached_units_share value = this.num_units_share } # Updates at start of coup
 		set_variable = { name = monthly_cached_commander_coup_strength value = this.commander_coup_strength }
+		character_get_and_save_coup_reason = yes
 		owner = {
 			add_journal_entry = { type = je_ip4_coup }
+		}
+	}
+}
+
+create_coup_event_from_character = { # Takes scope golpista_character
+	if = { # Ignores the cooldown
+		limit = {
+			has_variable = coup_cooldown_var
+		}
+		remove_variable = coup_cooldown_var
+	}
+	$CHARACTER$ = {
+		set_variable = golpista_var
+		save_scope_as = golpista_general
+		interest_group ?= {
+			set_variable = golpista_ig_var
+			save_scope_as = golpista_ig
+		}
+		set_variable = { name = monthly_cached_units_share value = this.num_units_share } # Updates at start of coup
+		set_variable = { name = monthly_cached_commander_coup_strength value = this.commander_coup_strength }
+		character_get_and_save_coup_reason = yes
+		owner = {
+			hidden_effect = {
+				trigger_event = { id = ip4_coup.11 }
+			}
 		}
 	}
 }
@@ -1026,18 +1177,6 @@ country_remove_colonial_variables = {
 			has_variable = senegal_subject_var
 		}
 		remove_variable = senegal_subject_var
-	}
-	if = {
-		limit = {
-			has_variable = niger_subject_var
-		}
-		remove_variable = niger_subject_var
-	}
-	if = {
-		limit = {
-			has_variable = ethiopia_subject_var
-		}
-		remove_variable = ethiopia_subject_var
 	}
 	if = {
 		limit = {
@@ -1558,7 +1697,7 @@ second_amendment_remove_obsessions_effect = {
 
 iberia_calculate_shared_laws = {
 	set_global_variable = { name = iberia_shared_laws_var value = 0 }
-	ordered_country_in_iberia = {
+	ordered_country_in_iberia_old = {
 		limit = {
 			is_involved_in_journal_entry = je_iberia
 		}
@@ -1568,7 +1707,7 @@ iberia_calculate_shared_laws = {
 		every_active_law = {
 			limit = {
 				save_temporary_scope_as = iberia_first_country_active_law
-				any_country_in_iberia = {
+				any_country_in_iberia_old = {
 					filter = {
 						AND = {
 							NOT = {
@@ -1803,7 +1942,6 @@ summon_napoleon_the_woat = { # Special case
 				set_global_variable = napoleon_iii_spawn
 				cleanup_ruler_character_roles = yes
 				set_character_as_ruler = yes
-				add_character_role = politician
 			}
 		}
 		if = {
@@ -1878,9 +2016,9 @@ transfer_character_of_unknown_status_to_country_effects = {
 		}
 		transfer_character = scope:summoning_country
 		set_variable = exile_to_ruler_var
-		set_variable = {
-			name = memento_mori_immunity
+		add_career_length = {
 			months = 60
+			random_range = { 1.0 1.5 } # 60-90 months
 		}
 		hidden_effect = {
 			free_from_exile_effect = yes
@@ -1924,9 +2062,9 @@ transfer_character_of_unknown_status_to_country_and_make_ruler_effects = { # Req
 		}
 		transfer_character = scope:summoning_country
 		set_variable = exile_to_ruler_var
-		set_variable = {
-			name = memento_mori_immunity
+		add_career_length = {
 			months = 60
+			random_range = { 1.0 1.5 } # 60-90 months
 		}
 		hidden_effect = {
 			free_from_exile_effect = yes
@@ -1946,7 +2084,7 @@ transfer_character_of_unknown_status_to_country_and_make_ruler_effects = { # Req
 						has_law = law_type:law_monarchy
 					}
 					scope:summoned_character_scope ?= {
-						is_ruler = yes
+						is_ruler_of_own_country = yes
 						owner ?= {
 							has_law = law_type:law_monarchy
 							has_gov_regency = no
@@ -2006,7 +2144,7 @@ transfer_character_of_unknown_status_to_country_and_make_ruler_effects = { # Req
 				if = {
 					limit = {
 						owner = scope:summoning_country
-						is_ruler = yes
+						is_ruler_of_own_country = yes
 					}
 					custom_tooltip = summoned_character_becomes_monarch_tt
 				}
@@ -2056,9 +2194,9 @@ set_character_of_unknown_status_as_heir = { # Fired in a country scope, requires
 		scope:new_heir_scope ?= {
 			transfer_character = prev
 			set_variable = exile_to_ruler_var
-			set_variable = {
-				name = memento_mori_immunity
+			add_career_length = {
 				months = 60
+				random_range = { 1.0 1.5 } # 60-90 months
 			}
 			hidden_effect = {
 				free_from_exile_effect = yes
@@ -2069,31 +2207,29 @@ set_character_of_unknown_status_as_heir = { # Fired in a country scope, requires
 
 summon_miguel_effect = {
 	set_character_as_ruler = yes
-	add_character_role = politician
 }
 
 summon_legitimist_carlist_effect = {
 	set_character_as_ruler = yes
-	add_character_role = politician
 	character_carlist_or_legitimist_switch_effect = yes
 }
 
 cleanup_ruler_character_roles = {
 	if = {
 		limit = {
-			has_role = agitator
+			has_role_of_type = agitator
 		}
 		remove_character_role = agitator
 	}
 	if = {
 		limit = {
-			has_role = general
+			has_role_of_type = general
 		}
 		remove_character_role = general
 	}
 	if = {
 		limit = {
-			has_role = admiral
+			has_role_of_type = admiral
 		}
 		remove_character_role = admiral
 	}
@@ -2182,7 +2318,6 @@ generate_governor_of_same_type = { # Run in country scope
 			template = character_template_colonial_governor_plantation
 			on_created = {
 				set_character_as_ruler = yes
-				remove_character_role = general
 				set_variable = { name = colonial_governor_term value = 0 }
 			}
 		}
@@ -2200,7 +2335,6 @@ generate_governor_of_same_type = { # Run in country scope
 			template = character_template_colonial_governor_local
 			on_created = {
 				set_character_as_ruler = yes
-				remove_character_role = general
 				set_variable = { name = colonial_governor_term value = 0 }
 			}
 		}
@@ -2218,7 +2352,6 @@ generate_governor_of_same_type = { # Run in country scope
 			template = character_template_colonial_governor_extraction
 			on_created = {
 				set_character_as_ruler = yes
-				remove_character_role = general
 				set_variable = { name = colonial_governor_term value = 0 }
 			}
 		}
@@ -2236,7 +2369,6 @@ generate_governor_of_same_type = { # Run in country scope
 			template = character_template_colonial_governor_business
 			on_created = {
 				set_character_as_ruler = yes
-				remove_character_role = general
 				set_variable = { name = colonial_governor_term value = 0 }
 			}
 		}
@@ -2262,11 +2394,25 @@ generate_governor_of_same_type = { # Run in country scope
 		scope:current_governor ?= {
 			remove_variable = colonial_governor_term
 		}
-		create_character = {
-			template = character_template_colonial_governor_military
-			on_created = {
-				set_character_as_ruler = yes
-				set_variable = { name = colonial_governor_term value = 0 }
+		if = {
+			limit = {
+				c:BIC ?= this
+			}
+			create_character = {
+				template = character_template_colonial_governor_extraction
+				on_created = {
+					set_character_as_ruler = yes
+					set_variable = { name = colonial_governor_term value = 0 }
+				}
+			}
+		}
+		else = {
+			create_character = {
+				template = character_template_colonial_governor_military
+				on_created = {
+					set_character_as_ruler = yes
+					set_variable = { name = colonial_governor_term value = 0 }
+				}
 			}
 		}
 	}

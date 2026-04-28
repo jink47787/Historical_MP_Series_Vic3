@@ -1,44 +1,148 @@
 ﻿japan_generate_scripted_heirs = {
 	if = {
 		limit = {
-			game_date >= 1852.11.3
-			NOT = { has_variable = heir_meiji_spawned }
-			ruler ?= {
-				has_template = JAP_komei_yamato
+			ruler = {
+				has_variable = house_yamato
 			}
-			NOT = { exists = heir }
 		}
-		set_variable = heir_meiji_spawned
-		create_character = {
-			template = JAP_meiji_yamato
+		if = {
+			limit = {
+				game_date >= 1831.7.22
+				NOT = { has_variable = heir_komei_spawned }
+				ruler ?= {
+					has_template = JAP_ninko_yamato
+				}
+			}
+			set_variable = heir_komei_spawned
+			create_character = {
+				template = JAP_komei_yamato
+				on_created = {
+					replace_character_roles = { add = { heir } remove_all = yes }
+				}
+			}
+		}
+		if = {
+			limit = {
+				game_date >= 1852.11.3
+				NOT = { has_variable = heir_meiji_spawned }
+				ruler ?= {
+					has_template = JAP_komei_yamato
+				}
+			}
+			set_variable = heir_meiji_spawned
+			create_character = {
+				template = JAP_meiji_yamato
+				on_created = {
+					replace_character_roles = { add = { heir } remove_all = yes }
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				game_date >= 1879.8.31
+				NOT = { has_variable = heir_taisho_spawned }
+				ruler ?= {
+					has_template = JAP_meiji_yamato
+				}
+			}
+			set_variable = heir_taisho_spawned
+			create_character = {
+				template = JAP_taisho_yamato
+				on_created = {
+					replace_character_roles = { add = { heir } remove_all = yes }
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				game_date >= 1901.4.29
+				NOT = { has_variable = heir_showa_spawned }
+				ruler ?= {
+					has_template = JAP_taisho_yamato
+				}
+			}
+			set_variable = heir_showa_spawned
+			create_character = {
+				template = JAP_showa_yamato
+				on_created = {
+					replace_character_roles = { add = { heir } remove_all = yes }
+				}
+			}
 		}
 	}
 	else_if = {
 		limit = {
-			game_date >= 1879.8.31
-			NOT = { has_variable = heir_taisho_spawned }
-			ruler ?= {
-				has_template = JAP_meiji_yamato
+			ruler = {
+				has_variable = house_tokugawa
 			}
-			NOT = { exists = heir }
 		}
-		set_variable = heir_taisho_spawned
-		create_character = {
-			template = JAP_taisho_yamato
-		}
-	}
-	else_if = {
-		limit = {
-			game_date >= 1901.4.29
-			NOT = { has_variable = heir_showa_spawned }
-			ruler ?= {
-				has_template = JAP_taisho_yamato
+		if = {
+			limit = {
+				NOT = { has_variable = heir_iesada_spawned }
+				ruler ?= {
+					has_template = JAP_ieyoshi_tokugawa
+				}
 			}
-			NOT = { exists = heir }
+			set_variable = heir_iesada_spawned
+			create_character = {
+				template = JAP_iesada_tokugawa
+				on_created = {
+					add_character_role = heir
+				}
+			}
 		}
-		set_variable = heir_showa_spawned
-		create_character = {
-			template = JAP_showa_yamato
+		else_if = {
+			limit = {
+				NOT = { has_dlc_feature = ep2_content } # Iesada's heir is handled by event in EP2
+				game_date >= 1846.7.16
+				NOT = { has_variable = heir_iemochi_spawned }
+				ruler ?= {
+					has_template = JAP_iesada_tokugawa
+				}
+			}
+			set_variable = heir_iemochi_spawned
+			create_character = {
+				template = JAP_iemochi_tokugawa
+				on_created = {
+					add_character_role = heir
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				game_date >= 1863.8.24
+				game_date < 1879.8.24
+				NOT = { has_variable = heir_yoshinobu_spawned }
+				ruler ?= {
+					has_template = JAP_iemochi_tokugawa
+				}
+			}
+			set_variable = heir_yoshinobu_spawned
+			create_character = {
+				template = JAP_yoshinobu_tokugawa
+				on_created = {
+					add_character_role = heir
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				game_date >= 1879.8.24 # Date of majority
+				NOT = { has_variable = heir_iesato_spawned }
+				ruler ?= {
+					OR = {
+						has_template = JAP_iemochi_tokugawa
+						has_template = JAP_yoshinobu_tokugawa
+					}
+				}
+			}
+			set_variable = heir_iesato_spawned
+			create_character = {
+				template = JAP_iesato_tokugawa
+				on_created = {
+					add_character_role = heir
+				}
+			}
 		}
 	}
 }
@@ -81,9 +185,6 @@ britain_generate_scripted_heirs = {
 			ruler ?= {
 				has_template = gbr_albert_edward_template
 			}
-			NOT = {
-				exists = heir
-			}
 		}
 		set_variable = george_v_heir_var
 		create_character = {
@@ -100,16 +201,6 @@ france_generate_scripted_heirs = {
 			NOT = { has_variable = napoleon_iv_heir_var }
 			ruler ?= {
 				has_template = fra_napoleon_iii_character_template
-			}
-			trigger_if = {
-				limit = {
-					exists = heir
-				}
-				NOT = {
-					heir ?= {
-						has_template = FRA_napoleon_eugene_louis_bonaparte
-					}
-				}
 			}
 		}
 		set_variable = napoleon_iv_heir_var

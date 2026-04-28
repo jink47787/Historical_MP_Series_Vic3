@@ -17,7 +17,7 @@ types country_panel_types
 		minimumsize = { @panel_width_plus_14 -1 }
 		maximumsize = { @panel_width_plus_14 -1 }
 		datacontext = "[CountryPanel.GetCountry]"
-		
+
 		widget = {
 			size = { @panel_width 125 }
 			parentanchor = hcenter
@@ -190,15 +190,15 @@ types country_panel_types
 
 		diplomatic_info = {}
 
-		widget = { 
+		widget = {
 			size = { 5 5 }
-		}	
+		}
 
 
 		flowcontainer = {
 			parentanchor = hcenter
 			direction = vertical
-		
+
 			default_header = {
 				blockoverride "text" {
 					text = INTERESTS
@@ -215,44 +215,80 @@ types country_panel_types
 				blockoverride "margin" {
 					margin_top = 10
 					margin_bottom = 10
-				}				
+				}
 			}
-			
-			dynamicgridbox = {
-				visible = "[Not(IsDataModelEmpty(Country.AccessInterests))]"
-				datamodel = "[Country.AccessInterests]"
-				flipdirection = yes
-				datamodel_wrap = 3	
+
+			flowcontainer = {
 				parentanchor = hcenter
-			
+				visible = "[Not(IsDataModelEmpty(Country.AccessInterests))]"
+
+				sort_button = {
+					size = { 270 30 }
+					tooltip = "SORT_BY_STRATEGIC_REGION_NAME"
+					text = "concept_strategic_region"
+					onclick = "[Country.SortInterests('strategic_region_name')]"
+				}
+
+				sort_button = {
+					size = { 270 30 }
+					tooltip = "SORT_BY_INVOLVEMENT"
+					text = "concept_involvement"
+					onclick = "[Country.SortInterests('involvement')]"
+				}
+			}
+
+			flowcontainer = {
+				parentanchor = hcenter
+				datamodel = "[Country.AccessInterests]"
+				visible = "[Not(IsDataModelEmpty(Country.AccessInterests))]"
+				direction = vertical
+
 				item = {
 					flowcontainer = {
 						datacontext = "[Interest.GetStrategicRegion]"
-						direction = horizontal
+						using = unclickable_listentry
+						margin_bottom = 10
+						spacing = 10
 						onmousehierarchyenter = "[AccessHighlightManager.HighlightStrategicRegion(StrategicRegion.Self)]"
 						onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
 						alwaystransparent = no
 
-						tooltipwidget = {
-							FancyTooltip_StrategicRegion = {}
+						button = {
+							size = { 260 40 }
+							using = default_button
+							parentanchor = vcenter
+							onclick = "[InformationPanelBar.OpenStrategicRegionPanel(StrategicRegion.Self)]"
+
+							tooltipwidget = {
+								FancyTooltip_StrategicRegion = {}
+							}
+
+							textbox = {
+								position = { 10 0 }
+								autoresize = yes
+								max_width = 240
+								parentanchor = vcenter
+								text = "[StrategicRegion.GetNameNoFormatting]"
+							}
 						}
 
-						background = {
-							using = entry_bg_simple
-						}	
-						
-						minimumsize = { 175 40 }
+						widget = {
+							parentanchor = vcenter
+							size = { 260 50 }
 
-						textbox = {
-							parentanchor = center					
-							text = "[StrategicRegion.GetNameNoFormatting] [SelectLocalization(GetPlayer.HasInterestIn(StrategicRegion.Self), '@green_checkmark!', '@red_cross!')]"
-							size = { 175 35 }
-							fontsize_min = 10
-							align = hcenter|nobaseline
+							country_involvement_bar_with_label = {
+								margin_right = 10
+
+								blockoverride "above_expand" {}
+
+								blockoverride "below" {
+									expand = {}
+								}
+							}
 						}
 					}
 				}
-			}		
+			}
 		}
 	}
 }

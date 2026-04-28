@@ -362,17 +362,18 @@ land_battle_unit_selection_weight = {
 	}
 }
 
-# the flotilla size for each side in a naval battle
+# the number of ships for each side in a naval battle
 # root = country
 # province = the naval province where the battle is happening
 # enemy_country = the other country
 # own_commander = the commander leading this side in battle (if any; could be garrison)
 # military_formation = the military formation in this side of the battle
-# enemy_commander = the commander leading this side in battle (if any; could be garrison)
+# enemy_commander = the commander leading the enemy side in battle (if any; could be garrison)
+# enemy_military_formation = the military formation on the enemy side of the battle
 naval_battle_size = {
     # Start with a baseline number of available flotillas not engaged in battle
 	value = {
-		value = scope:province.num_units_not_in_battle:root
+		value = scope:military_formation.num_ships_not_in_battle
 		desc = "NAVAL_BATTLE_SIZE_ADMIRAL_SHARE"
 	}
 
@@ -381,96 +382,68 @@ naval_battle_size = {
 	# Cap to the command limit of how many flotillas the admiral can command
 	if = {
 		limit = {
-			scope:pre_max_amount_cap > scope:own_commander.command_limit_num_units
+			exists = scope:own_commander
+			scope:pre_max_amount_cap > {
+				value = 0
+				scope:own_commander = {
+					add = this.modifier:character_command_limit_add
+				}
+				multiply = 0.5
+			}
 		}
 		max = {
-			add = scope:own_commander.command_limit_num_units
+			add = {
+				scope:own_commander = {
+					add = this.modifier:character_command_limit_add
+				}
+			}
+			multiply = 0.5
 			desc = "[concept_command_limit]"
 		}
 	}
+	else = {
+		max = define:NMilitary|MILITARY_FORMATION_COMMAND_LIMIT_NO_COMMANDER
+	}
 
-	# If we have more units than enemy formation - reduce the number (no more than by 50%) so we don't send too many units to battle
+	save_temporary_value_as = post_command_limit_base_amount_cap
+
+	# Modify our number by our detection vs enemy visibility
 	if = {
 		limit = {
-			scope:own_commander.command_limit_num_units > scope:enemy_commander.command_limit_num_units
+			exists = scope:military_formation
+			exists = scope:enemy_military_formation
 		}
-		multiply = {
-			fixed_range = {
-				min = {
-					value = 1.5
-					subtract = {
-						# Calculate the *strength* ratio, which is between 0.5 and 1 here
-						value = scope:own_commander.command_limit_num_units
-						divide = {
-							value = scope:own_commander.command_limit_num_units
-							add = scope:enemy_commander.command_limit_num_units
-						}
+		add = {
+			add = {
+				scope:military_formation = {
+					every_scope_ship = {
+						add = this.modifier:ship_detection_add
 					}
-					# Resulted minimum is between 0.5 (too strong) and 1 (too weak)
 				}
-				max = 1
+				divide = scope:military_formation.num_ships_not_in_battle
 			}
-			desc = "NAVAL_BATTLE_SIZE_UNIT_RATIO_TO_ENEMY"
-		}
-	}
-
-	# If we have fewer units than enemy formation - increase the number (no more than by 100%) so we have a higher chance to defeat the enemy
-	if = {
-		limit = {
-			scope:own_commander.command_limit_num_units < scope:enemy_commander.command_limit_num_units
-		}
-		multiply = {
-			fixed_range = {
-				min = 1
-				max = {
-					value = 2
-					subtract = {
-						# Calculate the *strength* ratio, which is between 0 and 0.5 here
-						value = scope:own_commander.command_limit_num_units
-						divide = {
-							value = scope:own_commander.command_limit_num_units
-							add = scope:enemy_commander.command_limit_num_units
-						}
-						multiply = 2
+			multiply = {
+				scope:enemy_military_formation = {
+					every_scope_ship = {
+						add = this.modifier:ship_visibility_add
 					}
-					# Resulted maximum is between 1 (too strong) and 2 (too weak)
 				}
+				divide = scope:enemy_military_formation.num_ships_not_in_battle
 			}
-			desc = "NAVAL_BATTLE_SIZE_UNIT_RATIO_TO_ENEMY"
+			divide = {
+				add = scope:military_formation.num_ships_not_in_battle
+				add = scope:enemy_military_formation.num_ships_not_in_battle
+			}
 		}
 	}
-
-	save_temporary_value_as = post_max_amount_cap
-
-	# Cap to the number of units available for battle (not involved in another battle)
-	if = {
+	else_if = {
 		limit = {
-			scope:post_max_amount_cap > scope:province.num_units_not_in_battle:root
+			exists = scope:military_formation
+			NOT = { exists = scope:enemy_military_formation }
 		}
-		max = {
-			add = scope:province.num_units_not_in_battle:root
-			desc = "NAVAL_BATTLE_SIZE_UNIT_NOT_IN_BATTLE"
-		}
+		add = scope:military_formation.num_ships_not_in_battle
 	}
-}
-
-# Defines weights for selecting Combat Units when a naval battle is created.
-# Units with weight <= 0 are never selected.
-# root = combat unit
-# own_commander = the commander leading this side in battle
-# province = naval province this battle takes place in
-# is_advancing_side = boolean indicating whether this is the attacker side of the battle.
-naval_battle_unit_selection_weight = {
-	if = {
-        limit = {
-            OR = {
-                manpower < define:NMilitary|MIN_USABLE_MANPOWER
-                morale < 0.20
-            }
-        }
-        value = -1
-    }
-    else = {
-	    value = 1
-    }
+	else = {
+		add = scope:enemy_military_formation.num_ships_not_in_battle
+	}
 }

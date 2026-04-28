@@ -1,0 +1,429 @@
+﻿namespace = ep2_sakoku
+
+# Don't worry about what happened to event 1. Don't worry about it!
+
+# Picking the Lock
+ep2_sakoku.2 = {
+	type = country_event
+	placement = ROOT
+	title = ep2_sakoku.2.t
+	desc = ep2_sakoku.2.d
+	flavor = ep2_sakoku.2.f
+
+	duration = 3
+
+	event_image = {
+		video = "asia_farmers_market"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_scales.dds"
+
+	trigger = {
+		# triggered by je_sakoku_stop_being_closed_button
+	}
+
+	immediate = {
+		# if any IG is in favor of Free Trade, save them
+		random_interest_group = {
+			limit = {
+				law_enactment_stance = {
+					law = law_type:law_free_trade
+					value < neutral
+				}
+				is_marginal = no
+			}
+			save_scope_as = free_trade_ig
+		}
+
+		# if Protectionism is an option, also save a pro-Protectionist IG.
+		if = {
+			limit = {
+				has_technology_researched = stock_exchange
+			}
+			random_interest_group = {
+				limit = {
+					NOT = { scope:free_trade_ig = this }
+					law_enactment_stance = {
+						law = law_type:law_protectionism
+						value < neutral
+					}
+					is_marginal = no
+				}
+				save_scope_as = protectionism_ig
+			}
+		}
+
+		remove_variable = je_sakoku_maybe_we_should_open_up
+	}
+
+	option = {
+		name = ep2_sakoku.2.a
+		default_option = yes
+
+		activate_law = law_type:law_mercantilism
+
+		every_interest_group = {
+			limit = {
+				law_enactment_stance = {
+					law = law_type:law_mercantilism
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = overdue_break_with_tradition
+				days = normal_modifier_time
+			}
+		}
+
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_isolationism
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = forced_transition_from_tradition
+				days = normal_modifier_time
+			}
+		}
+	}
+	option = {
+		name = ep2_sakoku.2.b
+		trigger = {
+			exists = scope:free_trade_ig
+		}
+
+		activate_law = law_type:law_free_trade
+
+		every_interest_group = {
+			limit = {
+				law_enactment_stance = {
+					law = law_type:law_free_trade
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = overdue_break_with_tradition
+				days = normal_modifier_time
+			}
+		}
+
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_isolationism
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = forced_transition_from_tradition
+				days = normal_modifier_time
+			}
+		}
+	}
+	option = {
+		name = ep2_sakoku.2.c
+		trigger = {
+			exists = scope:protectionism_ig
+		}
+
+		activate_law = law_type:law_protectionism
+
+		every_interest_group = {
+			limit = {
+				law_enactment_stance = {
+					law = law_type:law_protectionism
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = overdue_break_with_tradition
+				days = normal_modifier_time
+			}
+		}
+
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_isolationism
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = forced_transition_from_tradition
+				days = normal_modifier_time
+			}
+		}
+	}
+}
+
+# The Morrison Incident
+ep2_sakoku.3 = {
+	type = country_event
+	placement = ROOT
+	title = ep2_sakoku.3.t
+	desc = ep2_sakoku.3.d
+	flavor = ep2_sakoku.3.f
+
+	duration = 3
+
+	event_image = {
+		video = "asia_westerners_arriving"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	cooldown = { days = very_long_modifier_time }
+
+	trigger = {
+		any_country = {
+			country_rank >= rank_value:great_power
+			capital.state_region = {
+				NOT = { is_in_geographic_region = geographic_region_asia }
+			}
+			OR = {
+				has_interest_marker_in_region = sr:region_northeast_asia
+				has_interest_marker_in_region = sr:region_oceania
+				has_interest_marker_in_region = sr:region_north_china
+				has_interest_marker_in_region = sr:region_south_china
+			}
+			NOT = {
+				has_law = law_type:law_isolationism
+			}
+		}
+		any_interest_group = {
+			is_marginal = no
+			law_stance = {
+				law = law_type:law_isolationism
+				value >= approve
+			}
+		}
+	}
+
+	immediate = {
+		save_scope_as = japan_country
+		random_country = {
+			limit = {
+				country_rank >= rank_value:great_power
+				capital.state_region = {
+					NOT = { is_in_geographic_region = geographic_region_asia }
+				}
+				OR = {
+					has_interest_marker_in_region = sr:region_northeast_asia
+					has_interest_marker_in_region = sr:region_oceania
+					has_interest_marker_in_region = sr:region_north_china
+					has_interest_marker_in_region = sr:region_south_china
+				}
+				NOT = {
+					has_law = law_type:law_isolationism
+				}
+			}
+			save_scope_as = morrison_incident_country
+
+			random_scope_character = {
+				limit = {
+					has_role_of_type = general
+					is_ruler_of_own_country = no
+					character_is_valid_for_events = yes
+				}
+				save_scope_as = morrison_incident_country_namesake
+			}
+		}
+	}
+
+	option = {
+		name = ep2_sakoku.3.a
+		default_option = yes
+
+		change_relations = {
+			country = scope:morrison_incident_country
+			value = -30
+		}
+		scope:morrison_incident_country = {
+			change_relations = {
+				country = root
+				value = -30
+			}		
+		}
+		scope:morrison_incident_country = {
+			post_notification = morrison_incident_has_incidented
+		}
+
+		ai_chance = {
+			base = 1
+		}
+	}
+
+	option = {
+		name = ep2_sakoku.3.b
+
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_isolationism
+					value > neutral
+				}
+				NOT = { has_modifier = light_hand_with_foreigners }
+			}
+			add_modifier = {
+				name = light_hand_with_foreigners
+				days = normal_modifier_time
+			}
+		}
+
+		ai_chance = {
+			base = 1
+		}
+	}
+
+	option = {
+		name = ep2_sakoku.3.c
+		highlighted_option = yes
+
+		trigger = {
+			hidden_trigger = { NOT = { has_variable = je_sakoku_maybe_we_should_open_up } }
+			any_interest_group = {
+				is_in_government = yes
+				law_stance = {
+					law = law_type:law_isolationism
+					value <= neutral
+				}
+			}
+		}
+
+		custom_tooltip = {
+			text = end_sakoku_button_now_available
+			set_variable = je_sakoku_maybe_we_should_open_up
+		}
+
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_isolationism
+					value > neutral
+				}
+				NOT = { has_modifier = light_hand_with_foreigners }
+			}
+			add_modifier = {
+				name = caved_to_foreign_pressure_opposition
+				days = normal_modifier_time
+			}
+		}
+
+		every_interest_group = {
+			limit = {
+				is_in_government = yes
+				# whether the IG supported an end to sakoku/isolation or not, they were part of the government that signed off on this
+			}
+			add_modifier = {
+				name = caved_to_foreign_pressure_government
+				days = normal_modifier_time
+			}
+		}
+
+		ai_chance = {
+			base = 1
+		}
+	}
+}
+
+# The Picked Lock
+ep2_sakoku.4 = {
+	type = country_event
+	placement = ROOT
+	title = ep2_sakoku.4.t
+	desc = ep2_sakoku.4.d
+	flavor = ep2_sakoku.4.f
+
+	duration = 3
+
+	event_image = {
+		video = "ep2_active_shipyard"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = ep2_sakoku.4.a # if the effects for this option are changed, update event_outcome_completed_effect_desc in je_sakoku
+		default_option = yes
+
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_isolationism
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = the_picked_lock_modifier
+				days = long_modifier_time
+				is_decaying = yes
+			}
+		}
+	}
+}
+
+# Rusted Shut
+ep2_sakoku.5 = {
+	type = country_event
+	placement = ROOT
+	title = ep2_sakoku.5.t
+	desc = ep2_sakoku.5.d
+	flavor = ep2_sakoku.5.f
+
+	duration = 3
+
+	event_image = {
+		video = "votp_gunboat_diplomacy"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = ep2_sakoku.5.a # if the effects for this option are changed, update event_outcome_failed_effect_desc in je_sakoku
+		default_option = yes
+
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_isolationism
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = sakoku_entrenched_modifier
+				days = long_modifier_time
+				is_decaying = yes
+			}
+		}
+	}
+}

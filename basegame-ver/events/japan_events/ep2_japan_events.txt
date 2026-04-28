@@ -1,0 +1,765 @@
+﻿namespace = japan_events
+
+# Meiji Postal System
+japan_events.1 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = japan_events.1.t
+	desc = japan_events.1.d
+	flavor = japan_events.1.f
+
+    event_image = {
+		video = "ep2_japanese_cityscape"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		c:JAP ?= this
+		has_variable = japan_restoration_complete
+		NOR = {
+			has_law_or_variant = law_type:law_closed_borders
+			has_law_or_variant = law_type:law_isolationism
+		}
+		ig:ig_intelligentsia = {
+			has_ideology = ideology:ideology_constitutionalist
+		}
+		OR = {
+			NOT = {
+				has_social_hierarchy = edo_system #Overthrown the old feudal order and begun building a central state
+			}
+			literacy_rate > 0.50 #No need for postal system if the ppl cannot write or read
+		}
+		root.capital.region = sr:region_northeast_asia
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	immediate = {
+		ig:ig_intelligentsia = {
+			save_scope_as = intelligentsia_ig
+		}
+		random_scope_character ?= {
+			limit = {
+				has_template = JAP_maejima_hisoka
+			}
+			save_scope_as = JAP_maejima_hisoka
+		}
+	}
+
+	option = { # Fully fund a national postal service
+		name = japan_events.1.a
+		default_option = yes
+		ig:ig_intelligentsia = {
+			add_modifier = {
+				name = japan_single_fire_events_enlightened_correspondence_mod
+				days = normal_modifier_time
+			}
+		}
+		add_modifier = {
+			name = japan_single_fire_events_meji_stamping_out_chaos_mod
+			days = normal_modifier_time
+		}
+	}
+
+	option = { # Limit the system to cities only
+		name = japan_events.1.b
+		ig:ig_petty_bourgeoisie = {
+			add_modifier = {
+				name = japan_single_fire_events_enlightened_correspondence_mod
+				days = normal_modifier_time
+			}
+		}
+		ordered_scope_state = {
+			limit = {
+				owner = ROOT
+				region = sr:region_northeast_asia
+			}
+			order_by = gdp
+			min = 1
+			max = 4
+			add_modifier = {
+				name = japan_single_fire_events_meji_postal_system_mod
+				days = normal_modifier_time
+			}
+		}
+		add_modifier = {
+			name = japan_single_fire_events_meji_urban_only_mod
+			days = normal_modifier_time
+		}
+	}
+	option = { # Limit the system to rural areas only
+		name = japan_events.1.c
+		ig:ig_rural_folk = {
+			add_modifier = {
+				name = japan_single_fire_events_enlightened_correspondence_mod
+				days = normal_modifier_time
+			}
+		}
+		ordered_scope_state = {
+			limit = {
+				owner = ROOT
+				region = sr:region_northeast_asia
+				state_has_building_type_levels = {
+					target = bt:building_urban_center
+					value < 1
+				}
+			}
+			order_by = state_population
+			min = 1
+			max = 4
+			add_modifier = {
+				name = japan_single_fire_events_meji_postal_system_mod
+				days = normal_modifier_time
+			}
+		}
+		add_modifier = {
+			name = japan_single_fire_events_meji_rural_only_mod
+			days = normal_modifier_time
+		}
+	}
+	option = { # Entrust the Reform to Maejima Hisoka
+		name = japan_events.1.e
+		show_as_unavailable = {
+			NOT = {
+				any_scope_character ?= {
+					has_template = JAP_maejima_hisoka
+				}
+			}
+		}
+		trigger = {
+			custom_tooltip = {
+				text = japan_single_fire_events_missing_maejima_hisoka_tt
+				any_scope_character ?= {
+					has_template = JAP_maejima_hisoka
+				}
+			}
+		}
+		highlighted_option = yes
+
+		ig:ig_landowners = {
+			add_modifier = {
+				name = japan_single_fire_events_displaced_by_postal_modernization_mod
+				days = short_modifier_time
+			}
+		}
+		ig:ig_intelligentsia = {
+			add_modifier = {
+				name = japan_single_fire_events_enlightened_correspondence_mod
+				days = long_modifier_time
+			}
+		}
+		add_modifier = {
+			name = japan_single_fire_events_meji_centralized_communications_mod
+			days = normal_modifier_time
+		}
+	}
+	option = { # Preserve old courier system
+		name = japan_events.1.g
+		ig:ig_landowners = {
+			add_modifier = {
+				name = japan_single_fire_events_traditional_routes_preserved_mod
+				days = long_modifier_time
+			}
+		}
+	}
+}
+
+# The Unequal Calendars
+japan_events.2 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = japan_events.2.t
+	desc = japan_events.2.d
+	flavor = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_technology_researched = electric_telegraph
+				}
+				desc = japan_events.2.f_telegraph
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { has_technology_researched = electric_telegraph }
+				}
+				desc = japan_events.2.f
+			}
+		}
+	}
+
+    event_image = {
+		video = "ep2_intellectual_writer"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		c:JAP ?= this
+		has_variable = japan_restoration_complete
+		NOR = {
+			has_law_or_variant = law_type:law_closed_borders
+			has_law_or_variant = law_type:law_isolationism
+		}
+		OR = {
+			has_technology_researched = electric_telegraph
+			ig:ig_intelligentsia = { ig_clout >= 0.25 }
+		}
+		root.capital.region = sr:region_northeast_asia
+	}
+
+	cancellation_trigger = {
+
+	}
+	option = { # Proceed with calendar reform immediately
+		name = japan_events.2.a
+		default_option = yes
+
+		set_variable = {
+			name = jap_gregorian_calendar_implemented
+			months = 60
+		}
+
+		add_modifier = {
+			name = japan_calendar_clockwork_administration_mod
+			days = normal_modifier_time
+		}
+
+		add_modifier = {
+			name = japan_calendar_western_timekeeping_mod
+			days = long_modifier_time
+		}
+
+		ig:ig_intelligentsia = {
+			add_modifier = {
+				name = japan_single_fire_events_enlightened_timekeeping_mod
+				days = normal_modifier_time
+			}
+		}
+
+		ig:ig_rural_folk = {
+			add_modifier = {
+				name = japan_single_fire_events_tangled_seasons_mod
+				days = normal_modifier_time
+			}
+		}
+	}
+	option = { # Telegraph Implementation
+		name = japan_events.2.b
+		show_as_unavailable = {
+			NOT = { has_technology_researched = electric_telegraph }
+		}
+		trigger = { has_technology_researched = electric_telegraph }
+		highlighted_option = yes
+
+		set_variable = {
+			name = jap_gregorian_calendar_implemented
+			months = 60
+		}
+
+		add_modifier = {
+			name = japan_calendar_clockwork_administration_mod
+			days = short_modifier_time
+		}
+
+		add_modifier = {
+			name = japan_calendar_western_timekeeping_mod
+			days = long_modifier_time
+		}
+
+		ig:ig_intelligentsia = {
+			add_modifier = {
+				name = japan_single_fire_events_enlightened_timekeeping_mod
+				days = normal_modifier_time
+			}
+		}
+
+		ig:ig_rural_folk = {
+			add_modifier = {
+				name = japan_single_fire_events_tangled_seasons_mod
+				days = short_modifier_time
+			}
+		}
+	}
+	option = { # Delay reform and preserve the old system for now
+		name = japan_events.2.c
+
+		add_modifier = {
+			name = japan_single_fire_events_calendar_clinging_to_the_past_mod
+			days = normal_modifier_time
+		}
+
+		ig:ig_intelligentsia = {
+			add_modifier = {
+				name = japan_single_fire_events_intellectual_grumble_mod
+				days = short_modifier_time
+			}
+		}
+
+		ig:ig_rural_folk = {
+			add_modifier = {
+				name = japan_single_fire_events_seasonal_familiarity_mod
+				days = short_modifier_time
+			}
+		}
+	}
+}
+
+# A Year Recounted
+japan_events.3 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = japan_events.3.t
+	desc = japan_events.3.d
+	flavor = japan_events.3.f
+
+    event_image = {
+		video = "asia_farmers_market"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		c:JAP ?= this
+		has_variable = japan_restoration_complete
+		NOR = {
+			has_law_or_variant = law_type:law_closed_borders
+			has_law_or_variant = law_type:law_isolationism
+			has_law_or_variant = law_type:law_consumption_based_taxation
+		}
+		has_variable = jap_gregorian_calendar_implemented
+		root.capital.region = sr:region_northeast_asia
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	option = { # No Exceptions
+		name = japan_events.3.a
+		default_option = yes
+
+        add_modifier = {
+            name = japan_single_fire_events_lost_income_mod
+            days = short_modifier_time
+        }
+
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_land_based_taxation
+			}
+			add_radicals = {
+				value = large_radicals
+				pop_type = farmers
+			}
+		}
+		else = {
+			add_radicals = {
+				value = medium_radicals
+				pop_type = farmers
+			}
+		}
+
+		add_radicals = {
+			value = medium_radicals
+			pop_type = shopkeepers
+		}
+	}
+	option = { # Spread the Pain
+		name = japan_events.3.b
+        show_as_unavailable = {
+			NOR = {
+				has_law_or_variant = law_type:law_per_capita_based_taxation
+				has_law_or_variant = law_type:law_proportional_taxation
+			}
+        }
+        trigger = {
+				custom_tooltip = {
+					text = japan_single_fire_events_missing_tax_law_tt
+				OR = {
+               		has_law_or_variant = law_type:law_per_capita_based_taxation
+                	has_law_or_variant = law_type:law_proportional_taxation
+				}
+            }
+        }
+		highlighted_option = yes
+
+        add_modifier = {
+            name = japan_shortened_year_redistribute_burden_mod
+            days = short_modifier_time
+        }
+
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_per_capita_based_taxation
+			}
+			ig:ig_landowners = {
+				add_modifier = {
+					name = japan_shortened_year_unfair_practices_mod
+					days = short_modifier_time
+				}
+			}
+		}
+
+	}
+	option = { # Accept Shortfall
+		name = japan_events.3.c
+
+        add_modifier = {
+            name = japan_shortened_year_accept_shortfall_mod
+            days = short_modifier_time
+        }
+
+			ig:ig_rural_folk = {
+				add_modifier = {
+					name = japan_shortened_year_fair_tax_burden_mod
+					days = short_modifier_time
+				}
+			}
+
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_liberal
+			}
+			add_modifier = {
+				name = japan_single_fire_events_shortfall_discontent_mod
+				days = normal_modifier_time
+				is_decaying = yes
+			}
+		}
+
+	}
+}
+
+# The Westernization of Names
+japan_events.4 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = japan_events.4.t
+	desc = japan_events.4.d
+	flavor = japan_events.4.f
+
+    event_image = {
+		video = "ep2_intellectual_writer"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		c:JAP ?= this
+		has_variable = japan_restoration_complete
+		NOR = {
+			has_law_or_variant = law_type:law_closed_borders
+			has_law_or_variant = law_type:law_isolationism
+		}
+		any_diplomatically_relevant_country = {
+				capital = {
+					is_in_geographic_region = geographic_region_europe
+				}
+				OR = {
+					has_treaty_trade_privilege_with = { TARGET = root }
+					has_treaty_foreign_investment_rights_with = { TARGET = root }
+				}
+		}
+		root.capital.region = sr:region_northeast_asia
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	immediate = {
+
+	}
+
+	option = { # Adopt in foreign-language contexts
+		name = japan_events.4.a
+		default_option = yes
+
+        add_modifier = {
+            name = japan_single_fire_events_name_order_westernized_mod
+            days = normal_modifier_time
+        }
+
+		ig:ig_devout = {
+			add_modifier = {
+				name = japan_single_fire_events_name_order_resistance_mod
+				days = normal_modifier_time
+			}
+		}
+
+		ig:ig_armed_forces = {
+			add_modifier = {
+				name = japan_single_fire_events_name_order_resistance_mod
+				days = normal_modifier_time
+			}
+		}
+
+		if = {
+			limit = {
+				ruler ?= {
+					has_ideology = ideology:ideology_traditionalist
+				}
+			}
+			add_radicals = {
+				value = medium_radicals
+				pop_type = aristocrats
+			}
+		}
+		else = {
+			add_radicals = {
+				value = small_radicals
+				pop_type = aristocrats
+			}
+		}
+	}
+	option = { # Maintain traditional order
+		name = japan_events.4.b
+
+        add_modifier = {
+            name = japan_single_fire_events_name_order_traditional_mod
+            days = normal_modifier_time
+        }
+
+		if = {
+			limit = {
+				ruler ?= {
+					has_ideology = ideology:ideology_traditionalist
+				}
+			}
+			add_loyalists = {
+				value = medium_radicals
+				pop_type = clergymen
+			}
+			add_loyalists = {
+				value = medium_radicals
+				pop_type = soldiers
+			}
+		}
+		else = {
+			add_loyalists = {
+				value = small_radicals
+				pop_type = clergymen
+			}
+			add_loyalists = {
+				value = small_radicals
+				pop_type = soldiers
+			}
+		}
+	}
+	option = { # Adopt in all contexts
+		name = japan_events.4.c
+
+		cu:japanese ?= {
+			set_name_format = first_last
+		}
+		if = {
+			limit = {
+				owns_entire_state_region = STATE_RYUKYU_ISLANDS
+			}
+			cu:ryukyuan ?= {
+				set_name_format = first_last
+			}
+		}
+		if = {
+			limit = {
+				owns_entire_state_region = STATE_SAKHALIN
+				owns_entire_state_region = STATE_HOKKAIDO
+			}
+			cu:ainu ?= {
+				set_name_format = first_last
+			}
+		}
+
+        add_modifier = {
+            name = japan_single_fire_events_name_order_westernized_mod
+            days = normal_modifier_time
+			multiplier = 2
+        }
+
+		ig:ig_devout = {
+			add_modifier = {
+				name = japan_single_fire_events_name_order_resistance_mod
+				days = normal_modifier_time
+				multiplier = 2
+			}
+		}
+
+		ig:ig_armed_forces = {
+			add_modifier = {
+				name = japan_single_fire_events_name_order_resistance_mod
+				days = normal_modifier_time
+				multiplier = 2
+			}
+		}
+
+		if = {
+			limit = {
+				ig:ig_landowners.leader ?= {
+					has_ideology = ideology:ideology_traditionalist
+				}
+			}
+			add_radicals = {
+				value = large_radicals
+				pop_type = aristocrats
+			}
+			add_radicals = {
+				value = medium_radicals
+				pop_type = peasants
+			}
+		}
+		else = {
+			add_radicals = {
+				value = medium_radicals
+				pop_type = aristocrats
+			}
+			add_radicals = {
+				value = small_radicals
+				pop_type = peasants
+			}
+		}
+	}
+}
+
+# The Language of Administration
+japan_events.5 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = japan_events.5.t
+	desc = japan_events.5.d
+	flavor = japan_events.5.f
+
+    event_image = {
+		video = "ep2_important_japanese_men_negotiating"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		has_variable = japan_restoration_complete
+		NOR = {
+			has_law_or_variant = law_type:law_closed_borders
+			has_law_or_variant = law_type:law_isolationism
+		}
+		c:JAP ?= this
+		OR = {
+			ruler ?= { has_trait = ambitious }
+			ruler ?= { has_trait = innovative }
+			ruler ?= { has_trait = inspirational_orator }
+			ig:ig_intelligentsia ?= { ig_counts_as_marginal = no }
+		}
+		NOT = {
+			any_primary_culture = {
+				has_cultural_obsession = paper
+			}
+		}
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	option = { # Promote Vernacular Japanese
+		name = japan_events.5.a
+		default_option = yes
+
+		random_primary_culture = {
+			limit = {
+				NOT = { has_cultural_obsession = paper }
+			}
+			add_cultural_obsession = paper
+		}
+
+		add_radicals = {
+			value = small_radicals
+			pop_type = clergymen
+		}
+
+		ig:ig_intelligentsia = {
+			add_modifier = {
+				name = japan_single_fire_events_language_reform_support_mod
+				days = long_modifier_time
+			}
+		}
+	}
+	option = { # Limited administrative reform
+		name = japan_events.5.b
+
+		add_modifier = {
+			name = japan_language_partial_language_reform_mod
+			days = normal_modifier_time
+		}
+
+		add_radicals = {
+			value = small_radicals
+			pop_type = bureaucrats
+		}
+	}
+	option = { # Retain Classical Kanbun
+		name = japan_events.5.c
+
+		add_radicals = {
+			value = small_radicals
+			pop_type = clerks
+		}
+
+		ig:ig_devout = {
+			add_modifier = {
+				name = japan_single_fire_events_language_traditionalist_opposition_mod
+				days = normal_modifier_time
+			}
+		}
+	}
+}

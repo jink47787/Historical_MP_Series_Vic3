@@ -1,0 +1,176 @@
+default_popup = {
+	name = "transport_planner_popup"
+
+	blockoverride "header_close_button" {
+		onclick = "[PopupManager.HideTransportPlannerPopup]"
+	}
+
+	blockoverride "header_close_button_visibility" {}
+
+	blockoverride "window_header_name" {
+		text = "[SelectLocalization(TransportPlannerPopup.HasFrontTarget, 'TRANSPORT_PLANNER_FRONT_HEADER', 'TRANSPORT_PLANNER_HEADER')]"
+	}
+
+	blockoverride "scrollarea_content"
+	{
+		flowcontainer = {
+			direction = vertical
+			resizeparent = yes
+			margin_top = 10
+
+			flowcontainer = {
+				parentanchor = hcenter
+
+				### LEFT SIDE - FLEET
+				flowcontainer = {
+					direction = vertical
+					spacing = 10
+					parentanchor = hcenter
+
+					default_header_clean_faded = {
+						size = { 380 44 }
+						blockoverride "text" {
+							text = "SELECT_FLEET"
+						}
+					}
+
+					# SELECTED FLEET
+					widget = {
+						visible = "[TransportPlannerPopup.HasSelectedFleet]"
+						using = standard_formation_item_size
+						parentanchor = hcenter
+
+						military_formation_right_click_item = {
+							datacontext = "[TransportPlannerPopup.GetSelectedFleet]"
+
+							blockoverride "onclick" {
+								onclick = "[RightClickMenuManager.ShowForTransportSelectFleet]"
+							}
+
+							blockoverride "unit_count_text" {
+								text = "MILITARY_FORMATION_CARRYING_CAPACITY_WITH_ICON"
+							}
+
+							blockoverride "tooltip" {
+								tooltipwidget = {
+									FancyTooltip_MilitaryFormation = {}
+								}
+							}
+						}
+					}
+
+					# SELECT FLEET (+) BUTTON
+					button = {
+						visible = "[Not(TransportPlannerPopup.HasSelectedFleet)]"
+						enabled = "[GreaterThan_int32( GetDataModelSize( TransportPlannerPopup.GetArmyFormation.GetCountry.GetMilitaryFormationsFleet ), '(int32)0' )]"
+						tooltip = "[SelectLocalization( GreaterThan_int32( GetDataModelSize( TransportPlannerPopup.GetArmyFormation.GetCountry.GetMilitaryFormationsFleet ), '(int32)0' ), 'ADD_MILITARY_FORMATION_FLEET', 'TRANSPORT_NO_FLEETS_AVAILABLE' )]"
+						using = default_button
+						parentanchor = hcenter
+						size = { 320 80 }
+						using = fontsize_large
+						onclick = "[RightClickMenuManager.ShowForTransportSelectFleet]"
+						using = default_content_fade
+
+						icon = {
+							size = { 40 40 }
+							texture = "gfx/interface/buttons/button_icons/plus.dds"
+							parentanchor = center
+						}
+					}
+				}
+
+				vertical_divider = {}
+
+				### RIGHT SIDE - ARMY
+				flowcontainer = {
+					direction = vertical
+					spacing = 10
+					parentanchor = hcenter
+
+					default_header_clean_faded = {
+						size = { 380 44 }
+						blockoverride "text" {
+							text = "TRANSPORT_PLANNER_ARMY_HEADER"
+						}
+					}
+
+					widget = {
+						using = standard_formation_item_size
+						parentanchor = hcenter
+
+						military_formation_right_click_item = {
+							datacontext = "[TransportPlannerPopup.GetArmyFormation]"
+
+							blockoverride "tooltip" {
+								tooltipwidget = {
+									FancyTooltip_MilitaryFormation = {}
+								}
+							}
+
+							blockoverride "onclick" {
+								enabled = no
+							}
+						}
+					}
+				}
+			}
+
+			widget = {
+				size = { 20 20 }
+			}
+
+			divider_decorative = {}
+		}
+	}
+
+	blockoverride "fixed_bottom" {
+		flowcontainer = {
+			using = default_list_position
+			direction = vertical
+			margin_top = 20
+			parentanchor = hcenter
+
+			flowcontainer = {
+				minimumsize = { 680 -1 }
+				direction = vertical
+				parentanchor = hcenter
+				spacing = 20
+				margin = { 20 20 }
+
+				background = {
+					using = entry_bg_simple
+				}
+
+				textbox = {
+					visible = "[Not(StringIsEmpty(TransportPlannerPopup.GetCommandValidityDesc))]"
+					autoresize = yes
+					align = nobaseline
+					multiline = yes
+					max_width = 600
+					text = "[TransportPlannerPopup.GetCommandValidityDesc]"
+				}
+			}
+
+			flowcontainer = {
+				direction = vertical
+				margin = { 20 20 }
+				parentanchor = hcenter
+				spacing = 10
+
+				button = {
+					parentanchor = hcenter
+					using = default_button_primary_action
+					using = ui_pointer_over
+					size = { 170 42 }
+
+					onclick = "[Execute(TransportPlannerPopup.StartTransport)]"
+					onclick = "[PopupManager.HideTransportPlannerPopup]"
+					enabled = "[IsValid(TransportPlannerPopup.StartTransport)]"
+					tooltip = "TRANSPORT_PLANNER_CONFIRM_TOOLTIP"
+					input_action = "confirm"
+					text = "CONFIRM"
+				}
+			}
+		}
+	}
+}

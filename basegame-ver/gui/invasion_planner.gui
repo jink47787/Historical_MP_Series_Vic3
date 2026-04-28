@@ -26,6 +26,7 @@ default_popup = {
 					visible = "[InvasionPlannerPopup.CanNavalInvade]"
 					direction = vertical
 					spacing = 10
+					parentanchor = hcenter
 
 					default_header_clean_faded = {
 						size = { 380 44 }
@@ -50,6 +51,10 @@ default_popup = {
 										onclick = "[RightClickMenuManager.ShowForSelectFleet]"
 									}
 
+									blockoverride "unit_count_text" {
+										text = "MILITARY_FORMATION_CARRYING_CAPACITY_WITH_ICON"
+									}
+
 									blockoverride "tooltip" {
 							        	tooltipwidget = {
 			                        		FancyTooltip_MilitaryFormation = {
@@ -69,7 +74,8 @@ default_popup = {
                     # SELECT FLEET (+) BUTTON
 					button = {
 						visible = "[IsDataModelEmpty(InvasionPlannerPopup.GetSelectedFleets)]"
-						tooltip = "ADD_MILITARY_FORMATION_FLEET"
+						enabled = "[GreaterThan_int32( GetDataModelSize( GetPlayer.GetMilitaryFormationsFleet ), '(int32)0' )]"
+						tooltip = "[SelectLocalization( GreaterThan_int32( GetDataModelSize( GetPlayer.GetMilitaryFormationsFleet ), '(int32)0' ), 'ADD_MILITARY_FORMATION_FLEET', 'INVASION_NO_FLEETS_AVAILABLE' )]"
 						using = default_button
 						parentanchor = hcenter
 						size = { 320 80 }
@@ -85,7 +91,6 @@ default_popup = {
 					}
 
 					dynamicgridbox = {
-						parentanchor = hcenter
 						flipdirection = yes
 						datamodel_wrap = 4
 
@@ -106,6 +111,10 @@ default_popup = {
 
 											blockoverride "highlight" {}
 										}
+									}
+
+									blockoverride "button_size" {
+										size = { 320 60 }
 									}
 
 									blockoverride "widget_size" {
@@ -130,6 +139,7 @@ default_popup = {
 				flowcontainer = {
 					direction = vertical
 					spacing = 10
+					parentanchor = hcenter
 
 					default_header_clean_faded = {
 						size = { 380 44 }
@@ -178,7 +188,7 @@ default_popup = {
 								}
 								
 								button_icon_round_action = {
-									visible = "[InvasionPlannerPopup.CanLandInvade]"
+									visible = "[Not(InvasionPlannerPopup.IsFormationAutoIncluded(MilitaryFormation.Self))]"
 									size = { 25 25 }
 									position = { -10 -10 }
 									tooltip = "REMOVE_FORMATION"
@@ -200,8 +210,9 @@ default_popup = {
 
 					# SELECT ARMY (+) BUTTON
 					button = {
-						visible = "[Or(IsDataModelEmpty(InvasionPlannerPopup.GetSelectedArmies), InvasionPlannerPopup.CanLandInvade)]"
-						tooltip = "ADD_MILITARY_FORMATION_ARMY"
+						visible = "[InvasionPlannerPopup.CanAddMoreArmies]"
+						enabled = "[GreaterThan_int32( GetDataModelSize( GetPlayer.GetMilitaryFormationsArmy ), '(int32)0' )]"
+						tooltip = "[SelectLocalization( GreaterThan_int32( GetDataModelSize( GetPlayer.GetMilitaryFormationsArmy ), '(int32)0' ), 'ADD_MILITARY_FORMATION_ARMY', 'INVASION_NO_ARMIES_AVAILABLE' )]"
 						using = default_button
 						parentanchor = hcenter
 						size = { 320 80 }
@@ -217,8 +228,6 @@ default_popup = {
 					}
 
 					dynamicgridbox = {
-						parentanchor = hcenter
-						flipdirection = yes
 						datamodel_wrap = 4
 
 						datamodel = "[InvasionPlannerPopup.GetSelectedGenerals]"
@@ -242,6 +251,10 @@ default_popup = {
 
 									blockoverride "widget_size" {
 										size = { 30 30 }
+									}
+
+									blockoverride "button_size" {
+										size = { 320 60 }
 									}
 
 									blockoverride "warning_icon_properties" {
@@ -283,21 +296,39 @@ default_popup = {
 				}
 
 				textbox = {
-					visible = "[InvasionPlannerPopup.CanNavalInvade]"
-					autoresize = yes
-					align = nobaseline
-					multiline = yes
-					max_width = 600
-					text = "INVASION_PLANNER_EFFICIENCY_LABEL"
-				}
-
-				textbox = {
 					visible = "[InvasionPlannerPopup.CanLandInvade]"
 					autoresize = yes
 					align = nobaseline
 					multiline = yes
 					max_width = 600
 					text = "INVASION_PLANNER_INVASION_FROM_STATE"
+				}
+
+				textbox = {
+					visible = "[InvasionPlannerPopup.HasNavalInvasionContext]"
+					autoresize = yes
+					align = nobaseline
+					multiline = yes
+					max_width = 600
+					text = "[InvasionPlannerPopup.GetAssignedPowerProjectionDesc]"
+				}
+
+				textbox = {
+					visible = "[And(NotZero_CFixedPoint(InvasionPlannerPopup.GetTargetStateFortificationNavalDefense),InvasionPlannerPopup.HasNavalInvasionContext)]"
+					autoresize = yes
+					align = nobaseline
+					multiline = yes
+					max_width = 600
+					text = "INVASION_PLANNER_INVASION_FORTIFICATION_REQUIREMENTS"
+				}
+
+				textbox = {
+					visible = "[And(NotZero_CFixedPoint(InvasionPlannerPopup.GetTargetStateFortificationUnitDefense),InvasionPlannerPopup.HasNavalInvasionContext)]"
+					autoresize = yes
+					align = nobaseline
+					multiline = yes
+					max_width = 600
+					text = "INVASION_PLANNER_INVASION_FORTIFICATION_UNIT_DEFENSE"
 				}
 
 				flowcontainer = {
@@ -336,35 +367,30 @@ default_popup = {
 									text = "INVASION_PLANNER_ARMY_IS_MOBILIZED"
 								}
 							}
-							flowcontainer = {
-								visible = "[Not(IsDataModelEmpty(MilitaryFormation.GetCommanders))]"
-								datamodel = "[MilitaryFormation.GetCommanders]"
-								direction = vertical
-
-								item = {
-									textbox = {
-										visible = "[Not(Character.GetOrderType.HasAdvanceBehavior)]"
-										parentanchor = vcenter
-										autoresize = yes
-										align = nobaseline
-										multiline = yes
-										max_width = 550
-										text = "NAVAL_INVASION_GENERAL_FORCED_ADVANCE_WARNING"
-									}
-								}
+							textbox = {
+								visible = "[And(MilitaryFormation.HasCommander,Not(MilitaryFormation.GetCommander.GetOrderType.HasAdvanceBehavior))]"
+								datacontext = "[MilitaryFormation.GetCommander]"
+								parentanchor = vcenter
+								autoresize = yes
+								align = nobaseline
+								multiline = yes
+								max_width = 550
+								text = "NAVAL_INVASION_GENERAL_FORCED_ADVANCE_WARNING"
 							}
 						}
 					}
 				}
 
 				textbox = {
-					visible = "[And(And(InvasionPlannerPopup.HasNavalInvasionContext, InvasionPlannerPopup.HasSelectedNecessaryFormations), LessThan_CFixedPoint(InvasionPlannerPopup.GetEfficiencyRaw,'(CFixedPoint)1'))]"
+					visible = "[Not(StringIsEmpty(InvasionPlannerPopup.GetArmySplitWarning))]"
 					autoresize = yes
 					align = nobaseline
 					multiline = yes
 					max_width = 600
-					text = "INVASION_PLANNER_PENALTIES_LABEL"
+					using = elide_fontsize_min
+					text = "INVASION_PLANNER_ARMY_SPLIT_WARNING"
 				}
+
 			}
 
 			flowcontainer = {

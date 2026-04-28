@@ -3,17 +3,18 @@
 		exists = c:JAP
 		c:JAP = THIS
 		NOT = { country_has_state_religion = rel:shinto }
+		NOT = { has_dlc_feature = ep2_content }
 	}
 
 	possible = {
 		custom_tooltip = {
-			text = is_meiji_japan
-			has_variable = meiji_restoration_complete
+			text = ruler_is_japanese_emperor_tt
+			has_variable = japan_emperor_restored
 		}
 		ig:ig_devout ?= {
 			ig_counts_as_marginal = no
 		}
-		has_law = law_type:law_monarchy
+		country_has_monarchy_law = yes
 		NOT = { has_law_or_variant = law_type:law_state_religion }
 	}
 
@@ -59,3 +60,68 @@
 	}
 }
 
+# EP2 Religious JE Decisions
+
+shinbutsu_bunri_decision = {
+	is_shown = {
+		exists = c:JAP
+		c:JAP = THIS
+		has_dlc_feature = ep2_content
+		has_variable = japan_restoration_complete
+		has_variable = japan_emperor_restored
+		NOT = { has_variable = shinbutsu_bunri_decision_taken }
+	}
+
+	possible = {
+		ig:ig_devout = { is_powerful = no }
+		has_law_or_variant = law_type:law_freedom_of_conscience
+	}
+
+	when_taken = {
+		add_journal_entry = { type = je_shinbutsu_bunri }
+		show_as_tooltip = {
+			every_scope_homeland_state = {
+				convert_population = {
+					target = rel:shinto
+					value = 0.10
+				}
+			}
+		}
+		set_variable = shinbutsu_bunri_decision_taken
+	}
+
+	ai_chance = {
+		value = 50
+	}
+}
+
+elevate_buddhism_decision = {
+	is_shown = {
+		exists = c:JAP
+		c:JAP = THIS
+		has_dlc_feature = ep2_content
+		has_variable = japan_restoration_complete
+		NOT = { has_variable = japan_emperor_restored }
+		NOT = { has_variable = elevate_buddhism_decision_taken }
+	}
+
+	possible = {
+		ig:ig_devout = { is_marginal = no }
+		NOT = { has_law_or_variant = law_type:law_total_separation }
+		NOT = { has_law_or_variant = law_type:law_state_atheism }
+	}
+
+	when_taken = {
+		add_journal_entry = { type = je_elevate_buddhism }
+		set_variable = elevate_buddhism_decision_taken
+	}
+
+	ai_chance = {
+		value = 0
+
+		if = {
+			limit = { has_ruling_interest_group = ig_devout }
+			add = 20
+		}
+	}
+}

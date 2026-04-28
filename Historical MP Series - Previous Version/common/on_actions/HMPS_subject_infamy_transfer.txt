@@ -1,0 +1,53 @@
+﻿on_monthly_pulse_country = {
+	on_actions = {
+		subject_infamy_transfer
+	}
+}
+
+subject_infamy_transfer = {
+	effect = {
+		if = {
+			limit = {
+				is_subject = yes
+				#is_player = yes
+				has_variable = last_month_infamy
+				#NOT = { c:BIC ?= this }
+			}
+			if = {
+				limit = {
+					infamy > var:last_month_infamy
+					NOT = { has_global_variable = auto_infamy_transfer_disabled }
+				}
+				set_global_variable = {
+					name = temp
+					value = {
+						add = infamy
+						subtract = var:last_month_infamy
+						multiply = 0.5
+					}
+				}
+				overlord = {
+					trigger_event = {
+						id = gm_auto_infamy.1 
+						popup = yes
+					}
+					change_infamy = {
+						value = {
+							add = global_var:temp
+						}
+					}
+					add_modifier = {
+						name = modifier_infamy_transferred_from_subject
+						multiplier = global_var:temp
+						days = 365
+					}
+				}
+				remove_global_variable = temp
+			}
+		}
+		set_variable = {
+			name = last_month_infamy
+			value = infamy
+		}
+	}
+}

@@ -5,31 +5,6 @@ types character_types {
 		block "icon_size" {			
 			size = { 30 30 }
 		}
-
-		# commander order
-		block "commander_order_icon" {
-			icon = {
-				size = { 100% 100% }
-				visible = "[And(And(Character.GetOrderType.IsValid, Or(And( Character.IsAdmiral, Not( Character.IsDefeated )), Character.IsGeneral)), Not(Character.GetNextOrderType.IsValid))]"
-				texture = "[Character.GetOrderType.GetTexture]"
-				tooltip = "[Character.GetOrderType.GetDesc]"
-			}
-
-			icon = {
-				size = { 100% 100% }
-				visible = "[And(And(Character.GetOrderType.IsValid, Or(And( Character.IsAdmiral, Not( Character.IsDefeated )), Character.IsGeneral)), Character.GetNextOrderType.IsValid)]"
-				texture = "[Character.GetNextOrderType.GetTexture]"
-				tooltip = "[Character.GetNextOrderType.GetDesc]"
-			}
-		}
-
-		# admiral repairing icon
-		icon = {
-			size = { 100% 100% }
-			visible = "[And( Character.IsAdmiral, Character.IsDefeated )]"
-			texture = "[Character.GetRepairingTexture]"
-			tooltip = "ADMIRAL_REPAIRING_DATE_TOOLTIP"
-		}
 		
 		# role icon (turned off by default)
 		flowcontainer = {
@@ -38,33 +13,14 @@ types character_types {
 			}
 			
 			icon = {
+				visible = "[Character.GetPrimaryRole.IsValid]"
 				size = { 100% 100% }
-				texture = "gfx/interface/icons/character_role_icons/admiral.dds"
-				visible = "[Character.IsAdmiral]"            
+				texture = "[Character.GetPrimaryRole.GetTexture]"
 			}
-			
 			icon = {
+				visible = "[Not(Character.GetPrimaryRole.IsValid)]"
 				size = { 100% 100% }
-				texture = "gfx/interface/icons/character_role_icons/general.dds"
-				visible = "[Character.IsGeneral]"            
-			}
-			
-			icon = {
-				size = { 100% 100% }
-				texture = "gfx/interface/icons/character_role_icons/politician.dds"
-				visible = "[And(Character.IsPolitician,And(Not(Character.IsRuler),Not(Character.IsHeir)))]"            
-			}
-			
-			icon = {
-				size = { 100% 100% }
-				texture = "gfx/interface/icons/character_role_icons/ruler.dds"
-				visible = "[Character.IsRuler]"            
-			}
-
-			icon = {
-				size = { 100% 100% }
-				texture = "gfx/interface/icons/character_role_icons/heir.dds"
-				visible = "[Character.IsHeir]"            
+				texture = "gfx/interface/icons/generic_icons/undecided_icon.dds"
 			}
 		}
 	}
@@ -121,7 +77,7 @@ types character_types {
 					size = { 100% 100% }
 
 					block "portrait_button_onclick" {
-						onclick = "[InformationPanelBar.OpenCommanderPanel(Character.AccessSelf)]"
+						onclick = "[InformationPanelBar.OpenCharacterPanel(Character.AccessSelf)]"
 					}
 
 					block "portrait_button_onrightclick" {
@@ -451,6 +407,8 @@ types character_types {
 				position = { -2 0 }
 			}
 		}
+
+		block "additional_icons" {}
 	}
 	
 	### ADD CHARACTER BUTTON
@@ -474,26 +432,57 @@ types character_types {
 
 	type add_character_button_long = button {
 		using = default_button
-		size = { 155 35 }
+		size = { 240 45 }
 		block "onclick" {}
 
-		icon = {
-			position = { 5 0 }
+		flowcontainer = {
 			parentanchor = vcenter
-			size = { 25 25 }
-			texture = "gfx/interface/buttons/button_icons/plus.dds"
+
+			block "flowcontainer_position" {
+				position = { 5 0 }
+			}
+
+			block "spacing" {
+				spacing = 2
+			}
+
+			icon = {
+				parentanchor = vcenter
+				texture = "gfx/interface/buttons/button_icons/plus.dds"
+				
+				block "icon_size" {
+					size = { 25 25 }
+				}
+			}
+
+			textbox = {
+				parentanchor = vcenter
+				autoresize = yes
+				fontsize_min = 14
+				elide = right
+				align = nobaseline
+
+				block "text_left_margin" {
+					margin_left = 15
+				}
+				
+				block "recruit_character_text_max_width" {
+					max_width = 215
+				}
+				
+				block "recruit_character_text" {
+					text = "RECRUIT_GENERAL_BUTTON"
+				}
+			}
 		}
 
-		textbox = {
-			position = { 32 0 }
-			max_width = 115
-			autoresize = yes
-			fontsize_min = 14
-			elide = right
-			align = nobaseline
+		add_character_button = {
 			parentanchor = vcenter
-			block "recruit_character_text" {
-				text = "RECRUIT_GENERAL_BUTTON"
+			position = { -15 0 }
+			alwaystransparent = yes
+
+			block "character_frame_size" {
+				size = { 50 50 }
 			}
 		}
 	}
@@ -515,7 +504,7 @@ types character_types {
 			size = { 80 88 }
 		}
 		blockoverride "icon_size" {
-			size = { 30 30 }
+			size = { 34 34 }
 		}
 
 		blockoverride "rank_icon" {
@@ -524,6 +513,18 @@ types character_types {
 				parentanchor = bottom|right
 				blockoverride "icon_size" {
 					size = { 30 30 }
+				}
+			}
+		}
+
+		blockoverride "additional_icons" {
+			block "ig_button" {
+				ig_button = {
+					datacontext = "[Character.AccessInterestGroup]"
+					size = { 30 30 }
+					parentanchor = bottom
+					using = tooltip_se
+					blockoverride "in_government_icon"{}
 				}
 			}
 		}
@@ -719,7 +720,7 @@ types character_types {
 				size = { 100% 100% }
 
 				block "portrait_button_onclick" {
-					onclick = "[InformationPanelBar.OpenCommanderPanel(Character.AccessSelf)]"
+					onclick = "[InformationPanelBar.OpenCharacterPanel(Character.AccessSelf)]"
 				}
 
 				block "portrait_button_onrightclick" {
@@ -746,7 +747,7 @@ types character_types {
 				size = { 100% 100% }
 
 				block "portrait_button_onclick" {
-					onclick = "[InformationPanelBar.OpenCommanderPanel(Character.AccessSelf)]"
+					onclick = "[InformationPanelBar.OpenCharacterPanel(Character.AccessSelf)]"
 				}
 
 				block "portrait_button_onrightclick" {

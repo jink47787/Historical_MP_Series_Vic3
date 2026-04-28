@@ -10,11 +10,11 @@ meiji.1 = {
 
 	duration = 3
 
-	icon = "gfx/interface/icons/event_icons/event_scales.dds"
+	icon = "gfx/interface/icons/faction_icons/faction_japan_imperial_house.dds"
 
 	gui_window = event_window_1char_tabloid
 
-	left_icon = scope:meiji_ruler
+	left_icon = ROOT.var:emperor_var
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
@@ -28,108 +28,32 @@ meiji.1 = {
 			name = meiji_var
 			value = 0
 		}
+		ig:ig_landowners ?= {
+			save_scope_as = shogunate_ig
+		}
 		if = {
 			limit = {
 				has_gov_regency = yes
 			}
 			remove_regency_modifier = yes
 		}
-		ig:ig_landowners ?= {
-			save_scope_as = shogunate_ig
-			leader = {
-				save_scope_as = shogunate_ig_leader
-			}
-		}
-		if = {
-			limit = {
-				year < 1846
-			}
-			create_character = {
-				template = JAP_ninko_yamato
-			}
-			create_character = {
-				template = JAP_komei_yamato
-			}
-		}
-		else_if = {
-			limit = {
-				year >= 1846
-				year < 1867
-			}
-			create_character = {
-				template = JAP_komei_yamato
-				on_created = {
-					set_character_as_ruler = yes
-				}
-			}
-			if = {
-				limit = {
-					year >= 1852
-				}
-				create_character = {
-					template = JAP_meiji_yamato
-				}
-				set_variable = heir_meiji_spawned
-			}
-		}
-		else_if = {
-			limit = {
-				year >= 1867
-				year < 1912
-			}
-			create_character = {
-				template = JAP_meiji_yamato
-				on_created = {
-					set_character_as_ruler = yes
-				}
-			}
-			if = {
-				limit = {
-					year >= 1879
-				}
-				create_character = {
-					template = JAP_taisho_yamato
-				}
-				set_variable = heir_taisho_spawned
-			}
-		}
-		else_if = {
-			limit = {
-				year >= 1912
-				year < 1927
-			}
-			create_character = {
-				template = JAP_taisho_yamato
-				on_created = {
-					set_character_as_ruler = yes
-				}
-			}
-			create_character = {
-				template = JAP_showa_yamato
-			}
-			set_variable = heir_showa_spawned
-		}
-		else_if = {
-			limit = {
-				year >= 1927
-				year < 1989
-			}
-			create_character = {
-				template = JAP_showa_yamato
-				on_created = {
-					set_character_as_ruler = yes
-				}
-			}
-		}
-		ruler = {
+		var:emperor_var ?= { # Silence the error log
 			save_scope_as = meiji_ruler
 		}
 		add_journal_entry = {
 			type = je_meiji_main
 		}
+		random_law = {
+			limit = {
+				type = law_type:law_strict_edo_system
+			}
+			currently_active_law_in_group = {
+				save_scope_as = edo_caste_system_law
+			}
+		}
 	}
 
-	option = { # favour the industrialists
+	option = { # favor the industrialists
 		name = meiji.1.a
 		default_option = yes
 		ig:ig_industrialists ?= {
@@ -138,6 +62,17 @@ meiji.1 = {
 				days = very_long_modifier_time
 			}
 		}
+	}
+	option = { # favor the intellectuals
+		name = meiji.1.b
+		ig:ig_intelligentsia ?= {
+			add_modifier = {
+				name = meiji_favored_ig
+				days = very_long_modifier_time
+			}
+		}
+	}
+	after = {
 		if = {
 			limit = {
 				any_scope_state = {
@@ -155,14 +90,34 @@ meiji.1 = {
 		        }
 			}
         }
-		custom_tooltip = shogunate_rename.tt
-		hidden_effect = {
-			scope:shogunate_ig = {
-				set_interest_group_name = ig_landowners
+		scope:shogunate_ig = {
+			hidden_effect = {
+				if = {
+					limit = {
+						has_ideology = ideology:ideology_japan_hierarchic
+					}
+					remove_ideology = ideology_japan_hierarchic
+				}
+				if = {
+					limit = {
+						has_ideology = ideology:ideology_japan_hierarchic_2
+					}
+					remove_ideology = ideology_japan_hierarchic_2
+				}
+				if = {
+					limit = {
+						has_ideology = ideology:ideology_japan_paternalistic
+					}
+					remove_ideology = ideology_japan_paternalistic
+				}
+				add_ideology = ideology_paternalistic
+				add_ideology = ideology_hierarchic
 			}
-		}
-		scope:shogunate_ig_leader = { # honorable sudoku
-			kill_character = yes
+			show_as_tooltip = {
+				remove_ideology = ideology_japan_hierarchic_2
+				add_ideology = ideology_hierarchic
+			}
+			set_interest_group_name = ig_kazoku
 		}
 		if = {
 			limit = {
@@ -235,6 +190,7 @@ meiji.1 = {
 		}
 		if = {
 			limit = {
+				NOT = { has_dlc_feature = ep2_content }
 				NOT = { has_variable = completed_je_meiji_diplomacy }
 				NOT = { is_country_type = unrecognized }
 				NOT = { has_law_or_variant = law_type:law_isolationism }
@@ -245,126 +201,16 @@ meiji.1 = {
 			}
 			set_variable = completed_je_meiji_diplomacy # If the player manages to skip je_meiji_diplomacy we still need to set the variable
 		}
-		else = {
-			add_journal_entry = {
-				type = je_meiji_diplomacy
-			}
-		}
-	}
-	option = { # favour the intellectuals
-		name = meiji.1.b
-		ig:ig_intelligentsia ?= {
-			add_modifier = {
-				name = meiji_favored_ig
-				days = very_long_modifier_time
-			}
-		}
-		if = {
+		else_if = {
 			limit = {
-				any_scope_state = {
-					state_region = s:STATE_KANTO
+				NOT = { has_dlc_feature = ep2_content }
+				OR = {
+					has_law_or_variant = law_type:law_isolationism
+					has_law_or_variant = law_type:law_traditionalism
+					has_law_or_variant = law_type:law_closed_borders
+					is_subject = yes
 				}
 			}
-			set_capital = STATE_KANTO
-			random_scope_state = {
-				limit = { state_region = s:STATE_KANTO }
-				set_hub_name = {
-		            type = city
-		            name = HUB_NAME_STATE_KANTO_city_meiji
-		        }
-		    }
-        }
-		custom_tooltip = shogunate_rename.tt
-		hidden_effect = {
-			scope:shogunate_ig = {
-				set_interest_group_name = ig_landowners
-			}
-		}
-		scope:shogunate_ig_leader = {
-			kill_character = yes
-		}
-		if = {
-			limit = {
-				NOT = {
-					any_political_movement = {
-						is_political_movement_type = movement_modernizer
-					}
-				}
-			}
-			create_political_movement = { type = movement_modernizer }
-		}
-		if = {
-			limit = {
-				NOT = { has_variable = completed_je_meiji_economy }
-				in_default = no
-				any_scope_state = {
-					filter = {
-						is_incorporated = yes
-					}
-					any_scope_building = {
-						is_building_type = building_urban_center
-						level >= 5
-					}
-					has_building = building_railway
-					percent > 0.7
-				}
-			}
-			change_variable = {
-				name = meiji_var
-				add = 1
-			}
-			set_variable = completed_je_meiji_economy # If the player manages to skip je_meiji_economy we still need to set the variable
-		}
-		else = {
-			add_journal_entry = {
-				type = je_meiji_economy
-			}
-		}
-		if = {
-			limit = {
-				NOT = { has_law_or_variant = law_type:law_serfdom }
-				ig:ig_armed_forces ?= {
-					is_powerful = no
-					is_in_government = no
-				}
-				has_technology_researched = napoleonic_warfare
-				NOT = {
-					any_scope_building = {
-						is_building_type = building_barrack
-						OR = {
-							has_active_production_method = pm_no_organization
-							# has_active_production_method = pm_no_artillery
-							# has_active_production_method = pm_cannon_artillery
-						}
-					}
-				}
-			}
-			change_variable = {
-				name = meiji_var
-				add = 1
-			}
-			trigger_event = {
-				id = meiji.3
-			}
-		}
-		else = {
-			add_journal_entry = {
-				type = je_meiji_army
-			}
-		}
-		if = {
-			limit = {
-				NOT = { has_variable = completed_je_meiji_diplomacy }
-				NOT = { is_country_type = unrecognized }
-				NOT = { has_law_or_variant = law_type:law_isolationism }
-			}
-			change_variable = {
-				name = meiji_var
-				add = 1
-			}
-			set_variable = completed_je_meiji_diplomacy # If the player manages to skip je_meiji_diplomacy we still need to set the variable
-		}
-		else = {
 			add_journal_entry = {
 				type = je_meiji_diplomacy
 			}
@@ -397,12 +243,18 @@ meiji.2 = {
 		ruler = {
 			save_scope_as = meiji_ruler
 		}
-		set_global_variable = meiji_restoration_complete
 	}
 
 	option = {
 		name = meiji.2.a
 		default_option = yes
+		trigger = {
+			has_variable = completed_je_meiji_army
+		}
+		show_as_unavailable = {
+			always = yes
+		}
+
 		add_modifier = {
 			name = japan_military_reward
 			days = normal_modifier_time
@@ -450,6 +302,16 @@ meiji.2 = {
 	}
 	option = {
 		name = meiji.2.b
+		trigger = {
+			OR = {
+				has_variable = iwakura_mission_finished
+				has_variable = completed_je_meiji_diplomacy
+			}
+		}
+		show_as_unavailable = {
+			always = yes
+		}
+
 		add_modifier = {
 			name = japan_diplomatic_reward
 			days = normal_modifier_time
@@ -457,6 +319,13 @@ meiji.2 = {
 	}
 	option = {
 		name = meiji.2.c
+		trigger = {
+			has_variable = completed_je_meiji_economy
+		}
+		show_as_unavailable = {
+			always = yes
+		}
+
 		add_modifier = {
 			name = japan_production_reward
 			days = normal_modifier_time
@@ -595,7 +464,7 @@ meiji.4 = {
 			NOT = { is_owed_obligation_by = ROOT }
 			NOT = { has_war_with = ROOT }
 			any_scope_character = {
-				has_role = general
+				has_role_of_type = general
 				is_busy = no
 			}
 		}
@@ -610,14 +479,14 @@ meiji.4 = {
 				NOT = { is_owed_obligation_by = ROOT }
 				NOT = { has_war_with = ROOT }
 				any_scope_character = {
-					has_role = general
+					has_role_of_type = general
 					is_busy = no
 				}
 			}
 			save_scope_as = military_consultant_country
 			random_scope_character = {
 				limit = {
-					has_role = general
+					has_role_of_type = general
 					is_busy = no
 				}
 				save_scope_as = military_consultant_general
@@ -1330,7 +1199,7 @@ meiji.11 = {
 		NOT = { has_variable = japan_port_incident }
 		has_law_or_variant = law_type:law_isolationism
 		any_scope_state = {
-			has_port = yes
+			has_port_state = yes
 		}
 		any_country = {
 			country_rank = rank_value:great_power
@@ -1349,7 +1218,7 @@ meiji.11 = {
 			years = 4
 		}
 		random_scope_state = {
-			limit = { has_port = yes }
+			limit = { has_port_state = yes }
 			save_scope_as = infringed_port_state
 		}
 		random_country = {
@@ -1525,9 +1394,10 @@ meiji.13 = {
 
 	duration = 3
 
+	orphan = yes
+
 	icon = "gfx/interface/icons/event_icons/event_trade.dds"
 
-	icon = "gfx/interface/icons/event_icons/event_default.dds"
 	event_image = {
 		video = "asia_westerners_arriving"
 	}
@@ -1572,6 +1442,39 @@ meiji.13 = {
 				}
 			}
 			create_political_movement = { type = movement_modernizer }
+		}
+	}
+}
+
+meiji.14 = {
+	type = country_event
+	placement = root
+	title = meiji.14.t
+	desc = meiji.14.d
+	flavor = meiji.14.f
+
+	duration = 3
+
+	icon = "gfx/interface/icons/event_icons/event_scales.dds"
+	event_image = {
+		video = "asia_confucianism_shinto"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	trigger = {
+		# triggered by meiji restoration JE
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = meiji.14.a
+
+		add_modifier = {
+			name = meiji_failure_modifier
+			days = long_modifier_time
 		}
 	}
 }

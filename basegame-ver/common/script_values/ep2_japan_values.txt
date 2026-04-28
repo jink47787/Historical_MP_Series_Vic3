@@ -1,0 +1,302 @@
+﻿# NB: When altering any triggers here, make sure to mirror those changes in japan_custom_loc to avoid trigger dissonance
+tenpo_hardliner_goals_completed = {
+	value = 0
+	if = { # Tenpo - Hardliner: Social Control
+		limit = {
+			has_law_or_variant = law_type:law_secret_police
+		}
+		add = 1
+	}
+	if = { # Tenpo - Hardliner: Edo System: Strict
+		limit = {
+			has_law_or_variant = law_type:law_strict_edo_system
+		}
+		add = 1
+	}
+	if = { # Tenpo - Hardliner: PB Marginalized
+		limit = {
+            ig:ig_petty_bourgeoisie = {
+                is_marginal = yes
+            }
+		}
+		add = 1
+	}
+	if = { # Tenpo - Hardliner: Rural
+		limit = {
+            country_has_building_type_levels = {
+                target = bt:building_rice_farm
+                value >= 40
+            }
+		}
+		add = 1
+	}
+}
+
+tenpo_reformer_goals_completed = {
+	value = 0
+	if = { # Tenpo - Reformer: Urbanization
+		limit = {
+            any_scope_state = {
+                state_region = {
+                    is_homeland = cu:japanese
+                }
+                any_scope_building = {
+                    is_building_type = building_urban_center
+                    level >= 3
+                }
+                count >= 3
+            }
+		}
+		add = 1
+	}
+	if = { # Tenpo - Reformer: Edo System: Lax
+		limit = {
+			has_law_or_variant = law_type:law_lax_edo_system
+		}
+		add = 1
+	}
+	if = { # Tenpo - Reformer: PB Clout
+		limit = {
+            ig:ig_petty_bourgeoisie = {
+                ig_clout >= 0.1
+            }
+		}
+		add = 1
+	}
+	if = { # Tenpo - Reformer: Bureaucrats
+		limit = {
+            NOT = {
+                has_law_or_variant = law_type:law_hereditary_bureaucrats
+            }
+		}
+		add = 1
+	}
+}
+
+tenpo_total_agenda_goals_completed = {
+	value = 0
+	# Hardliner Agendas
+	if = { # Tenpo - Hardliner: Social Control
+		limit = {
+			has_law_or_variant = law_type:law_secret_police
+		}
+		add = 1
+	}
+	if = { # Tenpo - Hardliner: Edo System: Strict
+		limit = {
+			has_law_or_variant = law_type:law_strict_edo_system
+		}
+		add = 1
+	}
+	if = { # Tenpo - Hardliner: PB Marginalized
+		limit = {
+            ig:ig_petty_bourgeoisie = {
+                is_marginal = yes
+            }
+		}
+		add = 1
+	}
+	if = { # Tenpo - Hardliner: Rural
+		limit = {
+            country_has_building_type_levels = {
+                target = bt:building_rice_farm
+                value >= 40
+            }
+		}
+		add = 1
+	}
+	# Reformer Agendas
+	if = { # Tenpo - Reformer: Urbanization
+		limit = {
+            any_scope_state = {
+                state_region = {
+                    is_homeland = cu:japanese
+                }
+                any_scope_building = {
+                    is_building_type = building_urban_center
+                    level >= 3
+                }
+                count >= 3
+            }
+		}
+		add = 1
+	}
+	if = { # Tenpo - Reformer: Edo System: Lax
+		limit = {
+			has_law_or_variant = law_type:law_lax_edo_system
+		}
+		add = 1
+	}
+	if = { # Tenpo - Reformer: PB Clout
+		limit = {
+            ig:ig_petty_bourgeoisie = {
+                ig_clout >= 0.1
+            }
+		}
+		add = 1
+	}
+	if = { # Tenpo - Reformer: Bureaucrats
+		limit = {
+            NOT = {
+                has_law_or_variant = law_type:law_hereditary_bureaucrats
+            }
+		}
+		add = 1
+	}
+	# Shared Agendas
+	if = { # Tenpo - Shared: Army Size
+		limit = {
+			army_power_projection > 500
+		}
+		add = 1
+	}
+	if = { # Tenpo - Shared: Naval
+		limit = {
+            country_has_building_type_levels = {
+                target = bt:building_naval_fortification
+                value >= 10
+            }
+		}
+		add = 1
+	}
+	if = { # Tenpo - Shared: Famine
+		limit = {
+            NOT = {
+                any_scope_state = {
+                    state_region = {
+                        is_homeland = cu:japanese
+                    }
+                    has_famine = yes
+                }
+            }
+		}
+		add = 1
+	}
+	if = { # Tenpo - Shared: GDP
+		limit = {
+			gdp >= var:tenpo_gdp_goal
+		}
+		add = 1
+	}
+}
+
+absolute_state_daimyo_loyalty = { # Refers to var:cached_daimyo_loyalty for performance reasons - used only in movement tooltips
+	if = {
+		limit = {
+			NOT = {
+				has_variable = cached_daimyo_loyalty
+			}
+		}
+		value = 0.5 # Neutrality
+	}
+	else = { # Transforms to decimal
+		value = var:cached_daimyo_loyalty
+		divide = 100
+		min = 0
+		max = 1
+	}
+}
+
+state_daimyo_loyalty = { # Refers to var:cached_daimyo_loyalty for performance reasons
+	if = {
+		limit = {
+			NOT = {
+				has_variable = cached_daimyo_loyalty
+			}
+		}
+		value = 0.5 # Neutrality
+	}
+	else_if = { # If the owner does not have Bakufu, inverts
+		limit = {
+			owner ?= {
+				country_has_emperor_in_power = yes
+			}
+		}
+		value = 100
+		subtract = var:cached_daimyo_loyalty
+		divide = 100
+		min = 0
+		max = 1
+	}
+	else = { # Transforms to decimal
+		value = var:cached_daimyo_loyalty
+		divide = 100
+		min = 0
+		max = 1
+	}
+}
+
+state_daimyo_loyalty_impact_restorationist = {
+	value = 1.5
+	subtract = state_daimyo_loyalty
+	subtract = 1
+}
+
+state_daimyo_loyalty_impact_tokugawa = {
+	value = 0.5
+	add = state_daimyo_loyalty
+	subtract = 1
+}
+
+patronize_authority_cost = { # In character scope
+	value = 100 # Baseline
+	if = {
+		limit = {
+			OR = {
+				has_trait = opium_addiction
+				has_trait = alcoholic
+				has_trait = cocaine_addiction
+				has_trait = expensive_tastes
+			}
+		}
+		add = 50
+	}
+}
+
+ostracize_authority_cost = { # In character scope
+	value = 100 # Baseline
+}
+
+retire_daimyo_authority_cost = 100
+peerage_authority_cost = 25
+
+country_levels_owned_by_zaibatsu = {
+	value = 0
+	if = {
+		limit = {
+			any_company = {
+				company_is_zaibatsu = yes
+			}
+		}
+		every_company = {
+			limit = {
+				company_is_zaibatsu = yes
+			}
+			add = this.company_owned_levels
+		}
+	}
+}
+
+fraction_of_country_levels_owned_by_zaibatsu = {
+	if = {
+		limit = {
+			country_levels_owned_by_zaibatsu > 0
+		}
+		value = this.country_levels_owned_by_zaibatsu
+		divide = this.building_levels
+	}
+	else = {
+		value = 0
+	}
+}
+
+# je_zaibatsu thresholds — NB: if altering these, update ep2_04_l_english.yml tooltip strings to match
+je_zaibatsu_company_slots_threshold = 2        # Company slots must exceed this (possible)
+je_zaibatsu_min_company_count = 2              # Min zaibatsu companies required (possible/invalid)
+je_zaibatsu_possible_levels_threshold = 100    # Owned levels required to become possible
+je_zaibatsu_possible_fraction_threshold = 0.10 # Owned fraction required to become possible; also used as fail threshold
+je_zaibatsu_complete_levels_threshold = 250    # Owned levels required for completion
+je_zaibatsu_complete_fraction_threshold = 0.25 # Owned fraction required for completion
+je_zaibatsu_fail_legitimacy_threshold = 50     # Legitimacy threshold for fail condition
+je_zaibatsu_fail_voting_power_threshold = 10   # Voting power wealth threshold for fail condition
+je_zaibatsu_electoral_confidence_bonus = 0.25  # Electoral confidence gain from defeating the zaibatsu

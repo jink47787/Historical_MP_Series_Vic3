@@ -1,0 +1,569 @@
+﻿namespace = japan_events
+
+# Single-Fire Japan Events
+
+# Kabuki Theatres
+japan_events.31 = {
+	type = country_event
+	placement = scope:kabuki_theatre_state
+
+	duration = 3
+
+	title = japan_events.31.t
+	desc = japan_events.31.d
+	flavor = japan_events.31.f
+
+    event_image = {
+		video = "unspecific_fire"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		owner.active_law:lawgroup_edo_social_system ?= {
+			has_amendment = amendment_type:amendment_frugal_ordinance
+		}
+		NOT = {
+			has_variable = theatre_burned_down_var
+		}
+		s:STATE_KANTO = {
+			any_scope_state = {
+				owner = root
+			}
+		}
+		any_interest_group = {
+			is_in_government = yes
+			law_stance = {
+				law = law_type:law_strict_edo_system
+				value > neutral
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		scope:relevant_leader ?= {
+			is_character_alive = no
+		}
+	}
+
+	immediate = {
+		s:STATE_KANTO = {
+			random_scope_state = {
+				limit = {
+					owner = root
+				}
+				save_scope_as = kabuki_theatre_state
+			}
+		}
+		random_interest_group = {
+			limit = {
+				is_in_government = yes
+				law_stance = {
+					law = law_type:law_strict_edo_system
+					value > neutral
+				}
+			}
+			save_scope_as = relevant_ig
+			leader = {
+				save_scope_as = relevant_leader
+			}
+		}
+		set_variable = {
+			name = theatre_burned_down_var
+		}
+	}
+
+	option = {
+		name = japan_events.31.a
+		default_option = yes
+	    scope:relevant_ig ?= {
+    		add_modifier = {
+    			name = modifier_kabuki_regulated
+    			days = normal_modifier_time
+    		}
+    	}
+		scope:kabuki_theatre_state = {
+			add_radicals_in_state = {
+				pop_type = peasants
+				value = medium_radicals
+			}
+		}
+
+	}
+
+	option = {
+		name = japan_events.31.b
+		set_variable = {
+			name = rebuilt_kabuki_theatre_var
+		}
+		add_modifier = {
+			name = modifier_shogunate_opposition_ig_approval
+			days = normal_modifier_time
+		}
+		scope:relevant_ig ?= {
+    		leader ?= {
+				add_modifier = {
+					name = modifier_theatre_affronted_official
+					days = normal_modifier_time
+				}
+			}
+    	}
+		scope:kabuki_theatre_state = {
+			add_loyalists_in_state = {
+				pop_type = peasants
+				value = medium_radicals
+			}
+		}
+	}
+}
+
+# Ukiyo-e
+japan_events.32 = {
+	type = country_event
+	placement = scope:ukiyo_e_state
+
+	duration = 3
+
+	title = japan_events.32.t
+	desc = japan_events.32.d
+	flavor = japan_events.32.f
+
+    event_image = {
+		video = "ep2_important_japanese_men_negotiating"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		c:JAP ?= this
+		NOT = { has_law_or_variant = law_type:law_isolationism }
+		any_scope_state = {
+			owner = root
+			is_production_method_active = {
+				building_type = building_art_academy
+				production_method = pm_traditional_art
+			}
+			any_scope_building = {
+				is_building_type = building_art_academy
+				level >= 1
+				is_under_construction = no
+			}
+		}
+	}
+
+	immediate = {
+		random_scope_state = {
+			limit = {
+				owner = root
+				is_production_method_active = {
+					building_type = building_art_academy
+					production_method = pm_traditional_art
+				}
+				any_scope_building = {
+					count >= 1
+					is_under_construction = no
+					is_building_type = building_art_academy
+				}
+			}
+			save_scope_as = ukiyo_e_state
+		}
+	}
+
+	cancellation_trigger = {
+		has_law_or_variant = law_type:law_isolationism
+	}
+
+	option = {
+		name = japan_events.32.a
+		if = {
+			limit = {
+				has_variable = rebuilt_kabuki_theatre_var
+			}
+			add_modifier = {
+				name = modifier_ukiyo_e_prestige
+				days = normal_modifier_time
+				multiplier = 1.5
+			}
+		}
+		else = {
+			add_modifier = {
+				name = modifier_ukiyo_e_prestige
+				days = normal_modifier_time
+			}
+		}
+	}
+
+	option = {
+		name = japan_events.32.b
+		default_option = yes
+		if = {
+			limit = {
+				has_variable = rebuilt_kabuki_theatre_var
+			}
+			scope:ukiyo_e_state = {
+				add_modifier = {
+					name = modifier_ukiyo_e_production
+					days = long_modifier_time
+					multiplier = 1.5
+					is_decaying = yes
+				}
+			}
+		}
+		else = {
+			scope:ukiyo_e_state = {
+				add_modifier = {
+					name = modifier_ukiyo_e_production
+					days = long_modifier_time
+					is_decaying = yes
+				}
+			}
+		}
+	}
+}
+
+# Sumo Tournament Sponsored
+japan_events.33 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = japan_events.33.t
+	desc = japan_events.33.d
+	flavor = japan_events.33.f
+
+	gui_window = event_window_1char_tabloid
+
+	left_icon = scope:relevant_character
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		country_has_primary_culture = cu:japanese
+		any_scope_character = {
+			is_adult = yes
+			OR = {
+				is_ruler_of_own_country = yes
+				has_role = character_role_emperor_of_japan
+			}
+			OR = {
+				has_template = JAP_meiji_yamato
+				has_template = JAP_showa_yamato
+			}
+		}
+		any_political_movement = {
+			is_political_movement_type = movement_cultural_majority
+		}
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+	 			OR = {
+					has_template = JAP_meiji_yamato
+					has_template = JAP_showa_yamato
+				}
+			}
+			save_scope_as = relevant_character
+		}
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_cultural_majority
+			}
+			save_scope_as = relevant_political_movement
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			is_at_war = yes
+			scope:relevant_character ?= { is_character_alive = no }
+		}
+	}
+
+	option = {
+		name = japan_events.33.a
+		default_option = yes
+		scope:relevant_character = {
+			add_modifier = {
+				name = modifier_restored_sumo_popularity
+				days = long_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				cu:japanese ?= {
+					culture_national_awakening_occurred = no
+				}
+			}
+			add_fervor_target_modifier = { #changes target
+				culture = cu:japanese
+				days = normal_modifier_time
+				multiplier = 5
+			}
+		}
+	}
+
+	option = {
+		name = japan_events.33.b
+		scope:relevant_political_movement = {
+			add_modifier = {
+				name = modifier_traditional_sports_movement_support
+				days = long_modifier_time
+				is_decaying = yes
+			}
+		}
+		if = {
+			limit = {
+				cu:japanese ?= {
+					culture_national_awakening_occurred = no
+				}
+			}
+			add_fervor_target_modifier = { #changes target
+				culture = cu:japanese
+				days = normal_modifier_time
+				multiplier = 10
+			}
+		}
+	}
+}
+
+# Whaling Disaster based on the Oseminagare aka Semi-nagare tragedy
+japan_events.34 = {
+	type = country_event
+	placement = scope:whaling_state
+
+	duration = 3
+
+	title = japan_events.34.t
+	desc = japan_events.34.d
+	flavor = japan_events.34.f
+
+    event_image = {
+		video = "unspecific_whaling"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		c:JAP ?= this
+		any_scope_state = {
+			has_famine = yes
+			is_incorporated = yes
+			any_scope_building = {
+				is_building_type = building_whaling_station
+				level >= 2
+			}
+		}
+	}
+
+	immediate = {
+		random_scope_state = {
+			limit = {
+				has_famine = yes
+				is_incorporated = yes
+				any_scope_building = {
+					is_building_type = building_whaling_station
+					level >= 2
+				}
+			}
+			save_scope_as = whaling_state
+		}
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	option = {
+		name = japan_events.34.a
+		default_option = yes
+		scope:whaling_state = {
+			add_modifier = {
+				name = modifier_redouble_on_whaling
+				days = normal_modifier_time
+			}
+			add_modifier = {
+				name = modifier_whaling_deaths
+				days = normal_modifier_time
+			}
+			add_loyalists_in_state = {
+				value = medium_radicals
+			}
+		}
+	}
+
+	option = {
+		name = japan_events.34.b
+		scope:whaling_state = {
+			add_modifier = {
+				name = modifier_fishing_not_whaling
+				days = long_modifier_time
+			}
+			add_modifier = {
+				name = modifier_whaling_deaths
+				days = normal_modifier_time
+			}
+			add_radicals_in_state = {
+				value = medium_radicals
+			}
+		}
+	}
+}
+
+# Edo Arsonists
+japan_events.35 = {
+	type = country_event
+	placement = scope:relevant_state
+
+	duration = 3
+
+	title = japan_events.35.t
+	desc = japan_events.35.d
+	flavor = japan_events.35.f
+
+    event_image = {
+		video = "ep2_important_japanese_men_negotiating"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_fire.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_dlc_feature = ep2_content
+		c:JAP ?= this
+		has_social_hierarchy = edo_system
+		OR = {
+			has_law = law_type:law_strict_edo_system
+			has_law = law_type:law_intermediate_edo_system
+		}
+		NOT = {
+			has_variable = meiji_var
+		}
+		market_capital.market = {
+			mg:grain = { market_goods_pricier > 0.25 }
+		}
+		s:STATE_KANTO = {
+			any_scope_state = {
+	 			is_incorporated = yes
+		 		radical_fraction = {
+					value > 0.40
+					strata = lower
+				}
+				has_building = building_rice_farm
+	 		}
+		}
+		AND = {
+			exists = ig:ig_landowners
+			ig:ig_landowners ?= { is_in_government = yes }
+		}
+	}
+
+	immediate = {
+		g:grain = { save_scope_as = expensive_good }
+		s:STATE_KANTO = {
+			random_scope_state = {
+				limit = {
+		 			is_incorporated = yes
+			 		radical_fraction = {
+						value > 0.40
+						strata = lower
+					}
+					has_building = building_rice_farm
+				}
+				save_scope_as = relevant_state
+			}
+		}
+		ig:ig_landowners ?= {
+			leader = {
+				save_scope_as = relevant_leader
+			}
+			save_scope_as = relevant_ig
+		}
+	}
+
+	cancellation_trigger = {
+		NOR = {
+			has_social_hierarchy = edo_system
+			has_law = law_type:law_strict_edo_system
+		}
+
+	}
+
+	option = {
+		name = japan_events.35.a
+		default_option = yes
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_strict_edo_system
+					value < neutral
+				}
+			}
+			add_modifier = {
+				name = modifier_arson_measure_strict_ig
+				days = normal_modifier_time
+			}
+		}
+		scope:relevant_state = {
+			add_modifier = {
+				name = modifier_arson_measure_strict_pop
+				days = normal_modifier_time
+			}
+			add_loyalists_in_state = {
+				value = medium_radicals
+				strata = middle
+			}
+		}
+
+	}
+
+	option = {
+		name = japan_events.35.b
+		every_interest_group = {
+			limit = {
+				law_stance = {
+					law = law_type:law_strict_edo_system
+					value > neutral
+				}
+			}
+			add_modifier = {
+				name = modifier_arson_measure_lenient_ig
+				days = normal_modifier_time
+			}
+		}
+	}
+}

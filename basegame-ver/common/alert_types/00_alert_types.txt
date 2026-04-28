@@ -22,7 +22,6 @@
 # player_state
 # player_building
 # player_market_goods
-# player_commander
 # player_military_formation
 # player_subject
 # player_treaty
@@ -282,6 +281,20 @@ stalled_naval_invasion = {
 	color = red
 }
 
+port_bombardment_alert = {
+	script_context = player_state
+	texture = "gfx/interface/icons/commander_order_icons/bomb_shores.dds"
+
+	valid = {
+		is_being_bombarded = yes
+	}
+
+	open_panel = states_panel
+	type = alert
+	color = red
+	alert_group = bombarded_states
+}
+
 blockaded_hub_alert = {
 	script_context = player_state
 	texture = "gfx/interface/icons/alert_icons/blockaded.dds"
@@ -292,7 +305,7 @@ blockaded_hub_alert = {
 	}
 
 	open_panel = states_panel
-	type = alert
+    type = important_action
 	color = red
 	alert_group = blockaded_hubs
 }
@@ -317,6 +330,42 @@ high_attrition_alert = {
 	texture = "gfx/interface/icons/alert_icons/high_attrition.dds"
 
 	valid = { has_high_attrition = yes }
+
+	open_panel = military_formation
+	type = alert
+	color = red
+}
+
+naval_mission_invalid_area_alert = {
+	script_context = player_military_formation
+	texture = "gfx/interface/icons/alert_icons/invalid_mission.dds"
+
+	valid = { has_naval_mission_with_invalid_area = yes }
+
+	open_panel = military_formation
+	type = alert
+	color = red
+}
+
+invalid_naval_mission_grace_period_alert = {
+	script_context = player_military_formation
+	texture = "gfx/interface/icons/alert_icons/invalid_mission.dds"
+
+	valid = { is_invalid_naval_mission_grace_period_active = yes }
+
+	open_panel = military_formation
+	type = alert
+	color = yellow
+}
+
+ship_outside_max_port_distance_alert = {
+	script_context = player_military_formation
+	texture = "gfx/interface/icons/alert_icons/critical_supply_network.dds"
+
+	valid = {
+		is_fleet = yes
+		has_ship_outside_max_port_distance = yes
+	}
 
 	open_panel = military_formation
 	type = alert
@@ -513,17 +562,6 @@ isolated_colony_alert = {
 
 ### ANGRY IMPORTANT ACTIONS
 
-has_decreasing_interests_alert = {
-	script_context = player_country
-	texture = "gfx/interface/icons/alert_icons/has_decreasing_interests.dds"
-
-	valid = { has_decreasing_interests = yes }
-
-	open_panel = diplomatic_overview
-	type = angry_important_action
-	color = yellow
-}
-
 low_organization_idle = { # Formation is idle
 	texture = "gfx/interface/icons/alert_icons/organization_alert.dds"
 	script_context = player_military_formation
@@ -551,6 +589,23 @@ insufficient_construction_for_investment = {
 	type = angry_important_action
 	color = yellow
 	open_panel = construction|default
+}
+
+insufficient_ship_crew_alert = {
+	script_context = player_military_formation
+	texture = "gfx/interface/icons/military_icons/navy_icons/total_crew_navy.dds"
+
+	valid = {
+		is_fleet = yes
+		any_scope_ship = {
+			crew_percent < 0.5
+		}
+	}
+
+	type = alert
+	color = yellow
+	open_panel = military_formation
+	alert_group = insufficient_ship_crew
 }
 
 # Hidden by default
@@ -743,7 +798,7 @@ can_abdicate_alert = {
 
 	valid = {
 		has_dlc_feature = voice_of_the_people_content
-		has_law = law_type:law_monarchy
+		country_has_monarchy_law = yes
 		exists = heir
 		ruler = {
 			is_immortal = no
@@ -772,7 +827,7 @@ can_resign_alert = {
 	valid = {
 		has_dlc_feature = voice_of_the_people_content
 		NOR = {
-			has_law = law_type:law_monarchy
+			country_has_monarchy_law = yes
 			has_law_or_variant = law_type:law_theocracy
 		}
 		ruler = {
@@ -808,20 +863,6 @@ can_resign_alert = {
 #	type = important_action
 #	color = green
 #}
-
-# Hidden by default
-unused_interests_alert = {
-	script_context = player_country
-	texture = "gfx/interface/icons/alert_icons/unused_interests.dds"
-
-	valid = {
-		num_declared_interests < max_num_declared_interests
-	}
-
-	open_panel = diplomatic_overview
-	type = important_action
-	color = green
-}
 
 low_market_access_alert = {
 	texture = "gfx/interface/icons/alert_icons/market_over_capacity.dds"
@@ -1015,4 +1056,43 @@ may_be_annexed_by_austria = {
 	open_panel = diplomatic_overview
 	type = alert
 	color = red
+}
+
+naval_hostilities_alert = {
+	script_context = player_country
+	texture = "gfx/interface/icons/alert_icons/naval_hostilities.dds"
+
+	valid = {
+		has_any_naval_only_hostilities = yes
+	}
+
+	open_panel = military|navy
+	type = alert
+	color = red
+}
+
+insufficient_military_maintenance_alert = {
+	script_context = player_country
+	texture = "gfx/interface/icons/alert_icons/ship_military_maintenance_alert.dds"
+
+	valid = {
+		military_ship_maintenance_fulfillment < 1
+	}
+
+	open_panel = construction|ships
+	type = alert
+	color = yellow
+}
+
+insufficient_supply_maintenance_alert = {
+	script_context = player_country
+	texture = "gfx/interface/icons/alert_icons/ship_supply_maintenance_alert.dds"
+
+	valid = {
+		supply_ship_maintenance_fulfillment < 1
+	}
+
+	open_panel = construction|ships
+	type = alert
+	color = yellow
 }

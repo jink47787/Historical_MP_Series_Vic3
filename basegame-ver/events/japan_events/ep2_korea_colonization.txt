@@ -1,0 +1,217 @@
+﻿namespace = korea_colonization
+
+# je_colonize_korea - success event
+korea_colonization.2 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = korea_colonization.2.t
+	desc = korea_colonization.2.d
+	flavor = korea_colonization.2.f
+
+    event_image = {
+		video = "ep2_japanese_cityscape"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+
+	cooldown = { days = long_modifier_time }
+
+	trigger = {
+		# triggered by je_colonize_korea
+	}
+
+	cancellation_trigger = {
+		NOT = { # checks if c:JAP still owns all five states
+			any_scope_state = {
+				is_in_geographic_region = geographic_region_korea
+				count >= 5
+			}
+		}
+	}
+
+	immediate = {
+		if = { # if je_colonize_korea is completed with company_mantetsu or company_oriental_development_company
+			limit = {
+				any_company = {
+					AND = {
+						OR = {
+							is_company_type = company_type:company_mantetsu
+							is_company_type = company_type:company_oriental_development_company
+						}
+						company_prosperity >= 75
+					}
+				}
+			}
+			random_company = {
+				limit = {
+					AND = {
+						OR = {
+							is_company_type = company_type:company_mantetsu
+							is_company_type = company_type:company_oriental_development_company
+						}
+						company_prosperity >= 75
+					}
+				}
+				executive = {
+					save_scope_as = relevant_executive_scope
+				}
+				save_scope_as = relevant_company_scope
+			}
+		}
+		else = {  # if je_colonize_korea is completed with other prosperous companies
+			random_company = {
+				limit = {
+					company_is_prosperous = yes
+				}
+				executive = {
+					save_scope_as = relevant_executive_scope
+				}
+				save_scope_as = relevant_company_scope
+			}
+		}
+	}
+
+	option = {
+		name = korea_colonization.2.a # encourage more migration to the state regions
+		default_option = yes
+		add_modifier = {
+			name = modifier_peninsula_control_prestige_authority
+			days = moderately_long_modifier_time
+			is_decaying = yes
+		}
+		every_scope_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_SEOUL
+					state_region = s:STATE_BUSAN
+					state_region = s:STATE_YANGHO
+					state_region = s:STATE_SARIWON
+					state_region = s:STATE_PYONGYANG
+				}
+			}
+			add_modifier = {
+				name = modifier_peninsula_control_assimilation_migration
+				days = moderately_long_modifier_time
+				is_decaying = yes
+			}
+		}
+	}
+
+	option = {
+		name = korea_colonization.2.b # business is crucial
+		scope:relevant_executive_scope ?= {
+			add_modifier = {
+				name = modifier_peninsula_control_loyal_prominence
+				days = moderately_long_modifier_time
+				is_decaying = yes
+			}
+		}
+		add_modifier = {
+			name = modifier_peninsula_control_company_bonus
+			days = moderately_long_modifier_time
+			is_decaying = yes
+		}
+	}
+}
+
+korea_colonization.3 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = korea_colonization.3.t
+	desc = korea_colonization.3.d
+	flavor = korea_colonization.3.f
+
+    event_image = {
+		video = "ep2_important_japanese_men_negotiating"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_fire.dds"
+
+	cooldown = { days = long_modifier_time }
+
+	trigger = {
+		# triggered by je_colonize_korea
+	}
+
+	cancellation_trigger = {
+
+	}
+
+	immediate = {
+		random_interest_group = {
+			limit = {
+				is_in_government = yes
+			}
+			save_scope_as = relevant_ig
+			leader = { # this is needed since the character name is in the loc - ensures they don't die mid-event
+				if = {
+					limit = {
+						is_immortal = no # checks if the relevant character isn't already immortal
+					}
+					set_variable = temp_immortality
+					set_character_immortal = yes # makes the relevant character immortal only until the end of this event
+				}
+				save_scope_as = relevant_ig_leader
+			}
+		}
+	}
+
+	option = {
+		name = korea_colonization.3.a # we only have ourselves to blame
+		default_option = yes
+		add_modifier = {
+			name = modifier_peninsula_control_prestige_loss
+			days = moderately_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = {
+		name = korea_colonization.3.b # blame on relevant_ig_leader
+		scope:relevant_ig_leader ?= {
+			add_modifier = {
+				name = modifier_peninsula_control_loyal_prominence_loss
+				days = moderately_long_modifier_time
+				is_decaying = yes
+			}
+		}
+		scope:relevant_ig ?= {
+			add_modifier = {
+				name = modifier_peninsula_control_approval_pol_str_loss
+				days = moderately_long_modifier_time
+				is_decaying = yes
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			if = {
+				limit = {
+					scope:relevant_ig_leader ?= {
+						is_immortal = yes
+						has_variable = temp_immortality
+					}
+				}
+				scope:relevant_ig_leader ?= {
+					set_character_immortal = no # sets relevant_character back to not immortal
+					remove_variable = temp_immortality
+				}
+			}
+		}
+	}
+}

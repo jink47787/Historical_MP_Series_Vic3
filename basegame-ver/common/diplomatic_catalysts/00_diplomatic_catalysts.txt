@@ -754,6 +754,21 @@ catalyst_pact_broken = {
 	}
 }
 
+catalyst_treaty_signed = {
+	category = cc_diplomatic_treaty
+
+	ai_country_goal_recalculation = {
+		type = not_hostile
+		trigger = {
+			scope:new_diplomatic_relation = yes
+		}
+		
+		chance = {
+			value = 1.0
+		}
+	}
+}
+
 catalyst_treaty_broken = {
 	category = cc_diplomatic_treaty
 
@@ -2741,6 +2756,259 @@ catalyst_declined_military_assistance = {
 				}
 				add = 0.5
 			}
+		}
+	}
+}
+
+catalyst_orchestrate_coup_successful = { # Pro-Lobby always exists
+	category = cc_orchestrate_coup
+
+	ai_country_goal_recalculation = {
+		type = more_friendly
+		chance = 1.0
+	}
+}
+
+catalyst_orchestrate_coup_failed = {
+	category = cc_orchestrate_coup
+
+	political_lobby_creation = {
+		lobby_anti_country = {
+			value = 0.4
+
+			if = {
+				limit = {
+					NOT = { has_strategic_adjacency = scope:target_country }
+				}
+				multiply = 0.5
+			}
+		}
+	}
+
+	ai_country_goal_recalculation = {
+		type = more_hostile
+		chance = 1.0
+	}
+}
+
+catalyst_orchestrate_coup_fizzled = {
+	category = cc_orchestrate_coup
+
+	political_lobby_creation = {
+		lobby_anti_country = {
+			value = 0.05
+			if = {
+				limit = {
+					NOT = { has_strategic_adjacency = scope:target_country }
+				}
+				multiply = 0.5
+			}
+			if = {
+				limit = {
+					"relations(scope:target_country)" > relations_threshold:poor
+				}
+				multiply = 0.5
+			}
+			else_if = {
+				limit = {
+					"relations(scope:target_country)" <= relations_threshold:hostile
+				}
+				multiply = 1.5
+			}
+		}
+		lobby_anti_overlord = {
+			value = 0.05
+			if = {
+				limit = { liberty_desire >= 75 }
+				multiply = 3
+			}
+			else_if = {
+				limit = { liberty_desire >= 50 }
+				multiply = 2
+			}
+			if = {
+				limit = {
+					NOT = { has_strategic_adjacency = scope:target_country }
+				}
+				multiply = 0.5
+			}
+			if = {
+				limit = {
+					"relations(scope:target_country)" > relations_threshold:poor
+				}
+				multiply = 0.5
+			}
+		}
+	}
+
+	ai_country_goal_recalculation = {
+		type = more_hostile
+		chance = {
+			value = 0.1
+			if = {
+				limit = {
+					"relations(scope:target_country)" <= relations_threshold:cold
+				}
+				multiply = 4.0
+			}
+			else_if = {
+				limit = {
+					"relations(scope:target_country)" < relations_threshold:cordial
+				}
+				multiply = 3.0
+			}
+			else_if = {
+				limit = {
+					"relations(scope:target_country)" < relations_threshold:friendly
+				}
+				multiply = 2.0
+			}
+		}
+	}
+}
+
+# Triggered when a strait controller raises tolls to High
+catalyst_strait_toll_high = {
+	category = cc_relations_change
+
+	political_lobby_creation = {
+		lobby_anti_country = {
+			value = 1.05
+
+			if = {
+				limit = { scope:target_country.country_rank > root.country_rank }
+				multiply = 2
+			}
+			if = {
+				limit = { NOT = { has_strategic_adjacency = scope:target_country } }
+				multiply = 0.5
+			}
+		}
+	}
+
+	ai_country_goal_recalculation = {
+		type = more_hostile
+		chance = {
+			value = 1.1
+		}
+	}
+}
+
+# Triggered when a strait controller reduces tolls from High
+catalyst_strait_toll_reduced = {
+	category = cc_relations_change
+
+	political_lobby_creation = {
+		lobby_pro_country = {
+			value = 1.05
+
+			if = {
+				limit = { scope:target_country.country_rank > root.country_rank }
+				multiply = 2
+			}
+			if = {
+				limit = { NOT = { has_strategic_adjacency = scope:target_country } }
+				multiply = 0.5
+			}
+		}
+	}
+
+	ai_country_goal_recalculation = {
+		type = more_friendly
+		chance = {
+			value = 1.0
+		}
+	}
+}
+
+# Triggered when a strait is set to NoMilitary — countries that lose military passage
+catalyst_strait_no_military = {
+	category = cc_diplomatic_incident
+
+	political_lobby_creation = {
+		lobby_anti_country = {
+			value = 0.05
+
+			if = {
+				limit = { scope:target_country.country_rank > root.country_rank }
+				multiply = 2
+			}
+		}
+	}
+
+	ai_country_goal_recalculation = {
+		type = more_hostile
+		chance = {
+			value = 0.1
+		}
+	}
+}
+
+# Triggered when a strait is reopened — countries that regain access
+catalyst_strait_opened = {
+	category = cc_relations_change
+
+	political_lobby_creation = {
+		lobby_pro_country = {
+			value = 0.05
+
+			if = {
+				limit = { scope:target_country.country_rank > root.country_rank }
+				multiply = 2
+			}
+		}
+	}
+
+	ai_country_goal_recalculation = {
+		type = more_friendly
+		chance = {
+			value = 0.1
+		}
+	}
+}
+
+# Triggered when a strait is partially reopened — Closed to NoMilitary, restoring economic access
+catalyst_strait_partially_opened = {
+	category = cc_relations_change
+
+	political_lobby_creation = {
+		lobby_pro_country = {
+			value = 0.05
+
+			if = {
+				limit = { scope:target_country.country_rank > root.country_rank }
+				multiply = 2
+			}
+		}
+	}
+
+	ai_country_goal_recalculation = {
+		type = more_friendly
+		chance = {
+			value = 0.1
+		}
+	}
+}
+
+# Triggered when a strait is fully Closed — all affected countries lose access
+catalyst_strait_closed = {
+	category = cc_diplomatic_aggression
+
+	political_lobby_creation = {
+		lobby_anti_country = {
+			value = 0.10
+
+			if = {
+				limit = { scope:target_country.country_rank > root.country_rank }
+				multiply = 2
+			}
+		}
+	}
+
+	ai_country_goal_recalculation = {
+		type = more_hostile
+		chance = {
+			value = 0.25
 		}
 	}
 }

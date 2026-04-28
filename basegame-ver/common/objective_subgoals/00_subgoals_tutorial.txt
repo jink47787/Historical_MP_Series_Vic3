@@ -826,15 +826,44 @@ sg_improve_supply_network = {
 
 	trigger = {
 		any_scope_state = {
-			is_coastal = yes
+			AND = {
+				is_coastal = yes
+				sg:merchant_marine = {
+					state_goods_pricier > 0.1
+				}
+			}
 		}
-		supply_network_strength < 1
 	}
 
 	on_start = {
+		if = {
+			limit = {
+				any_scope_state = {
+					AND = {
+						is_coastal = yes
+						sg:merchant_marine = {
+							state_goods_pricier > 0.1
+						}
+					}
+				}
+			}
+			random_scope_state = {
+				limit = {
+					AND = {
+						is_coastal = yes
+						sg:merchant_marine = {
+							state_goods_pricier > 0.1
+						}
+					}
+				}
+				sg:merchant_marine = { save_scope_as = tut_supply_network }
+			}
+		}
+
 		add_journal_entry = {
 			type = je_tutorial_improve_supply_network
 			objective_subgoal = sg_improve_supply_network
+			target = scope:tut_supply_network
 		}
 	}
 }
@@ -1449,7 +1478,7 @@ sg_convoy_raiding = {
 
 	trigger = {
 		any_scope_character = {
-			has_role = general
+			has_role_of_type = general
 			NOT = { has_commander_order = defend }
 		}
 	}
@@ -1457,7 +1486,7 @@ sg_convoy_raiding = {
 	on_start = {
 		random_scope_character = {
 			limit = {
-				has_role = general
+				has_role_of_type = general
 				NOT = { has_commander_order = defend }
 			}
 			save_scope_as = tut_convoy_raiding
@@ -1762,50 +1791,24 @@ sg_declare_an_interest = {
 			limit = {
 				any_rival_country = {
 					ROOT = {
-						NOT = { has_interest_marker_in_region = prev.capital.region }
-					}
-					capital.region = {
-						can_have_declared_interest_here = ROOT
+						NOT = {
+							has_strategic_region_interest_tier = {
+								strategic_region = prev.capital.region
+								value >= 1
+							}
+						}
 					}
 				}
 			}
 			random_rival_country = {
 				limit = {
 					ROOT = {
-						NOT = { has_interest_marker_in_region = prev.capital.region }
-					}
-					capital.region = {
-						can_have_declared_interest_here = ROOT
-					}
-				}
-				save_scope_as = tut_declare_interest_country
-			}
-		}
-
-		else_if = {
-			limit = {
-				any_country = {
-					NOT = { this = ROOT }
-					ROOT = {
-						NOT = { has_interest_marker_in_region = prev.capital.region }
-					}
-					country_rank >= rank_value:major_power
-					relations:root < relations_threshold:amicable
-					capital.region = {
-						can_have_declared_interest_here = ROOT
-					}
-				}
-			}
-			random_country = {
-				limit = {
-					NOT = { this = ROOT }
-					ROOT = {
-						NOT = { has_interest_marker_in_region = prev.capital.region }
-					}
-					country_rank >= rank_value:major_power
-					relations:root < relations_threshold:amicable
-					capital.region = {
-						can_have_declared_interest_here = ROOT
+						NOT = {
+							has_strategic_region_interest_tier = {
+								strategic_region = prev.capital.region
+								value >= 1
+							}
+						}
 					}
 				}
 				save_scope_as = tut_declare_interest_country
@@ -1817,24 +1820,30 @@ sg_declare_an_interest = {
 				any_country = {
 					NOT = { this = ROOT }
 					ROOT = {
-						NOT = { has_interest_marker_in_region = prev.capital.region }
+						NOT = {
+							has_strategic_region_interest_tier = {
+								strategic_region = prev.capital.region
+								value >= 1
+							}
+						}
 					}
+					country_rank >= rank_value:major_power
 					relations:root < relations_threshold:amicable
-					capital.region = {
-						can_have_declared_interest_here = ROOT
-					}
 				}
 			}
 			random_country = {
 				limit = {
 					NOT = { this = ROOT }
 					ROOT = {
-						NOT = { has_interest_marker_in_region = prev.capital.region }
+						NOT = {
+							has_strategic_region_interest_tier = {
+								strategic_region = prev.capital.region
+								value >= 1
+							}
+						}
 					}
 					country_rank >= rank_value:major_power
-					capital.region = {
-						can_have_declared_interest_here = ROOT
-					}
+					relations:root < relations_threshold:amicable
 				}
 				save_scope_as = tut_declare_interest_country
 			}
@@ -1845,10 +1854,44 @@ sg_declare_an_interest = {
 				any_country = {
 					NOT = { this = ROOT }
 					ROOT = {
-						NOT = { has_interest_marker_in_region = prev.capital.region }
+						NOT = {
+							has_strategic_region_interest_tier = {
+								strategic_region = prev.capital.region
+								value >= 1
+							}
+						}
 					}
-					capital.region = {
-						can_have_declared_interest_here = ROOT
+					relations:root < relations_threshold:amicable
+				}
+			}
+			random_country = {
+				limit = {
+					NOT = { this = ROOT }
+					ROOT = {
+						NOT = {
+							has_strategic_region_interest_tier = {
+								strategic_region = prev.capital.region
+								value >= 1
+							}
+						}
+					}
+					country_rank >= rank_value:major_power
+				}
+				save_scope_as = tut_declare_interest_country
+			}
+		}
+
+		else_if = {
+			limit = {
+				any_country = {
+					NOT = { this = ROOT }
+					ROOT = {
+						NOT = {
+							has_strategic_region_interest_tier = {
+								strategic_region = prev.capital.region
+								value >= 1
+							}
+						}
 					}
 				}
 			}
@@ -1856,10 +1899,12 @@ sg_declare_an_interest = {
 				limit = {
 					NOT = { this = ROOT }
 					ROOT = {
-						NOT = { has_interest_marker_in_region = prev.capital.region }
-					}
-					capital.region = {
-						can_have_declared_interest_here = ROOT
+						NOT = {
+							has_strategic_region_interest_tier = {
+								strategic_region = prev.capital.region
+								value >= 1
+							}
+						}
 					}
 				}
 				save_scope_as = tut_declare_interest_country
@@ -1982,7 +2027,7 @@ sg_foreign_investment = {
 						any_scope_treaty = {
 							binds = root
 							any_scope_article = {
-								has_type = foreign_investment_agreement
+								has_type = foreign_investment_rights
 							}
 						}
 					}

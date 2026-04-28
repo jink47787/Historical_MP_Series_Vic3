@@ -49,3 +49,9 @@ matters for character trait gain
 determines how the AI parses this Order; should eventually be replaced with AI parsing order Behavior instead
 
 	ai_order_type = offensive
+
+(optional) scaling applied to naval target involvement when formations executing this order are positioned at (or have reached) their current order target location.
+If omitted, defaults to 0 (no involvement generated). Values > 1 increase target involvement contribution; values between 0 and 1 reduce it.
+Only read / applied for navy orders; ignored for army orders.
+
+	target_involvement_ratio = 1.25

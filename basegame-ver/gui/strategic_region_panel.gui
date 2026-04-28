@@ -1,0 +1,1040 @@
+# COPY-PASTED FOR NOW
+@panel_width_minus_10 = 530			# used to be 450
+@panel_width = 540  				# used to be 460
+@panel_width_half = 270				# used to be 230
+@panel_width_plus_10 = 550  		# used to be 470
+@panel_width_plus_14 = 554			# used to be 474
+@panel_width_plus_14_half = 277		# used to be 237
+@panel_width_plus_20 = 560			# used to be 480
+@panel_width_plus_30 = 570			# used to be 490
+@panel_width_plus_70 = 610			# used to be 530
+
+types strategic_region_panel_types
+{
+	type strategic_region_panel = default_block_window_two_lines {
+		name = "strategic_region_panel"
+		datacontext = "[StrategicRegionPanel.GetStrategicRegion]"
+
+		blockoverride "animation_state_block" {
+			state = {
+				name = _show
+				start_sound = {
+					soundeffect = "event:/SFX/UI/SideBar/powerbloc"
+				}
+			}
+
+			state = {
+				name = _hide
+				start_sound = {
+					soundeffect = "event:/SFX/UI/SideBar/powerbloc_stop"
+				}
+			}
+		}
+
+		blockoverride "window_header_name"
+		{
+			text = "[StrategicRegion.GetName]"
+		}
+
+		blockoverride "window_header_name_line_two"
+		{
+			text = "[concept_strategic_region]"
+		}
+
+		blockoverride "map_modes_button" {
+			map_modes_single_button_minimized = {
+				datacontext = "[StrategicRegionPanel.GetMapModeList]"
+				using = map_modes_button_position
+			}
+		}
+
+		blockoverride "fixed_top"
+		{
+			### TOP PART
+			widget = {
+				datacontext = "[GetPlayer]"
+				size = { @panel_width_plus_14 120 }
+
+				background = {
+					texture = "[StrategicRegion.GetBestTexture]"
+					fittype = centercrop
+					alpha = 0.5
+
+					modify_texture = {
+						texture = "gfx/interface/backgrounds/entry_bg_mask.dds"
+						spriteType = Corneredstretched
+						spriteborder = { 45 45 }
+						spriteborder_bottom = 0
+						blend_mode = alphamultiply
+						texture_density = 2
+					}
+
+					modify_texture = {
+						texture = "gfx/interface/masks/fade_vertical_bottom.dds"
+						spriteType = Corneredstretched
+						spriteborder = { 0 0 }
+						blend_mode = alphamultiply
+					}
+				}
+
+				textbox = {
+					visible = "[Not(GreaterThan_CFixedPoint(Country.GetCurrentInvolvementIn(StrategicRegion.Self), '(CFixedPoint)0'))]"
+					align = nobaseline
+					parentanchor = center
+					autoresize = yes
+					using = fontsize_xl
+					max_width = 500
+					using = elide_fontsize_min
+					alpha = 0.5
+					text = "NO_INVOLVEVMENT"
+
+					background = {
+						using = fade_center_colored_black
+						margin = { 10 10 }
+						margin_right = 30
+						alpha = 0.5
+					}
+				}
+
+				widget = {
+					size = { @panel_width_plus_14 90 }
+					parentanchor = bottom
+
+					country_involvement_bar_with_label = {
+						visible = "[GreaterThan_CFixedPoint(Country.GetCurrentInvolvementIn(StrategicRegion.Self), '(CFixedPoint)0')]"
+						margin = { 10 10 }
+						margin_bottom = 5
+
+						blockoverride "above_bar_text_hbox" {
+
+							hbox = {
+								layoutpolicy_horizontal = expanding
+								datacontext = "[Country.GetCurrentInterestTierTypeIn(StrategicRegion.Self)]"
+								spacing = 10
+
+								tooltipwidget = {
+									FancyTooltip_InterestTierTypeWithCountryAndStrategicRegionContext = {}
+								}
+
+								textbox = {
+									align = nobaseline
+									autoresize = yes
+									using = fontsize_xl
+									max_width = 500
+									using = elide_fontsize_min
+									text = "[Country.GetCurrentInterestTierTypeIn(StrategicRegion.Self).GetNameNoFormatting]"
+								}
+
+								textbox = {
+									align = nobaseline
+									autoresize = yes
+									max_width = 50
+									using = fontsize_xl
+									using = elide_fontsize_min
+									raw_text = "#v [Country.GetCurrentInvolvementIn(StrategicRegion.Self)|0]#!"
+								}
+
+								expand = {}
+							}
+						}
+					}
+				}
+
+
+				blockoverride "item_properties" {
+					size = { 0 20 }
+					layoutstretchfactor_horizontal = "[InterestTierType.GetWidth]"
+
+					tooltipwidget = {
+						FancyTooltip_InterestTierTypeWithCountryAndStrategicRegionContext = {}
+					}
+				}
+			}
+		}
+
+		blockoverride "scrollarea_content"
+		{
+			container = {
+				parentanchor = hcenter
+
+				flowcontainer = {
+					using = default_list_position
+					using = default_content_fade
+					direction = vertical
+					spacing = 10
+
+					default_header = {
+						blockoverride "text" {
+							text = "OTHER_COUNTRIES_INVOLVEMENT"
+						}
+
+						# grid/list toggle
+						button_icon_round_toggle = {
+							size = { 29 29 }
+							parentanchor = right|vcenter
+							position = { -10 0 }
+
+							blockoverride "on_click" {
+								onclick = "[GetVariableSystem.Toggle('country_interest_list')]"
+							}
+							blockoverride "view_1" {
+								visible = "[Not(GetVariableSystem.Exists('country_interest_list'))]"
+							}
+							blockoverride "view_2" {
+								visible = "[GetVariableSystem.Exists('country_interest_list')]"
+							}
+							blockoverride "icon_1" {
+								texture = "gfx/interface/buttons/button_icons/grid.dds"
+							}
+							blockoverride "icon_2" {
+								texture = "gfx/interface/buttons/button_icons/list.dds"
+							}
+							blockoverride "tooltip_1" {
+								tooltip = "TOOLTIP_VIEW_LIST"
+							}
+							blockoverride "tooltip_2" {
+								tooltip = "TOOLTIP_VIEW_GRID"
+							}
+						}
+					}
+
+					flowcontainer = {
+						visible = "[DataModelHasItems(StrategicRegion.GetNonPlayerCountriesWithInterest)]"
+						parentanchor = hcenter
+						direction = vertical
+
+						### Sort buttons
+						flowcontainer = {
+							parentanchor = hcenter
+
+							sort_button = {
+								size = { 180 30 }
+								tooltip = "SORT_BY_COUNTRY"
+								text = "concept_country"
+								onclick = "[StrategicRegion.SortNonPlayerCountries('country_name')]"
+							}
+
+							sort_button = {
+								size = { 80 30 }
+								tooltip = "SORT_BY_AI_STANCE"
+								text = "STANCE"
+								onclick = "[StrategicRegion.SortNonPlayerCountries('ai_stance_name')]"
+							}
+
+							sort_button = {
+								size = { 280 30 }
+								tooltip = "SORT_BY_INVOLVEMENT"
+								text = "concept_involvement"
+								onclick = "[StrategicRegion.SortNonPlayerCountries('involvement')]"
+							}
+						}
+
+						### Compact list view
+						flowcontainer = {
+							visible = "[GetVariableSystem.Exists('country_interest_list')]"
+							parentanchor = hcenter
+							direction = vertical
+
+							flowcontainer = {
+								direction = vertical
+								datamodel = "[StrategicRegion.GetNonPlayerCountriesWithInterest]"
+
+								item = {
+									container = {
+										country_interest_item_compact = {}
+									}
+								}
+							}
+						}
+
+						### Grid view
+						flowcontainer = {
+							visible = "[Not(GetVariableSystem.Exists('country_interest_list'))]"
+							parentanchor = hcenter
+							spacing = 5
+							wrap_count = 2
+							datamodel = "[StrategicRegion.GetNonPlayerCountriesWithInterest]"
+
+							item = {
+								container = {
+									country_interest_item = {
+										visible = "[EqualTo_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterest), '(int32)1')]"
+										minimumsize = { @panel_width_minus_10 120 }
+
+										blockoverride "country_name_max_width" {
+											max_width = 400
+										}
+									}
+
+									country_interest_item = {
+										visible = "[GreaterThan_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterest), '(int32)1')]"
+									}
+								}
+							}
+						}
+					}
+
+					empty_state = {
+						blockoverride "visible" {
+							visible = "[IsDataModelEmpty(StrategicRegion.GetNonPlayerCountriesWithInterest)]"
+						}
+
+						blockoverride "text" {
+							text = "NO_OTHER_COUNTRIES_INVOLVEMENT"
+						}
+					}
+
+					default_header = {
+						blockoverride "text" {
+							text = "concept_locality"
+						}
+					}
+
+					flowcontainer = {
+						parentanchor = hcenter
+						direction = vertical
+						spacing = 5
+
+						### LOCAL COUNTRIES
+						strategic_region_countries_item = {
+							parentanchor = hcenter
+							direction = vertical
+							alpha = "[TransparentIfTrue(IsDataModelEmpty(StrategicRegion.GetLocalCountriesWithOwnedStates))]"
+						}
+
+						### NON-LOCAL COUNTRIES
+						strategic_region_non_local_countries_item = {
+							parentanchor = hcenter
+							direction = vertical
+							alpha = "[TransparentIfTrue(IsDataModelEmpty(StrategicRegion.GetNonLocalCountriesWithOwnedStates))]"
+
+							blockoverride "local_header" {
+								text = "NON_LOCAL_COUNTRIES_HEADER"
+							}
+
+							blockoverride "local_onclick" {
+								onclick = "[GetVariableSystem.Toggle('strategic_region_non_local_countries')]"
+							}
+
+							blockoverride "local_showmore" {
+								visible = "[Not(GetVariableSystem.Exists('strategic_region_non_local_countries'))]"
+							}
+
+							blockoverride "local_showless" {
+								visible = "[GetVariableSystem.Exists('strategic_region_non_local_countries')]"
+							}
+
+							blockoverride "items_visibility" {
+								visible = "[GetVariableSystem.Exists('strategic_region_non_local_countries')]"
+							}
+
+							blockoverride "items_datamodel" {
+								datamodel = "[StrategicRegion.GetNonLocalCountriesWithOwnedStates]"
+							}
+
+							blockoverride "bar_visibility" {
+								visible = "[GreaterThan_CFixedPoint(StrategicRegion.GetNonLocalCountriesLocalityPercentage, '(CFixedPoint)0')]"
+							}
+
+							blockoverride "bar_color" {
+								using = color_grey_undecided
+							}
+						}
+					}
+				}
+			}
+		}
+
+		blockoverride "window_header_name_line_two"
+		{
+			text = "STRATEGIC_REGION_PANEL_SUBTITLE"
+		}
+
+		blockoverride "pin_visibility" {
+			visible = yes
+		}
+
+		blockoverride "pin_properties" {
+			visible = "[StrategicRegion.IsPinnedInOutliner]"
+			onclick = "[StrategicRegion.TogglePinInOutliner]"
+			tooltip = "UNPIN_STRATEGIC_REGION"
+		}
+
+		blockoverride "unpin_properties" {
+			visible = "[Not(StrategicRegion.IsPinnedInOutliner)]"
+			onclick = "[StrategicRegion.TogglePinInOutliner]"
+			tooltip = "PIN_STRATEGIC_REGION"
+		}
+
+		blockoverride "goto_visibility" {
+			visible = yes
+		}
+
+		blockoverride "goto_properties" {
+			tooltip = "ZOOM_TO_STRATEGIC_REGION"
+			onclick = "[StrategicRegion.ZoomToFar]"
+			enabled = "[Not( StrategicRegion.IsZoomingTo )]"
+		}
+	}
+
+	type country_interest_item = container {
+		minimumsize = { 260 120 }
+
+		background = {
+			using = entry_bg_simple
+		}
+
+		background = {
+			using = fade_right_colored
+			color = "[Country.GetMapColor]"
+			using = simple_frame_mask
+		}
+
+		icon = {
+			visible = "[Country.IsAI]"
+			parentanchor = right
+			size = { 48 48 }
+			position = { -5 5 }
+			texture = "[Country.GetAIStrategicRegionStanceTypeIn(StrategicRegion.Self).GetIcon]"
+
+			tooltipwidget = {
+				FancyTooltip_AIStrategicRegionStanceType = {}
+			}
+		}
+
+		widget = {
+			size = { 100% 100% }
+
+			vbox = {
+				margin = { 12 10 }
+				spacing = 2
+
+				hbox = {
+					layoutpolicy_horizontal = expanding
+					minimumsize = { -1 44 }
+
+					small_flag = {}
+
+					textbox = {
+						margin_left = 10
+						max_height = 44
+						align = nobaseline
+						autoresize = yes
+						multiline = yes
+						using = elide_fontsize_min
+						text = "[Country.GetNameNoFlag]"
+
+						block "country_name_max_width" {
+							max_width = 120
+						}
+					}
+
+					expand = {}
+
+					textbox = {
+						visible = "[Not(Country.IsAI)]"
+						layoutpolicy_horizontal = expanding
+						size = { 0 20 }
+						margin_left = 10
+						align = right|nobaseline
+						using = elide_fontsize_min
+						text = "[Country.GetPlayer.GetName]"
+					}
+				}
+
+				divider_clean = {
+					size = { 240 2 }
+				}
+
+				country_involvement_bar_with_label = {
+					blockoverride "tier_icon_size" {
+						size = { 45 45 }
+					}
+				}
+			}
+		}
+	}
+
+	type country_involvement_bar_with_label = hbox {
+		layoutpolicy_horizontal = expanding
+		spacing = 5
+
+		vbox = {
+			layoutpolicy_vertical = expanding
+			expand = {}
+
+			icon = {
+				datacontext = "[Country.GetCurrentInterestTierTypeIn(StrategicRegion.Self)]"
+				block "tier_icon_size" {
+					size = { 70 70 }
+				}
+
+				texture = "gfx/interface/map_markers/strategic_region_map_marker.dds"
+
+				icon = {
+					parentanchor = center
+					size = { 75% 75% }
+					texture = "[InterestTierType.GetIcon]"
+				}
+
+				tooltipwidget = {
+					FancyTooltip_InterestTierTypeWithCountryAndStrategicRegionContext = {}
+				}
+			}
+		}
+
+		vbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			spacing = 5
+
+			expand = {}
+
+			block "above_bar_text_hbox" {
+				hbox = {
+					layoutpolicy_horizontal = expanding
+					spacing = 5
+					datacontext = "[Country.GetCurrentInterestTierTypeIn(StrategicRegion.Self)]"
+
+					tooltipwidget = {
+						FancyTooltip_InterestTierTypeWithCountryAndStrategicRegionContext = {}
+					}
+
+					textbox = {
+						align = nobaseline
+						autoresize = yes
+						max_width = 230
+						using = elide_fontsize_min
+						text = "[InterestTierType.GetNameNoFormatting]"
+					}
+
+					textbox = {
+						align = nobaseline
+						autoresize = yes
+						max_width = 50
+						using = elide_fontsize_min
+						raw_text = "#v [Country.GetCurrentInvolvementIn(StrategicRegion.Self)|0]#!"
+					}
+
+					expand = {}
+				}
+			}
+
+			### This is not made into a type since there is some weird bug with blockoverrides in this case.
+			levels_progressbar = {
+				datamodel = "[GetInterestTierTypes]"
+
+
+				blockoverride "item_properties" {
+					size = { 0 15 }
+					layoutstretchfactor_horizontal = "[InterestTierType.GetWidth]"
+					using = tooltip_ws
+
+					tooltipwidget = {
+						FancyTooltip_InterestTierTypeWithCountryAndStrategicRegionContext = {}
+					}
+				}
+
+				blockoverride "skip_initial_animation" {}
+
+				blockoverride "level_active" {
+					visible = "[InterestTierType.IsActive( Country.Self, StrategicRegion.Self )]"
+				}
+
+				blockoverride "last_level" {
+					visible = "[Not(EqualTo_CFixedPoint( InterestTierType.GetUpperBound, GetDefine('NDiplomacy','INTEREST_MAX_INVOLVEMENT')))]"
+				}
+
+				blockoverride "default_progressbar_value" {
+					value = "[InterestTierType.GetProgress( Country.GetCurrentInvolvementIn(StrategicRegion.Self) )]"
+				}
+
+				blockoverride "default_progressbar_visible" {
+					visible = "[EqualTo_CFixedPoint(Country.GetTargetInvolvementIn(StrategicRegion.Self), Country.GetCurrentInvolvementIn(StrategicRegion.Self))]"
+				}
+
+				blockoverride "will_increase_visible" {
+					visible = "[GreaterThan_CFixedPoint(Country.GetTargetInvolvementIn(StrategicRegion.Self), Country.GetCurrentInvolvementIn(StrategicRegion.Self))]"
+				}
+
+				blockoverride "will_decrease_visible" {
+					visible = "[LessThan_CFixedPoint(Country.GetTargetInvolvementIn(StrategicRegion.Self), Country.GetCurrentInvolvementIn(StrategicRegion.Self))]"
+				}
+
+				blockoverride "new_value" {
+					value = "[InterestTierType.GetProgress( Country.GetCurrentInvolvementIn(StrategicRegion.Self) )]"
+				}
+			}
+
+			expand = {}
+		}
+
+		block "below" {}
+	}
+
+	type country_interest_item_compact = widget {
+		size = { @panel_width 44 }
+		datacontext = "[Country.GetCurrentInterestTierTypeIn(StrategicRegion.Self)]"
+
+		background = {
+			using = entry_bg_simple
+		}
+
+		background = {
+			using = fade_right_colored
+			color = "[Country.GetMapColor]"
+			using = simple_frame_mask
+		}
+
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			margin_left = 10
+
+			tiny_flag = {}
+
+			textbox = {
+				margin_left = 10
+				align = nobaseline
+				autoresize = yes
+				multiline = yes
+				using = elide_fontsize_min
+				text = "[Country.GetNameNoFlag]"
+
+				block "country_name_max_width" {
+					max_width = 160
+				}
+			}
+
+			expand = {}
+		}
+
+		icon = {
+			visible = "[Country.IsAI]"
+			parentanchor = center
+			size = { 35 35 }
+			position = { -50 0 }
+			texture = "[Country.GetAIStrategicRegionStanceTypeIn(StrategicRegion.Self).GetIcon]"
+
+			tooltipwidget = {
+				FancyTooltip_AIStrategicRegionStanceType = {}
+			}
+		}
+
+		textbox = {
+			visible = "[Not(Country.IsAI)]"
+			parentanchor = center
+			position = { -50 0 }
+			align = nobaseline
+			autoresize = yes
+			using = elide_fontsize_min
+			default_format = "#title"
+			max_width = 80
+			text = "NONE"
+		}
+
+		widget = {
+			parentanchor = vcenter|right
+			size = { 270 44 }
+
+			hbox = {
+				layoutpolicy_horizontal = expanding
+				margin_right = 10
+				spacing = 7
+
+				tooltipwidget = {
+					FancyTooltip_InterestTierTypeWithCountryAndStrategicRegionContext = {}
+				}
+
+				### This is not made into a type since there is some weird bug with blockoverrides in this case.
+				levels_progressbar = {
+					datamodel = "[GetInterestTierTypes]"
+
+					blockoverride "item_properties" {
+						size = { 0 15 }
+						layoutstretchfactor_horizontal = "[InterestTierType.GetWidth]"
+
+						tooltipwidget = {
+							FancyTooltip_InterestTierTypeWithCountryAndStrategicRegionContext = {}
+						}
+					}
+
+					blockoverride "skip_initial_animation" {}
+
+					blockoverride "level_active" {
+						visible = "[InterestTierType.IsActive( Country.Self, StrategicRegion.Self )]"
+					}
+
+					blockoverride "last_level" {
+						visible = "[Not(EqualTo_CFixedPoint( InterestTierType.GetUpperBound, GetDefine('NDiplomacy','INTEREST_MAX_INVOLVEMENT')))]"
+					}
+
+					blockoverride "default_progressbar_value" {
+						value = "[InterestTierType.GetProgress( Country.GetCurrentInvolvementIn(StrategicRegion.Self) )]"
+					}
+
+					blockoverride "default_progressbar_visible" {
+						visible = "[EqualTo_CFixedPoint(Country.GetTargetInvolvementIn(StrategicRegion.Self), Country.GetCurrentInvolvementIn(StrategicRegion.Self))]"
+					}
+
+					blockoverride "will_increase_visible" {
+						visible = "[GreaterThan_CFixedPoint(Country.GetTargetInvolvementIn(StrategicRegion.Self), Country.GetCurrentInvolvementIn(StrategicRegion.Self))]"
+					}
+
+					blockoverride "will_decrease_visible" {
+						visible = "[LessThan_CFixedPoint(Country.GetTargetInvolvementIn(StrategicRegion.Self), Country.GetCurrentInvolvementIn(StrategicRegion.Self))]"
+					}
+
+					blockoverride "new_value" {
+						value = "[InterestTierType.GetProgress( Country.GetCurrentInvolvementIn(StrategicRegion.Self) )]"
+					}
+				}
+
+				icon = {
+					size = { 36 36 }
+					texture = "[InterestTierType.GetSmallIcon]"
+				}
+			}
+		}
+	}
+
+	type strategic_region_countries_item = flowcontainer {
+		direction = vertical
+
+		section_header_button = {
+			blockoverride "layout" {
+				parentanchor = hcenter
+				size = { @panel_width 38 }
+			}
+
+			blockoverride "left_text" {
+				using = elide_fontsize_min
+
+				block "local_header" {
+					text = "LOCAL_COUNTRIES_HEADER"
+				}
+			}
+
+			blockoverride "right_text" {
+				strategic_region_countries_locality_bar = {}
+			}
+
+			blockoverride "onclick" {
+				block "local_onclick" {
+					onclick = "[GetVariableSystem.Toggle('strategic_region_local_countries')]"
+				}
+			}
+
+			blockoverride "onclick_showmore" {
+				block "local_showmore" {
+					visible = "[Not(GetVariableSystem.Exists('strategic_region_local_countries'))]"
+				}
+			}
+
+			blockoverride "onclick_showless" {
+				block "local_showless" {
+					visible = "[GetVariableSystem.Exists('strategic_region_local_countries')]"
+				}
+			}
+		}
+
+		flowcontainer = {
+			direction = vertical
+			parentanchor = right
+
+			block "items_visibility" {
+				visible = "[GetVariableSystem.Exists('strategic_region_local_countries')]"
+			}
+
+			block "items_datamodel" {
+				datamodel = "[StrategicRegion.GetLocalCountriesWithOwnedStates]"
+			}
+
+			item = {
+				country_with_strategic_region_locality_item = {}
+			}
+		}
+	}
+
+	type strategic_region_non_local_countries_item = flowcontainer {
+		direction = vertical
+
+		section_header_button = {
+			blockoverride "layout" {
+				parentanchor = hcenter
+				size = { @panel_width 38 }
+			}
+
+			blockoverride "left_text" {
+				using = elide_fontsize_min
+
+				block "local_header" {
+					text = "LOCAL_COUNTRIES_HEADER"
+				}
+			}
+
+			blockoverride "right_text" {
+				strategic_region_countries_locality_bar = {}
+			}
+
+			blockoverride "onclick" {
+				block "local_onclick" {
+					onclick = "[GetVariableSystem.Toggle('strategic_region_local_countries')]"
+				}
+			}
+
+			blockoverride "onclick_showmore" {
+				block "local_showmore" {
+					visible = "[Not(GetVariableSystem.Exists('strategic_region_local_countries'))]"
+				}
+			}
+
+			blockoverride "onclick_showless" {
+				block "local_showless" {
+					visible = "[GetVariableSystem.Exists('strategic_region_local_countries')]"
+				}
+			}
+
+			blockoverride "bar_value" {
+				value = "[StrategicRegion.GetNonLocalCountriesLocalityPercentage]"
+				invertprogress = yes
+			}
+
+			blockoverride "after_bar_text" {
+				raw_text = "#v [StrategicRegion.GetNonLocalCountriesLocalityPercentage|0%]#!"
+			}
+		}
+
+		flowcontainer = {
+			direction = vertical
+			parentanchor = right
+
+			block "items_visibility" {
+				visible = "[GetVariableSystem.Exists('strategic_region_local_countries')]"
+			}
+
+			block "items_datamodel" {
+				datamodel = "[StrategicRegion.GetLocalCountriesWithOwnedStates]"
+			}
+
+			item = {
+				country_with_strategic_region_locality_item = {}
+			}
+		}
+	}
+
+
+	type strategic_region_countries_locality_bar = flowcontainer {
+		spacing = 5
+
+		bar_horizontal = {
+			parentanchor = vcenter
+
+			block "bar_visibility" {
+				visible = "[GreaterThan_CFixedPoint(StrategicRegion.GetLocalCountriesLocalityPercentage, '(CFixedPoint)0')]"
+			}
+
+			block "progressbar_size" {
+				size = { 210 15 }
+			}
+
+			blockoverride "values" {
+				min = 0
+				max = 1
+
+				block "bar_value" {
+					value = "[StrategicRegion.GetLocalCountriesLocalityPercentage]"
+					invertprogress = yes
+				}
+			}
+
+			blockoverride "marker_widgetanchor" {
+				widgetanchor = left
+				mirror = horizontal
+			}
+
+			blockoverride "color" {
+				block "bar_color" {
+					using = color_green_approval
+				}
+			}
+		}
+
+		widget = {
+			size = { 40 20 }
+
+			textbox = {
+				parentanchor = vcenter
+				align = nobaseline
+				autoresize = yes
+				max_width = 40
+				using = elide_fontsize_min
+
+				block "after_bar_text" {
+					raw_text = "#v [StrategicRegion.GetLocalCountriesLocalityPercentage|0%]#!"
+				}
+			}
+		}
+	}
+
+	type country_with_strategic_region_locality_item = flowcontainer {
+		direction = vertical
+		tooltip = "COUNTRY_STRATEGIC_REGION_LOCALITY_TOOLTIP"
+
+		section_header_button = {
+			blockoverride "layout" {
+				parentanchor = hcenter
+				size = { 520 38 }
+			}
+
+			blockoverride "left_text" {
+				text = "[Country.GetName]"
+				using = elide_fontsize_min
+			}
+
+			blockoverride "right_text" {
+				country_strategic_region_locality_bar = {}
+			}
+
+			blockoverride "onclick" {
+				onclick = "[GetVariableSystem.Toggle(Concatenate('strategic_region_locality_', Country.GetIDString))]"
+			}
+
+			blockoverride "onclick_showmore" {
+				visible = "[Not(GetVariableSystem.Exists(Concatenate('strategic_region_locality_', Country.GetIDString)))]"
+			}
+
+			blockoverride "onclick_showless" {
+				visible = "[GetVariableSystem.Exists(Concatenate('strategic_region_locality_', Country.GetIDString))]"
+			}
+		}
+
+		flowcontainer = {
+			visible = "[GetVariableSystem.Exists(Concatenate('strategic_region_locality_', Country.GetIDString))]"
+			parentanchor = right
+			direction = vertical
+			datamodel = "[StrategicRegion.AccessStatesOwnedBy(Country.Self)]"
+
+			item = {
+				country_strategic_region_state_item = {}
+			}
+		}
+	}
+
+	type country_strategic_region_locality_bar = flowcontainer {
+		spacing = 5
+
+		bar_horizontal = {
+			parentanchor = vcenter
+			visible = "[GreaterThan_CFixedPoint(Country.GetLocalityIn(StrategicRegion.Self), '(CFixedPoint)0')]"
+
+			block "progressbar_size" {
+				size = { 210 15 }
+			}
+
+			blockoverride "values" {
+				min = 0
+				max = 1
+
+				block "bar_value" {
+					value = "[Country.GetLocalityIn(StrategicRegion.Self)]"
+					invertprogress = yes
+				}
+			}
+
+			blockoverride "marker_widgetanchor" {
+				widgetanchor = left
+				mirror = horizontal
+			}
+
+			blockoverride "color" {
+				block "bar_color" {
+					color = "[Country.GetMapColor]"
+				}
+			}
+		}
+
+		widget = {
+			size = { 40 20 }
+
+			textbox = {
+				parentanchor = vcenter
+				align = nobaseline
+				autoresize = yes
+				max_width = 40
+				using = elide_fontsize_min
+
+				block "after_bar_text" {
+					raw_text = "#v [Country.GetLocalityIn(StrategicRegion.Self)|0%]#!"
+				}
+			}
+		}
+	}
+
+	type country_strategic_region_state_item = button {
+		using = default_button
+		size = { 500 50 }
+		onmousehierarchyenter = "[AccessHighlightManager.HighlightState(State.Self)]"
+		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+		onclick = "[InformationPanelBar.OpenStatePanel( State.AccessSelf )]"
+		onrightclick = "[RightClickMenuManager.ShowForState(State.AccessSelf)]"
+		alwaystransparent = no
+
+		hbox = {
+			margin = { 8 0 }
+
+			textbox = {
+				layoutstretchfactor_horizontal = 2.5
+				layoutpolicy_horizontal = expanding
+				size = { 0 50 }
+				margin_left = 3
+				align = nobaseline
+				raw_text = "#bold [State.GetCountry.GetFlagTextIcon] [State.GetNameNoFormatting]#!"
+				multiline = yes
+				tooltipwidget = {
+					FancyTooltip_State = {}
+				}
+			}
+
+			flowcontainer = {
+				layoutstretchfactor_horizontal = 2.5
+				layoutpolicy_horizontal = expanding
+				spacing = 3
+
+				textbox = {
+					autoresize = yes
+					align = nobaseline
+					parentanchor = vcenter
+					raw_text = "@population! [State.GetPopulationSize|vD]"
+					tooltip = "TOOLTIP_STATE_POPULATION"
+				}
+
+				textbox = {
+					autoresize = yes
+					align = nobaseline
+					parentanchor = bottom
+					raw_text = "([State.GetLocality|1v%])"
+					tooltip = "STATE_LOCALITY_TOOLTIP"
+				}
+			}
+
+			textbox = {
+				layoutstretchfactor_horizontal = 1
+				layoutpolicy_horizontal = expanding
+				size = { 0 40 }
+				align = nobaseline
+				raw_text = "@gdp! [State.GetGDPContribution|vD]"
+				tooltip = "CURRENT_GDP_STATE"
+			}
+
+			textbox = {
+				layoutstretchfactor_horizontal = 1
+				layoutpolicy_horizontal = expanding
+				size = { 0 40 }
+				align = nobaseline
+				raw_text = "([State.GetGdpRatioOwnedBy(State.GetOwner)|0v%])"
+				tooltip = "[State.GetGdpRatioOwnedByDesc(State.GetOwner)]"
+			}
+		}
+	}
+}

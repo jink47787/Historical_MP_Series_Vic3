@@ -1,0 +1,124 @@
+﻿je_chinese_industry = {
+	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+	
+	group = je_group_historical_content
+	
+	complete = {
+		custom_tooltip = {
+			text = je_china_economic_success_tt
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+		}
+	}
+	
+	on_complete = {
+		remove_modifier = chinese_economic_stagnation
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			### Scaling by Railroads
+			
+			set_variable = {
+				name = railroad_effect
+				value = global_var:chinese_rail_expansion
+			}
+			
+			change_variable = {
+				name = railroad_effect
+				divide = -100
+			}
+			
+			change_variable = {
+				name = railroad_effect
+				add = 1
+			}
+			
+			remove_modifier = chinese_economic_stagnation
+			
+			add_modifier = {
+				name = chinese_economic_stagnation
+				multiplier = var:railroad_effect
+			}
+		}
+	}
+
+	current_value = {
+		value = global_var:chinese_rail_expansion
+	}
+
+	goal_add_value = {
+		value = 100
+	}
+
+	progressbar = yes
+
+	can_revolution_inherit = yes
+
+	weight = 5000
+	should_be_pinned_by_default = yes
+}
+
+je_chinese_agriculture = {
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+	
+	group = je_group_historical_content
+	
+	modifiers_while_active = {
+		modifier_china_subsistence_agri
+	}
+	
+	immediate = {
+		add_modifier = {
+			name = modifier_agricultural_econ_agri_debuff
+			months = -1
+		}
+		set_variable = { name = legitimist_progress_from_farms value = 0 }
+    }
+	
+	scripted_progress_bar = chinese_agriculture_progress_bar
+	
+	complete = {
+		custom_tooltip = {
+			text = chinese_agriculture_complete_tt
+			scope:journal_entry = {
+				"scripted_bar_progress(chinese_agriculture_progress_bar)" >= 100
+			}
+		}
+	}
+	
+	on_complete = {
+		if = {
+			limit = {
+				has_modifier = modifier_agricultural_econ_agri_debuff
+			}
+			remove_modifier = modifier_agricultural_econ_agri_debuff
+		}
+	}
+	
+	on_monthly_pulse = {
+		effect = {
+			# From Buildings
+			set_variable = { name = legitimist_progress_from_farms value = 0 }
+			every_scope_building = {
+				limit = {
+					is_building_group = bg_agriculture
+					NOT = {
+						is_building_group = bg_subsistence_agriculture
+					}
+					weekly_profit > 0
+				}
+				ROOT = {
+					change_variable = { name = legitimist_progress_from_farms add = prev.level }
+				}
+			}
+			change_variable = { name = legitimist_progress_from_farms divide = 400 }
+		}
+	}
+
+	can_revolution_inherit = yes
+
+	weight = 5000
+	should_be_pinned_by_default = yes
+}

@@ -1,0 +1,389 @@
+﻿je_zaibatsu = { # Successful industrialisation is evidence that I am not in Spain.
+	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+
+	group = je_group_historical_content
+
+	modifiers_while_active = {
+		modifier_zaibatsu_oligarchy
+	}
+
+	is_shown_when_inactive = {
+		c:JAP ?= this
+		has_dlc_feature = ep2_content
+		NOR = {
+			has_law_or_variant = law_type:law_isolationism
+			has_law_or_variant = law_type:law_traditionalism
+			has_law_or_variant = law_type:law_guild_system
+		}
+	}
+
+	possible = {
+		ig:ig_industrialists ?= {
+			ig_counts_as_marginal = no
+		}
+		custom_tooltip = {
+			text = two_more_more_company_slots_tt
+			modifier:country_max_companies_add > je_zaibatsu_company_slots_threshold
+		}
+		any_company = {
+			OR = {
+				is_company_type = company_type:company_mitsui
+				is_company_type = company_type:company_mitsubishi
+				is_company_type = company_type:company_yasuda
+				is_company_type = company_type:company_sumitomo
+			}
+			count >= je_zaibatsu_min_company_count
+		}
+		custom_tooltip = {
+			text = country_levels_owned_by_zaibatsu_100_tt
+			country_levels_owned_by_zaibatsu >= je_zaibatsu_possible_levels_threshold
+		}
+		custom_tooltip = {
+			text = fraction_of_country_levels_owned_by_zaibatsu_ge_to_10_tt
+			fraction_of_country_levels_owned_by_zaibatsu >= je_zaibatsu_possible_fraction_threshold
+		}
+		NOR = {
+			has_law_or_variant = law_type:law_command_economy
+			has_law_or_variant = law_type:law_cooperative_ownership
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				is_player = no
+			}
+			random_list = {
+				50 = {
+					set_variable = { name = ai_zaibatsu_curtail }
+				}
+				35 = { # 35-135
+					modifier = {
+						add = {
+							value = ig:ig_industrialists.ig_clout
+							multiply = 100
+						}
+					}
+					set_variable = { name = ai_zaibatsu_cement }
+					set_strategy = ai_strategy_economic_imperialism
+				}
+			}
+		}
+	}
+
+	on_monthly_pulse = {
+        effect = {
+			# Electoral confidence change handled in on_actions
+        }
+	}
+
+	on_weekly_pulse = {
+        effect = {
+			scope:journal_entry ?= {
+				if = {
+					limit = {
+						has_modifier = modifier_zaibatsu_oligarchy
+						owner = {
+							country_has_voting_franchise = yes
+						}
+					}
+					remove_modifier = modifier_zaibatsu_oligarchy
+					add_modifier = modifier_zaibatsu_oligarchy_democratic
+				}
+				else_if = {
+					limit = {
+						has_modifier = modifier_zaibatsu_oligarchy_democratic
+						owner = {
+							country_has_voting_franchise = no
+						}
+					}
+					remove_modifier = modifier_zaibatsu_oligarchy_democratic
+					add_modifier = modifier_zaibatsu_oligarchy
+				}
+			}
+        }
+	}
+
+	custom_completion_header = je_zaibatsu_complete_header
+
+	complete = {
+		trigger_if = {
+			limit = {
+				any_company = {
+					is_company_type = company_type:company_mitsui
+				}
+			}
+			any_company = {
+				is_company_type = company_type:company_mitsui
+				company_is_prosperous = yes
+			}
+		}
+		trigger_if = {
+			limit = {
+				any_company = {
+					is_company_type = company_type:company_mitsubishi
+				}
+			}
+			any_company = {
+				is_company_type = company_type:company_mitsubishi
+				company_is_prosperous = yes
+			}
+		}
+		trigger_if = {
+			limit = {
+				any_company = {
+					is_company_type = company_type:company_yasuda
+				}
+			}
+			any_company = {
+				is_company_type = company_type:company_yasuda
+				company_is_prosperous = yes
+			}
+		}
+		trigger_if = {
+			limit = {
+				any_company = {
+					is_company_type = company_type:company_sumitomo
+				}
+			}
+			any_company = {
+				is_company_type = company_type:company_sumitomo
+				company_is_prosperous = yes
+			}
+		}
+		custom_tooltip = {
+			text = country_levels_owned_by_zaibatsu_250_tt
+			country_levels_owned_by_zaibatsu >= je_zaibatsu_complete_levels_threshold
+		}
+		custom_tooltip = {
+			text = fraction_of_country_levels_owned_by_zaibatsu_ge_to_25_tt
+			fraction_of_country_levels_owned_by_zaibatsu >= je_zaibatsu_complete_fraction_threshold
+		}
+	}
+
+	custom_on_completion_header = je_zaibatsu_on_complete_header
+
+	on_complete = {
+		ig:ig_industrialists ?= {
+			add_modifier = {
+				name = modifier_zaibatsu_cemented
+				days = very_long_modifier_time
+				is_decaying = yes
+			}
+		}
+		set_variable = zaibatsu_victory_var
+		trigger_event = { id = zaibatsu.1 popup = yes }
+		if = {
+			limit = {
+				has_variable = ai_zaibatsu_cement
+			}
+			remove_variable = ai_zaibatsu_cement
+		}
+		if = {
+			limit = {
+				has_variable = ai_zaibatsu_curtail
+			}
+			remove_variable = ai_zaibatsu_curtail
+		}
+	}
+
+	event_outcome_completed_effect_desc = {
+        header = zaibatsu.1.a
+        effect = {
+			active_law:lawgroup_economic_system ?= {
+				add_amendment = {
+					type = amendment_zaibatsu_oligopoly_1
+					sponsor = PREV.ig:ig_industrialists
+					cooldown = 240
+				}
+			}
+			custom_tooltip = amendment_zaibatsu_oligopoly_1_tt
+			capital = {
+				add_modifier = {
+					name = modifier_a_sea_of_light
+				}
+			}
+        }
+    }
+
+    event_outcome_completed_effect_desc = {
+        header = zaibatsu.1.b
+        effect = {
+			active_law:lawgroup_economic_system ?= {
+				add_amendment = {
+					type = amendment_zaibatsu_oligopoly_2
+					sponsor = PREV.ig:ig_industrialists
+					cooldown = 240
+				}
+			}
+			custom_tooltip = amendment_zaibatsu_oligopoly_2_tt
+			ig:ig_armed_forces ?= {
+				add_modifier = {
+					name = modifier_military_industrial_supply_chain
+					days = very_long_modifier_time
+				}
+			}
+        }
+    }
+
+	custom_failure_header = je_zaibatsu_fail_header
+
+	fail = {
+		AND = {
+			legitimacy >= je_zaibatsu_fail_legitimacy_threshold
+			ig:ig_industrialists ?= {
+				is_in_government = no
+			}
+		}
+		trigger_if = {
+			limit = {
+				country_has_voting_franchise = yes
+			}
+			custom_tooltip = {
+				text = voting_power_wealth_threshold_below_10_tt
+				modifier:country_voting_power_wealth_threshold_add <= je_zaibatsu_fail_voting_power_threshold
+			}
+		}
+		trigger_else = {
+			political_strength_share = {
+				pop_type = capitalists
+				value < 0.20
+			}
+		}
+		OR = {
+			custom_tooltip = {
+				text = command_economy_or_cooperative_ownership_tt
+				OR = {
+					has_law_or_variant = law_type:law_command_economy
+					has_law_or_variant = law_type:law_cooperative_ownership
+				}
+			}
+			AND = {
+				custom_tooltip = {
+					text = fraction_of_country_levels_owned_by_zaibatsu_less_than_10_tt
+					fraction_of_country_levels_owned_by_zaibatsu < je_zaibatsu_possible_fraction_threshold
+				}
+				NOT = {
+					any_company = {
+						company_has_monopoly = yes
+					}
+				}
+			}
+		}
+	}
+
+	custom_on_failure_header = je_zaibatsu_on_fail_header
+
+	on_fail = {
+		ig:ig_industrialists ?= {
+			add_modifier = {
+				name = modifier_zaibatsu_curtailed
+				days = very_long_modifier_time
+				is_decaying = yes
+			}
+		}
+		trigger_event = { id = zaibatsu.2 popup = yes }
+		if = {
+			limit = {
+				has_variable = ai_zaibatsu_cement
+			}
+			remove_variable = ai_zaibatsu_cement
+		}
+		if = {
+			limit = {
+				has_variable = ai_zaibatsu_curtail
+			}
+			remove_variable = ai_zaibatsu_curtail
+		}
+	}
+
+	event_outcome_failed_effect_desc = {
+        header = zaibatsu.2.a
+        effect = {
+			add_loyalists = {
+				value = medium_radicals
+				strata = middle
+			}
+			add_loyalists = {
+				value = small_radicals
+				strata = lower
+			}
+			add_modifier = {
+				name = modifier_japan_reasserted_control
+				days = very_long_modifier_time
+				is_decaying = yes
+			}
+        }
+    }
+
+    event_outcome_failed_effect_desc = {
+        header = zaibatsu.2.b
+        effect = {
+			if = {
+				limit = {
+					country_has_voting_franchise = yes
+				}
+				add_loyalists = {
+					value = small_radicals
+					strata = middle
+				}
+				add_loyalists = {
+					value = medium_radicals
+					strata = lower
+				}
+				add_electoral_confidence = je_zaibatsu_electoral_confidence_bonus
+				ordered_interest_group = {
+					limit = {
+						is_in_government = yes
+					}
+					order_by = ig_clout
+					position = 0
+					add_modifier = {
+						name = modifier_defeated_zaibatsu_ig
+						days = very_long_modifier_time
+					}
+					leader = {
+						add_modifier = {
+							name = modifier_defeated_zaibatsu_char
+							days = very_long_modifier_time
+						}
+					}
+				}
+			}
+        }
+    }
+
+	invalid = {
+		NOT = {
+			any_company = {
+				OR = {
+					is_company_type = company_type:company_mitsui
+					is_company_type = company_type:company_mitsubishi
+					is_company_type = company_type:company_yasuda
+					is_company_type = company_type:company_sumitomo
+				}
+				count >= je_zaibatsu_min_company_count
+			}
+		}
+	}
+
+	on_invalid = {
+		if = {
+			limit = {
+				has_variable = ai_zaibatsu_cement
+			}
+			remove_variable = ai_zaibatsu_cement
+		}
+		if = {
+			limit = {
+				has_variable = ai_zaibatsu_curtail
+			}
+			remove_variable = ai_zaibatsu_curtail
+		}
+	}
+
+	weight = 5000
+
+    should_be_pinned_by_default_involved = yes
+	should_be_pinned_by_default_uninvolved_or_context = yes
+}

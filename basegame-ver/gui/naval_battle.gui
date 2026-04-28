@@ -1,0 +1,2763 @@
+﻿# COPY-PASTED FOR NOW
+@panel_width_minus_10 = 530			# used to be 450
+@panel_width = 540  				# used to be 460
+@panel_width_half = 270				# used to be 230
+@panel_width_plus_10 = 550  		# used to be 470
+@panel_width_plus_14 = 554			# used to be 474
+@panel_width_plus_14_half = 277		# used to be 237
+@panel_width_plus_20 = 560			# used to be 480
+@panel_width_plus_30 = 570			# used to be 490
+@panel_width_plus_70 = 610			# used to be 530
+
+types naval_battle_panel_types
+{
+	type naval_battle_panel = default_block_window_two_lines {
+		name = "naval_battle_panel"
+		datacontext = "[NavalBattlePanel.GetBattle]"
+
+		blockoverride "window_header_name"
+		{
+			text = "[LabelingHelper.CapitalizeOnlyFirst(NavalBattle.GetName)]"
+		}
+		blockoverride "window_header_name_line_two"
+		{
+			text = "NAVAL_BATTLE_SUBTITLE"
+		}
+
+		blockoverride "goto_visibility" {}
+
+		blockoverride "goto_properties" {
+			onclick = "[NavalBattle.ZoomToMapMarkerPosition]"
+			tooltip = "ZOOM_TO_NAVAL_BATTLE"
+			enabled = "[Not( NavalBattle.IsZoomingToMapMarkerPosition )]"
+		}
+
+		blockoverride "goto_button" {
+			button_icon_goto = {
+				datacontext = "[NavalBattle.GetProvince]"
+				size = { 30 30 }
+				onclick = "[InformationPanelBar.OpenSeaRegionPanel(Province.Self)]"
+				tooltip = "GO_TO_BUTTON_SEA_REGION"
+				input_action = "go_to_details"
+			}
+		}
+
+		blockoverride "animation_state_block" {
+			state = {
+				name = _show
+				using = viewport_sound_parameter_open
+				using = naval_battle_panel_open
+			}
+
+			state = {
+				name = _hide
+				using = viewport_sound_parameter_close
+			}
+		}
+
+		blockoverride "fixed_top"
+		{
+			tab_buttons = {
+				# Overview
+				blockoverride "first_button" {
+					text = "OVERVIEW"
+				}
+				blockoverride "first_button_tooltip" {
+					tooltip = "OVERVIEW"
+				}
+				blockoverride "first_button_click" {
+					onclick = "[InformationPanel.SelectTab('default')]"
+				}
+				blockoverride "first_button_visibility" {
+					visible = "[InformationPanel.IsTabSelected('default')]"
+				}
+				blockoverride "first_button_visibility_checked" {
+					visible = "[Not( InformationPanel.IsTabSelected('default') )]"
+				}
+				blockoverride "first_button_selected" {
+					text = "OVERVIEW"
+				}
+
+				# Battle Log
+				blockoverride "second_button" {
+					text = "BATTLE_LOG"
+				}
+				blockoverride "second_button_tooltip" {
+					tooltip = "BATTLE_LOG"
+				}
+				blockoverride "second_button_click" {
+					onclick = "[InformationPanel.SelectTab('battle_log')]"
+				}
+				blockoverride "second_button_visibility" {
+					visible = "[InformationPanel.IsTabSelected('battle_log')]"
+				}
+				blockoverride "second_button_visibility_checked" {
+					visible = "[Not( InformationPanel.IsTabSelected('battle_log') )]"
+				}
+				blockoverride "second_button_selected" {
+					text = "BATTLE_LOG"
+				}
+			}
+
+			flowcontainer = {
+				visible = "[InformationPanel.IsTabSelected('battle_log')]"
+				direction = vertical
+				spacing = 5
+				margin_top = 5
+
+				state = {
+					name = _show
+					using = naval_battle_combat_log_open
+				}
+
+				state = {
+					name = _hide
+					using = naval_battle_combat_log_close
+				}
+
+				widget = {
+					size = { @panel_width 120 }
+
+					background = {
+						texture = "gfx/interface/illustrations/top_illus/top_illu_navy.dds"
+						using = top_illu_properties
+					}
+
+					background = {
+						using = entry_bg
+					}
+
+					battle_results = {}
+
+					state = {
+						name = _show
+						using = naval_battle_combat_log_open
+					}
+
+					state = {
+						name = _hide
+						using = naval_battle_combat_log_close
+					}
+
+					attacker_progress = {
+						visible = "[NavalBattle.IsActive]"
+						datacontext = "[NavalBattle.GetAttackerSide]"
+						parentanchor = bottom
+					}
+
+					defender_progress = {
+						visible = "[NavalBattle.IsActive]"
+						datacontext = "[NavalBattle.GetDefenderSide]"
+						parentanchor = right|bottom
+					}
+				}
+
+				flowcontainer = {
+					margin_bottom = 5
+					parentanchor = hcenter
+
+					#ALL EVENTS
+					filter_button_battle_log = {
+						visible = "[Not(NavalBattle.IsLogFilterAll)]"
+						blockoverride "text" {
+							text = "NAVAL_BATTLE_SHOW_ALL_EVENTS"
+						}
+
+						blockoverride "onclick" {
+							onclick = "[NavalBattle.SetLogFilterAll]"
+						}
+					}
+
+					filter_background_selected_battle_log = {
+						visible = "[NavalBattle.IsLogFilterAll]"
+
+						blockoverride "text" {
+							text = "NAVAL_BATTLE_SHOW_ALL_EVENTS"
+						}
+					}
+
+					#HIGH PRIO EVENTS
+					filter_button_battle_log = {
+						visible = "[Not(NavalBattle.IsLogFilterMajor)]"
+
+						blockoverride "text" {
+							text = "NAVAL_BATTLE_MAJOR_EVENTS"
+						}
+
+						blockoverride "onclick" {
+							onclick = "[NavalBattle.SetLogFilterMajor]"
+						}
+					}
+
+					filter_background_selected_battle_log = {
+						visible = "[NavalBattle.IsLogFilterMajor]"
+
+						blockoverride "text" {
+							text = "NAVAL_BATTLE_MAJOR_EVENTS"
+						}
+					}
+
+					#STANDARD PRIO EVENTS
+					filter_button_battle_log = {
+						visible = "[Not(NavalBattle.IsLogFilterStandard)]"
+
+						blockoverride "text" {
+							text = "NAVAL_BATTLE_STANDARD_EVENTS"
+						}
+
+						blockoverride "onclick" {
+							onclick = "[NavalBattle.SetLogFilterStandard]"
+						}
+					}
+
+					filter_background_selected_battle_log = {
+						visible = "[NavalBattle.IsLogFilterStandard]"
+
+						blockoverride "text" {
+							text = "NAVAL_BATTLE_STANDARD_EVENTS"
+						}
+					}
+				}
+			}
+		}
+
+		blockoverride "scrollarea_content"
+		{
+			container = {
+				parentanchor = hcenter
+
+				container = {
+					visible = "[InformationPanel.IsTabSelected('default')]"
+					using = default_content_fade
+
+					flowcontainer = {
+            			parentanchor = center
+						direction = vertical
+						spacing = 5
+
+						widget = {
+							size = { @panel_width_plus_14 360 }
+							parentanchor = hcenter
+
+							background = {
+								visible = "[NavalBattle.HasEnded]"
+								texture = "gfx/interface/navy/bg_illu_naval_combat.dds"
+								alpha = 0.7
+								using = top_illu_properties
+								fittype = centercrop
+							}
+
+							background = {
+								using = entry_bg_simple
+							}
+
+
+							flowcontainer = {
+								parentanchor = hcenter
+
+								ship_viewer = {
+									visible = "[Not(NavalBattle.HasEnded)]"
+									datacontext = "[NavalBattlePanel.GetAttackerShipViewer]"
+
+									name = "attacker_ship_viewer_widget"
+									size = { @panel_width_plus_14_half 360 }
+								}
+
+								vertical_divider_navy_frame = {
+								}
+
+
+								ship_viewer = {
+									visible = "[Not(NavalBattle.HasEnded)]"
+									datacontext = "[NavalBattlePanel.GetDefenderShipViewer]"
+
+									name = "defender_ship_viewer_widget"
+									size = { @panel_width_plus_14_half 360 }
+								}
+							}
+
+
+							icon = {
+								size = { 100% 100% }
+								texture = "gfx/interface/navy/navy_bg_frame.dds"
+								spriteType = Corneredtiled
+
+								spriteborder_left = 200
+								spriteborder_right = 60
+								spriteborder_top = 170
+								spriteborder_bottom = 180
+
+								texture_density = 2
+							}
+
+							flowcontainer = {
+								visible = "[And(NavalBattlePanel.HasHighlightedBattleEvent, Not(NavalBattle.HasEnded))]"
+								position = { 0 15 }
+								parentanchor = hcenter
+								direction = vertical
+								spacing = 10
+								min_width = 500
+
+								background = {
+									using = entry_bg
+									margin = { 15 6 }
+								}
+
+								textbox = {
+									align = hcenter
+									parentanchor = hcenter
+									autoresize = yes
+									raw_text = "[NavalBattlePanel.GetHighlightedBattleEventLogEntry.GetDescription]"
+								}
+							}
+
+							battle_results = {
+								position = { 0 50 }
+							}
+
+							#attacker
+							diorama_stats = {
+								position = { 12 54 }
+								visible = "[NavalBattlePanel.HasHighlightedBattleEvent]"
+								datacontext = "[NavalBattle.GetAttackerSide]"
+								datacontext = "[NavalBattlePanel.GetHighlightedBattleEventLogEntry]"
+								datacontext = "[NavalBattlePanel.GetHighlightedBattleEventLogEntry.GetAttackerSideCombatShip]"
+							}
+
+            				attacker_admiral = {
+            					parentanchor = vcenter
+            				}
+
+							#defender
+							diorama_stats = {
+								position = { -12 54 }
+								visible = "[NavalBattlePanel.HasHighlightedBattleEvent]"
+								datacontext = "[NavalBattle.GetDefenderSide]"
+								datacontext = "[NavalBattlePanel.GetHighlightedBattleEventLogEntry]"
+								datacontext = "[NavalBattlePanel.GetHighlightedBattleEventLogEntry.GetDefenderSideCombatShip]"
+								parentanchor = right
+							}
+
+            				defender_admiral = {
+            					parentanchor = right|vcenter
+            				}
+						}
+
+						flowcontainer = {
+							parentanchor = hcenter
+							direction = vertical
+							spacing = 5
+							margin_top = 5
+							margin_bottom = 5
+
+							background = {
+								using = entry_bg
+							}
+
+							textbox = {
+								size = { @panel_width_minus_10 25 }
+								align = hcenter
+								text = "NAVAL_BATTLE_CONDITION"
+							}
+
+							textbox = {
+								size = { @panel_width_minus_10 25 }
+								align = hcenter
+								text = "NAVAL_BATTLE_START_DATE"
+							}
+						}
+
+						flowcontainer = {
+            				parentanchor = hcenter
+
+							naval_battle_side_content_attacker = {
+							}
+
+							vertical_divider_stronger_full = {
+								parentanchor = hcenter
+							}
+
+							naval_battle_side_content_defender = {
+								parentanchor = right
+							}
+						}
+					}
+				}
+
+				flowcontainer = {
+					direction = vertical
+					visible = "[InformationPanel.IsTabSelected('battle_log')]"
+					datamodel = "[NavalBattle.GetLogEntries]"
+					using = default_content_fade
+					spacing = 5
+
+					item = {
+						flowcontainer = {
+							direction = vertical
+
+							battle_log_entry = {
+								visible = "[BattleLogEntry.IsAttack]"
+							}
+
+							battle_log_entry_withdrew = {
+								visible = "[BattleLogEntry.IsWithdraw]"
+							}
+
+							battle_log_entry_condition = {
+								visible = "[BattleLogEntry.HasBattleCondition]"
+							}
+						}
+					}
+				}
+			}
+		}
+
+		blockoverride "fixed_bottom"
+		{
+			flowcontainer = {
+				visible = "[And(InformationPanel.IsTabSelected('battle_log'), GreaterThan_int32(NavalBattle.GetNumLogPages, '(int32)1'))]"
+				direction = vertical
+
+				divider_clean = {
+					size = { @panel_width_plus_14 4 }
+				}
+
+				flowcontainer = {
+					spacing = 20
+					margin_top = 30
+					using = default_list_position
+
+					button_select_arrow = {
+						size = { 25 25 }
+						mirror = horizontal
+						parentanchor = vcenter
+						using = decrease_button_sound
+						using = tooltip_above
+						tooltip = "PREVIOUS_PAGE"
+						onclick = "[NavalBattle.PrevLogPage]"
+					}
+
+					text_single = {
+						text = "NAVAL_BATTLE_LOG_CURRENT_PAGE"
+						parentanchor = vcenter
+						align = nobaseline
+					}
+
+					button_select_arrow = {
+						size = { 25 25 }
+						parentanchor = vcenter
+						using = increase_button_sound
+						using = tooltip_above
+						tooltip = "NEXT_PAGE"
+						onclick = "[NavalBattle.NextLogPage]"
+					}
+				}
+			}
+		}
+	}
+
+	type battle_log_entry = widget {
+		size = { @panel_width 120 }
+
+		background = {
+			using = entry_bg_simple
+		}
+
+		vbox = {
+			margin = { 0 10 }
+			layoutpolicy_vertical = expanding
+			spacing = 5
+
+			textbox = {
+				margin_left = 10
+				size = { @panel_width 25 }
+				text = "[BattleLogEntry.GetDescription]"
+				align = nobaseline
+				using = elide_fontsize_min
+			}
+
+			hbox = {
+				datacontext = "[NavalBattle.GetAttacker]"
+				layoutpolicy_horizontal = expanding
+				margin_top = 5
+				margin_left = 10
+				margin_right = 10
+
+				widget = {
+					size = { 170 60 }
+
+					flowcontainer = {
+						spacing = 5
+
+						### ATTACKER SIDE - Is Actor
+						attacker_battle_log_actor = {}
+
+						### ATTACKER SIDE - Is Target
+						attacker_battle_log_target = {}
+					}
+				}
+
+				expand = {}
+
+				vbox = {
+					spacing = 5
+
+					### ATTACKER SIDE
+					icon = {
+						visible = "[Not(BattleLogEntry.IsActorDefender)]"
+						size = { 32 32 }
+						texture = "gfx/interface/icons/generic_icons/win_war_against.dds"
+					}
+
+					### DEFENDER SIDE
+					icon = {
+						visible = "[BattleLogEntry.IsActorDefender]"
+						size = { 32 32 }
+						texture = "gfx/interface/icons/generic_icons/win_war_against.dds"
+						mirror = horizontal
+					}
+
+					hbox = {
+						spacing = 5
+
+						textbox = {
+							visible = "[BattleLogEntry.IsCritical]"
+							margin = { 5 0 }
+							autoresize = yes
+							align = nobaseline
+							raw_text = "@ship_critical_hit_damage! #v [BattleLogEntry.GetHullDamage] #!"
+						}
+
+						textbox = {
+							visible = "[Not( BattleLogEntry.IsCritical)]"
+							margin = { 5 0 }
+							autoresize = yes
+							align = nobaseline
+							raw_text = "@hull_attack_damage! #v [BattleLogEntry.GetHullDamage] #!"
+						}
+
+						textbox = {
+							margin = { 5 0 }
+							autoresize = yes
+							align = nobaseline
+							raw_text = "@crew_attack_damage! #v [BattleLogEntry.GetCrewDamage] #!"
+						}
+
+					}
+				}
+
+				expand = {}
+
+				widget = {
+					size = { 170 60 }
+
+					flowcontainer = {
+						spacing = 5
+						parentanchor = right
+
+
+						### DEFENDER SIDE - Is Actor
+						defender_battle_log_actor = {}
+
+						### DEFENDER SIDE - Is Target
+						defender_battle_log_target = {}
+					}
+				}
+			}
+		}
+	}
+
+	type battle_log_entry_withdrew = widget {
+		size = { @panel_width 120 }
+
+		background = {
+			using = entry_bg_simple
+		}
+
+		vbox = {
+			margin = { 0 10 }
+			layoutpolicy_vertical = expanding
+			spacing = 5
+
+			textbox = {
+				margin_left = 10
+				size = { @panel_width 25 }
+				text = "[BattleLogEntry.GetDescription]"
+				using = elide_fontsize_min
+			}
+
+			hbox = {
+				datacontext = "[NavalBattle.GetAttacker]"
+				layoutpolicy_horizontal = expanding
+				margin_top = 5
+				margin_left = 10
+				margin_right = 10
+
+				widget = {
+					size = { 170 60 }
+
+					flowcontainer = {
+						visible = "[Not(BattleLogEntry.IsActorDefender)]"
+						spacing = 5
+
+						### ATTACKER SIDE - Is Actor
+						attacker_battle_log_actor = {}
+					}
+				}
+
+				expand = {}
+
+				vbox = {
+
+					### ATTACKER SIDE
+					icon = {
+						visible = "[Not(BattleLogEntry.IsActorDefender)]"
+						size = { 32 32 }
+						texture = "gfx/interface/icons/generic_icons/turns_into.dds"
+						mirror = horizontal
+					}
+
+					### DEFENDER SIDE
+					icon = {
+						visible = "[BattleLogEntry.IsActorDefender]"
+						size = { 32 32 }
+						texture = "gfx/interface/icons/generic_icons/turns_into.dds"
+					}
+
+					icon = {
+						size = { 30 30 }
+						texture = "gfx/interface/icons/military_icons/ships_fled.dds"
+					}
+				}
+
+				expand = {}
+
+				widget = {
+					size = { 170 60 }
+
+					flowcontainer = {
+						visible = "[BattleLogEntry.IsActorDefender]"
+						spacing = 5
+						parentanchor = right
+
+
+						### DEFENDER SIDE - Is Actor
+						defender_battle_log_actor = {}
+					}
+				}
+			}
+		}
+	}
+
+	type battle_log_entry_condition = widget {
+		size = { @panel_width 120 }
+
+		background = {
+			using = entry_bg_simple
+		}
+
+		background = {
+			texture = "gfx/interface/illustrations/top_illus/top_illu_navy_2.dds"
+			using = top_illu_properties
+		}
+
+		vbox = {
+			margin = { 0 10 }
+			layoutpolicy_vertical = expanding
+			spacing = 5
+
+			textbox = {
+				margin_left = 10
+				size = { @panel_width 25 }
+				text = "[BattleLogEntry.GetDescription]"
+				using = elide_fontsize_min
+			}
+
+			hbox = {
+				datacontext = "[NavalBattle.GetAttacker]"
+				layoutpolicy_horizontal = expanding
+				margin_top = 5
+				margin_left = 10
+				margin_right = 10
+
+				widget = {
+					size = { 170 60 }
+
+					tiny_flag_no_interact = {
+						datacontext = "[NavalBattle.GetAttacker]"
+						parentanchor = vcenter
+						blockoverride "is_player_glow_size" {
+							size = { 270% 270% }
+						}
+					}
+				}
+
+				expand = {}
+
+				hbox = {
+
+					textbox = {
+						margin = { 5 0 }
+						autoresize = yes
+						align = nobaseline
+						raw_text = "@hull_attack_damage! #v [BattleLogEntry.GetHullDamage] #!"
+					}
+
+					textbox = {
+						margin = { 5 0 }
+						autoresize = yes
+						align = nobaseline
+						raw_text = "@crew_attack_damage! #v [BattleLogEntry.GetCrewDamage] #!"
+					}
+				}
+
+				expand = {}
+
+				widget = {
+					size = { 170 60 }
+
+					tiny_flag_no_interact = {
+						parentanchor = right|vcenter
+						datacontext = "[NavalBattle.GetDefender]"
+						blockoverride "is_player_glow_size" {
+							size = { 270% 270% }
+						}
+					}
+				}
+			}
+		}
+	}
+
+	type attacker_admiral = widget {
+		size = { @panel_width_half 360 }
+		datacontext = "[NavalBattle.GetAttackerSide]"
+		datacontext = "[NavalBattleSide.GetCommander]"
+
+		character_portrait_base = {
+			parentanchor = vcenter
+			position = { 0 30 }
+			size = { 120 220 }
+
+			blockoverride "portrait_size" {
+				block "character_portrait_size" {
+					size = { 120 220 }
+				}
+			}
+
+			blockoverride "portrait_texture" {
+				portrait_texture = "[Character.GetAnimatedPortrait('environment_front_generals_left', 'camera_event_left', 'commander_vs_left', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+			}
+
+			blockoverride "portrait_icons" {}
+			blockoverride "highlight" {}
+		}
+
+		attacker_progress = {
+			parentanchor = bottom
+		}
+	}
+
+	type attacker_progress = flowcontainer {
+		direction = vertical
+		margin_left = 15
+		spacing = 10
+		margin_bottom = 20
+
+		flowcontainer = {
+
+			dynamicgridbox = {
+				datamodel = "[NavalBattleSide.GetCommander.AccessTraits]"
+				datamodel_wrap = 6
+				flipdirection = yes
+
+				item = {
+
+					icon = {
+						size = { 21 30 }
+						texture = "[CharacterTrait.GetTexture]"
+						using = tooltip_ne
+						tooltipwidget = {
+							FancyTooltip_CharacterTrait = {}
+						}
+					}
+				}
+			}
+		}
+
+		widget = {
+			size = { 215 45 }
+
+			flowcontainer = {
+				direction = vertical
+				datacontext = "[NavalBattle.GetAttackerSide]"
+				parentanchor = right|vcenter
+
+				background = {
+					using = simple_frame
+					margin = { 3 3 }
+				}
+
+				bar_horizontal_with_background = {
+					size = { 148 25 }
+
+					block "first_bar_tooltip" {
+						tooltip = "NAVAL_BATTLE_SIDE_AVERAGE_HULL_TOOLTIP"
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 4
+					}
+
+					blockoverride "values" {
+						min = 0
+						max = 1
+						value = "[NavalBattleSide.GetActiveHullShare]"
+					}
+
+					textbox = {
+						parentanchor = vcenter|left
+						margin = { 5 0 }
+						autoresize = yes
+						align = nobaseline
+
+						block "first_bar_text" {
+							raw_text = "@ship_hp! #b [NavalBattleSide.GetActiveHullShare|0%]#!"
+						}
+					}
+
+					blockoverride "color" {
+						using = color_green_approval
+					}
+				}
+
+				bar_horizontal_with_background = {
+					size = { 148 18 }
+
+					block "first_bar_tooltip" {
+						tooltip = "NAVAL_BATTLE_SIDE_AVERAGE_CREW_TOOLTIP"
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 4
+					}
+
+					blockoverride "values" {
+						min = 0
+						max = 1
+						value = "[NavalBattleSide.GetActiveCrewShare]"
+					}
+
+					textbox = {
+						parentanchor = vcenter|left
+						margin = { 5 0 }
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_small
+
+						block "second_bar_text" {
+							raw_text = "@crew! #b [NavalBattleSide.GetTotalCrew|D]#! / [NavalBattleSide.GetMaxCrew|D]"
+						}
+					}
+
+					blockoverride "color" {
+						using = color_blue_negative
+					}
+				}
+			}
+
+			flag = {
+				parentanchor = vcenter
+				datacontext = "[NavalBattle.GetAttacker]"
+			}
+		}
+	}
+
+	type defender_admiral = widget {
+		size = { @panel_width_half 360 }
+		datacontext = "[NavalBattle.GetDefenderSide]"
+		datacontext = "[NavalBattleSide.GetCommander]"
+
+		character_portrait_base = {
+			visible = "[Character.IsValid]"
+			parentanchor = right|vcenter
+			position = { 0 30 }
+			size = { 120 220 }
+
+			blockoverride "portrait_size" {
+				block "character_portrait_size" {
+					size = { 120 220 }
+				}
+			}
+
+			blockoverride "portrait_texture" {
+				portrait_texture = "[Character.GetAnimatedPortrait('environment_front_generals_right', 'camera_event_right', 'commander_vs_right', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+			}
+
+			blockoverride "portrait_icons" {}
+			blockoverride "highlight" {}
+		}
+
+		defender_progress = {
+			parentanchor = right|bottom
+		}
+	}
+
+	type defender_progress = flowcontainer {
+		direction = vertical
+		margin_right = 15
+		spacing = 10
+		margin_bottom = 20
+
+		flowcontainer = {
+			margin_right = 15
+			parentanchor = right
+
+			dynamicgridbox = {
+				layoutanchor = topright
+				datamodel = "[NavalBattleSide.GetCommander.AccessTraits]"
+				datamodel_wrap = 6
+				flipdirection = yes
+
+				item = {
+					icon = {
+						size = { 21 30 }
+						texture = "[CharacterTrait.GetTexture]"
+						using = tooltip_above
+						tooltipwidget = {
+							FancyTooltip_CharacterTrait = {}
+						}
+					}
+				}
+			}
+		}
+
+		widget = {
+			size = { 216 45 }
+
+			flowcontainer = {
+				direction = vertical
+				parentanchor = vcenter
+
+				background = {
+					using = simple_frame
+					margin = { 3 3 }
+				}
+
+				bar_horizontal_with_background = {
+					size = { 148 25 }
+
+					block "first_bar_tooltip" {
+						tooltip = "NAVAL_BATTLE_SIDE_AVERAGE_HULL_TOOLTIP"
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 4
+					}
+
+					blockoverride "values" {
+						invertprogress = yes
+						min = 0
+						max = 1
+						value = "[NavalBattleSide.GetActiveHullShare]"
+					}
+
+					textbox = {
+						parentanchor = vcenter|right
+						margin = { 5 0 }
+						autoresize = yes
+						align = nobaseline
+
+						block "first_bar_text" {
+							raw_text = "@ship_hp! #b [NavalBattleSide.GetActiveHullShare|0%]#!"
+						}
+					}
+
+					blockoverride "marker_widgetanchor" {
+						visible = "[NotZero_CFixedPoint(NavalBattleSide.GetActiveHullShare)]"
+						widgetanchor = left
+						mirror = horizontal
+					}
+
+					blockoverride "color" {
+						using = color_green_approval
+					}
+				}
+
+				bar_horizontal_with_background = {
+					size = { 148 18 }
+
+					block "first_bar_tooltip" {
+						tooltip = "NAVAL_BATTLE_SIDE_AVERAGE_CREW_TOOLTIP"
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 4
+					}
+
+					blockoverride "values" {
+						invertprogress = yes
+						min = 0
+						max = 1
+						value = "[NavalBattleSide.GetActiveCrewShare]"
+					}
+
+					textbox = {
+						parentanchor = vcenter|right
+						margin = { 5 0 }
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_small
+
+						block "second_bar_text" {
+							raw_text = "@crew! #b [NavalBattleSide.GetTotalCrew|D]#! / [NavalBattleSide.GetMaxCrew|D]"
+						}
+					}
+
+					blockoverride "marker_widgetanchor" {
+						visible = "[NotZero_CFixedPoint(NavalBattleSide.GetActiveCrewShare)]"
+						widgetanchor = left
+						mirror = horizontal
+					}
+
+					blockoverride "color" {
+						using = color_blue_negative
+					}
+				}
+			}
+
+			flag = {
+				parentanchor = right|vcenter
+				datacontext = "[NavalBattle.GetDefender]"
+			}
+		}
+	}
+
+	type diorama_stats = flowcontainer {
+		visible = "[NavalBattle.IsActive]"
+		direction = vertical
+		spacing = 10
+
+		block "background" {
+			background = {
+				margin_top = 5
+				margin_bottom = 5
+				using = dark_area
+				alpha = 0.55
+			}
+		}
+
+		### ATTACKER
+		ship_type_silhouette = {
+			visible = "[NavalBattleSide.IsAttacker]"
+			datacontext = "[CombatShip.GetShip.GetType]"
+			size = { 100% 20 }
+			parentanchor = hcenter
+		}
+
+		### DEFENDER
+		ship_type_silhouette = {
+			visible = "[NavalBattleSide.IsDefender]"
+			datacontext = "[CombatShip.GetShip.GetType]"
+			size = { 100% 20 }
+			parentanchor = hcenter
+
+			blockoverride "direction" {
+				mirror = horizontal
+			}
+		}
+
+		flowcontainer = {
+			direction = vertical
+
+			textbox = {
+				visible = "[BattleLogEntry.IsActor(CombatShip.Self)]"
+				margin = { 5 0 }
+				autoresize = yes
+				align = nobaseline
+				raw_text = "@ship_hp! #v [CombatShip.GetShip.GetHitPoints|0]#!"
+			}
+
+			textbox = {
+				visible = "[BattleLogEntry.IsActor(CombatShip.Self)]"
+				margin = { 5 0 }
+				autoresize = yes
+				align = nobaseline
+				raw_text = "@crew! #v [CombatShip.GetShip.GetTotalCrew|0]#!"
+			}
+
+			textbox = {
+				visible = "[BattleLogEntry.IsTarget(CombatShip.Self)]"
+				margin = { 5 0 }
+				autoresize = yes
+				align = nobaseline
+				parentanchor = right
+				raw_text = "@ship_hp! #v [CombatShip.GetShip.GetHitPoints|0]#! (#r -[BattleLogEntry.GetHullDamage|0]#!)"
+			}
+
+			textbox = {
+				visible = "[BattleLogEntry.IsTarget(CombatShip.Self)]"
+				margin = { 5 0 }
+				autoresize = yes
+				align = nobaseline
+				parentanchor = right
+				raw_text = "@crew! #v [CombatShip.GetShip.GetTotalCrew|0]#! (#r -[BattleLogEntry.GetCrewDamage|0]#!)"
+			}
+		}
+	}
+
+	type fleets_grid_item = widget {
+		size = { 90 30 }
+		using = tooltip_se
+
+		block "backgrounds" {
+			background = {
+				using = entry_bg_simple
+				margin_left = -10
+
+				block "background_alpha" {
+					alpha = 0.5
+				}
+			}
+
+			background = {
+				margin_left = -10
+				using = simple_frame_mask
+				using = dark_area
+			}
+		}
+
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			margin_right = 5
+
+			widget = {
+				block "icon_widget_size" {
+					size = { 30 30 }
+				}
+
+				icon = {
+					parentanchor = vcenter
+					position = { 0 -5 }
+
+					block "icon_size" {
+						size = { 100% 100% }
+					}
+
+					block "icon" {
+						texture = "gfx/interface/icons/harvest_condition_icons/placeholder.dds"
+					}
+				}
+			}
+
+			textbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				using = elide_fontsize_min
+
+				block "text_alignment" {
+					align = right|nobaseline
+				}
+
+				block "text" {
+					raw_text = "99999999"
+				}
+			}
+		}
+	}
+
+	type naval_battle_side_fleet = button {
+		parentanchor = hcenter
+		using = default_button
+		size = { 255 40 }
+		onclick = "[InformationPanelBar.OpenMilitaryFormationPanelTab( MilitaryFormation.Self, 'default' )]"
+		onrightclick = "[RightClickMenuManager.ToggleMilitaryFormation(MilitaryFormation.AccessSelf, PdxGuiWidget.AccessSelf)]"
+		onmousehierarchyenter = "[AccessHighlightManager.HighlightMilitaryFormation( MilitaryFormation.Self )]"
+		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+
+		tooltipwidget = {
+			FancyTooltip_MilitaryFormation = {}
+		}
+
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			margin = { 5 0 }
+
+			button = {
+				size = { 30 30 }
+				alwaystransparent = yes
+				texture = "[MilitaryFormation.GetFlag]"
+				color = "[MilitaryFormation.GetFlagColor]"
+			}
+
+			textbox = {
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				using = elide_fontsize_min
+				align = nobaseline
+				text = "[MilitaryFormation.GetNameNoFormatting]"
+			}
+		}
+
+		icon = {
+			visible = "[MilitaryFormation.IsBeingHighlighted]"
+			using = highlighted_square_selection
+		}
+	}
+
+	type naval_battle_fleets_grid = flowcontainer {
+		parentanchor = hcenter
+		margin_bottom = 15
+		spacing = 5
+		wrap_count = 2
+
+		### NUMBER OF SHIPS
+		flowcontainer = {
+			direction = vertical
+
+			textbox = {
+				max_width = 85
+				parentanchor = right
+				margin_right = 2
+				margin_top = 5
+				autoresize = yes
+				elide = right
+				using = fontsize_medium
+				text = "SHIPS_CONCEPT"
+			}
+
+			fleets_grid_item = {
+				size = { 125 24 }
+				tooltip = "NAVAL_BATTLE_SIDE_NUM_SHIPS_TOOLTIP"
+
+				blockoverride "icon_size" {
+					size = { 45 45 }
+				}
+
+				blockoverride "icon_widget_size" {
+					size = { 24 24 }
+				}
+
+				blockoverride "text" {
+					raw_text = "#v [NavalBattleSide.GetNumShips] / [NavalBattleSide.GetStartingNumShips]#!"
+				}
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/generic_icons/flotillas.dds"
+				}
+			}
+		}
+
+		### WITHDRAWN SHIPS
+		flowcontainer = {
+			direction = vertical
+
+			textbox = {
+				max_width = 85
+				parentanchor = right
+				margin_right = 2
+				margin_top = 5
+				autoresize = yes
+				elide = right
+				using = fontsize_medium
+				text = "WITHDRAWN_SHIPS"
+			}
+
+			fleets_grid_item = {
+				size = { 125 24 }
+				tooltip = "NAVAL_BATTLE_SIDE_WITHDRAWN_TOOLTIP"
+
+				blockoverride "icon_size" {
+					size = { 45 45 }
+				}
+
+				blockoverride "icon_widget_size" {
+					size = { 24 24 }
+				}
+
+				blockoverride "text" {
+					raw_text = "[NavalBattleSide.GetNumShipsWithdrawn|0v]"
+				}
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/military_icons/ships_fled.dds"
+				}
+			}
+		}
+
+		### VULNERABILITY
+		flowcontainer = {
+			visible = "[NavalBattle.IsActive]"
+			direction = vertical
+
+			textbox = {
+				max_width = 85
+				parentanchor = right
+				margin_right = 2
+				margin_top = 5
+				autoresize = yes
+				elide = right
+				using = fontsize_medium
+				raw_text = "[concept_vulnerability]"
+			}
+
+			fleets_grid_item = {
+				size = { 125 24 }
+				tooltip = "NAVAL_BATTLE_SIDE_VULNERABILITY_TOOLTIP"
+
+				blockoverride "icon_size" {
+					size = { 45 45 }
+				}
+
+				blockoverride "icon_widget_size" {
+					size = { 24 24 }
+				}
+
+				blockoverride "text" {
+					raw_text = "[NavalBattleSide.GetTotalVulnerability|0v]"
+				}
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/military_icons/navy_icons/vulnerability.dds"
+				}
+			}
+		}
+
+		### SCREENING (fleet)
+		flowcontainer = {
+			visible = "[NavalBattle.IsActive]"
+			direction = vertical
+
+			textbox = {
+				max_width = 85
+				parentanchor = right
+				margin_right = 2
+				margin_top = 5
+				autoresize = yes
+				elide = right
+				using = fontsize_medium
+				raw_text = "[concept_screening]"
+			}
+
+			fleets_grid_item = {
+				size = { 125 24 }
+				tooltip = "NAVAL_BATTLE_SIDE_SCREENING_TOOLTIP"
+
+				blockoverride "icon_size" {
+					size = { 45 45 }
+				}
+
+				blockoverride "icon_widget_size" {
+					size = { 24 24 }
+				}
+
+				blockoverride "text" {
+					raw_text = "[NavalBattleSide.GetTotalScreening|0v]"
+				}
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/military_icons/navy_icons/screening.dds"
+				}
+			}
+		}
+
+		### ATTACK DAMAGE (fleet)
+		flowcontainer = {
+			visible = "[NavalBattle.IsActive]"
+			direction = vertical
+
+			textbox = {
+				max_width = 85
+				parentanchor = right
+				margin_right = 2
+				margin_top = 5
+				autoresize = yes
+				elide = right
+				using = fontsize_medium
+				raw_text = "HULL_DAMAGE_SHORT_CONCEPT"
+			}
+
+			fleets_grid_item = {
+				size = { 125 24 }
+
+				blockoverride "icon_size" {
+					size = { 45 45 }
+				}
+
+				blockoverride "icon_widget_size" {
+					size = { 24 24 }
+				}
+
+				blockoverride "text" {
+					text = "NAVAL_BATTLE_SIDE_AVERAGE_HULL_DAMAGE"
+				}
+
+				tooltip = "NAVAL_BATTLE_SIDE_AVERAGE_HULL_DAMAGE_TOOLTIP"
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/military_icons/navy_icons/hull_damage_navy.dds"
+				}
+			}
+		}
+
+		### ARMOR (fleet)
+		flowcontainer = {
+			visible = "[NavalBattle.IsActive]"
+			direction = vertical
+
+			textbox = {
+				max_width = 85
+				parentanchor = right
+				margin_right = 2
+				margin_top = 5
+				autoresize = yes
+				elide = right
+				using = fontsize_medium
+				text = "ARMOR_SHORT_CONCEPT"
+			}
+
+			fleets_grid_item = {
+				size = { 125 24 }
+
+				blockoverride "icon_size" {
+					size = { 45 45 }
+				}
+
+				blockoverride "icon_widget_size" {
+					size = { 24 24 }
+				}
+
+				blockoverride "text" {
+					text = "NAVAL_BATTLE_SIDE_AVERAGE_ARMOR"
+				}
+
+				tooltip = "NAVAL_BATTLE_SIDE_AVERAGE_ARMOR_TOOLTIP"
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/military_icons/navy_icons/armor_navy.dds"
+				}
+			}
+		}
+
+		### LOST SHIPS
+		flowcontainer = {
+			visible = "[NavalBattle.HasEnded]"
+			direction = vertical
+
+			textbox = {
+				max_width = 85
+				parentanchor = right
+				margin_right = 2
+				margin_top = 5
+				autoresize = yes
+				elide = right
+				using = fontsize_medium
+				text = "SUNK_SHIPS"
+			}
+
+			fleets_grid_item = {
+				size = { 125 24 }
+				tooltip = "NAVAL_BATTLE_SIDE_NUM_SHIPS_SUNK_TOOLTIP"
+
+				blockoverride "icon_size" {
+					size = { 45 45 }
+				}
+
+				blockoverride "icon_widget_size" {
+					size = { 24 24 }
+				}
+
+				blockoverride "text" {
+					raw_text = "[NavalBattleSide.GetNumShipsSunk|v-]"
+				}
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/military_icons/ships_destroyed.dds"
+				}
+			}
+		}
+
+		### LOST CREW
+		flowcontainer = {
+			visible = "[NavalBattle.HasEnded]"
+			direction = vertical
+
+			textbox = {
+				max_width = 85
+				parentanchor = right
+				margin_right = 2
+				margin_top = 5
+				autoresize = yes
+				elide = right
+				using = fontsize_medium
+				text = "CREW_CASUALTIES"
+			}
+
+			fleets_grid_item = {
+				size = { 125 24 }
+				tooltip = "NAVAL_BATTLE_SIDE_NUM_CREW_LOST_TOOLTIP"
+
+				blockoverride "icon_size" {
+					size = { 45 45 }
+				}
+
+				blockoverride "icon_widget_size" {
+					size = { 24 24 }
+				}
+
+				blockoverride "text" {
+					raw_text = "[NavalBattleSide.GetCrewDamageTaken|v-]"
+				}
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/military_icons/navy_icons/crew_casualties.dds"
+				}
+			}
+		}
+	}
+
+	type naval_battle_side_ships_list = flowcontainer {
+		minimumsize = { @panel_width_plus_14_half -1 }
+		maximumsize = { @panel_width_plus_14_half -1 }
+		direction = vertical
+		datamodel = "[NavalBattleSide.GetShipTemplateGroups]"
+		parentanchor = hcenter
+
+		item = {
+			flowcontainer = {
+				datacontext = "[NavalBattleShipTemplateGroup.GetTemplate]"
+				minimumsize = { @panel_width_half -1 }
+				maximumsize = { @panel_width_half -1 }
+				direction = vertical
+				margin_top = 10
+
+				using = entry_bg_fancy
+
+				section_header_button = {
+					parentanchor = hcenter
+					minimumsize = { @panel_width_half -1 }
+					maximumsize = { @panel_width_half -1 }
+					tooltip = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_ENTRY_NUM_TOOLTIP"
+
+					blockoverride "onclick" {
+						onclick = "[GetVariableSystem.Toggle(Concatenate('naval_battle_ship_template_group_', NavalBattleShipTemplateGroup.GetIDString))]"
+					}
+
+					blockoverride "onclick_showmore" {
+						visible = "[Not(GetVariableSystem.Exists(Concatenate('naval_battle_ship_template_group_', NavalBattleShipTemplateGroup.GetIDString)))]"
+					}
+
+					blockoverride "onclick_showless" {
+						visible = "[GetVariableSystem.Exists(Concatenate('naval_battle_ship_template_group_', NavalBattleShipTemplateGroup.GetIDString))]"
+					}
+
+					blockoverride "left_text" {
+						using = elide_fontsize_min
+
+						block "local_header" {
+							text = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_ENTRY_NAME"
+						}
+					}
+					blockoverride "right_text" {
+						section_header_right_text = {
+							text = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_ENTRY_NUM"
+						}
+					}
+				}
+
+				container = {
+					minimumsize = { @panel_width_half -1 }
+					maximumsize = { @panel_width_half -1 }
+					parentanchor = hcenter
+
+					flowcontainer = {
+						parentanchor = vcenter
+						spacing = 5
+						position = { 20 -5 }
+						direction = vertical
+
+						tooltipwidget = {
+							FancyTooltip_ShipTemplate = {}
+						}
+
+						textbox = {
+							autoresize = yes
+							align = nobaseline
+							text = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_ENTRY_TEMPLATE_NAME"
+						}
+
+						ship_type_silhouette = {
+							datacontext = "[ShipTemplate.GetType]"
+
+							blockoverride "fittype" {
+								fittype = start
+							}
+						}
+					}
+
+					flowcontainer = {
+						direction = vertical
+						parentanchor = right|vcenter
+						margin_right = 15
+						spacing = 3
+
+						textbox = {
+							minimumsize = { 45 -1 }
+							autoresize = yes
+							align = right
+							text = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_ENTRY_DESTROYED"
+							tooltip = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_ENTRY_DESTROYED_TOOLTIP"
+						}
+
+						textbox = {
+							minimumsize = { 45 -1 }
+							autoresize = yes
+							align = right
+							text = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_ENTRY_WITHDRAWN"
+							tooltip = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_ENTRY_WITHDRAWN_TOOLTIP"
+						}
+					}
+
+					widget = { size = { 0 85 } }
+				}
+
+				dynamicgridbox = {
+					visible = "[GetVariableSystem.Exists(Concatenate('naval_battle_ship_template_group_', NavalBattleShipTemplateGroup.GetIDString))]"
+					parentanchor = hcenter
+					datamodel_wrap = 2
+					flipdirection = yes
+					datamodel = "[NavalBattleShipTemplateGroup.GetShips]"
+
+					item = {
+						flowcontainer = {
+							direction = vertical
+							using = entry_bg_fancy
+							datacontext = "[CombatShip.GetShip]"
+
+							tooltipwidget = {
+								FancyTooltip_Ship = {}
+							}
+
+							container = {
+								parentanchor = top|hcenter
+
+								widget = {
+									size = { 120 25 }
+
+									background = {
+										using = dark_area
+									}
+								}
+
+								textbox = {
+									parentanchor = center
+									autoresize = yes
+									max_width = 115
+									align = center
+									using = elide_fontsize_min
+									text = "[Ship.GetNameNoFormatting]"
+								}
+							}
+
+							ship_type_silhouette = {
+								datacontext = "[Ship.GetTemplate.GetType]"
+
+								blockoverride "alpha" {
+									alpha = "[TransparentIfTrue( Not( CombatShip.IsActive ))]"
+								}
+
+								blockoverride "silhouettesize" {
+									size = { 130 25 }
+								}
+
+								blockoverride "fittype" {
+									fittype = center
+								}
+
+								icon = {
+									visible = "[CombatShip.IsSunk]"
+
+									parentanchor = center
+									size = { 25 25 }
+									texture = "gfx/interface/icons/military_icons/ships_destroyed.dds"
+									tooltip = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_SHIP_SUNK"
+								}
+
+								icon = {
+									visible = "[CombatShip.IsWithdrawn]"
+
+									parentanchor = center
+									size = { 25 25 }
+									texture = "gfx/interface/icons/military_icons/ships_fled.dds"
+									tooltip = "NAVAL_BATTLE_SHIP_TEMPLATE_LIST_SHIP_WITHDRAWN"
+								}
+							}
+
+							bar_horizontal_with_background = {
+								parentanchor = hcenter
+								size = { 90% 10 }
+
+								blockoverride "frame_texture_density" {
+									texture_density = 4
+								}
+
+								blockoverride "values" {
+									min = 0
+									max = 1
+									value = "[CombatShip.GetHitPointPercentage]"
+								}
+
+								textbox = {
+									parentanchor = center
+									autoresize = yes
+									align = nobaseline
+									using = fontsize_xsmall
+
+									block "first_bar_text" {
+										raw_text = "#b [CombatShip.GetHitPointPercentage|0%]#!"
+									}
+								}
+
+								blockoverride "color" {
+									using = color_green_approval
+								}
+							}
+
+							bar_horizontal_with_background = {
+								parentanchor = hcenter
+								size = { 90% 10 }
+
+								blockoverride "frame_texture_density" {
+									texture_density = 4
+								}
+
+								blockoverride "values" {
+									min = 0
+									max = 1
+									value = "[CombatShip.GetCrewPercentage]"
+								}
+
+								textbox = {
+									parentanchor = center
+									autoresize = yes
+									align = nobaseline
+									using = fontsize_xsmall
+
+									block "second_bar_text" {
+										raw_text = "#b [CombatShip.GetCrewPercentage|0%]#!"
+									}
+								}
+
+								blockoverride "color" {
+									using = color_blue_negative
+								}
+							}
+
+							widget = { size = { 8 8 } }
+						}
+					}
+				}
+			}
+		}
+	}
+
+	type naval_battle_side_content_attacker = flowcontainer {
+		datacontext = "[NavalBattle.GetAttackerSide]"
+		datacontext = "[NavalBattleSide.GetFormation]"
+		direction = vertical
+		spacing = 5
+
+		default_header = {
+			blockoverride "text" {
+				block "formation_header" {
+					text = "NAVAL_BATTLE_ATTACKET"
+				}
+			}
+
+			blockoverride "size" {
+				size = { @panel_width_plus_14_half 38 }
+			}
+		}
+
+		naval_battle_side_fleet = {}
+
+		naval_battle_fleets_grid = {}
+
+		divider_clean = {}
+
+		naval_battle_side_ships_list = {
+			margin_left = 2
+		}
+	}
+
+	type naval_battle_side_content_defender = flowcontainer {
+		datacontext = "[NavalBattle.GetDefenderSide]"
+		datacontext = "[NavalBattleSide.GetFormation]"
+		direction = vertical
+		spacing = 5
+
+		default_header = {
+			blockoverride "text" {
+				block "formation_header" {
+					text = "NAVAL_BATTLE_DEFENDER"
+				}
+			}
+
+			blockoverride "size" {
+				size = { @panel_width_plus_14_half 38 }
+			}
+		}
+
+		naval_battle_side_fleet = {}
+
+		naval_battle_fleets_grid = {}
+
+		divider_clean = {}
+
+		naval_battle_side_ships_list = {
+			margin_left = 4
+		}
+	}
+
+	### NAVAL BATTLE ITEM
+	type naval_battle_item = button {
+		using = default_button
+		size = { @panel_width 55 }
+		onclick = "[InformationPanelBar.OpenNavalBattlePanelTab(NavalBattle.AccessSelf, 'default')]"
+		onmousehierarchyenter = "[AccessHighlightManager.HighlightBattle(NavalBattle.Self)]"
+		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+		alwaystransparent = no
+		tooltip = "[NavalBattle.GetStatusString]"
+
+		icon = {
+			using = highlighted_square_selection
+		
+			block "highlight_visibility" {
+				visible = "[NavalBattle.IsBeingHighlighted]"
+			}
+		}
+
+		small_flag = {
+			datacontext = "[NavalBattle.GetAttacker]"
+			parentanchor = left|vcenter
+			position = { 10 0 }
+		}
+
+		flowcontainer = {
+			parentanchor = center
+			spacing = 15
+
+			textbox = {
+				margin_left = 0
+				raw_text = "@ships! [NavalBattle.GetAttackerSide.GetNumShips|v]#!"
+				size = { 100 50 }
+				align = right|nobaseline
+				parentanchor = vcenter
+				using = fontsize_large
+			}
+
+			button = {
+				size = { 45 45 }
+				texture = "[NavalBattle.GetBattleIcon]"
+				alwaystransparent = yes
+				parentanchor = vcenter
+			}
+
+			textbox = {
+				margin_left = 0
+				raw_text = "@ships! [NavalBattle.GetDefenderSide.GetNumShips|v]#!"
+				size = { 100 50 }
+				align = left|nobaseline
+				parentanchor = vcenter
+				using = fontsize_large
+			}
+
+		}
+
+		small_flag = {
+			datacontext = "[NavalBattle.GetDefender]"
+			parentanchor = right|vcenter
+			position = { -10 0 }
+		}
+	}
+
+	### ENDED NAVAL BATTLE ITEM
+	type ended_naval_battle_item = button {
+		onclick = "[InformationPanelBar.OpenNavalBattlePanelTab(NavalBattle.AccessSelf, 'default')]"
+		#onmousehierarchyenter = "[AccessHighlightManager.HighlightBattle(NavalBattle.Self)]" # TODO PRCAL-43091
+		#onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]" # TODO PRCAL-43091
+
+		#icon = { # TODO PRCAL-43091
+		#	visible = "[NavalBattle.IsBeingHighlighted]"
+		#	using = highlighted_square_selection
+		#}
+		using = default_button
+
+		container = {
+			resizeparent = yes
+			flowcontainer = {
+				direction = vertical
+				parentanchor = right
+				margin_top = 5
+
+				textbox = {
+					text = "[NavalBattle.GetProvince.GetSeaNodeName]"
+					autoresize = yes
+					align = nobaseline
+					parentanchor = right
+					margin_right = 10
+					maximumsize = { 190 -1 }
+					elide = left
+					fontsize_min = 12
+				}
+			}
+			flowcontainer = {
+				direction = vertical
+				margin_bottom = 5
+				margin_left = 5
+				margin_right = 5
+
+				background = {
+					using = entry_bg_simple
+				}
+
+				# victory/defeat + captured provinces
+				flowcontainer = {
+					margin_left = 5
+					margin_top = 5
+					# if you are in the battle
+					flowcontainer = {
+						visible = "[NavalBattle.IsLeadCountry(AccessPlayer)]"
+						direction = vertical
+						spacing = 10
+
+						textbox = {
+							visible = "[NavalBattle.IsWinner(AccessPlayer)]"
+							text = "BATTLE_VICTORY"
+							using = small_battle_outcome_formatting
+							default_format = "#p"
+						}
+						textbox = {
+							visible = "[NavalBattle.IsLoser(AccessPlayer)]"
+							text = "BATTLE_DEFEAT"
+							using = small_battle_outcome_formatting
+							default_format = "#n"
+						}
+						textbox = {
+							visible = "[NavalBattle.EndedInconclusively]"
+							text = "BATTLE_INCONCLUSIVE"
+							using = small_battle_outcome_formatting
+							default_format = "#n"
+						}
+					}
+
+					# if you are observer
+					flowcontainer = {
+						visible = "[Not( NavalBattle.IsLeadCountry(AccessPlayer) )]"
+						direction = vertical
+
+						textbox = {
+							visible = "[NavalBattle.IsOnWinnerSide( AccessPlayer )]"
+							text = "NAVAL_BATTLE_ALLY_VICTORY"
+							using = small_battle_outcome_formatting
+							default_format = "#p"
+						}
+						textbox = {
+							visible = "[NavalBattle.IsOnLoserSide( AccessPlayer )]"
+							text = "NAVAL_BATTLE_ALLY_DEFEAT"
+							using = small_battle_outcome_formatting
+							default_format = "#n"
+						}
+						textbox = {
+							visible = "[And(Not(Or( NavalBattle.IsOnWinnerSide(AccessPlayer), NavalBattle.IsOnLoserSide(AccessPlayer) )), Not(NavalBattle.EndedInconclusively))]"
+							text = "NAVAL_BATTLE_NONALLY_VICTORY"
+							using = small_battle_outcome_formatting
+						}
+						textbox = {
+							visible = "[NavalBattle.EndedInconclusively]"
+							text = "BATTLE_INCONCLUSIVE_OUTCOME"
+							using = small_battle_outcome_formatting
+						}
+					}
+				}
+
+				textbox = {
+					raw_text = "NAVAL_BATTLE_END_ATTACKER_OUTCOME"
+					autoresize = yes
+					align = nobaseline
+					margin_left = 5
+					margin_bottom = 2
+					minimumsize = { 350 -1 }
+					elide = right
+					fontsize_min = 12
+				}
+
+				widget = {
+					parentanchor = hcenter
+					size = { @panel_width_minus_10 36 }
+
+					background = {
+						using = entry_bg_simple
+					}
+
+					icon = {
+						size = { 30 30 }
+						texture = "[NavalBattle.GetBattleIcon]"
+						alwaystransparent = yes
+						parentanchor = center
+					}
+
+					### LEFT SIDE
+					flowcontainer = {
+						datacontext = "[NavalBattle.GetAttackerSide]"
+						position = { 10 0 }
+						parentanchor = vcenter
+						spacing = 10
+
+						tiny_flag_no_interact = {
+							datacontext = "[NavalBattle.GetAttacker]"
+							parentanchor = vcenter
+						}
+
+						textbox = {
+							raw_text = "@ships! #v [NavalBattleSide.GetNumShips] / [NavalBattleSide.GetStartingNumShips]#!"
+							tooltip = "[NavalBattleSide.GetNumShipsAtStartOfBattleDesc]"
+							autoresize = yes
+							align = left|nobaseline
+							parentanchor = vcenter
+							alpha = "[TransparentIfZero_int32(NavalBattle.GetStartingAttackerShips)]"
+						}
+
+						textbox = {
+							raw_text = "@ships_fled! #v [NavalBattleSide.GetNumShipsWithdrawn]#!"
+							tooltip = "[NavalBattleSide.GetNumShipsAtStartOfBattleDesc]"
+							autoresize = yes
+							align = right|nobaseline
+							parentanchor = vcenter
+						}
+					}
+
+					### RIGHT SIDE
+					flowcontainer = {
+						datacontext = "[NavalBattle.GetDefenderSide]"
+						position = { -10 0 }
+						parentanchor = vcenter|right
+						spacing = 10
+						alpha = "[TransparentIfZero_int32(NavalBattle.GetStartingDefenderShips)]"
+
+						textbox = {
+							raw_text = "@ships_fled! #v [NavalBattleSide.GetNumShipsWithdrawn]#!"
+							tooltip = "[NavalBattleSide.GetNumShipsAtStartOfBattleDesc]"
+							autoresize = yes
+							align = right|nobaseline
+							parentanchor = vcenter
+						}
+
+						textbox = {
+							raw_text = "@ships! #v [NavalBattleSide.GetNumShips] / [NavalBattleSide.GetStartingNumShips]#!"
+							tooltip = "[NavalBattleSide.GetNumShipsAtStartOfBattleDesc]"
+							autoresize = yes
+							align = left|nobaseline
+							parentanchor = vcenter
+							alpha = "[TransparentIfZero_int32(NavalBattle.GetStartingAttackerShips)]"
+						}
+
+						tiny_flag_no_interact = {
+							datacontext = "[NavalBattle.GetDefender]"
+							parentanchor = vcenter
+						}
+					}
+				}
+			}
+		}
+	}
+
+	type battle_results = flowcontainer {
+		parentanchor = hcenter
+		visible = "[NavalBattle.IsLeadCountry(AccessPlayer)]"
+		direction = vertical
+		spacing = 5
+
+		textbox = {
+			using = entry_bg_fancy
+			margin = { 100 6 }
+			visible = "[NavalBattle.IsWinner(AccessPlayer)]"
+			align = hcenter
+			text = "BATTLE_VICTORY"
+			using = battle_outcome_formatting
+			default_format = "#p"
+		}
+
+		textbox = {
+			using = entry_bg_fancy
+			margin = { 100 6 }
+			visible = "[NavalBattle.IsLoser(AccessPlayer)]"
+			align = hcenter
+			text = "BATTLE_DEFEAT"
+			using = battle_outcome_formatting
+			default_format = "#n"
+		}
+
+		textbox = {
+			using = entry_bg_fancy
+			margin = { 100 6 }
+			visible = "[NavalBattle.EndedInconclusively]"
+			align = hcenter
+			text = "BATTLE_INCONCLUSIVE"
+			using = battle_outcome_formatting
+			default_format = "#n"
+		}
+
+		textbox = {
+			visible = "[NavalBattle.HasEnded]"
+			text = "NAVAL_BATTLE_END_ATTACKER_OUTCOME"
+			parentanchor = hcenter
+			autoresize = yes
+			align = hcenter
+			using = fontsize_xxl
+			elide = right
+		}
+
+		textbox = {
+			visible = "[NavalBattle.HasEnded]"
+			parentanchor = hcenter
+			align = hcenter
+			minimumsize = { 350 -1 }
+			text = "NAVAL_BATTLE_END_DATE"
+			using = elide_fontsize_min
+		}
+	}
+
+	### ATTACKER SIDE - Is Actor
+	type attacker_battle_log_actor = flowcontainer {
+		direction = vertical
+		datacontext = "[BattleLogEntry.GetActor]"
+
+		spacing = 10
+		visible = "[Not(BattleLogEntry.IsActorDefender)]"
+
+		ship_type_silhouette = {
+			datacontext = "[BattleLogEntry.GetActor.GetType]"
+
+			block "direction" {}
+
+			blockoverride "fittype" {
+				fittype = center
+			}
+
+			tooltipwidget = {
+				FancyTooltip_Ship = {
+					blockoverride "icons_and_bars" {
+
+						military_formation_icon_and_bars = {
+							datacontext = "[Ship.GetFleet]"
+							size = { 500 80 }
+
+							blockoverride "first_bar_size" {
+								size = { 500 25 }
+							}
+
+							blockoverride "second_bar_size" {
+								size = { 500 18 }
+							}
+
+							blockoverride "third_bar_size" {
+								size = { 500 18 }
+							}
+
+							blockoverride "first_bar_tooltip" {
+								tooltip = "SHIP_HIT_POINTS_TOOLTIP"
+							}
+
+							blockoverride "second_bar_tooltip" {
+								tooltip = "SHIP_CREW_TOOLTIP"
+							}
+
+							blockoverride "first_bar_values" {
+								min = 0
+								max = 1
+								value = "[BattleLogEntry.GetActorCurrentHitPointPercentage]"
+							}
+
+							blockoverride "second_bar_values" {
+								min = 0
+								max = 1
+								value = "[BattleLogEntry.GetActorCurrentCrewPercentage]"
+							}
+
+							blockoverride "first_bar_text" {
+								raw_text = "@ship_hp! #b [BattleLogEntry.GetActorCurrentHitPoints|0] / [BattleLogEntry.GetActorMaxHitPoints|0]"
+							}
+
+							blockoverride "second_bar_text" {
+								raw_text = "@crew! #b [BattleLogEntry.GetActorCurrentCrew|D]#! / [BattleLogEntry.GetActorMaxCrew|D]"
+							}
+
+							blockoverride "entire_icon" {}
+						}
+					}					
+				}
+			}			
+		}
+
+		flowcontainer  = {
+			parentanchor = hcenter
+			spacing = 5
+
+			tiny_flag_no_interact = {
+				datacontext = "[NavalBattle.GetAttacker]"
+				blockoverride "is_player_glow_size" {
+					size = { 270% 270% }
+				}
+			}
+
+			flowcontainer = {
+				direction = vertical
+
+				bar_horizontal_with_background = {
+					size = { 110 10 }
+
+					blockoverride "values" {
+						min = 0
+						max = 1
+						value = "[BattleLogEntry.GetActorCurrentHitPointPercentage]"
+					}
+
+					blockoverride "color" {
+						using = color_green_approval
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					textbox = {
+						parentanchor = center
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_xsmall
+						raw_text = "#b [BattleLogEntry.GetActorCurrentHitPointPercentage|0%]#!"
+					}
+				}
+
+				bar_horizontal_with_background = {
+					size = { 110 10 }
+
+					blockoverride "values" {
+						min = 0
+						max = 1
+						value = "[BattleLogEntry.GetActorCurrentCrewPercentage]"
+					}
+
+					blockoverride "color" {
+						using = color_blue_negative
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					textbox = {
+						parentanchor = center
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_xsmall
+						raw_text = "#b [BattleLogEntry.GetActorCurrentCrewPercentage|0%]#!"
+					}
+				}
+			}						
+		}
+	}
+
+	### ATTACKER SIDE - Is Target
+	type attacker_battle_log_target = flowcontainer {
+		direction = vertical
+		datacontext = "[BattleLogEntry.GetTarget]"
+
+		spacing = 10
+		visible = "[Not(BattleLogEntry.IsTargetDefender)]"
+
+		ship_type_silhouette = {
+			datacontext = "[BattleLogEntry.GetTarget.GetType]"
+
+			blockoverride "fittype" {
+				fittype = center
+			}
+
+			tooltipwidget = {
+				FancyTooltip_Ship = {
+					blockoverride "icons_and_bars" {
+
+						military_formation_icon_and_bars = {
+							datacontext = "[Ship.GetFleet]"
+							size = { 500 80 }
+
+							blockoverride "first_bar_size" {
+								size = { 500 25 }
+							}
+
+							blockoverride "second_bar_size" {
+								size = { 500 18 }
+							}
+
+							blockoverride "third_bar_size" {
+								size = { 500 18 }
+							}
+
+							blockoverride "first_bar_tooltip" {
+								tooltip = "SHIP_HIT_POINTS_TOOLTIP"
+							}
+
+							blockoverride "second_bar_tooltip" {
+								tooltip = "SHIP_CREW_TOOLTIP"
+							}
+
+							blockoverride "first_bar_values" {
+								min = 0
+								max = 1
+								value = "[BattleLogEntry.GetTargetCurrentHitPointPercentage]"
+							}
+
+							blockoverride "second_bar_values" {
+								min = 0
+								max = 1
+								value = "[BattleLogEntry.GetTargetCurrentCrewPercentage]"
+							}
+
+							blockoverride "first_bar_text" {
+								raw_text = "@ship_hp! #b [BattleLogEntry.GetTargetCurrentHitPoints|0] / [BattleLogEntry.GetTargetMaxHitPoints|0]"
+							}
+
+							blockoverride "second_bar_text" {
+								raw_text = "@crew! #b [BattleLogEntry.GetTargetCurrentCrew|D]#! / [BattleLogEntry.GetTargetMaxCrew|D]"
+							}
+
+							blockoverride "entire_icon" {}
+						}
+					}					
+				}
+			}			
+		}
+
+		flowcontainer  = {
+			parentanchor = hcenter
+			spacing = 5
+
+			tiny_flag_no_interact = {
+				datacontext = "[NavalBattle.GetAttacker]"
+				blockoverride "is_player_glow_size" {
+					size = { 270% 270% }
+				}
+			}
+
+			flowcontainer = {
+				direction = vertical
+
+				bar_horizontal_with_background = {
+					size = { 110 10 }
+
+					blockoverride "values" {
+						min = 0
+						max = 1
+						value = "[BattleLogEntry.GetTargetCurrentHitPointPercentage]"
+					}
+
+					blockoverride "color" {
+						using = color_green_approval
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					textbox = {
+						parentanchor = center
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_xsmall
+						raw_text = "#b [BattleLogEntry.GetTargetCurrentHitPointPercentage|0%]#!"
+					}
+				}
+
+				bar_horizontal_with_background = {
+					size = { 110 10 }
+
+					blockoverride "values" {
+						min = 0
+						max = 1
+						value = "[BattleLogEntry.GetTargetCurrentCrewPercentage]"
+					}
+
+					blockoverride "color" {
+						using = color_blue_negative
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					textbox = {
+						parentanchor = center
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_xsmall
+						raw_text = "#b [BattleLogEntry.GetTargetCurrentCrewPercentage|0%]#!"
+					}
+				}
+			}			
+		}	
+	}
+
+	### DEFENDER SIDE - Is Actor
+	type defender_battle_log_actor = flowcontainer {
+		direction = vertical
+		datacontext = "[BattleLogEntry.GetActor]"
+
+		spacing = 10
+		visible = "[BattleLogEntry.IsActorDefender]"
+
+		ship_type_silhouette = {
+			datacontext = "[BattleLogEntry.GetActor.GetType]"
+
+			blockoverride "direction" {
+				mirror = horizontal
+			}
+
+			blockoverride "fittype" {
+				fittype = center
+			}
+
+			tooltipwidget = {
+				FancyTooltip_Ship = {
+					blockoverride "icons_and_bars" {
+
+						military_formation_icon_and_bars = {
+							datacontext = "[Ship.GetFleet]"
+							size = { 500 80 }
+
+							blockoverride "first_bar_size" {
+								size = { 500 25 }
+							}
+
+							blockoverride "second_bar_size" {
+								size = { 500 18 }
+							}
+
+							blockoverride "third_bar_size" {
+								size = { 500 18 }
+							}
+
+							blockoverride "first_bar_tooltip" {
+								tooltip = "SHIP_HIT_POINTS_TOOLTIP"
+							}
+
+							blockoverride "second_bar_tooltip" {
+								tooltip = "SHIP_CREW_TOOLTIP"
+							}
+
+							blockoverride "first_bar_values" {
+								min = 0
+								max = 1
+								value = "[BattleLogEntry.GetActorCurrentHitPointPercentage]"
+							}
+
+							blockoverride "second_bar_values" {
+								min = 0
+								max = 1
+								value = "[BattleLogEntry.GetActorCurrentCrewPercentage]"
+							}
+
+							blockoverride "first_bar_text" {
+								raw_text = "@ship_hp! #b [BattleLogEntry.GetActorCurrentHitPoints|0] / [BattleLogEntry.GetActorMaxHitPoints|0]"
+							}
+
+							blockoverride "second_bar_text" {
+								raw_text = "@crew! #b [BattleLogEntry.GetActorCurrentCrew|D]#! / [BattleLogEntry.GetActorMaxCrew|D]"
+							}
+
+							blockoverride "entire_icon" {}
+						}
+					}					
+				}
+			}				
+		}
+
+		flowcontainer  = {
+			parentanchor = hcenter
+			spacing = 5
+
+			flowcontainer = {
+				direction = vertical
+
+				bar_horizontal_with_background = {
+					size = { 110 10 }
+
+					blockoverride "values" {
+						min = 0
+						max = 1
+						value = "[BattleLogEntry.GetActorCurrentHitPointPercentage]"
+					}
+
+					blockoverride "color" {
+						using = color_green_approval
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					textbox = {
+						parentanchor = center
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_xsmall
+						raw_text = "#b [BattleLogEntry.GetActorCurrentHitPointPercentage|0%]#!"
+					}
+				}
+
+				bar_horizontal_with_background = {
+					size = { 110 10 }
+
+					blockoverride "values" {
+						min = 0
+						max = 1
+						value = "[BattleLogEntry.GetActorCurrentCrewPercentage]"
+					}
+
+					blockoverride "color" {
+						using = color_blue_negative
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					textbox = {
+						parentanchor = center
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_xsmall
+						raw_text = "#b [BattleLogEntry.GetActorCurrentCrewPercentage|0%]#!"
+					}
+				}
+			}
+
+			tiny_flag_no_interact = {
+				datacontext = "[NavalBattle.GetDefender]"
+				blockoverride "is_player_glow_size" {
+					size = { 270% 270% }
+				}
+			}						
+		}
+	}
+
+	### DEFENDER SIDE - Is Target
+	type defender_battle_log_target = flowcontainer {
+		direction = vertical
+		datacontext = "[BattleLogEntry.GetTarget]"
+
+		spacing = 10
+		visible = "[BattleLogEntry.IsTargetDefender]"
+
+		ship_type_silhouette = {
+			datacontext = "[BattleLogEntry.GetTarget.GetType]"
+
+			blockoverride "direction" {
+				mirror = horizontal
+			}
+
+			blockoverride "fittype" {
+				fittype = center
+			}
+
+			tooltipwidget = {
+				FancyTooltip_Ship = {
+					blockoverride "icons_and_bars" {
+
+						military_formation_icon_and_bars = {
+							datacontext = "[Ship.GetFleet]"
+							size = { 500 80 }
+
+							blockoverride "first_bar_size" {
+								size = { 500 25 }
+							}
+
+							blockoverride "second_bar_size" {
+								size = { 500 18 }
+							}
+
+							blockoverride "third_bar_size" {
+								size = { 500 18 }
+							}
+
+							blockoverride "first_bar_tooltip" {
+								tooltip = "SHIP_HIT_POINTS_TOOLTIP"
+							}
+
+							blockoverride "second_bar_tooltip" {
+								tooltip = "SHIP_CREW_TOOLTIP"
+							}
+
+							blockoverride "first_bar_values" {
+								min = 0
+								max = 1
+								value = "[BattleLogEntry.GetTargetCurrentHitPointPercentage]"
+							}
+
+							blockoverride "second_bar_values" {
+								min = 0
+								max = 1
+								value = "[BattleLogEntry.GetTargetCurrentCrewPercentage]"
+							}
+
+							blockoverride "first_bar_text" {
+								raw_text = "@ship_hp! #b [BattleLogEntry.GetTargetCurrentHitPoints|0] / [BattleLogEntry.GetTargetMaxHitPoints|0]"
+							}
+
+							blockoverride "second_bar_text" {
+								raw_text = "@crew! #b [BattleLogEntry.GetTargetCurrentCrew|D]#! / [BattleLogEntry.GetTargetMaxCrew|D]"
+							}
+
+							blockoverride "entire_icon" {}
+						}
+					}					
+				}
+			}			
+		}
+
+		flowcontainer = {
+			parentanchor = hcenter
+			spacing = 5
+
+			flowcontainer = {
+				direction = vertical
+
+				bar_horizontal_with_background = {
+					size = { 110 10 }
+
+					blockoverride "values" {
+						invertprogress = yes
+						min = 0
+						max = 1
+						value = "[BattleLogEntry.GetTargetCurrentHitPointPercentage]"
+					}
+
+					blockoverride "marker_widgetanchor" {
+						visible = "[NotZero_CFixedPoint(BattleLogEntry.GetTargetCurrentHitPointPercentage)]"
+						widgetanchor = left
+						mirror = horizontal
+					}
+
+					blockoverride "color" {
+						using = color_green_approval
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					textbox = {
+						parentanchor = center
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_xsmall
+						raw_text = "#b [BattleLogEntry.GetTargetCurrentHitPointPercentage|0%]#!"
+					}
+				}
+
+				bar_horizontal_with_background = {
+					size = { 110 10 }
+
+					blockoverride "values" {
+						invertprogress = yes
+						min = 0
+						max = 1
+						value = "[BattleLogEntry.GetTargetCurrentCrewPercentage]"
+					}
+
+					blockoverride "marker_widgetanchor" {
+						visible = "[NotZero_CFixedPoint(BattleLogEntry.GetTargetCurrentCrewPercentage)]"
+						widgetanchor = left
+						mirror = horizontal
+					}
+
+					blockoverride "color" {
+						using = color_blue_negative
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					textbox = {
+						parentanchor = center
+						autoresize = yes
+						align = nobaseline
+						using = fontsize_xsmall
+						raw_text = "#b [BattleLogEntry.GetTargetCurrentCrewPercentage|0%]#!"
+					}
+				}
+			}
+
+			tiny_flag_no_interact = {
+				datacontext = "[NavalBattle.GetDefender]"
+				blockoverride "is_player_glow_size" {
+					size = { 270% 270% }
+				}
+			}										
+		}
+	}
+
+	type filter_button_battle_log = button {
+		using = default_button
+		using = tooltip_above
+
+		block "size" {
+			size = { 135 40 }
+		}
+
+		block "onclick" {
+			onclick = "[Market.TogglePinInOutliner]"
+		}
+
+		textbox = {
+			parentanchor = center
+			size = { 90% 100% }
+			align = hcenter|nobaseline
+			using = elide_fontsize_min
+
+			block "text" {
+				text = "ALL"
+			}
+		}
+	}
+
+	type filter_background_selected_battle_log = widget {
+		using = tooltip_above
+
+		block "size" {
+			size = { 135 40 }
+		}
+
+		background = {
+			using = paper_bg
+		}
+
+		textbox = {
+			parentanchor = center
+			align = nobaseline
+			autoresize = yes
+
+			block "text" {
+				text = "ALL"
+			}
+		}
+
+		icon = {
+			name = "selected_bg"
+			size = { 100% 100% }
+			using = highlighted_square_selection
+			using = shimmer_fade_in
+		}
+	}
+}

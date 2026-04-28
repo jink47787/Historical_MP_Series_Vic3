@@ -437,12 +437,13 @@ types interest_group_panel_types
 									}
 
 									textbox = {
-										size = { @column_width 23 }
+										maximumsize = { @column_width 46 }
 										parentanchor = hcenter
 										align = nobaseline|hcenter
+										autoresize = yes
+										multiline = yes
+										using = elide_fontsize_min
 										text = "[InterestGroupTrait.GetNameNoFormatting]"
-										elide = right
-										fontsize_min = 14
 									}
 								}
 							}
@@ -658,73 +659,6 @@ types interest_group_panel_types
 							direction = vertical
 							spacing = 10
 
-							### POSSIBLE CHARACTER LEADERS
-							flowcontainer = {
-								visible = "[Not(IsDataModelEmpty(InterestGroup.GetPossibleCharacterLeaderIdeologies))]"
-								direction = vertical
-								spacing = 5
-
-								textbox = {
-									autoresize = yes
-									align = nobaseline
-									multiline = yes
-									max_width = 500
-									fontsize_min = 14
-									default_format = "#title"
-									text = "INTEREST_GROUP_CHARACTER_LEADER_IDEOLOGIES_HEADER" 
-								}
-
-								flowcontainer = {
-									direction = vertical
-									datamodel = "[InterestGroup.GetPossibleCharacterLeaderIdeologies]"
-									spacing = 5
-
-									item = {
-										flowcontainer = {
-											datacontext = "[PotentialLeaderIdeology.GetIdeology]"
-											minimumsize = { 395 -1 }
-											margin = { 5 5 }
-											spacing = 5
-											tooltip = "INTEREST_GROUP_CHARACTER_LEADER_IDEOLOGY_TOOLTIP"
-
-											background = {
-												using = entry_bg_simple
-											}
-
-											icon = {
-												parentanchor = vcenter
-												size = { 30 30 }
-												texture = "[Ideology.GetTexture]"
-											}
-
-											textbox = {
-												parentanchor = vcenter
-												size = { 150 30 }
-												align = nobaseline
-												multiline = yes
-												fontsize_min = 12
-												raw_text = "#v [PotentialLeaderIdeology.GetChancePercentage|%0]#! [Ideology.GetName]"
-											}
-
-											widget = {
-												size = { 5 5 }
-											}
-
-											textbox = {
-												parentanchor = vcenter
-												autoresize = yes
-												align = nobaseline
-												multiline = yes
-												max_width = 270
-												fontsize_min = 12
-												elide = right
-												text = "[PotentialLeaderIdeology.GetCharacterFullName]"
-											}
-										}
-									}
-								}
-							}
-
 							### POSSIBLE RANDOM IDEOLOGIES
 							flowcontainer = {
 								direction = vertical
@@ -737,11 +671,11 @@ types interest_group_panel_types
 									max_width = 500
 									fontsize_min = 14
 									default_format = "#title"
-									text = "INTEREST_GROUP_RANDOM_LEADER_IDEOLOGIES_HEADER"
+									text = "INTEREST_GROUP_LEADER_IDEOLOGIES_HEADER"
 								}
 
 								flowcontainer = {
-									datamodel = "[InterestGroup.GetPossibleRandomLeaderIdeologies]"
+									datamodel = "[InterestGroup.GetPossibleLeaderIdeologies]"
 									spacing = 5
 									wrap_count = 2
 
@@ -750,7 +684,7 @@ types interest_group_panel_types
 											datacontext = "[PotentialLeaderIdeology.GetIdeology]"
 											margin = { 5 5 }
 											spacing = 5
-											tooltip = "INTEREST_GROUP_RANDOM_LEADER_IDEOLOGY_TOOLTIP"
+											tooltip = "INTEREST_GROUP_LEADER_IDEOLOGY_TOOLTIP"
 
 											background = {
 												using = entry_bg_simple
@@ -764,11 +698,25 @@ types interest_group_panel_types
 
 											textbox = {
 												parentanchor = vcenter
-												size = { 150 30 }
+												size = { 165 30 }
 												align = nobaseline
 												multiline = yes
 												fontsize_min = 12
 												raw_text = "#v [PotentialLeaderIdeology.GetChancePercentage|%0]#! [Ideology.GetName]"
+											}
+
+											icon = {
+												visible = "[Not(PotentialLeaderIdeology.HasCharacter)]"
+												tooltip = "INTEREST_GROUP_NEXT_LEADER_POLITICAL_OUTSIDER"
+												parentanchor = vcenter
+												size = { 40 40 }
+												texture = "gfx/interface/icons/generic_icons/maybe_icon.dds"
+											}
+
+											character_portrait_small = {
+												parentanchor = vcenter
+												visible = "[PotentialLeaderIdeology.HasCharacter]"
+												datacontext = "[PotentialLeaderIdeology.GetCharacter]"
 											}
 										}
 									}
@@ -921,12 +869,20 @@ types interest_group_panel_types
 								raw_text = "[concept_leader]"
 								autoresize = yes
 								align = nobaseline
+
+								background = {
+									using = entry_bg
+									margin = { 45 5 }
+								}
 							}
 
 							character_portrait_medium_torso = {
 								parentanchor = hcenter
 								blockoverride "show_hat" {}
 								blockoverride "highlight" {}
+								blockoverride "medium_torso_portrait_size" {
+									size = { 120 160 } #+16 (extra space for high hats)
+								}
 							}
 						}
 
@@ -979,7 +935,7 @@ types interest_group_panel_types
 											button = {
 												size = { 45 45 }
 												datacontext = "[Character]"
-												onclick = "[InformationPanelBar.OpenCommanderPanel(Character.AccessSelf)]"
+												onclick = "[InformationPanelBar.OpenCharacterPanel(Character.AccessSelf)]"
 												onrightclick = "[RightClickMenuManager.ShowForCharacter(Character.AccessSelf)]"
 
 												character_portrait_small = {}
