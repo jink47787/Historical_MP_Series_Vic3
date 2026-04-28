@@ -77,7 +77,6 @@ decree_road_maintenance = {
 			}
 			multiply = 0
 		}
-		
 
 		# Place instances where content should ignore weights here
 		if = {
@@ -100,7 +99,7 @@ decree_violent_suppression = {
 	}
 
 	country_trigger = {
-		NOT = { has_law = law_type:law_guaranteed_liberties }
+		NOT = { has_law_or_variant = law_type:law_guaranteed_liberties }
 	}
 	state_trigger = {
 		turmoil >= 0.25
@@ -141,7 +140,6 @@ decree_violent_suppression = {
 		}
 	}
 }
-
 
 decree_emergency_relief = {
 	texture = "gfx/interface/icons/decree/decree_emergency_relief.dds"
@@ -211,8 +209,8 @@ decree_promote_social_mobility = {
 			AND = {
 				owner ?= {
 					OR = {
-						has_law = law_type:law_hindu_caste_enforced
-						has_law = law_type:law_hindu_caste_codified
+						has_law_or_variant = law_type:law_hindu_caste_enforced
+						has_law_or_variant = law_type:law_hindu_caste_codified
 					}
 				}
 				religion_percent_state = {
@@ -274,6 +272,7 @@ decree_promote_social_mobility = {
 			}
 			multiply = 1.5
 		}
+
 		# Content overrides
 		if = {
 			limit = {
@@ -307,6 +306,7 @@ decree_promote_national_values = {
 	}
 	state_trigger = {
 	}
+
 	modifier = {
 		state_assimilation_mult = 0.5
 		state_conversion_mult = 0.5
@@ -525,6 +525,32 @@ decree_promote_national_values = {
 			}
 			add = 1000
 		}
+		if = {
+			limit = {
+				scope:country = {
+					has_journal_entry = je_colonize_korea
+				}
+				is_in_geographic_region = geographic_region_korea
+			}
+			add = 500
+		}
+
+		# For Japanese religion Journal Entry
+		# If Shinbutsu Bunri is active and the Taikyo Proclamation has been made
+		# Only pursue this aggressively with a pious ruler or Devout in government
+		if = {
+			limit = {
+				scope:country = {
+					has_journal_entry = je_shinbutsu_bunri
+					country_has_state_religion = rel:shinto
+					OR = {
+						has_ruling_interest_group = ig_devout
+						ruler = { has_ideology = ideology:ideology_pious }
+					}
+				}
+			}
+			add = 500
+		}
 
 		if = {
 			limit = {
@@ -594,6 +620,17 @@ decree_encourage_manufacturing_industry = {
 		if = {
 			limit = {
 				scope:country = {
+					has_journal_entry = je_taming_the_north
+				}
+				state_region = {
+					this = s:STATE_HOKKAIDO
+				}
+			}
+			add = 50
+		}
+		if = {
+			limit = {
+				scope:country = {
 					has_strategy = ai_strategy_industrial_expansion
 				}
 			}
@@ -656,6 +693,17 @@ decree_encourage_agricultural_industry = {
 				}
 			}
 			add = 50
+		}
+		if = {
+			limit = {
+				scope:country = {
+					has_journal_entry = je_taming_the_north
+				}
+				state_region = {
+					this = s:STATE_HOKKAIDO
+				}
+			}
+			add = 100
 		}
 		if = {
 			limit = {
@@ -735,6 +783,17 @@ decree_encourage_resource_industry = {
 				}
 			}
 			add = 50
+		}
+		if = {
+			limit = {
+				scope:country = {
+					has_journal_entry = je_taming_the_north
+				}
+				state_region = {
+					this = s:STATE_HOKKAIDO
+				}
+			}
+			add = 100
 		}
 		if = {
 			limit = {
@@ -828,8 +887,28 @@ decree_greener_grass_campaign = {
 		}
 		if = {
 			limit = {
+				scope:country = {
+					has_journal_entry = je_taming_the_north
+				}
+				state_region = {
+					this = s:STATE_HOKKAIDO
+				}
+			}
+			add = 500
+		}
+		if = {
+			limit = {
+				scope:country = {
+					has_journal_entry = je_colonize_korea
+				}
+				is_in_geographic_region = geographic_region_korea
+			}
+			add = 500
+		}
+		if = {
+			limit = {
 				is_incorporated = no
-				scope:country = { NOT = { has_law = law_type:law_colonial_resettlement } } # Already gives a hefty migration bonus
+				scope:country = { NOT = { has_law_or_variant = law_type:law_colonial_resettlement } } # Already gives a hefty migration bonus
 			}
 			multiply = 2.0
 		}
@@ -918,3 +997,181 @@ decree_enlistment_efforts = {
 	}
 }
 
+decree_establish_missions = {
+	texture = "gfx/interface/icons/decree/decree_establish_missions.dds"
+
+	unlocking_technologies = {
+		civilizing_mission
+	}
+
+	unlocking_laws = {
+		law_frontier_colonization
+		law_colonial_exploitation
+		law_colonial_resettlement
+	}
+
+	country_trigger = {
+		NOR = {
+			country_has_state_religion = rel:atheist
+			country_has_state_religion = rel:animist
+		}
+	}
+
+	state_trigger = {
+		is_incorporated = no
+		religion_percent_state = {
+			target = owner.religion
+			value < 0.8
+		}
+		owner ?= {
+			has_strategic_region_interest_tier = {
+				strategic_region = root.region
+				value >= interest_tier_effect_can_establish_missions_min_tier
+			}
+		}
+		NOT = { is_homeland_of_country_cultures = root.owner }
+	}
+
+	modifier = {
+		state_colony_growth_speed_mult = 0.2
+		state_conversion_mult = 0.2
+		state_education_access_add = 0.1
+		state_food_security_add = 0.05
+	}
+
+	cost = 100
+
+	ai_weight = {
+		value = 0
+
+		if = {
+			limit = {
+				OR = {
+					NOT = { scope:country = { has_law_or_variant = law_type:law_total_separation } }
+					AND = {
+						scope:country = { is_not_in_geographic_region = geographic_region_africa }
+						is_in_geographic_region = geographic_region_africa
+					}
+					scope:country = {
+						country_is_colonial_or_company = yes
+					}
+				}
+				religion_percent_state = {
+					target = scope:country.religion
+					value <= 0.9
+				}
+			}
+
+			if = {
+				limit = {
+					scope:country = {
+						has_strategy = ai_strategy_conservative_agenda
+					}
+				}
+				add = 50
+			}
+			else_if = {
+				limit = {
+					scope:country = {
+						has_strategy = ai_strategy_reactionary_agenda
+					}
+				}
+				add = 100
+			}
+
+			if = {
+				limit = {
+					scope:country = {
+						has_law_or_variant = law_type:law_state_religion
+					}
+				}
+				add = 50
+			}
+
+			if = {
+				limit = {
+					scope:country = {
+						has_journal_entry = je_scramble_for_africa
+					}
+					is_in_geographic_region = geographic_region_africa
+				}
+				add = 150
+
+				if = {
+					limit = {
+						is_under_colonization = yes
+					}
+					add = 150
+				}
+			}
+
+			if = {
+				limit = {
+					religion_percent_state = {
+						target = scope:country.religion
+						value <= 0.1
+					}
+				}
+				multiply = 5.0
+			}
+			else_if = {
+				limit = {
+					religion_percent_state = {
+						target = scope:country.religion
+						value <= 0.3
+					}
+				}
+				multiply = 3.0
+			}
+			else_if = {
+				limit = {
+					religion_percent_state = {
+						target = scope:country.religion
+						value <= 0.5
+					}
+				}
+				multiply = 2.0
+			}
+		}
+
+		if = {
+			limit = {
+				state_population > 300000
+			}
+			multiply = 2.0
+		}
+
+		if = {
+			limit = {
+				scope:country = {
+					OR = {
+						has_law = law_type:law_cultural_exclusion
+						has_law = law_type:law_freedom_of_conscience
+					}
+				}
+			}
+			multiply = 0.5
+		}
+		else_if = {
+			limit = {
+				scope:country = {
+					OR = {
+						has_law = law_type:law_multicultural
+						has_law = law_type:law_total_separation
+					}
+				}
+			}
+			multiply = 0.1
+		}
+
+		if = {
+			limit = {
+				scope:country = {
+					has_journal_entry = je_colonize_korea
+				}
+				is_in_geographic_region = geographic_region_korea
+			}
+			add = 500
+		}
+	}
+}
