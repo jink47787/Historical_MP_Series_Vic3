@@ -1,63 +1,65 @@
-﻿#global JE for europeans to track 1848 revolutions
+#global JE for europeans to track 1848 revolutions
 
-REPLACE_OR_CREATE:je_napoleons_legacy = { #Political Question
+REPLACE_OR_CREATE:je_napoleons_legacy = { #The Political Question
 	icon = "gfx/interface/icons/event_icons/phrygian.dds"
 
-	group = je_group_crises
+	group = je_group_global_international_situations
 	
+	context = none
 	progressbar = yes
 	should_be_pinned_by_default = yes
 
-	transferable = no
-	can_revolution_inherit = no
-	
-	modifiers_while_active = {
-		modifier_napoleons_legacy
+	#things that cause this to increase (non laws are once per country) (this is outdated but kept for reference)
+		#laws
+			#any european major passing voting laws (scaling)
+			#any european major passing parliamentary or dual executiy (+3)
+			#any european major passing total_separation (+2)
+			#any european major passing state atheism (+5)
+			#any european major passing republic (+10)
+		#Italy or Germany forming (+5)
+		#a revolution in any european major+ country or subject of one (+8)
+		#having turmoil in a European capital (+3)
+		#the Hungry Forties ending (+5)
+		#a European losing a war (+5)
+
+	should_be_involved = { #Initial Involved Nations
+				OR = {
+					capital.region = sr:region_england
+					capital.region = sr:region_north_sea_coast
+					capital.region = sr:region_france
+					capital.region = sr:region_occitania
+					capital.region = sr:region_rhine
+					capital.region = sr:region_italy
+					capital.region = sr:region_balkans
+					capital.region = sr:region_north_germany
+					capital.region = sr:region_south_germany
+					capital.region = sr:region_baltic
+					capital.region = sr:region_danubia
+					capital.region = sr:region_poland
+				}
+			country_rank >= rank_value:major_power
+			is_subject = no
+			OR = {
+				OR = {
+					has_law_or_variant = law_type:law_autocracy
+					has_law_or_variant = law_type:law_oligarchy
+					has_law_or_variant = law_type:law_technocracy
+					has_law_or_variant = law_type:law_landed_voting
+				}
+				NOT = { has_law_or_variant = law_type:law_right_of_assembly }
+			}
 	}
 	
-	is_shown_when_inactive = {
-		capital = {
-			OR = {
-				region = sr:region_england
-				region = sr:region_north_sea_coast
-				#region = sr:region_iberia #remove this when carlist flavor
-				region = sr:region_france
-				region = sr:region_occitania
-				region = sr:region_rhine
-				region = sr:region_italy
-				region = sr:region_balkans
-				region = sr:region_north_germany
-				region = sr:region_south_germany
-				region = sr:region_baltic
-				region = sr:region_danubia
-				region = sr:region_poland
-				#region = sr:region_russia
-				#region = sr:region_dnieper
-			}
-		}
+	should_show_when_not_involved = { #Lets all of Europe see the Political Question Progress
+		is_in_geographic_region = geographic_region_europe
 	}
 
-	possible = {
-		#happens for all european majors and GPs at beginning of game
-		country_rank >= rank_value:major_power
-		is_subject = no
-		custom_tooltip = {
-			text = je_napoleons_legacy_t2
-			NOT = { has_global_variable = peoples_springtime_happening }
-			NOT = { has_global_variable = peoples_springtime_happened }
-		}
-		OR = {
-			OR = {
-				has_law_or_variant = law_type:law_autocracy
-				has_law_or_variant = law_type:law_oligarchy
-				has_law_or_variant = law_type:law_technocracy
-				has_law_or_variant = law_type:law_landed_voting
-			}
-			NOT = { has_law_or_variant = law_type:law_right_of_assembly }
-		}
+	is_shown_when_inactive = {
+		always = yes
 	}
 	
-	#scripted button to reduce it at the cost of 500 authority?
+	possible = {
+	}
 	
 	immediate = {
 		if = {
@@ -78,11 +80,27 @@ REPLACE_OR_CREATE:je_napoleons_legacy = { #Political Question
 				value = 1
 			}
 		}
+	}
+
+	immediate_all_involved = {
 		set_variable = 1848_country_var
-		add_modifier = {
-			name = modifier_napoleon_announce
-			years = 20
-		}
+	}
+
+	on_become_involved_after_activation = {
+		set_variable = 1848_country_var
+	}
+	
+	on_no_longer_involved = { #Avoiding Springtime Effects
+		#if = {
+		#	limit = {
+		#		country_rank >= rank_value:major_power
+		#	}
+			set_variable = passed_1848_var
+			add_modifier = {
+				name = modifier_1848_victory
+				months = 60
+			}
+		#}
 	}
 
 	current_value = {
@@ -92,75 +110,37 @@ REPLACE_OR_CREATE:je_napoleons_legacy = { #Political Question
 	goal_add_value = {
 		value = 40
 	}
-	
-	#things that cause this to increase (non laws are once per country) (this is outdated but kept for reference)
-		#laws
-			#any european major passing voting laws (scaling)
-			#any european major passing parliamentary or dual executiy (+3)
-			#any european major passing total_separation (+2)
-			#any european major passing state atheism (+5)
-			#any european major passing republic (+5)
-		#Italy forming
-		#a revolution in any european major+ country (+10)
-		#radicals in a European capital (+1) (passive?)
-		#potato blight ending (or beginning?) (+10)
-		#a European losing a war (+5)
-		#releasing a subject (+5) 
-	
-	complete = {
-		NOR = {
-			has_law_or_variant = law_type:law_traditionalism
-			has_law_or_variant = law_type:law_serfdom
-			has_law_or_variant = law_type:law_censorship
-			has_law_or_variant = law_type:law_outlawed_dissent
-			has_law_or_variant = law_type:law_secret_police
-			has_law_or_variant = law_type:law_militarized_police
-			has_law_or_variant = law_type:law_no_legislature
-			has_law_or_variant = law_type:law_landed_voting
-		}
-		NOT = { has_journal_entry = je_divided_monarchists } #MAKE THIS SEPARATE JE LATER
-	}
-	
-	on_complete = {
-		set_variable = passed_1848_var
-		add_modifier = {
-			name = modifier_1848_victory
-			months = 60
-		}
-		hidden_effect = {
-			remove_modifier = modifier_napoleon_announce
-		}
-	}
-	
-	timeout = 7305
-	
-	invalid = {
-		has_global_variable = peoples_springtime_happened
+
+	invalid = { #Removed it looking for global variables to invalidate to limit chances of it accidentally invalidating
+		game_date >= 1856.1.1
 	}
 	
 	on_invalid = {
-		remove_modifier = modifier_napoleon_announce
 	}
+
+	timeout = 7300
 	
 	on_timeout = {
 		set_global_variable = peoples_springtime_happened
-		remove_modifier = modifier_napoleon_announce
 	}
 
-	fail = {
+	complete = {
 		scope:journal_entry = {
 			is_goal_complete = yes
 		}
 	}
-	
-	on_fail = {
-		set_variable = failed_1848_var
+
+	on_complete = {
 		if = {
 			limit = {
 				NOT = { has_global_variable = peoples_springtime_happening }
 			}
 			set_global_variable = peoples_springtime_happening
 		}
+	}
+
+	on_complete_all_involved = { #Springtime hitting
+		set_variable = failed_1848_var
 		add_journal_entry = {
 			type = je_springtime_of_the_peoples
 		}
@@ -232,5 +212,61 @@ REPLACE_OR_CREATE:je_napoleons_legacy = { #Political Question
 			}
 		}
 	}
-}
 
+	on_weekly_pulse = {
+		effect = {
+			scope:journal_entry = { #Check for removing involved countries who shouldn't get hit with Springtime
+				every_scope_je_involved = {
+					limit = {
+						NOR = {
+							has_law_or_variant = law_type:law_autocracy
+							has_law_or_variant = law_type:law_oligarchy
+							has_law_or_variant = law_type:law_technocracy
+							has_law_or_variant = law_type:law_landed_voting
+							has_law_or_variant = law_type:law_traditionalism
+							has_law_or_variant = law_type:law_serfdom
+							has_law_or_variant = law_type:law_secret_police
+							has_law_or_variant = law_type:law_militarized_police
+						}
+						has_law_or_variant = law_type:law_right_of_assembly
+						NOT = { has_journal_entry = je_divided_monarchists }
+					}
+					scope:journal_entry = { remove_involved_country	= prev }
+				}
+			}
+			every_country = { #Check for adding countries who meet the requirements of the Political Question after start
+				limit = {
+					OR = {
+						capital.region = sr:region_england
+						capital.region = sr:region_north_sea_coast
+						capital.region = sr:region_france
+						capital.region = sr:region_occitania
+						capital.region = sr:region_rhine
+						capital.region = sr:region_italy
+						capital.region = sr:region_balkans
+						capital.region = sr:region_north_germany
+						capital.region = sr:region_south_germany
+						capital.region = sr:region_baltic
+						capital.region = sr:region_danubia
+						capital.region = sr:region_poland
+					}
+					OR = {
+						OR = {
+							has_law_or_variant = law_type:law_autocracy
+							has_law_or_variant = law_type:law_oligarchy
+							has_law_or_variant = law_type:law_technocracy
+							has_law_or_variant = law_type:law_landed_voting
+						}
+						NOT = { has_law_or_variant = law_type:law_right_of_assembly }
+					}
+					country_rank >= rank_value:major_power
+					is_subject = no
+					NOT = {
+						has_variable = passed_1848_var
+					}
+				}
+				scope:journal_entry = { add_involved_country = prev }		
+			}	
+		}
+	}				
+}
