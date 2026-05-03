@@ -29,7 +29,7 @@ bic_breakup.1 = {
 	}
 
 	immediate = {
-		cu:british = {
+		random_primary_culture = {
 			save_scope_as = british_culture
 		}
 		cu:scottish = { # Making sure to cover for that one Scottish guy
@@ -76,6 +76,18 @@ bic_breakup.1 = {
 			activate_law = law_type:law_oligarchy
 		}
 		hidden_effect = {
+			every_primary_culture = {
+				save_temporary_scope_as = primary_culture_to_remove
+				PREV ?= { # scope:target
+					remove_primary_culture = scope:primary_culture_to_remove
+					every_scope_character = {
+						limit = {
+							scope:primary_culture_to_remove ?= culture 
+						}
+						retire_character = yes
+					}
+				}
+			}
 			set_social_hierarchy = british_indian_caste_system
 			remove_primary_culture = cu:british
 			add_primary_culture = cu:bengali
@@ -112,16 +124,6 @@ bic_breakup.1 = {
 				remove_modifier = modifier_indian_imperial_police
 			}
 			recalculate_pop_ig_support = yes
-			every_scope_character = {
-				limit = {
-					OR = {
-						culture = cu:british
-						culture = cu:scottish
-						culture = cu:irish
-					}
-				}
-				kill_character = yes
-			}
 		}
 	}
 
@@ -140,7 +142,18 @@ bic_breakup.1 = {
 		add_modifier = country_modifier_india_post_homerule_religious_nerf
 		hidden_effect = {
 			set_social_hierarchy = british_indian_caste_system
-			remove_primary_culture = cu:british
+			every_primary_culture = {
+				save_temporary_scope_as = primary_culture_to_remove
+				PREV ?= { # scope:target
+					remove_primary_culture = scope:primary_culture_to_remove
+					every_scope_character = {
+						limit = {
+							scope:primary_culture_to_remove ?= culture 
+						}
+						retire_character = yes
+					}
+				}
+			}
 			add_primary_culture = cu:bengali
 			add_primary_culture = cu:assamese
 			add_primary_culture = cu:avadhi
@@ -215,222 +228,211 @@ bic_breakup.1 = {
 				remove_modifier = modifier_indian_imperial_police
 			}
 			recalculate_pop_ig_support = yes
-			every_scope_character = {
-				limit = {
-					OR = {
-						culture = cu:british
-						culture = cu:scottish
-						culture = cu:irish
-					}
-					is_immortal = no
-				}
-				kill_character = yes
-			}
-		#### Pakistan
-		if = {
-			limit = {
-				NOT = { 
-					exists = c:PAK
-				}
-			}
+			#### Pakistan
 			if = {
 				limit = {
-					exists = c:PAN
-					c:PAN ?= {
-						is_player = yes
-					}
-				}
-				c:PAN = {
-					change_tag = PAK
-				}
-			}
-			else_if = {
-				limit = {
-					exists = c:AGF
-					c:AFG ?= {
-						is_player = yes
-					}
-				}
-				c:AGF = {
-					change_tag = PAK
-				}
-			}
-			else_if = {
-				limit = {
-					exists = c:KAB
-					c:KAB ?= {
-						is_player = yes
-					}
-				}
-				c:KAB = {
-					change_tag = PAK
-				}
-			}
-		}
-		every_scope_state = {
-			if = {
-				limit = {
-					NOT = {
-						OR = {
-							is_in_geographic_region = geographic_region_india
-							is_in_geographic_region = geographic_region_central_asia #to make sure that if india takes Tibet some how, it wont get transfered away to UK
-							region = sr:region_persia
-						}
-					}
-				}
-				set_state_owner  = c:GBR
-			}
-			else_if = {
-				limit = {
-					OR = {
-						religion_percent_state = {
-							target = rel:sunni
-							value >= 0.50
-						}
-						religion_percent_state = { # To stop a few boarder gore creating edge cases
-							target = rel:shiite
-							value >= 0.50
-						}
+					NOT = { 
+						exists = c:PAK
 					}
 				}
 				if = {
 					limit = {
-						exists = c:PAK
-					}
-					set_state_owner = c:PAK
-				}
-				else = {
-					create_country = {
-						tag = PAK
-						origin = root
-						state = this
-						on_created = {
-							activate_law = law_type:law_republic
-							activate_law = law_type:law_oligarchy
+						exists = c:PAN
+						c:PAN ?= {
+							is_player = yes
 						}
 					}
+					c:PAN = {
+						change_tag = PAK
+					}
+				}
+				else_if = {
+					limit = {
+						exists = c:AGF
+						c:AFG ?= {
+							is_player = yes
+						}
+					}
+					c:AGF = {
+						change_tag = PAK
+					}
+				}
+				else_if = {
+					limit = {
+						exists = c:KAB
+						c:KAB ?= {
+							is_player = yes
+						}
+					}
+					c:KAB = {
+						change_tag = PAK
+					}
 				}
 			}
-		}
-		if = {
-			limit = {
-				exists = c:PAK
-			}
-			c:PAK = {
-				set_capital = s:STATE_PUNJAB
-			}
-		}
-		every_direct_subject = {
-			if = {
-				limit = {
-					NOT = {
-						OR = {
-							is_in_geographic_region = geographic_region_india
-							is_in_geographic_region = geographic_region_central_asia #to make sure that if india takes Tibet some how, it wont get transfered away to UK
-							capital ?= {
+			every_scope_state = {
+				if = {
+					limit = {
+						NOT = {
+							OR = {
+								is_in_geographic_region = geographic_region_india
+								is_in_geographic_region = geographic_region_central_asia #to make sure that if india takes Tibet some how, it wont get transfered away to UK
 								region = sr:region_persia
 							}
 						}
 					}
+					set_state_owner  = c:GBR
 				}
-				make_independent = yes
-				c:GBR ?= {
-					create_diplomatic_pact = {
-						country = prev
-						type = puppet
-					}
-				}
-			}
-			else_if = {
-				limit = {
-					OR = {
-						religion_percent_country = {
-							target = rel:sunni
-							value >= 0.50
-						}
-						religion_percent_country = { # To stop a few boarder gore creating edge cases
-							target = rel:shiite
-							value >= 0.30
+				else_if = {
+					limit = {
+						OR = {
+							religion_percent_state = {
+								target = rel:sunni
+								value >= 0.50
+							}
+							religion_percent_state = { # To stop a few boarder gore creating edge cases
+								target = rel:shiite
+								value >= 0.50
+							}
 						}
 					}
-				}
-				make_independent = yes
-				if = {
-					limit = {
-						exists = c:PAK
-						NOT = {
-							this ?= c:PAK
-						}
-					}
-					
-					every_scope_state = {
-						set_state_owner  = c:PAK
-					}
-#					c:PAK ?= { # Uncomment this section and Comment out the 3 above lines if you want to make Pakistan not annex the Princely states
-#						create_diplomatic_pact = {
-#							country = prev
-#							type = puppet
-#						}
-#					}
-				}
-				else = {
-					change_tag = PAK
-				}
-			}
-		}
-		if = {
-			limit = {
-				exists = c:PAK
-			}
-			c:PAK = {
-				if = {
-					limit = {
-						NOT = { country_has_primary_culture = cu:kashmiri }
-					}
-					add_primary_culture = cu:kashmiri
-				}
-				if = {
-					limit = {
-						NOT = { country_has_primary_culture = cu:panjabi }
-					}
-					add_primary_culture = cu:panjabi
-				}
-				if = {
-					limit = {
-						NOT = { country_has_primary_culture = cu:sindi }
-					}
-					add_primary_culture = cu:sindi
-				}
-				if = {
-					limit = {
-						NOT = { country_has_primary_culture = cu:baluchi }
-					}
-					add_primary_culture = cu:baluchi
-				}
-				if = {
-					limit = {
-						NOT = { country_has_primary_culture = cu:pashtun }
-					}
-					add_primary_culture = cu:pashtun
-				}
-				if = {
-					limit = {
-						NOT = { country_has_primary_culture = cu:bengali }
-					}
-					add_primary_culture = cu:bengali
-				}
-				#country_type = recognized #dont think this is needed now
-				set_state_religion = rel:sunni
-				every_scope_state = {
 					if = {
 						limit = {
-							is_in_geographic_region = geographic_region_india
+							exists = c:PAK
 						}
-						set_state_type = incorporated
+						set_state_owner = c:PAK
+					}
+					else = {
+						create_country = {
+							tag = PAK
+							origin = root
+							state = this
+							on_created = {
+								activate_law = law_type:law_republic
+								activate_law = law_type:law_oligarchy
+							}
+						}
 					}
 				}
 			}
-		}
+			if = {
+				limit = {
+					exists = c:PAK
+				}
+				c:PAK = {
+					set_capital = s:STATE_PUNJAB
+				}
+			}
+			every_direct_subject = {
+				if = {
+					limit = {
+						NOT = {
+							OR = {
+								is_in_geographic_region = geographic_region_india
+								is_in_geographic_region = geographic_region_central_asia #to make sure that if india takes Tibet some how, it wont get transfered away to UK
+								capital ?= {
+									region = sr:region_persia
+								}
+							}
+						}
+					}
+					make_independent = yes
+					c:GBR ?= {
+						create_diplomatic_pact = {
+							country = prev
+							type = puppet
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						OR = {
+							religion_percent_country = {
+								target = rel:sunni
+								value >= 0.50
+							}
+							religion_percent_country = { # To stop a few boarder gore creating edge cases
+								target = rel:shiite
+								value >= 0.30
+							}
+						}
+					}
+					make_independent = yes
+					if = {
+						limit = {
+							exists = c:PAK
+							NOT = {
+								this ?= c:PAK
+							}
+						}
+						
+						every_scope_state = {
+							set_state_owner  = c:PAK
+						}
+	#					c:PAK ?= { # Uncomment this section and Comment out the 3 above lines if you want to make Pakistan not annex the Princely states
+	#						create_diplomatic_pact = {
+	#							country = prev
+	#							type = puppet
+	#						}
+	#					}
+					}
+					else = {
+						change_tag = PAK
+					}
+				}
+			}
+			if = {
+				limit = {
+					exists = c:PAK
+				}
+				c:PAK = {
+					if = {
+						limit = {
+							NOT = { country_has_primary_culture = cu:kashmiri }
+						}
+						add_primary_culture = cu:kashmiri
+					}
+					if = {
+						limit = {
+							NOT = { country_has_primary_culture = cu:panjabi }
+						}
+						add_primary_culture = cu:panjabi
+					}
+					if = {
+						limit = {
+							NOT = { country_has_primary_culture = cu:sindi }
+						}
+						add_primary_culture = cu:sindi
+					}
+					if = {
+						limit = {
+							NOT = { country_has_primary_culture = cu:baluchi }
+						}
+						add_primary_culture = cu:baluchi
+					}
+					if = {
+						limit = {
+							NOT = { country_has_primary_culture = cu:pashtun }
+						}
+						add_primary_culture = cu:pashtun
+					}
+					if = {
+						limit = {
+							NOT = { country_has_primary_culture = cu:bengali }
+						}
+						add_primary_culture = cu:bengali
+					}
+					#country_type = recognized #dont think this is needed now
+					set_state_religion = rel:sunni
+					every_scope_state = {
+						if = {
+							limit = {
+								is_in_geographic_region = geographic_region_india
+							}
+							set_state_type = incorporated
+						}
+					}
+				}
+			}
 		}
 	}
 #	option = {
