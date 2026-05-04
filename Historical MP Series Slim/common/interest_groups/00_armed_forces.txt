@@ -10,9 +10,10 @@
 		ideology_patriotic
 		ideology_cultural_chauvinism
 	}
-	
+
 	character_ideologies = {
 		ideology_moderate
+		ideology_authoritarian
 		ideology_orleanist
 		ideology_bonapartist
 	}
@@ -33,9 +34,7 @@
 			if = {
 				limit = {
 					owner = {
-						any_primary_culture = {
-							has_discrimination_trait = heritage_han
-						}
+						c:CHI ?= this
 					}
 				}
 				set_ig_trait = ig_trait:ig_trait_newly_created_army
@@ -144,7 +143,7 @@
 				set_interest_group_name = ig_samurai
 			}
 		}
-				# India
+		# India
 		else_if = {
 			limit = {
 				c:BIC ?= this
@@ -239,7 +238,7 @@
 		rule = {
 			trigger = {
 				c:BIC ?= this
-				any_primary_culture = { 
+				any_primary_culture = {
 					cu:british = this
 				}
 			}
@@ -304,6 +303,11 @@
 			desc = "POP_NOT_DISCRIMINATED"
 			if = {
 				limit = {
+					NOT = {
+						owner = {
+							has_social_hierarchy = edo_system
+						}
+					}
 					pop_acceptance >= acceptance_status_4
 				}
 				value = 25
@@ -350,6 +354,14 @@
 						}
 					}
 					add = 50
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law = law_type:law_warrior_caste
+						}
+					}
+					add = 100
 				}
 				if = { # Pay makes soldiers more inclined to be loyal to Armed Forces
 					limit = {
@@ -400,7 +412,7 @@
 				limit = {
 					is_pop_type = aristocrats
 				}
-				value = 10
+				value = 5
 				if = {
 					limit = {
 						owner = {
@@ -412,14 +424,25 @@
 				if = {
 					limit = {
 						owner = {
-							has_law_or_variant = law_type:law_peasant_levies
+							has_law = law_type:law_peasant_levies
 						}
 					}
 					add = 50
 				}
 			}
 		}
-		
+
+		add = {
+			desc = "SAMURAI_TRADITIONS" # Warrior caste
+			if = {
+				limit = {
+					is_pop_type = aristocrats
+					culture = cu:japanese
+				}
+				add = 100
+			}
+		}
+
 		add = {
 			desc = "SIKH_MILITANCY"
 			if = {
@@ -440,7 +463,7 @@
 				value = 250
 			}
 		}
-		
+
 		add = { # There's one firearm for every twelve people on the planet. The question is, how do we arm the other eleven?
 			desc = "MILITARY_INDUSTRIES"
 			if = {
@@ -461,7 +484,7 @@
 				}
 			}
 		}
-		
+
 		add = {
 			desc = "POP_MILITARY_BUREAUCRACY"
 			if = {
@@ -478,7 +501,7 @@
 
 		multiply = {
 			desc = "LEADER_POPULARITY"
-			scope:interest_group = {
+			scope:interest_group ?= {
 				leader ?= {
 					value = popularity
 					multiply = 0.0025
@@ -490,7 +513,7 @@
 		}
 		if = {
 			limit = {
-				scope:interest_group = {
+				scope:interest_group ?= {
 					is_in_government = yes
 				}
 			}
@@ -503,7 +526,7 @@
 		}
 		if = {
 			limit = {
-				scope:interest_group = {
+				scope:interest_group ?= {
 					is_in_government = yes
 				}
 			}
@@ -516,7 +539,7 @@
 		}
 		if = {
 			limit = {
-				scope:interest_group = {
+				scope:interest_group ?= {
 					is_in_government = no
 				}
 			}
@@ -613,6 +636,10 @@
 	commander_weight = {
 		value = 5.0
 	}
+	
+	magnate_weight = {
+		value = 1.0
+	}	
 
 	executive_weight = {
 		value = 0.2
@@ -645,6 +672,10 @@
 		value = 0.0
 	}
 
+	female_monarch_chance = {
+		value = 0
+	}
+
 	female_politician_chance = {
 		value = 0.0
 
@@ -666,7 +697,7 @@
 
 	female_agitator_chance = {
 		value = 0.01
-		
+
 		if = {
 			limit = {
 				owner = {
@@ -677,8 +708,8 @@
 			add = {
 				value = 0.01
 			}
-		}	
-		
+		}
+
 		if = {
 			limit = {
 				owner = {
@@ -701,19 +732,33 @@
 			add = {
 				value = 0.01
 			}
-		}		
+		}
 	}
 
-	# The chance that a commander belonging to this IG takes over leadership when it changes
-	# scope:character is the most popular commander in the IG
-	commander_leader_chance = {
-		value = 0.75
-		multiply = ig_commander_leader_chance_mult
+	# Multiplier applied to the weight for an appropriate commander will be selected from the character pool to lead the IG
+	# root = interest group
+	commander_leader_weight = {
+		value = 3.0
+	}
+	
+	# Multiplier applied to the weight for an appropriate magnate will be selected from the character pool to lead the IG
+	# root = interest group
+	magnate_leader_weight = {
+		value = 1.0
+		if = {
+			limit = {
+				c:JAP ?= owner
+				NOT = {
+					has_variable = japan_restoration_complete
+				}
+			}
+			add = 5
+		}
 	}
 
-	# The chance that a executive belonging to this IG takes over leadership when it changes
-	# scope:character is the most popular executive in the IG
-	executive_leader_chance = {
+	# Multiplier applied to the weight for an appropriate executive will be selected from the character pool to lead the IG
+	# root = interest group
+	executive_leader_weight = {
 		value = 0.1
 	}
 }
