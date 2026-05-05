@@ -1,169 +1,147 @@
 ﻿assign_taiping_states = {
 	c:TPG ?= {
-		every_scope_state = {
-			create_building = {
-				building = building_iron_mine
-				level = 15
-			}
-			create_building = {
-				building = building_logging_camp
-				level = 10
-			}
-			create_building = {
-				building = building_tooling_workshop
-				level = 10
-			}
-			create_building = {
-				building = building_arms_industry
-				level = 5
-			}
-			create_building = {
-				building = building_artillery_foundry
-				level = 3
-			}
-		}
 		create_military_formation = {
 			type = army
 			hq_region = scope:heavenly_kingdom_spawn.region #Because the Heavenly Kingdom is not always in South China.
 
-			combat_unit = {
+			combat_unit = { #HMPS CHANGE
 				type = unit_type:combat_unit_type_irregular_infantry
 				state_region = scope:heavenly_kingdom_spawn.state_region
 				count = 40
 			}
 
-			combat_unit = {
+			combat_unit = { #HMPS CHANGE
 				type = unit_type:combat_unit_type_cannon_artillery
 				state_region = scope:heavenly_kingdom_spawn.state_region
 				count = 10
 			}
 		}
 	}
-	every_state = {
+	if = {
 		limit = {
-			has_variable = cult_center
-		}
-		save_scope_as = tpg_defector_state
-		create_building = {
-			building = building_tooling_workshop
-			level = 2
-		}
-		create_building = {
-			building = building_arms_industry
-			level = 2
-		}
-		create_building = {
-			building = building_artillery_foundry
-			level = 1
-		}
-		custom_tooltip = {
-			text = taiping_state_defection
-			set_state_owner = c:TPG
-			set_state_type = incorporated
-			add_culture_standard_of_living_modifier = {
-				culture = cu:manchu
-				months = long_modifier_time
-				multiplier = -5
+			any_scope_state = {
+				has_variable = cult_center
 			}
 		}
+		every_scope_state = {
+			limit = {
+				has_variable = cult_center
+			}
+			save_scope_as = tpg_defector_state
+			custom_tooltip = {
+				text = taiping_state_defection
+				set_state_owner = c:TPG
+				set_state_type = incorporated
+				add_culture_standard_of_living_modifier = {
+					culture = cu:manchu
+					days = long_modifier_time
+					multiplier = -5
+				}
+			}
+		}
+		every_scope_state = {
+			limit = {
+				is_capital = no
+				NOT = {
+					has_variable = cult_center
+					state_region = {
+						is_homeland = cu:manchu
+					}
+				}
+				any_neighbouring_state = {
+					has_variable = cult_center
+				}
+				turmoil >= 0.1
+			}
+			if = {
+				limit = {
+					this = {
+						state_region = {
+							OR = {
+								is_homeland = cu:han
+								is_homeland = cu:hakka
+							}
+						}
+					}
+				}
+				save_scope_as = tpg_defector_state
+				custom_tooltip = {
+					text = taiping_state_defection
+					set_state_owner = c:TPG
+					set_state_type = incorporated
+					add_culture_standard_of_living_modifier = {
+						culture = cu:manchu
+						days = long_modifier_time
+						multiplier = -5
+					}
+					c:TPG ?= {
+						create_military_formation = {
+							type = army
+							hq_region = scope:tpg_defector_state.region
+
+							combat_unit = {
+								type = unit_type:combat_unit_type_irregular_infantry
+								state_region = scope:tpg_defector_state.state_region
+								count = 5
+							}
+						}
+					}
+				}
+
+			}
+			else_if = {
+				random_list = {
+					50 = {
+						save_scope_as = tpg_defector_state
+						custom_tooltip = {
+							text = taiping_state_defection
+							set_state_owner = c:TPG
+							set_state_type = incorporated
+							add_culture_standard_of_living_modifier = {
+								culture = cu:manchu
+								days = long_modifier_time
+								multiplier = -5
+							}
+							c:TPG ?= {
+								create_military_formation = {
+									type = army
+									hq_region = scope:tpg_defector_state.region
+
+									combat_unit = {
+										type = unit_type:combat_unit_type_irregular_infantry
+										state_region = scope:tpg_defector_state.state_region
+										count = 5
+									}
+								}
+							}
+						}
+					}
+					50 = {
+						add_radicals_in_state = {
+							value = very_large_radicals
+							religion = rel:protestant
+						}
+						this.state_region = {
+							add_claim = c:TPG
+						}
+					}
+				}
+			}
+		}
+	}
+	hidden_effect = {
 		c:TPG ?= {
-			create_military_formation = {
-				type = army
-				hq_region = scope:tpg_defector_state.region
-		
-				combat_unit = {
-					type = unit_type:combat_unit_type_irregular_infantry
-					state_region = scope:tpg_defector_state.state_region
-					count = 40
+			every_scope_state = {
+				add_modifier = {
+					name = modifier_taiping_hiring_bonus
+					months = 6
 				}
-
-				combat_unit = {
-					type = unit_type:combat_unit_type_cannon_artillery
-					state_region = scope:heavenly_kingdom_spawn.state_region
-					count = 5
+				state_region = {
+					add_claim = c:CHI
 				}
 			}
 		}
 	}
-	c:TPG ?= {
-		every_scope_state = {
-			limit = {
-                OR = {
-                    state_region = s:STATE_SUZHOU
-                    state_region = s:STATE_WESTERN_HUBEI 
-                }
-            }
-			create_building = {
-				building = building_lead_mine
-				level = 2
-			}
-		}
-	}
-	c:TPG ?= {
-		every_scope_state = {
-			limit = {
-                OR = {
-                    state_region = s:STATE_JIANGSU 
-                    state_region = s:STATE_SUZHOU
-                    state_region = s:STATE_ZHEJIANG 
-                }
-            }
-			create_building = {
-				building = building_port
-				level = 3
-			}
-			create_building = {
-				building = building_shipyard
-				level = 1
-			}
-		}
-	}
-	hidden_effect = {
-		every_state = {
-			limit = {
-				owner = c:TPG
-			}
-			this.state_region = {
-				add_claim = c:CHI
-			}
-		}
-	}
-	hidden_effect = {
-		every_state = {
-			limit = {
-				owner = c:TPG
-			}
-			add_modifier = {
-				name = modifier_taiping_hiring_bonus
-				months = 6
-			}
-		}
-	}
-}
-
-taiping_concurrent_rebellion_setup = {
-	capital = {
-		add_modifier = {
-			name = modifier_taiping_hiring_bonus
-			months = 6
-		}
-		save_scope_as = capital_scope
-	}
-	create_military_formation = {
-		type = army
-		hq_region =  scope:capital_scope.region
-
-		combat_unit = {
-			type = unit_type:combat_unit_type_irregular_infantry
-			state_region = scope:capital_scope.state_region
-			count = 30
-		}
-	}
-	every_scope_state = {
-		state_region = {
-			add_claim = c:CHI
-		}
-	}	
 }
 
 create_taiping_characters = {
@@ -182,21 +160,9 @@ create_taiping_characters = {
 			}
 		}
 		create_character = {
-			first_name = Xiuquan
-			last_name = Hong
-			birth_date = 1814.1.1
-			culture = cu:hakka
-			religion = rel:protestant
-			interest_group = ig_devout
-			ruler = yes
-			historical = yes
-			ideology = ideology_theocrat
-			traits = {
-				inspirational_orator
-				persistent
-				psychological_affliction
-			}
+			template = TPG_hong_xiuquan
 			on_created = {
+				set_character_as_ruler = yes
 				set_variable = hong_var
 				add_modifier = {
 					name = modifier_brother_of_christ
@@ -209,18 +175,7 @@ create_taiping_characters = {
 				game_date > 1847.1.1
 			}
 			create_character = {
-				first_name = Tianguifu
-				last_name = Hong
-				birth_date = 1846.6.6
-				culture = cu:hakka
-				historical = yes
-				religion = rel:protestant
-				interest_group = ig_devout
-				heir = yes
-				ideology = ideology_moderate
-				traits = {
-					reserved
-				}
+				template = TPG_hong_tianguifu
 			}
 		}
 	}
@@ -257,23 +212,7 @@ create_taiping_characters = {
 			game_date < 1880.1.1
 		}
 		create_character = {
-			first_name = Xiuqing
-			last_name = Yang
-			birth_date = 1821.9.23
-			culture = cu:han
-			religion = rel:protestant
-			is_general = yes
-			ig_leader = yes
-			historical = yes
-			interest_group = ig_armed_forces
-			ideology = ideology_theocrat
-			commander_rank = commander_rank_3
-			traits = {
-				grifter
-				expert_political_operator
-				ambitious
-				demagogue
-			}
+			template = TPG_xiuqing_yang
 		}
 	}
 	if = {
@@ -282,22 +221,7 @@ create_taiping_characters = {
 			game_date < 1880.1.1
 		}
 		create_character = {
-			first_name = Chaogui
-			last_name = Xiao
-			birth_date = 1820.1.1
-			culture = cu:hakka
-			religion = rel:protestant
-			is_general = yes
-			ig_leader = yes
-			historical = yes
-			interest_group = ig_devout
-			ideology = ideology_theocrat
-			commander_rank = commander_rank_1
-			traits = {
-				reckless
-				charismatic
-				demagogue
-			}
+			template = TPG_chaogui_xiao
 		}
 	}
 	if = {
@@ -306,20 +230,7 @@ create_taiping_characters = {
 			game_date < 1880.1.1
 		}
 		create_character = {
-			first_name = Rengan
-			last_name = Hong
-			birth_date = 1822.2.18
-			culture = cu:han
-			religion = rel:protestant
-			ig_leader = yes
-			historical = yes
-			interest_group = ig_intelligentsia
-			ideology = ideology_market_liberal
-			traits = {
-				innovative
-				persistent
-				basic_diplomat
-			}
+			template = TPG_hong_rengan
 		}
 	}
 }
@@ -328,13 +239,14 @@ create_taiping_characters = {
 ai_expedition_simulator_start = {
 	random_scope_character = {
 		limit = {
-			is_ruler = no
+			is_ruler_of_own_country = no
 			OR = {
-				has_role = general
-				has_role = admiral
+				has_role_of_type = general
+				has_role_of_type = admiral
 			}
 		}
 		set_variable = expedition_leader_var
+		unassign_from_formation = yes
 		set_character_busy_and_immortal = yes
 	}
 	set_variable = on_expedition
@@ -491,7 +403,7 @@ adopt_random_antigovernment_ideology = { # I'm so sorry for this.
 				trigger = {
 					ideology_vanguardist_valid_trigger = yes
 					scope:exiling_country_scope ?= {
-						has_technology_researched = socialism
+						has_technology_researched = socialism #HMPS CHANGE
 						NOT = {
 							ruler = {
 								has_ideology = ideology:ideology_vanguardist
@@ -1326,7 +1238,8 @@ adopt_random_antigovernment_ideology = { # I'm so sorry for this.
 									has_ideology = ideology:ideology_corporatist_leader
 								}
 							}
-							has_law_or_variant = law_type:law_technocracy
+							has_law_or_variant = law_type:law_corporate_state
+							has_law_or_variant = law_type:law_social_monarchy
 						}
 					}
 				}
@@ -1454,6 +1367,17 @@ adopt_random_antigovernment_ideology = { # I'm so sorry for this.
 						}
 						add = 10
 					}
+					#if = { #HMPS Change
+					#	limit = {
+					#		scope:exiling_country_scope ?= {
+					#			NOR = {
+					#				has_law_or_variant = law_type:law_graduated_taxation
+					#				has_law_or_variant = law_type:law_proportional_taxation
+					#			}
+					#		}
+					#	}
+					#	add = 10
+					#}
 				}
 				set_ideology = ideology:ideology_utilitarian_leader
 			}
@@ -1478,7 +1402,7 @@ save_agitator_election_scopes = {
 	else = {
 		random_scope_character = {
 			limit = {
-				has_role = agitator
+				has_role_of_type = agitator
 				NOT = {
 					has_variable = agitator_election_participation
 				}
@@ -1678,7 +1602,7 @@ communist_agitator_election_scope_effect = {
 					}
 				}
 			}
-			has_role = agitator
+			has_role_of_type = agitator
 			NOT = {
 				has_variable = agitator_election_participation
 			}
@@ -1720,7 +1644,7 @@ fascist_agitator_election_scope_effect = {
 					}
 				}
 			}
-			has_role = agitator
+			has_role_of_type = agitator
 		}
 		save_scope_as = agitator_scope
 		this.interest_group ?= {
@@ -1748,7 +1672,7 @@ agrarian_agitator_election_scope_effect = {
 					is_member_of_party = owner.py:agrarian_party
 				}
 			}
-			has_role = agitator
+			has_role_of_type = agitator
 			NOT = {
 				has_variable = agitator_election_participation
 			}
@@ -1779,7 +1703,7 @@ socdem_agitator_election_scope_effect = {
 					is_member_of_party = owner.py:social_democrat_party
 				}
 			}
-			has_role = agitator
+			has_role_of_type = agitator
 			NOT = {
 				has_variable = agitator_election_participation
 			}
@@ -1813,7 +1737,7 @@ liberal_agitator_election_scope_effect = {
 					is_member_of_party = owner.py:liberal_party
 				}
 			}
-			has_role = agitator
+			has_role_of_type = agitator
 			NOT = {
 				has_variable = agitator_election_participation
 			}
@@ -1848,7 +1772,7 @@ conservative_agitator_election_scope_effect = {
 					is_member_of_party = owner.py:conservative_party
 				}
 			}
-			has_role = agitator
+			has_role_of_type = agitator
 			NOT = {
 				has_variable = agitator_election_participation
 			}
@@ -1879,7 +1803,7 @@ radical_agitator_election_scope_effect = {
 					is_member_of_party = owner.py:radical_party
 				}
 			}
-			has_role = agitator
+			has_role_of_type = agitator
 			NOT = {
 				has_variable = agitator_election_participation
 			}
@@ -1910,7 +1834,7 @@ free_trade_agitator_election_scope_effect = {
 					is_member_of_party = owner.py:free_trade_party
 				}
 			}
-			has_role = agitator
+			has_role_of_type = agitator
 			NOT = {
 				has_variable = agitator_election_participation
 			}
@@ -1934,13 +1858,8 @@ create_paris_commune_characters = {
 		}
 		if = {
 			limit = {
-				NOR = {
-					any_character = {
-						has_template = rus_jaroslaw_dabrowski_character_template
-					}
-					any_character_in_exile_pool = {
-						has_template = rus_jaroslaw_dabrowski_character_template
-					}
+				NOT = {
+					has_global_variable = dabrowski_spawn
 				}
 			}
 			create_character = {
@@ -1948,30 +1867,33 @@ create_paris_commune_characters = {
 				on_created = {
 					add_character_role = general
 					add_commander_rank = 1
-					set_variable = dabrowski_var
 					set_global_variable = dabrowski_spawn
 				}
 			}
 		}
 		else_if = {
 			limit = {
-				any_character = {
-					owner = c:FRA
-					has_template = rus_jaroslaw_dabrowski_character_template
+				has_global_variable = dabrowski_spawn
+				c:FRA ?= {
+					any_scope_character = {
+						has_template = rus_jaroslaw_dabrowski_character_template
+					}
 				}
 			}
-			random_character = {
-				limit = {
-					owner = c:FRA
-					has_template = rus_jaroslaw_dabrowski_character_template
+			c:FRA ?= {
+				random_scope_character = {
+					limit = {
+						has_template = rus_jaroslaw_dabrowski_character_template
+					}
+					transfer_character = c:PRC
+					add_character_role = general
+					add_commander_rank = 1
 				}
-				transfer_character = c:PRC
-				add_character_role = general
-				add_commander_rank = 1
 			}
 		}
 		else_if = {
 			limit = {
+				has_global_variable = dabrowski_spawn
 				any_character_in_exile_pool = {
 					has_template = rus_jaroslaw_dabrowski_character_template
 				}
@@ -1992,46 +1914,40 @@ create_paris_commune_characters = {
 		}
 		if = {
 			limit = {
-				NOR = {
-					any_character = {
-						has_template = fra_delescluze_character_template
-					}
-					any_character_in_exile_pool = {
-						has_template = fra_delescluze_character_template
-					}
+				NOT = {
+					has_global_variable = delescluze_spawn
 				}
 			}
 			create_character = {
 				template = fra_delescluze_character_template
 				on_created = {
-					add_character_role = politician
-					remove_character_role = agitator
 					set_as_interest_group_leader = yes
-					set_variable = delescluze_var
 					set_global_variable = delescluze_spawn
 				}
 			}
 		}
 		else_if = {
 			limit = {
-				any_character = {
-					owner = c:FRA
-					has_template = fra_delescluze_character_template
+				has_global_variable = delescluze_spawn
+				c:FRA ?= {
+					any_scope_character = {
+						has_template = fra_delescluze_character_template
+					}
 				}
 			}
-			random_character = {
-				limit = {
-					owner = c:FRA
-					has_template = fra_delescluze_character_template
+			c:FRA ?= {
+				random_scope_character = {
+					limit = {
+						has_template = fra_delescluze_character_template
+					}
+					transfer_character = c:PRC
+					set_as_interest_group_leader = yes
 				}
-				transfer_character = c:PRC
-				add_character_role = politician
-				remove_character_role = agitator
-				set_as_interest_group_leader = yes
 			}
 		}
 		else_if = {
 			limit = {
+				has_global_variable = delescluze_spawn
 				any_character_in_exile_pool = {
 					has_template = fra_delescluze_character_template
 				}
@@ -2041,8 +1957,6 @@ create_paris_commune_characters = {
 					has_template = fra_delescluze_character_template
 				}
 				transfer_character = c:PRC
-				add_character_role = politician
-				remove_character_role = agitator
 				set_as_interest_group_leader = yes
 			}
 		}
@@ -2054,13 +1968,8 @@ create_paris_commune_characters = {
 		}
 		if = {
 			limit = {
-				NOR = {
-					any_character = {
-						has_template = agitator_louise_michel
-					}
-					any_character_in_exile_pool = {
-						has_template = agitator_louise_michel
-					}
+				NOT = {
+					has_global_variable = louise_michel_spawn
 				}
 			}
 			create_character = {
@@ -2069,21 +1978,25 @@ create_paris_commune_characters = {
 		}
 		else_if = {
 			limit = {
-				any_character = {
-					owner = c:FRA
-					has_template = agitator_louise_michel
+				has_global_variable = louise_michel_spawn
+				c:FRA ?= {
+					any_scope_character = {
+						has_template = agitator_louise_michel
+					}
 				}
 			}
-			random_character = {
-				limit = {
-					owner = c:FRA
-					has_template = agitator_louise_michel
+			c:FRA ?= {
+				random_scope_character = {
+					limit = {
+						has_template = agitator_louise_michel
+					}
+					transfer_character = c:PRC
 				}
-				transfer_character = c:PRC
 			}
 		}
 		else_if = {
 			limit = {
+				has_global_variable = louise_michel_spawn
 				any_character_in_exile_pool = {
 					has_template = agitator_louise_michel
 				}
@@ -2102,20 +2015,7 @@ create_paris_commune_characters = {
 			game_date < 1900.1.1
 		}
 		create_character = {
-			first_name = Gustave
-			last_name = Cluseret
-			birth_date = 1823.6.13
-			culture = cu:french
-			ig_leader = yes
-			is_general = yes
-			interest_group = ig_armed_forces
-			ideology = ideology_radical
-			commander_rank = commander_rank_2
-			traits = {
-				grifter
-				reckless
-				explorer
-			}
+			template = PRC_gustave_cluseret
 		}
 	}
 	if = {
@@ -2124,18 +2024,7 @@ create_paris_commune_characters = {
 			game_date < 1910.1.1
 		}
 		create_character = {
-			first_name = Eugene
-			last_name = Varlin
-			birth_date = 1839.10.5
-			culture = cu:french
-			ig_leader = yes
-			interest_group = ig_trade_unions
-			ideology = ideology_anarchist
-			traits = {
-				persistent
-				brave
-				charismatic
-			}
+			template = PRC_eugene_varlin
 		}
 	}
 }
@@ -2881,10 +2770,10 @@ calculate_populism_progress = {
 		}
 		change_variable = { name = temp_ha_var_contribution multiply = -0.5 }
 	}
-	#change_variable = { name = populism_progress_from_laws add = var:temp_policing_var_contribution }
-	#change_variable = { name = populism_progress_from_laws add = var:temp_ha_var_contribution }
-	#remove_variable = temp_policing_var_contribution
-	#remove_variable = temp_ha_var_contribution
+	change_variable = { name = populism_progress_from_laws add = var:temp_policing_var_contribution }
+	change_variable = { name = populism_progress_from_laws add = var:temp_ha_var_contribution }
+	remove_variable = temp_policing_var_contribution
+	remove_variable = temp_ha_var_contribution
 }
 
 set_populism_vars = {
@@ -2975,10 +2864,10 @@ restore_peruvian_constitution = {
 	if = {
 		limit = {
 			NOT = {
-				has_law = law_type:law_republic
+				has_law = law_type:law_presidential_republic
 			}
 		}
-		activate_law = law_type:law_republic
+		activate_law = law_type:law_presidential_republic
 	}
 	if = {
 		limit = {
@@ -3426,8 +3315,8 @@ calculate_caudillo_progress = {
 		limit = {
 			any_scope_character = {
 				OR = {
-					has_role = general
-					has_role = admiral
+					has_role_of_type = general
+					has_role_of_type = admiral
 				}
 				popularity >= 50 # Loved
 			}
@@ -3440,10 +3329,10 @@ calculate_caudillo_progress = {
 	if = {
 		limit = {
 			any_scope_character = {
-				has_role = politician
-				NOT = { has_role = general }
+				has_role_of_type = politician
+				NOT = { has_role_of_type = general }
 				popularity >= 50 # Loved
-				interest_group = {
+				interest_group ?= {
 					is_powerful = yes
 					AND = {
 						law_stance = {
@@ -3467,7 +3356,7 @@ calculate_caudillo_progress = {
 			}
 			NOT = {
 				any_scope_character = {
-					has_role = general
+					has_role_of_type = general
 					popularity >= 50 # Loved
 				}
 			}
@@ -3480,7 +3369,7 @@ calculate_caudillo_progress = {
 	if = {
 		limit = {
 			any_scope_character = {
-				is_ruler = yes
+				is_ruler_of_own_country = yes
 				has_ideology = ideology:ideology_authoritarian
 			}
 		}
@@ -4587,76 +4476,6 @@ add_large_european_loyalists = {
 	}
 }
 
-generate_new_eic_government_leader = {
-	random_list = {
-		100 = {
-			trigger = {
-				c:GBR ?= ROOT.top_overlord
-				game_date > 1841.1.1
-				game_date < 1862.1.1
-				NOT = {
-					has_variable = canning_var
-				}
-			}
-			set_variable = canning_var
-			create_character = {
-				template = BIC_charles_canning
-			}
-		}
-		100 = {
-			trigger = {
-				c:GBR ?= ROOT.top_overlord
-				game_date > 1846.1.1
-				game_date < 1879.1.1
-				NOT = {
-					has_variable = lawrence_var
-				}
-			}
-			set_variable = lawrence_var
-			create_character = {
-				template = BIC_john_lawrence
-			}
-		}
-		50 = {
-			trigger = {
-				c:GBR ?= ROOT.top_overlord
-			}
-			create_character = {
-				ig_leader = yes
-				interest_group = ig:ig_industrialists
-				culture = cu:british
-			}
-		}
-		33 = {
-			trigger = {
-				c:GBR ?= ROOT.top_overlord
-			}
-			create_character = {
-				ig_leader = yes
-				interest_group = ig:ig_industrialists
-				culture = cu:scottish
-			}
-		}
-		17 = {
-			trigger = {
-				c:GBR ?= ROOT.top_overlord
-			}
-			create_character = {
-				ig_leader = yes
-				interest_group = ig:ig_industrialists
-				culture = cu:irish
-			}
-		}
-		75 = {
-			create_character = {
-				ig_leader = yes
-				interest_group = ig:ig_industrialists
-				culture = primary_culture
-			}
-		}
-	}
-}
-
 collapse_india_effect = {
 	hidden_effect = { # Sensible prioritzed snatches
 		if = {
@@ -5061,11 +4880,8 @@ collapse_india_effect = {
 							THIS = ROOT
 						}
 						OR = {
-							capital.region = sr:region_bombay
-							capital.region = sr:region_madras
-							capital.region = sr:region_bengal
-							capital.region = sr:region_punjab
-							capital.region = sr:region_central_india
+							capital.region = sr:region_south_india
+							capital.region = sr:region_north_india
 						}
 					}
 				}
