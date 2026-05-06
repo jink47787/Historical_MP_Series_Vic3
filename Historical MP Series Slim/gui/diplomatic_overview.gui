@@ -1,4 +1,4 @@
-# COPY-PASTED FOR NOW
+# COPY-PASTED FOR NOW  ###CTRL F "###HMPS ADDITION START"
 @panel_width_minus_10 = 530			# used to be 450
 @panel_width = 540  				# used to be 460
 @panel_width_half = 270				# used to be 230
@@ -15,7 +15,7 @@ types diplomatic_panel
 		name = "diplomatic_overview_panel"
 		enabled = yes
 		datacontext = "[AccessPlayer]" # using AccessPlayer instead of GetPlayer here because sorting subjects requires a non-const country
-		
+
 		blockoverride "animation_state_block" {
 			state = {
 				name = _show
@@ -31,7 +31,7 @@ types diplomatic_panel
 				}
 			}
 		}
-		
+
 		blockoverride "window_header_name"
 		{
 			text = "DIPLOMATIC_OVERVIEW_TITLE"
@@ -53,12 +53,12 @@ types diplomatic_panel
 				blockoverride "illu" {
 					texture = "gfx/interface/illustrations/top_illus/top_illu_diplomacy.dds"
 				}
-				
+
 				flowcontainer = {
 					parentanchor = center
-					
+
 					rank_badge = {}
-					
+
 					textbox = {
 						text = "[Country.GetRank|v]"
 						tooltip = "[Country.GetRankTooltip]"
@@ -91,7 +91,7 @@ types diplomatic_panel
 				}
 				blockoverride "first_button_selected" {
 					text = "OVERVIEW"
-				}	
+				}
 
 				# Subjects
 				blockoverride "second_button" {
@@ -192,7 +192,7 @@ types diplomatic_panel
 				release_subject_tab_content = {
 					visible = "[InformationPanel.IsTabSelected('release_subject')]"
 				}
-				
+
 				nation_formation_tab_content = {
 					visible = "[InformationPanel.IsTabSelected('nation_formation')]"
 				}
@@ -219,16 +219,6 @@ types diplomatic_panel
 
 				widget = {
 					size = { 10 10 }
-				}
-
-				button = {
-					parentanchor = hcenter
-					using = default_button
-					text = "DECLARE_INTEREST_BUTTON"
-					size = { @panel_width 50 }
-					using = fontsize_large
-					onclick = "[GetLensToolbar.ActivateOption('declare_interest')]"
-					tooltip = "declare_interest_tooltip"
 				}
 
 				widget = {
@@ -311,26 +301,24 @@ types diplomatic_panel
 		flowcontainer = {
 			parentanchor = hcenter
 			visible = "[Not(IsDataModelEmpty(AccessPlayer.AccessInterests))]"
-			
+
 			sort_button = {
-				size = { 375 30 }
-				text = "INTEREST_IN"
+				size = { 270 30 }
+				tooltip = "SORT_BY_STRATEGIC_REGION_NAME"
+				text = "concept_strategic_region"
+				onclick = "[Country.SortInterests('strategic_region_name')]"
 			}
 
 			sort_button = {
-				size = { 155 30 }
-				tooltip = PROGRESS
-				button = {
-					texture = "gfx/interface/buttons/sort_button_icons/sort_icon_progress.dds"
-					size = { 25 25 }
-					parentanchor = center
-					alwaystransparent = yes
-				}
+				size = { 270 30 }
+				tooltip = "SORT_BY_INVOLVEMENT"
+				text = "concept_involvement"
+				onclick = "[Country.SortInterests('involvement')]"
 			}
 		}
 
 		flowcontainer = {
-			using = default_list_position
+			parentanchor = hcenter
 			datamodel = "[AccessPlayer.AccessInterests]"
 			visible = "[Not(IsDataModelEmpty(AccessPlayer.AccessInterests))]"
 			direction = vertical
@@ -338,78 +326,47 @@ types diplomatic_panel
 			item = {
 				flowcontainer = {
 					datacontext = "[Interest.GetStrategicRegion]"
-					tooltip = "INTEREST_MARKER_TOOLTIP"
 					using = unclickable_listentry
-					margin_bottom = 10 
+					margin_bottom = 10
 					spacing = 10
 					onmousehierarchyenter = "[AccessHighlightManager.HighlightStrategicRegion(StrategicRegion.Self)]"
 					onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
 					alwaystransparent = no
-					
-					# Needs to be in a widget to avoid conflict of aligments
-					widget = {
-						size = { 370 30 }
+
+					button = {
+						size = { 260 40 }
+						using = default_button
 						parentanchor = vcenter
-						
-						textbox = {
-							visible = "[Interest.IsActive]"
-							text = "[StrategicRegion.GetName]"
-							autoresize = yes
-							minimumsize = { 370 -1 }
-							parentanchor = vcenter
+						onclick = "[InformationPanelBar.OpenStrategicRegionPanel(StrategicRegion.Self)]"
+
+						tooltipwidget = {
+							FancyTooltip_StrategicRegion = {}
 						}
+
 						textbox = {
-							visible = "[Not(Interest.IsActive)]"
-							text = "[StrategicRegion.GetName]"
+							position = { 10 0 }
 							autoresize = yes
-							minimumsize = { 370 -1 }
+							max_width = 240
 							parentanchor = vcenter
-							alpha = 0.5
+							text = "[StrategicRegion.GetNameNoFormatting]"
 						}
-					}	
+					}
 
 					widget = {
-						size = { 150 30 }
 						parentanchor = vcenter
-						
-						container = {
-							visible = "[Interest.ShouldShowProgressBar]"
-							parentanchor = center
-							
-							bad_progressbar_horizontal = {
-								size = { 120 16 }
-								visible = "[Interest.IsActive]"
-								parentanchor = center
-								blockoverride "values" {
-									value = "[Interest.GetProgress]"
-									min = 0
-									max = 1
-								}
+						size = { 260 60 }
 
-								textbox = {
-									text = "[Interest.GetProgress|%0]"
-									parentanchor = center
-									autoresize = yes
-									align = nobaseline	
-								}
+						country_involvement_bar_with_label = {
+							margin_right = 10
+
+							blockoverride "tier_icon_size" {
+								size = { 60 60 }
 							}
 
-							default_progressbar_horizontal = {
-								size = { 120 16 }
-								visible = "[Not(Interest.IsActive)]"
-								parentanchor = center					
-								blockoverride "values" {
-									value = "[Interest.GetProgress]"
-									min = 0
-									max = 1
-								}
+							blockoverride "above_expand" {}
 
-								textbox = {
-									text = "[Interest.GetProgress|%0]"
-									parentanchor = center
-									autoresize = yes
-									align = nobaseline	
-								}
+							blockoverride "below" {
+								expand = {}
 							}
 						}
 					}
@@ -464,13 +421,13 @@ types diplomatic_panel
 						spacing = 2
 						margin_right = 10
 						alpha = "[TransparentIfTrue(IsDataModelEmpty(AccessPlayer.GetUnenforcedTreatiesWith(Country.Self)))]"
-						
+
 						icon = {
 							parentanchor = vcenter
 							size = { 30 30 }
 							texture = "gfx/interface/icons/generic_icons/diplomatic_treaties.dds"
 						}
-						
+
 						textbox = {
 							parentanchor = vcenter
 							autoresize = yes
@@ -578,7 +535,7 @@ types diplomatic_panel
 				blockoverride "left_text" {
 					text = "SUBJECT_TYPES_VISUALIZATION"
 				}
-				
+
 				blockoverride "onclick" {
 					onclick = "[GetVariableSystem.Toggle('subject_types_visualization')]"
 				}
@@ -682,21 +639,7 @@ types diplomatic_panel
 						}
 					}
 
-					### CONVOY CONTRIBUTION
-					hbox = {
-						layoutpolicy_horizontal = expanding
-						layoutpolicy_vertical = expanding
-						layoutstretchfactor_horizontal = 2
-						tooltip = "SUBJECT_TYPE_CONVOY_CONTRIBUTION_HEADER_TOOLTIP"
-						using = tooltip_ne
-
-						icon = {
-							size = { 30 30 }
-							texture = "gfx/interface/icons/topbar/convoys.dds"
-						}
-					}
-
-					### OVERLORD TYPE
+						### OVERLORD TYPE
 					textbox = {
 						layoutpolicy_horizontal = expanding
 						layoutpolicy_vertical = expanding
@@ -875,20 +818,6 @@ types diplomatic_panel
 
 							}
 
-							### VALUE - CONVOY CONTRIBUTION
-							textbox = {
-								layoutpolicy_horizontal = expanding
-								layoutpolicy_vertical = expanding
-								layoutstretchfactor_horizontal = 2
-								align = hcenter|nobaseline
-								elide = right
-								fontsize_min = 12
-								alpha = "[TransparentIfFalse(GreaterThan_CFixedPoint(SubjectType.GetDiplomaticActionType.GetSecondModifier.GetValueFor('country_convoy_contribution_to_market_owner_add'), '(CFixedPoint)0'))]"
-								tooltip = "SUBJECT_TYPE_CONVOY_CONTRIBUTION_TOOLTIP"
-								using = tooltip_se
-								raw_text = "[SubjectType.GetDiplomaticActionType.GetSecondModifier.GetValueFor('country_convoy_contribution_to_market_owner_add')|v%0]"
-							}
-
 							### VALUE - OVERLORD TYPE
 							textbox = {
 								layoutpolicy_horizontal = expanding
@@ -908,7 +837,7 @@ types diplomatic_panel
 		widget = {
 			size = { 10 10 }
 		}
-		
+
 		flowcontainer = {
 			parentanchor = hcenter
 			direction = vertical
@@ -1062,7 +991,7 @@ types diplomatic_panel
 							blockoverride "onclick" {
 								onclick = "[GetVariableSystem.Toggle( Concatenate('show_diplomatic_pacts_', SubjectType.GetKey) )]"
 							}
-							
+
 							blockoverride "onclick_showmore" {
 								visible = "[Not(GetVariableSystem.Exists( Concatenate('show_diplomatic_pacts_', SubjectType.GetKey) ))]"
 							}
@@ -1091,7 +1020,7 @@ types diplomatic_panel
 					}
 				}
 			}
-		}			
+		}
 	}
 
 	type diplo_actions_button = button_icon_round {
@@ -1130,11 +1059,11 @@ types diplomatic_panel
 		direction = vertical
 		spacing = 5
 		margin_top = 3
-		
+
 		block "datamodel" {
 			datamodel = "[AccessPlayer.GetSubjects]"
 		}
-	
+
 		item = {
 			subject_list_item = {}
 		}
@@ -1421,7 +1350,7 @@ types diplomatic_panel
 								text = "[GetDataModelSize(Country.GetAvailablePowerBlocMemberDiploActions)|+]"
 							}
 						}
-						
+
 						### BLOC LEADER ACTIONS
 						diplo_actions_button = {
 							visible = "[Not(IsDataModelEmpty(Country.GetAllPowerBlocLeaderDiploActions))]"
@@ -1441,7 +1370,7 @@ types diplomatic_panel
 							blockoverride "available_number_text" {
 								text = "[GetDataModelSize(Country.GetAvailablePowerBlocLeaderDiploActions)|+]"
 							}
-						}						
+						}
 					}
 				}
 			}
@@ -1449,8 +1378,6 @@ types diplomatic_panel
 			rank_badge = {
 				size = { 45 45 }
 				position = { -15 -15 }
-
-				blockoverride "datacontext " {}
 
 				blockoverride "font_size_under_100_rank" {
 					using = fontsize_medium
@@ -1578,7 +1505,7 @@ types diplomatic_panel
 				}
 			}
 			
-			vertical_divider_full = {}
+			vertical_divider_full = {} ###HMPS ADDITION START
 			
 			flowcontainer = {
 				direction = vertical
@@ -1600,7 +1527,7 @@ types diplomatic_panel
 	                 	}
 	              	}
 				}
-			}
+			} ###HMPS ADDITION END
 		}
 	}
 
@@ -1608,7 +1535,7 @@ types diplomatic_panel
 		minimumsize = { @panel_width_plus_20 -1 }
 		maximumsize = { @panel_width_plus_20 -1 }
 		using = default_content_fade
-		
+
 		empty_state = {
 			blockoverride "visible" {
 				visible = "[IsDataModelEmpty(AccessPlayer.AccessReleasableCountries)]"
@@ -1616,12 +1543,12 @@ types diplomatic_panel
 			blockoverride "text" {
 				text = "NO_RELEASABLE_COUNTRIES"
 			}
-		}	
-		
+		}
+
 		flowcontainer = {
 			parentanchor = hcenter
 			direction = vertical
-			visible = "[Not(IsDataModelEmpty(AccessPlayer.AccessReleasableCountries))]"		
+			visible = "[Not(IsDataModelEmpty(AccessPlayer.AccessReleasableCountries))]"
 			spacing = 10
 
 			default_header = {
@@ -1635,12 +1562,12 @@ types diplomatic_panel
 				direction = vertical
 				datamodel = "[AccessPlayer.AccessReleasableCountries]"
 				spacing = 5
-			
+
 				item = {
 					releasable_country_button = {}
 				}
-			}	
-		}			
+			}
+		}
 	}
 
 	type nation_formation_tab_content = container {
@@ -1669,7 +1596,7 @@ types diplomatic_panel
 					blockoverride "text" {
 						text = "NO_FORMABLE_COUNTRIES"
 					}
-				}	
+				}
 
 				flowcontainer = {
 					parentanchor = hcenter
@@ -1701,11 +1628,11 @@ types diplomatic_panel
 			blockoverride "country_name" {
 				text = "RELEASE_COUNTRY_NAME"
 			}
-			
+
 			blockoverride "country_tier" {
 				text = "RELEASE_COUNTRY_TIER"
 			}
-			
+
 
 			blockoverride "flag_definition" {
 				# Using medium size textures in small flag for better downscaling of flag details
@@ -1736,10 +1663,10 @@ types diplomatic_panel
 
 		widget = {
 			size = { @panel_width 30 }
-			
+
 			hbox = {
 				datacontext = "[DiplomaticOverviewPanel.GetMapModeList]"
-				
+
 				sort_button = {
 					size = { 40 30 }
 					onclick = "[DiplomaticOverviewPanel.Sort('rank')]"
@@ -1787,25 +1714,25 @@ types diplomatic_panel
 					onclick = "[DiplomaticOverviewPanel.Sort('infamy')]"
 				}
 			}
-		}		
-		
+		}
+
 		flowcontainer = {
 			datamodel = "[DiplomaticOverviewPanel.GetCountries]"
 			minimumsize = { @panel_width -1 }
 			maximumsize = { @panel_width -1 }
 			direction = vertical
 			margin_top = 5
-			
+
 			item = {
 				widget = {
 					size = { @panel_width 35 }
 					name = "tutorial_highlight_country"
-					
+
 					divider_clean = {
 						parentanchor = bottom
 						position = { 0 2 }
 					}
-			
+
 					hbox = {
 						datacontext = "[DiplomaticOverviewPanel.GetMapModeList]"
 						spacing = 10
@@ -1822,14 +1749,11 @@ types diplomatic_panel
 
 							rank_badge = {
 								size = { 40 40 }
-								
-								blockoverride "datacontext " { 
-									datacontext = "[Country]"
-								}
 
 								blockoverride "rank_text" {
 									raw_text = "#BOLD [Country.GetCountryScorePositionDesc]"
 								}
+
 								blockoverride "rank_text_2" {
 									raw_text = "#BOLD [Country.GetCountryScorePositionDesc]"
 									visible = no
@@ -1842,18 +1766,21 @@ types diplomatic_panel
 							layoutpolicy_horizontal = preferred
 							size = { 0 30 }
 							spacing = 10
-							
+
 							tiny_flag = {}
 
 							button = {
 								using = clean_button
 								layoutpolicy_horizontal = preferred
 								size = { 0 30 }
-								
 								onclick = "[InformationPanelBar.OpenCountryPanel(Country.Self)]"
-									
+
+								tooltipwidget = {
+									FancyTooltip_Country = {}
+								}
+
 								textbox = {
-									text = "[Country.GetNameNoFlag]"
+									text = "[Country.GetNameNoFormatting]"
 									size = { 100% 100% }
 									elide = right
 									align = nobaseline
@@ -1910,6 +1837,6 @@ types diplomatic_panel
 					}
 				}
 			}
-		}	
+		}
 	}
 }
