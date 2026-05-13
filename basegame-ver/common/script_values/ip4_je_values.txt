@@ -547,9 +547,9 @@ commander_coup_strength = {
 			owner.army_size_including_raised_conscripts > 0
 		}
 		add = {
-			desc = "coup_num_army_units_tt"
-			value = this.num_units_share
-			divide = owner.army_size_including_raised_conscripts
+			desc = "coup_commander_rank_tt"
+			value = this.commander_rank
+			divide = owner.country_collected_army_commander_ranks
 			multiply = 5
 		}
 	}
@@ -560,9 +560,9 @@ commander_coup_strength = {
 			owner.navy_size > 0
 		}
 		add = {
-			desc = "coup_num_navy_units_tt"
-			value = this.num_units_share
-			divide = owner.navy_size
+			desc = "coup_commander_rank_tt"
+			value = this.commander_rank
+			divide = owner.country_collected_navy_commander_ranks
 			multiply = 5
 		}
 	}
@@ -611,6 +611,7 @@ commander_coup_strength = {
 	}
 	else_if = {
 		limit = {
+			exists = this.commander_military_formation
 			NOT = {
 				exists = this.commander_military_formation.current_hq
 			}
@@ -618,6 +619,17 @@ commander_coup_strength = {
 		add = {
 			desc = "coup_commander_no_location_tt"
 			value = -1
+		}
+	}
+	else_if = {
+		limit = {
+			NOT = {
+				exists = this.commander_military_formation
+			}
+		}
+		add = {
+			desc = "coup_commander_unassigned_location_tt"
+			value = 2
 		}
 	}
 	add = {
@@ -656,14 +668,14 @@ commander_coup_strength_country_display = { # Note - absolute fraud script value
 			}
 		}
 		add = {
-			desc = "coup_commander_num_army_units_tt"
+			desc = "coup_commander_rank_progress_tt"
 			every_scope_character = {
 				limit = {
 					has_variable = golpista_var
 					has_role_of_type = general
 				}
-				value = this.num_units_share
-				divide = owner.army_size_including_raised_conscripts
+				value = this.commander_rank
+				divide = owner.country_collected_army_commander_ranks
 				multiply = 5
 			}
 		}
@@ -677,14 +689,14 @@ commander_coup_strength_country_display = { # Note - absolute fraud script value
 			}
 		}
 		add = {
-			desc = "coup_commander_num_navy_units_tt"
+			desc = "coup_commander_rank_progress_tt"
 			every_scope_character = {
 				limit = {
 					has_variable = golpista_var
 					has_role_of_type = admiral
 				}
-				value = this.num_units_share
-				divide = owner.navy_size
+				value = this.commander_rank
+				divide = owner.country_collected_navy_commander_ranks
 				multiply = 5
 			}
 		}
@@ -742,6 +754,7 @@ commander_coup_strength_country_display = { # Note - absolute fraud script value
 		limit = {
 			any_scope_character = {
 				has_variable = golpista_var
+				exists = this.commander_military_formation
 				NOT = {
 					exists = this.commander_military_formation.current_hq
 				}
@@ -750,6 +763,20 @@ commander_coup_strength_country_display = { # Note - absolute fraud script value
 		add = {
 			desc = "coup_commander_no_location_progress_tt"
 			value = -1
+		}
+	}
+	else_if = {
+		limit = {
+			any_scope_character = {
+				has_variable = golpista_var
+				NOT = {
+					exists = this.commander_military_formation
+				}
+			}
+		}
+		add = {
+			desc = "coup_commander_unassigned_location_progress_tt"
+			value = 2
 		}
 	}
 	add = {
@@ -781,6 +808,48 @@ commander_coup_strength_country_display = { # Note - absolute fraud script value
 			value = 1
 			add = modifier:character_coup_strength_mult
 		}
+	}
+}
+
+country_collected_army_commander_ranks = {
+	if = {
+		limit = {
+			any_scope_character = {
+				has_role_of_type = general
+			}
+		}
+		value = 0
+		every_scope_character = {
+			limit = {
+				has_role_of_type = general
+				exists = commander_rank
+			}
+			add = this.commander_rank
+		}
+	}
+	else = {
+		value = 0
+	}
+}
+
+country_collected_navy_commander_ranks = {
+	if = {
+		limit = {
+			any_scope_character = {
+				has_role_of_type = admiral
+			}
+		}
+		value = 0
+		every_scope_character = {
+			limit = {
+				has_role_of_type = admiral
+				exists = commander_rank
+			}
+			add = this.commander_rank
+		}
+	}
+	else = {
+		value = 0
 	}
 }
 

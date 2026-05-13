@@ -465,8 +465,9 @@ NEconomy = {
 	TRADE_CENTER_PREFERENCE_TRADE_AGREEMENT_MULTIPLIER = 4.0				# Added to weight multiplier for each Trade Agreement between the two countries
 	TRADE_CENTER_PREFERENCE_EMBARGO_DIVISOR = 2.0							# Added to weight divisor for each Embargo between the two countries
 	TRADE_CENTER_PREFERENCE_NO_INTEREST_DIVISOR = 0.25						# Added to weight divisor for each side that lacks an Interest in the other's market
-	TRADE_CENTER_PREFERENCE_DISTANCE_DIVISOR = 0.25							# Weight is divided by 1 + ( distance in sea nodes * this ) between the two Trade Centers' hubs, this is done last after other multipliers/divisors
+	TRADE_CENTER_PREFERENCE_DISTANCE_DIVISOR = 0.25							# Added to weight divisor per multiple of expected distance between the two Trade Centers' hubs
 	TRADE_CENTER_PREFERENCE_TOLL_DIVISOR = 0.05								# Weight is divided by 1 + ( toll rate in whole percent * this ) for strait tolls along the route between two Trade Centers' hubs
+	SEA_DISTANCE_EXPECTED_TRAVEL_DISTANCE = 1000							# Expected sea travel distance - distances below this do not apply any scaling, distances above scale linearly
 	MAX_TRADE_ROUTE_ALTERNATIVES = 3										# Maximum number of alternate sea paths calculated between world market hubs
 
 	MARKET_SHARE_FROM_GDP = 1.0					# Get this many points of market share per pound of GDP in states
@@ -490,6 +491,7 @@ NEconomy = {
 	BUILDING_WAGES_WELFARE_INCOME_FACTOR = 0.8 # A pop with welfare income has its wealth multiplied by 1 - ( the fraction of their income that is welfare * this ) to ensure buildings don't start wage dumping just because all employees are getting welfare
 	BUILDING_WAGES_OWNERSHIP_BUILDING_FACTOR = 0.75 # Buildings that own other buildings multiply their target wages by this to ensure profitability
 	BUILDING_WAGES_MIN_RELEVANT_POP_SIZE = 50 # Pops with less workforce than this are ignored when checking whether a profitable building should raise wages because of radicalizing workers
+	BUILDING_WAGES_MIN_EMPLOYEES_FOR_RELEVANT_POP_SIZE_CHECK = 200 # For the BUILDING_WAGES_MIN_RELEVANT_POP_SIZE to be checked, the buildings must have at least this many employees to avoid small buildings wage dumping
 	BUILDING_RAISE_WAGES_TARGET_WEALTH_MULT = 0.9 # Buildings will consider raising wages if any significant pops working in them have this or lower * the target wealth to expected SoL ratio
 	BUILDING_LOWER_WAGES_TARGET_WEALTH_MULT = 1.2 # Buildings will consider lowering wages if all significant pops working in them have this or higher * the target wealth to expected SoL ratio
 	BUILDING_WAGES_AVERAGE_PRODUCTIVITY_THRESHOLD = 0.5 # At which ratio to average productivity does BUILDING_WAGES_AVERAGE_PRODUCTIVITY_FACTOR start kicking in (average tends to be high due to ownership buildings & trade centers, so this value should be fairly low)
@@ -622,7 +624,7 @@ NEconomy = {
 	ESTABLISH_COLONY_PORT_COST = 100000				# How much money it costs to establish a coastal colony that builds a port
 	ESTABLISH_COLONY_PORT_LEVEL = 1					# What level port you get when establishing a coastal colony
 
-	SHIPPING_LANE_MERCHANT_MARINE_COST_SCALING = 0.1	# The cost for a shipping lane for each node beyond the first. So at 0.1 it goes 1.0, 1.1, 1.2 and so on.
+	SHIPPING_LANE_MERCHANT_MARINE_COST_SCALING = 0.15	# Added to shipping lane cost multiplier for each multiple of expected distance beyond the first
 	GOODS_DEFAULT_MERCHANT_MARINE_COST_MULTIPLIER = 1	# The merchant marine cost of shipping a single unit of goods (can be overridden in defines)
 	OVERSEAS_INFRASTRUCTURE_MERCHANT_MARINE_COST_MULTIPLIER = 0.2	# Merchant marine cost for each infrastructure usage in overseas state for port connection shipping lanes
 	MERCHANT_MARINE_GOODS_KEY = "merchant_marine"		# The goods key used for merchant marine demand
@@ -794,13 +796,14 @@ NMilitary = {
 	BATTLE_CONDITION_MIN_TICKS_BETWEEN_UPDATE_DEFAULT = 40	# Unless otherwise specified on the battle condition type, battle conditions will not update until at least this many ticks has passed
 	BATTLE_CONDITION_CHANCE_TO_UPDATE_PER_EXTRA_TICK = 0.01 # For each tick that has passed since the minimum number of ticks, this chance to refresh battle conditions (i.e. 13 ticks after min, there's 13% chance of switching)
 
-	DEFAULT_ORDER_GENERAL = "advance"						# Default order for generals
-	DEFAULT_ORDER_ADMIRAL = "interception_coast"			# Default order for admirals
+	DEFAULT_ORDER = "advance"						# Default order for generals
 
-	MILITARY_FORMATION_COMMAND_LIMIT_NO_COMMANDER = 10		# Default command limit if formation has no commander
+	MILITARY_FORMATION_COMMAND_LIMIT_NO_COMMANDER = 20		# Default command limit if formation has no commander
 	LOW_COMMAND_LIMIT_GRACE_PERIOD_DAYS = 30				# How many days will it take for a formation whose units exceeds its command limit to start suffering penalties
 
 	INVALID_NAVAL_MISSION_GRACE_PERIOD_DAYS = 10			# How many days a fleet with an invalid naval mission will wait before going back to port
+
+	FORMATION_AUTO_MERGE_GRACE_PERIOD_DAYS = 3			# Only auto-merge units into formations created within this many days
 
 	COMMANDER_SUFFICIENT_CAPACITY_MULT = 1.5				# Commanders of a type are considered sufficient if their cumulative command limit is at least this times the total active combat units of that type
 
@@ -815,16 +818,16 @@ NMilitary = {
 	MILITARY_FORMATION_ORGANIZATION_GAIN_MIN = 0.1								# The minimum amount of Organization a Military Formation can gain in a day
 	MILITARY_FORMATION_ORGANIZATION_SPECIAL_UNITS_ADD = -50						# Military Formation with too many special units gain this Organization penalty: Target = Target + ( excess ratio * this )
 	MILITARY_FORMATION_ORGANIZATION_EXILE_MULT = -1								# Exiled Military Formation has its Target Organization modified: Target = Target * ( 1 + this )
-	MILITARY_FORMATION_ORGANIZATION_SUPPLY_SHORTAGE_EFFECT_THRESHOLD = 0.5		# Organization penalty starts when supply drops below this ratio
+	MILITARY_FORMATION_ORGANIZATION_SUPPLY_SHORTAGE_EFFECT_THRESHOLD = 0.25		# Organization penalty starts when supply drops below this ratio
 	MILITARY_FROMATION_MAX_RESUPPLY_RATIO_PER_WEEK = 0.1						# Each week, a military formation can resupply this fraction of its total supply need
 	MILITARY_FORMATION_MIN_RESUPPLY_PER_WEEK = 10								# Each week, a military formation can resupply at least this amount of its supply need
 	MOBILIZATION_OPTION_DIFFERENCE_ORGANIZATION_IMPACT = 20 # The penalty to Organization gained for each difference by merging units between Formations with different Mobilization Options
 	FLEET_PRESENCE_GAIN_PER_DAY = 0.02						# The amount of Presence a Fleet gains per day while in Mission Area
 	FLEET_PRESENCE_DECAY_PER_DAY = 0.02						# The amount of Presence a Fleet decays per day while not in Mission Area
 	FLEET_PRESENCE_TRANSPORTING_OR_INVADING = 1.0			# Sea Presence forced on fleets transporting armies or supporting a naval invasion
-	FLEET_GUARANTEED_BATTLE_SIZE = 0.5 					# It's guaranteed that half of the ships arrive regardless of sea presence
-	FLEET_SPOT_BASE_CHANCE = 0.005						# Base chance (1%) to spot an enemy fleet per detection/visibility ratio
-	FLEET_SPOT_SCALING_MULTIPLIER = 0.01				# Scaling factor multiplier per total ship count when spotting a fleet
+	FLEET_GUARANTEED_BATTLE_SIZE = 0.5 						# It's guaranteed that half of the ships arrive regardless of sea presence
+	FLEET_SPOT_BASE_CHANCE = 0.005							# Base chance (1%) to spot an enemy fleet per detection/visibility ratio
+	FLEET_SPOT_SCALING_MULTIPLIER = 0.01					# Scaling factor multiplier per total ship count when spotting a fleet
 
 	MILITARY_FORMATION_WEEKLY_MAX_UNIT_UPGRADES_ARMY = 0.1		# Each week a mobilized army can upgrade this (0.0-1.0) fraction of its total number of units.
 	MILITARY_FORMATION_WEEKLY_MAX_UNIT_UPGRADES_FLEET = 0.05	# Each week a mobilized fleet can upgrade this (0.0-1.0) fraction of its total number of units.
@@ -843,54 +846,62 @@ NMilitary = {
 
 	# Defines below control how much blockade strength is required to fully blockade a state
 	# The base target strength is equal to the state_blockade_resistance_add modifier
-	BLOCKADE_TARGET_STRENGTH_MAXIMUM = 100000				# Required blockade strength cannot be higher than this
-	BLOCKADE_TARGET_STRENGTH_PER_TRADED_UNIT = 0.1			# Each base value of imports/exports in the market area increases required blockade strength by this (only for world market hubs)
-	BLOCKADE_TARGET_STRENGTH_PER_PRODUCED_UNIT = 0.15		# Each base value of goods produced in buildings affected by blockades (such as fisheries and shipyards) increases required blockade strength by this
-	BLOCKADE_TARGET_STRENGTH_PER_MERCHANT_MARINE = 3					# Each convoy passing through the state's port increases required blockade strength by this
+	BLOCKADE_TARGET_STRENGTH_MAXIMUM = 100000					# Required blockade strength cannot be higher than this
+	BLOCKADE_TARGET_STRENGTH_PER_TRADED_UNIT = 0.1				# Each base value of imports/exports in the market area increases required blockade strength by this (only for world market hubs)
+	BLOCKADE_TARGET_STRENGTH_PER_PRODUCED_UNIT = 0.15			# Each base value of goods produced in buildings affected by blockades (such as fisheries and shipyards) increases required blockade strength by this
+	BLOCKADE_TARGET_STRENGTH_PER_MERCHANT_MARINE = 3			# Each convoy passing through the state's port increases required blockade strength by this
 
-	BLOCKADE_WORLD_MARKET_ACCESS_IMPACT_SCALING = 0.75		# Reduction of world market access for blockaded world market hubs, scales against blockade level
-	BLOCKADE_SHIPPING_LANE_IMPACT_SCALING = 0.75			# Reduction of efficiency for blockaded shipping lanes, scales against blockade level of either start or end point, whichever is most blockaded
-	BLOCKADE_THROUGHPUT_IMPACT_SCALING = 0.75				# Reduction of throughput for buildings affected by blockades, scales against blockade level
+	BLOCKADE_WORLD_MARKET_ACCESS_IMPACT_SCALING = 0.75			# Reduction of world market access for blockaded world market hubs, scales against blockade level
+	BLOCKADE_SHIPPING_LANE_IMPACT_SCALING = 0.75				# Reduction of efficiency for blockaded shipping lanes, scales against blockade level of either start or end point, whichever is most blockaded
+	BLOCKADE_THROUGHPUT_IMPACT_SCALING = 0.75					# Reduction of throughput for buildings affected by blockades, scales against blockade level
 	BLOCKADE_SEA_PRESENCE_TRESHOLD = 0.5						# At what level of sea presence is the blockade effective
 	BLOCKADE_FORCED_BATTLE_LEVEL = 1.0							# A fleet undocking from a state with at least this blockade level will be forced into a battle with the blockading fleet
 
 	# Defines below control port bombardment effects on enemy coastal states
-	BOMBARDMENT_DEVASTATION_MAX = 25.0						# Maximum devastation that can be generated by port bombardment
-	BOMBARDMENT_DEVASTATION_RATE = 0.20						# Per day devastation increase, scales with effective bombardment level
-	BOMBARDMENT_BUILDING_DAMAGE_BASE_CHANCE = 0.02			# Base daily chance to reduce the level of a random coastal building, scales with effective bombardment level
-	BOMBARDMENT_SEA_PRESENCE_THRESHOLD = 0.1				# At what level of sea presence is the port bombardment effective
+	BOMBARDMENT_DEVASTATION_MAX = 25.0							# Maximum devastation that can be generated by port bombardment
+	BOMBARDMENT_DEVASTATION_RATE = 0.20							# Per day devastation increase, scales with effective bombardment level
+	BOMBARDMENT_BUILDING_DAMAGE_BASE_CHANCE = 0.02				# Base daily chance to reduce the level of a random coastal building, scales with effective bombardment level
+	BOMBARDMENT_SEA_PRESENCE_THRESHOLD = 0.1					# At what level of sea presence is the port bombardment effective
 
-	OFFICERS_TO_SERVICEMEN_RATIO_THRESHOLD = 0.75	# If the officer to servicemen ratio falls below this percentage from its ideal ratio for a building, the combat units provided by that building will start applying the effectiveness factor defined below. A threshold value means the effectiveness factor kicks in in later (when lacking more officers) [>= 0 and <= 1]
+	OFFICERS_TO_SERVICEMEN_RATIO_THRESHOLD = 0.75					# If the officer to servicemen ratio falls below this percentage from its ideal ratio for a building, the combat units provided by that building will start applying the effectiveness factor defined below. A threshold value means the effectiveness factor kicks in in later (when lacking more officers) [>= 0 and <= 1]
 	OFFICERS_TO_SERVICEMEN_RATIO_EFFECTIVENESS_FACTOR_MIN = -0.5	# The effectiveness factor to offense and defense applied to units provided by a building that completely lacks officers. -1 means -100%. Total offense and defence cannot drop below MIN_OFFENSE_DEFENCE. [>= -1 and <= 0]
 	OFFICERS_TO_SERVICEMEN_RATIO_EFFECTIVENESS_FACTOR_MAX = 0		# The effectiveness factor to offense and defense applied to units provided by a building that doesn't lack any officer. 0 means -0%, therefore units supplied by buildings that don't lack officers will fight at their full effectiveness allowed by their circumstances [>= OFFICERS_TO_SERVICEMEN_RATIO_EFFECTIVENESS_FACTOR_MIN and <= 0]
 
-	SAILORS_PER_ASSIGNMENT_SLOT = 100				# The number of sailors per ship assignment slot on Naval Administration buildings
-	SAILORS_PER_BUILDING_LEVEL = 1000				# The number of sailors per building level of Naval Administration
-	ACTIVE_SHIP_LIVING_CREW_PERCENTAGE = 0.1		# If a ship has this percentage of living crew or less, it is rendered inactive
-	SHIP_PARTICIPATE_IN_UPRISING_CREW_PERCENTAGE = 0.33		# If at least this ratio of a ship's crew is from a rebelling state, the ship can participate in an uprising
+	SAILORS_PER_ASSIGNMENT_SLOT = 100							# The number of sailors per ship assignment slot on Naval Administration buildings
+	SAILORS_PER_BUILDING_LEVEL = 1000							# The number of sailors per building level of Naval Administration
+	ACTIVE_SHIP_LIVING_CREW_PERCENTAGE = 0.1					# If a ship has this percentage of living crew or less, it is rendered inactive
+	SHIP_PARTICIPATE_IN_UPRISING_CREW_PERCENTAGE = 0.33			# If at least this ratio of a ship's crew is from a rebelling state, the ship can participate in an uprising
 
 	SHIP_MAINTENANCE_SHIPYARD_PREMIUM_FACTOR = 0.2              # The profit margin shipyards get on maintenance costs (GoodsCost * (1 + this))
-	SHIP_MAINTENANCE_GOODS_TO_CONSTRUCTION_GOODS_FACTOR = 0.002		# The ratio of maintenance goods cost to construction goods cost for ships. Used to determine how many goods are needed for maintenance paid by shipyards
+	SHIP_MAINTENANCE_GOODS_TO_CONSTRUCTION_GOODS_FACTOR = 0.002	# The ratio of maintenance goods cost to construction goods cost for ships. Used to determine how many goods are needed for maintenance paid by shipyards
 	SHIP_UPKEEP_GOODS_TO_CONSTRUCTION_GOODS_FACTOR = 0.002		# The ratio of upkeep goods cost to construction goods cost for ships. Used to determine how many goods are needed for upkeep based on how many were needed for construction
 	SHIP_UPKEEP_GOODS_DOCKED_MULT = -0.8						# If the ship is docked, its upkeep goods cost is changed by this mult value
 	SHIP_CONSTRUCTION_COST_MODIFICATION_LEVEL_FACTOR = 1.05		# The construction cost of a ship is multiplied by this^(total modification levels)
 	SHIP_TEMPLATE_DEFAULT_MODIFICATION_LEVEL = 2				# Default modification level per slot used to calculate the default level cost for ship goods balancing
-	LOGISTICS_CENTER_SUPPLY_PER_LEVEL = 10		# Spawn a new level of logistics center for each this much base supply consumption from formations using this state as a supply hub
-	SUPPLY_SHIP_TYPE = "ship_type_supply_ship"  # What ship type is code-side treated as the supply ship type. Changing this will very likely break things
-	SUPPLY_SHIP_MAINTENANCE_COST_PER_SHIP = 1	# Weekly maintenance cost per supply ship
+	LOGISTICS_CENTER_SUPPLY_PER_LEVEL = 10						# Spawn a new level of logistics center for each this much base supply consumption from formations using this state as a supply hub
+	SUPPLY_SHIP_TYPE = "ship_type_supply_ship"  				# What ship type is code-side treated as the supply ship type. Changing this will very likely break things
+	SUPPLY_SHIP_MAINTENANCE_COST_PER_SHIP = 1					# Weekly maintenance cost per supply ship
 	SHIP_CONSTRUCTION_MAINTENANCE_FRACTION = 0.0003				# Fraction of a ship's total construction cost consumed weekly as construction point maintenance
 	SHIP_CONSTRUCTION_MAINTENANCE_PENALTY_THRESHOLD = 0.5		# Fulfillment ratio at or below which the maintenance penalty reaches 100%
 	SHIP_CONSTRUCTION_MAINTENANCE_MAX_HP_PENALTY_FRACTION = 0.05	# Max fraction of a ship's total HP lost per week at full maintenance penalty
-	SHIP_CONSTRUCTION_MAINTENANCE_DAMAGE_RATIO = 0.2				# Fraction of ships randomly selected to receive maintenance damage each week (0-1)
+	SHIP_CONSTRUCTION_MAINTENANCE_DAMAGE_RATIO = 0.2			# Fraction of ships randomly selected to receive maintenance damage each week (0-1)
 	SUPPLY_SHIP_CONSTRUCTION_MAINTENANCE_FRACTION = 0.0003		# Fraction of supply ship construction cost consumed weekly as construction point maintenance
 	SUPPLY_SHIP_MAINTENANCE_STOCKPILE_REMOVAL_FRACTION = 0.05	# Max fraction of supply ships removed per week at full maintenance penalty
-	FLEET_RESUPPLY_SURPLUS = 0.25				# How much above the maintenance rate (where delivered supply equals consumed supply) will a fleet get supplied when attempting to increase it's supply level
-	ARMY_RESUPPLY_SURPLUS = 0.25				# How much above the maintenance rate (where delivered supply equals consumed supply) will an army get supplied when attempting to increase it's supply level
-	FLEET_SUPPLY_REPLENISH_SHIP_MULT = 1.1		# How much more supply ships requested by fleets when under max supply stockpile
+	FLEET_RESUPPLY_SURPLUS = 0.25								# How much above the maintenance rate (where delivered supply equals consumed supply) will a fleet get supplied when attempting to increase it's supply level
+	ARMY_RESUPPLY_SURPLUS = 0.25								# How much above the maintenance rate (where delivered supply equals consumed supply) will an army get supplied when attempting to increase it's supply level
+	FLEET_SUPPLY_REPLENISH_SHIP_MULT = 1.1						# How much more supply ships requested by fleets when under max supply stockpile
 	SHIP_POWER_PROJECTION_HULL_DAMAGE_MULTIPLIER = 0.33			# The multiplier applied to a ship's hull damage in calculating its power projection
 	SHIP_POWER_PROJECTION_CREW_DAMAGE_MULTIPLIER = 0.33			# The multiplier applied to a ship's crew damage in calculating its power projection
 	SHIP_POWER_PROJECTION_ARMOR_MULTIPLIER = 0.33				# The multiplier applied to a ship's armor in calculating its power projection
 	SHIP_POWER_PROJECTION_HIT_POINTS_MULTIPLIER = 0.1			# The multiplier applied to a ship's max hit points in calculating its power projection
+
+	SHIP_CREW_STARTING_VETERANCY_EXPERIENCE = 0						# The amount of experience crew for a ship starts with when recruited
+	SHIP_MAX_VETERANCY_EXPERIENCE = 1000 							# Experience cap for a ship. Should be higher than the highest veterancy level experience threshold.
+	SHIP_VETERANCY_EXPERIENCE_DECAY_RATE = 0.01						# Percentage of experience lost per week when not on a mission.
+	SHIP_VETERANCY_EXPERIENCE_MIN_DECAY = 1							# Minimum amount of experience lost per week due to decay (if decay applies), regardless of current experience
+	SHIP_VETERANCY_BASE_EXPERIENCE_GAIN_BATTLE_VICTORY = 5 		# Base experience gain for a ship that was in a battle that was won by its side.
+	SHIP_VETERANCY_BASE_EXPERIENCE_GAIN_BATTLE_DEFEAT = 2			# Base experience gain for a ship that was in a battle that was lost by its side.
+	SHIP_VETERANCY_BASE_EXPERIENCE_GAIN_BATTLE_SUNK_ENEMY_SHIP = 1	# Base experience gain for a ship for each ship it has sunk in battle.
 
 	SHIP_COMBAT_POWER_HULL_DAMAGE_MULTIPLIER = 0.75				# The multiplier applied to a ship's hull damage in calculating its combat power
 	SHIP_COMBAT_POWER_CREW_DAMAGE_MULTIPLIER = 0.25				# The multiplier applied to a ship's crew damage in calculating its combat power
@@ -901,15 +912,15 @@ NMilitary = {
 	FLAGSHIP_CHANGE_COOLDOWN_MONTHS = 60						# After changing flagship, you have to wait this many months before changing it again
 	FLAGSHIP_ON_WON_FAIR_COMBAT_POWER_RATIO_THRESHOLD = 0.5 	# The ratio between the combat power of the opposing side and the flagship's side needs to be at least this for on_flagship_battle_won to trigger
 
-	NAVAL_MISSION_SUPPLY_COST_FACTOR_SCALING = 0.1		# Additional supply cost (percent, 0-1) incurred per sea region beyond the first in a naval mission
+	NAVAL_MISSION_SUPPLY_COST_FACTOR_SCALING = 0.1				# Additional supply cost (percent, 0-1) incurred per sea region beyond the first in a naval mission
 
-	NAVAL_MISSION_BASE_MAX_SEA_REGIONS = 2				# Base max number of sea regions that can be assigned to a fleet mission (before modifiers)
+	NAVAL_MISSION_BASE_MAX_SEA_REGIONS = 2						# Base max number of sea regions that can be assigned to a fleet mission (before modifiers)
 
 	NAVAL_MISSION_TYPE_INTERCEPT = "naval_mission_type_intercept"
 	NAVAL_MISSION_TYPE_PROJECT_POWER = "naval_mission_type_project_power"
 
-	FRIENDLY_PORT_MAX_SUPPLY_DISTANCE_DISCOUNT = 0.5	# Maximum supply distance discount (0-1) when a formation is near a friendly port
-	FRIENDLY_PORT_MAX_DISTANCE = 1000					# Travel network distance at which the friendly port discount reaches zero
+	FRIENDLY_PORT_MAX_SUPPLY_DISTANCE_DISCOUNT = 0.5			# Maximum supply distance discount (0-1) when a formation is near a friendly port
+	FRIENDLY_PORT_MAX_DISTANCE = 2500							# Travel network distance at which the friendly port discount reaches zero
 
 	AI_FIND_FLEET_EXPECTED_DISTANCE = 25000						# Expected map distance for normalizing fleet-to-army distance scoring
 	DEFAULT_ARMY_COLOR = "army_color_6"
@@ -931,12 +942,12 @@ NDiplomacy = {
 	RECENTLY_CONQUERED_DURATION_MONTHS = 120
 	RECENTLY_LIBERATED_DURATION_MONTHS = 120
 
-	DIPLOMATIC_DEMAND_PENDING_APPROVAL_DAYS = 14  # Number of days before a demand is auto-declined and a diplomatic play starts
-	DIPLOMATIC_DEMAND_TIMEOUT_DAYS = 14  # Number of days before an accepted or rejected demand is deleted
+	DIPLOMATIC_DEMAND_PENDING_APPROVAL_DAYS = 14		# Number of days before a demand is auto-declined and a diplomatic play starts
+	DIPLOMATIC_DEMAND_TIMEOUT_DAYS = 14					# Number of days before an accepted or rejected demand is deleted
 
-	DIPLOMATIC_ACTION_COOLDOWN_DAYS = 0				# Number of days you must wait between diplomatic actions/proposals
-	DIPLOMATIC_ACTION_PENDING_APPROVAL_DAYS = 30	# Number of days before a pending action is auto-declined
-	TREATY_PROPOSAL_PENDING_APPROVAL_DAYS = 30		# Number of days before a pending treaty proposal is auto-declined
+	DIPLOMATIC_ACTION_COOLDOWN_DAYS = 0					# Number of days you must wait between diplomatic actions/proposals
+	DIPLOMATIC_ACTION_PENDING_APPROVAL_DAYS = 30		# Number of days before a pending action is auto-declined
+	TREATY_PROPOSAL_PENDING_APPROVAL_DAYS = 30			# Number of days before a pending treaty proposal is auto-declined
 
 	DIPLOMATIC_PACT_COST_DEFAULT = 0					# The default maintenance in Influence for a pact
 	DIPLOMATIC_PACT_COST_MULT_FROM_INFAMOUS = 0.25		# Maintenance cost of a pact is increased by this when at Infamous level of infamy
@@ -1242,11 +1253,12 @@ NDiplomacy = {
 	INTEREST_MIN_INVOLVEMENT_RATIO = 0.1			# Minimum ratio of the article and pacts max involvement per article type or diplomatic pact
 	REGION_LOCALITY_SHARE_THRESHOLD = 0.25     		# If you have at least this share of a region's locality, you get the local interest in the region
 	REGION_LOCALITY_COUNTRY_INCORPORATED_SHARE_THRESHOLD = 0.25 # If at least this share of your total incorporated states are in a region, you get the local interest in the region
-	INTEREST_TIER_MIN_RELEVANT_RANK = 1				# Min rank of an interest tier to be considered relevant
+	INTEREST_TIER_MIN_RELEVANT_RANK = 2				# Min rank of an interest tier to be considered relevant
 	INTEREST_TIER_MIN_VIOLATE_SOVEREIGNTY_RANK = 2	# Min interest tier rank for a country to be an "interested party" for Violate Sovereignty (receive event to join defender). Use 2 for engaged or 3 for influential;
 	INTEREST_ARMY_INVOLVEMENT_CAP = 5000			# Max involvement from army strength
 	INTEREST_NAVY_INVOLVEMENT_CAP = 5000			# Max involvement from navy strength
 	INTEREST_TREATY_PACT_INVOLVEMENT_CAP = 5000		# Max involvement from treaties and pacts
+	INTEREST_POWER_BLOC_MEMBER_TARGET_INVOLVEMENT = 2500	# Involvement generated by each non-subject power bloc member for the leader
 	INTEREST_TIER_REDUCTION_GRACE_PERIOD_DAYS = 30		# When a country increases its interest tier, this many days must pass before the tier can be reduced
 
 	STRAIT_MIN_INTEREST_TIER_FOR_CATALYST = 1		# Minimum interest tier required for a country to get a catalyst from strait closing to military access

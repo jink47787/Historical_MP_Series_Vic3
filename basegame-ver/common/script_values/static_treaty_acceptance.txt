@@ -16,12 +16,12 @@ static_treaty_acceptance = {
 		desc = "DIPLOMATIC_ACCEPTANCE_BASE"
 		value = -10
 	}
-	
+
 	if = {
-		limit = { 
+		limit = {
 			exists = scope:bad_faith_factor
 		}
-		
+
 		subtract = {
 			value = 10
 			add = {
@@ -36,7 +36,7 @@ static_treaty_acceptance = {
 				add = 1000 # GPs will not regard the Shimonoseki Strait Indemnity as just a free gift
 			}
 			desc = "DIPLOMATIC_ACCEPTANCE_DEAL_IS_WORSE"
-		}	
+		}
 	}
 
 	add = {
@@ -408,6 +408,20 @@ static_treaty_acceptance = {
 			value = 30
 		}
 	}
+
+	if = {
+		limit = {
+			NOT = { exists = scope:is_renegotiation }
+			scope:treaty_options.remaining_binding_period > 0
+			scope:treaty_options ?= {
+				is_historical_treaty = yes
+			}
+		}
+		add = {
+			desc = "TRIGGER_IS_HISTORICAL_TREATY_NONE"
+			value = 600
+		}
+	}
 }
 
 threaten_naval_hostilities_acceptance = {
@@ -419,7 +433,7 @@ threaten_naval_hostilities_acceptance = {
 		min = 5 # You have to have higher navy power projection to use this at all
 		desc = "country_navy_power_projection"
 	}
-	
+
 	# Vulnerability - how much do we rely on our coast & trade
 	multiply = {
 		desc = "DIPLOMATIC_ACCEPTANCE_NAVAL_VULNERABILITY"
@@ -427,15 +441,15 @@ threaten_naval_hostilities_acceptance = {
 		add = {
 			value = naval_vulnerability
 			multiply = 1.9
-		}		
+		}
 	}
-	
+
 	# Have they followed through on previous threats?
 	if = {
 		limit = {
 			"scope:other_country.naval_hostility_average_damage_dealt" >= 0
 		}
-		
+
 		multiply = {
 			desc = "DIPLOMATIC_ACCEPTANCE_NAVAL_HOSTILITIES_PAST_DAMAGE"
 			value = "scope:other_country.naval_hostility_average_damage_dealt"
@@ -444,7 +458,7 @@ threaten_naval_hostilities_acceptance = {
 			max = 1.5
 		}
 	}
-	
+
 	# Are they lower rank?
 	if = {
 		limit = { country_rank > scope:other_country.country_rank }
@@ -454,34 +468,34 @@ threaten_naval_hostilities_acceptance = {
 }
 
 threaten_naval_hostilities_infamy = {
-	value = 10
+	value = 5
 
 	if = {
 		limit = {
 			scope:other_country.country_rank = rank_value:great_power
 		}
-		
+
 		multiply = 3.0
 	}
 	else_if = {
 		limit = {
 			scope:other_country.country_rank = rank_value:major_power
 		}
-		
+
 		multiply = 2.5
-	}	
+	}
 	else_if = {
 		limit = {
 			NOT = { scope:other_country = { is_country_type = unrecognized } }
 		}
-		
+
 		multiply = 2.0
 	}
 	else_if = {
 		limit = {
 			scope:other_country.country_rank = rank_value:unrecognized_major_power
 		}
-		
+
 		multiply = 1.5
 	}
 }
@@ -489,7 +503,7 @@ threaten_naval_hostilities_infamy = {
 ai_threaten_naval_hostilities_chance = {
 	value = 0
 
-	if = { 
+	if = {
 		limit = {
 			"ai_navy_comparison(scope:other_country)" >= 1.0 # Roughly 2x as strong navy required
 			is_diplomatic_play_committed_participant = no
@@ -498,35 +512,35 @@ ai_threaten_naval_hostilities_chance = {
 			NOR = {
 				has_attitude = {
 					who = scope:other_country
-					attitude = protective		
+					attitude = protective
 				}
 				has_attitude = {
 					who = scope:other_country
-					attitude = genial		
+					attitude = genial
 				}
 				has_attitude = {
 					who = scope:other_country
-					attitude = cooperative	
+					attitude = cooperative
 				}
 				has_attitude = {
 					who = scope:other_country
-					attitude = conciliatory	
-				}					
+					attitude = conciliatory
+				}
 			}
 		}
-		
+
 		add = { # Base 5-25% based on relative navy strength
 			value = "ai_navy_comparison(scope:other_country)"
 			multiply = 0.05
 			max = 0.25
 		}
-		
+
 		divide = { # Lower chance the higher the infamy
 			value = threaten_naval_hostilities_infamy
 			divide = 10
 			min = 1
 		}
-		
+
 		if = { # Less likely unless we have a hostile attitude
 			limit = {
 				OR = {
@@ -545,6 +559,6 @@ ai_threaten_naval_hostilities_chance = {
 				}
 			}
 			multiply = 0.33
-		}	
+		}
 	}
 }

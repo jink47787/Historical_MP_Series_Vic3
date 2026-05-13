@@ -566,93 +566,25 @@ types ship_panel_types
 					size = { 5 5 }
 				}
 
-
-				# KEY STATS
-				flowcontainer = {
-					margin = { 30 5 }
-					spacing = 20
-					parentanchor = hcenter
-
-					flowcontainer = {
-						parentanchor = vcenter
-						spacing = 5
-
-						### SHIP UPKEEP
-						small_header_grid_item = {
-							tooltip = "SHIP_UPKEEP_TOOLTIP"
-
-							blockoverride "text" {
-								text = "[Ship.GetUpkeepCost|0-K]"
-							}
-
-							blockoverride "icon" {
-								texture = "gfx/interface/icons/topbar/income_power_icon.dds"
-							}
-						}
-
-						### ARMOR
-						small_header_grid_item = {
-							tooltip = "SHIP_ARMOR_TOOLTIP"
-
-							blockoverride "text" {
-								raw_text = "#v [Ship.GetArmor|0]#!"
-							}
-
-							blockoverride "icon" {
-								texture = "gfx/interface/icons/military_icons/navy_icons/armor_navy.dds"
-							}
-						}
-
-						### AVERAGE ATTACK DAMAGE
-						small_header_grid_item = {
-							datacontext = "[Ship.GetModifier]"
-							tooltip = "SHIP_TEMPLATE_ATTACK_DAMAGE_TOOLTIP"
-
-							blockoverride "text" {
-								raw_text = "#v [Ship.GetAverageAttackDamage|0]#!"
-							}
-
-							blockoverride "icon" {
-								texture = "gfx/interface/icons/military_icons/navy_icons/average_damage_navy.dds"
-							}
-						}
-
-						### SPEED
-						small_header_grid_item = {
-							tooltip = "SHIP_SPEED_TOOLTIP"
-
-							blockoverride "text" {
-								text = "[Ship.GetMovementSpeed|v^2]"
-							}
-
-							blockoverride "icon" {
-								texture = "gfx/interface/icons/military_icons/navy_icons/speed_navy.dds"
-							}
-						}
-
-						### SUPPLY CAPACITY
-						small_header_grid_item = {
-							datacontext = "[Ship.GetModifier]"
-							tooltip = "[Modifier.GetShipSupplyCapacityTooltip]"
-
-							blockoverride "text" {
-								text = "[Modifier.GetShipSupplyCapacity|v0]"
-							}
-
-							blockoverride "icon" {
-								texture = "gfx/interface/icons/military_icons/navy_icons/supplies_navy.dds"
-							}
-						}
-					}
-				}
-
 				divider_clean = {}
 
 				flowcontainer = {
+					datacontext = "[Ship.GetModifier]"
 					parentanchor = hcenter
 
 					flowcontainer = {
 						direction = vertical
+
+						ship_stat_upkeep = {}
+
+						### Armor
+						ship_stat_armor = {}
+
+						### Crew Damage
+						ship_stat_crew_damage = {}
+
+						# Hull Damage
+						ship_stat_hull_damage = {}
 
 						### Crit Chance
 						ship_stat_critical_hit_chance = {}
@@ -660,14 +592,34 @@ types ship_panel_types
 						### Crit Damage
 						ship_stat_critical_hit_multiplier = {}
 
-						### Vulnerability
-						ship_stat_vulnerability = {}
+						### Visibility
+						ship_stat_visibility = {}
 
-						### Screening
-						ship_stat_screening = {}
+						### Detection/Stealth
+						ship_stat_detection = {}
+
+						### Veteran Rank
+						ship_stat_veterancy = {}
 
 						### Accuracy
 						ship_stat_accuracy = {}
+
+						ship_modifier_battle_against_torpedo_boat_accuracy = {
+							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_torpedo_boat_accuracy_mult'))]"
+						}
+
+						ship_modifier_battle_against_submarine_accuracy = {
+							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_submarine_accuracy_mult'))]"
+						}
+
+						ship_modifier_battle_against_modern_ironclad_hull_damage = {
+							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_modern_ironclad_hull_damage_mult'))]"
+						}
+
+						ship_modifier_battle_against_pre_dreadnought_hull_damage = {
+							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_pre_dreadnought_hull_damage_mult'))]"
+						}
+
 					}
 
 					vertical_divider_full = {}
@@ -675,20 +627,49 @@ types ship_panel_types
 					flowcontainer = {
 						direction = vertical
 
+						### Vulnerability
+						ship_stat_vulnerability = {}
+
+						### Screening
+						ship_stat_screening = {}
+
+						### Speed
+						ship_stat_movement_speed = {}
+
 						### Supply Efficiency
 						ship_stat_supply_efficiency = {}
 
-						### Visibility
-						ship_stat_visibility = {}
+						### Supply Capacity
+						ship_stat_supply_capacity = {}
 
-						### Detection/Stealth
-						ship_stat_detection = {}
+						### Carrying Capacity
+						ship_stat_carrying_capacity = {}
+
+						### Marine Capacity
+						ship_stat_marine_capacity = {}
+
+						### Readiness Gain
+						ship_stat_readiness_gain = {}
 
 						### Blockade Strength
 						ship_stat_blockade_strength = {}
 
-						### Readiness Gain
-						ship_stat_readiness_gain = {}
+						ship_modifier_battle_against_torpedo_boat_destroyer_accuracy = {
+							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_torpedo_boat_destroyer_accuracy_mult'))]"
+						}
+
+						ship_modifier_battle_against_destroyer_accuracy = {
+							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_destroyer_accuracy_mult'))]"
+						}
+
+						ship_modifier_battle_against_dreadnought_hull_damage = {
+							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_dreadnought_hull_damage_mult'))]"
+						}
+
+						ship_modifier_battle_against_super_dreadnought_hull_damage = {
+							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_super_dreadnought_hull_damage_mult'))]"
+						}
+
 					}
 				}
 
@@ -898,12 +879,14 @@ types ship_types
 			margin = { 10 5 }
 			spacing = 5
 
-			icon = {
-				size = { 24 24 }
-
-				block "stat_icon" {
-					texture = "gfx/interface/icons/harvest_condition_icons/placeholder.dds"
+			container = {
+				icon = {
+					size = { 24 24 }
+					block "stat_icon" {
+						texture = "gfx/interface/icons/harvest_condition_icons/placeholder.dds"
+					}
 				}
+				block "stat_icon_extra" {}
 			}
 
 			textbox = {
@@ -943,6 +926,16 @@ types ship_types
 
 		blockoverride "stat_label" {
 			text = "[concept_ship_armor]"
+		}
+	}
+
+	type ship_stat_base_upkeep = ship_stat {
+		blockoverride "stat_icon" {
+			texture = "gfx/interface/icons/topbar/income_power_icon.dds"
+		}
+
+		blockoverride "stat_label" {
+			text = "[concept_ship_upkeep]"
 		}
 	}
 
@@ -1093,6 +1086,38 @@ types ship_types
 
 		blockoverride "stat_label" {
 			text = "[concept_accuracy]"
+		}
+	}
+
+	type ship_stat_base_veterancy = ship_stat {
+		blockoverride "stat_icon" {
+			texture = "[Ship.GetVeterancyLevel.GetTexture]"
+			tooltip = "SHIP_VETERANCY_TOOLTIP"
+			#parentanchor = vcenter|hcenter # todo PRCAL-45075 - comment back in once veteran rank number has been added by code
+        	#position = { 0 -9 } # todo PRCAL-45075 - comment back in once veteran rank number has been added by code
+		}
+
+		# blockoverride "stat_icon_extra" { # todo PRCAL-45075 - comment back in once veteran rank number has been added by code
+		# 	white_progressbar_vertical = {
+		# 		visible = "[Not(Ship.IsAtMaxVeterancy)]"
+		# 		size = { 20 6 }
+		# 		parentanchor = bottom|hcenter
+		# 		position = { 0 -3 }
+		# 		tooltip = "SHIP_VETERANCY_TOOLTIP"
+
+		# 		blockoverride "values" {
+		# 			min = "[Ship.GetVeterancyLevel.GetExperienceThreshold]"
+		# 			max = "[Ship.GetVeterancyLevel.GetNextLevel.GetExperienceThreshold]"
+		# 			value = "[Ship.GetVeterancyExperience]"
+		# 		}
+		# 		blockoverride "color" {
+		# 			color = { 0.6 0.4 0.6 1 }
+		# 		}
+		# 	}
+		# }
+
+		blockoverride "stat_label" {
+			text = "[concept_veterancy_level]"
 		}
 	}
 
@@ -1478,6 +1503,16 @@ types ship_types
 		}
 	}
 
+	type ship_template_stat_blockade_strength = ship_stat_base_blockade_strength {
+		blockoverride "stat_tooltip" {
+			tooltip = "[ShipTemplate.GetBlockadeStrength]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[ShipTemplate.GetBlockadeStrength|v0]"
+		}
+	}
+
 	type ship_template_stat_readiness_gain = ship_stat_base_readiness_gain {
 		blockoverride "stat_tooltip" {
 			tooltip = "[ShipTemplate.GetReadinessGainBreakdown]"
@@ -1496,6 +1531,41 @@ types ship_types
 
 		blockoverride "stat_value" {
 			text = "[Ship.GetAccuracy|v0]"
+		}
+	}
+
+	type ship_stat_veterancy = ship_stat_base_veterancy {
+		blockoverride "stat_tooltip" {
+			tooltip = "SHIP_VETERANCY_TOOLTIP"
+		}
+
+		blockoverride "stat_value" {
+			#text = "[Ship.GetVeterancyLevel.GetNameNoIcon]" # todo PRCAL-45075 - comment back in once veteran rank number has been added by code.
+			white_progressbar_vertical = { # todo PRCAL-45075 - delete once veteran rank number has been added by code.
+				visible = "[Not(Ship.IsAtMaxVeterancy)]"
+				size = { 6 20 }
+				parentanchor = vcenter|left
+				tooltip = "SHIP_VETERANCY_TOOLTIP"
+
+				blockoverride "values" {
+					min = "[Ship.GetVeterancyLevel.GetExperienceThreshold]"
+					max = "[Ship.GetVeterancyLevel.GetNextLevel.GetExperienceThreshold]"
+					value = "[Ship.GetVeterancyExperience]"
+				}
+				blockoverride "color" {
+					color = { 0.6 0.4 0.6 1 }
+				}
+			}
+		}
+	}
+
+	type ship_stat_upkeep = ship_stat_base_upkeep {
+		blockoverride "stat_tooltip" {
+			tooltip = "SHIP_UPKEEP_TOOLTIP"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Ship.GetUpkeepCost|0-K]"
 		}
 	}
 

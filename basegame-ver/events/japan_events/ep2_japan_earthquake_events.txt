@@ -4,64 +4,112 @@
 # Ansei Great Earthquakes
 # Tōkai/Kansai/Shikoku
 # Tsunami
-# TODO Add functionality from magnates & holdings
-#japan_earthquakes.1 = {
-#	type = country_event
-#	placement = s:STATE_TOKAI.region_state:JAP
-#	title = japan_earthquakes.1.t
-#	desc = japan_earthquakes.1.d
-#	flavor = japan_earthquakes.1.f
-#	
-#	duration = 3
-#
-#	event_image = {
-#		video = "unspecific_devastation"
-#	}
-#
-#	dlc = dlc018
-#
-#	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-#
-#	icon = "gfx/interface/icons/event_icons/event_skull.dds"
-#
-#	trigger = {
-#		# Triggered by japan_earthquake_events effect in on_yearly_pulse_country
-#		c:JAP ?= this
-#		has_dlc_feature = ep2_content
-#		year = 1854
-#		has_state_in_state_region = STATE_TOKAI
-#		has_state_in_state_region = STATE_KANSAI
-#		has_state_in_state_region = STATE_SHIKOKU
-#	}
-#
-#	immediate = {
-#		s:STATE_TOKAI ?= {
-#			start_harvest_condition = tsunami
-#		}
-#		s:STATE_KANSAI ?= {
-#			start_harvest_condition = tsunami
-#		}
-#		s:STATE_SHIKOKU ?= {
-#			start_harvest_condition = tsunami
-#		}
-#	}
-#
-#	# Focus reconstruction efforts in Tōkai
-#	option = {
-#		name = japan_earthquakes.1.a
-#		default_option = yes
-#	}
-#
-#	# Focus reconstruction efforts in Kansai
-#	option = {
-#		name = japan_earthquakes.1.b
-#	}
-#
-#	# Focus reconstruction efforts in Shikoku
-#	option = {
-#		name = japan_earthquakes.1.c
-#	}
-#}
+japan_earthquakes.1 = {
+	type = country_event
+	placement = s:STATE_TOKAI.region_state:JAP
+	title = japan_earthquakes.1.t
+	desc = japan_earthquakes.1.d
+	flavor = japan_earthquakes.1.f
+	
+	duration = 3
+
+	event_image = {
+		video = "unspecific_devastation"
+	}
+
+	dlc = dlc018
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_skull.dds"
+
+	trigger = {
+		# Triggered by japan_earthquake_events effect in on_yearly_pulse_country
+		c:JAP ?= this
+		has_dlc_feature = ep2_content
+		year = 1854
+		has_state_in_state_region = STATE_TOKAI
+		has_state_in_state_region = STATE_KANSAI
+		has_state_in_state_region = STATE_SHIKOKU
+		# Check that there are daimyo assigned to all relevant states
+		any_scope_character = {
+			has_variable = daimyo_var
+			var:daimyo_var ?= s:STATE_TOKAI
+		}
+		any_scope_character = {
+			has_variable = daimyo_var
+			var:daimyo_var ?= s:STATE_KANSAI
+		}
+		any_scope_character = {
+			has_variable = daimyo_var
+			var:daimyo_var ?= s:STATE_SHIKOKU
+		}
+	}
+
+	immediate = {
+		s:STATE_TOKAI ?= {
+			start_harvest_condition = tsunami
+		}
+		s:STATE_KANSAI ?= {
+			start_harvest_condition = tsunami
+		}
+		s:STATE_SHIKOKU ?= {
+			start_harvest_condition = tsunami
+		}
+	}
+
+	# Focus reconstruction efforts in Tōkai
+	option = {
+		name = japan_earthquakes.1.a
+		default_option = yes
+		every_scope_character = {
+			limit = {
+				has_variable = daimyo_var
+				NOT = { var:daimyo_var ?= s:STATE_TOKAI }
+				NOT = { var:daimyo_var ?= s:STATE_KANSAI }
+				NOT = { var:daimyo_var ?= s:STATE_SHIKOKU }
+				var:daimyo_var ?= {
+					any_neighbouring_state = {
+						OR = {
+							state_region = s:STATE_TOKAI
+							state_region = s:STATE_KANSAI
+							state_region = s:STATE_SHIKOKU
+						}
+					}
+				}
+			}
+			add_modifier = {
+				name = earthquake_assisting_daimyo
+				days = long_modifier_time
+			}
+		}
+		s:STATE_TOKAI ?= { add_devastation = 10 }
+		s:STATE_KANSAI ?= { add_devastation = 10 }
+		s:STATE_SHIKOKU ?= { add_devastation = 10 }
+	}
+
+	# Focus reconstruction efforts in Kansai
+	option = {
+		name = japan_earthquakes.1.b
+		every_scope_character = {
+			limit = {
+				has_variable = daimyo_var
+				OR = {
+					var:daimyo_var ?= s:STATE_TOKAI
+					var:daimyo_var ?= s:STATE_KANSAI
+					var:daimyo_var ?= s:STATE_SHIKOKU
+				}
+			}
+			add_modifier = {
+				name = earthquake_affected_daimyo
+				days = long_modifier_time
+			}
+		}
+		s:STATE_TOKAI ?= { add_devastation = 15 }
+		s:STATE_KANSAI ?= { add_devastation = 15 }
+		s:STATE_SHIKOKU ?= { add_devastation = 15 }
+	}
+}
 
 # Ansei Edo Earthquake
 # Kantō
@@ -125,8 +173,8 @@ japan_earthquakes.2 = {
 	}
 	option = {
 		name = japan_earthquakes.2.b
+		s:STATE_KANTO ?= { add_devastation = 15 }
 		s:STATE_KANTO.region_state:JAP ?= {
-			add_devastation = 15
 			add_modifier = {
 				name = earthquake_rebuilding_focus
 				days = normal_modifier_time
@@ -215,8 +263,8 @@ japan_earthquakes.3 = {
 	option = {
 		name = japan_earthquakes.3.c
 		default_option = yes
+		s:STATE_TOKAI ?= { add_devastation = 10 }
 		s:STATE_TOKAI.region_state:JAP ?= {
-			add_devastation = 10
 			add_modifier = {
 				name = earthquake_bracing_for_aftershocks
 				days = short_modifier_time
@@ -270,8 +318,8 @@ japan_earthquakes.4 = {
 
 	option = {
 		name = japan_earthquakes.4.a
+		s:STATE_TOHOKU = { add_devastation = 20 }
 		s:STATE_TOHOKU.region_state:JAP = {
-			add_devastation = 20
 			add_modifier = {
 				name = tsunami_stones
 			}
@@ -378,7 +426,7 @@ japan_earthquakes.5 = {
 	}
 	option = {
 		name = japan_earthquakes.5.c
-		s:STATE_KANTO.region_state:JAP ?= { add_devastation = 30 }
+		s:STATE_KANTO ?= { add_devastation = 30 }
 		add_modifier = {
 			name = earthquake_modernization
 			days = normal_modifier_time

@@ -371,10 +371,22 @@ land_battle_unit_selection_weight = {
 # enemy_commander = the commander leading the enemy side in battle (if any; could be garrison)
 # enemy_military_formation = the military formation on the enemy side of the battle
 naval_battle_size = {
+	value = 0
     # Start with a baseline number of available flotillas not engaged in battle
-	value = {
-		value = scope:military_formation.num_ships_not_in_battle
-		desc = "NAVAL_BATTLE_SIZE_ADMIRAL_SHARE"
+	if = {
+		limit = {
+			exists = scope:military_formation
+		}
+		value = {
+			add = scope:military_formation.num_ships_not_in_battle
+			desc = "NAVAL_BATTLE_SIZE_ADMIRAL_SHARE"
+		}
+	}
+	else = { # This can only happen if we are supply ships being raided
+		value = {
+			add = scope:enemy_military_formation.num_ships
+			desc = "NAVAL_BATTLE_SIZE_ADMIRAL_SHARE"
+		}
 	}
 
 	save_temporary_value_as = pre_max_amount_cap
@@ -386,7 +398,7 @@ naval_battle_size = {
 			scope:pre_max_amount_cap > {
 				value = 0
 				scope:own_commander = {
-					add = this.modifier:character_command_limit_add
+					add = this.command_limit_num_units
 				}
 				multiply = 0.5
 			}
@@ -394,14 +406,18 @@ naval_battle_size = {
 		max = {
 			add = {
 				scope:own_commander = {
-					add = this.modifier:character_command_limit_add
+					add = this.command_limit_num_units
 				}
 			}
 			multiply = 0.5
 			desc = "[concept_command_limit]"
 		}
+		min = define:NMilitary|MILITARY_FORMATION_COMMAND_LIMIT_NO_COMMANDER
 	}
-	else = {
+	else_if = {
+		limit = {
+			NOT = { exists = scope:own_commander }
+		}
 		max = define:NMilitary|MILITARY_FORMATION_COMMAND_LIMIT_NO_COMMANDER
 	}
 
@@ -413,20 +429,17 @@ naval_battle_size = {
 			exists = scope:military_formation
 			exists = scope:enemy_military_formation
 		}
+		value = scope:post_command_limit_base_amount_cap
 		add = {
 			add = {
 				scope:military_formation = {
-					every_scope_ship = {
-						add = this.modifier:ship_detection_add
-					}
+					add = this.detection
 				}
 				divide = scope:military_formation.num_ships_not_in_battle
 			}
 			multiply = {
 				scope:enemy_military_formation = {
-					every_scope_ship = {
-						add = this.modifier:ship_visibility_add
-					}
+					add = this.visibility
 				}
 				divide = scope:enemy_military_formation.num_ships_not_in_battle
 			}
@@ -441,9 +454,11 @@ naval_battle_size = {
 			exists = scope:military_formation
 			NOT = { exists = scope:enemy_military_formation }
 		}
+		value = scope:post_command_limit_base_amount_cap
 		add = scope:military_formation.num_ships_not_in_battle
 	}
 	else = {
+		value = scope:post_command_limit_base_amount_cap
 		add = scope:enemy_military_formation.num_ships_not_in_battle
 	}
 }

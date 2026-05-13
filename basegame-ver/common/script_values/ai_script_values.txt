@@ -133,7 +133,7 @@ wanted_army_size_script_value = {
 	# Countries with a huge overseas subject population should focus more on navy
 	subtract = {
 		value = cached_ai_overseas_subject_population
-		divide = 20000000
+		divide = 50000000
 		max = {
 			value = scope:pre_overseas_empire_value
 			divide = 2
@@ -155,7 +155,7 @@ wanted_army_size_script_value = {
 				subtract = { # Coastal population reduces spending on army as that spending is needed for navy too
 					value = cached_ai_incorporated_coastal_population
 					divide = cached_ai_incorporated_population
-					divide = 2
+					divide = 4
 				}
 			}
 			divide = 2500 # 1 level of barracks per 2.5k income
@@ -184,7 +184,7 @@ wanted_army_size_script_value = {
 	}
 	
 	# General multiplier for easy adjustment
-	multiply = 0.75
+	multiply = 1.0
 
 	# Factor in strategies
 	if = {
@@ -319,9 +319,10 @@ wanted_marines_size_script_value = {
 			divide = 15000
 		}
 	}
-	# Special logic for british isles - this should be reworked to be less specific later
+	# Special logic for Great Britain - this should be reworked to be less specific later
 	if = {
 		limit = {
+			country_rank = rank_value:great_power
 			capital = {
 				OR = {
 					is_in_geographic_region = geographic_region_england_old
@@ -342,6 +343,12 @@ wanted_marines_size_script_value = {
 	
 	# General multiplier for easy adjustment
 	multiply = 0.5
+	
+	# Less marines before we have steel ships
+	if = {
+		limit = { NOT = { has_technology_researched = ironclad_tech } }
+		multiply = 0.5
+	}	
 
 	# Factor in strategies
 	if = {
@@ -409,9 +416,10 @@ wanted_navy_size_script_value = {
 			divide = 5000
 		}
 	}
-	# Special logic for british isles - this should be reworked to be less specific later
+	# Special logic for Great Britain - this should be reworked to be less specific later
 	if = {
 		limit = {
+			country_rank = rank_value:great_power
 			capital = {
 				OR = {
 					is_in_geographic_region = geographic_region_england_old
@@ -419,7 +427,7 @@ wanted_navy_size_script_value = {
 				}
 			}
 		}
-		add = 50
+		add = 100
 	}
 	else_if = { # GPs and MPs should want to maintain a bit of a navy
 		limit = { country_rank = rank_value:great_power }
@@ -552,9 +560,9 @@ flagship_score_for_ship = {
 }
 
 
-ship_mod_ai_price_ratio_reject     = { value = 1.25 }  # Weighted buy/sell ratio at/above which a mod is rejected (multiplier = 0)
+ship_mod_ai_price_ratio_reject     = { value = 1.75 }  # Weighted buy/sell ratio at/above which a mod is rejected (multiplier = 0)
 ship_mod_ai_price_ratio_bonus      = { value = 0.75 }  # At/below which the full bonus multiplier applies
-ship_mod_ai_price_bonus_multiplier = { value = 2.0 }   # Multiplier at the bonus ratio (linear interpolation in between)
+ship_mod_ai_price_bonus_multiplier = { value = 1.5 }   # Multiplier at the bonus ratio (linear interpolation in between)
 
 # Scales each mod's base ai_weight by a function of the goods-weighted buy/sell
 # ratio for its construction goods, against the country's market.
@@ -576,7 +584,7 @@ ship_mod_market_multiplier = {
 	value = 1
 	if = {
 		limit = { scope:temp_ship_mod_demand_ratio >= ship_mod_ai_price_ratio_reject }
-		multiply = 0
+		multiply = 0.1 # We still want to score better modules a bit higher instead of all being 0
 	}
 	else_if = {
 		limit = { scope:temp_ship_mod_demand_ratio <= ship_mod_ai_price_ratio_bonus }

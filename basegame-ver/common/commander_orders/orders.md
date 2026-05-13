@@ -6,13 +6,13 @@ the military type this order applies to, must be either army or navy
 
 	military_type = army
 
-check to determine if this order should be visible for the given commander
+check to determine if this order should be visible for the given general
 
 	visible = {
 		has_role = general
 	}
 
-check to determine if it should be possible to select this order for the given commander
+check to determine if it should be possible to select this order for the given general
 NOTE: use of has_trait is brittle here, since datatraits (in the UI) will try to determine if they
 unlock specific orders by parsing has_trait triggers; this means that e.g. NOT = { has_trait = child }
 could be parsed as if the child trait unlocks, rather than blocks, an Order
@@ -37,7 +37,7 @@ the sound that will be played when this order is selected
 
 	clicksound = "event:/SFX/UI/Military/order_general_front_advance"
 
-commanders with at least this power projection ratio to enemy don't try to escape from battle
+generals with at least this power projection ratio to enemy don't try to escape from battle
 
 	escape_power_ratio = 4.0
 

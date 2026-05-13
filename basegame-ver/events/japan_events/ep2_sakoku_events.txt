@@ -30,9 +30,10 @@ ep2_sakoku.2 = {
 		# if any IG is in favor of Free Trade, save them
 		random_interest_group = {
 			limit = {
+				is_in_government = yes
 				law_enactment_stance = {
 					law = law_type:law_free_trade
-					value < neutral
+					value > neutral
 				}
 				is_marginal = no
 			}
@@ -46,10 +47,11 @@ ep2_sakoku.2 = {
 			}
 			random_interest_group = {
 				limit = {
+					is_in_government = yes
 					NOT = { scope:free_trade_ig = this }
 					law_enactment_stance = {
 						law = law_type:law_protectionism
-						value < neutral
+						value > neutral
 					}
 					is_marginal = no
 				}
@@ -63,9 +65,10 @@ ep2_sakoku.2 = {
 	option = {
 		name = ep2_sakoku.2.a
 		default_option = yes
-
+		ai_chance = {
+			base = 10
+		}
 		activate_law = law_type:law_mercantilism
-
 		every_interest_group = {
 			limit = {
 				law_enactment_stance = {
@@ -78,28 +81,16 @@ ep2_sakoku.2 = {
 				days = normal_modifier_time
 			}
 		}
-
-		every_interest_group = {
-			limit = {
-				law_stance = {
-					law = law_type:law_isolationism
-					value > neutral
-				}
-			}
-			add_modifier = {
-				name = forced_transition_from_tradition
-				days = normal_modifier_time
-			}
-		}
 	}
 	option = {
 		name = ep2_sakoku.2.b
+		ai_chance = {
+			base = 10
+		}
 		trigger = {
 			exists = scope:free_trade_ig
 		}
-
 		activate_law = law_type:law_free_trade
-
 		every_interest_group = {
 			limit = {
 				law_enactment_stance = {
@@ -112,28 +103,16 @@ ep2_sakoku.2 = {
 				days = normal_modifier_time
 			}
 		}
-
-		every_interest_group = {
-			limit = {
-				law_stance = {
-					law = law_type:law_isolationism
-					value > neutral
-				}
-			}
-			add_modifier = {
-				name = forced_transition_from_tradition
-				days = normal_modifier_time
-			}
-		}
 	}
 	option = {
 		name = ep2_sakoku.2.c
+		ai_chance = {
+			base = 10
+		}
 		trigger = {
 			exists = scope:protectionism_ig
 		}
-
 		activate_law = law_type:law_protectionism
-
 		every_interest_group = {
 			limit = {
 				law_enactment_stance = {
@@ -146,7 +125,8 @@ ep2_sakoku.2 = {
 				days = normal_modifier_time
 			}
 		}
-
+	}
+	after = {
 		every_interest_group = {
 			limit = {
 				law_stance = {
@@ -157,6 +137,17 @@ ep2_sakoku.2 = {
 			add_modifier = {
 				name = forced_transition_from_tradition
 				days = normal_modifier_time
+				is_decaying = yes
+			}
+		}
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_meiji_restorationist
+			}
+			add_modifier = {
+				name = modifier_ended_sakoku_movement
+				days = normal_modifier_time
+				is_decaying = yes
 			}
 		}
 	}
@@ -243,21 +234,13 @@ ep2_sakoku.3 = {
 	option = {
 		name = ep2_sakoku.3.a
 		default_option = yes
-
-		change_relations = {
-			country = scope:morrison_incident_country
-			value = -30
-		}
-		scope:morrison_incident_country = {
+		scope:morrison_incident_country ?= {
 			change_relations = {
 				country = root
 				value = -30
 			}		
-		}
-		scope:morrison_incident_country = {
 			post_notification = morrison_incident_has_incidented
 		}
-
 		ai_chance = {
 			base = 1
 		}
@@ -265,7 +248,6 @@ ep2_sakoku.3 = {
 
 	option = {
 		name = ep2_sakoku.3.b
-
 		every_interest_group = {
 			limit = {
 				law_stance = {
@@ -288,23 +270,26 @@ ep2_sakoku.3 = {
 	option = {
 		name = ep2_sakoku.3.c
 		highlighted_option = yes
-
 		trigger = {
-			hidden_trigger = { NOT = { has_variable = je_sakoku_maybe_we_should_open_up } }
-			any_interest_group = {
-				is_in_government = yes
-				law_stance = {
-					law = law_type:law_isolationism
-					value <= neutral
+			custom_tooltip = {
+				text = government_ig_dislikes_sakoku_tt
+				any_interest_group = {
+					is_in_government = yes
+					law_stance = {
+						law = law_type:law_isolationism
+						value < neutral
+					}
 				}
+				NOT = { has_variable = je_sakoku_maybe_we_should_open_up }
 			}
 		}
-
+		show_as_unavailable = {
+			NOT = { has_variable = je_sakoku_maybe_we_should_open_up }
+		}
 		custom_tooltip = {
 			text = end_sakoku_button_now_available
 			set_variable = je_sakoku_maybe_we_should_open_up
 		}
-
 		every_interest_group = {
 			limit = {
 				law_stance = {
@@ -314,11 +299,10 @@ ep2_sakoku.3 = {
 				NOT = { has_modifier = light_hand_with_foreigners }
 			}
 			add_modifier = {
-				name = caved_to_foreign_pressure_opposition
+				name = light_hand_with_foreigners
 				days = normal_modifier_time
 			}
 		}
-
 		every_interest_group = {
 			limit = {
 				is_in_government = yes

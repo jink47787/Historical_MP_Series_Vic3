@@ -46,9 +46,37 @@ je_meiji_restoration_update_japanese_emperor = {
             value = scope:emperor_var_scope
         }
     }
+    else_if = { # Something has gone very wrong. We need a new Emperor, stat.
+        limit = {
+            has_law_or_variant = law_type:law_monarchy
+            NOT = {
+                any_scope_character = {
+                    has_trait = special_character_japanese_emperor
+                }
+            }
+        }
+        create_character = {
+            template = JAP_backup_emperor_template
+            save_temporary_scope_as = emperor_var_scope
+        }
+        if = {
+            limit = {
+                NOT = {
+                    has_law = law_type:law_bakufu
+                }
+            }
+            scope:emperor_var_scope ?= {
+                set_character_as_ruler = yes
+            }
+        }
+        set_variable = {
+            name = emperor_var
+            value = scope:emperor_var_scope
+        }
+    }
 }
 
-je_meiji_restoration_update_daimyos = {
+je_meiji_restoration_update_daimyos = { # Country scope
     if = {
         limit = {
             has_variable_list = daimyos_list
@@ -59,16 +87,18 @@ je_meiji_restoration_update_daimyos = {
         limit = {
             any_scope_character = {
                 has_variable = daimyo_var
+                is_character_alive = yes
             }
         }
         every_scope_character = {
             limit = {
                 has_variable = daimyo_var
+                is_character_alive = yes
             }
-            root = {
+            owner = {
                 add_to_variable_list = {
                     name = daimyos_list
-                    target = prev
+                    target = prev # every_scope_character
                 }
             }
         }

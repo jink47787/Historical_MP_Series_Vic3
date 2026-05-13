@@ -117,25 +117,27 @@ owner_is_root_or_subject_of_root = {
 }
 
 character_has_valid_reason_for_coup = {
+    save_temporary_scope_as = coupist_to_be
     OR = {
-        owner = { # Case 1 - owner is enacting a law the character does not approve of
-			exists = owner.currently_enacting_law
+        owner ?= { # Case 1 - owner is enacting a law the character does not approve of
+            save_temporary_scope_as = couped_to_be
+            exists = currently_enacting_law
             OR = {
-                PREV = {
+                scope:coupist_to_be ?= {
                     law_enactment_stance = { # Refers to any_scope_character
-                        law = PREV.currently_enacting_law.type # Refers to owner
+                        law = scope:couped_to_be.currently_enacting_law.type # Refers to owner
                         value < neutral # Disapproves of the law
                     }
                 }
                 AND = {
-                    PREV ?= {
+                    scope:coupist_to_be ?= {
                         law_enactment_stance = { # Refers to any_scope_character
-                            law = PREV.currently_enacting_law.type # Refers to owner
+                            law = scope:couped_to_be.currently_enacting_law.type # Refers to owner
                             value < approve # Character does not approve of the law
                         }
                         interest_group ?= {
                             law_enactment_stance = { # Refers to any_scope_character's interest group
-                                law = PREV.owner.currently_enacting_law.type # Refers to owner
+                                law = scope:couped_to_be.currently_enacting_law.type # Refers to owner
                                 value < neutral # Interest group opposes the law
                             }
                         }
@@ -156,8 +158,8 @@ character_has_valid_reason_for_coup = {
             has_trait = special_character_napoleonic_return
         }
         # Not in this trigger, but exposed elsewhere:
-            # Case 5 - Foreign-Backed Coup
-            # Case 6 - Foreign-Backed Coup
+        # Case 5 - Foreign-Backed Coup
+        # Case 6 - Foreign-Backed Coup
     }
 }
 
@@ -208,6 +210,7 @@ country_is_abolishing_bakufu = {
 
 character_is_valid_for_events = {
    NOT = { has_role = character_role_emperor_of_japan }
+   NOT = { has_variable = golpista_var }
    is_adult = yes
 }
 
@@ -235,6 +238,23 @@ country_has_tokugawa_in_power = {
     NOT = {
         country_is_abolishing_bakufu = yes
     }
+}
+
+country_has_former_shogun_in_government = {
+    any_scope_character = {
+        has_variable = shogun_var
+        is_interest_group_leader = yes
+        interest_group ?= {
+            is_in_government = yes
+        }
+    }
+}
+
+sonnojoi_have_shojoi_ideology = {
+	any_political_movement = {
+		is_political_movement_type = movement_meiji_restorationist
+		has_core_ideology = ideology:ideology_meiji_restorationist_movement_shojoi
+	}
 }
 
 country_has_pending_meiji_restoration = {
@@ -292,5 +312,37 @@ law_is_governance_principles_law = { # law scope
         type ?= law_type:law_presidential_republic
         type ?= law_type:law_parliamentary_republic
         type ?= law_type:law_council_republic
+    }
+}
+
+country_has_nobility = {
+    OR = {
+        has_law_or_variant = law_type:law_theocracy
+        country_has_monarchy_law = yes
+        AND = {
+            has_law = law_type:law_colonial_administration
+            overlord ?= { 
+                country_has_nobility = yes
+            }
+        }
+    }
+}
+
+country_has_springtime_revolution = {
+    any_civil_war = {
+        is_civil_war_type = revolution
+        civil_war_progress >= $THRESHOLD$
+        custom_tooltip = {
+            text = caused_by_liberal_or_socialist_movement_tt
+            political_movement ?= {
+                OR = {
+                    movement_is_liberal = yes
+                    movement_is_socialist = yes
+                }
+            }
+        }
+    }
+    capital = {
+        is_in_revolt = yes
     }
 }

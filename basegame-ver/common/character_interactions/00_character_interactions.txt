@@ -817,9 +817,8 @@ exile_character = {
 						create_character = {
 							template = exile_count_dracula
 							on_created = {
-								exile_character = yes
+								exile_character_with_role_cleanup = yes
 								set_character_immortal = yes
-								clean_up_exile_character_roles = yes
 							}
 						}
 					}
@@ -843,7 +842,7 @@ exile_character = {
 				OR = {
 					interest_group ?= {
 						ig_approval < 0
-				}
+					}
 					political_movement ?= {
 						is_being_suppressed = yes
 					}
@@ -853,39 +852,54 @@ exile_character = {
 			add = {
 				value = popularity
 				multiply = 0.2
-		}
-
-		if = {
-			limit = {
-				scope:actor ?= {
-					has_law_or_variant = law_type:law_outlawed_dissent
-				}
 			}
+
+			if = { # Dangerous agitators have a greater chance of getting booted
+				limit = {
+					has_role_of_type = agitator
+					OR = {
+						has_trait = ambitious
+						has_trait = wrathful
+						has_trait = ruthless
+						has_trait = bandit
+						has_trait = social_bandit
+						has_trait = special_character_luxemburg_in_exile
+					}
+				}
 				multiply = 1.5
-		}
-			else_if = {
-			limit = {
-				scope:actor ?= {
-					has_law_or_variant = law_type:law_censorship
-				}
 			}
-				multiply = 1.25
-		}
-			else_if = {
-			limit = {
-				scope:actor ?= {
-					has_law_or_variant = law_type:law_right_of_assembly
-				}
-			}
-				multiply = 0.75
-		}
 
-		if = {
-			limit = {
-				scope:actor ?= {
-						has_law_or_variant = law_type:law_secret_police
+			if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_outlawed_dissent
+					}
 				}
+				multiply = 1.5
 			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_censorship
+					}
+				}
+				multiply = 1.25
+			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_right_of_assembly
+					}
+				}
+				multiply = 0.75
+			}
+
+			if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_secret_police
+					}
+				}
 				multiply = 1.5
 			}
 			else_if = {
@@ -969,7 +983,6 @@ exile_character = {
 				}
 				multiply = 0.5
 			}
-
 
 			if = { # Be less inclined to toss out politicians
 				limit = {

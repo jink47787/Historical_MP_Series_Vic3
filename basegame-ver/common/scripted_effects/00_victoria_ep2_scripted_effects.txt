@@ -36,7 +36,6 @@
 					}
 					add_character_role = character_role_politician
 				}
-				remove_character_role = ruler
 				set_variable = former_shogun_var
 				set_as_interest_group_leader = yes # Landowners leader, typically
 				hidden_effect = { set_character_immortal = yes }
@@ -66,7 +65,6 @@
 				retire_character = yes
 			}
 			ruler ?= {
-				remove_character_role = ruler
 				set_variable = former_shogun_var
 				set_as_interest_group_leader = yes # Landowners leader, typically
 				set_character_immortal = yes
@@ -320,7 +318,6 @@ japan_generate_imperial_princess_effect = {
 	}
 }
 
-
 JAP_character_generate_new_daimyo = { # Fired on_character_death
 	if = {
 		limit = {
@@ -381,6 +378,9 @@ JAP_character_generate_new_daimyo = { # Fired on_character_death
 			var:daimyo_var ?= s:STATE_HOKKAIDO
 		}
 		JAP_character_generate_matsumae_daimyo = yes
+	}
+	owner ?= {
+		je_meiji_restoration_update_daimyos = yes
 	}
 }
 
@@ -445,6 +445,7 @@ JAP_state_generate_new_daimyo = { # Generates new daimyo for the state
 		}
 		JAP_character_generate_matsumae_daimyo = yes
 	}
+	# je_meiji_restoration_update_daimyos called one step up, in japan_reconcile_revolutionary_daimyos
 }
 
 JAP_character_generate_satsuma_daimyo = { # Owner = country, ROOT = predecessor
@@ -1630,9 +1631,6 @@ iwakura_character_change_ideology_with_world_politics = {
 }
 
 character_get_and_save_coup_reason = {
-	owner = {
-		set_variable = { name = coup_reason_var value = 0 } # If 0, something is broken
-	}
     if = {
 		limit = {
 			owner ?= {
@@ -1642,7 +1640,7 @@ character_get_and_save_coup_reason = {
 			}
 		}
 		owner = {
-			set_variable = { name = coup_reason_var value = 5 } # Case 5 - Foreign-Backed Coup
+			set_variable = { name = coup_reason_var value = 6 } # Case 6 - Foreign-Backed Coup
 		}
 	}
     else_if = {
@@ -1650,29 +1648,31 @@ character_get_and_save_coup_reason = {
 			has_modifier = modifier_dynastic_coup
 		}
 		owner = {
-			set_variable = { name = coup_reason_var value = 6 } # Case 6 - Dynastic Coup
+			set_variable = { name = coup_reason_var value = 5 } # Case 5 - Dynastic Coup
 		}
 	}
     else_if = {
 		limit = {
+			save_temporary_scope_as = coupist_to_be
 			owner ?= { # Case 1 - owner is enacting a law the character does not approve of
-				exists = owner.currently_enacting_law
+				save_temporary_scope_as = couped_to_be
+				exists = currently_enacting_law
 				OR = {
-					PREV = {
+					scope:coupist_to_be ?= {
 						law_enactment_stance = { # Refers to any_scope_character
-							law = PREV.currently_enacting_law.type # Refers to owner
+							law = scope:couped_to_be.currently_enacting_law.type # Refers to owner
 							value < neutral # Disapproves of the law
 						}
 					}
 					AND = {
-						PREV ?= {
+						scope:coupist_to_be ?= {
 							law_enactment_stance = { # Refers to any_scope_character
-								law = PREV.currently_enacting_law.type # Refers to owner
+								law = scope:couped_to_be.currently_enacting_law.type # Refers to owner
 								value < approve # Character does not approve of the law
 							}
 							interest_group ?= {
 								law_enactment_stance = { # Refers to any_scope_character's interest group
-									law = PREV.currently_enacting_law.type # Refers to owner
+									law = scope:couped_to_be.currently_enacting_law.type # Refers to owner
 									value < neutral # Interest group opposes the law
 								}
 							}
@@ -1723,6 +1723,11 @@ character_get_and_save_coup_reason = {
 		}
 		owner = {
 			set_variable = { name = coup_reason_var value = 7 } # Case 7 - Louis Auguste Blanqui
+		}
+	}
+	else = {
+		owner = {
+			set_variable = { name = coup_reason_var value = 0 } # If 0, something is broken
 		}
 	}
 }
@@ -2104,21 +2109,25 @@ meiji_civil_war_effects = { # Executed from on_revolution_start
 		if = {
 			limit = {
 				OR = {
-					any_scope_character = {
-						has_variable = shogun_var
-						is_interest_group_leader = yes
-						interest_group ?= {
-							is_in_government = yes
-						}
+					has_law = law_type:law_bakufu
+					country_has_former_shogun_in_government = yes
+					any_active_law = {
+						has_amendment = amendment_type:amendment_taikunate 
 					}
+					sonnojoi_have_shojoi_ideology = yes
+				}
+			}
+			trigger_event = { id = ep2_meiji.41 popup = yes }
+		}
+		if = {
+			limit = {
+				NOR = {
+					has_law = law_type:law_bakufu
 					any_active_law = {
 						has_amendment = amendment_type:amendment_taikunate 
 					}
 				}
 			}
-			trigger_event = { id = ep2_meiji.41 popup = yes }
-		}
-		else = {
 			scope:target ?= {
 				set_variable = sonnojoi_contrast_color # So that the Sonnojoi use a different colour than the Empire
 			}
@@ -2246,13 +2255,13 @@ meiji_civil_war_effects = { # Executed from on_revolution_start
 japan_replace_missing_daimyo = {
 	every_state_in_home_islands = { # Iterates through all Japanese states, and checks for those that do not have a sitting daimyo
 		limit = {
+			NOT = { state_region = s:STATE_RYUKYU_ISLANDS } # Has no Daimyo
 			save_temporary_scope_as = daimyo_polled_state
 			owner ?= {
 				this ?= ROOT
 				ROOT ?= {
 					NOT = {
-						any_in_list = {
-							variable = daimyos_list
+						any_scope_character = {
 							var:daimyo_var ?= scope:daimyo_polled_state.state_region
 						}
 					}
@@ -2292,6 +2301,7 @@ japan_reconcile_revolutionary_daimyos = { # Fired from on_wargoal_enforced
 		}
 	}
 	japan_replace_missing_daimyo = yes
+	je_meiji_restoration_update_daimyos = yes
 }
 
 japan_display_add_meiji_reforms = {
@@ -2472,5 +2482,15 @@ character_handle_possible_emperor_ig_leader = { # TODO PRCAL-44673 replace with 
 		set_variable = emperor_kicked_out_of_ig_leadership # Infinite loop safety variable
 		remove_character_role = character_role_ig_leader
 		remove_character_role = character_role_politician
+	}
+}
+
+
+on_remove_ruler_effects = {
+	if = {
+		limit = {
+			has_trait = special_character_japanese_emperor
+		}
+		remove_trait = special_character_japanese_emperor
 	}
 }
