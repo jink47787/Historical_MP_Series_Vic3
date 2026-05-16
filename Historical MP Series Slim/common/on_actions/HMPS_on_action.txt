@@ -1,4 +1,246 @@
-﻿HMPS_treaty_port_cb_fix = {
+﻿on_monthly_pulse = {
+	on_actions = {
+		HMPS_treaty_port_cb_fix
+	}
+}
+
+
+on_monthly_pulse_country = {
+	on_actions = {
+		HMPS_Check_for_GM
+		HMPS_ai_modifiers
+		#HMPS_China_Puppet
+		HMPS_France_Pop_Growth
+		HMPS_China_Ports_Fracture
+		HMPS_Coastal_Capital
+		#HMPS_Institution_Modifier
+		HMPS_China
+		HMPS_rev_handling
+		HMPS_undo_sp
+		HMPS_pb_cleanup
+		HMPS_1848_Radicals
+		HMPS_Remove_Hungary_Modifiers
+		HMPS_Reform_AH
+		HMPS_Remove_War_Taxes
+		HMPS_Remove_Default_Modifier
+		HMPS_interest_by_rank_action
+		HMPS_ai_help
+	}
+	events = {
+		#mahdists_uprising.1 commented out until further africa flava is made
+		wine_blight_evt.4
+		chem_weapons_infamy.1
+		prussian_germany.1
+		dp_modifiers.1
+		#dp_modifiers.2
+		#dp_modifiers.3
+		grants.3
+		Britain_India_Transfer.1
+		austria_monarchy.3
+		austria_monarchy.4
+		dual_monarchy.4 # military occupation of Hungary
+		dual_monarchy.7 # claims on independent Hungary
+		potato_blight.5 # Irish potato event
+		dual_monarchy.6 #Russian aid against Hungary
+		zionism.1
+		zionism.2
+		wine_blight_evt.2
+		wine_blight_evt.1
+		
+		#Genocide Prevention
+		defacto_capitulate.1 #HMPS
+		defacto_capitulate.2 #HMPS
+	}
+	effect = {
+		#### HMPS CODE FOR NON LEADER NON SUBECT BLOC MEMEBR DEBUFF
+		if = {
+			limit = { has_game_rule = HMPS_punish_major_non_leader_bloc_memebers }
+			remove_modifier = modifier_great_power_non_leader_bloc_member
+			remove_modifier = modifier_major_power_non_leader_bloc_member
+			if = {
+				limit = {
+					is_losing_power_rank = no
+					country_rank = rank_value:great_power
+					is_in_power_bloc = yes
+					is_power_bloc_leader = no
+				}
+				add_modifier = modifier_great_power_non_leader_bloc_member
+			}
+			if = {
+				limit = {
+					OR = {
+						AND = {
+							country_rank = rank_value:great_power
+							is_losing_power_rank = yes
+						}
+						AND = {
+							country_rank = rank_value:major_power
+							is_losing_power_rank = no
+						}
+					}
+					is_in_power_bloc = yes
+					is_power_bloc_leader = no
+				}
+				add_modifier = modifier_major_power_non_leader_bloc_member
+			}
+		}
+	}
+}
+on_yearly_pulse_country = {
+	events = {
+		railroad_bubble.2 #HMPS
+	}
+}
+
+
+on_monthly_pulse_state = {
+	on_actions = {
+		HMPS_handle_demographic_shifts
+		HMPS_Slave_State_Migration
+		HMPS_remove_bad_unis
+	}
+	effect = {
+		check_china_state_nerf = yes #HMPS
+		check_india_state_nerf = yes #HMPS
+	}
+}
+on_building_expanded = {
+	on_actions = {
+		HMPS_rr_counting
+	}
+}
+on_country_default = { ##HMPS Change
+	effect = {
+		if = { ##HMPS Change
+			limit = {
+				in_default = yes
+				NOT = { has_modifier = modifier_recently_defaulted }
+			}
+			trigger_event = {
+				id = HMPS_default.1
+				popup = yes
+			}
+		}
+	}
+}
+
+on_country_formed = {
+	on_actions = {
+		HMPS_1848_Italy
+	}
+}
+on_diplo_play_back_down_involved = {
+	effect = {
+		scope:notification_target = { #HMPS? I think
+			if = {
+				limit = {
+					is_diplomatic_play_enemy_of = scope:actor
+				}
+				create_bidirectional_truce = {
+					country = scope:actor
+					months = 60
+				}
+			}
+			
+			if = {
+				limit = {
+					is_diplomatic_play_enemy_of = scope:target
+				}
+				create_bidirectional_truce = {
+					country = scope:target
+					months = 60
+				}
+			}
+		}
+	}
+}
+
+on_revolution_start = {
+	on_actions = {
+		HMPS_revolution_boost
+		HMPS_1848_Revolution
+		HMPS_Modifier_Transfer
+	}
+	effect = {
+		### Transferring Infamy
+		scope:target ?= {
+			change_infamy = root.infamy
+		}
+		if = {
+			limit = {
+				c:GBR ?= ROOT
+				country_has_primary_culture = cu:irish
+			}
+			scope:target ?= {
+				add_primary_culture = cu:irish
+				
+			}
+		}
+	}
+}
+on_law_enactment_started = {
+	effect = {
+		if = {
+			limit = {
+				has_law = law_type:law_theocracy
+				OR = {
+					is_enacting_law = law_type:law_presidential_republic
+					is_enacting_law = law_type:law_parliamentary_republic
+					is_enacting_law = law_type:law_council_republic
+				}
+			}
+			add_journal_entry = { type = je_abolish_theocracy }
+		}
+		if = {
+			limit = {
+				is_enacting_law = law_type:law_slavery_banned
+			}
+			set_variable = {
+				name = abolishing_slavery_var
+				value = 0
+			}
+			add_journal_entry = { type = je_abolish_slavery }
+		}
+		#Montenegro events
+		if = {
+			limit = {
+				c:MON ?= THIS
+			}
+			if = {
+				limit = {
+					OR = {
+						is_enacting_law = law_type:law_moderate_corporation_tax
+						is_enacting_law = law_type:law_low_corporation_tax
+						is_enacting_law = law_type:law_high_corporation_tax
+						is_enacting_law = law_type:law_low_consumption_tax
+						is_enacting_law = law_type:law_moderate_consumption_tax
+						is_enacting_law = law_type:law_high_consumption_tax
+						is_enacting_law = law_type:law_low_income_tax
+						is_enacting_law = law_type:law_moderate_income_tax
+						is_enacting_law = law_type:law_high_income_tax
+					}
+				}
+				trigger_event = {
+					ID = mon_state_formation.12
+				}
+			}
+		}
+	}
+}
+on_wargoal_enforced = {
+	on_actions = {
+		HMPS_1848_War
+	}
+}
+on_state_owner_change = {
+	effect = {
+		check_china_state_nerf = yes
+		check_india_state_nerf = yes
+	}
+}
+
+
+HMPS_treaty_port_cb_fix = {
 	effect = {
 		every_state = {
 			limit = {
