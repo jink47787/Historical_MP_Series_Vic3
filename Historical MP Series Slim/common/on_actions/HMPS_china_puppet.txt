@@ -3,10 +3,120 @@
 
 on_monthly_pulse_country = {
 	on_actions = {
-		#HMPS_China_Puppet
+		HMPS_China_Puppet
 	}
 }
 HMPS_China_Puppet = {
+	effect = {
+		ROOT = {
+			if = {
+				limit = {
+					has_game_rule = HMPS_game_rule_chinese_puppets_enabled
+					NOT = {
+						OR = {
+							any_primary_culture = {
+								OR = {
+									has_discrimination_trait = tradition_sinosphere
+									has_discrimination_trait = heritage_han
+									has_discrimination_trait = language_tibetan
+								}
+							}
+							capital ?= {
+								OR = {
+									region = sr:region_north_china
+									region = sr:region_south_china
+								}
+							}
+						}
+					}
+					any_scope_state = {
+						OR = {
+							region = sr:region_north_china
+							region = sr:region_south_china
+						}
+						NOT = { state_region = s:STATE_FORMOSA }
+						state_population > 3500000
+					}
+					#code to check if you already have a chinese dominion and puppet
+				}
+				every_scope_state = {
+					limit = {
+						OR = {
+							region = sr:region_north_china
+							region = sr:region_south_china
+						}
+						NOT = { state_region = s:STATE_FORMOSA }
+						state_population >= 3500000
+					}
+					set_variable = chinese_state_to_cede
+				}
+				random_scope_state = {
+					limit = {
+						has_variable = chinese_state_to_cede
+					}
+					save_scope_as = china_puppet_capital_scope
+				}
+				create_dynamic_country = {
+					origin = root
+					country_type = colonial
+					tier = principality
+					capital = scope:china_puppet_capital_scope
+					cede_state_trigger = {
+						has_variable = chinese_state_to_cede
+					}
+					on_created = {
+						every_scope_state = {
+							remove_variable = chinese_state_to_cede
+							set_variable = china_state_foreign_owned
+						}
+						add_primary_culture = cu:han
+						activate_law = law_type:law_extraction_economy
+						activate_law = law_type:law_presidential_republic
+						activate_law = law_type:law_autocracy
+						activate_law = law_type:law_peasant_levies
+						activate_law = law_type:law_no_home_affairs
+						activate_law = law_type:law_no_police
+						activate_law = law_type:law_no_schools
+						activate_law = law_type:law_no_health_system
+						activate_law = law_type:law_no_workers_rights
+						activate_law = law_type:law_no_social_security
+						activate_law = law_type:law_no_environmental_regulations
+					}
+				}
+				#scope:china_puppet_capital_scope.owner = {
+				#	set_variable = test
+				#}
+				#create_diplomatic_pact = {
+				#	country = scope:china_puppet_capital_scope.owner
+				#	type = grant_own_market
+				#}
+				if = {
+					limit = {
+						root = {
+							is_country_type = unrecognized
+						}
+					}
+					create_diplomatic_pact = {
+						country = scope:china_puppet_capital_scope.owner
+						type = vassal
+					}
+				}
+				else = {
+					create_diplomatic_pact = {
+						country = scope:china_puppet_capital_scope.owner
+						type = colony
+					}
+				}
+				
+				create_bidirectional_truce = {
+					country = scope:china_puppet_capital_scope.owner
+					months = 60
+				}
+			}
+		}
+	}
+}
+HMPS_China_Puppet_towns_era = { #UNUSED for now, will use later
 	effect = {
 		ROOT = {
 			if = {
