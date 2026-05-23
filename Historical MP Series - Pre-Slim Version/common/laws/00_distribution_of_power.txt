@@ -1,0 +1,1309 @@
+﻿# group = this is the law_group a law belongs to
+# icon = graphical icon shown in-game
+# modifier = {} modifier on country for having adopted this law
+
+law_vanguardism = {	
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/vladimir_illyich_lenin.dds"
+	
+	progressiveness = -125
+
+	unlocking_technologies = {
+		socialism
+	}
+	
+	can_enact = {
+		OR = {
+			custom_tooltip = {
+				text = ruler_in_party_tt
+				exists = ruler
+				OR = {
+					ruler = {
+						this.interest_group = {
+							has_party = yes
+						}
+					}
+				}
+			}
+			custom_tooltip = {
+				text = sps_no_party_tt
+				country_has_voting_franchise = no
+			}
+		}
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	disallowing_laws = {
+		law_chiefdom
+	}
+
+	modifier = {
+		country_legitimacy_govt_total_votes_add = 100
+		country_voting_power_base_add = 10
+		country_bureaucrats_pol_str_mult = 0.5
+		country_academics_pol_str_mult = 0.5
+		country_authority_add = 400
+		country_authority_mult = 0.25
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				game_date > 1836.01.01
+			}
+			activate_law = law_type:law_no_legislature
+			activate_law = law_type:law_no_voting
+			activate_law = law_type:law_single_party_state
+			
+			set_only_legal_party_from_ig = ruler.interest_group
+			
+			custom_tooltip = {
+				text = sps_government_reshuffle_tt
+				every_interest_group = {
+					limit = {
+						is_in_government = yes
+						NOT = { #Removes all IGs from government that aren't in your party
+							has_party = yes
+						}
+					}
+					remove_ruling_interest_group = yes
+				}
+				every_interest_group = {
+					limit = { #Adds all IGs that are in your party to the government
+						is_in_government = no
+						has_party = yes
+					}
+					add_ruling_interest_group = yes
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = missouri_compromise
+			}
+			remove_modifier = missouri_compromise
+		}
+	}
+	
+	on_deactivate = {
+		unset_only_legal_party = yes
+		update_party_support = yes
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			AND = { # modification of the standard trigger, only other vanguardist countries can impose vanguardism on their subjects
+				has_law = scope:law
+				can_impose_law_default = yes
+			}
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
+
+law_autocracy = {	
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/autocracy.dds"
+	
+	progressiveness = -100
+
+	is_visible = {
+		NOT = { # Replaced by Neo-Absolutism
+			has_law = law_type:law_neo_absolutism
+		}
+	}
+
+	on_activate = {
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_elected_bureaucrats
+				has_law_or_variant = law_type:law_monarchy
+			}
+			deactivate_law = law_type:law_elected_bureaucrats
+			activate_law = law_type:law_hereditary_bureaucrats
+		}
+		else_if = {
+			limit = {
+				has_law_or_variant = law_type:law_elected_bureaucrats
+				NOT = {
+					has_law = law_type:law_monarchy
+				}
+			}
+			deactivate_law = law_type:law_elected_bureaucrats
+			activate_law = law_type:law_appointed_bureaucrats
+		}
+		activate_law = law_type:law_no_legislature
+		activate_law = law_type:law_no_voting
+		activate_law = law_type:law_independent_executive
+		scripted_effect_parties_disappearence = yes
+		if = {
+			limit = {
+				has_modifier = missouri_compromise
+			}
+			remove_modifier = missouri_compromise
+		}
+	}
+
+	modifier = {
+		country_legitimacy_headofstate_add = 40
+		country_legitimacy_govt_total_clout_add = 90
+		country_legitimacy_ideological_incoherence_mult = 0.05
+		country_aristocrats_pol_str_mult = 1.0
+		country_officers_pol_str_mult = 0.5
+		country_authority_add = 300
+		country_authority_mult = 0.20
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
+
+law_neo_absolutism = { # Reward for completing the neo-absolutist content
+	group = lawgroup_distribution_of_power
+	parent = law_autocracy
+
+	icon = "gfx/interface/icons/law_icons/neo_absolutism.dds"
+
+	progressiveness = -100
+	
+	requires_law_or = {
+		law_monarchy
+	}
+
+	on_activate = {
+		scripted_effect_parties_disappearence = yes
+	}
+
+	is_visible = {
+		c:AUS ?= this
+		has_global_variable = neo_absolutism_victory
+	}
+
+	modifier = {
+		country_legitimacy_headofstate_add = 40
+		country_legitimacy_govt_total_clout_add = 90
+		country_legitimacy_ideological_incoherence_mult = 0.05
+		country_bureaucrats_pol_str_mult = 1.0
+		country_officers_pol_str_mult = 0.5
+		country_authority_add = 300
+		country_authority_mult = 0.25
+	}
+
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+
+	ai_impose_chance = {
+		value = 0
+	}
+}
+
+law_oligarchy = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/oligarchy.dds"
+	
+	progressiveness = -50
+
+	is_visible = {
+		NAND = {
+			country_has_primary_culture = cu:romanian
+			is_subject = yes
+		}
+	}
+
+	on_activate = {
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_elected_bureaucrats
+				has_law_or_variant = law_type:law_monarchy
+			}
+			deactivate_law = law_type:law_elected_bureaucrats
+			activate_law = law_type:law_hereditary_bureaucrats
+		}
+		else_if = {
+			limit = {
+				has_law_or_variant = law_type:law_elected_bureaucrats
+				NOT = {
+					has_law_or_variant = law_type:law_monarchy
+				}
+			}
+			deactivate_law = law_type:law_elected_bureaucrats
+			activate_law = law_type:law_appointed_bureaucrats
+		}
+		activate_law = law_type:law_no_legislature
+		activate_law = law_type:law_no_voting
+		activate_law = law_type:law_independent_executive
+		scripted_effect_parties_disappearence = yes
+		if = {
+			limit = {
+				has_modifier = missouri_compromise
+			}
+			remove_modifier = missouri_compromise
+		}
+	}
+	
+	modifier = {
+		country_legitimacy_headofstate_add = 10
+		country_legitimacy_govt_total_clout_add = 105
+		country_legitimacy_govt_size_add = 2
+		country_legitimacy_ideological_incoherence_mult = -0.40
+		country_officers_pol_str_mult = 0.5
+		country_aristocrats_pol_str_mult = 0.75
+		country_capitalists_pol_str_mult = 0.5
+		country_authority_add = 200
+		country_authority_mult = 0.15
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
+
+law_organic_regulation = {
+	group = lawgroup_distribution_of_power
+	parent = law_oligarchy
+
+	icon = "gfx/interface/icons/law_icons/organic_regulation.dds"
+
+	progressiveness = -50
+
+	is_visible = {
+		country_has_primary_culture = cu:romanian
+		is_subject = yes
+	}
+
+	can_enact = {
+		country_has_primary_culture = cu:romanian
+		is_subject = yes
+	}
+
+	on_activate = {
+		scripted_effect_parties_disappearence = yes
+	}
+
+	modifier = {
+		country_legitimacy_headofstate_add = 10
+		country_legitimacy_govt_total_clout_add = 105
+		country_legitimacy_govt_size_add = 2
+		country_legitimacy_ideological_incoherence_mult = -0.40
+		country_officers_pol_str_mult = 0.5
+		country_shopkeepers_pol_str_mult = 0.75
+		country_clerks_pol_str_mult = 0.5
+		country_authority_add = 200
+		country_authority_mult = 0.15
+	}
+
+	can_impose = {
+		OR = {
+			AND = {
+				scope:target_country = {
+					country_has_primary_culture = cu:romanian
+				}
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
+	}
+
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+
+	ai_impose_chance = {
+		value = 0
+
+		if = {
+			limit = {
+				has_law = law_type:law_organic_regulation
+				OR = {
+					AND = {
+						power_bloc ?= { has_identity = identity:identity_ideological_union }
+						has_strategy = ai_strategy_conservative_agenda
+					}
+					has_strategy = ai_strategy_reactionary_agenda
+				}
+				scope:target_country = {
+					NOR = { # Is their law different enough from what we want to impose?
+						has_law_or_variant = law_type:law_autocracy
+						has_law_or_variant = law_type:law_landed_voting
+					}
+				}
+			}
+
+			add = base_impose_law_weight
+		}
+	}
+}
+
+law_technocracy = {
+	group = lawgroup_distribution_of_power
+
+	icon = "gfx/interface/icons/law_icons/technocracy.dds"
+
+	progressiveness = -50
+	
+	#unlocking_laws = {
+	#	law_republic
+	#}
+
+	on_activate = {
+		activate_law = law_type:law_no_legislature
+		activate_law = law_type:law_no_voting
+		activate_law = law_type:law_single_party_state
+		if = {
+			limit = {
+				OR = {
+					has_law_or_variant = law_type:law_hereditary_bureaucrats
+					has_law_or_variant = law_type:law_elected_bureaucrats
+				}
+			}
+			activate_law = law_type:law_appointed_bureaucrats
+		}
+		scripted_effect_parties_disappearence = yes
+		if = {
+			limit = {
+				has_modifier = missouri_compromise
+			}
+			remove_modifier = missouri_compromise
+		}
+	}
+
+	modifier = {
+		country_legitimacy_headofstate_add = 10
+		country_legitimacy_govt_total_clout_add = 115
+		country_legitimacy_govt_size_add = 2
+		country_legitimacy_ideological_incoherence_mult = -0.1
+		country_academics_pol_str_mult = 0.50
+		country_capitalists_pol_str_mult = 0.50
+		country_engineers_pol_str_mult = 0.33
+		country_officers_pol_str_mult = 0.33
+		#country_authority_add = 100
+		#country_authority_mult = 0.10
+	}
+
+	unlocking_technologies = {
+		central_archives 
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
+	}
+}
+
+law_elder_council = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/elder_council.dds"
+	
+	progressiveness = -25
+
+	unlocking_laws = {
+		law_chiefdom
+	}
+
+	is_visible = {
+		is_country_type = decentralized
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_elected_bureaucrats
+				has_law_or_variant = law_type:law_monarchy
+			}
+			deactivate_law = law_type:law_elected_bureaucrats
+			activate_law = law_type:law_hereditary_bureaucrats
+		}
+		else_if = {
+			limit = {
+				has_law_or_variant = law_type:law_elected_bureaucrats
+				NOT = {
+					has_law_or_variant = law_type:law_monarchy
+				}
+			}
+			deactivate_law = law_type:law_elected_bureaucrats
+			activate_law = law_type:law_appointed_bureaucrats
+		}
+		scripted_effect_parties_disappearence = yes
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_single_party_state
+			}
+			activate_law = law_type:law_independent_executive
+		}
+		if = {
+			limit = {
+				has_modifier = missouri_compromise
+			}
+			remove_modifier = missouri_compromise
+		}
+	}
+
+	modifier = {
+		country_legitimacy_base_add = 20
+		country_legitimacy_govt_total_clout_add = 100
+		country_legitimacy_govt_size_add = 2
+		country_legitimacy_ideological_incoherence_mult = -0.2
+		country_aristocrats_pol_str_mult = 0.5
+		country_officers_pol_str_mult = 0.5
+		country_clergymen_pol_str_mult = 0.5
+		country_authority_add = 200
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+}
+
+law_clerical_voting = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/clerical_voting.dds"
+	
+	progressiveness = -25
+
+	unlocking_technologies = {
+		democracy
+	}
+	
+	unlocking_laws = {
+		law_theocracy
+	}
+
+	is_visible = {
+		has_law_or_variant = law_type:law_theocracy
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_single_party_state
+			}
+			activate_law = law_type:law_independent_executive
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_legislature
+			}
+			activate_law = law_type:law_unicameralism
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_voting
+			}
+			activate_law = law_type:law_plurality
+		}
+		scripted_effect_parties_emergence = yes
+	}
+
+	disallowing_laws = {
+		law_chiefdom
+		law_monarchy
+		law_republic
+	}
+
+	modifier = {
+		country_legitimacy_govt_total_votes_add = 30
+		country_legitimacy_govt_total_clout_add = 90
+		country_aristocrats_voting_power_add = 25
+		country_clergymen_voting_power_add = 50
+		country_authority_add = 200
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
+
+law_landed_voting = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/landed_voting.dds"
+	
+	progressiveness = -25
+
+	unlocking_technologies = {
+		democracy
+	}
+
+	is_visible = {
+		NOT = { has_law_or_variant = law_type:law_theocracy }
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				game_date > 1836.1.1
+				country_has_voting_franchise = yes
+			}
+			initialize_electoral_confidence = yes
+		}
+		random_law = {
+			limit = {
+				type = law_type:law_landed_voting
+			}
+			save_scope_as = relevant_voting_law
+		}
+		handle_possible_absent_caciquismo_variables = yes
+		scripted_effect_parties_emergence = yes
+		inherit_caciquismo_effect = yes
+		inherit_free_elections_effect = yes
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_monarchy
+				has_variable = king_in_parliament_possible
+				NOT = {
+					has_journal_entry = je_king_in_parliament
+				}
+			}
+			custom_tooltip = {
+				text = king_in_parliament_tt
+				add_journal_entry = { type = je_king_in_parliament }
+			}
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_single_party_state
+			}
+			activate_law = law_type:law_independent_executive
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_legislature
+			}
+			activate_law = law_type:law_unicameralism
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_voting
+			}
+			activate_law = law_type:law_plurality
+		}
+		scripted_effect_parties_emergence = yes
+		if = {
+			limit = {
+				OR = {
+					has_journal_entry = je_napoleons_legacy
+					overlord = {
+						has_journal_entry = je_napoleons_legacy
+					}
+				}
+				has_global_variable = global_1848_progress
+			}
+			change_global_variable = {
+				name = global_1848_progress
+				add = 3
+			}
+		}
+	}
+
+	disallowing_laws = {
+		law_chiefdom
+		law_theocracy
+	}
+
+	modifier = {
+		country_legitimacy_govt_total_votes_add = 30
+		country_legitimacy_govt_total_clout_add = 90
+		country_aristocrats_voting_power_add = 50
+		country_officers_voting_power_add = 25
+		country_clergymen_voting_power_add = 25
+		country_capitalists_voting_power_add = 25
+		country_authority_add = 200
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
+
+law_wealth_voting = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/wealth_voting.dds"
+	
+	progressiveness = 0
+
+	unlocking_technologies = {
+		democracy
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				game_date > 1836.1.1
+				country_has_voting_franchise = yes
+			}
+			initialize_electoral_confidence = yes
+		}
+		random_law = {
+			limit = {
+				type = law_type:law_wealth_voting
+			}
+			save_scope_as = relevant_voting_law
+		}
+		handle_possible_absent_caciquismo_variables = yes
+		scripted_effect_parties_emergence = yes
+		inherit_caciquismo_effect = yes
+		inherit_free_elections_effect = yes
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_monarchy
+				has_variable = king_in_parliament_possible
+				NOT = {
+					has_journal_entry = je_king_in_parliament
+				}
+			}
+			custom_tooltip = {
+				text = king_in_parliament_tt
+				add_journal_entry = { type = je_king_in_parliament }
+			}
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_single_party_state
+			}
+			activate_law = law_type:law_independent_executive
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_legislature
+			}
+			activate_law = law_type:law_unicameralism
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_voting
+			}
+			activate_law = law_type:law_plurality
+		}
+		scripted_effect_parties_emergence = yes
+		if = {
+			limit = {
+				OR = {
+					has_journal_entry = je_napoleons_legacy
+					overlord = {
+						has_journal_entry = je_napoleons_legacy
+					}
+				}
+				has_global_variable = global_1848_progress
+			}
+			change_global_variable = {
+				name = global_1848_progress
+				add = 4
+			}
+		}
+	}
+
+	disallowing_laws = {
+		law_chiefdom
+		law_theocracy
+		law_outlawed_dissent
+	}
+	
+	modifier = {
+		country_legitimacy_govt_total_votes_add = 55
+		country_legitimacy_govt_total_clout_add = 65
+		country_voting_power_base_add = 40
+		country_voting_power_wealth_threshold_add = 25
+		country_authority_add = 100
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
+
+law_census_voting = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/census_voting.dds"
+	
+	progressiveness = 50
+
+	unlocking_technologies = {
+		democracy
+	}
+	
+	disallowing_laws = {
+		law_extraction_economy
+		law_the_company
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				game_date > 1836.1.1
+				country_has_voting_franchise = yes
+			}
+			initialize_electoral_confidence = yes
+		}
+		random_law = {
+			limit = {
+				type = law_type:law_census_voting
+			}
+			save_scope_as = relevant_voting_law
+		}
+		handle_possible_absent_caciquismo_variables = yes
+		scripted_effect_parties_emergence = yes
+		inherit_caciquismo_effect = yes
+		inherit_free_elections_effect = yes
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_monarchy
+				has_variable = king_in_parliament_possible
+				NOT = {
+					has_journal_entry = je_king_in_parliament
+				}
+			}
+			custom_tooltip = {
+				text = king_in_parliament_tt
+				add_journal_entry = { type = je_king_in_parliament }
+			}
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_single_party_state
+			}
+			activate_law = law_type:law_independent_executive
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_legislature
+			}
+			activate_law = law_type:law_unicameralism
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_voting
+			}
+			activate_law = law_type:law_plurality
+		}
+		scripted_effect_parties_emergence = yes
+		if = {
+			limit = {
+				OR = {
+					has_journal_entry = je_napoleons_legacy
+					overlord = {
+						has_journal_entry = je_napoleons_legacy
+					}
+				}
+				has_global_variable = global_1848_progress
+			}
+			change_global_variable = {
+				name = global_1848_progress
+				add = 5
+			}
+		}
+	}
+
+	disallowing_laws = {
+		law_chiefdom
+		law_theocracy
+		law_outlawed_dissent
+	}
+
+	modifier = {
+		country_legitimacy_govt_total_votes_add = 75
+		country_legitimacy_govt_total_clout_add = 45
+		country_voting_power_base_add = 30
+		country_voting_power_wealth_threshold_add = 15
+		country_voting_power_from_literacy_add = 30
+		state_migration_pull_mult = 0.05
+		country_authority_add = 50
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
+
+law_universal_suffrage = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/universal_suffrage.dds"
+	
+	progressiveness = 100
+
+	unlocking_technologies = {
+		egalitarianism
+	}
+	
+	disallowing_laws = {
+		law_extraction_economy
+		law_the_company
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				game_date > 1836.1.1
+				country_has_voting_franchise = yes
+			}
+			initialize_electoral_confidence = yes
+		}
+		random_law = {
+			limit = {
+				type = law_type:law_universal_suffrage
+			}
+			save_scope_as = relevant_voting_law
+		}
+		handle_possible_absent_caciquismo_variables = yes
+		scripted_effect_parties_emergence = yes
+		inherit_caciquismo_effect = yes
+		inherit_free_elections_effect = yes
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_monarchy
+				has_variable = king_in_parliament_possible
+				NOT = {
+					has_journal_entry = je_king_in_parliament
+				}
+			}
+			custom_tooltip = {
+				text = king_in_parliament_tt
+				add_journal_entry = { type = je_king_in_parliament }
+			}
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_single_party_state
+			}
+			activate_law = law_type:law_independent_executive
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_legislature
+			}
+			activate_law = law_type:law_unicameralism
+		}
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_no_voting
+			}
+			activate_law = law_type:law_plurality
+		}
+		scripted_effect_parties_emergence = yes
+		if = {
+			limit = {
+				OR = {
+					has_journal_entry = je_napoleons_legacy
+					overlord = {
+						has_journal_entry = je_napoleons_legacy
+					}
+				}
+				has_global_variable = global_1848_progress
+			}
+			change_global_variable = {
+				name = global_1848_progress
+				add = 6
+			}
+		}
+	}
+
+	disallowing_laws = {
+		law_chiefdom
+		law_theocracy
+		law_outlawed_dissent
+	}
+	
+	modifier = {
+		country_legitimacy_govt_total_votes_add = 100
+		country_legitimacy_govt_total_clout_add = 15
+		country_voting_power_base_add = 20
+		state_migration_pull_mult = 0.15
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
+
+law_anarchy = {
+	group = lawgroup_distribution_of_power
+	
+	icon = "gfx/interface/icons/law_icons/anarchy.dds"
+	
+	progressiveness = 200
+
+	unlocking_technologies = {
+		anarchism 
+	}
+	
+	unlocking_laws = {
+		law_council_republic
+	}
+	
+	on_activate = {
+		if = {
+			limit = {
+				NOT = { has_law_or_variant = law_type:law_no_police }
+			}
+			activate_law = law_type:law_no_police
+		}
+		if = {
+			limit = {
+				NOT = { has_law_or_variant = law_type:law_no_home_affairs }
+			}
+			activate_law = law_type:law_no_home_affairs
+		}
+		if = {
+			limit = {
+				OR = {
+					has_law_or_variant = law_type:law_peasant_levies
+					has_law_or_variant = law_type:law_mass_conscription
+				}
+			}
+			activate_law = law_type:law_national_militia
+		}
+		scripted_effect_parties_disappearence = yes
+		cleanup_voting_strength_modifiers = yes
+	}
+
+	disallowing_laws = {
+		law_chiefdom
+		law_theocracy
+		law_outlawed_dissent
+		law_extraction_economy
+		law_the_company
+	}
+	
+	modifier = {
+		country_legitimacy_govt_total_clout_add = 200
+		state_political_strength_from_wealth_mult = -0.75
+		country_authority_mult = -1
+		country_legitimacy_govt_size_add = 7
+		state_migration_pull_mult = 0.30
+	}
+	
+	can_enact = {
+		trigger_if = {
+			limit = {
+				c:BIC ?= ROOT
+				is_subject = yes
+			}
+			custom_tooltip = {
+				text = BIC_not_able_to_change_distribution_of_power_tt
+				has_variable = britain_granted_dop_permission
+			}
+		}
+	}
+	
+	can_impose = {
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_distribution_of_power_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			AND = { # modification of the standard trigger, only other anarchic countries can impose anarchy on their subjects
+				has_law = scope:law
+				can_impose_law_default = yes
+			}
+		}
+	}
+	
+	ai_will_do = {
+		exists = ruler
+		ruler = {
+			has_ideology = ideology:ideology_anarchist
+		}
+	}
+	
+	ai_enact_weight_modifier = { #Petitions
+		value = 0
+		
+		if = {
+			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
+			add = 750
+		}
+	}
+}
