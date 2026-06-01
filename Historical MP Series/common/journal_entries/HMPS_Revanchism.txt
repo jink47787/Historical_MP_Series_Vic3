@@ -1,0 +1,273 @@
+﻿je_hmps_revanchism_generic = { #try to add in check to reset/refreash JE if total homelands increase/decrease
+	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+
+	group = je_group_internal_affairs
+
+	progressbar = yes
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	is_shown_when_inactive = {
+		is_player = yes
+	}
+	
+	possible = {
+		is_player = yes
+	}
+
+	immediate = {
+		ROOT = {
+			set_variable = { #HMPS: Creates max state value
+				name = max_revanchism_states
+				value = 0
+			}
+			set_variable = { #HMPS: Creates current state value
+				name = current_revanchism_states
+				value = 0
+			}
+			set_variable = { #HMPS: Creates percent of homeland states occupied value
+				name = revanchism_states_percent
+				value = 0
+			}
+			set_variable = { #HMPS: Creates value to check if total homelands increases/decreases
+				name = revanchism_max_state_check
+				value = 0
+			}
+		}
+		#HMPS: we have to account for the part that each 'split' of a state adds up, so if a state was split 4 ways, it would add to the value 4 times.
+		every_state = { #HMPS: Counts/adds up non-split states with homelands of countries primary culture(s)
+			limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_split_state = no
+			}
+			ROOT = {
+				change_variable = {
+					name = max_revanchism_states
+					add = 1
+				}
+			}
+		}
+		every_state = { #HMPS: Counts/adds up split states with homelands of countries primary culture(s)
+			limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_split_state = yes
+			}
+			ROOT = {
+				change_variable = {
+					name = max_revanchism_states
+					add = 0.5
+				}
+			}
+		}
+		every_state = { #HMPS: Sets the max state check value to the same value as max states on initialization of the JE
+			limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_split_state = no
+			}
+			ROOT = {
+				change_variable = {
+					name = revanchism_max_state_check
+					add = 1
+				}
+			}
+		}
+		every_state = {
+			limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_split_state = yes
+			}
+			ROOT = {
+				change_variable = {
+					name = revanchism_max_state_check
+					add = 0.5
+				}
+			}
+		}
+	}
+
+	invalid = { #HMPS: Invalidates thje JE if the amount of homeland states increases or decreases
+		NOT = {
+			ROOT.var:max_revanchism_states = ROOT.var:revanchism_max_state_check
+		}
+	}
+	
+	on_invalid = { #HMPS: Should immediatly re-add the JE to the country, this is done so the max_revanchism_states value can be re-calculated and have that new value be the max value for the progress bar and later calculations
+		ROOT = {
+			trigger_event = {
+				id = hmps_revanchism_reset
+			}
+		}
+	}
+
+	current_value = {
+		value = ROOT.var:current_revanchism_states
+	}
+
+	goal_add_value = {
+		value = ROOT.var:max_revanchism_states
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = { #HMPS: Adds modifier to states taken forcefully that is checked for when looking for revanchism states
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					OR = {
+						has_modifier = recently_conquered_state
+						has_modifier = recently_liberated_state
+					}
+					NOT = {
+						has_modifier = modifier_hmps_revanchism_target
+					}
+				}
+				add_modifier = {
+					name = modifier_hmps_revanchism_target
+					years = 50
+				}
+			}
+			every_state = {
+				limit = { #HMPS: Removes revanchism target modifier from states you own that are your homeland, or overlords homeland if a subject
+					is_homeland_of_country_cultures = ROOT
+					owner = ROOT
+					has_modifier = modifier_hmps_revanchism_target
+					if = {
+						limit = {
+							is_subject = yes
+						}
+						is_homeland_of_country_cultures = top_overlord
+					}
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = { #HMPS: Resets current revanchism states value so it isnt increasing forever
+				change_variable = {
+					name = current_revanchism_states
+					multiply = 0
+				}
+			}
+			every_state = { #HMPS: Counts up states that are current revanchism targets for the country
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					NAND = {
+						owner = ROOT
+						OR = {
+							is_subject_of = ROOT
+							is_indirect_subject_of = ROOT
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+					is_split_state = no
+				}
+				ROOT = {
+					change_variable = {
+						name = current_revanchism_states
+						add = 1
+					}
+				}
+			}
+			ROOT = { #HMPS: Resets the percent of revanchism target states to total homeland states
+				change_variable = {
+					name = revanchism_states_percent
+					multiply = 0
+				}					
+				change_variable = { #HMPS: Calculated the percentage of revanchism target states to total homeland states to scale the modifier(s) gained from revanchism
+					name = revanchism_states_percent
+					add = ROOT.var:current_revanchism_states
+				}
+				change_variable = {
+					name = revanchism_states_percent
+					divide = ROOT.var:max_revanchism_states
+				}
+			}
+			ROOT = { #HMPS: Removes revanchism modifiers before re-applying them so it doesn't stack up multiple times
+				remove_modifier = modifier_hmps_revanchism_0
+				remove_modifier = modifier_hmps_revanchism_25
+				remove_modifier = modifier_hmps_revanchism_50
+				remove_modifier = modifier_hmps_revanchism_75
+			}
+			#Threashold levels/percents to be heavily looked at to make sure they are balanced
+			if = { #HMPS: Checks if you have reached a certain revanchism threashold and applies a modifiers for that level.
+				limit = {
+					ROOT.var:revanchism_states_percent > 0
+					ROOT.var:revanchism_states_percent <= 0.25
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_revanchism_0
+						multiplier =  {
+							value = ROOT.var:current_revanchism_states
+							divide = ROOT.var:max_revanchism_states
+						}
+					}
+				}
+			}				
+			if = {
+				limit = {
+					ROOT.var:revanchism_states_percent > 0.25
+					ROOT.var:revanchism_states_percent <= 0.50
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_revanchism_25
+						multiplier =  {
+							value = ROOT.var:current_revanchism_states
+							divide = ROOT.var:max_revanchism_states
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_states_percent > 0.50
+					ROOT.var:revanchism_states_percent <= 0.75
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_revanchism_50
+						multiplier =  {
+							value = ROOT.var:current_revanchism_states
+							divide = ROOT.var:max_revanchism_states
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_states_percent > 0.75
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_revanchism_75
+						multiplier =  {
+							value = ROOT.var:current_revanchism_states
+							divide = ROOT.var:max_revanchism_states
+						}
+					}
+				}
+			}
+			every_state = { #HMPS: Recalculated current total homeland states to compare against the set/original homeland state count
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					is_split_state = no
+				}
+				ROOT = {
+					change_variable = {
+						name = revanchism_max_state_check
+						add = 1
+					}
+				}
+			}
+			every_state = {
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					is_split_state = yes
+				}
+				ROOT = {
+					change_variable = {
+						name = revanchism_max_state_check
+						add = 0.5
+					}
+				}
+			}	
+		}
+	}			
+}
