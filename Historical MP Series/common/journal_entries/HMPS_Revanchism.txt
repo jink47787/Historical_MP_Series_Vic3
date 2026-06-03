@@ -1,9 +1,8 @@
-﻿je_hmps_revanchism_generic = { #try to add in check to reset/refreash JE if total homelands increase/decrease
+je_hmps_revanchism_generic = { #try to add in check to reset/refreash JE if total homelands increase/decrease
 	icon = "gfx/interface/icons/event_icons/event_industry.dds"
 
 	group = je_group_internal_affairs
 
-	progressbar = yes
 	should_be_pinned_by_default_uninvolved_or_context = yes
 
 	is_shown_when_inactive = {
@@ -28,8 +27,8 @@
 				name = revanchism_states_percent
 				value = 0
 			}
-			set_variable = { #HMPS: Creates value to check if total homelands increases/decreases
-				name = revanchism_max_state_check
+			set_variable = { #HMPS: Created value to show % value in JE description
+				name = revanchism_percent_loc
 				value = 0
 			}
 		}
@@ -58,53 +57,13 @@
 				}
 			}
 		}
-		every_state = { #HMPS: Sets the max state check value to the same value as max states on initialization of the JE
-			limit = {
-				is_homeland_of_country_cultures = ROOT
-				is_split_state = no
-			}
-			ROOT = {
-				change_variable = {
-					name = revanchism_max_state_check
-					add = 1
-				}
-			}
-		}
-		every_state = {
-			limit = {
-				is_homeland_of_country_cultures = ROOT
-				is_split_state = yes
-			}
-			ROOT = {
-				change_variable = {
-					name = revanchism_max_state_check
-					add = 0.5
-				}
-			}
-		}
 	}
 
-	invalid = { #HMPS: Invalidates thje JE if the amount of homeland states increases or decreases
+	invalid = {
 		always = no
-	#	NOT = {
-	#		ROOT.var:max_revanchism_states = ROOT.var:revanchism_max_state_check
-	#	}
 	}
 	
-	on_invalid = { #HMPS: Should immediatly re-add the JE to the country, this is done so the max_revanchism_states value can be re-calculated and have that new value be the max value for the progress bar and later calculations
-	#	ROOT = {
-	#		trigger_event = {
-	#			id = hmps_revanchism_reset
-	#		}
-	#	}
-	}
-
-	current_value = {
-		value = ROOT.var:current_revanchism_states
-	}
-
-	goal_add_value = {
-		value = ROOT.var:max_revanchism_states
+	on_invalid = {
 	}
 
 	on_monthly_pulse = {
@@ -119,6 +78,15 @@
 					NOT = {
 						has_modifier = modifier_hmps_revanchism_target
 					}
+					NOR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
 				}
 				add_modifier = {
 					name = modifier_hmps_revanchism_target
@@ -128,16 +96,54 @@
 			every_state = {
 				limit = { #HMPS: Removes revanchism target modifier from states you own that are your homeland, or overlords homeland if a subject
 					is_homeland_of_country_cultures = ROOT
-					owner = ROOT
-					has_modifier = modifier_hmps_revanchism_target
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
 					if = {
 						limit = {
 							is_subject = yes
 						}
 						is_homeland_of_country_cultures = top_overlord
 					}
+					has_modifier = modifier_hmps_revanchism_target
 				}
 				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = { #HMPS: Resets the max homeland state value before recalculating it
+				change_variable = {
+					name = max_revanchism_states
+					multiply = 0
+				}
+			}
+			every_state = { #HMPS: Recalculated current total homeland states as this can change for some nations
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					is_split_state = no
+				}
+				ROOT = {
+					change_variable = {
+						name = max_revanchism_states
+						add = 1
+					}
+				}
+			}
+			every_state = {
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					is_split_state = yes
+				}
+				ROOT = {
+					change_variable = {
+						name = max_revanchism_states
+						add = 0.5
+					}
+				}
 			}
 			ROOT = { #HMPS: Resets current revanchism states value so it isnt increasing forever
 				change_variable = {
@@ -148,15 +154,17 @@
 			every_state = { #HMPS: Counts up states that are current revanchism targets for the country
 				limit = {
 					is_homeland_of_country_cultures = ROOT
+					is_split_state = no
 					NAND = {
 						owner = ROOT
-						OR = {
-							is_subject_of = ROOT
-							is_indirect_subject_of = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
 						}
 					}
 					has_modifier = modifier_hmps_revanchism_target
-					is_split_state = no
 				}
 				ROOT = {
 					change_variable = {
@@ -181,100 +189,393 @@
 			}
 			ROOT = { #HMPS: Removes revanchism modifiers before re-applying them so it doesn't stack up multiple times
 				remove_modifier = modifier_hmps_revanchism_0
+				remove_modifier = modifier_hmps_revanchism_10
 				remove_modifier = modifier_hmps_revanchism_25
 				remove_modifier = modifier_hmps_revanchism_50
-				remove_modifier = modifier_hmps_revanchism_75
 			}
 			#Threashold levels/percents to be heavily looked at to make sure they are balanced
 			if = { #HMPS: Checks if you have reached a certain revanchism threashold and applies a modifiers for that level.
 				limit = {
 					ROOT.var:revanchism_states_percent > 0
-					ROOT.var:revanchism_states_percent <= 0.25
+					ROOT.var:revanchism_states_percent < 0.10
 				}
 				ROOT = {
 					add_modifier = {
 						name = modifier_hmps_revanchism_0
-						multiplier =  {
-							value = ROOT.var:current_revanchism_states
-							divide = ROOT.var:max_revanchism_states
-						}
+						multiplier = ROOT.var:revanchism_states_percent
 					}
 				}
 			}				
 			if = {
 				limit = {
-					ROOT.var:revanchism_states_percent > 0.25
-					ROOT.var:revanchism_states_percent <= 0.50
+					ROOT.var:revanchism_states_percent >= 0.10
+					ROOT.var:revanchism_states_percent < 0.25
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_revanchism_10
+						multiplier = ROOT.var:revanchism_states_percent
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_states_percent >= 0.25
+					ROOT.var:revanchism_states_percent < 0.50
 				}
 				ROOT = {
 					add_modifier = {
 						name = modifier_hmps_revanchism_25
-						multiplier =  {
-							value = ROOT.var:current_revanchism_states
-							divide = ROOT.var:max_revanchism_states
-						}
+						multiplier = ROOT.var:revanchism_states_percent
 					}
 				}
 			}
 			if = {
 				limit = {
-					ROOT.var:revanchism_states_percent > 0.50
-					ROOT.var:revanchism_states_percent <= 0.75
+					ROOT.var:revanchism_states_percent >= 0.50
 				}
 				ROOT = {
 					add_modifier = {
 						name = modifier_hmps_revanchism_50
-						multiplier =  {
-							value = ROOT.var:current_revanchism_states
-							divide = ROOT.var:max_revanchism_states
+						multiplier = ROOT.var:revanchism_states_percent
+					}
+				}
+			}
+			ROOT = { #HMPS: Resets the percent loc value
+				change_variable = {
+					name = revanchism_percent_loc
+					multiply = 0
+				}					
+				change_variable = { #HMPS: Adds code revanching percent
+					name = revanchism_percent_loc
+					add = ROOT.var:revanchism_states_percent
+				}
+				change_variable = { #HMPS: Multiplies by 100 for non decimal percent number
+					name = revanchism_percent_loc
+					multiply = 100
+				}
+			}
+		}
+	}			
+}
+
+je_hmps_revanchism_rus_buffer_states = {
+	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	is_shown_when_inactive = {
+		is_player = yes
+		c:RUS ?= THIS
+	}
+	
+	possible = {
+		is_player = yes
+		c:RUS ?= THIS
+	}
+
+	immediate = {
+		ROOT = {
+			#HMPS: Max state values for the three regions are set at
+			#Baltics: 6
+			#Poland-Belarus: 8
+			#Ukraine: 9
+			set_variable = {
+				name = current_baltic_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = current_poland_belarus_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = current_ukraine_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = revanchism_baltic_percent
+				value = 0
+			}
+			set_variable = {
+				name = revanchism_poland_belarus_percent
+				value = 0
+			}
+			set_variable = {
+				name = revanchism_ukraine_percent
+				value = 0
+			}
+			set_variable = {
+				name = baltic_percent_loc
+				value = 0
+			}
+			set_variable = {
+				name = poland_belarus_percent_loc
+				value = 0
+			}
+			set_variable = {
+				name = ukraine_percent_loc
+				value = 0
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					OR = {
+						is_in_geographic_region = geographic_region_rus_baltics
+						is_in_geographic_region = geographic_region_rus_poland_belarus
+						is_in_geographic_region = geographic_region_rus_ukraine
+					}
+					OR = {
+						has_modifier = recently_conquered_state
+						has_modifier = recently_liberated_state
+					}
+					NOT = {
+						has_modifier = modifier_hmps_revanchism_target
+						owner = {
+							is_subject_of = c:RUS
 						}
+					}
+				}
+				add_modifier = {
+					name = modifier_hmps_revanchism_target
+					years = 50
+				}
+			}
+			every_state = {
+				limit = {
+					OR = {
+						is_in_geographic_region = geographic_region_rus_baltics
+						is_in_geographic_region = geographic_region_rus_poland_belarus
+						is_in_geographic_region = geographic_region_rus_ukraine
+					}
+					OR = {
+						owner = c:RUS
+						owner = {
+							is_subject_of = c:RUS
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = current_baltic_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_rus_baltics = {
+				limit = {
+					NAND = {
+						owner = c:RUS
+						owner = {
+							OR = {
+								is_subject_of = c:RUS
+								is_indirect_subject_of = c:RUS
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = current_baltic_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = current_poland_belarus_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_rus_poland_belarus = {
+				limit = {
+					NAND = {
+						owner = c:RUS
+						owner = {
+							OR = {
+								is_subject_of = c:RUS
+								is_indirect_subject_of = c:RUS
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = current_poland_belarus_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = current_ukraine_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_rus_ukraine = {
+				limit = {
+					NAND = {
+						owner = c:RUS
+						owner = {
+							OR = {
+								is_subject_of = c:RUS
+								is_indirect_subject_of = c:RUS
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = current_ukraine_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = revanchism_baltic_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = revanchism_baltic_percent
+					add = ROOT.var:current_baltic_revanchism
+				}
+				change_variable = {
+					name = revanchism_baltic_percent
+					divide = 6
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = revanchism_poland_belarus_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = revanchism_poland_belarus_percent
+					add = ROOT.var:current_poland_belarus_revanchism
+				}
+				change_variable = {
+					name = revanchism_poland_belarus_percent
+					divide = 8
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = revanchism_ukraine_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = revanchism_ukraine_percent
+					add = ROOT.var:current_ukraine_revanchism
+				}
+				change_variable = {
+					name = revanchism_ukraine_percent
+					divide = 9
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = baltic_percent_loc
+					multiply = 0
+				}					
+				change_variable = {
+					name = baltic_percent_loc
+					add = ROOT.var:revanchism_baltic_percent
+				}
+				change_variable = {
+					name = baltic_percent_loc
+					multiply = 100
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = poland_belarus_percent_loc
+					multiply = 0
+				}					
+				change_variable = {
+					name = poland_belarus_percent_loc
+					add = ROOT.var:revanchism_poland_belarus_percent
+				}
+				change_variable = {
+					name = poland_belarus_percent_loc
+					multiply = 100
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = ukraine_percent_loc
+					multiply = 0
+				}					
+				change_variable = {
+					name = ukraine_percent_loc
+					add = ROOT.var:revanchism_ukraine_percent
+				}
+				change_variable = {
+					name = ukraine_percent_loc
+					multiply = 100
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_rus_baltic_revanchism
+				remove_modifier = modifier_hmps_rus_poland_belarus_revanchism
+				remove_modifier = modifier_hmps_rus_ukraine_revanchism
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_baltic_percent > 0
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_rus_baltic_revanchism
+						multiplier = ROOT.var:revanchism_baltic_percent
 					}
 				}
 			}
 			if = {
 				limit = {
-					ROOT.var:revanchism_states_percent > 0.75
+					ROOT.var:revanchism_poland_belarus_percent > 0
 				}
 				ROOT = {
 					add_modifier = {
-						name = modifier_hmps_revanchism_75
-						multiplier =  {
-							value = ROOT.var:current_revanchism_states
-							divide = ROOT.var:max_revanchism_states
-						}
+						name = modifier_hmps_rus_poland_belarus_revanchism
+						multiplier = ROOT.var:revanchism_poland_belarus_percent
 					}
 				}
 			}
-			ROOT = { #HMPS: Resets the max homeland state check value before recalculating it
-				change_variable = {
-					name = revanchism_max_state_check
-					multiply = 0
-				}
-			}
-			every_state = { #HMPS: Recalculated current total homeland states to compare against the set/original homeland state count
+			if = {
 				limit = {
-					is_homeland_of_country_cultures = ROOT
-					is_split_state = no
+					ROOT.var:revanchism_ukraine_percent > 0
 				}
 				ROOT = {
-					change_variable = {
-						name = revanchism_max_state_check
-						add = 1
+					add_modifier = {
+						name = modifier_hmps_rus_ukraine_revanchism
+						multiplier = ROOT.var:revanchism_ukraine_percent
 					}
 				}
 			}
-			every_state = {
-				limit = {
-					is_homeland_of_country_cultures = ROOT
-					is_split_state = yes
+			journal_entry:je_hmps_revanchism_rus_buffer_states = {
+				set_bar_progress = {
+					value = ROOT.var:current_baltic_revanchism
+					name = hmps_rus_baltic_revanchism_bar
 				}
-				ROOT = {
-					change_variable = {
-						name = revanchism_max_state_check
-						add = 0.5
-					}
-				}
-			}	
+			}
 		}
-	}			
+	}
 }
