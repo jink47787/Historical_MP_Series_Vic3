@@ -3,35 +3,78 @@
 
 	group = je_group_historical_content
 
-	scripted_button = button_reestablish_new_spain
-	scripted_button = button_reestablish_new_grenada
-	scripted_button = button_reestablish_peru
-	scripted_button = button_reestablish_la_plata
+	#scripted_button = button_reestablish_new_spain
+	#scripted_button = button_reestablish_new_grenada
+	#scripted_button = button_reestablish_peru
+	#scripted_button = button_reestablish_la_plata
 	#scripted_button = button_reestablish_caribbean #HMPS removes this button
 
 	immediate = {
+		every_state_in_latin_america = {
+			limit = {
+				OR = {
+					owner = root
+					owner = {
+						is_subject_of = root
+					}
+				}
+				NOT = {
+					OR = {
+						state_region = s:STATE_GUAYANA
+						state_region = s:STATE_AMAZONAS
+						state_region = {
+							is_homeland = cu:brazilian
+						}
+					}
+				}
+				NOT = {
+					has_variable = HMPS_variable_state_has_gotten_reconquista_buff
+				}
+			}
+			set_variable = HMPS_variable_state_has_gotten_reconquista_buff
+		}
 	}
 
 	complete = {
-		OR = { #HMPS makes this an OR rather than an AND
-			AND = {
-				custom_tooltip = {
-					text = reestablish_new_spain_goal_tt
-					has_variable = button_reestablish_new_spain_var
-				}
-				custom_tooltip = {
-					text = reestablish_new_grenada_goal_tt
-					has_variable = button_reestablish_new_grenada_var
+		any_state_in_latin_america = {
+			OR = {
+				owner = root
+				owner = {
+					is_subject_of = root
 				}
 			}
-			AND = {
-				custom_tooltip = {
-					text = reestablish_peru_goal_tt
-					has_variable = button_reestablish_peru_var
+			NOT = {
+				OR = {
+					state_region = s:STATE_GUAYANA
+					state_region = s:STATE_AMAZONAS
+					state_region = {
+						is_homeland = cu:brazilian
+					}
 				}
-				custom_tooltip = {
-					text = reestablish_la_plata_goal_tt
-					has_variable = button_reestablish_la_plata_var
+			}
+			count >= 20
+		}
+		hidden_trigger = {
+			NOT = {
+				any_state_in_latin_america = {
+					OR = {
+						owner = root
+						owner = {
+							is_subject_of = root
+						}
+					}
+					NOT = {
+						OR = {
+							state_region = s:STATE_GUAYANA
+							state_region = s:STATE_AMAZONAS
+							state_region = {
+								is_homeland = cu:brazilian
+							}
+						}
+					}
+					NOT = {
+						has_variable = HMPS_variable_state_has_gotten_reconquista_buff
+					}
 				}
 			}
 		}
@@ -69,6 +112,68 @@
 			}
 		}
 		custom_tooltip = je_reconquista_goal_tt
+	}
+	
+	on_monthly_pulse = {
+		effect = {
+			every_state_in_latin_america = {
+				limit = {
+					OR = {
+						owner = root
+						owner = {
+							is_subject_of = root
+						}
+					}
+					NOT = {
+						OR = {
+							state_region = s:STATE_GUAYANA
+							state_region = s:STATE_AMAZONAS
+							state_region = {
+								is_homeland = cu:brazilian
+							}
+						}
+					}
+					NOT = {
+						has_variable = HMPS_variable_state_has_gotten_reconquista_buff
+					}
+				}
+				if = {
+					limit = {
+						root = { has_law_or_variant = law_type:law_colonial_resettlement }
+					}
+					add_modifier = {
+						name = modifier_spanish_new_world_migration
+						years = 10
+						is_decaying = yes
+					}
+				}
+				else_if = {
+					limit = {
+						root = { has_law_or_variant = law_type:law_colonial_exploitation }
+					}
+					add_modifier = {
+						name = modifier_spanish_new_world_extractives
+						years = 10
+						is_decaying = yes
+					}
+				}
+				else = {
+					add_modifier = {
+						name = modifier_spanish_new_world_migration
+						years = 10
+						multiplier = 0.5
+						is_decaying = yes
+					}
+					add_modifier = {
+						name = modifier_spanish_new_world_extractives
+						years = 10
+						multiplier = 0.5
+						is_decaying = yes
+					}
+				}
+				set_variable = HMPS_variable_state_has_gotten_reconquista_buff
+			}
+		}
 	}
 
 
