@@ -1,0 +1,504 @@
+﻿je_army_reform_china = {
+	icon = "gfx/interface/icons/event_icons/bicorne_hat.dds"
+	
+	group = je_group_historical_content
+	
+	modifiers_while_active = {
+		modifier_bannermen_decadence
+	}
+
+	immediate = {
+		c:CHI ?= {
+			every_scope_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_OUTER_MANCHURIA
+						state_region = s:STATE_SOUTHERN_MANCHURIA
+						state_region = s:STATE_NORTHERN_MANCHURIA
+						state_region = s:STATE_SHENGJING
+					}
+				}
+				add_modifier = {
+					name = eight_banners
+					days = -1
+				}
+			}
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = china_army_reform_tt
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+		}
+	}
+
+	on_complete = {
+		remove_modifier = modifier_banner_system
+		add_modifier = {
+			name = modifier_new_army
+			is_decaying = yes
+			years = 10
+		}
+		custom_tooltip = {
+			text = china_army_reform_rename_tt
+			ig:ig_armed_forces = {
+				set_interest_group_name = ig_new_army
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = modifier_green_standard_army
+			}
+			remove_modifier = modifier_green_standard_army
+		}
+		every_state = {
+			limit = {
+                has_modifier = eight_banners
+            }
+			remove_modifier = eight_banners
+		}
+	}
+	
+	invalid = {
+		has_global_variable = china_shatters
+	}
+
+	current_value = {
+		value = global_var:china_army_reform
+	}
+
+	goal_add_value = {
+		value = 100
+	}
+	
+	progressbar = yes
+
+	on_weekly_pulse = {
+		effect = {
+			change_global_variable = {
+				name = china_army_reform
+				multiply = 0
+			}
+			### European Training
+			if = {
+				limit = {
+					has_global_variable = boxer_je_happened
+				}
+				change_global_variable = {
+					name = china_army_reform
+					add = 15
+				}
+			}
+			if = {
+				limit = {
+					has_global_variable = taiping_revolution_happened
+				}
+				change_global_variable = {
+					name = china_army_reform
+					add = 15
+				}
+			}
+
+			### Policing Tech
+
+			if = {
+				limit = {
+					has_technology_researched =  law_enforcement
+				}
+				change_global_variable = {
+					name = china_army_reform
+					add = 10
+				}
+			}
+
+			### Army Tech
+			if = {
+				limit = {
+					has_technology_researched = army_reserves
+				}
+				change_global_variable = {
+					name = china_army_reform
+					add = 20
+				}
+			}
+			if = {
+				limit = {
+					has_technology_researched = logistics
+				}
+				change_global_variable = {
+					name = china_army_reform
+					add = 20
+				}
+			}
+			if = {
+				limit = {
+					has_technology_researched = enlistment_offices
+				}
+				change_global_variable = {
+					name = china_army_reform
+					add = 20
+				}
+			}
+			if = {
+				limit = {
+					has_technology_researched = military_statistics
+				}
+				change_global_variable = {
+					name = china_army_reform
+					add = 20
+				}
+			}
+			if = {
+				limit = {
+					has_technology_researched = wargaming
+				}
+				change_global_variable = {
+					name = china_army_reform
+					add = 20
+				}
+			}
+			# No Peasant Levies = Army Reform progress
+			change_global_variable = {
+				name = china_army_reform
+				add = global_var:china_army_reform_tick
+			}
+		}
+	}
+	
+	on_yearly_pulse = {
+		effect = {
+			# No Peasant Leves = Army Reform progress
+			if = {
+				limit = {
+					NOT = { has_law_or_variant = law_type:law_peasant_levies }
+				}
+				change_global_variable = {
+					name = china_army_reform_tick
+					add = 1
+				}
+			}
+		}
+	}
+
+	weight = 10000
+	should_be_pinned_by_default_uninvolved_or_context = yes
+	
+	can_revolution_inherit = yes
+}
+
+je_chinese_industry = {
+	icon = "gfx/interface/icons/event_icons/event_industry.dds"
+	
+	group = je_group_historical_content
+	
+	complete = {
+		custom_tooltip = {
+			text = je_china_economic_success_tt
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+		}
+	}
+	
+	on_complete = {
+		remove_modifier = chinese_economic_stagnation
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			### Scaling by Railroads
+			
+			set_variable = {
+				name = railroad_effect
+				value = global_var:chinese_rail_expansion
+			}
+			
+			change_variable = {
+				name = railroad_effect
+				divide = -100
+			}
+			
+			change_variable = {
+				name = railroad_effect
+				add = 1
+			}
+			
+			remove_modifier = chinese_economic_stagnation
+			
+			add_modifier = {
+				name = chinese_economic_stagnation
+				multiplier = var:railroad_effect
+			}
+		}
+	}
+
+	current_value = {
+		value = global_var:chinese_rail_expansion
+	}
+
+	goal_add_value = {
+		value = 100
+	}
+
+	progressbar = yes
+
+	can_revolution_inherit = yes
+
+	weight = 5000
+	should_be_pinned_by_default_uninvolved_or_context = yes
+}
+
+je_chinese_agriculture = {
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+	
+	group = je_group_historical_content
+	
+	modifiers_while_active = {
+		modifier_china_subsistence_agri
+	}
+	
+	immediate = {
+		set_variable = { name = legitimist_progress_from_farms value = 0 }
+		
+		# initial assigning adjustments of the modifier for viewing
+		every_state = {
+			limit = {
+				c:CHI ?= owner
+				OR = {
+					state_region = { is_homeland = cu:han }
+					state_region = { is_homeland = cu:manchu }
+				}
+			}
+			add_modifier = {
+				name = modifier_agricultural_econ_agri_debuff
+				months = -1
+			}
+		}
+    }
+	
+	scripted_progress_bar = chinese_agriculture_progress_bar
+	
+	complete = {
+		custom_tooltip = {
+			text = chinese_agriculture_complete_tt
+			scope:journal_entry = {
+				"scripted_bar_progress(chinese_agriculture_progress_bar)" >= 100
+			}
+		}
+	}
+	
+	on_complete = {
+		every_state = {
+			limit = {
+				has_modifier = modifier_agricultural_econ_agri_debuff
+			}
+			remove_modifier = modifier_agricultural_econ_agri_debuff
+		}
+	}
+	
+	on_monthly_pulse = {
+		effect = {
+			# From Buildings
+			set_variable = { name = legitimist_progress_from_farms value = 0 }
+			every_scope_building = {
+				limit = {
+					is_building_group = bg_agriculture
+					NOT = {
+						is_building_group = bg_subsistence_agriculture
+					}
+					weekly_profit > 0
+				}
+				ROOT = {
+					change_variable = { name = legitimist_progress_from_farms add = prev.level }
+				}
+			}
+			change_variable = { name = legitimist_progress_from_farms divide = 400 }
+			
+			# Modifier Removal & Assignment
+			every_scope_state = {
+				limit = {
+					has_modifier = modifier_agricultural_econ_agri_debuff
+				}
+				remove_modifier = modifier_agricultural_econ_agri_debuff
+			}
+			# variable manipulation
+			je:je_chinese_agriculture = {
+				set_global_variable = {
+					name = agri_je_progress_var
+					value = "scripted_bar_progress(chinese_agriculture_progress_bar)"
+				}
+			}
+			change_global_variable = {
+				name = agri_je_progress_var
+				divide = -100
+			}
+			change_global_variable = {
+				name = agri_je_progress_var
+				add = 1
+			}
+			
+			# assigning adjustments of the modifier
+			every_scope_state = {
+				limit = {
+					any_scope_building = {
+						is_subsistence_building = yes
+						occupancy >= 0.95
+					}
+					NOT = { has_modifier = modifier_agricultural_econ_agri_debuff }
+				}
+				add_modifier = {
+					name = modifier_agricultural_econ_agri_debuff
+					months = 2
+					multiplier = global_var:agri_je_progress_var
+				}
+			}
+			set_variable = {
+				name = adjusted_agri_je_progress_var
+				value = global_var:agri_je_progress_var
+			}
+			change_variable = {
+				name = adjusted_agri_je_progress_var
+				multiply = 0.8
+			}
+			every_scope_state = {
+				limit = {
+					any_scope_building = {
+						is_subsistence_building = yes
+						occupancy >= 0.9
+					}
+					NOT = { has_modifier = modifier_agricultural_econ_agri_debuff }
+				}
+				add_modifier = {
+					name = modifier_agricultural_econ_agri_debuff
+					months = 2
+					multiplier = var:adjusted_agri_je_progress_var
+				}
+			}
+			set_variable = {
+				name = adjusted_agri_je_progress_var
+				value = global_var:agri_je_progress_var
+			}
+			change_variable = {
+				name = adjusted_agri_je_progress_var
+				multiply = 0.6
+			}
+			every_scope_state = {
+				limit = {
+					any_scope_building = {
+						is_subsistence_building = yes
+						occupancy >= 0.85
+					}
+					NOT = { has_modifier = modifier_agricultural_econ_agri_debuff }
+				}
+				add_modifier = {
+					name = modifier_agricultural_econ_agri_debuff
+					months = 2
+					multiplier = var:adjusted_agri_je_progress_var
+				}
+			}
+			set_variable = {
+				name = adjusted_agri_je_progress_var
+				value = global_var:agri_je_progress_var
+			}
+			change_variable = {
+				name = adjusted_agri_je_progress_var
+				multiply = 0.4
+			}
+			every_scope_state = {
+				limit = {
+					any_scope_building = {
+						is_subsistence_building = yes
+						occupancy >= 0.8
+					}
+					NOT = { has_modifier = modifier_agricultural_econ_agri_debuff }
+				}
+				add_modifier = {
+					name = modifier_agricultural_econ_agri_debuff
+					months = 2
+					multiplier = var:adjusted_agri_je_progress_var
+				}
+			}
+			set_variable = {
+				name = adjusted_agri_je_progress_var
+				value = global_var:agri_je_progress_var
+			}
+			change_variable = {
+				name = adjusted_agri_je_progress_var
+				multiply = 0.2
+			}
+			every_scope_state = {
+				limit = {
+					any_scope_building = {
+						is_subsistence_building = yes
+						occupancy >= 0.75
+					}
+					NOT = { has_modifier = modifier_agricultural_econ_agri_debuff }
+				}
+				add_modifier = {
+					name = modifier_agricultural_econ_agri_debuff
+					months = 2
+					multiplier = var:adjusted_agri_je_progress_var
+				}
+			}
+		}
+	}
+
+	can_revolution_inherit = yes
+
+	weight = 5000
+	should_be_pinned_by_default_uninvolved_or_context = yes
+}
+
+je_xinhai_revolution = {
+    icon = "gfx/interface/icons/event_icons/five_races_flag.dds"
+	
+	group = je_group_qing
+
+    is_shown_in_lobby = {
+        c:CHI ?= THIS
+    }
+	
+    is_shown_when_inactive = {
+        OR = {
+			AND = {
+				exists = c:CHI
+				THIS = c:CHI
+			}
+			AND = {
+				exists = c:TPG
+				THIS = c:TPG
+			}
+		}
+		hidden_trigger = {
+			NOT = { has_global_variable = xinhai_je_happened }
+		}
+		NOT = { has_law = law_type:law_presidential_republic }
+    }
+    possible = {
+		OR = {
+			cu:han.culture_current_fervor >= 60
+			has_technology_researched = pan-nationalism
+		}
+		hidden_trigger = {
+			NOT = { has_global_variable = xinhai_je_happened }
+		}
+    }
+    immediate = {
+		set_global_variable = xinhai_je_happened
+        trigger_event = { id = xinhai_revolution_events.1 } # Anti-Manchu Sentiment
+    }
+    complete = {
+		has_law = law_type:law_presidential_republic
+    }
+    on_complete = {
+    }
+    timeout = 1825
+    on_timeout = {
+        trigger_event = { id = xinhai_revolution_events.2 } # The Wuchan Uprising
+    }
+    weight = 1000
+    should_be_pinned_by_default_uninvolved_or_context = yes
+}
