@@ -1,0 +1,164 @@
+﻿hmps_revanchism_gain_claims = {
+	name = "hmps_revanchism_gain_claims_button"
+	desc = "hmps_revanchism_gain_claims_button_desc"
+
+	visible = { 
+		any_state = {
+			count >= 1
+			#limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_treaty_port = no
+				NOR = {
+					owner = ROOT
+					owner = {
+						OR = {
+							is_subject_of = ROOT
+							is_indirect_subject_of = ROOT
+						}
+					}
+				}
+				has_modifier = modifier_hmps_revanchism_target
+			#}
+		}
+	}
+
+	possible = {
+		any_state = {
+			count >= 1
+			#limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_treaty_port = no
+				NOR = {
+					owner = ROOT
+					owner = {
+						OR = {
+							is_subject_of = ROOT
+							is_indirect_subject_of = ROOT
+						}
+					}
+				}
+				has_modifier = modifier_hmps_revanchism_target
+				NOT = {
+					has_claim_by = ROOT
+				}
+			#}
+		}		
+	}
+
+	effect = {
+		every_state = {
+			limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_treaty_port = no
+				NOR = {
+					owner = ROOT
+					owner = {
+						OR = {
+							is_subject_of = ROOT
+							is_indirect_subject_of = ROOT
+						}
+					}
+				}
+				has_modifier = modifier_hmps_revanchism_target
+				NOT = {
+					has_claim_by = ROOT
+				}
+			}
+			add_claim = ROOT
+		}	
+	}
+}
+
+REPLACE:je_danubian_federation_north_italian_button = {
+	name = "je_danubian_federation_north_italian_button"
+	desc = "je_danubian_federation_north_italian_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:north_italian = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = danubian_federation_button_cooldown_tt
+			NOT = {
+				has_variable = danubian_federation_button_cooldown
+			}
+		}
+		OR = {
+			AND = {
+				average_sol_for_culture = { target = cu:north_italian value >= var:integrated_cultures_sol_requirement }
+				any_scope_state = { state_region = { is_homeland = cu:north_italian } }
+			}
+			any_subject_or_below = {
+				AND = {
+					average_sol_for_culture = { target = cu:north_italian value >= prev.var:integrated_cultures_sol_requirement }
+					any_scope_state = { state_region = { is_homeland = cu:north_italian } }
+				}
+			}
+		}
+		cu:north_italian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:north_italian ?= this } } } } }
+		cu:slovene = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:slovene ?= this } } } } }
+		cu:croat = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:croat ?= this } } } } }
+		cu:serb = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:serb ?= this } } } } }
+	}
+
+	effect = {
+		set_variable = danubian_federation_north_italian_button
+		every_state = { #Revanchism addition: ->
+			limit = {
+				OR = {
+					state_region = s:STATE_LOMBARDY
+					state_region = s:STATE_VENETIA
+				}
+			}
+			set_variable = hmps_state_cant_remove_revanchism
+		} #Revanchism addition: <-
+        add_radicals = {
+			culture = cu:hungarian
+			value = 0.1
+		}
+        add_radicals = {
+			culture = cu:south_german
+			value = 0.1
+		}
+        add_loyalists = {
+			culture = cu:north_italian
+			value = 0.1
+		}
+		cu:north_italian = {
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = {
+			name = danubian_federation_button_cooldown
+			days = 180
+		}
+		add_to_variable_list = { name = aus_integrated_cultures target = cu:north_italian }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		every_subject_or_below = {
+			every_scope_state = {
+				limit = {
+					state_region = { is_homeland = cu:north_italian }
+					owner = { is_player = no }
+				}
+				set_state_owner = root
+				set_state_type = incorporated
+			}
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
