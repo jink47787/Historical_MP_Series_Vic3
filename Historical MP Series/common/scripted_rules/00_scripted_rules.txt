@@ -1,4 +1,6 @@
-﻿# Root = War
+﻿### HMPS! only hmps changes are commenting out much of the requirements for unlock_power_bloc_principle_slot_3 and unlock_power_bloc_principle_slot_4
+### CTRL F SEARCH FOR HMPS
+# Root = War
 # scope:target_country = target of violate sovereignty
 violate_sovereignty_war_check_rule = {
 	violate_sovereignty_war_check = yes
@@ -27,6 +29,9 @@ is_weak_power_bloc = {
 # Checks if any diplomatic play is possible against the target country
 # Root = Country
 # scope:target_country = target of a diplomatic play
+# scope:region = strategic region of the initial war goal
+# scope:stakeholder = the stakeholder of the initial war goal, in case it's not the target country
+# scope:state = if the war goal is targeting a state, that. otherwise, empty
 can_start_diplomatic_plays_against = {
 	# Not allowed to attack subjects of play participants
 	NOT = {
@@ -59,7 +64,10 @@ can_start_diplomatic_plays_against = {
 	}
 
 	OR = {
-		highest_overlapping_interest_tier = { target = scope:target_country value >= interest_tier_effect_can_start_diplomatic_plays_min_tier }
+		has_strategic_region_interest_tier = {
+			strategic_region = scope:region
+			value >= interest_tier_effect_can_start_diplomatic_plays_min_tier
+		}
 		is_direct_subject_of = scope:target_country
 		scope:target_country = { is_direct_subject_of = root }
 	}	
@@ -75,6 +83,8 @@ can_start_diplomatic_plays_against = {
 # Root = Country
 # scope:target_country = country of the side to join to
 # scope:enemy_country = enemy country of target_country to which we could fight against
+# scope:initiator = country that started the play (i.e the attacker)
+# scope:region = strategic region of the initial war goal
 can_join_side_in_diplomatic_play = {
 	# Might be disallowed by power bloc
 	NOT = {
@@ -100,7 +110,32 @@ can_join_side_in_diplomatic_play = {
 	}
 
 	OR = {
-		highest_overlapping_interest_tier = { target = scope:target_country value >= interest_tier_effect_can_join_diplomatic_plays_min_tier }
+		has_strategic_region_interest_tier = {
+			strategic_region = scope:region
+			value >= interest_tier_effect_can_join_diplomatic_plays_min_tier
+		}
+		has_treaty_alliance_with = { TARGET = scope:target_country }
+		AND = {
+			has_treaty_defensive_pact_with = { TARGET = scope:target_country }
+			hidden_trigger = {
+				scope:target_country = {
+					scope:initiator != this
+				}
+			}
+		}
+		AND = {
+			scope:target_country = {
+				has_treaty_guarantee_independence_with = { TARGET = root }
+			}
+			hidden_trigger = {
+				scope:target_country = {
+					scope:initiator != this
+				}
+			}
+		}
+		scope:target_country = {
+			has_treaty_support_independence_with = { TARGET = root }
+		}
 		is_direct_subject_of = scope:enemy_country
 		scope:enemy_country = { is_direct_subject_of = root }
 		is_direct_subject_of = scope:target_country
@@ -131,7 +166,7 @@ unlock_power_bloc_principle_slot_3 = {
 	hidden_trigger = {
 		has_dlc_feature = power_bloc_features
 	}
-	#OR = {
+	#OR = { #HMPS
 	#	hidden_trigger = {
 	#		used_principle_slots >= 3
 	#	}
@@ -147,7 +182,7 @@ unlock_power_bloc_principle_slot_4 = {
 	hidden_trigger = {
 		has_dlc_feature = power_bloc_features
 	}
-	#OR = {
+	#OR = { #HMPS
 	#	hidden_trigger = {
 	#		used_principle_slots = 4
 	#	}
@@ -167,11 +202,11 @@ unlock_power_bloc_formation_principle_slot_2 = {
 }
 
 unlock_power_bloc_formation_principle_slot_3 = {
-	has_dlc_feature = power_bloc_features
+	always = no
 }
 
 unlock_power_bloc_formation_principle_slot_4 = {
-	has_dlc_feature = power_bloc_features
+	always = no
 }
 
 
@@ -181,14 +216,11 @@ unlock_power_bloc_formation_principle_slot_4 = {
 can_sign_treaty_with = {
 	scope:other_country = {
 		NOT = { is_country_type = decentralized }
-					   
 	}
 	root = {
 		NOT = { is_diplomatic_play_enemy_of = scope:other_country }
 	}
 
-	# TODO PRCAL-41248: Add a new and properly localized trigger
-	#has_diplomatic_relevance = scope:other_country
 	OR = {
 		has_strategic_adjacency = scope:other_country
 		AND = {
