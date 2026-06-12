@@ -1,13 +1,37 @@
-﻿on_monthly_pulse_country = {
+﻿on_game_started = {
+	on_actions = {
+		HMPS_handle_research_effort_game_start
+	}
+}
+on_monthly_pulse_country = {
 	on_actions = {
 		HMPS_handle_research_effort
+	}
+}
+HMPS_handle_research_effort_game_start = {
+	effect = {
+		every_country = {
+			set_variable = {
+				name = current_innovation_from_research_effort
+				value = 0
+			}
+			trigger_event = {
+				on_action = HMPS_handle_research_effort
+				#days/months/years = X  	# Optional
+			}
+			trigger_event = {
+				on_action = HMPS_handle_research_effort
+				days = 1
+			}
+		}
 	}
 }
 
 HMPS_handle_research_effort = { #Country Scope
 	effect = {
+		###### IMPORTANT CODE FOR APPLYING MODIFIER
 		set_variable = {
-			name = incorporated_population
+			name = incorporated_population_based_scaler
 			value = 0
 		}
 		every_scope_state = {
@@ -16,11 +40,53 @@ HMPS_handle_research_effort = { #Country Scope
 			}
 			ROOT = {
 				change_variable = {
-					name = incorporated_population
+					name = incorporated_population_based_scaler
 					add = PREV.state_population
 				}
 			}
 		}
+		set_variable = {
+			name = incorporated_population
+			value = var:incorporated_population_based_scaler
+		}
+		change_variable = {
+			name = incorporated_population_based_scaler
+			divide = 1000000
+		}
+		change_variable = {
+			name = incorporated_population_based_scaler
+			add = 5
+		}
+		### HOW MUCH NEEDED TO REACH CAP, this code bellow is important for loc
+		set_variable = {
+			name = flat_inno_needed_from_effort
+			value = {
+				add = modifier:country_weekly_innovation_max_add
+				divide = {
+					value = 1
+					add = modifier:country_weekly_innovation_mult #this is because we care about when flat reaches the cap, additionally note that there is no country_weekly_innovation_MAX_mult so we dont need to care about that
+				}
+				subtract = modifier:country_weekly_innovation_add
+				add = var:current_innovation_from_research_effort
+			}
+		}
+		set_variable = {
+			name = effort_needed_to_reach_inno_cap
+			value = {
+				add = var:flat_inno_needed_from_effort
+				divide = 10
+				add = 1
+				multiply = var:flat_inno_needed_from_effort
+				divide = 10
+				divide = 2
+				multiply = var:incorporated_population_based_scaler
+			}
+		}
+		set_variable = {
+			name = monthly_cached_country_research_effort_add
+			value = modifier:country_research_effort_add
+		}
+		###### IMPORTANT CODE FOR APPLYING MODIFIER
 	
 		set_variable = {
 			name = scaled_effort
@@ -28,14 +94,11 @@ HMPS_handle_research_effort = { #Country Scope
 		} 
 		change_variable = {
 			name = scaled_effort
-			multiply = 2000000#x1000000 for the per million part, x2 for hocus pocus triangle numbers formula
+			multiply = 2# x2 for hocus pocus triangle numbers formula
 		}
 		change_variable = {
 			name = scaled_effort
-			divide = { 
-				value = var:incorporated_population
-				add = 5000000
-			}
+			divide = var:incorporated_population_based_scaler
 		}
 		change_variable = {
 			name = scaled_effort
@@ -44,59 +107,59 @@ HMPS_handle_research_effort = { #Country Scope
 	
 		if = {
 			limit = { var:scaled_effort < 1 }
-			set_variable = { name = current_guess value = 0.32 }
+			set_variable = { name = current_innovation_from_research_effort value = 0.32 }
 		}
 		else_if = {
 			limit = { var:scaled_effort < 100 }
-			set_variable = { name = current_guess value = 3.2 }
+			set_variable = { name = current_innovation_from_research_effort value = 3.2 }
 		}
 		else_if = {
 			limit = { var:scaled_effort < 10000 }
-			set_variable = { name = current_guess value = 32 }
+			set_variable = { name = current_innovation_from_research_effort value = 32 }
 		}
 		else_if = {
 			limit = { var:scaled_effort < 1000000 }
-			set_variable = { name = current_guess value = 320 }
+			set_variable = { name = current_innovation_from_research_effort value = 320 }
 		}
 		else = {
-			set_variable = { name = current_guess value = 3200 }
+			set_variable = { name = current_innovation_from_research_effort value = 3200 }
 		}
 	
 		### Newton itterations to find square root
 		change_variable = {
-			name = current_guess
+			name = current_innovation_from_research_effort
 			add = {
 				value = var:scaled_effort
-				divide = var:current_guess
+				divide = var:current_innovation_from_research_effort
 			}
 		}
-		change_variable = { name = current_guess divide = 2 }
+		change_variable = { name = current_innovation_from_research_effort divide = 2 }
 		change_variable = {
-			name = current_guess
+			name = current_innovation_from_research_effort
 			add = {
 				value = var:scaled_effort
-				divide = var:current_guess
+				divide = var:current_innovation_from_research_effort
 			}
 		}
-		change_variable = { name = current_guess divide = 2 }
+		change_variable = { name = current_innovation_from_research_effort divide = 2 }
 		change_variable = {
-			name = current_guess
+			name = current_innovation_from_research_effort
 			add = {
 				value = var:scaled_effort
-				divide = var:current_guess
+				divide = var:current_innovation_from_research_effort
 			}
 		}
-		change_variable = { name = current_guess divide = 2 }
+		change_variable = { name = current_innovation_from_research_effort divide = 2 }
 		change_variable = {
-			name = current_guess
+			name = current_innovation_from_research_effort
 			add = {
 				value = var:scaled_effort
-				divide = var:current_guess
+				divide = var:current_innovation_from_research_effort
 			}
 		}
-		change_variable = { name = current_guess divide = 2 }
-		change_variable = { name = current_guess subtract = 0.5 }
-		change_variable = { name = current_guess multiply = 10 }
+		change_variable = { name = current_innovation_from_research_effort divide = 2 }
+		change_variable = { name = current_innovation_from_research_effort subtract = 0.5 }
+		change_variable = { name = current_innovation_from_research_effort multiply = 10 }
 		if = {
 			limit = {
 				has_modifier = modifier_country_innovation_from_research_effort
@@ -105,7 +168,17 @@ HMPS_handle_research_effort = { #Country Scope
 		}
 		add_modifier = {
 			name = modifier_country_innovation_from_research_effort
-			multiplier = var:current_guess
+			multiplier = var:current_innovation_from_research_effort
 		}	
+		### NEEDED FOR LOC
+		set_variable = {
+			name = monthly_cached_immediate_derivative_dresearch_effort_per_dinnovation #how much effort required to produce 1 extra innovation
+			value = { #population_modifier*(current_inno/10 + 1/2)/10
+				add = var:current_innovation_from_research_effort
+				divide = 100
+				add = 0.05
+				multiply = var:incorporated_population_based_scaler
+			}
+		}
 	}
 }
