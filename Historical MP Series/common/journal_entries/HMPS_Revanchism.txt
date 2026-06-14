@@ -1,0 +1,2259 @@
+﻿je_hmps_revanchism_generic = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	#scripted_button = hmps_revanchism_gain_claims
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				OR = {
+					country_rank >= rank_value:minor_power
+					country_rank = rank_value:unrecognized_regional_power
+				}
+			}
+		}
+	}
+	
+	possible = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+			AND = {
+				is_country_type = unrecognized
+				country_rank > insignificant_power
+				is_subject = yes
+			}
+		}
+		NOR = {
+			c:DEI ?= THIS
+			c:BIC ?= THIS
+			c:PRU ?= THIS
+			c:NGF ?= THIS
+			c:GER ?= THIS
+			c:AUS ?= THIS
+			c:KUK ?= THIS
+			c:TUR ?= THIS
+			c:CHI ?= THIS
+			c:TPG ?= THIS
+		}
+		NOR = {
+			is_subject_type = subject_type_chartered_company
+			is_country_type = company
+		}
+	}
+
+	immediate = {
+		ROOT = {
+			set_variable = { #HMPS: Creates max state value
+				name = max_revanchism_states
+				value = 0
+			}
+			set_variable = { #HMPS: Creates current state value
+				name = current_revanchism_states
+				value = 0
+			}
+			set_variable = { #HMPS: Creates percent of homeland states occupied value
+				name = revanchism_states_percent
+				value = 0
+			}
+		}
+		#HMPS: we have to account for the part that each 'split' of a state adds up, so if a state was split 4 ways, it would add to the value 4 times.
+		every_state = { #HMPS: Counts/adds up non-split states with homelands of countries primary culture(s)
+			limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_split_state = no
+			}
+			ROOT = {
+				change_variable = {
+					name = max_revanchism_states
+					add = 1
+				}
+			}
+		}
+		every_state = { #HMPS: Counts/adds up split states with homelands of countries primary culture(s)
+			limit = {
+				is_homeland_of_country_cultures = ROOT
+				is_split_state = yes
+			}
+			ROOT = {
+				change_variable = {
+					name = max_revanchism_states
+					add = 0.5
+				}
+			}
+		}
+		every_state = {
+			limit = {
+				state_region = s:STATE_ALSACE_LORRAINE
+				NOT = {
+					has_variable = hmps_state_cant_remove_revanchism
+				}
+			}
+			set_variable = hmps_state_cant_remove_revanchism
+		}
+	}
+
+	invalid = {
+		OR = { #HMPS: add any new unique revanchism JEs that replace generic one here
+			has_journal_entry = je_hmps_revanchism_ottoman
+			has_journal_entry = je_hmps_revanchism_germany
+			has_journal_entry = je_hmps_revanchism_austria
+		}
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					NOT = {
+						ROOT = {
+							has_variable = hmps_cant_remove_revanchism_targets
+						}
+					}
+				}
+				every_state = {
+					limit = { #HMPS: Removes revanchism target modifier from states you own that are your homeland, or overlords homeland if a subject
+						is_homeland_of_country_cultures = ROOT
+						has_modifier = modifier_hmps_revanchism_target
+						NOT = { #HMPS: This must be applied to all JE variants for revanchism
+							has_variable = hmps_state_cant_remove_revanchism
+						}
+						OR = {
+							owner = ROOT
+							owner = {
+								OR = {
+									is_subject_of = ROOT
+									is_indirect_subject_of = ROOT
+								}
+							}
+						}
+					}
+					remove_modifier = modifier_hmps_revanchism_target
+				}
+			}
+			ROOT = { #HMPS: Resets the max homeland state value before recalculating it
+				change_variable = {
+					name = max_revanchism_states
+					multiply = 0
+				}
+			}
+			every_state = { #HMPS: Recalculated current total homeland states as this can change for some nations
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					is_split_state = no
+				}
+				ROOT = {
+					change_variable = {
+						name = max_revanchism_states
+						add = 1
+					}
+				}
+			}
+			every_state = {
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					is_split_state = yes
+				}
+				ROOT = {
+					change_variable = {
+						name = max_revanchism_states
+						add = 0.5
+					}
+				}
+			}
+			ROOT = { #HMPS: Resets current revanchism states value so it isnt increasing forever
+				change_variable = {
+					name = current_revanchism_states
+					multiply = 0
+				}
+			}
+			every_state = { #HMPS: Counts up states that are current revanchism targets for the country
+				limit = {
+					is_homeland_of_country_cultures = ROOT
+					is_treaty_port = no
+					NOR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = current_revanchism_states
+						add = 1
+					}
+				}
+			}
+			ROOT = { #HMPS: Resets the percent of revanchism target states to total homeland states
+				change_variable = {
+					name = revanchism_states_percent
+					multiply = 0
+				}					
+				change_variable = { #HMPS: Calculated the percentage of revanchism target states to total homeland states to scale the modifier(s) gained from revanchism
+					name = revanchism_states_percent
+					add = ROOT.var:current_revanchism_states
+				}
+				change_variable = {
+					name = revanchism_states_percent
+					divide = ROOT.var:max_revanchism_states
+				}
+			}
+			ROOT = { #HMPS: Removes revanchism modifiers before re-applying them so it doesn't stack up multiple times
+				remove_modifier = modifier_hmps_revanchism_0
+				remove_modifier = modifier_hmps_revanchism_10
+				remove_modifier = modifier_hmps_revanchism_25
+				remove_modifier = modifier_hmps_revanchism_50
+				remove_modifier = modifier_hmps_revanchism_subject_0
+				remove_modifier = modifier_hmps_revanchism_subject_10
+				remove_modifier = modifier_hmps_revanchism_subject_25
+				remove_modifier = modifier_hmps_revanchism_subject_50
+			}
+			#Threashold levels/percents to be heavily looked at to make sure they are balanced
+			if = { #HMPS: Checks if you have reached a certain revanchism threashold and applies a modifiers for that level.
+				limit = {
+					ROOT.var:revanchism_states_percent > 0
+					ROOT.var:revanchism_states_percent < 0.10
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_0
+							multiplier = ROOT.var:revanchism_states_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_0
+							multiplier = ROOT.var:revanchism_states_percent
+						}
+					}
+				}
+			}				
+			if = {
+				limit = {
+					ROOT.var:revanchism_states_percent >= 0.10
+					ROOT.var:revanchism_states_percent < 0.25
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_10
+							multiplier = ROOT.var:revanchism_states_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_10
+							multiplier = ROOT.var:revanchism_states_percent
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_states_percent >= 0.25
+					ROOT.var:revanchism_states_percent < 0.50
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_25
+							multiplier = ROOT.var:revanchism_states_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_25
+							multiplier = ROOT.var:revanchism_states_percent
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_states_percent >= 0.50
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_50
+							multiplier = ROOT.var:revanchism_states_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_50
+							multiplier = ROOT.var:revanchism_states_percent
+						}
+					}
+				}
+			}
+		}
+	}			
+}
+
+je_hmps_revanchism_rus_buffer_states = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		c:RUS ?= THIS
+	}
+	
+	possible = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		c:RUS ?= THIS
+	}
+
+	immediate = {
+		ROOT = {
+			#HMPS: Max state values for the three regions are set at
+			#Baltics: 6
+			#Poland: 3
+			#Ukraine-Belarus: 13
+			set_variable = {
+				name = current_baltic_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = current_poland_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = current_ukraine_belarus_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = revanchism_baltic_percent
+				value = 0
+			}
+			set_variable = {
+				name = revanchism_poland_percent
+				value = 0
+			}
+			set_variable = {
+				name = revanchism_ukraine_belarus_percent
+				value = 0
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					OR = {
+						is_in_geographic_region = geographic_region_rus_baltics
+						is_in_geographic_region = geographic_region_rus_poland_belarus
+						is_in_geographic_region = geographic_region_rus_ukraine
+					}
+					OR = {
+						owner = c:RUS
+						owner = {
+							is_subject_of = c:RUS
+							is_indirect_subject_of = c:RUS
+						}
+					}
+					NOT = {
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = current_baltic_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_rus_baltics = {
+				limit = {
+					NOR = {
+						owner = c:RUS
+						owner = {
+							OR = {
+								is_subject_of = c:RUS
+								is_indirect_subject_of = c:RUS
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = current_baltic_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = current_poland_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_rus_poland = {
+				limit = {
+					NOR = {
+						owner = c:RUS
+						owner = {
+							OR = {
+								is_subject_of = c:RUS
+								is_indirect_subject_of = c:RUS
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = current_poland_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = current_ukraine_belarus_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_rus_ukraine_belarus = {
+				limit = {
+					NOR = {
+						owner = c:RUS
+						owner = {
+							OR = {
+								is_subject_of = c:RUS
+								is_indirect_subject_of = c:RUS
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = current_ukraine_belarus_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = revanchism_baltic_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = revanchism_baltic_percent
+					add = ROOT.var:current_baltic_revanchism
+				}
+				change_variable = {
+					name = revanchism_baltic_percent
+					divide = 6
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = revanchism_poland_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = revanchism_poland_percent
+					add = ROOT.var:current_poland_revanchism
+				}
+				change_variable = {
+					name = revanchism_poland_percent
+					divide = 3
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = revanchism_ukraine_belarus_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = revanchism_ukraine_belarus_percent
+					add = ROOT.var:current_ukraine_belarus_revanchism
+				}
+				change_variable = {
+					name = revanchism_ukraine_belarus_percent
+					divide = 13
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_rus_baltic_revanchism
+				remove_modifier = modifier_hmps_rus_poland_revanchism
+				remove_modifier = modifier_hmps_rus_ukraine_belarus_revanchism
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_baltic_percent > 0
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_rus_baltic_revanchism
+						multiplier = ROOT.var:revanchism_baltic_percent
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_poland_percent > 0
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_rus_poland_revanchism
+						multiplier = ROOT.var:revanchism_poland_percent
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:revanchism_ukraine_belarus_percent > 0
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_rus_ukraine_belarus_revanchism
+						multiplier = ROOT.var:revanchism_ukraine_belarus_percent
+					}
+				}
+			}
+		}
+	}
+}
+
+je_hmps_revanchism_ottoman = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	#scripted_button = hmps_ottoman_revanchism_gain_claims
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		c:TUR ?= THIS
+	}
+	
+	possible = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		c:TUR ?= THIS
+	}
+
+	immediate = {
+		c:GRE = {
+			set_variable = {
+				name = hmps_cant_remove_revanchism_targets
+				years = 44
+			}
+		}			
+		every_state = {
+			limit = {
+				is_in_geographic_region = geographic_region_greater_ottoman
+				OR = {
+					owner = c:TUR
+					owner = {
+						is_subject_of = c:TUR
+					}
+				}
+				NOR = {
+					owner = c:EGY
+					owner = c:GRE
+				}
+			}
+			set_variable = revanchism_otto_owned
+		}
+		every_state = {
+			limit = {
+				is_in_geographic_region = geographic_region_greater_ottoman
+				NOT = {
+					state_region = s:STATE_YEMEN
+				}
+				OR = {
+					owner = c:GRE
+					owner = c:EGY
+					owner = {
+						OR = {
+							is_subject_of = c:EGY
+							is_indirect_subject_of = c:EGY
+						}
+					}
+				}
+			}
+			set_variable = revanchism_otto_owned
+			add_modifier = {
+				name = modifier_hmps_revanchism_target
+				years = 44
+			}
+		}
+		every_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_BUKOVINA
+					state_region = s:STATE_NORTHERN_TRANSYLVANIA
+					state_region = s:STATE_SOUTHERN_TRANSYLVANIA
+					state_region = s:STATE_BANAT
+					state_region = s:STATE_DELVIDEK
+					state_region = s:STATE_DALMATIA
+					state_region = s:STATE_CROATIA
+					state_region = s:STATE_SLAVONIA
+					state_region = s:STATE_BESSARABIA
+					state_region = s:STATE_GREATER_CAUCASUS
+					state_region = s:STATE_AZERBAIJAN
+					state_region = s:STATE_ELIZAVETPOL
+					state_region = s:STATE_PERSIAN_KURDISTAN
+					state_region = s:STATE_URMIA
+					state_region = s:STATE_TABRIZ
+					state_region = s:STATE_ARMENIA
+				}
+			}
+			set_variable = otto_state_locked
+		}
+		ROOT = {
+			set_variable = {
+				name = ottoman_current_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = ottoman_revanchism_percent
+				value = 0
+			}
+			set_variable = {
+				name = ottoman_max_states
+				value = 0
+			}
+		}
+		every_state_in_greater_ottoman = {
+			limit = {
+				has_variable = revanchism_otto_owned
+				is_split_state = no
+			}
+			ROOT = {
+				change_variable = {
+					name = ottoman_max_states
+					add = 1
+				}
+			}
+		}
+		every_state_in_greater_ottoman = {
+			limit = {
+				has_variable = revanchism_otto_owned
+				is_split_state = yes
+			}
+			ROOT = {
+				change_variable = {
+					name = ottoman_max_states
+					add = 0.5
+				}
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					is_in_geographic_region = geographic_region_greater_ottoman
+					OR = {
+						owner = c:TUR
+						owner = {
+							OR = {
+								is_subject_of = c:TUR
+								is_indirect_subject_of = c:TUR
+							}
+						}
+					}
+					NOR = {
+						owner = c:EGY
+						owner = {
+							OR = {
+								is_subject_of = c:EGY
+								is_indirect_subject_of = c:EGY
+							}
+						}
+					}
+					NOT = {
+						has_variable = revanchism_otto_owned
+						has_variable = otto_state_locked
+					}
+				}
+				set_variable = revanchism_otto_owned
+			}
+			every_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_BUKOVINA
+						state_region = s:STATE_NORTHERN_TRANSYLVANIA
+						state_region = s:STATE_SOUTHERN_TRANSYLVANIA
+						state_region = s:STATE_BANAT
+						state_region = s:STATE_DELVIDEK
+						state_region = s:STATE_DALMATIA
+						state_region = s:STATE_CROATIA
+						state_region = s:STATE_SLAVONIA
+						state_region = s:STATE_BESSARABIA
+						state_region = s:STATE_GREATER_CAUCASUS
+						state_region = s:STATE_AZERBAIJAN
+						state_region = s:STATE_ELIZAVETPOL
+						state_region = s:STATE_PERSIAN_KURDISTAN
+						state_region = s:STATE_URMIA
+						state_region = s:STATE_TABRIZ
+						state_region = s:STATE_ARMENIA
+					}
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_variable = revanchism_otto_owned
+					NOT = {
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+				}
+				set_variable = hmps_state_cant_remove_revanchism
+			}
+			every_state = {
+				limit = {
+					is_in_geographic_region = geographic_region_greater_ottoman
+					OR = {
+						owner = c:TUR
+						owner = {
+							OR = {
+								is_subject_of = c:TUR
+								is_indirect_subject_of = c:TUR
+							}
+						}
+					}
+					NOR = {
+						owner = c:EGY
+						owner = {
+							OR = {
+								is_subject_of = c:EGY
+								is_indirect_subject_of = c:EGY
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+					has_variable = revanchism_otto_owned
+					NOT = {
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = ottoman_max_states
+					multiply = 0
+				}
+			}
+			every_state_in_greater_ottoman = {
+				limit = {
+					has_variable = revanchism_otto_owned
+					is_split_state = no
+				}
+				ROOT = {
+					change_variable = {
+						name = ottoman_max_states
+						add = 1
+					}
+				}
+			}
+			every_state_in_greater_ottoman = {
+				limit = {
+					has_variable = revanchism_otto_owned
+					is_split_state = yes
+				}
+				ROOT = {
+					change_variable = {
+						name = ottoman_max_states
+						add = 0.5
+					}
+				}
+			}			
+			ROOT = {
+				change_variable = {
+					name = ottoman_current_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_greater_ottoman = {
+				limit = {
+					OR = {
+						NOR = {
+							owner = c:TUR
+							owner = {
+								OR = {
+									is_subject_of = c:TUR
+									is_indirect_subject_of = c:TUR
+								}
+							}
+						}
+						OR = {
+							owner = c:EGY
+							owner = {
+								OR = {
+									is_subject_of = c:EGY
+									is_indirect_subject_of = c:EGY
+								}
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+					has_variable = revanchism_otto_owned
+				}
+				ROOT = {
+					change_variable = {
+						name = ottoman_current_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = ottoman_revanchism_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = ottoman_revanchism_percent
+					add = ROOT.var:ottoman_current_revanchism
+				}
+				change_variable = {
+					name = ottoman_revanchism_percent
+					divide = ROOT.var:ottoman_max_states
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_revanchism_0
+				remove_modifier = modifier_hmps_revanchism_10
+				remove_modifier = modifier_hmps_revanchism_25
+				remove_modifier = modifier_hmps_revanchism_50
+				remove_modifier = modifier_hmps_revanchism_subject_0
+				remove_modifier = modifier_hmps_revanchism_subject_10
+				remove_modifier = modifier_hmps_revanchism_subject_25
+				remove_modifier = modifier_hmps_revanchism_subject_50
+			}
+			#Threashold levels/percents to be heavily looked at to make sure they are balanced
+			if = { #HMPS: Checks if you have reached a certain revanchism threashold and applies a modifiers for that level.
+				limit = {
+					ROOT.var:ottoman_revanchism_percent > 0
+					ROOT.var:ottoman_revanchism_percent < 0.10
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_0
+							multiplier = ROOT.var:ottoman_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_0
+							multiplier = ROOT.var:ottoman_revanchism_percent
+						}
+					}
+				}
+			}				
+			if = {
+				limit = {
+					ROOT.var:ottoman_revanchism_percent >= 0.10
+					ROOT.var:ottoman_revanchism_percent < 0.25
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_10
+							multiplier = ROOT.var:ottoman_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_10
+							multiplier = ROOT.var:ottoman_revanchism_percent
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:ottoman_revanchism_percent >= 0.25
+					ROOT.var:ottoman_revanchism_percent < 0.50
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_25
+							multiplier = ROOT.var:ottoman_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_25
+							multiplier = ROOT.var:ottoman_revanchism_percent
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:ottoman_revanchism_percent >= 0.50
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_50
+							multiplier = ROOT.var:ottoman_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_50
+							multiplier = ROOT.var:ottoman_revanchism_percent
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+je_hmps_revanchism_spa_colonies = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:SPA ?= THIS
+			c:IBE ?= THIS
+		}
+	}
+	
+	possible = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:SPA ?= THIS
+			c:IBE ?= THIS
+		}
+		OR = {
+			any_subject_or_below = {
+				capital = {
+					is_in_geographic_region = geographic_region_spa_colonies
+				}
+			}
+			any_state = {
+				count = 3
+				is_in_geographic_region = geographic_region_spa_colonies
+				owner = ROOT
+			}
+		}
+	}
+
+	immediate = {
+		ROOT = {
+			set_variable = {
+				name = spa_colony_current_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = spa_colony_revanchism_percent
+				value = 0
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					is_in_geographic_region = geographic_region_spa_colonies
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					NOT = {
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = spa_colony_current_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_spa_colonies = {
+				limit = {
+					NOR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = spa_colony_current_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = spa_colony_revanchism_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = spa_colony_revanchism_percent
+					add = ROOT.var:spa_colony_current_revanchism
+				}
+				change_variable = {
+					name = spa_colony_revanchism_percent
+					divide = 7
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_spa_colony_revanchism
+			}
+			if = {
+				limit = {
+					ROOT.var:spa_colony_revanchism_percent > 0
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_spa_colony_revanchism
+						multiplier = ROOT.var:spa_colony_revanchism_percent
+					}
+				}
+			}
+		}
+	}
+}
+
+je_hmps_revanchism_jap_korea = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		c:JAP ?= THIS
+	}
+	
+	possible = {
+		c:JAP ?= THIS
+		any_state_in_jap_korea = {
+			count = all
+			OR = {
+				owner = c:JAP
+				owner = {
+					OR = {
+						is_subject_of = c:JAP
+						is_indirect_subject_of = c:JAP
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		ROOT = {
+			set_variable = {
+				name = jap_korea_current_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = jap_korea_revanchism_percent
+				value = 0
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					is_in_geographic_region = geographic_region_jap_korea
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					NOT = {
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = jap_korea_current_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_jap_korea = {
+				limit = {
+					NOR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = jap_korea_current_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = jap_korea_revanchism_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = jap_korea_revanchism_percent
+					add = ROOT.var:jap_korea_current_revanchism
+				}
+				change_variable = {
+					name = jap_korea_revanchism_percent
+					divide = 5
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_jap_korea_revanchism
+			}
+			if = {
+				limit = {
+					ROOT.var:jap_korea_revanchism_percent > 0
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_jap_korea_revanchism
+						multiplier = ROOT.var:jap_korea_revanchism_percent
+					}
+				}
+			}
+		}
+	}
+}
+
+je_hmps_revanchism_lowland_indonesia = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:NET ?= THIS
+			#c:BEL ?= THIS
+			c:UNL ?= THIS
+		}
+	}
+	
+	possible = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:NET ?= THIS
+			#c:BEL ?= THIS
+			c:UNL ?= THIS
+		}
+		OR = {
+			any_subject_or_below = {
+				capital = {
+					is_in_geographic_region = geographic_region_lowland_indonesia
+				}
+			}
+			any_state_in_lowland_indonesia = {
+				count = 3
+				owner = ROOT
+			}
+		}
+	}
+
+	immediate = {
+		ROOT = {
+			set_variable = {
+				name = lowland_indonesia_current_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = lowland_indonesia_revanchism_percent
+				value = 0
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					is_in_geographic_region = geographic_region_lowland_indonesia
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					NOT = {
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = lowland_indonesia_current_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_lowland_indonesia = {
+				limit = {
+					NOR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = lowland_indonesia_current_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = lowland_indonesia_revanchism_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = lowland_indonesia_revanchism_percent
+					add = ROOT.var:lowland_indonesia_current_revanchism
+				}
+				change_variable = {
+					name = lowland_indonesia_revanchism_percent
+					divide = 12
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_lowland_indonesia_revanchism
+			}
+			if = {
+				limit = {
+					ROOT.var:lowland_indonesia_revanchism_percent > 0
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_lowland_indonesia_revanchism
+						multiplier = ROOT.var:lowland_indonesia_revanchism_percent
+					}
+				}
+			}
+		}
+	}
+}
+
+je_hmps_revanchism_usa_ne = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:USA ?= THIS
+			c:CSA ?= THIS
+		}
+	}
+	
+	possible = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:USA ?= THIS
+			c:CSA ?= THIS
+		}
+		any_state = {
+			OR = {
+				is_in_geographic_region = geographic_region_usa_sne
+				is_in_geographic_region = geographic_region_usa_nne
+				is_in_geographic_region = geographic_region_usa_gm
+			}
+			owner = ROOT
+			is_incorporated = yes
+		}
+	}
+
+	immediate = {
+		ROOT = {
+			set_variable = {
+				name = usa_ne_current_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = usa_ne_revanchism_percent
+				value = 0
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					OR = {
+						is_in_geographic_region = geographic_region_usa_sne
+						is_in_geographic_region = geographic_region_usa_nne
+						is_in_geographic_region = geographic_region_usa_gm
+					}
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					NOT = {
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = usa_ne_current_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_usa_sne = {
+				limit = {
+					NOR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = usa_ne_current_revanchism
+						add = 1
+					}
+				}
+			}
+			if = {
+				limit = {
+					any_state_in_usa_nne = {
+						count >= 1
+						NOR = {
+							owner = ROOT
+							owner = {
+								OR = {
+									is_subject_of = ROOT
+									is_indirect_subject_of = ROOT
+								}
+							}
+						}
+						has_modifier = modifier_hmps_revanchism_target
+					}
+				}
+				ROOT = {
+					change_variable = {
+						name = usa_ne_current_revanchism
+						add = 1
+					}
+				}
+			}
+			if = {
+				limit = {
+					any_state_in_usa_gm = {
+						count >= 1
+						NOR = {
+							owner = ROOT
+							owner = {
+								OR = {
+						 			is_subject_of = ROOT
+									is_indirect_subject_of = ROOT
+								}
+							}
+						}
+						has_modifier = modifier_hmps_revanchism_target
+					}
+				}
+				ROOT = {
+					change_variable = {
+						name = usa_ne_current_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = usa_ne_revanchism_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = usa_ne_revanchism_percent
+					add = ROOT.var:usa_ne_current_revanchism
+				}
+				change_variable = {
+					name = usa_ne_revanchism_percent
+					divide = 5
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_usa_ne_revanchism
+			}
+			if = {
+				limit = {
+					ROOT.var:usa_ne_revanchism_percent > 0
+				}
+				ROOT = {
+					add_modifier = {
+						name = modifier_hmps_usa_ne_revanchism
+						multiplier = ROOT.var:usa_ne_revanchism_percent
+					}
+				}
+			}
+		}
+	}
+}
+
+je_hmps_revanchism_germany = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	#scripted_button = hmps_germany_revanchism_gain_claims
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:PRU ?= THIS
+			c:NGF ?= THIS
+			c:GER ?= THIS
+		}
+	}
+	
+	possible = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:PRU ?= THIS
+			c:NGF ?= THIS
+			c:GER ?= THIS
+		}
+	}
+
+	immediate = {
+		ROOT = {
+			set_variable = {
+				name = germany_current_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = germany_revanchism_percent
+				value = 0
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					is_in_geographic_region = geographic_region_revanchism_germany
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					NOT = {
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = germany_current_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_revanchism_germany = {
+				limit = {
+					NOR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+				}
+				ROOT = {
+					change_variable = {
+						name = germany_current_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = germany_revanchism_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = germany_revanchism_percent
+					add = ROOT.var:germany_current_revanchism
+				}
+				change_variable = {
+					name = germany_revanchism_percent
+					divide = 24
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_revanchism_0
+				remove_modifier = modifier_hmps_revanchism_10
+				remove_modifier = modifier_hmps_revanchism_25
+				remove_modifier = modifier_hmps_revanchism_50
+				remove_modifier = modifier_hmps_revanchism_subject_0
+				remove_modifier = modifier_hmps_revanchism_subject_10
+				remove_modifier = modifier_hmps_revanchism_subject_25
+				remove_modifier = modifier_hmps_revanchism_subject_50
+			}
+			if = {
+				limit = {
+					ROOT.var:germany_revanchism_percent > 0
+					ROOT.var:germany_revanchism_percent < 0.10
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_0
+							multiplier = ROOT.var:germany_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_0
+							multiplier = ROOT.var:germany_revanchism_percent
+						}
+					}
+				}
+			}				
+			if = {
+				limit = {
+					ROOT.var:germany_revanchism_percent >= 0.10
+					ROOT.var:germany_revanchism_percent < 0.25
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_10
+							multiplier = ROOT.var:germany_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_10
+							multiplier = ROOT.var:germany_revanchism_percent
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:germany_revanchism_percent >= 0.25
+					ROOT.var:germany_revanchism_percent < 0.50
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_25
+							multiplier = ROOT.var:germany_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_25
+							multiplier = ROOT.var:germany_revanchism_percent
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:germany_revanchism_percent >= 0.50
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_50
+							multiplier = ROOT.var:germany_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_50
+							multiplier = ROOT.var:germany_revanchism_percent
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+je_hmps_revanchism_austria = {
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	group = je_group_internal_affairs
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+
+	#scripted_button = hmps_austria_revanchism_gain_claims
+
+	is_shown_when_inactive = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:AUS ?= THIS
+			c:KUK ?= THIS
+		}
+	}
+	
+	possible = {
+		OR = {
+			is_player = yes
+			AND = {
+				is_player = no
+				country_rank >= rank_value:minor_power
+			}
+		}
+		OR = {
+			c:AUS ?= THIS
+			c:KUK ?= THIS
+		}
+	}
+
+	immediate = {
+		every_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_SOUTH_TYROL
+					state_region = s:STATE_ISTRIA
+				}
+			}
+			set_variable = hmps_state_cant_remove_revanchism
+		}
+		every_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_VENETIA
+					state_region = s:STATE_LOMBARDY
+					state_region = s:STATE_WALLACHIA
+					state_region = s:STATE_MOLDAVIA
+					state_region = s:STATE_BUKOVINA
+					state_region = s:STATE_EAST_GALICIA
+					state_region = s:STATE_WEST_GALICIA
+				}
+			}
+			set_variable = austria_state_locked
+		}
+		ROOT = {
+			set_variable = {
+				name = austria_max_revanchism_states
+				value = 0
+			}
+			set_variable = {
+				name = austria_current_revanchism
+				value = 0
+			}
+			set_variable = {
+				name = austria_revanchism_percent
+				value = 0
+			}
+		}
+		every_state = {
+			limit = {
+				is_in_geographic_region = geographic_region_greater_austria
+				is_split_state = no
+				NOT = {
+					has_variable = austria_state_locked
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = austria_max_revanchism_states
+					add = 1
+				}
+			}
+		}
+		every_state = {
+			limit = {
+				is_in_geographic_region = geographic_region_greater_austria
+				is_split_state = yes
+				NOT = {
+					has_variable = austria_state_locked
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = austria_max_revanchism_states
+					add = 0.5
+				}
+			}
+		}
+	}
+
+	invalid = {
+		always = no
+	}
+	
+	on_invalid = {
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			every_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_VENETIA
+						state_region = s:STATE_LOMBARDY
+						state_region = s:STATE_WALLACHIA
+						state_region = s:STATE_MOLDAVIA
+						state_region = s:STATE_BUKOVINA
+						state_region = s:STATE_EAST_GALICIA
+						state_region = s:STATE_WEST_GALICIA
+					}
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					NOR = {
+						has_variable = austria_state_locked
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+				}
+				set_variable = hmps_state_cant_remove_revanchism
+			}
+			every_state = {
+				limit = {
+					is_in_geographic_region = geographic_region_greater_austria
+					OR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+					NOR = {
+						has_variable = austria_state_locked
+						has_variable = hmps_state_cant_remove_revanchism
+					}
+				}
+				remove_modifier = modifier_hmps_revanchism_target
+			}
+			ROOT = {
+				change_variable = {
+					name = austria_max_revanchism_states
+					multiply = 0
+				}
+			}
+			every_state_in_greater_austria = {
+				limit = {
+					is_split_state = no
+					NOT = {
+						has_variable = austria_state_locked
+					}
+				}
+				ROOT = {
+					change_variable = {
+						name = austria_max_revanchism_states
+						add = 1
+					}
+				}
+			}
+			every_state_in_greater_austria = {
+				limit = {
+					is_split_state = yes
+					NOT = {
+						has_variable = austria_state_locked
+					}
+				}
+				ROOT = {
+					change_variable = {
+						name = austria_max_revanchism_states
+						add = 0.5
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = austria_current_revanchism
+					multiply = 0
+				}
+			}
+			every_state_in_greater_austria = {
+				limit = {
+					NOR = {
+						owner = ROOT
+						owner = {
+							OR = {
+								is_subject_of = ROOT
+								is_indirect_subject_of = ROOT
+							}
+						}
+					}
+					has_modifier = modifier_hmps_revanchism_target
+					NOT = {
+						has_variable = austria_state_locked
+					}
+				}
+				ROOT = {
+					change_variable = {
+						name = austria_current_revanchism
+						add = 1
+					}
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = austria_revanchism_percent
+					multiply = 0
+				}					
+				change_variable = {
+					name = austria_revanchism_percent
+					add = ROOT.var:austria_current_revanchism
+				}
+				change_variable = {
+					name = austria_revanchism_percent
+					divide = ROOT.var:austria_max_revanchism_states
+				}
+			}
+			ROOT = {
+				remove_modifier = modifier_hmps_revanchism_0
+				remove_modifier = modifier_hmps_revanchism_10
+				remove_modifier = modifier_hmps_revanchism_25
+				remove_modifier = modifier_hmps_revanchism_50
+				remove_modifier = modifier_hmps_revanchism_subject_0
+				remove_modifier = modifier_hmps_revanchism_subject_10
+				remove_modifier = modifier_hmps_revanchism_subject_25
+				remove_modifier = modifier_hmps_revanchism_subject_50
+			}
+			if = {
+				limit = {
+					ROOT.var:austria_revanchism_percent > 0
+					ROOT.var:austria_revanchism_percent < 0.10
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_0
+							multiplier = ROOT.var:austria_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_0
+							multiplier = ROOT.var:austria_revanchism_percent
+						}
+					}
+				}
+			}				
+			if = {
+				limit = {
+					ROOT.var:austria_revanchism_percent >= 0.10
+					ROOT.var:austria_revanchism_percent < 0.25
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_10
+							multiplier = ROOT.var:austria_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_10
+							multiplier = ROOT.var:austria_revanchism_percent
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:austria_revanchism_percent >= 0.25
+					ROOT.var:austria_revanchism_percent < 0.50
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_25
+							multiplier = ROOT.var:austria_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_25
+							multiplier = ROOT.var:austria_revanchism_percent
+						}
+					}
+				}
+			}
+			if = {
+				limit = {
+					ROOT.var:austria_revanchism_percent >= 0.50
+				}
+				if = {
+					limit = {
+						ROOT = {
+							is_subject = no
+						}
+					}
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_50
+							multiplier = ROOT.var:austria_revanchism_percent
+						}
+					}
+				}
+				else = {
+					ROOT = {
+						add_modifier = {
+							name = modifier_hmps_revanchism_subject_50
+							multiplier = ROOT.var:austria_revanchism_percent
+						}
+					}
+				}
+			}
+		}
+	}
+}
