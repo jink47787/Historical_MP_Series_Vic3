@@ -1,5 +1,4 @@
-﻿#China dominion creation
-#One should be for if you don't have any other china states, the other should be to add china states to a dominion, the other should be for if you have a chinese puppet
+﻿#China puppet creation
 
 on_monthly_pulse_country = {
 	on_actions = {
@@ -14,104 +13,169 @@ HMPS_China_Puppet = {
 					has_game_rule = HMPS_game_rule_china_puppets_enabled
 					NOT = {
 						OR = {
-							any_primary_culture = {
+							any_primary_culture = { #Excempt_by_culture
 								OR = {
 									has_discrimination_trait = tradition_sinosphere
 									has_discrimination_trait = heritage_han
 									has_discrimination_trait = language_tibetan
 								}
 							}
-							capital ?= {
+							capital ?= { #Excempt_by_capital
 								OR = {
 									region = sr:region_north_china
 									region = sr:region_south_china
 								}
+								state_region = { is_homeland = cu:han }
+								NOT = { state_region = s:STATE_FORMOSA }
 							}
 						}
 					}
-					any_scope_state = {
+					any_scope_state = { #State_Conditions
 						OR = {
 							region = sr:region_north_china
 							region = sr:region_south_china
 						}
+						state_region = { is_homeland = cu:han }
 						NOT = { state_region = s:STATE_FORMOSA }
+						NOT = { is_homeland_of_country_cultures = ROOT }
+						is_treaty_port = no
 						state_population > 3500000
 					}
-					#code to check if you already have a chinese dominion and puppet
 				}
 				every_scope_state = {
-					limit = {
+					limit = { #State_Conditions
 						OR = {
 							region = sr:region_north_china
 							region = sr:region_south_china
 						}
+						state_region = { is_homeland = cu:han }
 						NOT = { state_region = s:STATE_FORMOSA }
-						state_population >= 3500000
+						NOT = { is_homeland_of_country_cultures = ROOT }
+						is_treaty_port = no
+						state_population > 3500000
 					}
-					set_variable = china_state_to_cede
+					set_variable = state_to_cede
 				}
-				random_scope_state = {
+				if = { #Code to give states to an existing colonial puppet in region if you have one
 					limit = {
-						has_variable = china_state_to_cede
-					}
-					save_scope_as = china_puppet_capital_scope
-				}
-				create_dynamic_country = {
-					origin = root
-					country_type = colonial
-					tier = principality
-					capital = scope:china_puppet_capital_scope
-					cede_state_trigger = {
-						has_variable = china_state_to_cede
-					}
-					on_created = {
-						every_scope_state = {
-							remove_variable = china_state_to_cede
-							set_variable = china_state_foreign_owned
-						}
-						#add_primary_culture = cu:han
-						activate_law = law_type:law_extraction_economy
-						activate_law = law_type:law_presidential_republic
-						activate_law = law_type:law_autocracy
-						activate_law = law_type:law_peasant_levies
-						activate_law = law_type:law_no_home_affairs
-						activate_law = law_type:law_no_police
-						activate_law = law_type:law_no_schools
-						activate_law = law_type:law_no_health_system
-						activate_law = law_type:law_no_workers_rights
-						activate_law = law_type:law_no_social_security
-						activate_law = law_type:law_no_environmental_regulations
-					}
-				}
-				#scope:china_puppet_capital_scope.owner = {
-				#	set_variable = test
-				#}
-				#create_diplomatic_pact = {
-				#	country = scope:china_puppet_capital_scope.owner
-				#	type = grant_own_market
-				#}
-				if = {
-					limit = {
-						root = {
-							is_country_type = unrecognized
+						any_subject_or_below = {
+							NOT = {
+								any_primary_culture = { #Excempt_by_culture
+									OR = {
+									has_discrimination_trait = tradition_sinosphere
+										has_discrimination_trait = heritage_han
+										has_discrimination_trait = language_tibetan
+									}
+								}
+							}
+							capital ?= { #Excempt_by_capital
+								OR = {
+									region = sr:region_north_china
+									region = sr:region_south_china
+								}
+								state_region = { is_homeland = cu:han }
+								NOT = { state_region = s:STATE_FORMOSA }
+							}
 						}
 					}
-					create_diplomatic_pact = {
-						country = scope:china_puppet_capital_scope.owner
-						type = vassal
+					ordered_subject_or_below = {
+						limit = {
+							NOT = {
+								any_primary_culture = { #Excempt_by_culture
+									OR = {
+										has_discrimination_trait = tradition_sinosphere
+										has_discrimination_trait = heritage_han
+										has_discrimination_trait = language_tibetan
+									}
+								}
+							}
+							capital ?= { #Excempt_by_capital
+								OR = {
+									region = sr:region_north_china
+									region = sr:region_south_china
+								}
+								state_region = { is_homeland = cu:han }
+								NOT = { state_region = s:STATE_FORMOSA }
+							}
+						}
+						order_by = prestige
+						position = 0
+						check_range_bounds = no
+						save_temporary_scope_as = largest_relevant_subject
+					}
+					every_scope_state = {
+						limit = {
+							has_variable = state_to_cede
+						}
+						set_state_owner = scope:largest_relevant_subject
+						set_state_type = incorporated
+						remove_variable = state_to_cede
 					}
 				}
 				else = {
-					create_diplomatic_pact = {
-						country = scope:china_puppet_capital_scope.owner
-						type = colony
+					random_scope_state = {
+						limit = {
+							has_variable = state_to_cede
+						}
+						save_scope_as = puppet_capital_scope
 					}
-				}
-				
-				create_bidirectional_truce = {
-					country = scope:china_puppet_capital_scope.owner
-					months = 60
-				}
+					create_dynamic_country = {
+						origin = root
+						country_type = colonial
+						tier = principality
+						capital = scope:puppet_capital_scope
+						cede_state_trigger = {
+							has_variable = state_to_cede
+						}
+						on_created = {
+							every_scope_state = { remove_variable = state_to_cede }
+							activate_law = law_type:law_extraction_economy
+							activate_law = law_type:law_land_based_taxation
+							activate_law = law_type:law_colonial_administration
+							activate_law = law_type:law_tenant_farmers
+							activate_law = law_type:law_autocracy
+							activate_law = law_type:law_peasant_levies
+							activate_law = law_type:law_language_discrimination
+							activate_law = law_type:law_appointed_bureaucrats
+							activate_law = law_type:law_no_minimum_wage
+							activate_law = law_type:law_no_home_affairs
+							activate_law = law_type:law_no_police
+							activate_law = law_type:law_no_schools
+							activate_law = law_type:law_no_health_system
+							activate_law = law_type:law_no_workers_rights
+							activate_law = law_type:law_no_social_security
+							activate_law = law_type:law_no_environmental_regulations
+						}
+					}
+					#scope:puppet_capital_scope.owner = {
+					#	set_variable = test
+					#}
+					#create_diplomatic_pact = {
+					#	country = scope:puppet_capital_scope.owner
+					#	type = grant_own_market
+					#}
+					#create_bidirectional_truce = {
+					#	country = scope:puppet_capital_scope.owner
+					#	months = 60
+					#}
+					if = {
+						limit = {
+							root = {
+								is_country_type = unrecognized
+							}
+						}
+						create_diplomatic_pact = {
+							country = scope:puppet_capital_scope.owner
+							type = vassal
+						}
+					}
+					else = {
+						create_diplomatic_pact = {
+							country = scope:puppet_capital_scope.owner
+							type = colony
+						}
+					}
+				#}
 			}
 		}
 	}
