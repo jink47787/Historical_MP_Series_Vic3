@@ -1,8 +1,9 @@
-﻿#China puppet creation
+﻿#China and India puppet creation
 
 on_monthly_pulse_country = {
 	on_actions = {
 		HMPS_China_Puppet
+		HMPS_India_Puppet
 	}
 }
 HMPS_China_Puppet = {
@@ -176,6 +177,175 @@ HMPS_China_Puppet = {
 						}
 					}
 				#}
+			}
+		}
+	}
+}
+
+HMPS_India_Puppet = {
+	effect = {
+		ROOT = {
+			if = {
+				limit = {
+					has_game_rule = HMPS_game_rule_india_puppets_enabled
+					NOT = {
+						OR = {
+							any_primary_culture = { #Excempt_by_culture
+								OR = {
+									has_discrimination_trait_group = heritage_group_south_asian
+									has_discrimination_trait_group = language_group_indo_aryan
+								}
+							}
+							capital ?= { #Excempt_by_capital
+								OR = {
+									region = sr:region_north_india
+									region = sr:region_south_india
+								}
+								NOT = { state_region = s:STATE_CEYLON }
+							}
+						}
+					}
+					any_scope_state = { #State_Conditions
+						OR = {
+							region = sr:region_north_india
+							region = sr:region_south_india
+						}
+						NOT = { state_region = s:STATE_CEYLON }
+						NOT = { is_homeland_of_country_cultures = ROOT }
+						is_treaty_port = no
+						state_population > 1000000
+					}
+				}
+				every_scope_state = {
+					limit = { #State_Conditions
+						OR = {
+							region = sr:region_north_india
+							region = sr:region_south_india
+						}
+						NOT = { state_region = s:STATE_CEYLON }
+						NOT = { is_homeland_of_country_cultures = ROOT }
+						is_treaty_port = no
+						state_population > 1000000
+					}
+					set_variable = state_to_cede
+				}
+				if = { #Code to give states to an existing colonial puppet in region if you have one
+					limit = {
+						any_subject_or_below = {
+							NOT = {
+								any_primary_culture = { #Excempt_by_culture
+									OR = {
+										has_discrimination_trait_group = heritage_group_south_asian
+									has_discrimination_trait_group = language_group_indo_aryan
+								}
+								}
+							}
+							capital ?= { #Excempt_by_capital
+								OR = {
+									region = sr:region_north_india
+									region = sr:region_south_india
+								}
+								NOT = { state_region = s:STATE_CEYLON }
+							}
+						}
+					}
+					ordered_subject_or_below = {
+						limit = {
+							NOT = {
+								any_primary_culture = { #Excempt_by_culture
+									OR = {
+										has_discrimination_trait_group = heritage_group_south_asian
+										has_discrimination_trait_group = language_group_indo_aryan
+									}
+								}
+							}
+							capital ?= { #Excempt_by_capital
+								OR = {
+									region = sr:region_north_india
+									region = sr:region_south_india
+								}
+								NOT = { state_region = s:STATE_CEYLON }
+							}
+						}
+						order_by = prestige
+						position = 0
+						check_range_bounds = no
+						save_temporary_scope_as = largest_relevant_subject
+					}
+					every_scope_state = {
+						limit = {
+							has_variable = state_to_cede
+						}
+						set_state_owner = scope:largest_relevant_subject
+						set_state_type = incorporated
+						remove_variable = state_to_cede
+					}
+				}
+				else = {
+					random_scope_state = {
+						limit = {
+							has_variable = state_to_cede
+						}
+						save_scope_as = puppet_capital_scope
+					}
+					create_dynamic_country = {
+						origin = root
+						country_type = colonial
+						tier = principality
+						capital = scope:puppet_capital_scope
+						cede_state_trigger = {
+							has_variable = state_to_cede
+						}
+						on_created = {
+							every_scope_state = { remove_variable = state_to_cede }
+							activate_law = law_type:law_extraction_economy
+							activate_law = law_type:law_land_based_taxation
+							activate_law = law_type:law_colonial_administration
+							activate_law = law_type:law_tenant_farmers
+							activate_law = law_type:law_autocracy
+							activate_law = law_type:law_peasant_levies
+							activate_law = law_type:law_language_discrimination
+							activate_law = law_type:law_appointed_bureaucrats
+							activate_law = law_type:law_no_minimum_wage
+							activate_law = law_type:law_no_home_affairs
+							activate_law = law_type:law_no_police
+							activate_law = law_type:law_no_schools
+							activate_law = law_type:law_no_health_system
+							activate_law = law_type:law_no_workers_rights
+							activate_law = law_type:law_no_social_security
+							activate_law = law_type:law_no_environmental_regulations
+							activate_law = law_type:law_hindu_caste_not_enforced # Special for India
+						}
+					}
+					#scope:puppet_capital_scope.owner = {
+					#	set_variable = test
+					#}
+					#create_diplomatic_pact = {
+					#	country = scope:puppet_capital_scope.owner
+					#	type = grant_own_market
+					#}
+					#create_bidirectional_truce = {
+					#	country = scope:puppet_capital_scope.owner
+					#	months = 60
+					#}
+					if = {
+						limit = {
+							root = {
+								is_country_type = unrecognized
+							}
+						}
+						create_diplomatic_pact = {
+							country = scope:puppet_capital_scope.owner
+							type = vassal
+						}
+					}
+					else = {
+						create_diplomatic_pact = {
+							country = scope:puppet_capital_scope.owner
+							type = colony
+						}
+					}
+				}
 			}
 		}
 	}
