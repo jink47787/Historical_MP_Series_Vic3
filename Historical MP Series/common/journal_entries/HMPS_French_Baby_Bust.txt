@@ -1,0 +1,171 @@
+﻿je_hmps_french_baby_bust = {
+	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
+	
+	group = je_group_historical_content
+	
+	modifiers_while_active = {
+	}
+	is_shown_when_inactive = {
+		c:FRA ?= this
+	}
+
+	possible = {
+		always = yes
+	}
+	
+	immediate = {
+		hidden_effect = {
+			every_state_in_france = {
+				limit = {
+					NOT = { state_region = s:STATE_SAVOY }
+					NOT = { state_region = s:STATE_ALSACE_LORRAINE }
+					NOT = { state_region = s:STATE_BRITTANY }
+				}
+				add_modifier = modifier_hmps_french_baby_bust
+			}
+		}
+		set_variable = {
+			name = hmps_french_baby_bust_progress_variable
+			value = 0
+		}
+		set_variable = {
+			name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+			value = 1
+		}
+	}
+
+	complete = {
+		scope:journal_entry = {
+			is_goal_complete = yes
+		}
+	}
+
+	on_complete = {
+		ig:ig_devout ?= {
+			set_ig_trait = ig_trait:ig_trait_be_fruitful_and_multiply
+		}
+		hidden_effect = {
+			every_state_in_france_old = {
+				limit = {
+					has_modifier = modifier_hmps_french_baby_bust
+				}
+				remove_modifier = modifier_hmps_french_baby_bust
+			}
+		}
+		remove_variable = hmps_french_baby_bust_progress_variable
+	}
+	
+	invalid = {
+	}
+	
+	on_invalid = {
+		hidden_effect = {
+			every_state_in_france_old = {
+				remove_modifier = modifier_hmps_french_baby_bust
+			}
+		}
+		remove_variable = hmps_french_baby_bust_progress_variable
+	}
+
+	current_value = {
+		value = var:hmps_french_baby_bust_progress_variable
+	}
+
+	goal_add_value = {
+		value = 100
+	}
+	
+	progressbar = yes
+
+	on_weekly_pulse = { #We use weekly pulse because i dont want any degenerate stuff where people lower taxes only on the monthly pulse
+		effect = {
+			set_variable = {
+				name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+				value = 1
+			}
+			
+			if = {
+				limit = {
+					#tax_level <= low
+					#has_law_or_variant = law_type:law_theocracy
+					has_law_or_variant = law_type:law_state_religion
+					has_law_or_variant = law_type:law_charitable_health_system 
+					has_law_or_variant = law_type:law_religious_schools 
+#					NOR = {
+#						has_consumption_tax = g:liquor
+#					}
+				}
+				
+				if = {
+					limit = {
+						tax_level = low
+					}
+					change_variable = {
+						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+						add = 1
+					}
+				}
+				if = {
+					limit = {
+						tax_level = very_low
+					}
+					change_variable = {
+						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+						add = 2
+					}
+				}
+				if = {
+					limit = {
+						has_law_or_variant = law_type:law_no_income_taxes
+					}
+					change_variable = {
+						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+						add = 1
+					}
+				}
+				if = {
+					limit = {
+						NOR = {
+							has_law_or_variant = law_type:law_land_based_taxation
+							has_law_or_variant = law_type:law_per_capita_based_taxation
+						}
+					}
+					change_variable = {
+						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+						add = 2
+					}
+				}
+			}
+			
+			change_variable = {
+				name = hmps_french_baby_bust_progress_variable
+				add = {
+					value = var:hmps_french_baby_bust_progress_cached_weekly_progress_rate
+					multiply = 0.01916 # Number means it goes down average of 1 per year
+				}
+			}
+			
+			every_state_in_france = {
+				limit = {
+					NOT = { state_region = s:STATE_SAVOY }
+					NOT = { state_region = s:STATE_ALSACE_LORRAINE }
+					NOT = { state_region = s:STATE_BRITTANY }
+				}
+				remove_modifier = modifier_hmps_french_baby_bust
+				add_modifier = {
+					name = modifier_hmps_french_baby_bust
+					multiplier = {
+						value = 100
+						subtract = var:hmps_french_baby_bust_progress_variable
+						divide = 100
+					}
+				}
+			}
+		}
+	}
+
+	weight = 10000
+	should_be_pinned_by_default_uninvolved_or_context = yes
+	
+	can_revolution_inherit = yes
+}

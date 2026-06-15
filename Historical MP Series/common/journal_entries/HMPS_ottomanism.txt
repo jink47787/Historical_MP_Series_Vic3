@@ -12,103 +12,126 @@ je_embrace_ottomanism = {
 	
 	possible = {
 		c:TUR = {
-			custom_tooltip = {
-				text = ottoman_fed_tt.a
-				has_variable = sick_man_complete_success
+			OR = {
+				custom_tooltip = {
+					text = ottoman_fed_tt.a
+					has_variable = sick_man_complete_success
+				}
+				has_technology_researched = political_agitation
 			}
 		}
 	}
 	
-	complete = {
-		has_law_or_variant = law_type:law_elected_bureaucrats
-		OR = {
-			has_law_or_variant = law_type:law_total_separation
-			#has_law_or_variant = law_type:law_state_atheism
+	immediate = {
+		#HMPS: Made it so that you must have higher and higher sol to keep incorporating cultures to the tradition group
+		set_variable = { name = count_integrated_cultures value = 0 }
+		set_variable = { name = integrated_cultures_sol_requirement value = 6 }
+		set_variable = { name = integrated_cultures_sol_requirement_increase_per_culture value = 1 }
+		set_variable = { name = count_disqualified_cultures value = 0 }
+	}
+	
+	scripted_button = je_ottomanism_mashriqi_button
+	scripted_button = je_ottomanism_bulgarian_button
+	scripted_button = je_ottomanism_kurdish_button
+	scripted_button = je_ottomanism_armenian_button
+	scripted_button = je_ottomanism_greek_button
+	scripted_button = je_ottomanism_serb_button
+	scripted_button = je_ottomanism_romanian_button
+	scripted_button = je_ottomanism_bedouin_button
+	#scripted_button = je_ottomanism_maghrebi_button
+	#scripted_button = je_ottomanism_misri_button
+	scripted_button = je_ottomanism_enact_the_federation
+	scripted_button = je_ottomanism_start_button
+	
+	fail = {
+		custom_tooltip = {
+			text = ottomanism_started_tt
+			has_variable = ottomanism_started
 		}
-		OR = {
-			has_law_or_variant = law_type:law_subjecthood
-			has_law_or_variant = law_type:law_multicultural
+		NOT = {
+			AND = {
+				OR = {
+					has_law_or_variant = law_type:law_total_separation
+					#has_law_or_variant = law_type:law_state_atheism # State atheism kinda goes against the idea of being religiously tolerant which is what we are going for here
+				}
+				#has_law_or_variant = law_type:law_elected_bureaucrats # commented out to allow democratic backsliding
+				OR = {
+					has_law_or_variant = law_type:law_subjecthood
+					has_law_or_variant = law_type:law_multicultural
+				}
+				#OR = {  # commented out to allow democratic backsliding
+				#	has_law_or_variant = law_type:law_census_voting
+				#	has_law_or_variant = law_type:law_universal_suffrage
+				#	has_law_or_variant = law_type:law_anarchy
+				#}
+			}
 		}
-		OR = { has_law_or_variant = law_type:law_census_voting has_law_or_variant = law_type:law_universal_suffrage has_law_or_variant = law_type:law_anarchy }
-		owns_entire_state_region = STATE_ALEPPO
-		owns_entire_state_region = STATE_SYRIA
-		owns_entire_state_region = STATE_LEBANON
-		owns_entire_state_region = STATE_PALESTINE
-		owns_entire_state_region = STATE_TRANSJORDAN
-		owns_entire_state_region = STATE_ADANA
-		owns_entire_state_region = STATE_BAGHDAD
-		#custom_tooltip = {
-        #    text = ottoman_fed_tt.b
-		#	owns_entire_state_region = STATE_BAGHDAD
-		#	owns_entire_state_region = STATE_GREATER_SYRIA
-		#	owns_entire_state_region = STATE_TRANSJORDAN
-		#	owns_entire_state_region = STATE_ADANA
-		#}
-		has_technology_researched = pan-nationalism
 	}
 
-	on_complete = {
-		cu:mashriqi = {
-			add_tradition_trait = tradition_rumelian
-		}
-		custom_tooltip = {
-			text = ottomanism_bulgarians_tt
-			if = {
-				limit = {
-					owns_entire_state_region = STATE_NORTHERN_THRACE
-					owns_entire_state_region = STATE_BULGARIA
-				}
-				cu:bulgarian = {
-					add_tradition_trait = tradition_rumelian
-				}
-			}
-		}
-		custom_tooltip = {
-			text = ottomanism_kurds_armenians_tt
-			if = {
-				limit = {
-					owns_entire_state_region = STATE_DIYARBAKIR
-					owns_entire_state_region = STATE_ERZURUM
-				}
-				cu:kurdish = {
-				add_tradition_trait = tradition_rumelian
-				}
-				cu:armenian = {
-					add_tradition_trait = tradition_rumelian
+	on_fail = { #NOTE, the only way to fail this JE is the embrace ottomanism and then backslide
+		add_modifier = modifier_HMPS_turkish_supremacy
+		activate_law = law_type:law_ethnostate
+		#remove_primary_culture = cu:european_oghuz
+		#activate_law = law_type:law_racial_segregation
+		#cu:european_oghuz = {
+		#	remove_tradition_trait = tradition_rumelian
+		#}
+		#cu:turkish = {
+		#	remove_tradition_trait = tradition_rumelian
+		#}
+		
+		custom_tooltip = { # We dont need all this because turkish doenst have rumelian tradition, so by removing the european_oghuz primary, ottomans loose all acceptance
+			text = ottoman_fed_failure_tt
+			cu:mashriqi = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
 				}
 			}
-		}
-		custom_tooltip = {
-			text = ottomanism_greek_tt
-			if = {
-				limit = {
-					OR = {
-						has_variable = completed_tanzimat_greece
-						calc_true_if = {
-							amount >= 3
-							owns_entire_state_region = STATE_ATTICA
-							owns_entire_state_region = STATE_PELOPONNESE
-							owns_entire_state_region = STATE_WEST_AEGEAN_ISLANDS
-							owns_entire_state_region = STATE_CRETE
-							owns_entire_state_region = STATE_IONIAN_ISLANDS
-						}
-						AND = {
-							exists = c:GRE
-							c:GRE ?= {
-								is_subject_of = ROOT
-								is_subject_type = subject_type_puppet
-							}
-						}
-					}
-				}
-				cu:greek = {
-					add_tradition_trait = tradition_rumelian
+			cu:bulgarian = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
 				}
 			}
-		}
-		#add_primary_culture = cu:mashriqi
-		custom_tooltip = {
-			text = ottoman_fed_tt.c
+			cu:kurdish = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
+				}
+			}
+			cu:armenian = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
+				}
+			}
+			cu:greek = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
+				}
+			}
+			cu:serb = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
+				}
+			}
+			cu:romanian = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
+				}
+			}
+			cu:bedouin = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
+				}
+			}
+			cu:maghrebi = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
+				}
+			}
+			cu:misri = {
+				if = { limit = { has_discrimination_trait = tradition_rumelian }
+					remove_tradition_trait = tradition_rumelian
+				}
+			}
 		}
 	}
 

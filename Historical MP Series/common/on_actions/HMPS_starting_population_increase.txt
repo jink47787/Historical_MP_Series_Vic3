@@ -1,0 +1,218 @@
+﻿on_game_started = {
+	on_actions = {
+		HMPS_population_edit
+		HMPS_population_edit_clean_up #do not comment this out!
+	}
+}
+
+
+HMPS_population_edit = {
+	effect = {
+		s:STATE_NORTHERN_TERRITORY.region_state:YGU = { save_scope_as = origin_state }   ### STATE WHERE POPS GET TAKEN FROM [do not change unless you understand what you are doing]
+		s:STATE_NORTHERN_TERRITORY.region_state:LRR = { save_scope_as = holder_state }   ### STATE WHERE POPS get moved to before moving to destination, we do this so we dont ever double count a pop [do not change unless you understand what you are doing]
+		s:STATE_NORTHERN_TERRITORY.region_state:ARH = { save_scope_as = annexing_state } ### STATE Which annexes origin_state after (if we dont do this then the population map mode will look really weird at game start) [do not change unless you understand what you are doing]
+		scope:holder_state = { kill_population_percent_in_state = { percent = 1 } }
+		every_state_region = {
+			#############################################################################################
+			####                   START OF : DETERMINING BONUSES FOR CURRENT STATE                   ###
+			####                                                                                      ###
+			####        pop_bonus : percentage that population in a state will be increased by        ###
+			####       land_bonus : percentage that arable land in a state will be increased by       ###
+			####   (Negative values work for both pop_bonus and land_bonus if you want to decrease)   ###
+			####            [EDIT THIS SECTION BELOW BY ADDING MORE CONDITIONS IF YOU WANT]           ###
+			#############################################################################################
+			if = { # increasing population and arable land in african states by 80% and 100% respectively, this is based off https://patrickmanningworldhistorian.com/wp-content/uploads/2021/01/H3.2014.AfricanPop-Akyeampong.pdf, look at figure 4.1 to get an idea of range of academic opinion. If we see Africa ending with a total 1900 population which is much above 150 million then perhaps these should be revised down.
+				limit = { is_in_geographic_region = geographic_region_africa }
+				set_global_variable = {
+					name = pop_bonus
+					value = 0.8
+				}
+				set_global_variable = {
+					name = land_bonus
+					value = 1
+				}
+			}
+			else_if = { # increasing population in brazil strategic region states by 25%
+				limit = { is_in_geographic_region = geographic_region_brazil }
+				set_global_variable = {
+					name = pop_bonus
+					value = 0.25
+				}
+				set_global_variable = {
+					name = land_bonus
+					value = 0
+				}
+			}
+			else_if = { # increasing population and arable land in java by 55% and 50% respectively. Based off of https://www.rug.nl/ggdc/historicaldevelopment/maddison/publications/wp3.pdf, which proposes an estimate of 14 million javanese population in 1850 (end of page), ratio implemeted is to match this number by 1850
+				limit = {
+					OR = {
+						s:STATE_WEST_JAVA ?= this
+						s:STATE_CENTRAL_JAVA ?= this
+						s:STATE_EAST_JAVA ?= this
+					}
+				}
+				set_global_variable = {
+					name = pop_bonus
+					value = 0.55
+				}
+				set_global_variable = {
+					name = land_bonus
+					value = 0.5
+				}
+			}
+			#############################################################################################
+			####                    END OF : DETERMINING BONUSES FOR CURRENT STATE                    ###
+			#############################################################################################
+			
+			############ ARABLE LAND PART ############
+			if = {
+				limit = {
+					has_global_variable = land_bonus
+					NOT = { global_var:land_bonus ?= 0}
+				}
+				set_global_variable = {
+					name = cur_arable_land_to_add
+					value = 0
+				}
+				every_scope_state = {
+					change_global_variable = {
+						name = cur_arable_land_to_add
+						add = this.arable_land
+					}
+				}
+				change_global_variable = {
+					name = cur_arable_land_to_add
+					multiply = global_var:land_bonus
+				}
+				add_arable_land = global_var:cur_arable_land_to_add
+			}
+			remove_global_variable = land_bonus
+			
+			############ POP TRANSFER PART ############
+			if = {
+				limit = {
+					has_global_variable = pop_bonus
+					NOT = { global_var:pop_bonus ?= 0}
+				}
+				if = { ### if pop bonus is a negative value, then we kill that percentage of pops
+					limit = {
+						global_var:pop_bonus < 0
+					}
+					change_global_variable = {
+						name = pop_bonus
+						multiply = -1
+					}
+					every_scope_state = {
+						kill_population_percent_in_state = {
+							percent = global_var:pop_bonus
+						}
+					}
+				}
+				else = { ### else (ie if bonus is a positive value) then add that percentage of pops
+					every_scope_state = {
+						limit = {
+							not = { this = scope:origin_state }
+							not = { this = scope:holder_state }
+						}
+						save_scope_as = current_state
+						every_scope_pop = {
+							set_global_variable = {
+								name = pop_size
+								value = {
+									add = total_size
+									multiply = global_var:pop_bonus
+								}
+							}
+							set_global_variable = {
+								name = pop_wealth
+								value = wealth
+							}
+							culture = { save_scope_as = current_culture }
+							religion = { save_scope_as = current_religion }
+							scope:origin_state = {
+								convert_population = {
+									target = scope:current_religion
+									value = 1
+								}
+								ordered_scope_pop = {
+									order_by = total_size
+									position = 0
+									set_pop_wealth = {
+										wealth_distribution = global_var:pop_wealth
+										update_loyalties = no
+									}
+									change_pop_culture = {
+										target = scope:current_culture
+										value = 1
+									}
+								}
+								ordered_scope_pop = {
+									order_by = total_size
+									position = 0
+									move_partial_pop = {
+										state = scope:holder_state
+										population = global_var:pop_size
+									}
+								}
+							}
+						}
+						scope:holder_state = {
+							#every_scope_pop = {
+							#	change_poptype = pop_type:peasants
+							#}
+							every_scope_pop = {
+								move_pop = scope:current_state
+							}
+						}
+					}
+				}
+			}
+			remove_global_variable = pop_bonus
+		}
+	}
+}
+		
+HMPS_population_edit_clean_up = {
+	effect = {
+		s:STATE_NORTHERN_TERRITORY.region_state:YGU = { save_scope_as = origin_state }   ### STATE WHERE POPS GET TAKEN FROM do not change unless you understand what you are doing [do not change unless you understand what you are doing]
+		s:STATE_NORTHERN_TERRITORY.region_state:LRR = { save_scope_as = holder_state }   ### STATE WHERE POPS get moved to before moving to destination, we do this so we dont ever double count a pop [do not change unless you understand what you are doing]
+		s:STATE_NORTHERN_TERRITORY.region_state:ARH = { save_scope_as = annexing_state } ### STATE Which annexes origin_state after (if we dont do this then the population map mode will look really weird at game start) [do not change unless you understand what you are doing]
+		### Cleaning up Origin/Holder states
+		scope:origin_state = {
+			convert_population = {
+				target = rel:animist
+				value = 1
+			}
+			every_scope_pop = {
+				set_pop_wealth = {
+					wealth_distribution = 1
+					update_loyalties = no
+				}
+				change_pop_culture = {
+					target = cu:aborigine
+					value = 1
+				}
+			}
+			ordered_scope_pop = {
+				order_by = total_size
+				position = 0
+				move_partial_pop = {
+					state = scope:holder_state
+					population = 15600
+				}
+			}
+			ordered_scope_pop = {
+				order_by = total_size
+				position = 0
+				move_partial_pop = {
+					state = scope:annexing_state
+					population = 10200
+				}
+			}
+			kill_population_percent_in_state = {
+				percent = 1
+			}
+			set_state_owner = scope:annexing_state.owner
+		}
+	}
+}

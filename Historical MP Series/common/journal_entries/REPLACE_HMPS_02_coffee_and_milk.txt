@@ -1,0 +1,129 @@
+﻿REPLACE:je_agricultural_development = {
+	icon = "gfx/interface/icons/goods_icons/coffee.dds"
+
+	group = je_group_brazil
+
+	is_shown_in_lobby = {
+		has_dlc_feature = rp1_content #Colossus of the South
+		c:BRZ = THIS
+	}
+	
+	is_shown_when_inactive = {
+		c:BRZ ?= this
+		has_dlc_feature = rp1_content
+	}
+
+	possible = {
+		has_technology_researched = intensive_agriculture
+		any_scope_state = {
+			count >= 2
+			is_capital = no
+			has_building = building_coffee_plantation
+			has_building = building_livestock_ranch
+			is_incorporated = yes
+		}
+		country_has_building_group_levels = {
+			type = bg_plantations
+			value  >= 50
+		}
+		custom_tooltip = {
+			text = is_not_in_other_market_tt
+			ROOT.market_capital = {
+				owner = ROOT
+			}
+		}
+	}
+
+	immediate = {
+		ig:ig_landowners ?= {
+			save_scope_as = landowners_ig
+		}
+		market_capital.market = {
+			mg:coffee = {
+				save_scope_as = coffee_scope
+			}
+		}
+		root = {
+			save_scope_as = brazil_scope
+		}
+		set_variable = coffee_with_milk_1_active
+		trigger_event = { id = coffee_with_milk.1 }
+	}
+
+	on_yearly_pulse = {
+		random_events = {
+			100 = 0
+			10 = coffee_with_milk.2
+			10 = coffee_with_milk.3
+		}
+	}
+
+	complete = {
+		OR = {
+			leading_producer_of = g:meat
+			leading_producer_of = g:coffee
+			leading_producer_of = g:sugar
+		}
+		trigger_if = {
+			limit = {
+				has_variable = coffee_with_milk_1_active
+			}
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+		}
+		trigger_else = {
+			custom_tooltip = {
+				text = je_agricultural_development_goal_dummy
+				always = no
+			}
+		}
+		country_has_building_group_levels = {
+			type = bg_plantations
+			value  >= 125
+		} 
+	}
+
+	on_complete = {
+		trigger_event = { id = coffee_with_milk.5 }
+		set_variable = agricultural_dev_done
+	}
+
+	current_value = {
+		value = scope:coffee_scope.market_goods_buy_orders
+	}
+
+	goal_add_value = {
+		value = scope:coffee_scope.market_goods_buy_orders
+		multiply = 1.5 #HMPS: Reduced from 2.5x multiplier, if set to one then it starts instantly fulfilled
+	}
+	
+	fail = {
+		custom_tooltip = {
+			text = is_in_other_market_tt
+			ROOT.market_capital = {
+				NOT = {
+					owner = ROOT
+				}
+			}
+		}
+	}
+
+	invalid = {
+		NOT = {
+			any_scope_state = {
+				count >= 2
+				is_capital = no
+				has_building = building_coffee_plantation
+				has_building = building_livestock_ranch
+				is_incorporated = yes
+			}
+		}
+	}
+
+	weight = 100
+
+	progressbar = yes
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+}

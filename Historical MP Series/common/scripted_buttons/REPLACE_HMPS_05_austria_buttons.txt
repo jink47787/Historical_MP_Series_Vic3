@@ -1,0 +1,906 @@
+﻿REPLACE:austrian_neo_absolutism_papal_concordat_button = {
+	name = austrian_neo_absolutism_papal_concordat_button
+	desc = austrian_neo_absolutism_papal_concordat_button_desc
+
+	visible = {
+		NOT = {
+			has_variable = austrian_neo_absolutism_papal_concordat_var
+		}
+	}
+
+	possible = {
+		NOT = {
+			c:PAP ?= {
+				is_diplomatic_play_enemy_of = root
+			}
+		}
+		OR = {
+			NOT = {
+				exists = c:PAP
+			}
+			c:PAP ?= {
+				relations:root >= relations_threshold:amicable
+			}
+		}
+	}
+
+	selected = {
+	}
+
+	effect = {
+		set_variable = je_austrian_neo_absolutism_marginalized_papal_concordat_var
+		custom_tooltip = {
+			text = austrian_neo_absolutism_constitutional_pressure_progress_bar_increase_10_tt
+			je:je_austrian_neo_absolutism = {
+				add_progress = { value = 10 name = austrian_neo_absolutism_constitutional_pressure_progress_bar }
+			}
+		}
+		if = {
+			limit = {
+				exists = c:PAP
+			}
+			change_relations = {
+				country = c:PAP
+				value = 40
+			}
+			if = {
+				limit = {
+					is_power_bloc_leader = yes
+				}
+				root.power_bloc ?= {
+					add_leverage = { target = c:PAP value = 100 }
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_state_religion
+				}
+			}
+			activate_law = law_type:law_state_religion
+		}
+		#if = {
+		#	limit = {
+		#		NOT = {
+		#			has_law = law_type:law_religious_schools
+		#		}
+		#	}
+		#	activate_law = law_type:law_religious_schools
+		#}
+		add_loyalists = {
+			religion = rel:catholic
+			value = medium_radicals
+		}
+		add_radicals = {
+			religion = rel:protestant
+			value = small_radicals
+		}
+		set_variable = austrian_neo_absolutism_papal_concordat_var
+	}
+
+	ai_chance = {
+		value = 1
+	}
+}
+
+REPLACE:je_danubian_federation_czech_button = {
+	name = "je_danubian_federation_czech_button"
+	desc = "je_danubian_federation_czech_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:czech = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:czech = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:czech ?= this } } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:czech value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:czech value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:czech = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = { ### Annexing any homeland states from any AI subjects, Then incorporating all homeland states in austria and all subjects
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_polish_button = {
+	name = "je_danubian_federation_polish_button"
+	desc = "je_danubian_federation_polish_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:polish = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:polish = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:polish ?= this } } } } } }
+		cu:ukrainian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:ukrainian ?= this } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:polish value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:polish value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:polish = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_slovak_button = {
+	name = "je_danubian_federation_slovak_button"
+	desc = "je_danubian_federation_slovak_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:slovak = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:slovak = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:slovak ?= this } } } } } }
+		#cu:hungarian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:hungarian ?= this } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:slovak value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:slovak value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:slovak = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_hungarian_button = {
+	name = "je_danubian_federation_hungarian_button"
+	desc = "je_danubian_federation_hungarian_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:szekely = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:hungarian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:hungarian ?= this } } } } } }
+		cu:romanian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:romanian ?= this } } } } }
+		#cu:slovak = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:slovak ?= this } } } } }
+		c:HUN ?= { is_player = no }
+		OR = {
+			average_sol_for_culture = { target = cu:hungarian value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:hungarian value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		if = { limit = { c:HUN ?= { is_subject_of = root } }
+			annex_with_incorporation = c:HUN
+		}
+		je:je_danubian_federation = {
+			remove_modifier = modifier_HMPS_danubian_federation_hungarian_negative_acceptance
+			add_modifier = modifier_HMPS_danubian_federation_hungarian_option_buff
+		}
+		cu:szekely = { add_tradition_trait = tradition_danubian }
+		cu:hungarian = {
+			save_scope_as = temp_culture
+			#add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}}
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_slovene_button = {
+	name = "je_danubian_federation_slovene_button"
+	desc = "je_danubian_federation_slovene_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:slovene = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:slovene = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:slovene ?= this } } } } } }
+		cu:north_italian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:north_italian ?= this } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:slovene value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:slovene value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:slovene = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_croat_button = {
+	name = "je_danubian_federation_croat_button"
+	desc = "je_danubian_federation_croat_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:croat = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:croat = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:croat ?= this } } } } } }
+		cu:north_italian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:north_italian ?= this } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:croat value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:croat value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:croat = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_romanian_button = {
+	name = "je_danubian_federation_romanian_button"
+	desc = "je_danubian_federation_romanian_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:romanian = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:romanian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:romanian ?= this } } } } } }
+		cu:hungarian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:hungarian ?= this } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:romanian value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:romanian value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:romanian = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_north_italian_button = {
+	name = "je_danubian_federation_north_italian_button"
+	desc = "je_danubian_federation_north_italian_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:north_italian = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:north_italian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:north_italian ?= this } } } } } }
+		cu:slovene = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:slovene ?= this } } } } }
+		cu:croat = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:croat ?= this } } } } }
+		cu:serb = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:serb ?= this } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:north_italian value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:north_italian value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:north_italian = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_serb_button = {
+	name = "je_danubian_federation_serb_button"
+	desc = "je_danubian_federation_serb_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:serb = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:serb = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:serb ?= this } } } } } }
+		cu:north_italian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:north_italian ?= this } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:serb value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:serb value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:serb = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_ukrainian_button = {
+	name = "je_danubian_federation_ukrainian_button"
+	desc = "je_danubian_federation_ukrainian_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	selected = {
+		cu:ukrainian = {
+			has_discrimination_trait = tradition_danubian
+		}
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		custom_tooltip = { text = danubian_federation_started_tt has_variable = danubian_federation_started }
+		custom_tooltip = { text = danubian_federation_button_cooldown_tt NOT = { has_variable = danubian_federation_button_cooldown } }
+		hidden_trigger = { cu:ukrainian = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:ukrainian ?= this } } } } } }
+		cu:polish = { custom_tooltip = { text = already_integrated_tt   ROOT = { NOT = { any_in_list = { variable = aus_integrated_cultures cu:polish ?= this } } } } }
+		OR = {
+			average_sol_for_culture = { target = cu:ukrainian value >= var:integrated_cultures_sol_requirement }
+			any_subject_or_below = {
+				average_sol_for_culture = { target = cu:ukrainian value >= prev.var:integrated_cultures_sol_requirement }
+			}
+		}
+	}
+
+	effect = {
+		cu:ukrainian = {
+			save_scope_as = temp_culture
+			add_tradition_trait = tradition_danubian
+		}
+		set_variable = { name = danubian_federation_button_cooldown days = 180 } # Setting Cool Down, if you change the duration of this make sure to change the loc (danubian_federation_button_cooldown_tt) for it as well
+		add_to_variable_list = { name = aus_integrated_cultures target = scope:temp_culture }
+		change_variable = { name = count_integrated_cultures add = 1 }
+		change_variable = { name = integrated_cultures_sol_requirement add = var:integrated_cultures_sol_requirement_increase_per_culture }
+		scope:temp_culture = { custom_tooltip = incorporate_any_this_culture_states_including_in_ai_subjects_tt }
+		hidden_effect = {
+			every_subject_or_below = {
+				every_scope_state = {
+					limit = { state_region = { is_homeland = scope:temp_culture } }
+					if = { limit = { owner = { is_player = no } }
+						set_state_owner = root
+					}
+					set_state_type = incorporated
+				}
+			}
+			every_scope_state = {
+				limit = { state_region = { is_homeland = scope:temp_culture } is_incorporated = no }
+				set_state_type = incorporated
+			}
+		}
+        add_radicals = { culture = cu:south_german value = 0.1 }
+        add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		every_subject_or_below = { ### giving subjects the radicals and loyalists as well
+			add_radicals = { culture = cu:south_german value = 0.1 }
+			add_loyalists = { culture = scope:temp_culture value = 0.1 }
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+
+REPLACE:je_danubian_federation_enact_the_federation = {
+	name = "je_danubian_federation_enact_the_federation"
+	desc = "je_danubian_federation_enact_the_federation_desc"
+
+	visible = {
+		always = yes
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		trigger_if = {
+			limit = {
+				has_variable = count_integrated_cultures
+			}
+			custom_tooltip = {
+				text = has_integrated_5_danubian_cultures_tt
+				var:count_integrated_cultures >= 5
+				NOT = { has_variable = danubian_federation_final_act }
+			}
+		}
+	}
+
+	effect = {
+		custom_tooltip = {
+			text = federalization_signed_tt
+			set_variable = danubian_federation_final_act
+		}
+		activate_law = law_type:law_multicultural
+		add_loyalists = {
+			value = 0.1
+		}
+		hidden_effect = {
+			change_tag = KUK
+		}
+	}
+
+	selected = {
+		custom_tooltip = {
+			text = federalization_was_signed_tt
+			has_variable = danubian_federation_final_act
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}
+
+je_danubian_federation_start_button = { #HMPS ADDITION
+	name = "je_danubian_federation_start_button"
+	desc = "je_danubian_federation_start_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	ai_chance = {
+		value = 10
+	}
+
+	possible = {
+		has_technology_researched = pan-nationalism
+		OR = {
+			has_law_or_variant = law_type:law_subjecthood
+			has_law_or_variant = law_type:law_multicultural
+		}
+		OR = { #HMPS Slim: Readded check for specific government type and set it as a possibility in place of hungarian primary incase that isnt added into slim
+			has_government_type = gov_dual_monarchy
+			has_government_type = gov_triple_monarchy
+			hidden_trigger = {
+				country_has_primary_culture = cu:hungarian
+			}
+		}
+		hidden_trigger = {
+			NOT = { has_variable = danubian_federation_started }
+		}
+	}
+
+	effect = {
+		custom_tooltip = {
+			text = danubian_federation_start_tt
+			set_variable = danubian_federation_started
+		}
+		add_primary_culture = cu:hungarian
+		cu:hungarian = {
+			add_tradition_trait = tradition_danubian
+		}
+		je:je_danubian_federation = {
+			add_modifier = modifier_HMPS_danubian_federation_hungarian_negative_acceptance
+		}
+		remove_modifier = secondary_culture_slovene
+		remove_modifier = secondary_culture_czech
+	}
+
+	selected = {
+		custom_tooltip = {
+			text = danubian_federation_started_tt
+			has_variable = danubian_federation_started
+		}
+	}
+
+	ai_chance = {
+		value = 100
+	}
+}

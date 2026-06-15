@@ -9,7 +9,6 @@ on_monthly_pulse_country = {
 	on_actions = {
 		HMPS_Check_for_GM
 		HMPS_ai_modifiers
-		HMPS_France_Pop_Growth
 		HMPS_China_Ports_Fracture
 		HMPS_Coastal_Capital
 		#HMPS_Institution_Modifier
@@ -38,10 +37,7 @@ on_monthly_pulse_country = {
 		Britain_India_Transfer.1
 		austria_monarchy.3
 		austria_monarchy.4
-		dual_monarchy.4 # military occupation of Hungary
-		dual_monarchy.7 # claims on independent Hungary
 		#potato_blight.5 # Irish potato event
-		dual_monarchy.6 #Russian aid against Hungary
 		zionism.1
 		zionism.2
 		wine_blight_evt.2
@@ -55,6 +51,18 @@ on_monthly_pulse_country = {
 on_yearly_pulse_country = {
 	events = {
 		railroad_bubble.2 #HMPS
+	}
+}
+
+on_country_released_as_independent = {
+	on_actions = {
+		HMPS_russian_poland_release_effect
+	}
+}
+
+on_country_released_as_own_subject = {
+	on_actions = {
+		HMPS_russian_poland_release_effect
 	}
 }
 
@@ -414,37 +422,6 @@ HMPS_revolution_boost = {
 			}
 		}
 		
-	}
-}
-
-HMPS_France_Pop_Growth = {
-	effect = {
-		if = {
-			limit = {
-				NOT = { has_global_variable = french_pop_nerf }
-			}
-			c:FRA = {	
-				every_scope_state = {
-					limit = {
-						NOT = { state_region = s:STATE_ALSACE_LORRAINE }
-						NOT = { state_region = s:STATE_CORSICA }
-						NOT = { state_region = s:STATE_BRITTANY }
-						is_in_geographic_region = geographic_region_europe
-					}
-					add_modifier = {
-						name = france_baby_bust			
-						is_decaying = yes
-						years = 100
-					}
-					add_modifier = {
-						name = france_early_game_birth_fix			
-						is_decaying = yes
-						years = 30
-					}
-					set_global_variable = french_pop_nerf
-				}
-			}
-		}
 	}
 }
 
@@ -1210,6 +1187,36 @@ HMPS_handle_demographic_shifts = {
 					max = 5 #What is Cap WFR?
 				}
 				days = -1
+			}
+		}
+	}
+}
+
+HMPS_russian_poland_release_effect = {
+	effect = {
+		### Poland has historical government structure on game start #HMPS
+		if = {
+			limit = {
+				ROOT ?= c:RUS
+				scope:target ?= {
+					country_has_primary_culture = cu:polish
+					country_has_voting_franchise = no
+				}
+			}
+			scope:target ?= {
+				activate_law = law_type:law_wealth_voting
+			}
+		}
+		#always grant freedom of conscience to Poland
+		if = {
+			limit = {
+				ROOT ?= c:RUS
+				scope:target ?= {
+					country_has_primary_culture = cu:polish
+				}
+			}
+			scope:target ?= {
+				activate_law = law_type:law_freedom_of_conscience
 			}
 		}
 	}
