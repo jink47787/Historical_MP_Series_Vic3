@@ -170,15 +170,15 @@ types lens_toolbar_types {
 
 			button = {
 				using = default_button_action
-				onclick = "[UnlockMapMode]"
-				visible = "[IsMapModeLocked]"
+				onclick = "[ClearDefaultMapMode]"
+				visible = "[HasDefaultMapMode]"
 				shortcut = "close_window"
-				tooltip = "UNLOCK_MAP_MODE_TOOLTIP"
+				tooltip = "CLEAR_DEFAULT_MAP_MODE_TOOLTIP"
 				parentanchor = bottom|hcenter
 				widgetanchor = bottom|left
 				position = { 210 -47 }
 				textbox = {
-					text = "UNLOCK_MAP_MODE"
+					text = "CLEAR_DEFAULT_MAP_MODE"
 					autoresize = yes
 					resizeparent = yes
 					margin = { 15 5 }
@@ -195,21 +195,21 @@ types lens_toolbar_types {
 				onmousehierarchyleave = "[PdxGuiTriggerAllAnimations('map_modes_hide')]"
 				alwaystransparent = no
 
-				### LOCKED MAPMODE
+				### SELECTED MAPMODE BAR
 				widget = {
-					size = { 200 35 }
+					size = { 40 35 }
 					position = { 46 0 }
 					parentanchor = vcenter
 
 					state = {
-						name = map_mode_locked
-						alpha = 1
+						name = map_modes_show
+						size = { 200 35 }
 						duration = 0.2
 						using = Animation_Curve_Default
 					}
 					state = {
-						name = map_mode_unlocked
-						alpha = 0
+						name = map_modes_hide
+						size = { 40 35 }
 						duration = 0.2
 						using = Animation_Curve_Default
 					}
@@ -229,12 +229,34 @@ types lens_toolbar_types {
 
 					textbox = {
 						margin_left = 22
-						size = { 200 25 }
+						margin_right = 30
+						size = { 170 25 }
 						parentanchor = vcenter
 						fontsize_min = 12
 						elide = right
 						text = "[GetSelectedMapModeName]"
 						align = left|nobaseline
+						alpha = 0
+
+						state = {
+							name = map_modes_show
+							alpha = 1
+							duration = 0.2
+							using = Animation_Curve_Default
+						}
+						state = {
+							name = map_modes_hide
+							alpha = 0
+							duration = 0.2
+							using = Animation_Curve_Default
+						}
+					}
+
+					icon = {
+						size = { 24 24 }
+						parentanchor = vcenter|right
+						position = { -5 0 }
+						texture = "[GetSelectedMapModeIcon]"
 					}
 				}
 
@@ -243,7 +265,7 @@ types lens_toolbar_types {
 					parentanchor = vcenter
 					position = { 0 0 }
 					datamodel = "[GetMapModeIndices]"
-					onselectionchanged = "[SetLockedMapMode]"
+					onselectionchanged = "[SetDefaultMapMode]"
 					selectedindex = "[GetSelectedMapMode]"
 					size = { 246 35 }
 					focuspolicy = all
@@ -384,37 +406,38 @@ types lens_toolbar_types {
 					}
 				}
 
-				### MAP INFO
-				icon = {
+				### MAP INFO / LOCK TOGGLE
+				button = {
 					name = "tutorial_highlight_map_modes_button"
 					size = { 46 46 }
 					texture = "gfx/interface/backgrounds/round_button_bg.dds"
+					onclick = "[ToggleMapModeLock]"
+					tooltip = "MAP_MODE_LOCK_TOOLTIP"
+					using = tooltip_above
 
-					### no mapmode locked
+					### unlocked state
 					icon = {
 						visible = "[Not(IsMapModeLocked)]"
 						size = { 34 34 }
 						texture = "gfx/interface/main_hud/lens_map_info.dds"
-						tooltip = "MAP_INFO"
-						using = tooltip_above
 						parentanchor = center
+						alwaystransparent = yes
 					}
 
-					### mapmode locked, click to unlock
-					button = {
+					### locked state
+					icon = {
 						visible = "[IsMapModeLocked]"
 						size = { 34 34 }
 						texture = "gfx/interface/main_hud/lens_map_info.dds"
-						tooltip = "MAP_INFO_MAP_MODE_LOCKED"
-						onclick = "[UnlockMapMode]"
-						using = tooltip_above
 						parentanchor = center
+						alwaystransparent = yes
 
-						button = {
+						icon = {
 							parentanchor = center
 							alwaystransparent = yes
 							texture = "gfx/interface/main_hud/map_mode_locked.dds"
 							size = { 100% 100% }
+						}
 						}
 
 						state = {
@@ -424,7 +447,6 @@ types lens_toolbar_types {
 						state = {
 							name = _hide
 							on_start = "[PdxGuiTriggerAllAnimations('map_mode_unlocked')]"
-						}
 					}
 				}
 			}
