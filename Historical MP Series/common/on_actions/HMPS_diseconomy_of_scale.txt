@@ -1,91 +1,48 @@
-﻿on_monthly_pulse_country = {
+﻿on_monthly_pulse_state = {
 	on_actions = {
-		HMPS_handle_diseconomy_of_scale_pms
+		HMPS_handle_diseconomies_of_scale
 	}
 }
 
-HMPS_handle_diseconomy_of_scale_pms = { #Country Scope
+HMPS_handle_diseconomies_of_scale = {
 	effect = {
-		every_scope_state = {
-			if = {
-				limit = {
-					can_activate_production_method = {
-						building_type = building_urban_center
-						production_method = pm_arcades
-					}
-				}
-				activate_production_method = {
-					building_type = building_urban_center
-					production_method = pm_arcades
-				}
+		if = {
+			limit = {
+				has_modifier = modifier_hmps_diseconomies_of_scale
 			}
-			else_if = {
-				limit = {
-					NOT = { 
-						any_scope_building = {
-							is_building_type = building_urban_center
-							has_active_production_method = pm_arcades
-						}
-					}
-					can_activate_production_method = {
-						building_type = building_urban_center
-						production_method = pm_covered_markets
-					}
-				}
-				activate_production_method = {
-					building_type = building_urban_center
-					production_method = pm_covered_markets
-				}
-			}
-			else_if = {
-				limit = {
-					NOT = { 
-						any_scope_building = {
-							is_building_type = building_urban_center
-							OR = {
-								has_active_production_method = pm_arcades
-								has_active_production_method = pm_covered_markets
-							}
-						}
-					}
-					can_activate_production_method = {
-						building_type = building_urban_center
-						production_method = pm_market_squares
-					}
-				}
-				activate_production_method = {
-					building_type = building_urban_center
-					production_method = pm_market_squares
-				}
-			}
+			remove_modifier = modifier_hmps_diseconomies_of_scale
 		}
-		
-#		if = {
-#			limit = {
-#				has_technology_researched  = elevator
-#			}
-#			activate_production_method = {
-#				building_type = building_urban_center
-#				production_method = pm_arcades
-#			}
-#		}
-#		else_if = {
-#			limit = {
-#				has_technology_researched  = steel_frame_buildings
-#			}
-#			activate_production_method = {
-#				building_type = building_urban_center
-#				production_method = pm_covered_markets
-#			}
-#		}
-#		else_if = {
-#			limit = {
-#				has_technology_researched  = urban_planning
-#			}
-#			activate_production_method = {
-#				building_type = building_urban_center
-#				production_method = pm_market_squares
-#			}
-#		}
+		if = {
+			limit = {
+				total_urbanization > 0
+			}
+			set_variable = a
+		}
+		if = {
+			limit = {
+				modifier:state_diseconomies_of_scale_per_hundred_urbanization_mult > 0
+			}
+			set_variable = b
+		}
+		if = {
+			limit = {
+				modifier:state_diseconomies_of_scale_per_hundred_urbanization_add > 0
+			}
+			set_variable = c
+		}
+		add_modifier = {
+			name = modifier_hmps_diseconomies_of_scale
+			multiplier = {
+				add = total_urbanization
+				divide = 100
+				multiply = {
+					add = 1
+					add = modifier:state_diseconomies_of_scale_per_hundred_urbanization_mult
+					multiply = modifier:state_diseconomies_of_scale_per_hundred_urbanization_add
+				}
+				#min = 0 #To stop ppl getting positive construction efficency if we ever add more ways to reduce it
+			}
+			days = -1
+		}
 	}
 }
