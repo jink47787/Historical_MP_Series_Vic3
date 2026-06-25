@@ -49,7 +49,7 @@
 			custom_tooltip = { text = je_hmps_revanchism_extra_cultures_10 }
 		}
 		#every_in_list = { # UNCOMMENT ME TO ENABLE A LIST OF REGISTERED STATES FOR DEBUGING REASONS
-		#	variable = revanchism_states_which_have_been_owned_at_one_point
+		#	variable = revanchism_core_states_which_have_been_owned_at_one_point
 		#	custom_tooltip = { text = je_hmps_revanchism_get_state_name }
 		#}
 	}
@@ -58,7 +58,7 @@
 	custom_on_failure_header  = je_hmps_revanchism_mechanic_on_failure_header
 	on_fail = {
 		every_in_list = {
-			variable = revanchism_states_which_have_been_owned_at_one_point
+			variable = revanchism_core_states_which_have_been_owned_at_one_point
 			limit = {
 				NOT = {
 					any_scope_state = {
@@ -84,7 +84,7 @@
 			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:javan }
 		}
 		if = { limit = { c:JAP ?= THIS }
-			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:korean }
+			add_to_variable_list = { name = revanchism_bonus_cultures_50         target = cu:korean }
 		}
 		if = { limit = { c:RUS ?= THIS }
 			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:polish }
@@ -103,14 +103,9 @@
 		if = { limit = { c:GBR ?= THIS }
 			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:irish }
 			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:australian }
-			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:australian }
-			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:australian }
-			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:australian }
-			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:australian }
-			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:australian }
 			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:anglo_canadian }
 			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:franco_canadian }
-			add_to_variable_list = { name = revanchism_bonus_cultures         target = cu:boer }
+			add_to_variable_list = { name = revanchism_bonus_cultures_25         target = cu:boer }
 			add_to_variable_list = { name = revanchism_bonus_cultures_10         target = cu:bengali }
 			add_to_variable_list = { name = revanchism_bonus_cultures_10         target = cu:hindustani }
 		}
@@ -137,40 +132,16 @@
 		effect = {
 		
 			### GETTING LIST OF STATES THAT ARE UNDER OUR CONTROL #####
-			every_scope_state = {
-				limit = {
-					any_scope_culture = {
-						has_homeland = prev
-						OR = {
-							shares_tradition_trait_with_any_primary_culture = ROOT
-							is_primary_culture_of = ROOT
-							ROOT = { OR = {
-								is_target_in_variable_list = { name = revanchism_bonus_cultures target = prev }
-								is_target_in_variable_list = { name = revanchism_bonus_cultures_50 target = prev }
-								is_target_in_variable_list = { name = revanchism_bonus_cultures_25 target = prev }
-								is_target_in_variable_list = { name = revanchism_bonus_cultures_10 target = prev }
-							} }
-						}
-					}
-				}
-				state_region = {
-					root = {
-						if = {
-							limit = {
-								NOT = {
-									is_target_in_variable_list = { name = revanchism_states_which_have_been_owned_at_one_point target = prev }
-								}
-							}
-							add_to_variable_list = {
-								name = revanchism_states_which_have_been_owned_at_one_point
-								target = prev
-								#years = 20
-							}
-						}
-					}
-				}
+			#   Getting list of countries that are "Under Our Control"
+			add_to_temporary_list = temporary_list_of_tags_to_be_considered_under_root
+			every_subject_or_below = { add_to_temporary_list = temporary_list_of_tags_to_be_considered_under_root }
+			if = {
+				limit = { is_power_bloc_leader = yes }
+				power_bloc = { every_power_bloc_member = { add_to_temporary_list = temporary_list_of_tags_to_be_considered_under_root } }
 			}
-			every_subject_or_below = {
+			
+			every_in_list  = {
+				list = temporary_list_of_tags_to_be_considered_under_root
 				every_scope_state = {
 					limit = {
 						any_scope_culture = {
@@ -180,38 +151,26 @@
 								is_primary_culture_of = ROOT
 								ROOT = {
 									OR = {
-									is_target_in_variable_list = { name = revanchism_bonus_cultures target = prev }
-									is_target_in_variable_list = { name = revanchism_bonus_cultures_50 target = prev }
-									is_target_in_variable_list = { name = revanchism_bonus_cultures_25 target = prev }
-									is_target_in_variable_list = { name = revanchism_bonus_cultures_10 target = prev }
+										is_target_in_variable_list = { name = revanchism_bonus_cultures target = prev }
+										is_target_in_variable_list = { name = revanchism_bonus_cultures_50 target = prev }
+										is_target_in_variable_list = { name = revanchism_bonus_cultures_25 target = prev }
+										is_target_in_variable_list = { name = revanchism_bonus_cultures_10 target = prev }
 									}
 								}
 							}
 						}
 					}
-					state_region = {
-						root = {
-							if = {
-								limit = {
-									NOT = {
-										is_target_in_variable_list = { name = revanchism_states_which_have_been_owned_at_one_point target = prev }
-									}
-								}
-								add_to_variable_list = {
-									name = revanchism_states_which_have_been_owned_at_one_point
-									target = prev
-									#years = 20
-								}
-							}
-						}
-					}
+					state_region = { root = { add_to_variable_list = { #Note: The game doesnt allow for duplicates with in a list anyway so dont need to check
+								name = revanchism_core_states_which_have_been_owned_at_one_point
+								target = prev
+					} } }
 				}
 			}
 			
 			
 			### PURGING STATES WHICH ARE BOTH LOST AND NON VALID REVANCHIMS TARGETS (ie states that have been traded away)##############
 			every_in_list = {
-				variable = revanchism_states_which_have_been_owned_at_one_point
+				variable = revanchism_core_states_which_have_been_owned_at_one_point
 				limit = {
 					NOT = {
 						any_scope_state = {
@@ -226,7 +185,7 @@
 				}
 				ROOT = {
 					remove_list_variable = {
-						name = revanchism_states_which_have_been_owned_at_one_point
+						name = revanchism_core_states_which_have_been_owned_at_one_point
 						target = prev
 					}
 				}
@@ -239,7 +198,7 @@
 			set_variable = { name = enemy_revanchism_pops value = 0 }
 			
 			every_in_list = {
-				variable = revanchism_states_which_have_been_owned_at_one_point
+				variable = revanchism_core_states_which_have_been_owned_at_one_point
 				
 				### GETTING STATE REGION WEIGHTING
 				if = { limit = { any_scope_state = { any_scope_culture = {
@@ -269,7 +228,7 @@
 					set_local_variable  = { name = current_state_weight_multiplier value = 0.1 }
 				}
 				else = { # IF none of previous options were positive then we have lost a primary culture or tradition or something and the state ought to be removed from the list
-					ROOT = { remove_list_variable = { name = revanchism_states_which_have_been_owned_at_one_point target = prev } } # Removing state from list
+					ROOT = { remove_list_variable = { name = revanchism_core_states_which_have_been_owned_at_one_point target = prev } } # Removing state from list
 					set_local_variable  = { name = current_state_weight_multiplier value = 0 } # Setting weight to 0
 				}
 				
