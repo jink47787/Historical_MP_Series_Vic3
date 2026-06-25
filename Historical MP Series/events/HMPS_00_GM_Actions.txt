@@ -313,9 +313,16 @@ gm_actions.1 = {
 		}
 	}
 
-#Add Revanchism To scoped states
+#Add Revanchism To scoped states and to list of marked_country
 	option = {
 		name = gm_actions.1.revanchism
+		random_country = {
+			limit = {
+				has_modifier = modifier_marked_by_game_master
+				NOT = { this = scope:recipient }
+			}
+			save_scope_as = marked_country
+		}
 		scope:recipient = {
 			if = {
 				limit = {
@@ -327,16 +334,21 @@ gm_actions.1 = {
 				every_scope_state = {
 					limit = {
 						has_decree = decree_host_scope
-						has_modifier = modifier_hmps_revanchism_target
 					}
-					remove_modifier = modifier_hmps_revanchism_target
+					if = {
+						limit = {
+							has_modifier = modifier_hmps_revanchism_target
+						}
+						scope:marked_country = { remove_list_variable = { name = revanchism_states_which_have_been_owned_at_one_point target = prev.state_region } }
+						remove_modifier = modifier_hmps_revanchism_target
+					}
 				}
 			}
 			else_if = {
 				limit = {
 					any_scope_state = {
 						has_decree = decree_host_scope
-						NOT = {
+						NOT = { 
 							has_modifier = modifier_hmps_revanchism_target
 						}
 					}
@@ -344,13 +356,16 @@ gm_actions.1 = {
 				every_scope_state = {
 					limit = {
 						has_decree = decree_host_scope
-						NOT = {
-							has_modifier = modifier_hmps_revanchism_target
-						}
 					}
-					add_modifier = {
-						name = modifier_hmps_revanchism_target
-						years = 50
+					if = {
+						limit = {
+							NOT = { has_modifier = modifier_hmps_revanchism_target }
+						}
+						scope:marked_country = { add_to_variable_list = { name = revanchism_states_which_have_been_owned_at_one_point target = prev.state_region } }
+						add_modifier = {
+							name = modifier_hmps_revanchism_target
+							years = 50
+						}
 					}
 				}
 			}
