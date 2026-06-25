@@ -1,4 +1,4 @@
-﻿NGame = {
+NGame = {
 	START_DATE = "1836.1.1"
 	END_DATE = "1936.1.1"
 	SAVE_VERSION = 0
@@ -38,7 +38,7 @@ NCountry = {
 	URBAN_CENTER_BUILDING = "building_urban_center"
 	CONSCRIPTION_CENTER_BUILDING = "building_conscription_center"
 	NAVAL_LOGISTICS_CENTER_BUILDING = "building_naval_logistics_center"
-	LAND_LOGISTICS_CENTER_BUILDING = "building_land_logistics_center"
+	LAND_LOGISTICS_CENTER_BUILDING = "building_army_logistics_center"
 	CONSCRIPTION_CENTER_LEVEL_POPULATION_DIVISOR = 1000 # Civilian population is divded by this amount to calculate maximum conscription center level [>=1]
 	TRADE_CENTER_BUILDING = "building_trade_center"
 	MANOR_HOUSE_BUILDING = "building_manor_house"
@@ -166,6 +166,7 @@ NPolitics = {
 	GOVERNMENT_RADICAL_PETITION_THRESHOLD = 100 
 
 	LAW_ENACTMENT_MIN_TOTAL_DAYS = 1		# Minimum number of total days that an enactment checkpoint can take [>=1]
+	LAW_ENACTMENT_MIN_SPEED_FACTOR = 0.1	# Minimum value of (1 + enactment_speed), preventing extreme slowdowns [>0]
 	LAW_ENACTMENT_DEFAULT_BASE_DAYS = 90	# Default number of base days required to reach an enactment checkpoint [>=1]
 	LAW_ENACTMENT_COOLDOWN_DAYS = 730		# When an enactment fails, or is manually stopped after at least one checkpoint, that law can't be tried to be enacted for this many days [>=0]
 	LAW_ENACTMENT_ADVANCE_FACTOR = 2		# The _base_ advance chance is the success chance multiplied by this factor [>=1]
@@ -462,6 +463,7 @@ NEconomy = {
 	# Only one of the penalties below is ever applied, in the following priority order: Embargo, War
 	TRADE_CENTER_ADVANTAGE_EMBARGO_FACTOR = -100							# Trade Centers lose this amount of export/import advantage, scaled against % of opposite-direction trade is from markets where the owner is embargoed by the market controller
 	TRADE_CENTER_ADVANTAGE_AT_WAR_FACTOR = -75 								# Trade Centers lose this amount of export/import advantage, scaled against % of opposite-direction trade is from markets where the owner is at war with the market controller
+	TRADE_CENTER_PRESTIGE_MERCHANT_MARINE_ADVANTAGE_MULT = 0.25				# Trade Centers gain this multiplier on trade advantage when 100% of their merchant marine input is prestige goods
 
 	# Weights for Trade Center preference in importing/exporting to other specific Trade Centers
 	TRADE_CENTER_PREFERENCE_BASE = 1										# Base weight in preference for each other Trade Center
@@ -471,6 +473,7 @@ NEconomy = {
 	TRADE_CENTER_PREFERENCE_NO_INTEREST_DIVISOR = 0.25						# Added to weight divisor for each side that lacks an Interest in the other's market
 	TRADE_CENTER_PREFERENCE_DISTANCE_DIVISOR = 0.25							# Weight is divided by 1 + ( distance in sea nodes * this ) between the two Trade Centers' hubs, this is done last after other multipliers/divisors
 	TRADE_CENTER_PREFERENCE_TOLL_DIVISOR = 0.05								# Weight is divided by 1 + ( toll rate in whole percent * this ) for strait tolls along the route between two Trade Centers' hubs
+	SEA_DISTANCE_EXPECTED_TRAVEL_DISTANCE = 1000																																							  
 	MAX_TRADE_ROUTE_ALTERNATIVES = 3										# Maximum number of alternate sea paths calculated between world market hubs
 
 	MARKET_SHARE_FROM_GDP = 1.0					# Get this many points of market share per pound of GDP in states
@@ -494,6 +497,7 @@ NEconomy = {
 	BUILDING_WAGES_WELFARE_INCOME_FACTOR = 0.8 # A pop with welfare income has its wealth multiplied by 1 - ( the fraction of their income that is welfare * this ) to ensure buildings don't start wage dumping just because all employees are getting welfare
 	BUILDING_WAGES_OWNERSHIP_BUILDING_FACTOR = 0.5 # Buildings that own other buildings multiply their target wages by this to ensure profitability
 	BUILDING_WAGES_MIN_RELEVANT_POP_SIZE = 50 # Pops with less workforce than this are ignored when checking whether a profitable building should raise wages because of radicalizing workers
+	BUILDING_WAGES_MIN_EMPLOYEES_FOR_RELEVANT_POP_SIZE_CHECK = 200 # For the BUILDING_WAGES_MIN_RELEVANT_POP_SIZE to be checked, the buildings must have at least this many employees to avoid small buildings wage dumping																																																					
 	BUILDING_RAISE_WAGES_TARGET_WEALTH_MULT = 0.66 # Buildings will consider raising wages if any significant pops working in them have this or lower * the target wealth to expected SoL ratio
 	BUILDING_LOWER_WAGES_TARGET_WEALTH_MULT = 1.2 # Buildings will consider lowering wages if all significant pops working in them have this or higher * the target wealth to expected SoL ratio
 	BUILDING_WAGES_AVERAGE_PRODUCTIVITY_THRESHOLD = 0.5 # At which ratio to average productivity does BUILDING_WAGES_AVERAGE_PRODUCTIVITY_FACTOR start kicking in (average tends to be high due to ownership buildings & trade centers, so this value should be fairly low)
@@ -709,11 +713,14 @@ NEconomy = {
 	PRESTIGE_GOODS_INPUT_THROUGHPUT_BONUS = 0.2			# Bonus to throughput, scaled against proportion of input goods base value that is prestige goods
 	
 	TOLL_RATE_NO_TOLLS = 0.0							# Toll rate on No Tolls setting. Value is multiplied with goods value crossing a strait
-	TOLL_RATE_LOW_TOLLS = 0.10							# Toll rate on Low Tolls setting. Value is multiplied with goods value crossing a strait
-	TOLL_RATE_MEDIUM_TOLLS = 0.20						# Toll rate on Medium Tolls setting. Value is multiplied with goods value crossing a strait
-	TOLL_RATE_HIGH_TOLLS = 0.40							# Toll rate on High Tolls setting. Value is multiplied with goods value crossing a strait
+	TOLL_RATE_LOW_TOLLS = 0.05							# Toll rate on Low Tolls setting. Value is multiplied with goods value crossing a strait
+	TOLL_RATE_MEDIUM_TOLLS = 0.10						# Toll rate on Medium Tolls setting. Value is multiplied with goods value crossing a strait
+	TOLL_RATE_HIGH_TOLLS = 0.20							# Toll rate on High Tolls setting. Value is multiplied with goods value crossing a strait
 	TOLL_RATE_MULTIPLIER_FULL_CONTROL = 2.0				# Multiplie on the above value if a country controls both sides of a strait
 	STRAIT_FULL_CONTROL_TRADE_IMPORTANCE_MULT = 1.5	# Multiplier on strait trade importance when the controller controls both sides of the strait
+	STRAIT_TOLL_RATE_COOLDOWN_MONTHS = 6				# After changing a toll rate on a strait, you must wait this long to change it again
+	STRAIT_ACCESS_SETTING_COOLDOWN_MONTHS = 6			# After changing an access setting on a strait, you must wait this long to change it again
+	STRAIT_SETTING_COOLDOWN_GRACE_PERIOD_DAYS = 7		# After changing a strait setting, it takes this many days before the cooldown activates (to give you a chance to change your mind)
 	MAX_PIRATED_GOODS_PER_HUB = 0.25 					# Max % of goods that can be pirated in one Hub->Hub connection
 	PIRACY_SHIP_SPEED_TO_GOODS_RATIO = 0.003 			# The % of goods trade quantity that are stolen per speed of a ship.
 	PIRATED_GOODS_SALE_DISCOUNT = 0.5 					# How much % value goods we get when being sold and turned into income for the country
@@ -806,6 +813,9 @@ NMilitary = {
 
 	INVALID_NAVAL_MISSION_GRACE_PERIOD_DAYS = 10			# How many days a fleet with an invalid naval mission will wait before going back to port
 
+	FORMATION_AUTO_MERGE_GRACE_PERIOD_DAYS = 3			# Only auto-merge units into formations created within this many days
+	FORMATIONS_MERGE_DISTANCE = 1												 
+
 	COMMANDER_SUFFICIENT_CAPACITY_MULT = 1.5				# Commanders of a type are considered sufficient if their cumulative command limit is at least this times the total active combat units of that type
 
 	UNNECESSARY_PROMOTION_PENALTY_YEARS = 5				# Duration in years of the interest group approval penalty for unnecessary promotions
@@ -838,6 +848,8 @@ NMilitary = {
 	
 	MILITARY_FORMATION_AUTO_DEPLOY_DISTANCE_LIMIT = 150			# Armies are not auto-deployed to fronts that are located further than this pixel-distance from the army's current position
 
+																																												  
+
 	BASECAMP_WANTED_FORMATIONS_SCORE = 1.0			# The more formations we need to add to the basecamp the higher the score
 	BASECAMP_DISTANCE_SCORE_THRESHOLD = 100			# Is multiplied with penalties below and then is subtracted from the basecamp score
 	BASECAMP_DISTANCE_PENALTY = 0.4					# The further basecamp is from the formation the lower the score
@@ -856,7 +868,7 @@ NMilitary = {
 	BLOCKADE_WORLD_MARKET_ACCESS_IMPACT_SCALING = 0.75		# Reduction of world market access for blockaded world market hubs, scales against blockade level
 	BLOCKADE_SHIPPING_LANE_IMPACT_SCALING = 0.75			# Reduction of efficiency for blockaded shipping lanes, scales against blockade level of either start or end point, whichever is most blockaded
 	BLOCKADE_THROUGHPUT_IMPACT_SCALING = 0.75				# Reduction of throughput for buildings affected by blockades, scales against blockade level
-	BLOCKADE_SEA_PRESENCE_TRESHOLD = 0.5						# At what level of sea presence is the blockade effective
+	BLOCKADE_SEA_PRESENCE_THRESHOLD = 0.5						# At what level of sea presence is the blockade effective
 	BLOCKADE_FORCED_BATTLE_LEVEL = 1.0							# A fleet undocking from a state with at least this blockade level will be forced into a battle with the blockading fleet
 
 	# Defines below control port bombardment effects on enemy coastal states
@@ -873,6 +885,11 @@ NMilitary = {
 	SAILORS_PER_BUILDING_LEVEL = 1000				# The number of sailors per building level of Naval Administration
 	ACTIVE_SHIP_LIVING_CREW_PERCENTAGE = 0.1		# If a ship has this percentage of living crew or less, it is rendered inactive
 	SHIP_PARTICIPATE_IN_UPRISING_CREW_PERCENTAGE = 0.33		# If at least this ratio of a ship's crew is from a rebelling state, the ship can participate in an uprising
+
+																														   
+																										   
+																															 
+																																								   
 
 	SHIP_MAINTENANCE_SHIPYARD_PREMIUM_FACTOR = 0.2              # The profit margin shipyards get on maintenance costs (GoodsCost * (1 + this))
 	SHIP_MAINTENANCE_GOODS_TO_CONSTRUCTION_GOODS_FACTOR = 0.002		# The ratio of maintenance goods cost to construction goods cost for ships. Used to determine how many goods are needed for maintenance paid by shipyards
@@ -896,6 +913,14 @@ NMilitary = {
 	SHIP_POWER_PROJECTION_CREW_DAMAGE_MULTIPLIER = 0.33			# The multiplier applied to a ship's crew damage in calculating its power projection
 	SHIP_POWER_PROJECTION_ARMOR_MULTIPLIER = 0.33				# The multiplier applied to a ship's armor in calculating its power projection
 	SHIP_POWER_PROJECTION_HIT_POINTS_MULTIPLIER = 0.1			# The multiplier applied to a ship's max hit points in calculating its power projection
+
+	SHIP_CREW_STARTING_VETERANCY_EXPERIENCE = 0						# The amount of experience crew for a ship starts with when recruited
+	SHIP_MAX_VETERANCY_EXPERIENCE = 1000 							# Experience cap for a ship. Should be higher than the highest veterancy level experience threshold.
+	SHIP_VETERANCY_EXPERIENCE_DECAY_RATE = 0.01						# Percentage of experience lost per week when not on a mission.
+	SHIP_VETERANCY_EXPERIENCE_MIN_DECAY = 1							# Minimum amount of experience lost per week due to decay (if decay applies), regardless of current experience
+	SHIP_VETERANCY_BASE_EXPERIENCE_GAIN_BATTLE_VICTORY = 5 		# Base experience gain for a ship that was in a battle that was won by its side.
+	SHIP_VETERANCY_BASE_EXPERIENCE_GAIN_BATTLE_DEFEAT = 2			# Base experience gain for a ship that was in a battle that was lost by its side.
+	SHIP_VETERANCY_BASE_EXPERIENCE_GAIN_BATTLE_SUNK_ENEMY_SHIP = 1	# Base experience gain for a ship for each ship it has sunk in battle.
 
 	SHIP_COMBAT_POWER_HULL_DAMAGE_MULTIPLIER = 0.75				# The multiplier applied to a ship's hull damage in calculating its combat power
 	SHIP_COMBAT_POWER_CREW_DAMAGE_MULTIPLIER = 0.25				# The multiplier applied to a ship's crew damage in calculating its combat power
@@ -1045,6 +1070,8 @@ NDiplomacy = {
 	ALLY_WARGOAL_MAX_MANEUVERS_COST = 25				# When an ally adds a 'free' wargoal in a play, it cannot have a maneuvers cost higher than this
 
 	PERSONAL_UNION_ACTION_NAME = "personal_union"
+													  
+															   
 	INCREASE_AUTONOMY_OF_SELF_NAME = "da_increase_autonomy_of_self"
 	INCREASE_AUTONOMY_OF_SUBJECT_ACTION_NAME = "da_increase_autonomy_of_subject"
 	DECREASE_AUTONOMY_OF_SUBJECT_ACTION_NAME = "da_decrease_autonomy"
@@ -1110,6 +1137,7 @@ NDiplomacy = {
 	WAR_GOAL_INFAMY_DIPLO_PLAY_BACKER_REFUND = -1.00 	# Refund of infamy for war goals that are dropped for backers in a diplo play (due to play not escalating to war or backer switching sides)
 	WAR_GOAL_INFAMY_PEACE_REFUND = -0.5 				# Refund of infamy for war goals that are dropped due to a country capitulating or negotating peace without enforcing their wargoal
 	WAR_GOAL_INFAMY_REDUCTION_FOR_TARGET = -0.5 		# This much of a war goal's infamy value is removed from the target when target has it enforced on them
+
 	WAR_OUTCOME_MIN_WARGOAL_IMPACT = 10				# Minimum impact value for a wargoal when calculating war outcomes
 	WAR_OUTCOME_VICTORY_RATIO = 2.0					# Below this ratio of enforced wargoal impact, a victory is considered to be limited. If ratio is above this but both sides still enforced wargoals, it's a victory. If one side enforced all its wargoals and the other side enforced none, it's a total victory.
 	WAR_OUTCOME_VICTORY_MIN_ENFORCEMENT_RATIO = 0.5	# A side must enforce at least this fraction of their total wargoal impact to qualify for a victory, otherwise it is a limited victory
@@ -1252,6 +1280,7 @@ NDiplomacy = {
 	INTEREST_ARMY_INVOLVEMENT_CAP = 5000			# Max involvement from army strength
 	INTEREST_NAVY_INVOLVEMENT_CAP = 5000			# Max involvement from navy strength
 	INTEREST_TREATY_PACT_INVOLVEMENT_CAP = 5000		# Max involvement from treaties and pacts
+																																  
 	INTEREST_TIER_REDUCTION_GRACE_PERIOD_DAYS = 30		# When a country increases its interest tier, this many days must pass before the tier can be reduced
 
 	STRAIT_MIN_INTEREST_TIER_FOR_CATALYST = 1		# Minimum interest tier required for a country to get a catalyst from strait closing to military access
@@ -1311,6 +1340,10 @@ NDiplomacy = {
 	TREATY_ARTICLE_TREATY_PORT_ARTICLE_TYPE = "treaty_port"
 	TREATY_ARTICLE_INVESTMENT_RIGHTS_ARTICLE_TYPE = "foreign_investment_rights"
 	TREATY_ARTICLE_LAW_COMMITMENT_ARTICLE_TYPE = "law_commitment"
+															
+															  
+												  
+																	
 	DEFAULT_WAR_REPARATIONS_MONEY_TRANSFER = 0.1
 	TREATY_PROPOSAL_COOLDOWN_DAYS = 7 			# The number of days before you can send another treaty proposal after having one rejected
 	TREATY_DEFAULT_BINDING_DURATION_YEARS = 1
@@ -1780,6 +1813,7 @@ NCharacters = {
 	RECRUIT_COMMANDER_POOL_SIZE = 3
 	RECRUIT_COMMANDER_VALUE_MARGINAL = -50
 	RECRUIT_COMMANDER_VALUE_HISTORICAL = 50     # Prioritize showing historical commanders
+																																	   
 	RECRUIT_COMMANDER_VALUE_AGE_MULT = 0.5
 	RECRUIT_COMMANDER_VALUE_SAME_IGS = -40
 	RECRUIT_COMMANDER_REMOVE_AGE = 55			# removed from the recruit pool when they reach 55 years
@@ -1956,9 +1990,14 @@ NBattle = {
 	SHIP_INITIAL_READINESS = 0.0					# What readiness a ship has at the start of combat
 
 	SHIP_ATTACK_BASE_MISS_CHANCE = 0.2				# Base chance for a ship to miss its attack against another ship. This is further modified by a ship's accuracy
+																					 
 	SHIP_ATTACK_MIN_MISS_CHANCE = 0.01				# Minimum miss chance when a ship attacks
+																								   
+																											
+																															
 	SHIP_WITHDRAW_BASE_CHANCE = 0.5					# Base chance for a ship to successfully escape. The ship's speed is added to this.
 	SHIP_WITHDRAW_SPEED_FACTOR = 1.0				# Factor on speed when it's modifying withdraw chance.
+																																					
 
 	###### Withdraw Desire Calculation ######
 	## Withdraw desire = ( Damage Desire + Zero Damage Hit Ratio Desire ) * ( 1 + Overwhelming Odds Desire + Exposed Desire + Raiding Desire )
@@ -1991,9 +2030,12 @@ NBattle = {
 	FLEET_INTERCEPT_CHANCE_BASE = 10.0						# The chance (0-100) that a fleet will intercept as a base
 	FLEET_RAID_SUPPLY_CHANCE_BASE = 10.0					# The chance (0-100) that a fleet will raid supply as a base
 
+																																														 
+
 	NAVAL_BATTLE_LOG_INITIAL_SIZE_FACTOR = 8				# Initial reserved log size factor. This is multiplied by the number of ships in a battle to estimate number of entries needed. Too large a value and you allocate too much data, too little and you need to expand the array multiple times which is slow.
 	NAVAL_BATTLE_LOG_ENTRIES_PER_PAGE = 20				# Number of naval battle log entries shown per page in the battle log UI.
 	NAVAL_BATTLE_CONDITION_DAMAGE_RANGE = 0.25 				# When a naval battle condition applies damage to a ship, the actual damage will be in a range from (1 - this) * damage to (1 + this) * damage
+																																								
 
 	DEFAULT_NAVAL_BATTLE_CONDITION_TYPE = "naval_condition_calm_waters"		# If a naval battle is not able to select a valid condition due to all weights being 0 or something, it will override the selection to use this battle condition. This is a backup though and ideally all battle conditions should have a non-zero weight and there should always be at least one possible condition
 
@@ -2045,6 +2087,9 @@ NWar = {
 	STATE_CONQUEST_KEEP_ALL = 0.0
 
 	NUM_PROVINCES_FOR_ADVANCEMENT_SELECTION = 5		# After having computed weights for possible advancement provinces using front_battle_province_weight, filter out all but the X top weighted provinces. This is done to prevent randomly selecting an element that had a low weight.
+																									 
+																																				 
+																																						
 }
 
 NTravelNetwork = {
@@ -2095,6 +2140,10 @@ NText = {
 	DURATION_SHOW_YEARS_THRESHOLD = 1105	# Duration will show as years if it's at least this many days
 	DURATION_SHOW_MONTHS_THRESHOLD = 100	# Duration will show as months if it's at least this many days
 	DURATION_SHOW_WEEKS_THRESHOLD = 15		# Duration will show as weeks if it's at least this many days
+
+																								  
+																																	  
+																																	
 }
 
 NDebug = {
