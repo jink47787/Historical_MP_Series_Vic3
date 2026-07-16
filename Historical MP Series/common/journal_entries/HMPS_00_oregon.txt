@@ -1,0 +1,343 @@
+﻿REPLACE:je_oregon = { #Add JE buttons for targeting british columbia + to trigger oregon trail expedition specifically + to annex claimed states and start diploplay to hold them (UK is aggressor)
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	group = je_group_usa_manifest_destiny
+
+	scripted_button = hmps_start_oregon_settle_bc
+	scripted_button = hmps_end_oregon_settle_bc
+	scripted_button = hmps_survey_the_oregon_trail
+	scripted_button = hmps_send_demand_for_oregon
+	scripted_button = hmps_take_oregon_by_force
+
+	is_shown_when_inactive = {
+		c:USA ?= THIS
+	}
+
+	possible = {
+		c:USA ?= THIS
+	}
+
+	immediate = {
+		s:STATE_IDAHO.region_state:ORG = {
+			save_scope_as = hmps_oregon_trail_idaho_target
+		}
+		s:STATE_OREGON.region_state:ORG = {
+			save_scope_as = hmps_oregon_trail_oregon_target
+		}
+		s:STATE_WASHINGTON.region_state:ORG = {
+			save_scope_as = hmps_oregon_trail_washington_target
+		}
+		s:STATE_BRITISH_COLUMBIA.region_state:ORG = {
+			save_scope_as = hmps_oregon_trail_bc_target
+		}
+		c:ORG = {
+			save_scope_as = hmps_oregon_owner_country
+		}
+		ROOT = {
+			set_variable = {
+				name = hmps_oregon_trail_value
+				value = 10
+			}
+		}
+	}
+
+	complete = {
+		OR = {
+			AND = {
+				owns_entire_state_region = STATE_WASHINGTON
+				owns_entire_state_region = STATE_IDAHO
+				owns_entire_state_region = STATE_OREGON
+			}
+			c:ORG ?= {
+				is_subject_of = ROOT
+			}
+		}
+	}
+
+	on_complete = {
+		add_journal_entry = {
+			type = je_manifest_destiny_mexico
+			target = c:USA
+		}
+		set_variable = hmps_oregon_border_dispute_over
+		if = {
+			limit = {
+				NOT = {
+					c:USA = {
+						has_claim = s:STATE_IDAHO
+					}
+				}
+			}
+			s:STATE_IDAHO = {
+				add_homeland = cu:yankee
+				add_claim = c:USA
+			}	
+		}
+		if = {
+			limit = {
+				NOT = {
+					c:USA = {
+						has_claim = s:STATE_OREGON
+					}
+				}
+			}
+			s:STATE_OREGON= {
+				add_homeland = cu:yankee
+				add_claim = c:USA
+			}	
+		}
+		if = {
+			limit = {
+				NOT = {
+					c:USA = {
+						has_claim = s:STATE_WASHINGTON
+					}
+				}
+			}
+			s:STATE_WASHINGTON = {
+				add_homeland = cu:yankee
+				add_claim = c:USA
+			}	
+		}
+	}
+
+	on_weekly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					NOT = {
+						c:USA = {
+							has_claim = s:STATE_IDAHO
+							has_claim = s:STATE_OREGON
+							has_claim = s:STATE_WASHINGTON
+							has_claim = s:STATE_BRITISH_COLUMBIA
+						}
+					}
+				}
+				random_state = {
+					limit = {
+						owner = ROOT
+						is_incorporated = yes
+						is_homeland = cu:yankee
+					}
+					if = {
+						limit = {
+							NOT = {
+								has_global_variable = oregon_trail_mapped
+							}
+						}
+						if = {
+							limit = {
+								NOT = {
+									c:USA = {
+										has_claim = s:STATE_IDAHO
+									}
+								}
+							}
+							random_scope_pop = {
+								limit = {
+									culture = cu:yankee
+									strata = lower
+								}
+								move_partial_pop = {
+									state = scope:hmps_oregon_trail_idaho_target
+									population = ROOT.var:hmps_oregon_trail_value
+								}
+							}
+						}
+						if = {
+							limit = {
+								NOT = {
+									c:USA = {
+										has_claim = s:STATE_OREGON
+									}
+								}
+							}
+							random_scope_pop = {
+								limit = {
+									culture = cu:yankee
+									strata = lower
+								}
+								move_partial_pop = {
+									state = scope:hmps_oregon_trail_oregon_target
+									population = ROOT.var:hmps_oregon_trail_value
+								}
+							}
+						}
+						if = {
+							limit = {
+								NOT = {
+									c:USA = {
+										has_claim = s:STATE_WASHINGTON
+									}
+								}
+							}
+							random_scope_pop = {
+								limit = {
+									culture = cu:yankee
+									strata = lower
+								}
+								move_partial_pop = {
+									state = scope:hmps_oregon_trail_washington_target
+									population = ROOT.var:hmps_oregon_trail_value
+								}
+							}
+						}
+						if = {
+							limit = {
+								ROOT = {
+									has_variable = hmps_oregon_trail_to_british_columbia
+								}
+								NOT = {
+									c:USA = {
+										has_claim = s:STATE_BRITISH_COLUMBIA
+									}
+								}
+							}
+							random_scope_pop = {
+								limit = {
+									culture = cu:yankee
+									strata = lower
+								}
+								move_partial_pop = {
+									state = scope:hmps_oregon_trail_bc_target
+									population = ROOT.var:hmps_oregon_trail_value
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			if = {
+				limit = {
+					NOT = {
+						has_variable = hmps_otm
+					}
+					has_global_variable = oregon_trail_mapped
+				}
+				set_variable = hmps_otm	
+				change_variable = {
+					name = hmps_oregon_trail_value
+					add = 40
+				}
+			}	
+			if = {
+				limit = {
+					NOT = {
+						exists = c:ORG
+					}
+				}
+				random_country = {
+					limit = {
+						any_scope_state = {
+							OR = {
+								state_region = s:STATE_IDAHO
+								state_region = s:STATE_OREGON
+								state_region = s:STATE_WASHINGTON
+								state_region = s:STATE_BRITISH_COLUMBIA
+							}
+						}
+						is_subject_of = c:GBR
+					}
+					save_scope_as = hmps_oregon_owner_country
+				}
+				s:STATE_IDAHO.region_state:scope:hmps_oregon_owner_country = {
+					save_scope_as = hmps_oregon_trail_idaho_target
+				}
+				s:STATE_OREGON.region_state:scope:hmps_oregon_owner_country = {
+					save_scope_as = hmps_oregon_trail_oregon_target
+				}
+				s:STATE_WASHINGTON.region_state:scope:hmps_oregon_owner_country = {
+					save_scope_as = hmps_oregon_trail_washington_target
+				}
+				s:STATE_BRITISH_COLUMBIA.region_state:hmps_oregon_owner_country = {
+					save_scope_as = hmps_oregon_trail_bc_target
+				}
+			}		
+			if = {
+				limit = {
+					NOT = {
+						cu:yankee = {
+							has_homeland = s:STATE_IDAHO
+						}
+					}
+					s:STATE_IDAHO.region_state:ORG = {
+						culture_percent_state = {
+							target = cu:yankee
+							value >= 0.2
+						}
+					}
+				}
+				s:STATE_IDAHO = {
+					add_homeland = cu:yankee
+					add_claim = c:USA
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						cu:yankee = {
+							has_homeland = s:STATE_OREGON
+						}
+					}
+					s:STATE_OREGON.region_state:ORG = {
+						culture_percent_state = {
+							target = cu:yankee
+							value >= 0.4
+						}
+					}
+				}
+				s:STATE_OREGON = {
+					add_homeland = cu:yankee
+					add_claim = c:USA
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						cu:yankee = {
+							has_homeland = s:STATE_WASHINGTON
+						}
+					}
+					s:STATE_WASHINGTON.region_state:ORG = {
+						culture_percent_state = {
+							target = cu:yankee
+							value >= 0.33
+						}
+					}
+				}
+				s:STATE_WASHINGTON = {
+					add_homeland = cu:yankee
+					add_claim = c:USA
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						cu:yankee = {
+							has_homeland = s:STATE_BRITISH_COLUMBIA
+						}
+					}
+					s:STATE_BRITISH_COLUMBIA.region_state:ORG = {
+						culture_percent_state = {
+							target = cu:yankee
+							value >= 0.15
+						}
+					}
+				}
+				s:STATE_BRITISH_COLUMBIA = {
+					add_homeland = cu:yankee
+					add_claim = c:USA
+				}
+			}
+		}
+	}
+	weight = 100
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+}
