@@ -1,0 +1,90 @@
+﻿regional_investment_building_allowed = {
+	# Government/private construction without an investor_country is domestic.
+	trigger_if = {
+		limit = {
+			NOT = { exists = scope:investor_country }
+		}
+		always = yes
+	}
+	trigger_else = {
+		# Keep the state owner available while checking the investor country.
+		owner = {
+			save_temporary_scope_as = regional_investment_state_owner
+		}
+		# Vanilla investment rights granted by a top overlord also apply to
+		# states owned by that overlord's subjects.
+		trigger_if = {
+			limit = {
+				exists = scope:regional_investment_state_owner.top_overlord
+			}
+			scope:regional_investment_state_owner.top_overlord = {
+				save_temporary_scope_as = regional_investment_top_overlord
+			}
+		}
+		OR = {
+			# The state's owner is the investor's own country.
+			owner = scope:investor_country
+
+			# Vanilla treaty foreign investment rights.
+			scope:investor_country = {
+				has_treaty_foreign_investment_rights_with = {
+					TARGET = scope:regional_investment_state_owner
+				}
+			}
+
+			# An overlord may invest in its subject. This is separate from the
+			# subject investment-rights pact below.
+			scope:regional_investment_state_owner = {
+				is_subject_of = scope:investor_country
+			}
+
+			# A foreign investor with rights from the subject's top overlord
+			# also retains those rights in the subject's states.
+			AND = {
+				scope:regional_investment_top_overlord ?= {
+					scope:investor_country = {
+						has_treaty_foreign_investment_rights_with = {
+							TARGET = scope:regional_investment_top_overlord
+						}
+					}
+				}
+			}
+
+			# A subject may invest in its overlord only while the special vanilla
+			# investment-rights diplomatic action is active. Ordinary subject
+			# relations must not grant this permission.
+			AND = {
+				scope:investor_country = {
+					is_subject_of = scope:regional_investment_state_owner
+					any_scope_diplomatic_pact = {
+						OR = {
+							is_diplomatic_action_type = da_overlord_grant_investment_rights
+							is_diplomatic_action_type = da_subject_request_investment_rights
+						}
+						"diplomatic_pact_other_country(scope:investor_country)" = scope:regional_investment_state_owner
+					}
+				}
+			}
+
+			# Vanilla power-bloc foreign investment principle: a member with
+			# principle_foreign_investment_3 may invest in lower-ranked members.
+			AND = {
+				scope:investor_country.power_bloc ?= {
+					has_principle = principle:principle_foreign_investment_3
+					any_power_bloc_member = {
+						this = scope:regional_investment_state_owner
+					}
+					scope:regional_investment_state_owner = {
+						country_rank > scope:investor_country.country_rank
+					}
+				}
+			}
+
+			# Regional investment rights granted by this mod.
+			is_target_in_variable_list = {
+				name = regional_investment_rights_investors
+				target = scope:investor_country
+			}
+		}
+	}
+}

@@ -1,0 +1,50 @@
+﻿on_state_owner_change = {
+	on_actions = { regional_investment_state_owner_changed }
+}
+
+on_monthly_pulse_state = {
+	on_actions = { regional_investment_state_monthly_cleanup }
+}
+
+regional_investment_state_owner_changed = {
+	effect = {
+		regional_investment_clear_state_slots = yes
+	}
+}
+
+regional_investment_state_monthly_cleanup = {
+	effect = {
+		if = {
+			limit = {
+				has_variable_list = regional_investment_rights_investors
+			}
+			clear_variable_list = regional_investment_rights_investors
+		}
+		owner = {
+			save_scope_as = regional_investment_state_owner
+			every_scope_treaty = {
+				limit = {
+					any_scope_article = {
+						has_type = regional_investment_rights
+						input_state ?= root
+					}
+				}
+				every_scope_article = {
+					limit = {
+						has_type = regional_investment_rights
+						input_state ?= root
+					}
+					target_country = {
+						save_scope_as = regional_investment_rebuild_investor
+					}
+					root = {
+						add_to_variable_list = {
+							name = regional_investment_rights_investors
+							target = scope:regional_investment_rebuild_investor
+						}
+					}
+				}
+			}
+		}
+	}
+}
