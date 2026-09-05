@@ -1,0 +1,537 @@
+﻿#Oregon Border Dispute Buttons
+hmps_start_oregon_settle_bc = {
+	name = "hmps_start_oregon_settle_bc_button"
+	desc = "hmps_start_oregon_settle_bc_button_desc"
+
+	visible = { 
+		NOT = {
+			has_variable = hmps_oregon_trail_to_british_columbia
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = hmps_settle_bc_tt
+
+			NOT = {
+				has_variable = hmps_oregon_trail_to_british_columbia
+			}
+			NOT = {
+				has_variable = hmps_usa_decision_cooldown
+			}
+		}
+	}
+
+	effect = {
+		ROOT = {
+			set_variable = hmps_oregon_trail_to_british_columbia
+		}
+		set_variable = {
+			name = hmps_usa_decision_cooldown
+			months = 6
+		}
+		hidden_effect = {
+			s:STATE_BRITISH_COLUMBIA.region_state:ORG = {
+				if = {
+					limit = {
+						NOT = {
+							any_scope_pop = {
+								has_pop_culture = yankee
+							}
+						}
+					}
+					create_pop = {			
+						culture = yankee
+						size = 100
+					}
+				}
+			}
+		}
+	}
+}
+
+hmps_end_oregon_settle_bc = {
+	name = "hmps_end_oregon_settle_bc_button"
+	desc = "hmps_end_oregon_settle_bc_button_desc"
+
+	visible = {
+		has_variable = hmps_oregon_trail_to_british_columbia
+		NOT = {
+			c:USA = {
+				has_claim = STATE_BRITISH_COLUMBIA
+			}
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = hmps_end_settle_bc_tt
+
+			has_variable = hmps_oregon_trail_to_british_columbia
+			NOT = {
+				has_variable = hmps_usa_decision_cooldown
+			}
+		}
+		NOT = {
+			c:USA = {
+				has_claim = s:STATE_BRITISH_COLUMBIA
+			}
+		}
+	}
+
+	effect = {
+		ROOT = {
+			remove_variable = hmps_oregon_trail_to_british_columbia
+		}
+		set_variable = {
+			name = hmps_usa_decision_cooldown
+			months = 6
+		}
+	}
+}
+
+hmps_survey_the_oregon_trail = {
+	name = "hmps_survey_the_oregon_trail_button"
+	desc = "hmps_survey_the_oregon_trail_button_desc"
+
+	visible = { 
+		NOT = {
+			has_global_variable = oregon_trail_mapped
+		}
+		NOT = {  has_variable = on_expedition }
+		OR = {
+			is_ai = no
+			NOT = { has_variable = ai_expedition_cooldown }
+		}
+	}
+
+	possible = {
+		is_at_war = no
+		has_technology_researched = quinine
+		any_scope_character = {
+			OR = {
+				has_role_of_type = general
+				has_role_of_type = admiral
+			}
+			count >= 3
+		}
+	}
+
+	effect = {
+		ROOT = {
+			set_variable = hmps_surveying_oregon_trail_usa
+		}
+		if = {
+			limit = {
+				is_player = yes
+			}
+			trigger_event = { id = expedition_events.200 popup = yes }
+			set_variable = on_expedition
+		}
+		else = {
+			set_variable = AI_EXPEDITION_WAMERICA
+			ai_expedition_simulator_start = yes
+		}
+		hidden_effect = {
+			set_variable = {
+				name = ai_expedition_cooldown
+				value = yes
+				days = 1825
+			}
+		}
+	}
+}
+
+hmps_send_demand_for_oregon = {
+	name = "hmps_send_demand_for_oregon_button"
+	desc = "hmps_send_demand_for_oregon_button_desc"
+
+	visible = { 
+		NOT = {
+			has_variable = hmps_sent_oregon_demand
+		}
+	}
+
+	possible = {
+		any_state = {
+			filter = {
+				OR = {
+					state_region = s:STATE_IDAHO
+					state_region = s:STATE_OREGON
+					state_region = s:STATE_WASHINGTON
+					state_region = s:STATE_BRITISH_COLUMBIA
+				}
+			}
+			count >= 2
+			has_claim_by = c:USA
+			NOR = {
+				owner = {
+					is_country_type = decentralized
+				}
+				owner = c:USA
+			}
+		}
+	}
+
+	effect = {
+		set_variable = hmps_sent_oregon_demand
+		set_variable = {
+			name = hmps_sent_oregon_demand_countdown
+			months = 3
+		}
+		c:GBR ?= { trigger_event = { id = oregon.2 } }
+	}
+}
+
+hmps_take_oregon_by_force = {
+	name = "hmps_take_oregon_by_force_button"
+	desc = "hmps_take_oregon_by_force_button_desc"
+
+	visible = { 
+		NOT = {
+			any_state = {
+				filter = {
+					OR = {
+						state_region = s:STATE_IDAHO
+						state_region = s:STATE_OREGON
+						state_region = s:STATE_WASHINGTON
+						state_region = s:STATE_BRITISH_COLUMBIA
+					}
+				}
+				count >= 3
+				OR = {
+					owner = c:USA
+					owner = {
+						OR = {
+							is_subject_of = c:USA
+							is_indirect_subject_of = c:USA
+						}
+					}
+				}
+			}
+		}
+	}
+
+	possible = {
+		any_state = {
+			filter = {
+				OR = {
+					state_region = s:STATE_IDAHO
+					state_region = s:STATE_OREGON
+					state_region = s:STATE_WASHINGTON
+					state_region = s:STATE_BRITISH_COLUMBIA
+				}
+			}
+			count >= 3
+			has_claim_by = c:USA
+			NOR = {
+				owner = {
+					is_country_type = decentralized
+				}
+				owner = c:USA
+			}
+		}
+		NOT = {
+			ROOT = {
+				has_truce_with = c:GBR
+			}
+		}
+		NOT = {
+			any_scope_treaty = {
+				binds = c:GBR
+				any_scope_article = {
+					count >= 1
+					OR = {
+						has_type = defensive_pact
+						has_type = alliance
+					}
+				}
+			}
+		}			
+	}
+
+	effect = {
+		every_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_IDAHO
+					state_region = s:STATE_OREGON
+					state_region = s:STATE_WASHINGTON
+					state_region = s:STATE_BRITISH_COLUMBIA
+				}
+				has_claim_by = c:USA
+			}
+			set_state_owner = c:USA
+		}
+		hidden_effect = {
+			trigger_event = {
+				id = hmps_obd.1
+				days = 5
+			}
+		}
+	}
+}
+
+# Manifest Destiny Buttons
+hmps_initiate_manifest_destiny = {
+	name = "hmps_initiate_manifest_destiny"
+	desc = "hmps_initiate_manifest_destiny_desc"
+
+	visible = {
+		always = yes
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = hmps_brd
+
+			has_global_variable = buenaventura_river_disproven
+		}
+		custom_tooltip = {
+			text = hmps_gslm
+
+			has_global_variable = great_salt_lake_mapped
+		}
+	}
+
+	effect = {
+		if = {
+			limit = {
+				owns_entire_state_region = STATE_CALIFORNIA
+				owns_entire_state_region = STATE_NEVADA
+				owns_entire_state_region = STATE_UTAH
+				owns_entire_state_region = STATE_ARIZONA
+				owns_entire_state_region = STATE_NEW_MEXICO
+				owns_entire_state_region = STATE_TEXAS
+			}
+			trigger_event = { id = manifest_destiny.1 }
+		}
+		ig:ig_landowners ?= {
+			add_modifier = {
+				name = ig_manifest_destiny
+				days = normal_modifier_time
+			}
+		}
+		ig:ig_intelligentsia ?= {
+			add_modifier = {
+				name = ig_manifest_destiny
+				days = normal_modifier_time
+				multiplier = -1
+			}
+		}
+		if = {
+			limit = {
+				exists = c:MEX
+			}
+			create_incident = {
+				country = c:MEX
+				value = 20
+			}
+			change_relations = {
+				country = c:MEX
+				value = -50
+			}
+		}
+		s:STATE_CALIFORNIA = {
+			if = {
+				limit = {
+					any_scope_state = {
+						 NOT = {
+							owner = ROOT
+						}
+					}
+				}
+				add_claim = ROOT
+			}
+		}
+		s:STATE_NEVADA = {
+			if = {
+				limit = {
+					any_scope_state = {
+						NOT = {
+							owner = ROOT
+						}
+					}
+				}
+				add_claim = ROOT
+			}
+		}
+		s:STATE_UTAH = {
+			if = {
+				limit = {
+					any_scope_state = {
+						NOT = {
+							owner = ROOT
+						}
+					}
+				}
+				add_claim = ROOT
+			}
+		}
+		s:STATE_ARIZONA = {
+			if = {
+				limit = {
+					any_scope_state = {
+						NOT = {
+							owner = ROOT
+						}
+					}
+				}
+				add_claim = ROOT
+			}
+		}
+		s:STATE_NEW_MEXICO = {
+			if = {
+				limit = {
+					any_scope_state = {
+						NOT = {
+							owner = ROOT
+						}
+					}
+				}
+				add_claim = ROOT
+			}
+		}
+		s:STATE_TEXAS = {
+			if = {
+				limit = {
+					any_scope_state = {
+						NOT = {
+							owner = ROOT
+						}
+					}
+				}
+				add_claim = ROOT
+			}
+		}
+		set_variable = manifested_destiny
+	}
+}
+
+hmps_send_demand_for_mexican_states = {
+	name = "hmps_send_demand_for_mexican_states"
+	desc = "hmps_send_demand_for_mexican_states_desc"
+
+	visible = {
+		NOT = {
+			has_variable = hmps_mexican_american_war_demands
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = hmps_texan_statehood_tt
+		
+			has_variable = manifested_destiny
+		}
+		c:MEX ?= {
+			relations:ROOT <= relations_threshold:cold
+		}
+		NOT = {
+			any_scope_treaty = {
+				binds = c:MEX
+				any_scope_article = {
+					count >= 1
+					OR = {
+						has_type = defensive_pact
+						has_type = alliance
+					}
+				}
+			}
+		}
+	}
+
+	effect = {
+		change_infamy = 25
+		set_variable = hmps_mexican_american_war_demands
+		c:MEX ?= { trigger_event = { id = manifest_destiny.4 } }
+	}
+}
+
+# Reconstruction Buttons
+hmps_decreased_discrimination_against_afro_americans = {
+	name = "hmps_decreased_discrimination_against_afro_americans"
+	desc = "hmps_decreased_discrimination_against_afro_americans_desc"
+
+	visible = {
+		NOT = {
+			has_variable = hmps_gained_afro_american_loyalists
+		}
+	}
+
+	possible = {
+		has_law = law_type:law_language_discrimination
+	}
+
+	effect = {
+		set_variable = hmps_gained_afro_american_loyalists
+		every_state = {
+			limit = {
+				is_in_geographic_region = geographic_region_north_america
+				owner = ROOT
+			}
+			add_loyalists_in_state = {
+				value = 0.1
+				culture = cu:afro_american
+			}
+			add_radicals_in_state = {
+				value = 0.05
+				culture = cu:dixie
+			}
+		}
+	}
+}
+
+hmps_instate_sharecropping = {
+	name = "hmps_instate_sharecropping"
+	desc = "hmps_instate_sharecropping_desc"
+
+	visible = {
+		NOT = {
+			has_variable = hmps_instated_sharecropping
+		}
+	}
+
+	possible = {
+		NOR = {
+			has_law = law_type:law_language_discrimination
+			has_law = law_type:law_cultural_exclusion
+			has_law = law_type:law_multicultural
+		}
+		NOT = {
+			has_law = law_type:law_collectivized_agriculture
+		}
+	}
+
+	effect = {
+		set_variable = hmps_instated_sharecropping
+		add_modifier = hmps_sharecropping
+		every_state = {
+			limit = {
+				is_in_geographic_region = geographic_region_hmps_csa
+				owner = ROOT
+			}
+			add_loyalists_in_state = {
+				value = 0.05
+				culture = cu:dixie
+			}
+		}
+	}
+}
+
+hmps_end_reconstruction_early = {
+	name = "hmps_end_reconstruction_early"
+	desc = "hmps_end_reconstruction_early_desc"
+
+	visible = {
+		always = yes
+	}
+
+	possible = {
+		var:reconstruction_var >= 2
+	}
+
+	effect = {
+		set_variable = hmps_ended_reconstruction_early
+	}
+}
