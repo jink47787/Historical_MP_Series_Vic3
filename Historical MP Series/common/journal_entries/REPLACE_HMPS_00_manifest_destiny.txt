@@ -1,67 +1,237 @@
-﻿REPLACE:je_manifest_destiny_mexico = {
+REPLACE:je_manifest_destiny_mexico = {
 	icon = "gfx/interface/icons/event_icons/event_military.dds"
-	
+
 	group = je_group_usa_manifest_destiny
+
+	scripted_button = hmps_initiate_manifest_destiny
+	scripted_button = hmps_send_demand_for_mexican_states
+
+	scripted_progress_bar = hmps_manifest_destiny_time_limit_bar
+	progressbar = yes
 	
-	# note that if you change this, also update the decision
-	# added variable for mexico to reverse manifest destiny
+	immediate = {
+		ROOT = {
+			set_variable = {
+				name = hmps_manifest_destiny_completion_var
+				value = 0
+			}
+		}
+		c:MEX = {
+			save_scope_as = hmps_mex_scope
+		}
+	}
+
+	current_value = {
+		value = root.var:hmps_manifest_destiny_completion_var
+	}
+
+	goal_add_value = {
+		value = 60
+	}
+
 	complete = {
-		owns_entire_state_region = STATE_CALIFORNIA
-		owns_entire_state_region = STATE_NEVADA
-		owns_entire_state_region = STATE_UTAH
-		owns_entire_state_region = STATE_ARIZONA
-		owns_entire_state_region = STATE_NEW_MEXICO
-		owns_entire_state_region = STATE_TEXAS
+		scope:journal_entry = { is_goal_complete = yes }
 	}
 
 	on_complete = {
 		trigger_event = { id = manifest_destiny.1 }
-		trigger_event = { id = usa_politics.2 }
-		custom_tooltip = {
-			text = america_win
-			set_global_variable = mexican_cession_complete
+	}
+
+	fail = {
+		scope:journal_entry = {
+			"scripted_bar_progress(hmps_manifest_destiny_time_limit_bar)" <= 0
+		}
+		NOT = {
+			every_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_CALIFORNIA
+						state_region = s:STATE_NEVADA
+						state_region = s:STATE_UTAH
+						state_region = s:STATE_ARIZONA
+						state_region = s:STATE_NEW_MEXICO
+						state_region = s:STATE_TEXAS
+					}
+				}
+				owner = c:USA
+				OR = {
+					is_incorporated = yes
+					incorporation_progress >= 0.25
+				}
+			}
 		}
 	}
 	
-	fail = {
-		OR = {
-			custom_tooltip = {
-				text = mexico_win
-				has_global_variable = repudiate_manifest_destiny
+	on_fail = {
+		every_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_CALIFORNIA
+					state_region = s:STATE_NEVADA
+					state_region = s:STATE_UTAH
+					state_region = s:STATE_ARIZONA
+					state_region = s:STATE_NEW_MEXICO
+					state_region = s:STATE_TEXAS
+				}
+				owner = c:USA
 			}
-			has_global_variable = mexican_cession_complete
+			set_state_type = unincorporated
+			remove_claim = c:USA
+		}
+	}
+
+	on_monthly_pulse = {
+		if = {
+			limit = {
+				every_state = {
+					limit = {
+						OR = {
+							state_region = s:STATE_CALIFORNIA
+							state_region = s:STATE_NEVADA
+							state_region = s:STATE_UTAH
+							state_region = s:STATE_ARIZONA
+							state_region = s:STATE_NEW_MEXICO
+							state_region = s:STATE_TEXAS
+						}
+					}
+					owner = c:USA
+					is_incorporated = yes
+				}
+			}
+			ROOT = {
+				change_variable = {
+					name = hmps_manifest_destiny_completion_var
+					add = 1
+				}
+			}
 		}
 	}
 
 	weight = 100
+		
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
 REPLACE:je_manifest_destiny_frontier_wars = {
 	icon = "gfx/interface/icons/event_icons/event_map.dds"
-	
+
 	group = je_group_usa_manifest_destiny
-	
+
+	modifiers_while_active = {
+		hmps_usa_frontier_wars_modifier
+	}
+
 	# note that if you change this, also update the decision
 	complete = {
 		owns_entire_state_region = STATE_MONTANA
 		owns_entire_state_region = STATE_WYOMING
-		owns_entire_state_region = STATE_COLORADO
 		owns_entire_state_region = STATE_NORTH_DAKOTA
 		owns_entire_state_region = STATE_SOUTH_DAKOTA
 		owns_entire_state_region = STATE_NEBRASKA
 		owns_entire_state_region = STATE_KANSAS
 	}
-	
-	fail = {
-			has_global_variable = frontier_wars_complete
-	}
-	
+
 	on_complete = {
 		trigger_event = { id = manifest_destiny.2 }
-		set_global_variable = frontier_wars_complete
-		
-		
+		set_global_variable = hmps_frontier_wars_done
+		hidden_effect = {
+			s:STATE_OKLAHOMA = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
+						}
+					}
+					add_claim = ROOT
+				}
+			}
+			s:STATE_MONTANA = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
+						}
+					}
+					add_claim = ROOT
+				}
+			}
+			s:STATE_WYOMING = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
+						}
+					}
+					add_claim = ROOT
+				}
+			}
+			s:STATE_COLORADO = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
+						}
+					}
+					add_claim = ROOT
+				}
+			}
+			s:STATE_NORTH_DAKOTA = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
+						}
+					}
+					add_claim = ROOT
+				}
+			}
+			s:STATE_SOUTH_DAKOTA = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
+						}
+					}
+					add_claim = ROOT
+				}
+			}
+			s:STATE_NEBRASKA = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
+						}
+					}
+					add_claim = ROOT
+				}
+			}
+			s:STATE_KANSAS = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
+						}
+					}
+					add_claim = ROOT
+				}
+			}
+		}
 	}
 
 	on_monthly_pulse = {
@@ -70,9 +240,10 @@ REPLACE:je_manifest_destiny_frontier_wars = {
 			1 = manifest_destiny.3
 		}
 	}
-	
+
 	weight = 100
-	
+
 	transferable = no
+		
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
