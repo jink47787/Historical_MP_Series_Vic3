@@ -1,0 +1,157 @@
+﻿namespace = acw_je_events
+
+# ACW end, reconstruction start
+acw_je_events.2 = {
+	type = country_event
+	event_image = {
+		video = "unspecific_factory_closed"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	title = acw_je_events.2.t
+	desc = acw_je_events.2.d
+	flavor = acw_je_events.2.f
+
+	duration = 3
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		# triggered by je_acw_war completion
+	}
+
+	immediate = {
+		set_variable = {
+			name = reconstruction_var
+			value = 0
+		}
+		set_variable = {
+			name = je_acw_wild_west_var
+			value = 0
+		}
+		if = {
+			limit = {
+				has_variable = csa_will_spawn_var
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = yes
+					is_capital = no
+					state_region = {
+						is_homeland = cu:dixie
+						NOT = { is_homeland = cu:yankee }
+						NOR = {
+							s:STATE_DELAWARE = this
+							s:STATE_DISTRICT_OF_COLUMBIA = this
+							s:STATE_MARYLAND = this
+						}
+					}
+				}
+				set_state_type = unincorporated
+				add_modifier = {
+					name = unreconstructed_state
+					years = 18
+				}
+			}
+		}
+		else = {
+			every_scope_state = {
+				limit = {
+					is_incorporated = yes
+					is_capital = no
+					state_region = {
+						is_homeland = cu:yankee
+						NOT = { is_homeland = cu:dixie }
+						NOR = {
+							s:STATE_DELAWARE = this
+							s:STATE_DISTRICT_OF_COLUMBIA = this
+							s:STATE_MARYLAND = this
+						}
+					}
+				}
+				set_state_type = unincorporated
+				add_modifier = {
+					name = unreconstructed_state
+					years = 18
+				}
+			}
+		}
+	}
+
+	option = {
+		name = acw_je_events.1.a
+
+		add_journal_entry = {
+			type = je_acw_reconstruction
+		}
+
+		add_journal_entry = { type = je_acw_reincorporate }
+		if = {
+			limit = {
+				has_law_or_variant = law_type:law_slavery_banned
+			}
+			add_journal_entry = {
+				type = je_acw_equality
+			}
+		}
+		else = {
+			change_variable = {
+				name = reconstruction_var
+				add = 1
+			}
+		}
+		add_journal_entry = {
+			type = je_acw_wild_wild_west
+		}
+	}
+}
+
+# Reconstruction ending event
+acw_je_events.3 = {
+	type = country_event
+	event_image = {
+		video = "europenorthamerica_london_center"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	title = acw_je_events.3.t
+	desc = acw_je_events.3.d
+	flavor = acw_je_events.3.f
+
+	duration = 3
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		# triggered by je_acw_war completion
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = acw_je_events.3.a
+
+		if = {
+			limit = {
+				has_variable = acw_gain_african_american
+			}
+			activate_law:law_type:law_cultural_exclusion
+		}
+		# revise this if we split the JE's
+		if = {
+			limit = {
+				NOT = {
+					has_variable = acw_gain_dixie
+				}
+			}
+			remove_modifier = hmps_a_divided_nation
+		}
+	}
+}
