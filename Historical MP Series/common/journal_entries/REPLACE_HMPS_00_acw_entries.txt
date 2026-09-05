@@ -1,4 +1,4 @@
-﻿REPLACE:je_acw_countdown = { #HMPS: Removing progress bar as HMPS changes makes is useless
+REPLACE:je_acw_countdown = { #HMPS: Removing progress bar as HMPS changes makes is useless
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 	
 	group = je_group_usa_american_civil_war
@@ -181,9 +181,45 @@ REPLACE:je_acw_reconstruction = {
 	
 	group = je_group_usa_american_civil_war
 
+	scripted_button = hmps_decreased_discrimination_against_afro_americans
+	scripted_button = hmps_instate_sharecropping
+	scripted_button = hmps_end_reconstruction_early
+
+	modifiers_while_active = {
+		hmps_jim_crow_laws
+	}
+		
+	immediate = {
+		ROOT = {
+			add_modifier = hmps_a_divided_nation
+		}
+		every_state_in_gr_csa = {
+			add_acceptance = {
+				culture = cu:afro_american
+				value = -20
+			}
+		}
+		if = {
+			OR = {
+				has_law = law_type:law_census_voting
+				has_law = law_type:law_universal_suffrage
+			}
+			active_law:lawgroup_distribution_of_power = {	
+				add_amendment = {
+					type = hmps_14th_amendment
+					sponser = intelligentsia
+					cooldown = 240
+				}
+			}
+		}
+	}
+
 	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
+		OR = {
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+			has_variable = hmps_ended_reconstruction_early
 		}
 	}
 
@@ -224,15 +260,9 @@ REPLACE:je_acw_reincorporate = {
 	immediate = {
 		every_scope_state = {
 			limit = {
-				state_region = {
-					is_homeland = cu:dixie
-				}
-				culture_percent_state = {
-					target = cu:dixie
-					value > 0
-				}
+				is_in_geographic_region = geographic_region_hmps_csa
 			}
-			root = {
+			ROOT = {
 				add_to_variable_list = {
 					name = acw_dixie_states
 					target = prev
@@ -247,18 +277,12 @@ REPLACE:je_acw_reincorporate = {
 
 			any_scope_state = {
 				filter = {
-					state_region = {
-						is_homeland = cu:dixie
-					}
-					culture_percent_state = {
-						target = cu:dixie
-						value > 0
-					}
+					is_in_geographic_region = geographic_region_hmps_csa
 				}
 				count = all
 				is_incorporated = yes
 				loyalist_fraction = {
-					value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+					value >= acw_reincorporate_dixie_loyalist_min
 					culture = cu:dixie
 				}
 			}
@@ -295,26 +319,14 @@ REPLACE:je_acw_reincorporate = {
 			if = {
 				limit = {
 					any_scope_state = {
-						state_region = {
-							is_homeland = cu:dixie
-						}
-						culture_percent_state = {
-							target = cu:dixie
-							value > 0
-						}
+						is_in_geographic_region = geographic_region_hmps_csa
 					}
 				}
 				every_scope_state = {
 					limit = {
-						state_region = {
-							is_homeland = cu:dixie
-						}
-						culture_percent_state = {
-							target = cu:dixie
-							value > 0
-						}
+						is_in_geographic_region = geographic_region_hmps_csa
 					}
-					root = {
+					ROOT = {
 						add_to_variable_list = {
 							name = acw_dixie_states
 							target = prev
@@ -357,13 +369,50 @@ REPLACE:je_acw_equality = {
 		c:USA = THIS
 	}
 
-	complete = { #HMPS: Changed completion requirement to getting language discrim
-		has_law = law_type:law_language_discrimination
+	immediate = {
+		every_scope_state = {
+			limit = {
+				is_in_geographic_region = geographic_region_north_america
+				culture_percent_state = {
+					target = cu:afro_american
+					value > 0.05
+				}
+				owner = ROOT
+			}
+			ROOT = {
+				add_to_variable_list = {
+					name = hmps_afroamerican_states
+					target = prev
+				}
+			}
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = "HMPS_ACW_EQUALITY_TT"
+
+			any_scope_state = {
+				filter = {
+					is_in_geographic_region = geographic_region_north_america
+					culture_percent_state = {
+						target = cu:afro_american
+						value > 0.05
+					}
+				}
+				owner = ROOT
+				count = all
+				loyalist_fraction = {
+					value >= hmps_equality_afro_american_loyalists_min
+					culture = cu:afro_american
+				}
+			}
+		}
 	}
 
 	on_complete = {
 		custom_tooltip = {
-			text = acw_african_american_culture
+			text = acw_afro_american_culture_hmps
 			set_variable = acw_gain_african_american
 		}
 		custom_tooltip = {
@@ -371,6 +420,34 @@ REPLACE:je_acw_equality = {
 			change_variable = {
 				name = reconstruction_var
 				add = 1
+			}
+		}
+	}
+
+	on_weekly_pulse = {
+		effect = {
+			clear_variable_list = hmps_afroamerican_states
+			if = {
+				limit = {
+					any_scope_state = {
+						is_in_geographic_region = geographic_region_north_america
+						culture_percent_state = {
+							target = cu:afro_american
+							value > 0.05
+						}
+					}
+				}
+				every_scope_state = {
+					limit = {
+						is_in_geographic_region = geographic_region_hmps_csa
+					}
+					root = {
+						add_to_variable_list = {
+							name = hmps_afroamerican_states
+							target = prev
+						}
+					}
+				}
 			}
 		}
 	}
