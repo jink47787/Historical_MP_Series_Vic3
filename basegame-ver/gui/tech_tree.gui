@@ -273,6 +273,11 @@ types tech_tree
 						tooltip = "TECHNOLOGY_SPREAD_RATE_TOOLTIP"
 					}
 				}
+
+				### SEARCH
+				search_bar = {
+					datacontext = "[TechTreePanel.GetSearchBar]"
+				}
 			}
 			
 			### TABS
@@ -449,7 +454,23 @@ types tech_tree
 				}
 			}
 		}
-		
+
+		### SEARCH RESULTS DROPDOWN
+		# Direct child of the derived window type so it is rendered above the tech tree and other buttons
+		search_bar_results = {
+			parentanchor = top|right
+			position = { -73 245 }
+			datacontext = "[TechTreePanel.GetSearchBar]"
+
+			blockoverride "result_tooltip" {
+				visible = "[Not(StringIsEmpty(SearchResult.GetKey))]"
+				datacontext = "[GetTechnology(SearchResult.GetKey)]"
+				tooltipwidget = {
+					FancyTooltip_Technology = {}
+				}
+			}
+		}
+
 		### CONTENT
 		blockoverride "scrollarea_content"
 		{
@@ -744,7 +765,16 @@ types tech_tree
 								tooltipwidget = {
 									FancyTooltip_Technology_Tech_Tree = {}
 								}
-								
+
+								### IS HIGHLIGHTED BY SEARCH
+								icon = {
+									visible = "[TechTreeItem.IsHighlightedBySearch]"
+									position = { 0 -20 }
+									parentanchor = center
+									using = rotate_glow_animation_02
+									size = { 600 600 }
+								}
+
 								### CAN RESEARCH
 								technology = {
 									visible = "[IsValid(Technology.Research(GetPlayer.Self))]"
@@ -886,10 +916,10 @@ types tech_tree
 		### RESEARCHING BACKGROUND GLOW
 		icon = {
 			visible = "[Technology.IsResearching(GetPlayer.Self)]"
-			position = { 0 -20 }
+			position = { 0 -10 }
 			parentanchor = center
-			using = rotate_glow_animation_02
-			size = { 500 500 }
+			using = rotate_glow_blue
+			size = { 600 600 }
 		}
 
 		### SIMPLE RECTANGULAR BACKGROUND GLOW
@@ -1086,11 +1116,10 @@ types tech_tree
 		
 		### CHECKMARK
 		widget = {
-			#visible = "[Technology.HasResearchedTech(GetPlayer.Self)]"
+			visible = "[Technology.HasResearchedTech(GetPlayer.Self)]"
 			size = { 50 50 }
 			parentanchor = bottom|right
 			position = { 20 20 }
-			visible = no
 		
 			icon = {
 				size = { 50 50 }

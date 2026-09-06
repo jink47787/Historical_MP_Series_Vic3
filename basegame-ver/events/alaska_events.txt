@@ -25,6 +25,8 @@ alaska.1 = {
 			}
 		}
 	}
+	
+	cooldown = { days = 180 }
 
 	duration = 3
 
@@ -69,6 +71,28 @@ alaska.1 = {
 						add_claim = scope:alaska_buyer
 					}
 					set_state_owner = scope:alaska_buyer
+				}
+			}
+			if = {
+				limit = {
+					c:ALK ?= {
+						is_subject_of = scope:alaska_seller
+						is_country_type = company
+					}
+				}
+				scope:alaska_seller ?= {
+					c:ALK.owning_company ?= {
+						if = {
+							limit = {
+								is_company_type = company_type:company_russian_american_company
+							}
+							remove_owned_country = c:ALK
+							owner ?= {
+								remove_company = prev.type
+							}
+						}
+					}
+					annex = c:ALK
 				}
 			}
 			change_relations = {
@@ -133,6 +157,8 @@ alaska.2 = {
 	immediate = {
 		# Scopes set in alaska.4
 	}
+	
+	cooldown = { days = 180 }
 
 	option = {
 		name = alaska.2.a
@@ -151,7 +177,37 @@ alaska.2 = {
 					is_subject_of = scope:alaska_seller
 				}
 			}
-			scope:alaska_buyer = {
+			s:STATE_ALASKA ?= {
+				random_scope_state = {
+					limit = {
+						c:ALK ?= owner
+					}
+					state_region ?= {
+						if = {
+							limit = {
+								scope:alaska_seller ?= {
+									has_claim = prev # state_region
+								}
+							}
+							remove_claim = scope:alaska_seller
+						}
+						add_claim = scope:alaska_buyer
+					}
+					set_state_owner = scope:alaska_buyer
+				}
+			}
+			scope:alaska_seller ?= {
+				c:ALK.owning_company ?= {
+					if = {
+						limit = {
+							is_company_type = company_type:company_russian_american_company
+						}
+						remove_owned_country = c:ALK
+						owner ?= {
+							remove_company = prev.type
+						}
+					}
+				}
 				annex = c:ALK
 			}
 		}
@@ -206,6 +262,8 @@ alaska.3 = {
 	immediate = {
 		# Scopes set in alaska.4
 	}
+	
+	cooldown = { days = 180 }
 
 	option = {
 		name = alaska.3.a
@@ -285,6 +343,8 @@ alaska.4 = {
 			}
 		}
 	}
+	
+	cooldown = { days = 180 }
 
 	option = {
 		name = alaska.4.a
@@ -292,10 +352,9 @@ alaska.4 = {
 			base = 1
 		}
 		custom_tooltip = alaska.4.tt1 # 3 million over a year
-		scope:alaska_seller = {
+		scope:alaska_seller ?= {
 			trigger_event = {
 				id = alaska.1
-				days = 0
 				popup = yes
 			}
 		}

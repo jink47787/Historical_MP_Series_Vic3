@@ -217,6 +217,7 @@
 	CONTAINMENT_PLAY_PARTICIPATION_RANK = 7 # Ranks of this value or above should be keen on joining containment plays to beat down threats
 
 	START_DIPLO_PLAY_RANDOM_FACTOR = 2.0 # The higher this is, the more random AI will be on where to target when starting diplo plays
+	START_DIPLO_PLAY_DAYS_TO_WAIT = 90 # Don't start any diplomatic plays for this many days after game start, to give the AI time to organize
 	START_DIPLO_PLAY_ALLY_STRENGTH_WEIGHT = 0.75 # Consider participants that will for sure join a side with this amount of their forces
 	START_DIPLO_PLAY_LIKELY_ALLY_STRENGTH_WEIGHT = 0.5 # Consider participants that will likely to join a side with this amount of their forces
 
@@ -529,6 +530,7 @@
 	NAVAL_INVASION_MAX_TARGET_CANDIDATES = 5						# Number of candidate target states to consider per invasion (tries in score order until one passes garrison checks)
 	NAVAL_INVASION_HIGH_VALUE_STATE_THRESHOLD = 100					# If target state importance is at least this, always send regular army support alongside marines
 	NAVAL_INVASION_MAX_LOCAL_FRONT_SCORE = 100						# Don't launch a naval invasion if there is a local front of at least this total score for the general
+	NAVAL_INVASION_ARMY_EXPECTED_DISTANCE = 1000					# Expected distance for army selection scoring. Armies further than this are penalized, closer are preferred.
 	NAVAL_INVASION_CANCEL_SCORE_THRESHOLD = 50						# Cancel invasion if its score is less than this
 
 	NAVAL_INVASION_MAX_AVAILABLE_ARMY_FRACTION = 0.5				# No more than this fraction of available armies can be used in naval invasions at the same time
@@ -550,6 +552,8 @@
 	FLEET_RECALL_CREW_RATIO_PEACE = 1.0								# At peace, recall fleets with average crew below this ratio (1.0 = recall any undermanned fleet)
 	FLEET_RECALL_MIN_MISSION_SCORE = 0.5							# Recall fleets whose best mission score is below this threshold
 	SHIP_DESIGN_MODIFICATION_RANDOM_FACTOR = 0.25					# Random factor applied to AI modification weights when designing ships, creating per-country variance
+	SHIP_DESIGN_UTILITY_MOD_MIN_SCORE = 2.0							# Minimum weight threshold for the AI to pick a utility mod
+	SHIP_DESIGN_UTILITY_MOD_MIN_SCORE_DIVISOR_PER_FREE_SLOT = 2.0	# For each free utility slot beyond the first, minimum score is divided by this to make AI more keen on putting utility on ships with a lot of slots
 	SHIP_CONSTRUCTION_WANTED_SHIPS_TO_BUILD_COST_FACTOR = 1.0		# This is multiplied by the cost of the ships the AI wants to build to determine how much the AI wants to build them. The higher this is, the more the AI is willing to spend on wanted ships
 	SHIP_CONSTRUCTION_WANTED_BUILT_SHIPS_COST_FACTOR = 0.3			# This is multiplied by the cost of the existing ships, so that it allocates extra construction points for repairs/retrofitting
 	SHIP_CONSTRUCTION_DEBT_RESUME = 0.1 							# If ship constructions are paused, resume once debt is this low relative to ceiling
@@ -557,13 +561,17 @@
 
 	MIN_SHIPS_TO_TRANSFER = 5										# AI will not transfer ships between fleets unless at least this many are being transferred
 	SHIP_TRANSFER_BASE_VALUE_PER_CONSTRUCTION_POINT = 150			# Base £ per construction point used for AI ship valuation (e.g. ship_transfer treaty acceptance). Above the empirical ~£40/CP replacement cost so that target-side acceptance scores clear int32 truncation for mid-tier capital ships at multi-year bindings.
-	DISBAND_OBSOLETE_SHIP_DAYS = 3650								# If a ship has been marked obsolete by the AI for at least this many days (~10 years) and hasn't been sold/transferred away, the AI decommissions it outright. Paired with ship_transfer: ships will ideally be sold before this threshold fires.
-	DISBAND_OBSOLETE_SHIP_CREW_RATIO = 0.8							# If the ratio of crew needed to max available sailors exceeds this value, the AI will immediately decommission obsolete ships regardless of how long they've been obsolete
+	DISBAND_OBSOLETE_SHIP_CREW_RATIO = 0.8							# If the ratio of crew needed to max available sailors exceeds this value, the AI will immediately decommission obsolete ships
+	DISBAND_OBSOLETE_SHIPS_MAX_COUNT = 5							# Maximum number of obsolete ships the AI will decommission per update
+	DISBAND_OBSOLETE_SHIPS_MAX_RATIO = 0.05							# Maximum ratio of total ships the AI will decommission per update
+	DISBAND_VERY_OBSOLETE_SHIP_MIN_RATIO = 0.5						# AI will only disband very obsolete ships if the group has more than this ratio of wanted ships
 	SHIP_CONSTRUCTION_BLOCK_CREW_RATIO = 1.0						# If the ratio of crew needed to max available sailors is at or above this value, the AI will not queue new ship constructions
 
 	SUPPLY_SHIP_ALLOCATION_HIGH_RATIO = 0.5							# If current supply ships are below this ratio of wanted, AI uses High supply construction allocation
 	SUPPLY_SHIP_ALLOCATION_LOW_RATIO = 1.0							# If current supply ships are above this ratio of wanted, AI uses Low supply construction allocation
 	SUPPLY_SHIP_ALLOCATION_VERY_LOW_RATIO = 1.5						# If current supply ships are above this ratio of wanted, AI uses Very Low supply construction allocation
+	DISBAND_EXCESS_SUPPLY_SHIPS_MIN_RATIO = 2.0						# AI only decommissions available supply ships when they exceed this ratio of wanted, then goes down to wanted
+	DISBAND_EXCESS_SUPPLY_SHIPS_MAX_COUNT = 10						# Maximum number of excess supply ships the AI will decommission per update
 
     # Below data is used for General Orders:
 	HQ_DEFENSE_MIN_THEATER_SCORE = 100								# Theater of local HQ must have at least this importance score to have a minimum garrison
@@ -571,7 +579,7 @@
 	NUM_DAYS_TO_REMEMBER_FAILED_FRONT_OR_HQ_ASSIGNMENT = 10 				# For how many days should the AI remember failing to assign a general to a front or HQ (and thus not try with that front again)
 	NUM_DAYS_TO_REMEMBER_FAILED_SUPPLY_ROUTE = 30 							# For how many days should the AI remember that a formation failed to find a supply route to a target
 	NUM_DAYS_TO_REMEMBER_FAILED_NAVAL_INVASION = 100 						# For how many days should the AI remember that a regular formation failed to launch a naval invasion
-	
+
 	# If a front is worth less than this, the AI will not assign any generals to it
 	FRONT_OR_HQ_IMPORTANCE_MIN_SCORE = 50
 
@@ -593,6 +601,7 @@
 
 	# If no fleet can carry an entire army for naval transport, the AI will split the army if the best fleet can carry at least this fraction of the army
 	TRANSPORT_SPLIT_MIN_FLEET_CAPACITY_FRACTION = 0.2
+	TRANSPORT_MARINE_FLEET_SCORE_MULT = 0.1						# Score multiplier for fleets with marines when selecting transport (non-invasion). Lower = stronger preference for marine-free fleets.
 
 	# A percentage [0.0, 1.0] representing how many AI units are on a front out of the total (AI's + Enemy's) units, used to
 	# determine when to start applying FRONT_IMPORTANCE_WEIGHT_WHEN_IN_DISADVANTAGE.
@@ -621,28 +630,23 @@
 	# Below data is used for Admiral Orders:
 	BLOCKADE_STATE_TRADE_VOLUME_MILITARY_GOODS_WEIGHT = 5.0		# Score weight for state blockade based on the trade volume of military goods in the state
 	BLOCKADE_STATE_TRADE_VOLUME_OTHER_GOODS_WEIGHT = 1.0		# Score weight for state blockade based on the trade volume of other goods in the state
-	BLOCKADE_STATE_WEIGHT = 1									# Score weight for state blockade based on the total score. The higher this is the more likely AI will choose to blockade the state rather than other offensive orders in the sea node
+	BLOCKADE_STATE_WEIGHT = 0.02								# Score weight for state blockade based on the total score. The higher this is the more likely AI will choose to blockade the state rather than other offensive orders in the sea node
 	BLOCKADE_ORDER_LEVEL_DELTA_WEIGHT = 100						# Score weight for admiral order based on how much blockade level this admiral provides
 	BLOCKADE_ORDER_NAVY_STRENGTH_RATIO_MULT = 1					# Navy strength ratio increases the blockade order score by this: score = score * (1 + navy strength ratio * this)
 
-	FLEET_MISSION_INTERCEPT_WEIGHT = 1.5 						# Score weight for interception (defend HQ coasts) among other tasks in the sea province
-	FLEET_MISSION_PROJECT_POWER_WEIGHT = 1.0 					# Score weight for project power task among other tasks in the sea province
-	FLEET_MISSION_BLOCKADE_WEIGHT = 3.0 						# Score weight for blockade among other tasks in the sea province
-	FLEET_MISSION_RAID_SUPPLY_WEIGHT = 3.0 						# Score weight for raid military supply among other tasks in the sea province
-	FLEET_MISSION_PROTECT_SUPPLY_WEIGHT = 2.0 					# Score weight for escorting military supply among other tasks in the sea province
-	FLEET_MISSION_PORT_BOMBARDMENT_WEIGHT = 1.0 				# Score weight for port bombardment among other tasks in the sea province
-	FLEET_MISSION_PIRACY_WEIGHT = 1.0 							# Score weight for commercial raiding against neutrals & hostiles in the sea province
-	FLEET_MISSION_PRIVATEER_WEIGHT = 1.0 						# Score weight for commercial raiding against hostiles in the sea province
-	FLEET_MISSION_HUNT_PIRATES_WEIGHT = 1.0 					# Score weight for defending against commercial raiding in the sea province
-	FLEET_MISSION_DEFEND_COAST_WEIGHT = 5.0						# Score weight for defending the coast against naval invasion & blockades
+	FLEET_MISSION_SCORE_CAP = 1000								# Hard cap on any individual mission score before normalization. Scores are normalized to [0, 1] by dividing by this cap.
+	NODE_STACKING_PENALTY_MULT = 5								# Multiplied with (committed power / total fleet power) for node stacking penalty divisor
 
 	FLEET_TASK_ASSIGNMENT_RANDOM_SPICE = 0.5     					# Random factor for fleet mission selection, also determines stickiness to prevent flip-flopping
 	FLEET_SEA_PROVINCE_ASSIGNMENT_STICKINESS = 1.5					# Fleet-to-sea-province score is multiplied by this when the fleet is already assigned to that province
+	FLEET_HQ_REASSIGNMENT_THRESHOLD = 1.5							# A candidate HQ must beat the fleet's current HQ score by this ratio before the AI interrupts its mission to restation
+	FLEET_HQ_REASSIGNMENT_THRESHOLD_AT_WAR = 2.5					# Same as above but for countries at war or in an active diplomatic play, interrupting a mission mid-conflict is costlier
 	FLEET_SEA_PROVINCE_SETTLING_DAYS = 60							# Days for the settling stickiness multiplier to decay from max to 1x
 	FLEET_SEA_PROVINCE_SETTLING_STICKINESS_MULT = 4.0				# Extra stickiness multiplier for recently assigned fleets (at day 0), linearly decays to 1x over SETTLING_DAYS
 	FLEET_SEA_PROVINCE_HOME_HQ_SCORE = 0.5							# The higher this is the more likely fleets would defend their home HQs
 	FLEET_SEA_PROVINCE_DISTANCE_SCORE = 1							# The higher this is the more the distance to the sea province matters for fleet task score
 	FLEET_SEA_PROVINCE_DISTANCE_SCORE_MAX_DISTANCE = 5000			# Distance score is calculated linearly from 0 to this using effective supply distance (pathfinding with friendly port discount)
+	FLEET_MISSION_AREA_SHIPS_PER_NODE = 20							# AI limits mission area to 1 node per this many ships in the fleet (min 1 node)
 	FLEET_RAID_CONVOYS_TASK_SCORE_FROM_STRENGTH = 2					# The higher this is the more likely fleets with high convoy raiding strength would do the convoy raiding task
 	FLEET_ESCORT_CONVOYS_TASK_SCORE_FROM_DEFENSE = 2					# The higher this is the more likely fleets with high convoy escorting strength would do the convoy escorting task
 	FLEET_PROJECT_INTEREST_TASK_SCORE_FROM_INTEREST_PROJECTION = 2					# The higher this is the more likely fleets with high project interest strength would do the project interest task
@@ -668,7 +672,7 @@
 	RAID_CONVOYS_LANE_SIZE_FACTOR = 0.5					# Multiplied by the number of convoys that the target shipping lane uses
 
 	ESCORT_CONVOYS_ABSOLUTE_LANE_SIZE_FACTOR = 0.1		# Apply this score per actual convoy used by the route
-	ESCORT_CONVOYS_LANE_SIZE_FACTOR_MAX = 200			# Total lane size factor cannot be above this
+	ESCORT_CONVOYS_LANE_SIZE_FACTOR_MAX = 500			# Total lane size factor cannot be above this
 	ESCORT_CONVOYS_PORT_CONNECTION_WAR_MULT = 0.1		# Score for shipping lanes supporting overseas ports multiplied by this while at war
 	ESCORT_CONVOYS_PORT_CONNECTION_PEACE_MULT = 1.0		# Score for shipping lanes supporting overseas ports multiplied by this while not at war
 
@@ -706,7 +710,8 @@
 	MONEY_SPENDING_MIN_SURPLUS_TO_ADD_SHOULD_HAVE = 2000 # How much of a surplus in absolute money does AI want to have after increasing spending for a 'should-have' project
 	MONEY_SPENDING_MIN_SURPLUS_TO_ADD_WANTS_TO_HAVE = 5000 # How much of a surplus in absolute money does AI want to have after increasing spending for a 'wants-to-have' project
 	MONEY_SPENDING_MIN_SURPLUS_TO_ADD_NICE_TO_HAVE = 10000 # How much of a surplus in absolute money does AI want to have after increasing spending for a 'nice-to-have' project
-	MONEY_SPENDING_MIN_SURPLUS_TO_IGNORE_RATIO_FOR_SHOULD_HAVE = 15000 # If AI has this surplus in absolute money, it's always fine to increase spending on a 'should-have' project, regardless of income ratio
+	MONEY_SPENDING_MIN_SURPLUS_RELATIVE_INCOME_CONVERSION = 5000 # For the above MIN_SURPLUS_TO_ADD values, for each this amount of absolute money, the AI can also pass the check by having at least a 100% relative surplus. IE, if this is set to 4000 and MONEY_SPENDING_MIN_SURPLUS_TO_ADD_SHOULD_HAVE is set to 2000, then the AI will be fine with either a 2000 absolute surplus or a 50% relative surplus.
+	MONEY_SPENDING_MIN_SURPLUS_TO_IGNORE_RATIO_FOR_SHOULD_HAVE = 15000 # If AI has this surplus in absolute money, it's always fine to increase spending on a 'should-have' project, regardless of income ratio.
 	MONEY_SPENDING_MIN_SURPLUS_TO_IGNORE_RATIO_FOR_WANTS_TO_HAVE = 30000 # If AI has this surplus in absolute money, it's always fine to increase spending on a 'wants-to-have' project, regardless of income ratio
 	MONEY_SPENDING_MIN_SURPLUS_TO_IGNORE_RATIO_FOR_NICE_TO_HAVE = 50000 # If AI has this surplus in absolute money, it's always fine to increase spending on a 'nice-to-have' project, regardless of income ratio
 	MONEY_SPENDING_ACCEPTABLE_WAR_DEBT = 0.5 # If the AI has less than this % debt to ceiling, avoid doing cost-cutting at war for 'wants to have' and above
@@ -741,6 +746,7 @@
 	MONEY_SPENDING_BUREAUCRACY_EXCESSIVE_THRESHOLD = 1.30 # If bureaucracy income to expenses is better than this, AI will not improve it
 	MONEY_SPENDING_INFRASTRUCTURE_CRITICAL_THRESHOLD = 0.80 # If infra production to usage is worse than this, AI considers it critical to improve it
 	MONEY_SPENDING_INFRASTRUCTURE_DESIRED_THRESHOLD = 1.20 # If infra production to usage is worse than this, AI wants to improve it
+	MONEY_SPENDING_CANAL_MIN_CONSTRUCTION_FOR_SHOULD_HAVE = 100 # If construction output is less than this, AI will have lower priority to construct canals
 
 	# Below data is used to calculate how much weight the AI places on specific government buildings
 	GOVERNMENT_BUILDING_BASE_VALUE = 1000 # If no ai_value is scripted in the building
@@ -966,7 +972,9 @@
 	PRODUCTION_METHOD_PRODUCED_VALUE_FACTOR = 0.25 # Per pound of produced goods in base value
 	PRODUCTION_METHOD_EMPLOYMENT_CHANGE_FACTOR = 2.0 # The total score of a PM will be multiplied or divided by 1 + ( this * the proportion of labor that is added or saved by the change )
 	PRODUCTION_METHOD_REDUCE_OUTPUT_PENALTY_FACTOR = 10 # Multiply method score by this if we're reducing the building's output penalties
+	PRODUCTION_METHOD_REDUCE_OUTPUT_PENALTY_NO_WORLD_MARKET_ACCESS_FACTOR = 10000 # Replaces PRODUCTION_METHOD_REDUCE_OUTPUT_PENALTY_FACTOR if the state in question lacks world market access
 	PRODUCTION_METHOD_INCREASE_OUTPUT_PENALTY_FACTOR = 0.01 # Multiply method score by this if we're increasing the building's output penalties
+	PRODUCTION_METHOD_INCREASE_OUTPUT_PENALTY_NO_WORLD_MARKET_ACCESS_FACTOR = 0.0001 # Multiply method score by this if we're increasing the building's output penalties
 	PRODUCTION_METHOD_FAVORED_GOODS_FACTOR = 0.25 # Per base cost * units of goods produced that the AI favors (for non military goods)
 	PRODUCTION_METHOD_FAVORED_MILITARY_GOODS_FACTOR = 0.5 # Per base cost * units of goods produced that the AI favors (for military goods)
 	PRODUCTION_METHOD_DISFAVORED_GOODS_FACTOR = -0.25 # Per base cost * units of goods produced that the AI disfavors
@@ -1006,7 +1014,8 @@
 	# Below data is used to calculate AI's desire for peace
 	AI_PEACE_AGREEMENT_BASE_VALUE = -10
 	AI_PEACE_AGREEMENT_WHITE_PEACE_BASE = 10 # If no wargoals are being enforced on either side
-	AI_PEACE_AGREEMENT_WHITE_PEACE_WAR_DURATION = 2 # For each month the war goes on add this to the acceptance for a white peace
+	AI_PEACE_AGREEMENT_WHITE_PEACE_WAR_DURATION_START_MONTH = 12 # Amount of months before increased peace acceptance from war duration kicks in
+	AI_PEACE_AGREEMENT_WHITE_PEACE_WAR_DURATION = 2 # For each month the war goes on after AI_PEACE_AGREEMENT_WHITE_PEACE_WAR_DURATION_START_MONTH add this to the acceptance for a white peace
 	AI_PEACE_AGREEMENT_WAR_SUPPORT_FACTOR = -1	# Each point of war support affects peace acceptance by this amoun
 	AI_PEACE_AGREEMENT_UNACCEPTABLE_WARGOAL_VALUE = -1000 # Fixed wargoal value that will be added to peace acceptance if an unacceptable wargoal (such as cut down to size) is being enforced on us
 	AI_PEACE_AGREEMENT_WARGOAL_VALUE_BASE = 10	# How much does the AI value each wargoal (base)
@@ -1031,7 +1040,7 @@
 	AI_CAPITULATE_ENEMY_WARGOAL_FACTOR = -20 # For each wargoal targeting us in the war
 	AI_CAPITULATE_PEACE_DESIRE_FACTOR = 0.5 # Peace desire is multiplied by this when added to capitulation score
 
-	AI_MONTHS_OF_REDUCED_PEACE_DESIRE = 10 # Before this amount of months, reduce AI peace desire
+	AI_MONTHS_OF_REDUCED_PEACE_DESIRE = 12 # Before this amount of months, reduce AI peace desire
 	AI_PEACE_DESIRE_FROM_SHORT_WAR = -10 # Subtract this amount of peace desire for the above number of months (multiplied by AI_MONTHS_OF_REDUCED_PEACE_DESIRE - months of war duration)
 	AI_PEACE_DESIRE_FROM_TURMOIL = 25 # Add this amount of peace desire at 100% radicals
 	AI_PEACE_DESIRE_FROM_DEVASTATION = 50 # Add this amount of peace desire at 100% devastation
@@ -1173,7 +1182,9 @@
 	AI_INTERACTION_PROMINENCE_CHANCE_FACTOR = 1.0							# Each point of prominence gives this % chance of being considered for character interactions
 	AI_INTERACTION_MIN_PROMINENCE_CHANCE = 10							# Minimum % chance of being considered regardless of prominence
 
-	TREATY_FAIRNESS_BASE_SCORE = 10										# The base score for treaty fairness before country acceptances are considered, treaties with an acceptance delta smaller than this will be considered fair to both parts
+	SENT_PEACE_DEAL_MEMORY_DURATION_DAYS = 100							# For how many days does the AI remember sending a peace deal in a war and thus will not send another one
+
+	TREATY_FAIRNESS_BASE_SCORE = 10										# The base score for treaty fairness before country acceptances are considered, treaties with an acceptance delta smaller than this will be considered fair to both part
 
 	REJECTED_TREATY_MEMORY_DURATION_DAYS = 365								# For how many days does the AI remember a rejected treaty and refuse any treaties that aren't a significant enough improvement on it
 	REJECTED_TREATY_MIN_ACCEPTANCE_IMPROVEMENT_FOR_NEW_PROPOSAL = 10		# For the AI to have a chance to accept a treaty proposal after recently having rejected a treaty, the new proposal must be this much better than the old one
@@ -1204,8 +1215,11 @@
 	TREATY_OBLIGATION_THEY_CALL_US_IN_ACCEPTANCE = 30	# How country A's acceptance of a treaty changes if B is calling in an obligation that A owes B. Note: "US" is the country doing the evaluation, not the player
 	TREATY_OBLIGATION_THEY_CALL_US_IN_RECENTLY_REPUDIATED_ACCEPTANCE = 15	# Same as above, but use this if B has recently repudiated an obligation (A values it less because they're less inclined to follow honor agreements that B is willing to ignore)
 
-	PIRACY_HEAT_GAIN_PER_GOODS = 0.01 			# Multiplied with the trade quantity of pirated goods to determine how "hot" a shipping lane is
-	PIRACY_HEAT_DECAY = 0.01 					# How many percent the piracy heat decays with each ai update
+	PIRACY_HEAT_RAMP_UP_RATE = 0.5 				# How fast piracy heat approaches the current piracy level (as a fraction of difference)
+	PIRACY_HEAT_RAMP_DOWN_RATE = 0.5 			# How fast piracy heat decays toward zero when pirates leave (as a fraction of difference)
+	PIRACY_HEAT_BASE_TRADE_VALUE_FOR_SCALING = 1000			# Added to trade value for country before scaling, for more reasonable scaling when piracy is damaging very small economies
+	PIRACY_HEAT_SCALING = 1000					# Base value of seized goods is multiplied by this, then divided by total value of trade in the market
+	PIRACY_HEAT_MAX = 100						# Piracy heat cannot be higher than this
 
 	RAID_HEAT_GAIN_PER_LOST_SUPPLY_SHIP = 0.01 	# Multiplied with the amount of supply ships lost in a supply path
 	RAID_HEAT_DECAY = 0.01 						# How many percent the piracy heat decays with each ai update
@@ -1217,16 +1231,21 @@
 	RAID_SUPPLY_SCORING_FLEET_SIZE_MULT = 2.0  						# Will calculate this value / num ships and add to the scoring mult, so more ships means less scoring
 	RAID_SUPPLY_SCORING_FLEET_STRENGTH_RATIO_MULT = 3.0  		# How much we multiply the ratio of strength between hostile/friendly presence
 
+	RAID_SUPPLY_SCORE_MULT = 20									# Multiplied with supply path importance for raid supply mission scoring
+
+	PROTECT_SUPPLY_SCORE_MULT = 3								# Multiplied with supply path importance for protect supply mission scoring
+	PROJECT_POWER_SCORE_MULT = 0.8								# Multiplied with strategic region interest for project power mission scoring
+
 	PROTECT_SUPPLY_SCORING_FLEET_SCREENING_RATIO_MULT = 2.0         # We want to primarily use fleets with high screening
 	PROTECT_SUPPLY_SCORING_FLEET_SIZE_MULT = 0.005 					# How much we multiply the size of the fleet with for scoring
 	PROTECT_SUPPLY_SCORING_FLEET_RAID_HEAT_MULT = 0.01 				# How much we multiply the accumulated raid heat in the sea province for scoring
 	PROTECT_SUPPLY_SCORING_FLEET_STRENGTH_RATIO_MULT = 3.0  		# How much we multiply the ratio of strength between hostile/friendly presence
 
-	HUNT_PIRATES_SCORING_FLEET_PIRACY_HEAT_MULT = 0.01 			# How much accumulated piracy heat in the sea province boosts hunt pirates scoring
 	HUNT_PIRATES_SCORING_FLEET_DETECTION_RATIO_MULT = 2.0 			# Favor fleets with high detection for hunting pirates
 	HUNT_PIRATES_SCORING_FLEET_SCREENING_RATIO_MULT = 1.0 			# Favor fleets with high screening ratio for pirate hunting patrols
 	HUNT_PIRATES_MIN_HOSTILITY_MULT = 0.25							# Minimum multiplier for hunt pirates scoring during hostilities. Prevents AI from completely abandoning pirate hunting during war.
 	HUNT_PIRATES_AT_WAR_MULT = 0.25									# Additional multiplier applied to hunt pirates scoring when at war
+	HUNT_PIRATES_SCORE_MULT = 15									# Multiplied with capped piracy heat for hunt pirates mission scoring
 
 	PIRACY_SCORING_FLEET_SPEED_VISIBILITY_RATIO_ADJUSTER = 1.0 	# If the score seems to end up being too high for piracy, lower this oen
 	PIRACY_SCORING_FLEET_SPEED_VISIBILITY_RATIO_MULT = 2.0 		# Favor fleets with as much goods per visibility for pirates
@@ -1244,8 +1263,9 @@
 	# The AI calculates an "Outclassed ratio" to determien how screwed it is on the naval engagement.
 	# The outclassed ratio will be multiplied with this and added to the mult when scoring what naval mission to pick
 	# So if this below is negative it means it will avoid doing those missions, positive it will prioritize those.
-	INTERCEPT_OUTCLASSED_MULT = -4.0
-	POWER_PROJECTION_OUTCLASSED_MULT = -1.0
+	INTERCEPT_ENEMY_NAVAL_POWER_MULT = -0.75
+	POWER_PROJECTION_ENEMY_NAVAL_POWER_MULT = 2.0
+	ENEMY_NAVAL_POWER_RATIO_MAX = 4.0								# Max hostile/friendly strength ratio for enemy naval power calculations. Ratio is clamped to [0, this] before subtracting 1.
 	POWER_PROJECTION_HOSTILE_NAVAL_RATIO_MAX = 0.25				# Hostile-to-friendly naval strength ratio at which power projection score is fully suppressed. At 0 ratio there is no penalty, linearly scales to 0x score at this ratio.
 	INTERCEPT_HOSTILE_NAVAL_RATIO_FOR_FULL_SCORE = 0.25			# Hostile-to-friendly naval strength ratio at which intercept and defend coast reach full score. Below this ratio the scores are scaled down linearly.
 	INTERCEPT_ACCEPTABLE_DISTANCE = 1000						# Effective supply distance below which there is no distance penalty. Above this, score is divided by (distance / acceptable_distance).
@@ -1255,12 +1275,11 @@
 	PROTECT_SUPPLY_ACCEPTABLE_DISTANCE = 1000
 	PORT_BOMBARDMENT_ACCEPTABLE_DISTANCE = 1000
 	HUNT_PIRATES_ACCEPTABLE_DISTANCE = 1000
-	DEFEND_COAST_ACCEPTABLE_DISTANCE = 1000
-	RAID_SUPPLY_OUTCLASSED_MULT = 2.0
-	PROTECT_SUPPLY_OUTCLASSED_MULT = -1.0
-	DEFEND_COAST_OUTCLASSED_MULT = -4.0
-	BLOCKADE_OUTCLASSED_MULT = -4.0
-	PORT_BOMBARDMENT_OUTCLASSED_MULT = -4.0
+	DEFEND_COAST_SCORE_MULT = 4									# Multiplied with intercept score when under enemy naval invasion or blockade
+	RAID_SUPPLY_ENEMY_NAVAL_POWER_MULT = 0.33
+	PROTECT_SUPPLY_ENEMY_NAVAL_POWER_MULT = -1.0
+	BLOCKADE_ENEMY_NAVAL_POWER_MULT = -4.0
+	PORT_BOMBARDMENT_ENEMY_NAVAL_POWER_MULT = -4.0
 	PROTECT_SUPPLY_DOMINANCE_PENALTY = 0.75							# How much to reduce protect supply scoring when dominating the enemy navy. At full dominance, score is reduced by this amount (e.g. 0.9 means score goes to 10% at full dominance).
 	PROTECT_SUPPLY_MIN_DOMINANCE_MULT = 0.1						# Minimum multiplier for protect supply during naval dominance. Prevents AI from completely ignoring supply protection.
 	BLOCKADE_DOMINANCE_BOOST = 3.0								# How much to boost blockade scoring when dominating the enemy navy. Added as a multiplier (e.g. 3.0 means score can reach 4.0x at full dominance).

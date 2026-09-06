@@ -36,7 +36,7 @@
 					}
 					add_character_role = character_role_politician
 				}
-				set_variable = former_shogun_var
+				set_variable = former_shogun_var # designates Taikun
 				set_as_interest_group_leader = yes # Landowners leader, typically
 				hidden_effect = { set_character_immortal = yes }
 				set_variable = { name = temporary_immortality_var value = 36 }
@@ -65,7 +65,7 @@
 				retire_character = yes
 			}
 			ruler ?= {
-				set_variable = former_shogun_var
+				set_variable = former_shogun_var # designates Taikun
 				set_as_interest_group_leader = yes # Landowners leader, typically
 				set_character_immortal = yes
 				set_variable = { name = temporary_immortality_var value = 36 }
@@ -203,7 +203,6 @@ country_generate_japanese_shogun = {
 				add_character_role = heir
 			}
 		}
-		set_variable = heir_iesada_spawned
 	}
 	else_if = {
 		limit = {
@@ -222,7 +221,6 @@ country_generate_japanese_shogun = {
 				add_character_role = heir
 			}
 		}
-		set_variable = heir_iemochi_spawned
 	}
 	else_if = {
 		limit = {
@@ -241,7 +239,6 @@ country_generate_japanese_shogun = {
 				add_character_role = heir
 			}
 		}
-		set_variable = heir_yoshinobu_spawned
 	}
 	else_if = {
 		limit = {
@@ -260,7 +257,6 @@ country_generate_japanese_shogun = {
 				add_character_role = heir
 			}
 		}
-		set_variable = heir_iesato_spawned
 	}
 	else_if = {
 		limit = {
@@ -272,6 +268,192 @@ country_generate_japanese_shogun = {
 			on_created = {
 				set_character_as_ruler = yes
 			}
+		}
+	}
+}
+
+country_ezo_generate_next_japanese_shogun = { # Used in the Ezo content - 
+	if = {
+		limit = {
+			is_template_used = JAP_ienari_tokugawa
+			NOT = {
+				is_template_used = JAP_ieyoshi_tokugawa
+			}
+			game_date >= 1793.6.22
+		}
+		create_character = {
+			template = JAP_ieyoshi_tokugawa
+			on_created = {
+				set_character_as_ruler = yes
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			is_template_used = JAP_ieyoshi_tokugawa
+			NOT = {
+				is_template_used = JAP_iesada_tokugawa
+			}
+			game_date >= 1824.5.6
+		}
+		create_character = {
+			template = JAP_iesada_tokugawa
+			on_created = {
+				set_character_as_ruler = yes
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			is_template_used = JAP_iesada_tokugawa
+			NOT = {
+				is_template_used = JAP_iemochi_tokugawa
+			}
+			game_date >= 1846.7.16
+		}
+		create_character = {
+			template = JAP_iemochi_tokugawa
+			on_created = {
+				set_character_as_ruler = yes
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			is_template_used = JAP_iemochi_tokugawa
+			NOT = {
+				is_template_used = JAP_yoshinobu_tokugawa
+			}
+			game_date >= 1837.10.28
+		}
+		create_character = {
+			template = JAP_yoshinobu_tokugawa
+			on_created = {
+				set_character_as_ruler = yes
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			is_template_used = JAP_yoshinobu_tokugawa
+			NOT = {
+				is_template_used = JAP_iesato_tokugawa
+			}
+			game_date >= 1863.8.24
+		}
+		create_character = {
+			template = JAP_iesato_tokugawa
+			on_created = {
+				set_character_as_ruler = yes
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			c:JAP ?= {
+				any_scope_character = {
+					character_is_valid_for_events = yes
+					NOR = {
+						is_ruler_of_own_country = yes
+						is_heir_of_own_country = yes
+					}
+					has_variable = house_tokugawa
+				}
+			}
+		}
+		c:JAP ?= {
+			ordered_scope_character = {
+				limit = {
+					character_is_valid_for_events = yes
+					NOR = {
+						is_ruler_of_own_country = yes
+						is_heir_of_own_country = yes
+					}
+					has_variable = house_tokugawa
+				}
+				order_by = prominence
+				transfer_character = c:EZO
+				set_character_as_ruler = yes
+			}
+		}
+	}
+	else = {
+		create_character = {
+			template = JAP_backup_shogun_template
+		}
+	}
+}
+
+country_ezo_set_up_as_colony = {
+	set_country_type = colonial
+	activate_law = law_type:law_colonial_administration
+	if = {
+		limit = {
+			any_scope_state = {
+				state_region = s:STATE_HOKKAIDO
+				state_is_eligible_as_mass_migration_target = yes
+			}
+		}
+		s:STATE_HOKKAIDO.region_state:EZO ?= {
+			create_mass_migration = {
+				origin = top_overlord
+				culture = cu:japanese
+			}
+		}
+	}
+	remove_variable = ezo_waiting_for_shogun
+}
+
+country_ezo_setup = {
+	custom_tooltip = {
+		text = establish_ezo_republic_tt
+		every_scope_character = {
+			limit = {
+				has_variable = tokugawa_exile
+			}
+			transfer_character = c:EZO
+		}
+		s:STATE_HOKKAIDO ?= {
+			random_scope_state = {
+				limit = {
+					owner ?= scope:tokugawa_scope
+				}
+				set_state_owner = c:EZO
+			}
+		}
+		c:EZO ?= {
+			copy_laws = scope:tokugawa_scope
+			activate_law = law_type:law_presidential_republic
+			hidden_effect = { 
+				activate_law = law_type:law_intermediate_edo_system
+			}
+			scope:tokugawa_exile_leader_scope ?= {
+				set_character_as_ruler = yes
+			}
+			generate_ezo_military = yes
+			hidden_effect = {
+				clear_ownership_transfer_fleet = yes
+			}
+		}
+	}
+	c:EZO ?= {
+		if = {
+			limit = {
+				NOT = {
+					has_law = law_type:law_landed_voting
+				}
+			}
+			activate_law = law_type:law_landed_voting
+		}
+		call_election = {
+			months = 1
+		}
+		remove_primary_culture = cu:ainu
+		set_state_religion = c:JAP.religion
+		set_variable = ezo_republic_var
+		set_social_hierarchy = edo_system
+		capital ?= {
+			STATE_HOKKAIDO_state_name_assign = yes
 		}
 	}
 }
@@ -1707,11 +1889,7 @@ character_get_and_save_coup_reason = {
 	}
 	else_if = {
 		limit = {
-			OR = {
-				has_trait = ambitious # Case 4 - this just has a coupiful personality
-				has_trait = imperious
-				has_trait = special_character_napoleonic_return
-			}
+			has_trait = special_character_napoleonic_return # Case 4 - this just has a coupiful personality
 		}
 		owner = {
 			set_variable = { name = coup_reason_var value = 4 }
@@ -1744,9 +1922,7 @@ designate_as_fudai_daimyo = {
 				owner ?= {
 					OR = {
 						has_law = law_type:law_bakufu
-						any_active_law = {
-							has_amendment = amendment_type:amendment_taikunate
-						}
+						country_is_taikunate = yes
 					}
 				}
 			}
@@ -1780,9 +1956,7 @@ designate_as_tozama_daimyo = {
 				owner ?= {
 					OR = {
 						has_law = law_type:law_bakufu
-						any_active_law = {
-							has_amendment = amendment_type:amendment_taikunate
-						}
+						country_is_taikunate = yes
 					}
 				}
 			}
@@ -1816,9 +1990,7 @@ designate_as_shinpan_daimyo = {
 				owner ?= {
 					OR = {
 						has_law = law_type:law_bakufu
-						any_active_law = {
-							has_amendment = amendment_type:amendment_taikunate
-						}
+						country_is_taikunate = yes
 					}
 				}
 			}
@@ -1843,43 +2015,10 @@ designate_as_shinpan_daimyo = {
 country_clear_daimyo = {
 	set_global_variable = japan_daimyo_abolished # Set globally just in case
 	every_character = { # To handle exiled characters, the void, etcetera - it is very important that all Daimyo are removed
-		remove_variable = daimyo_var
-		if = {
-			limit = {
-				has_modifier = modifier_fudai_daimyo
-			}
-			remove_modifier = modifier_fudai_daimyo
+		limit = {
+			has_variable = daimyo_var
 		}
-		if = {
-			limit = {
-				has_modifier = modifier_tozama_daimyo
-			}
-			remove_modifier = modifier_tozama_daimyo
-		}
-		if = {
-			limit = {
-				has_modifier = modifier_shinpan_daimyo
-			}
-			remove_modifier = modifier_shinpan_daimyo
-		}
-		if = {
-			limit = {
-				has_modifier = modifier_fudai_daimyo_restoration
-			}
-			remove_modifier = modifier_fudai_daimyo_restoration
-		}
-		if = {
-			limit = {
-				has_modifier = modifier_tozama_daimyo_restoration
-			}
-			remove_modifier = modifier_tozama_daimyo_restoration
-		}
-		if = {
-			limit = {
-				has_modifier = modifier_shinpan_daimyo_restoration
-			}
-			remove_modifier = modifier_shinpan_daimyo_restoration
-		}
+		character_clear_daimyo_status = yes
 	}
 }
 
@@ -1888,9 +2027,7 @@ country_assess_daimyo_alignments = {
 		limit = {
 			OR = {
 				has_law = law_type:law_bakufu
-				any_active_law = {
-					has_amendment = amendment_type:amendment_taikunate
-				}
+				country_is_taikunate = yes
 			}
 		}
 		every_scope_character = {
@@ -1947,6 +2084,46 @@ country_assess_daimyo_alignments = {
 				add_modifier = modifier_shinpan_daimyo_restoration
 			}
 		}
+	}
+}
+
+character_clear_daimyo_status = {
+	remove_variable = daimyo_var
+	if = {
+		limit = {
+			has_modifier = modifier_fudai_daimyo
+		}
+		remove_modifier = modifier_fudai_daimyo
+	}
+	if = {
+		limit = {
+			has_modifier = modifier_tozama_daimyo
+		}
+		remove_modifier = modifier_tozama_daimyo
+	}
+	if = {
+		limit = {
+			has_modifier = modifier_shinpan_daimyo
+		}
+		remove_modifier = modifier_shinpan_daimyo
+	}
+	if = {
+		limit = {
+			has_modifier = modifier_fudai_daimyo_restoration
+		}
+		remove_modifier = modifier_fudai_daimyo_restoration
+	}
+	if = {
+		limit = {
+			has_modifier = modifier_tozama_daimyo_restoration
+		}
+		remove_modifier = modifier_tozama_daimyo_restoration
+	}
+	if = {
+		limit = {
+			has_modifier = modifier_shinpan_daimyo_restoration
+		}
+		remove_modifier = modifier_shinpan_daimyo_restoration
 	}
 }
 
@@ -2111,9 +2288,7 @@ meiji_civil_war_effects = { # Executed from on_revolution_start
 				OR = {
 					has_law = law_type:law_bakufu
 					country_has_former_shogun_in_government = yes
-					any_active_law = {
-						has_amendment = amendment_type:amendment_taikunate 
-					}
+					country_is_taikunate = yes
 					sonnojoi_have_shojoi_ideology = yes
 				}
 			}
@@ -2123,9 +2298,7 @@ meiji_civil_war_effects = { # Executed from on_revolution_start
 			limit = {
 				NOR = {
 					has_law = law_type:law_bakufu
-					any_active_law = {
-						has_amendment = amendment_type:amendment_taikunate 
-					}
+					country_is_taikunate = yes
 				}
 			}
 			scope:target ?= {
@@ -2168,12 +2341,12 @@ meiji_civil_war_effects = { # Executed from on_revolution_start
 			if = {
 				limit = {
 					any_character = { # This is a sin, but necessary
-						has_variable = former_shogun_var
+						has_variable = former_shogun_var # designates Taikun
 					}
 				}
 				random_character = {
 					limit = {
-						has_variable = former_shogun_var
+						has_variable = former_shogun_var # designates Taikun
 					}
 					if = {
 						limit = {
@@ -2189,7 +2362,7 @@ meiji_civil_war_effects = { # Executed from on_revolution_start
 			trigger_event = { id = ep2_meiji.4 popup = yes }
 		}
 	}
-	# Ezochi always sides with the Matsumae
+	# AI Ezochi always sides with the Matsumae
 	if = {
 		limit = {
 			exists = c:EZO
@@ -2220,6 +2393,12 @@ meiji_civil_war_effects = { # Executed from on_revolution_start
 					}
 					add_initiator_backers = { c:EZO }
 				}
+				add_war_goal = {
+					holder = ROOT
+					target_country = c:EZO
+					type = annex_country
+					primary_demand = yes
+				}
 			}
 		}
 		else_if = {
@@ -2246,6 +2425,53 @@ meiji_civil_war_effects = { # Executed from on_revolution_start
 						}
 					}
 					add_target_backers = { c:EZO }
+				}
+				add_war_goal = {
+					holder = scope:target
+					target_country = c:EZO
+					type = annex_country
+					primary_demand = yes
+				}
+			}
+		}
+		else_if = {
+			limit = {
+				c:EZO ?= {
+					is_subject = yes
+					OR = {
+						c:EZO ?= { top_overlord ?= ROOT }
+						c:EZO ?= { top_overlord ?= scope:target }
+					}
+				}
+			}
+			random_diplomatic_play = {
+				limit = {
+					is_diplomatic_play_type = dp_revolution
+					initiator ?= {
+						scope:target ?= this
+					}
+				}
+				if = {
+					limit = {
+						c:EZO ?= { top_overlord ?= scope:target }
+					}
+					add_war_goal = {
+						holder = ROOT
+						target_country = c:EZO
+						type = annex_country
+						primary_demand = yes
+					}
+				}
+				if = {
+					limit = {
+						c:EZO ?= { top_overlord ?= ROOT }
+					}
+					add_war_goal = {
+						holder = scope:target
+						target_country = c:EZO
+						type = annex_country
+						primary_demand = yes
+					}
 				}
 			}
 		}
@@ -2435,6 +2661,19 @@ transition_off_of_monarchy_effects = {
 			add_ideology = ideology_republican
 		}
 	}
+	if = {
+		limit = {
+			NOR = {
+				has_journal_entry = je_abolish_monarchy
+				has_variable = monarchy_stamped_out_var
+			}
+		}
+		set_variable = {
+			name = abolishing_monarchy_var
+			value = 0
+		}
+		add_journal_entry = { type = je_abolish_monarchy }
+	}
 }
 
 country_switch_sonnojoi_ideology = {
@@ -2485,6 +2724,75 @@ character_handle_possible_emperor_ig_leader = { # TODO PRCAL-44673 replace with 
 	}
 }
 
+generate_ezo_military = {
+	if = {
+		limit = {
+			c:JAP ?= {
+				has_technology_researched = general_staff
+			}
+		}
+		create_military_formation = {
+			type = army
+			hq_region = sr:region_northeast_asia
+			name = shogunate_army
+
+			combat_unit = {
+				type = unit_type:combat_unit_type_line_infantry
+				state_region = s:STATE_HOKKAIDO
+				count = 3
+			}
+
+			combat_unit = {
+				type = unit_type:combat_unit_type_mobile_artillery
+				state_region = s:STATE_HOKKAIDO
+				count = 1
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			c:JAP ?= {
+				has_technology_researched = line_infantry
+			}
+		}
+		create_military_formation = {
+			type = army
+			hq_region = sr:region_northeast_asia
+			name = shogunate_army
+
+			combat_unit = {
+				type = unit_type:combat_unit_type_line_infantry
+				state_region = s:STATE_HOKKAIDO
+				count = 3
+			}
+
+			combat_unit = {
+				type = unit_type:combat_unit_type_cannon_artillery
+				state_region = s:STATE_HOKKAIDO
+				count = 1
+			}
+		}
+	}
+	else = {
+		create_military_formation = {
+			type = army
+			hq_region = sr:region_northeast_asia
+			name = shogunate_army
+
+			combat_unit = {
+				type = unit_type:combat_unit_type_irregular_infantry
+				state_region = s:STATE_HOKKAIDO
+				count = 3
+			}
+
+			combat_unit = {
+				type = unit_type:combat_unit_type_cannon_artillery
+				state_region = s:STATE_HOKKAIDO
+				count = 1
+			}
+		}
+	}
+}
 
 on_remove_ruler_effects = {
 	if = {
@@ -2492,5 +2800,328 @@ on_remove_ruler_effects = {
 			has_trait = special_character_japanese_emperor
 		}
 		remove_trait = special_character_japanese_emperor
+	}
+	if = {
+		limit = {
+			has_template = JAP_ninko_yamato
+		}
+		owner = {
+			if = {
+				limit = {
+					has_dlc_feature = ep2_content
+				}
+				trigger_event = { id = japan_monarchy.1 }
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			has_template = JAP_komei_yamato
+			game_date >= 1852.11.3
+		}
+		owner = {
+			if = {
+				limit = {
+					has_dlc_feature = ep2_content
+				}
+				trigger_event = { id = japan_monarchy.2 }
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			has_template = JAP_meiji_yamato
+			game_date >= 1879.8.31
+		}
+		owner = {
+			if = {
+				limit = {
+					has_dlc_feature = ep2_content
+				}
+				trigger_event = { id = japan_monarchy.3 }
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			has_template = JAP_taisho_yamato
+			game_date >= 1901.4.29
+		}
+		owner = {
+			if = {
+				limit = {
+					has_dlc_feature = ep2_content
+				}
+				trigger_event = { id = japan_monarchy.4 }
+			}
+		}
+	}
+}
+
+character_adopt_into_tokugawa = {
+	set_last_name = Tokugawa # Adopted into Tokugawa family
+	set_variable = house_tokugawa
+	if = {
+		limit = {
+			has_variable = daimyo_var
+		}
+		JAP_character_generate_new_daimyo = yes
+		character_clear_daimyo_status = yes
+	}
+}
+
+character_appoint_new_shogun_when_no_heir = {
+	if = {
+		limit = {
+			NOT = { exists = owner.heir }
+		}
+		owner ?= {
+			if = {
+				limit = {
+					any_scope_character = {
+						is_adult = yes
+						has_variable = house_tokugawa
+						NOT = { has_role_of_type = ruler }
+					}
+				}
+				ordered_scope_character = {
+					limit = {
+						is_adult = yes
+						has_variable = house_tokugawa
+						NOT = { has_role_of_type = ruler }
+					}
+					order_by = prominence
+					position = 0
+					set_character_as_ruler = yes
+					if = {
+						limit = {
+							has_variable = daimyo_var
+						}
+						JAP_character_generate_new_daimyo = yes
+						character_clear_daimyo_status = yes
+					}
+					set_variable = shogun_var
+				}
+			}
+			else = {
+				create_character = {
+					template = JAP_backup_shogun_template
+					on_created = {
+						set_variable = shogun_var
+						set_character_as_ruler = yes
+					}
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			owner.heir ?= {
+				NOT = {
+					has_variable = house_tokugawa
+				}
+			}
+		}
+		owner.heir ?= {
+			character_adopt_into_tokugawa = yes
+			set_variable = shogun_var
+		}
+	}
+}
+
+character_designate_new_taikun = {
+	remove_variable = former_shogun_var # designates Taikun
+	if = {
+		limit = {
+			has_modifier = modifier_taikun
+		}
+		remove_modifier = modifier_taikun
+	}
+	save_scope_as = previous_taikun_scope
+	owner ?= {
+		if = {
+			limit = {
+				any_scope_character = {
+					NOT = { scope:previous_taikun_scope ?= this }
+					has_variable = house_tokugawa
+					is_character_alive = yes
+				}
+			}
+			#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: New Taikun designated: selected from existing Tokugawa - [THIS.GetCountry.GetNameNoFormatting]"
+			ordered_scope_character = {
+				limit = {
+					NOT = { scope:previous_taikun_scope ?= this }
+					has_variable = house_tokugawa
+					is_interest_group_leader = yes
+					is_character_alive = yes
+				}
+				alternative_limit = {
+					NOT = { scope:previous_taikun_scope ?= this }
+					has_variable = house_tokugawa
+					is_character_alive = yes
+				}
+				order_by = prominence
+				position = 0
+				set_variable = former_shogun_var
+				add_modifier = modifier_taikun
+				character_replace_ig_leader_with_taikun = yes
+			}
+		}
+		else = {
+			create_character = {
+				template = JAP_backup_shogun_template
+				on_created = {
+					set_variable = former_shogun_var
+					add_modifier = modifier_taikun
+					set_as_interest_group_leader = yes
+				}
+			}
+			#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: New Taikun designated: generated from backup template - [THIS.GetCountry.GetNameNoFormatting]"
+		}
+	}
+}
+
+country_designate_new_taikun = {
+	every_scope_character = {
+		limit = {
+			has_variable = former_shogun_var
+		}
+		remove_variable = former_shogun_var # designates Taikun
+		if = {
+			limit = {
+				has_modifier = modifier_taikun
+			}
+			remove_modifier = modifier_taikun
+		}
+	}
+	if = {
+		limit = {
+			any_scope_character = {
+				has_variable = house_tokugawa
+				is_character_alive = yes
+			}
+		}
+		#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: New Taikun designated: selected from existing Tokugawa - [THIS.GetCountry.GetNameNoFormatting]"
+		ordered_scope_character = {
+			limit = {
+				has_variable = house_tokugawa
+				is_interest_group_leader = yes
+				is_character_alive = yes
+			}
+			alternative_limit = {
+				has_variable = house_tokugawa
+				is_character_alive = yes
+			}
+			order_by = prominence
+			position = 0
+			set_variable = former_shogun_var
+			add_modifier = modifier_taikun
+			character_replace_ig_leader_with_taikun = yes
+		}
+	}
+	else = {
+		create_character = {
+			template = JAP_backup_shogun_template
+			on_created = {
+				set_variable = former_shogun_var
+				add_modifier = modifier_taikun
+				set_as_interest_group_leader = yes
+			}
+		}
+		#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: New Taikun designated: generated from backup template - [THIS.GetCountry.GetNameNoFormatting]"
+	}
+}
+
+character_replace_ig_leader_with_taikun = {
+	if = {
+		limit = {
+			is_interest_group_leader = no
+		}
+		#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: New Taikun designated: replacing existing interest group leader ([THIS.GetCharacter.GetInterestGroup.GetLeader.GetFullNameNoFormatting]) with new Taikun ([THIS.GetCharacter.GetFullNameNoFormatting]) - [THIS.GetCharacter.GetCountry.GetNameNoFormatting]"
+		set_as_interest_group_leader = yes
+	}
+	else = {
+		#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: New Taikun designated: New Taikun ([THIS.GetCharacter.GetFullNameNoFormatting]) already [THIS.GetCharacter.GetInterestGroup.GetNameNoFormatting] Interest Group Leader - [THIS.GetCharacter.GetCountry.GetNameNoFormatting]"
+	}
+}
+
+on_new_ruler_sikh_maharaja_effect = {
+	if = {
+		limit = {
+			NOT = {
+				has_variable = sikh_maharaja_enthroned
+			}
+		}
+		owner = {
+			je:je_sikh_sovereignty = {
+				set_bar_progress = { value = 0 name = sikh_empire_progress_bar }
+			}
+		}
+		set_variable = sikh_maharaja_enthroned
+		owner = {
+			change_variable = { name = sikh_dead_maharajas_var add = 1 }
+		}
+	}
+}
+
+on_new_ruler_brazil_succession_rights_effect = {
+	save_temporary_scope_as = portuguese_monarch_scope
+	c:BRZ ?= {
+		heir ?= {
+			if = {
+				limit = {
+					is_character_alive = yes
+					NOT = { c:POR.ruler ?= this  }
+				}
+				kill_character = { hidden = yes }
+			}
+		}
+		set_heir = scope:portuguese_monarch_scope
+	}
+}
+
+on_new_ruler_japan_effect = {
+	if = {
+		limit = {
+			has_variable = house_yamato
+		}
+		save_temporary_scope_as = emperor_to_be_scope
+		c:JAP ?= {
+			set_variable = { name = emperor_var value = scope:emperor_to_be_scope }
+		}
+		if = {
+			limit = {
+				NOT = {
+					has_trait = special_character_japanese_emperor
+				}
+			}
+			add_trait = special_character_japanese_emperor
+		}
+		if = {
+			limit = {
+				owner ?= {
+					has_law = law_type:law_bakufu # If a member of the Imperial Family somehow heads the Bakufu, end it instantly
+				}
+			}
+			owner ?= {
+				deactivate_law = law_type:law_bakufu
+				activate_law = law_type:law_oligarchy
+			}
+		}
+	}
+	if = { # Sitting Emperors don't need this role
+		limit = {
+			has_role = character_role_emperor_of_japan
+		}
+		remove_character_role = character_role_emperor_of_japan
+	}
+	if = { # Marks the Shogun as the Shogun
+		limit = {
+			owner ?= {
+				has_law = law_type:law_bakufu
+				has_gov_regency = no
+			}
+		}
+		set_variable = shogun_var
 	}
 }

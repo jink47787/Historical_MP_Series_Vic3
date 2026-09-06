@@ -12,14 +12,14 @@ template tooltip_properties
 		onclick = "[CloseAllTooltips]"
 		shortcut = "close_window"
 	}
-		
+
 	background = {
 		spriteType = CorneredTiled
 		spriteborder = { 48 48 }
 		texture = "gfx/interface/tooltip/tooltip_bg.dds"
 		texture_density = 2
-		tintcolor = "[TooltipInfo.GetTintColor]"	
-		
+		tintcolor = "[TooltipInfo.GetTintColor]"
+
 		modify_texture = {
 			texture = "gfx/interface/backgrounds/default_bg_shading.dds"
 			spriteType = Corneredstretched
@@ -60,9 +60,68 @@ types TooltipTypes
 		using = tooltip_font
 	}
 
+	type tooltip_lock_action_tab = container {
+		name = "tooltip_lock_action_tab"
+		visible = "[HasActionLock]"
+		parentanchor = bottom|right
+		widgetanchor = bottom|right
+		position = { 0 5 }
+
+		background = {
+			spriteType = CorneredTiled
+			spriteborder = { 16 16 }
+			texture_density = 2
+			tintcolor = "[TooltipInfo.GetTintColor]"
+			texture = "gfx/interface/tooltip/tooltip_bg.dds"
+		}
+
+		icon = {
+			size = { 100% 100% }
+			spriteType = Corneredstretched
+			spriteborder = { 8 8 }
+			texture_density = 2
+			tintcolor = "[TooltipInfo.GetTintColor]"
+			texture = "gfx/interface/tooltip/tooltip_frame.dds"
+		}
+
+		flowcontainer = {
+			margin = { 6 4 }
+
+			icon = {
+				parentanchor = left
+				size = { 16 16 }
+				visible = "[Not(PdxGuiWidget.IsTooltipLocked)]"
+				texture = "gfx/interface/buttons/button_icons/unlock.dds"
+			}
+
+			icon = {
+				parentanchor = left
+				size = { 16 16 }
+				visible = "[PdxGuiWidget.IsTooltipLocked]"
+				texture = "gfx/interface/buttons/button_icons/lock.dds"
+			}
+
+			textbox = {
+				visible = "[Not(PdxGuiWidget.IsTooltipLocked)]"
+				autoresize = yes
+				using = fontsize_small
+				fonttintcolor = "[TooltipInfo.GetTintColor]"
+				raw_text = "[GetActionLockInputText]"
+			}
+
+			textbox = {
+				visible = "[PdxGuiWidget.IsTooltipLocked]"
+				autoresize = yes
+				using = fontsize_small
+				fonttintcolor = "[TooltipInfo.GetTintColor]"
+				text = "TOOLTIP_LOCK_TAB_LOCKED"
+			}
+		}
+	}
+
 	# Alias (cannot rename the actual type due to how it is hooked into code)
 	type RegularTooltip = TooltipWidgetType {}
-	
+
 	type TooltipWidgetType = container {
 		using = tooltip_properties
 
@@ -73,7 +132,7 @@ types TooltipTypes
 				block "tooltip_margins" {
 					margin = { 18 15 }
 				}
-				
+
 				block "tooltip_content" {
 					block "tooltip_content_before" {}
 
@@ -88,7 +147,7 @@ types TooltipTypes
 						maximumsize = { @tooltip_max_width -1 }
 						fonttintcolor = "[TooltipInfo.GetTintColor]"
 					}
-					
+
 					DefaultTooltipTextBox = {
 						name = "TooltipTextDelayed"
 						autoresize = yes
@@ -154,11 +213,11 @@ types TooltipTypes
 						visible = "[IsInGame]"
 						block "buttons" {}
 					}
-				}	
+				}
 			}
 
 			block "tooltip_content_free_floating" {}
-		
+
 			margin_widget = {
 				size = { 100% 100% }
 				margin = { 5 5 }
@@ -186,6 +245,8 @@ types TooltipTypes
 		### timer lock icon
 		block "progress"
 		{
+			tooltip_lock_action_tab = {}
+
 			progresspie = {
 				name = "tooltip_progress"
 				visible = "[And(UsesTimerLocking, Not(PdxGuiWidget.IsTooltipLocked))]"
@@ -204,7 +265,7 @@ types TooltipTypes
 					name = _show
 					alpha = 1
 				}
-	
+
 				state = {
 					name = _hide
 					bezier = { 0.25 0.1 0.25 1 }
@@ -229,7 +290,7 @@ types TooltipTypes
 				block "tooltip_content_before_before" {}
 
 				block "tooltip_content_before" {}
-				
+
 				block "tooltip_content" {
 					DefaultTooltipTextBox = {
 						name = "DebugText"
@@ -279,7 +340,7 @@ types TooltipTypes
 						maximumsize = { @tooltip_max_width -1 }
 						fonttintcolor = "[TooltipInfo.GetTintColor]"
 					}
-					
+
 					DefaultTooltipTextBox = {
 						name = "TooltipTextDelayed"
 						autoresize = yes
@@ -303,7 +364,7 @@ types TooltipTypes
 					}
 
 					block "tooltip_content_after" {}
-					
+
 					caligula_table = {
 						block "table_visibility" {
 							visible = no
@@ -347,7 +408,7 @@ types TooltipTypes
 					}
 				}
 			}
-			
+
 			margin_widget = {
 				size = { 100% 100% }
 				margin = { 5 5 }
@@ -370,7 +431,7 @@ types TooltipTypes
 					#}
 				}
 			}
-			
+
 			### HEADER BG
 			icon = {
 				texture = "gfx/interface/tooltip/tooltip_title_bg.dds"
@@ -380,7 +441,7 @@ types TooltipTypes
 				}
 				alpha = 0.5
 				size = { 325 55 }
-				
+
 				modify_texture = {
 					texture = "gfx/interface/textures/velvet_texture.dds"
 					spriteType = Corneredtiled
@@ -397,7 +458,7 @@ types TooltipTypes
 					alpha = 0.15
 				}
 			}
-				
+
 			### ICON
 			block "whole_icon" {
 				icon = {
@@ -414,14 +475,14 @@ types TooltipTypes
 					block "color" {
 						color = { 0.5 0.5 0.5 1 }
 					}
-					
+
 					block "icon_frame" {
 						icon = {
 							texture = "gfx/interface/tooltip/tooltip_icon_frame.dds"
 							size = { 100% 100% }
 						}
 					}
-					
+
 					block "replace_icon" {
 						icon = {
 							block "icon_texture" {
@@ -435,12 +496,12 @@ types TooltipTypes
 					}
 				}
 			}
-			
+
 			### HEADER TEXT
 			widget = {
 				size = { 100% 60 }
 				position = { 0 0 }
-				
+
 				hbox = {
 					margin_right = 15
 					spacing = 5
@@ -448,7 +509,7 @@ types TooltipTypes
 					block "header_text_margin_left" {
 						margin_left = 64
 					}
-					
+
 					layoutpolicy_horizontal = expanding
 					layoutpolicy_vertical = expanding
 
@@ -467,7 +528,7 @@ types TooltipTypes
 						using = fontsize_large
 						default_format = "#tooltip_header"
 					}
-					
+
 					hbox = {
 						layoutpolicy_horizontal = growing
 						layoutpolicy_vertical = growing
@@ -477,7 +538,7 @@ types TooltipTypes
 							layoutpolicy_horizontal = growing
 							layoutpolicy_vertical = growing
 							autoresize = yes
-							
+
 							block "type" {
 								raw_text = "Name"
 							}
@@ -536,7 +597,7 @@ types TooltipTypes
 					size =  { 100% 2 }
 					alpha = 0.3
 					parentanchor = hcenter|bottom
-					
+
 					modify_texture = {
 						texture = "gfx/interface/masks/fade_horizontal_center.dds"
 						spriteType = Corneredstretched
@@ -547,10 +608,12 @@ types TooltipTypes
 				}
 			}
 		}
-		
+
 		### timer lock icon
 		block "progress"
 		{
+			tooltip_lock_action_tab = {}
+
 			progresspie = {
 				name = "tooltip_progress"
 				visible = "[And(UsesTimerLocking, Not(PdxGuiWidget.IsTooltipLocked))]"
@@ -569,7 +632,7 @@ types TooltipTypes
 					name = _show
 					alpha = 1
 				}
-	
+
 				state = {
 					name = _hide
 					bezier = { 0.25 0.1 0.25 1 }
@@ -592,7 +655,7 @@ TooltipWidgetType = {
 }
 
 # Templates and types used in tooltips
-# Need to be defined in this file since tooltips can be used on the loading screen (where we do not have the all gui files loaded yet) 
+# Need to be defined in this file since tooltips can be used on the loading screen (where we do not have the all gui files loaded yet)
 
 types Tables {
 	type caligula_table = margin_widget {
@@ -611,16 +674,16 @@ types Tables {
 				layoutpolicy_horizontal = expanding
 			}
 
-			hbox = {				
+			hbox = {
 				# column 1
 				vbox = {
 					using = table_column
-					
+
 					textbox = {
 						using = table_header
 						align = left|nobaseline
 						margin_left = 0
-						
+
 						block "table_header_1" {
 							visible = no
 							# raw_text = "header 1"
@@ -650,11 +713,11 @@ types Tables {
 				# column 2
 				vbox = {
 					using = table_column
-					
+
 					textbox = {
 						using = table_header
 						align = right|nobaseline
-						
+
 						block "table_header_2" {
 							visible = no
 							# raw_text = "header 2"
@@ -679,11 +742,11 @@ types Tables {
 				# column 3
 				vbox = {
 					using = table_column
-					
+
 					textbox = {
 						using = table_header
 						align = right|nobaseline
-						
+
 						block "table_header_3" {
 							visible = no
 							# raw_text = "header 3"
@@ -709,11 +772,11 @@ types Tables {
 				# column 4
 				vbox = {
 					using = table_column
-					
+
 					textbox = {
 						using = table_header
 						align = right|nobaseline
-						
+
 						block "table_header_4" {
 							visible = no
 							# raw_text = "header 4"
@@ -742,11 +805,11 @@ types Tables {
 				# column 5
 				vbox = {
 					using = table_column
-					
+
 					textbox = {
 						using = table_header
 						align = right|nobaseline
-						
+
 						block "table_header_5" {
 							visible = no
 							# raw_text = "header 5"
@@ -772,11 +835,11 @@ types Tables {
 				# column 6
 				vbox = {
 					using = table_column
-					
+
 					textbox = {
 						using = table_header
 						align = right|nobaseline
-						
+
 						block "table_header_6" {
 							visible = no
 							# raw_text = "header 6"
@@ -803,7 +866,7 @@ types Tables {
 			}
 
 			block "content_after_table" {}
-		}	
+		}
 	}
 }
 
@@ -820,7 +883,7 @@ template table_header {
 	maximumsize = { -1 26 }
 	margin_bottom = 3
 	using = tooltip_font
-	
+
 	divider_clean = {
 		parentanchor = bottom|hcenter
 	}
@@ -861,19 +924,19 @@ template condensed_table {
 	maximumsize = { -1 23 }
 }
 
-Types dividers {	
+Types dividers {
 	type divider_clean = icon {
 		texture = "gfx/interface/dividers/divider_clean.dds"
 		texture_density = 2
 		spriteType = CorneredTiled
 		spriteborder = { 4 0 }
-		
+
 		alpha = 0.3
 
 		block "size" {
 			size =  { 100% 2 }
 		}
-		
+
 		block "fade" {
 			modify_texture = {
 				texture = "gfx/interface/masks/fade_horizontal_center.dds"

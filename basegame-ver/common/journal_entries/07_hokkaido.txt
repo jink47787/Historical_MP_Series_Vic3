@@ -11,7 +11,16 @@
 
     is_shown_when_inactive = {
         has_dlc_feature = ep2_content
-        c:JAP ?= this
+        OR = {
+            c:JAP ?= this
+            AND = {
+                c:EZO ?= this
+                OR = {
+                    has_government_type = gov_ezo_republic
+                    has_government_type = gov_ezo_republic_colonial
+                }
+            }
+        }
         s:STATE_HOKKAIDO = {
             any_scope_state = {
                 owner = root
@@ -21,16 +30,44 @@
 
     possible = {
         owns_entire_state_region = STATE_HOKKAIDO
-        s:STATE_HOKKAIDO.region_state:JAP = {
-            is_incorporated = yes
-            any_scope_building = {
-                is_building_type = building_urban_center
-                level >= 1
+        trigger_if = {
+            limit = {
+                c:JAP ?= ROOT
+            }
+            s:STATE_HOKKAIDO.region_state:JAP ?= {
+                is_incorporated = yes
+                any_scope_building = {
+                    is_building_type = building_urban_center
+                    level >= 1
+                }
+            }
+        }
+        trigger_else_if = {
+            limit = {
+                c:EZO ?= ROOT
+            }
+            s:STATE_HOKKAIDO.region_state:EZO ?= {
+                is_incorporated = yes
+                any_scope_building = {
+                    is_building_type = building_urban_center
+                    level >= 1
+                }
             }
         }
     }
 
     immediate = {
+        if = {
+            limit = {
+                OR = {
+                    c:JAP ?= ROOT
+                    is_subject_of = c:JAP
+                }
+            }
+            c:JAP ?= {
+                save_scope_as = japan_scope # Intentionally invalidating this scope if the Ezo Republic is independent
+            }
+        }
         trigger_event = {
             id = hokkaido_events.1
             popup = yes
@@ -69,9 +106,23 @@
     }
 
     complete = {
-        s:STATE_HOKKAIDO.region_state:JAP = {
-            state_population > 500000
-            gdp > 1000000
+        trigger_if = {
+            limit = {
+                c:JAP ?= ROOT
+            }
+            s:STATE_HOKKAIDO.region_state:JAP ?= {
+                state_population > 500000
+                gdp > 1000000
+            }
+        }
+        trigger_else_if = {
+            limit = {
+                c:EZO ?= ROOT
+            }
+            s:STATE_HOKKAIDO.region_state:EZO ?= {
+                state_population > 500000
+                gdp > 1000000
+            }
         }
         custom_tooltip = {
             text = taming_the_north_agriculture_potentials_goal_tt
@@ -100,7 +151,7 @@
                 name = modifier_northern_learnings
                 days = very_long_modifier_time
             }
-            s:STATE_HOKKAIDO.region_state:JAP ?= {
+            scope:hokkaido_state_scope ?= {
                 add_modifier = {
                     name = modifier_tamed_north
                     days = very_long_modifier_time
@@ -118,8 +169,11 @@
             }
             else_if = {
                 limit = {
-                    NOT = {
+                    NOR = {
                         owns_entire_state_region = STATE_SAKHALIN
+                        overlord ?= {
+                            owns_entire_state_region = STATE_SAKHALIN
+                        }
                     }
                 }
                 custom_tooltip = {
@@ -128,13 +182,26 @@
             }
             else_if = {
                 limit = {
-                    owns_entire_state_region = STATE_SAKHALIN
+                    OR = {
+                        owns_entire_state_region = STATE_SAKHALIN
+                        overlord ?= {
+                            owns_entire_state_region = STATE_SAKHALIN
+                        }
+                    }
                 }
                 custom_tooltip = je_taming_the_north_additional_goal_completed
-                s:STATE_SAKHALIN.region_state:JAP ?= {
-                    add_modifier = {
-                        name = modifier_tamed_north
-                        days = very_long_modifier_time
+                s:STATE_SAKHALIN = {
+                    every_scope_state = {
+                        limit = {
+                            owner = {
+                                ROOT ?= this
+                                overlord ?= this
+                            }
+                        }
+                        add_modifier = {
+                            name = modifier_tamed_north
+                            days = very_long_modifier_time
+                        }
                     }
                 }
             }
@@ -171,29 +238,39 @@
     }
 
     on_fail = {
-        trigger_event = {
-            id = hokkaido_events.8
-            popup = yes
+        if = {
+            limit = {
+                c:JAP ?= ROOT
+            }
+            trigger_event = {
+                id = hokkaido_events.8
+                popup = yes
+            }
         }
     }
 
     event_outcome_failed_effect_desc = {
         header = hokkaido_events.8.a
         effect = {
-            add_radicals = {
-                value = medium_radicals
-                culture = cu:japanese
-            }
-            ig:ig_industrialists = {
-                add_modifier = {
-                    name = modifier_lost_northern_investments
-                    days = normal_modifier_time
+            if = {
+                limit = {
+                    c:JAP ?= ROOT
                 }
-            }
-            ig:ig_petty_bourgeoisie = {
-                add_modifier = {
-                    name = modifier_lost_northern_investments
-                    days = normal_modifier_time
+                add_radicals = {
+                    value = medium_radicals
+                    culture = cu:japanese
+                }
+                ig:ig_industrialists = {
+                    add_modifier = {
+                        name = modifier_lost_northern_investments
+                        days = normal_modifier_time
+                    }
+                }
+                ig:ig_petty_bourgeoisie = {
+                    add_modifier = {
+                        name = modifier_lost_northern_investments
+                        days = normal_modifier_time
+                    }
                 }
             }
         }

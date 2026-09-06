@@ -38,7 +38,7 @@ NCountry = {
 	URBAN_CENTER_BUILDING = "building_urban_center"
 	CONSCRIPTION_CENTER_BUILDING = "building_conscription_center"
 	NAVAL_LOGISTICS_CENTER_BUILDING = "building_naval_logistics_center"
-	LAND_LOGISTICS_CENTER_BUILDING = "building_land_logistics_center"
+	LAND_LOGISTICS_CENTER_BUILDING = "building_army_logistics_center"
 	CONSCRIPTION_CENTER_LEVEL_POPULATION_DIVISOR = 1000 # Civilian population is divded by this amount to calculate maximum conscription center level [>=1]
 	TRADE_CENTER_BUILDING = "building_trade_center"
 	MANOR_HOUSE_BUILDING = "building_manor_house"
@@ -114,14 +114,14 @@ NPolitics = {
 	MOVEMENT_RADICALISM_FROM_BOLSTERING = 0.0 # Bolstered movements become this much less radical
 
 	# The chance for a character from an IG to pick an ideology is increased with the amount of pressure exerted from movements espousing that ideology
-	# At 100% pressure, the weight for the ideology is multiplied by ( 1 + this )
-	MOVEMENT_PRESSURE_IDEOLOGY_FACTOR = 4.0
+	# At 100% pressure, this value is added to the weight for the ideology
+	MOVEMENT_PRESSURE_IDEOLOGY_FACTOR = 1000
 
 	# The chance for the next leader of the IG to follow an ideology is increased with the total prominence of potential leaders espousing that ideology
 	# Unlike movement pressure this effect is not applied when generating ideology for other characters from that IG
 	# This value is also affected by role-specific weights on IGs, such as commander_leader_weight for prominence from commanders
-	# The multiplier is ( 1 + ( this * total prominence multiplied by role weights ) )
-	CHARACTER_PROMINENCE_AND_ROLE_LEADER_IDEOLOGY_FACTOR = 0.04
+	# The contribution is additive: base + ( this * total prominence multiplied by role weights )
+	CHARACTER_PROMINENCE_AND_ROLE_LEADER_IDEOLOGY_FACTOR = 1.0
 
 	IG_MAX_INFLUENCING_MOVEMENTS = 3 # An interest group cannot have more than this number of influencing movements
 	IG_SUPPORTING_MOVEMENT_MIN_SUPPORTING_CLOUT = 0.05 # A movement must be supported by at least this % of the clout in an IG to be shown as a supporting IG for the movement
@@ -166,6 +166,7 @@ NPolitics = {
 	GOVERNMENT_RADICAL_PETITION_THRESHOLD = 100
 
 	LAW_ENACTMENT_MIN_TOTAL_DAYS = 1		# Minimum number of total days that an enactment checkpoint can take [>=1]
+	LAW_ENACTMENT_MIN_SPEED_FACTOR = 0.1	# Minimum value of (1 + enactment_speed), preventing extreme slowdowns [>0]
 	LAW_ENACTMENT_DEFAULT_BASE_DAYS = 100	# Default number of base days required to reach an enactment checkpoint [>=1]
 	LAW_ENACTMENT_COOLDOWN_DAYS = 730		# When an enactment fails, or is manually stopped after at least one checkpoint, that law can't be tried to be enacted for this many days [>=0]
 	LAW_ENACTMENT_ADVANCE_FACTOR = 2		# The _base_ advance chance is the success chance multiplied by this factor [>=1]
@@ -251,11 +252,11 @@ NPolitics = {
 	# Insurrectionary countries receive an injection of military goods in their capital, below values control which goods and in which quantities
 	# Multiplies are based on the states assigned to the civil war and the pre-civil war market sell & buy orders
 	CIVIL_WAR_STOCKPILE_SMALL_ARMS_GOODS_TYPE = "small_arms"
-	CIVIL_WAR_STOCKPILE_SMALL_ARMS_MULTIPLIER = 0.80
+	CIVIL_WAR_STOCKPILE_SMALL_ARMS_MULTIPLIER = 0.50
 	CIVIL_WAR_STOCKPILE_AMMUNITION_GOODS_TYPE = "ammunition"
-	CIVIL_WAR_STOCKPILE_AMMUNITION_MULTIPLIER = 0.80
+	CIVIL_WAR_STOCKPILE_AMMUNITION_MULTIPLIER = 0.50
 	CIVIL_WAR_STOCKPILE_ARTILLERY_GOODS_TYPE = "artillery"
-	CIVIL_WAR_STOCKPILE_ARTILLERY_MULTIPLIER = 0.65
+	CIVIL_WAR_STOCKPILE_ARTILLERY_MULTIPLIER = 0.40
 
 	CIVIL_WAR_MAX_PROGRESS_AT_CHECKPOINT = 0.25	# A civil war can advance at most this amount per checkpoint, regardless of radicalism
 	MIN_RADICALISM_FOR_CIVIL_WAR_PROGRESSION = 0.75	# A political movement must have this much radicalism for a civil war to start organizing
@@ -265,7 +266,7 @@ NPolitics = {
 	CIVIL_WAR_CHECKPOINT_INTERVAL_BASE_WEEKS = 8   # civil war progress will be updated every this many weeks (may be affected by modifiers)
 	CIVIL_WAR_CHECKPOINT_INTERVAL_MAXIMUM_WEEKS = 52	# This serves as a limit, to protect modifiers from reducing the progress speed to zero
 
-	CIVIL_WAR_CONSCRIPTION_RATE_POPULAR_SUPPORT_MULTIPLIER = 0.25 # At 100% popular support, insurrectionary states gain this multiplier of civil_war_conscription modifier
+	CIVIL_WAR_CONSCRIPTION_RATE_POPULAR_SUPPORT_MULTIPLIER = 0.15 # At 100% popular support, insurrectionary states gain this multiplier of civil_war_conscription modifier
 	CIVIL_WAR_CONSCRIPTION_RATE_CLOUT_MULTIPLIER = 0.05 # At 100% clout from supporting IGs, insurrectionary states gain this multiplier of civil_war_conscription modifier
 	CIVIL_WAR_CONSCRIPTION_RATE_MAX_MULTIPLIER = 0.1 # Total multiplier of civil_war_conscription modifier cannot exceed this number (this is intentionally much lower than the possible maximum scaling above, as movements very rarely have >10-20% popular support)
 	CIVIL_WAR_LOSER_IG_AND_MOVEMENT_DEBUFF_YEARS = 20			# Debuff duration in years for IG that looses in a revolution
@@ -299,7 +300,7 @@ NPolitics = {
 	ELECTION_INTERVAL_YEARS = 4							# How many years normally pass between elections
 	CAMPAIGN_PERIOD_MONTHS = 6							# How long the Campaign Period before the election is
 
-	MIN_AFFILIATION_TO_STAY_IN_PARTY = 0				# An IG must have this much affiliation with a party to want to stay in it
+	MIN_AFFILIATION_TO_STAY_IN_PARTY = 0.5				# An IG must have this much affiliation with a party to want to stay in it
 	MIN_AFFILIATION_TO_JOIN_PARTY = 1					# An IG must have this much affiliation with a party to want to join it
 	MAX_ELECTORAL_CONFIDENCE = 1.0						# Electoral confidence can never be higher than this
 	INITIAL_ELECTORAL_CONFIDENCE = 1.0					# Starting electoral confidence at start of game or when elections are first introduced
@@ -458,6 +459,7 @@ NEconomy = {
 	# Only one of the penalties below is ever applied, in the following priority order: Embargo, War
 	TRADE_CENTER_ADVANTAGE_EMBARGO_FACTOR = -100							# Trade Centers lose this amount of export/import advantage, scaled against % of opposite-direction trade is from markets where the owner is embargoed by the market controller
 	TRADE_CENTER_ADVANTAGE_AT_WAR_FACTOR = -75 								# Trade Centers lose this amount of export/import advantage, scaled against % of opposite-direction trade is from markets where the owner is at war with the market controller
+	TRADE_CENTER_PRESTIGE_MERCHANT_MARINE_ADVANTAGE_MULT = 0.25				# Trade Centers gain this multiplier on trade advantage when 100% of their merchant marine input is prestige goods
 
 	# Weights for Trade Center preference in importing/exporting to other specific Trade Centers
 	TRADE_CENTER_PREFERENCE_BASE = 1										# Base weight in preference for each other Trade Center
@@ -626,7 +628,7 @@ NEconomy = {
 
 	SHIPPING_LANE_MERCHANT_MARINE_COST_SCALING = 0.15	# Added to shipping lane cost multiplier for each multiple of expected distance beyond the first
 	GOODS_DEFAULT_MERCHANT_MARINE_COST_MULTIPLIER = 1	# The merchant marine cost of shipping a single unit of goods (can be overridden in defines)
-	OVERSEAS_INFRASTRUCTURE_MERCHANT_MARINE_COST_MULTIPLIER = 0.2	# Merchant marine cost for each infrastructure usage in overseas state for port connection shipping lanes
+	OVERSEAS_INFRASTRUCTURE_MERCHANT_MARINE_COST_MULTIPLIER = 0.1	# Merchant marine cost for each infrastructure usage in overseas state for port connection shipping lanes
 	MERCHANT_MARINE_GOODS_KEY = "merchant_marine"		# The goods key used for merchant marine demand
 
 	SUPPLY_NETWORK_SHORTAGE_THRESHOLD = 0.5				# If merchant marine sell/buy ratio is lower than this, start applying supply network strength penalties
@@ -707,11 +709,14 @@ NEconomy = {
 	PRESTIGE_GOODS_INPUT_THROUGHPUT_BONUS = 0.2			# Bonus to throughput, scaled against proportion of input goods base value that is prestige goods
 
 	TOLL_RATE_NO_TOLLS = 0.0							# Toll rate on No Tolls setting. Value is multiplied with goods value crossing a strait
-	TOLL_RATE_LOW_TOLLS = 0.10							# Toll rate on Low Tolls setting. Value is multiplied with goods value crossing a strait
-	TOLL_RATE_MEDIUM_TOLLS = 0.20						# Toll rate on Medium Tolls setting. Value is multiplied with goods value crossing a strait
-	TOLL_RATE_HIGH_TOLLS = 0.40							# Toll rate on High Tolls setting. Value is multiplied with goods value crossing a strait
+	TOLL_RATE_LOW_TOLLS = 0.05							# Toll rate on Low Tolls setting. Value is multiplied with goods value crossing a strait
+	TOLL_RATE_MEDIUM_TOLLS = 0.10						# Toll rate on Medium Tolls setting. Value is multiplied with goods value crossing a strait
+	TOLL_RATE_HIGH_TOLLS = 0.20							# Toll rate on High Tolls setting. Value is multiplied with goods value crossing a strait
 	TOLL_RATE_MULTIPLIER_FULL_CONTROL = 2.0				# Multiplie on the above value if a country controls both sides of a strait
 	STRAIT_FULL_CONTROL_TRADE_IMPORTANCE_MULT = 1.5	# Multiplier on strait trade importance when the controller controls both sides of the strait
+	STRAIT_TOLL_RATE_COOLDOWN_MONTHS = 6				# After changing a toll rate on a strait, you must wait this long to change it again
+	STRAIT_ACCESS_SETTING_COOLDOWN_MONTHS = 6			# After changing an access setting on a strait, you must wait this long to change it again
+	STRAIT_SETTING_COOLDOWN_GRACE_PERIOD_DAYS = 7		# After changing a strait setting, it takes this many days before the cooldown activates (to give you a chance to change your mind)
 	MAX_PIRATED_GOODS_PER_HUB = 0.25 					# Max % of goods that can be pirated in one Hub->Hub connection
 	PIRACY_SHIP_SPEED_TO_GOODS_RATIO = 0.003 			# The % of goods trade quantity that are stolen per speed of a ship.
 	PIRATED_GOODS_SALE_DISCOUNT = 0.5 					# How much % value goods we get when being sold and turned into income for the country
@@ -804,6 +809,7 @@ NMilitary = {
 	INVALID_NAVAL_MISSION_GRACE_PERIOD_DAYS = 10			# How many days a fleet with an invalid naval mission will wait before going back to port
 
 	FORMATION_AUTO_MERGE_GRACE_PERIOD_DAYS = 3			# Only auto-merge units into formations created within this many days
+	FORMATIONS_MERGE_DISTANCE = 1						# Formations can be merged instantly within this distance
 
 	COMMANDER_SUFFICIENT_CAPACITY_MULT = 1.5				# Commanders of a type are considered sufficient if their cumulative command limit is at least this times the total active combat units of that type
 
@@ -819,6 +825,7 @@ NMilitary = {
 	MILITARY_FORMATION_ORGANIZATION_SPECIAL_UNITS_ADD = -50						# Military Formation with too many special units gain this Organization penalty: Target = Target + ( excess ratio * this )
 	MILITARY_FORMATION_ORGANIZATION_EXILE_MULT = -1								# Exiled Military Formation has its Target Organization modified: Target = Target * ( 1 + this )
 	MILITARY_FORMATION_ORGANIZATION_SUPPLY_SHORTAGE_EFFECT_THRESHOLD = 0.25		# Organization penalty starts when supply drops below this ratio
+	MILITARY_FORMATION_SHORTAGE_BATTALION_ORG_WEIGHT = 0.25						# Organization-target weight of a battalion whose required goods are fully in shortage (1 = no penalty); interpolated by the battalion's goods shortage severity
 	MILITARY_FROMATION_MAX_RESUPPLY_RATIO_PER_WEEK = 0.1						# Each week, a military formation can resupply this fraction of its total supply need
 	MILITARY_FORMATION_MIN_RESUPPLY_PER_WEEK = 10								# Each week, a military formation can resupply at least this amount of its supply need
 	MOBILIZATION_OPTION_DIFFERENCE_ORGANIZATION_IMPACT = 20 # The penalty to Organization gained for each difference by merging units between Formations with different Mobilization Options
@@ -826,7 +833,7 @@ NMilitary = {
 	FLEET_PRESENCE_DECAY_PER_DAY = 0.02						# The amount of Presence a Fleet decays per day while not in Mission Area
 	FLEET_PRESENCE_TRANSPORTING_OR_INVADING = 1.0			# Sea Presence forced on fleets transporting armies or supporting a naval invasion
 	FLEET_GUARANTEED_BATTLE_SIZE = 0.5 						# It's guaranteed that half of the ships arrive regardless of sea presence
-	FLEET_SPOT_BASE_CHANCE = 0.005							# Base chance (1%) to spot an enemy fleet per detection/visibility ratio
+	FLEET_SPOT_BASE_CHANCE = 0.00005						# Base chance to spot an enemy fleet, multiplied by the spotter's average Detection and the target's average Visibility
 	FLEET_SPOT_SCALING_MULTIPLIER = 0.01					# Scaling factor multiplier per total ship count when spotting a fleet
 
 	MILITARY_FORMATION_WEEKLY_MAX_UNIT_UPGRADES_ARMY = 0.1		# Each week a mobilized army can upgrade this (0.0-1.0) fraction of its total number of units.
@@ -847,14 +854,14 @@ NMilitary = {
 	# Defines below control how much blockade strength is required to fully blockade a state
 	# The base target strength is equal to the state_blockade_resistance_add modifier
 	BLOCKADE_TARGET_STRENGTH_MAXIMUM = 100000					# Required blockade strength cannot be higher than this
-	BLOCKADE_TARGET_STRENGTH_PER_TRADED_UNIT = 0.1				# Each base value of imports/exports in the market area increases required blockade strength by this (only for world market hubs)
-	BLOCKADE_TARGET_STRENGTH_PER_PRODUCED_UNIT = 0.15			# Each base value of goods produced in buildings affected by blockades (such as fisheries and shipyards) increases required blockade strength by this
-	BLOCKADE_TARGET_STRENGTH_PER_MERCHANT_MARINE = 3			# Each convoy passing through the state's port increases required blockade strength by this
+	BLOCKADE_TARGET_STRENGTH_PER_TRADED_UNIT = 0.05				# Each base value of imports/exports in the market area increases required blockade strength by this (only for world market hubs)
+	BLOCKADE_TARGET_STRENGTH_PER_PRODUCED_UNIT = 0.075			# Each base value of goods produced in buildings affected by blockades (such as fisheries and shipyards) increases required blockade strength by this
+	BLOCKADE_TARGET_STRENGTH_PER_MERCHANT_MARINE = 10			# Each convoy passing through the state's port increases required blockade strength by this
 
 	BLOCKADE_WORLD_MARKET_ACCESS_IMPACT_SCALING = 0.75			# Reduction of world market access for blockaded world market hubs, scales against blockade level
 	BLOCKADE_SHIPPING_LANE_IMPACT_SCALING = 0.75				# Reduction of efficiency for blockaded shipping lanes, scales against blockade level of either start or end point, whichever is most blockaded
 	BLOCKADE_THROUGHPUT_IMPACT_SCALING = 0.75					# Reduction of throughput for buildings affected by blockades, scales against blockade level
-	BLOCKADE_SEA_PRESENCE_TRESHOLD = 0.5						# At what level of sea presence is the blockade effective
+	BLOCKADE_SEA_PRESENCE_THRESHOLD = 0.5						# At what level of sea presence is the blockade effective
 	BLOCKADE_FORCED_BATTLE_LEVEL = 1.0							# A fleet undocking from a state with at least this blockade level will be forced into a battle with the blockading fleet
 
 	# Defines below control port bombardment effects on enemy coastal states
@@ -870,6 +877,8 @@ NMilitary = {
 	SAILORS_PER_ASSIGNMENT_SLOT = 100							# The number of sailors per ship assignment slot on Naval Administration buildings
 	SAILORS_PER_BUILDING_LEVEL = 1000							# The number of sailors per building level of Naval Administration
 	ACTIVE_SHIP_LIVING_CREW_PERCENTAGE = 0.1					# If a ship has this percentage of living crew or less, it is rendered inactive
+	DESTROYED_SHIP_LIVING_CREW_PERCENTAGE = 0					# If a ship has this percentage of living crew or less, it is destroyed while not in port
+	MINIMUM_SHIP_CREW_PERCENTAGE_TO_DEPLOY = 0.1				# A fleet cannot be deployed while any of its ships has less than this percentage of living crew, and at-sea fleets with such ships are sent home to re-crew
 	SHIP_PARTICIPATE_IN_UPRISING_CREW_PERCENTAGE = 0.33			# If at least this ratio of a ship's crew is from a rebelling state, the ship can participate in an uprising
 
 	SHIP_MAINTENANCE_SHIPYARD_PREMIUM_FACTOR = 0.2              # The profit margin shipyards get on maintenance costs (GoodsCost * (1 + this))
@@ -1051,6 +1060,8 @@ NDiplomacy = {
 	ALLY_WARGOAL_MAX_MANEUVERS_COST = 25				# When an ally adds a 'free' wargoal in a play, it cannot have a maneuvers cost higher than this
 
 	PERSONAL_UNION_ACTION_NAME = "personal_union"
+	SUPPORT_SEPARATISM_ACTION_NAME = "support_separatism"
+	CULTURAL_MINORITY_MOVEMENT_TYPE = "movement_cultural_minority"
 	INCREASE_AUTONOMY_OF_SELF_NAME = "da_increase_autonomy_of_self"
 	INCREASE_AUTONOMY_OF_SUBJECT_ACTION_NAME = "da_increase_autonomy_of_subject"
 	DECREASE_AUTONOMY_OF_SUBJECT_ACTION_NAME = "da_decrease_autonomy"
@@ -1203,7 +1214,7 @@ NDiplomacy = {
 	DIPLOMATIC_CATALYST_MIN_CHANGE_FOR_IDEOLOGICAL_ALIGNMENT = 10
 
 	TOP_PRESTIGE_RANK_BONUS_THRESHOLD = 10  # Prestige rank threshold at which the prestige_ranking_top static modifier starts being applied
-	TOP_PRESTIGE_RANK_BONUS_SCALE = 1.0 # At prestige rank 1, the prestige_ranking_top modifier is applied with ( 1 + this multiplier ), scaling down to 1x at threshold
+	TOP_PRESTIGE_RANK_BONUS_SCALE = 1.0 	# At prestige rank 1, the prestige_ranking_top modifier is applied with ( 1 + this multiplier ), scaling down to 1x at threshold
 
 	COUNTRY_TIER_CITY_STATE_PRESTIGE = 0
 	COUNTRY_TIER_PRINCIPALITY_PRESTIGE = 5
@@ -1213,12 +1224,12 @@ NDiplomacy = {
 	COUNTRY_TIER_HEGEMONY_PRESTIGE = 50
 
 	PRESTIGE_FROM_COUNTRY_GDP_DIVISOR = 1000000
-	PRESTIGE_FROM_COUNTRY_GDP = 3 # Per PRESTIGE_FROM_COUNTRY_GDP_DIVISOR GDP
-	PRESTIGE_FROM_SUBJECT_GDP = 1.5 # Per PRESTIGE_FROM_COUNTRY_GDP_DIVISOR GDP in subjects
-	PRESTIGE_FROM_ARMY_POWER_PROJECTION = 0.03 # Per point of power projection from army combat power
-	PRESTIGE_FROM_NAVY_POWER_PROJECTION = 0.006 # Per point of power projection from navy combat power
-	PRESTIGE_FROM_SUBJECT_ARMY_POWER_PROJECTION = 0.0005 # Per point of power projection from army combat power in subjects
-	PRESTIGE_FROM_SUBJECT_NAVY_POWER_PROJECTION = 0.01 # Per point of power projection from navy combat power in subjects
+	PRESTIGE_FROM_COUNTRY_GDP = 3 							# Per PRESTIGE_FROM_COUNTRY_GDP_DIVISOR GDP
+	PRESTIGE_FROM_SUBJECT_GDP = 1.5 						# Per PRESTIGE_FROM_COUNTRY_GDP_DIVISOR GDP in subjects
+	PRESTIGE_FROM_ARMY_POWER_PROJECTION = 0.03 				# Per point of power projection from army combat power
+	PRESTIGE_FROM_NAVY_POWER_PROJECTION = 0.006 			# Per point of power projection from navy combat power
+	PRESTIGE_FROM_SUBJECT_ARMY_POWER_PROJECTION = 0.0005 	# Per point of power projection from army combat power in subjects
+	PRESTIGE_FROM_SUBJECT_NAVY_POWER_PROJECTION = 0.01 		# Per point of power projection from navy combat power in subjects
 
 	PRESTIGE_FROM_PRESTIGE_GOODS_PRODUCTION = 3 # Multiplier on usual prestige from goods leaderboards
 
@@ -1228,43 +1239,43 @@ NDiplomacy = {
 	DAYS_TO_LOSE_POWER_RANK = 365
 	POWER_RANK_LOSS_THRESHOLD = 0.9
 
-	ARMY_POWER_PROJECTION_MODIFIER_MAX_SCALING = 1000 # Above this amount of army power projection, the country_army_power_projection static modifier provides no further benefit
-	NAVY_POWER_PROJECTION_MODIFIER_MAX_SCALING = 1000 # Above this amount of army power projection, the country_navy_power_projection static modifier provides no further benefit
+	ARMY_POWER_PROJECTION_MODIFIER_MAX_SCALING = 1000 			# Above this amount of army power projection, the country_army_power_projection static modifier provides no further benefit
+	NAVY_POWER_PROJECTION_MODIFIER_MAX_SCALING = 1000 			# Above this amount of army power projection, the country_navy_power_projection static modifier provides no further benefit
 
-	DEFAULT_STATES_REQUIRED_TO_RELEASE_COUNTRY = 0 # Applied if nothing is specified in country_creation
-	DEFAULT_STATES_REQUIRED_TO_FORM_COUNTRY = 0.75 # Applied if nothing is specified in country_formation
+	DEFAULT_STATES_REQUIRED_TO_RELEASE_COUNTRY = 0 				# Applied if nothing is specified in country_creation
+	DEFAULT_STATES_REQUIRED_TO_FORM_COUNTRY = 0.75 				# Applied if nothing is specified in country_formation
 	RELEASE_COUNTRY_AS_SUBJECT_RELATIONS_BOOST = 30
 	RELEASE_COUNTRY_AS_INDEPENDENT_RELATIONS_BOOST = 50
 
 	INTEREST_NUM_DAYS_CHANGE = 30
-	INTEREST_MAX_INVOLVEMENT = 10000				# Max involvement score for the interest tiers
-	INTEREST_GROWTH_RATIO = 0.02					# Each week, an interest's current involvement value grows by this proportion of the difference between its current involvement and target involvement
-	INTEREST_MIN_GROWTH = 10						# Each week, an interest's current involvement value grows by at least this much
-	INTEREST_DECAY_SPEED = 20						# Each week, an interest's current involvement value decays by this amount
-	INTEREST_CAPITAL_TARGET_INVOLVEMENT = 2500		# Target involvement score for having your capital in a strategic region
-	INTEREST_CAPITAL_NEIGHBOR_TARGET_INVOLVEMENT = 1500	# Target involvement score for having your capital in a neighboring strategic region
-	INTEREST_STATE_OR_CLAIM_TARGET_INVOLVEMENT = 7500		# Target involvement score for state or claim locality
-	INTEREST_STATE_OR_CLAIM_MIN_TARGET_INVOLVEMENT = 1500	# Minimum target involvement guaranteed when having any ownership or claims in a region
-	INTEREST_CLAIM_LOCALITY_WEIGHT = 0.20			# Each claim contributes this much locality weight (equivalent to owning this fraction of the whole state region)
-	INTEREST_GDP_TARGET_INVOLVEMENT = 2500			# Target involvement score multiplier for GDP share in a region
-	INTEREST_ARMY_TARGET_INVOLVEMENT = 0.33			# How much of army offense and defense is converted into target involvement for a present country
-	INTEREST_NAVY_TARGET_INVOLVEMENT = 0.33			# How much of navy power projection is converted into target involvement for a present country
-	INTEREST_NAVY_MISSION_MULTI_REGION_BONUS = 0.75	# Bonus to fleet involvement generation for each strategic region covered by a naval mission
-	INTEREST_MIN_INVOLVEMENT_RATIO = 0.1			# Minimum ratio of the article and pacts max involvement per article type or diplomatic pact
-	REGION_LOCALITY_SHARE_THRESHOLD = 0.25     		# If you have at least this share of a region's locality, you get the local interest in the region
+	INTEREST_MAX_INVOLVEMENT = 10000							# Max involvement score for the interest tiers
+	INTEREST_GROWTH_RATIO = 0.02								# Each week, an interest's current involvement value grows by this proportion of the difference between its current involvement and target involvement
+	INTEREST_MIN_GROWTH = 10									# Each week, an interest's current involvement value grows by at least this much
+	INTEREST_DECAY_SPEED = 20									# Each week, an interest's current involvement value decays by this amount
+	INTEREST_CAPITAL_TARGET_INVOLVEMENT = 2500					# Target involvement score for having your capital in a strategic region
+	INTEREST_CAPITAL_NEIGHBOR_TARGET_INVOLVEMENT = 1500			# Target involvement score for having your capital in a neighboring strategic region
+	INTEREST_STATE_OR_CLAIM_TARGET_INVOLVEMENT = 7500			# Target involvement score for state or claim locality
+	INTEREST_STATE_OR_CLAIM_MIN_TARGET_INVOLVEMENT = 1500		# Minimum target involvement guaranteed when having any ownership or claims in a region
+	INTEREST_CLAIM_LOCALITY_WEIGHT = 0.20						# Each claim contributes this much locality weight (equivalent to owning this fraction of the whole state region)
+	INTEREST_GDP_TARGET_INVOLVEMENT = 2500						# Target involvement score multiplier for GDP share in a region
+	INTEREST_ARMY_TARGET_INVOLVEMENT = 0.33						# How much of army offense and defense is converted into target involvement for a present country
+	INTEREST_NAVY_TARGET_INVOLVEMENT = 0.33						# How much of navy power projection is converted into target involvement for a present country
+	INTEREST_NAVY_MISSION_MULTI_REGION_BONUS = 0.75				# Bonus to fleet involvement generation for each strategic region covered by a naval mission
+	INTEREST_MIN_INVOLVEMENT_RATIO = 0.1						# Minimum ratio of the article and pacts max involvement per article type or diplomatic pact
+	REGION_LOCALITY_SHARE_THRESHOLD = 0.25     					# If you have at least this share of a region's locality, you get the local interest in the region
 	REGION_LOCALITY_COUNTRY_INCORPORATED_SHARE_THRESHOLD = 0.25 # If at least this share of your total incorporated states are in a region, you get the local interest in the region
-	INTEREST_TIER_MIN_RELEVANT_RANK = 2				# Min rank of an interest tier to be considered relevant
-	INTEREST_TIER_MIN_VIOLATE_SOVEREIGNTY_RANK = 2	# Min interest tier rank for a country to be an "interested party" for Violate Sovereignty (receive event to join defender). Use 2 for engaged or 3 for influential;
-	INTEREST_ARMY_INVOLVEMENT_CAP = 5000			# Max involvement from army strength
-	INTEREST_NAVY_INVOLVEMENT_CAP = 5000			# Max involvement from navy strength
-	INTEREST_TREATY_PACT_INVOLVEMENT_CAP = 5000		# Max involvement from treaties and pacts
-	INTEREST_POWER_BLOC_MEMBER_TARGET_INVOLVEMENT = 2500	# Involvement generated by each non-subject power bloc member for the leader
-	INTEREST_TIER_REDUCTION_GRACE_PERIOD_DAYS = 30		# When a country increases its interest tier, this many days must pass before the tier can be reduced
+	INTEREST_TIER_MIN_RELEVANT_RANK = 2							# Min rank of an interest tier to be considered relevant
+	INTEREST_TIER_MIN_VIOLATE_SOVEREIGNTY_RANK = 2				# Min interest tier rank for a country to be an "interested party" for Violate Sovereignty (receive event to join defender). Use 2 for engaged or 3 for influential;
+	INTEREST_ARMY_INVOLVEMENT_CAP = 5000						# Max involvement from army strength
+	INTEREST_NAVY_INVOLVEMENT_CAP = 5000						# Max involvement from navy strength
+	INTEREST_TREATY_PACT_INVOLVEMENT_CAP = 5000					# Max involvement from treaties and pacts
+	INTEREST_POWER_BLOC_MEMBER_TARGET_INVOLVEMENT = 2500		# Involvement generated by each non-subject power bloc member for the leader
+	INTEREST_TIER_REDUCTION_GRACE_PERIOD_DAYS = 30				# When a country increases its interest tier, this many days must pass before the tier can be reduced
 
 	STRAIT_MIN_INTEREST_TIER_FOR_CATALYST = 1		# Minimum interest tier required for a country to get a catalyst from strait closing to military access
 
 	REGION_LOCALITY_STATES_WEIGHT = 1				# Weight of the proportion of states you own in a region when calculating region locality
-	REGION_LOCALITY_POPULATION_WEIGHT = 1.25			# Weight of the proportion of population you own in a region when calculating region locality
+	REGION_LOCALITY_POPULATION_WEIGHT = 1.25		# Weight of the proportion of population you own in a region when calculating region locality
 
 	RELATION_PENALTY_OVERLORD_KICK_BACKER_SUBJECT = -30		# When an overlord joins a diplomatic play they will force any subjects of theirs to become neutral if they are supporting the other side, this is a penalty to relations between the subject and overlord when that happens
 
@@ -1273,8 +1284,8 @@ NDiplomacy = {
 	ECONOMIC_DEPENDENCE_GDP_RATIO_BY_OTHER_FACTOR = 5				# Ex. if you own 15% of the other country's GDP, that works out to +0.75
 	ECONOMIC_DEPENDENCE_GDP_RATIO_BY_OTHER_MIN = 0
 	ECONOMIC_DEPENDENCE_GDP_RATIO_BY_OTHER_MAX = 5
-	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_FACTOR = 20 #More embarrassing if your subjects own your stuff than the other way round.
-	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_MIN = -5 #This value is negative
+	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_FACTOR = 20 			#More embarrassing if your subjects own your stuff than the other way round
+	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_MIN = -5 				#This value is negative
 	ECONOMIC_DEPENDENCE_OTHER_GDP_RATIO_OWNED_MAX = 0
 	ECONOMIC_DEPENDENCE_GDP_PERCENTAGE_FACTOR = 1
 	ECONOMIC_DEPENDENCE_GDP_PERCENTAGE_MIN = 0
@@ -1318,8 +1329,12 @@ NDiplomacy = {
 	TREATY_ARTICLE_TREATY_PORT_ARTICLE_TYPE = "treaty_port"
 	TREATY_ARTICLE_INVESTMENT_RIGHTS_ARTICLE_TYPE = "foreign_investment_rights"
 	TREATY_ARTICLE_LAW_COMMITMENT_ARTICLE_TYPE = "law_commitment"
+	TREATY_ARTICLE_STRAIT_ACCESS_ARTICLE_TYPE = "strait_access"
+	TREATY_ARTICLE_TOLL_EXEMPTION_ARTICLE_TYPE = "toll_exemption"
+	TREATY_ARTICLE_NO_TOLLS_ARTICLE_TYPE = "no_tolls"
+	TREATY_ARTICLE_NO_STRAIT_CLOSURE_ARTICLE_TYPE = "no_strait_closure"
 	DEFAULT_WAR_REPARATIONS_MONEY_TRANSFER = 0.1
-	TREATY_PROPOSAL_COOLDOWN_DAYS = 7 			# The number of days before you can send another treaty proposal after having one rejected
+	TREATY_PROPOSAL_COOLDOWN_DAYS = 7 								# The number of days before you can send another treaty proposal after having one rejected
 	TREATY_DEFAULT_BINDING_DURATION_YEARS = 5
 	TREATY_THREATEN_HOSTILITIES_DURATION_DAYS = 365
 	THREATEN_NAVAL_HOSTILITIES_COOLDOWN_DAYS = 1825					# 5 years before you can threaten naval hostilities against the same country again
@@ -1338,28 +1353,28 @@ NDiplomacy = {
 }
 
 NPowerBlocs = {
-	MAX_PRINCIPLES = 4					# Max number of principles that a Power Bloc can have
-	INITIAL_PRINCIPLE_LEVELS = 1		# Max total levels of principles that a Power Bloc can have during formation
-	FORMATION_COOLDOWN_MONTHS = 24		# Cooldown in months between the attempts to form Power Blocs
-	JOIN_COOLDOWN_MONTHS = 6			# If a Country leaves a Power Bloc they cannot re-join before X months
-	LEAVE_COOLDOWN_MONTHS = 6			# If a Country joins a Power Bloc they cannot leave within X months
-	MIN_MEMBERS = 2 					# This is the minimum number of members that the bloc needs to have to be considered active. Members include the leader.
-	LEVERAGE_LOBBY_CLOUT_FACTOR = 500 	# Leverage gain is increased or decreased by the Lobby's total Clout * this factor
+	MAX_PRINCIPLES = 4														# Max number of principles that a Power Bloc can have
+	INITIAL_PRINCIPLE_LEVELS = 1											# Max total levels of principles that a Power Bloc can have during formation
+	FORMATION_COOLDOWN_MONTHS = 24											# Cooldown in months between the attempts to form Power Blocs
+	JOIN_COOLDOWN_MONTHS = 6												# If a Country leaves a Power Bloc they cannot re-join before X months
+	LEAVE_COOLDOWN_MONTHS = 6												# If a Country joins a Power Bloc they cannot leave within X months
+	MIN_MEMBERS = 2 														# This is the minimum number of members that the bloc needs to have to be considered active. Members include the leader.
+	LEVERAGE_LOBBY_CLOUT_FACTOR = 500 										# Leverage gain is increased or decreased by the Lobby's total Clout * this factor
 	INVITE_ACTION_NAME = "invite_to_power_bloc"
 	JOIN_ACTION_NAME = "join_power_bloc"
-	MAX_MANDATE_PROGRESS = 2000			# When mandate progress reaches this value, the power bloc gains one mandate
-	MAX_MANDATES = 3					# This is the maximum number of mandates that can be accumulated at once
-	PRINCIPLE_SELECTION_COOLDOWN_DAYS = 90	# Once a principle is selected, it cannot be changed for this many days. Upgrading is unaffected by the cooldown, but resets it.
-	POWER_STRUGGLE_PRESTIGE_THRESHOLD_START = 1.2 	# If a power bloc member has more prestige than leader's prestige X this - power struggle starts with the member becoming contender
-	POWER_STRUGGLE_PRESTIGE_THRESHOLD_FAIL = 1.15 	# If a contender has less prestige than leader's prestige X this - power struggle fails
-	POWER_STRUGGLE_DURATION_SUCCESS_MONTHS = 12 	# Power struggle succeeds after this months
-	POWER_STRUGGLE_DURATION_FACTOR_FOR_FOUNDER = 0.75 	# Power struggle succeeds after this X POWER_STRUGGLE_DURATION_SUCCESS_MONTHS if the contender is the founder of the power bloc
-	COHESION_WEEKLY_DRIFT_MAX = 1		# At most, Cohesion will drift by +/- this value each week
-	COHESION_TARGET_MAX = 100			# The highest value Cohesion can reach
-	POWER_BLOC_INFLUENCE_COST = 500		# Cost in Influence to form / be the leader of a Power Bloc
-	MAX_LEVERAGE = 1000					# How much "raw" Leverage can be split between parties (the country itself + each Power Bloc)
-	LEVERAGE_WEEKLY_DRIFT_FACTOR = 0.02	# The delta between current Leverage and Target Leverage will be multiplied by this to determine the weekly Leverage drift
-	LEVERAGE_WEEKLY_DRIFT_MIN = 1		# At minimum, Leverage will drift by +/- this value each week, up/down to the target
+	MAX_MANDATE_PROGRESS = 2000												# When mandate progress reaches this value, the power bloc gains one mandate
+	MAX_MANDATES = 3														# This is the maximum number of mandates that can be accumulated at once
+	PRINCIPLE_SELECTION_COOLDOWN_DAYS = 90									# Once a principle is selected, it cannot be changed for this many days. Upgrading is unaffected by the cooldown, but resets it.
+	POWER_STRUGGLE_PRESTIGE_THRESHOLD_START = 1.2 							# If a power bloc member has more prestige than leader's prestige X this - power struggle starts with the member becoming contender
+	POWER_STRUGGLE_PRESTIGE_THRESHOLD_FAIL = 1.15 							# If a contender has less prestige than leader's prestige X this - power struggle fails
+	POWER_STRUGGLE_DURATION_SUCCESS_MONTHS = 12 							# Power struggle succeeds after this months
+	POWER_STRUGGLE_DURATION_FACTOR_FOR_FOUNDER = 0.75 						# Power struggle succeeds after this X POWER_STRUGGLE_DURATION_SUCCESS_MONTHS if the contender is the founder of the power bloc
+	COHESION_WEEKLY_DRIFT_MAX = 1											# At most, Cohesion will drift by +/- this value each week
+	COHESION_TARGET_MAX = 100												# The highest value Cohesion can reach
+	POWER_BLOC_INFLUENCE_COST = 500											# Cost in Influence to form / be the leader of a Power Bloc
+	MAX_LEVERAGE = 1000														# How much "raw" Leverage can be split between parties (the country itself + each Power Bloc)
+	LEVERAGE_WEEKLY_DRIFT_FACTOR = 0.02										# The delta between current Leverage and Target Leverage will be multiplied by this to determine the weekly Leverage drift
+	LEVERAGE_WEEKLY_DRIFT_MIN = 1											# At minimum, Leverage will drift by +/- this value each week, up/down to the target
 	COUNTRY_POPULATION_LEVERAGE_RESISTANCE_MODIFIER_DIVISOR = 1000000 		# Population divided by this is multiplied by country_leverage_resistance_per_population to give a certain amount of leverage per million people
 	COUNTRY_POPULATION_LEVERAGE_RESISTANCE_MODIFIER_MAX_MULTIPLIER = 100	# Max multiplier given by population. With the value above at 1 000 000, this means the cap for leverage resistance is at 100 000 000.
 }
@@ -1386,10 +1401,10 @@ NPops = {
 	LOYALTIES_GAIN_GRACE_PERIOD_SHORT = "1837.1.1"		# Until this date, only a scaling part of the Radicals and Loyalists gained from SOL changes will be applied if the Short game rule is applied
 	LOYALTIES_GAIN_GRACE_PERIOD_LONG = "1841.1.1"		# Until this date, only a scaling part of the Radicals and Loyalists gained from SOL changes will be applied if the Long game rule is applied
 	LOYALTIES_GAIN_GRACE_PERIOD_EXTRA_LONG = "1846.1.1"	# Until this date, only a scaling part of the Radicals and Loyalists gained from SOL changes will be applied if the Extra Long game rule is applied
-	RADICALS_MAX_FROM_LOW_SOL = 0.15				# If pop is already this % radical, don't add more radicals from low SOL (Scales by delta between SoL and expected min SoL)
-	RADICALS_MAX_FROM_DISCRIMINATION = 0.5		# If pop is already this % radical, don't add more radicals from discrimination (Scales by literacy)
-	RADICALS_MONTHLY_FROM_LOW_SOL = 0.003		# Scales by delta between SoL and expected min SoL
-	RADICALS_MONTHLY_FROM_DISCRIMINATION = 0.005 # Scales by literacy
+	RADICALS_MAX_FROM_LOW_SOL = 0.15					# If pop is already this % radical, don't add more radicals from low SOL (Scales by delta between SoL and expected min SoL)
+	RADICALS_MAX_FROM_DISCRIMINATION = 0.5				# If pop is already this % radical, don't add more radicals from discrimination (Scales by literacy)
+	RADICALS_MONTHLY_FROM_LOW_SOL = 0.003				# Scales by delta between SoL and expected min SoL
+	RADICALS_MONTHLY_FROM_DISCRIMINATION = 0.005 		# Scales by literacy
 
 	# Radicals Monthly indicates what fraction of the pop turns radical every month while starving
 	# Radicals max indicates at what max fraction of radicals we stop adding new ones due to starvation
@@ -1416,18 +1431,18 @@ NPops = {
 
 	DEFAULT_OBSESSION_DEMAND_MIN = 0.5					# The minimum relative demand of an obsession (overrides min demand in buy package goods categories), can be overriden in pop need
 	DEFAULT_OBSESSION_DEMAND_MULT = 1.5					# Demand of an obsession is multiplied by this, can be overriden in pop need
-	MIN_POPS_FOR_NEW_OBSESSION = 50000			# At least this many pops of a culture must live in a market to get an obsession from its goods
-	MIN_SUPPLY_LEVEL_FOR_NEW_OBSESSION = 0.5	# Supply needs to be at least this times the demand
-	MIN_DEMAND_VALUE_FOR_NEW_OBSESSION = 500	# At this amount of (number of units * goods base price) needs to be demanded in a market to create a new obsession
-	MAX_NUM_OBSESSIONS = 3						# A culture can only have this number of obsessions at the same time
-	OBSESSION_SPAWN_CHANCE = 0.5				# Per year (1.0 = 1%), multiplied by goods supply and market size mult
+	MIN_POPS_FOR_NEW_OBSESSION = 50000					# At least this many pops of a culture must live in a market to get an obsession from its goods
+	MIN_SUPPLY_LEVEL_FOR_NEW_OBSESSION = 0.5			# Supply needs to be at least this times the demand
+	MIN_DEMAND_VALUE_FOR_NEW_OBSESSION = 500			# At this amount of (number of units * goods base price) needs to be demanded in a market to create a new obsession
+	MAX_NUM_OBSESSIONS = 3								# A culture can only have this number of obsessions at the same time
+	OBSESSION_SPAWN_CHANCE = 0.5						# Per year (1.0 = 1%), multiplied by goods supply and market size mult
 	OBSESSION_SPAWN_CHANCE_MAX_SUPPLY_MULT = 3.0		# Supply relative to demand above this isn't factored into spawn chance
 	OBSESSION_SPAWN_CHANCE_PRESTIGE_GOODS_MULT = 4.0	# Chance for a new obsession to spawn is multiplied by 1 + this, scaled by fraction of the goods supply that is prestige goods
-	TABOO_DEMAND_MULT = 0.5						# Demand of a taboo is multiplied by this
-	DEFAULT_PRESTIGE_GOODS_DEMAND_INCREASE = 0.5	# Demand for goods is multiplied by ( 1 + this ), scaled by how much of the local supply is prestige goods, can be overriden in pop need
-	MAX_DEMAND_ADJUSTMENT_BASE_AMOUNT = 0.01	# Controls how much a pop can change demand of a substituable goods in a single update (base)
-	MAX_DEMAND_ADJUSTMENT_SCALED_AMOUNT = 0.09	# Controls how much a pop can change demand of a substituable goods in a single update (scaled)
-	MAX_DEMAND_ADJUSTMENT_SCALE = 1.0			# At this delta between target and current demand, apply max demand adjustment scale
+	TABOO_DEMAND_MULT = 0.5								# Demand of a taboo is multiplied by this
+	DEFAULT_PRESTIGE_GOODS_DEMAND_INCREASE = 0.5		# Demand for goods is multiplied by ( 1 + this ), scaled by how much of the local supply is prestige goods, can be overriden in pop need
+	MAX_DEMAND_ADJUSTMENT_BASE_AMOUNT = 0.01			# Controls how much a pop can change demand of a substituable goods in a single update (base)
+	MAX_DEMAND_ADJUSTMENT_SCALED_AMOUNT = 0.09			# Controls how much a pop can change demand of a substituable goods in a single update (scaled)
+	MAX_DEMAND_ADJUSTMENT_SCALE = 1.0					# At this delta between target and current demand, apply max demand adjustment scale
 
 	PRESTIGE_GOOD_SOL_BONUS_SCALING = 0.4 		# Added multiplier to SoL, scales with % of pop buy package that is prestige goods
 	PRESTIGE_GOOD_SOL_MAX_BONUS = 0.2 			# Added multiplier to SoL from prestige goods cannot be higher than this
@@ -1445,7 +1460,7 @@ NPops = {
 
 	LITERACY_DIEOFF_BIAS = 1.0					# Percentage of literate pops who die of old age compared to the current literacy rate, the higher this value the faster the population becomes illiterate when literacy suffers
 
-	DEFAULT_SOL_CHANGE_IMPACT_FACTOR = 0.03		# How large part of a pop become more loyalist or radical as a result of a change in standard of living, can be overriden on specific pop types
+	DEFAULT_SOL_CHANGE_IMPACT_FACTOR = 0.03			# How large part of a pop become more loyalist or radical as a result of a change in standard of living, can be overriden on specific pop types
 	SOL_CHANGE_IMPACT_FACTOR_REDUCTION_START = 15	# Above amount of SoL, we start scaling down loyalists/radicals from SoL changes
 	SOL_CHANGE_IMPACT_FACTOR_REDUCTION_END = 30 	# At this amount of SoL, we apply maximum scaling down of loyalists/radicals from SoL changes
 	SOL_CHANGE_IMPACT_FACTOR_REDUCTION_SCALE = 9 	# Loyalists/radicals from SoL changes is divided by ( 1 + this ) at maximum scaling
@@ -1510,7 +1525,7 @@ NPops = {
 
 	CULTURAL_FERVOR_PUBLIC_SCHOOLS_IMPACT = 10									# The impact of public schools on the cultural fervor, if all pops of a culture lives under public schools, then the cultural fervor will increase by this amount, else a fraction of it
 
-	CULTURAL_FERVOR_OTHER_CULTURES_RELEASED_IMPACT = 10						# The impact on non-primary cultures in country where a culture gets released
+	CULTURAL_FERVOR_OTHER_CULTURES_RELEASED_IMPACT = 10							# The impact on non-primary cultures in country where a culture gets released
 
 	CULTURAL_FERVOR_NATIONAL_AWAKENING_THRESHOLD = 25							# The fervor threshold over which it is possible for a culture to have a national awakening
 	CULTURAL_NATIONAL_AWAKENING_CHANCE_INCREASE_PER_FERVOR = 0.01				# The increase in chance per point of fervor of a national awakening happening once fervor is above the awakening threshold
@@ -1577,7 +1592,7 @@ NPops = {
 	MIGRATION_PULL_MULT_FROM_MASS_MIGRATION_TARGET = 1.5						# Migration pull multiplied by this from target state being a mass migration target
 	MIGRATION_PULL_MULT_FROM_MASS_MIGRATION_TARGET_ADJACENCY = 1.1				# Migration pull multiplied by this from target state being next to a mass migration target
 	MIGRATION_MAX_PER_STATE_MASS_EMIGRATION_MULT = 3.0							# Weekly emigration caps are multiplied by this amount by this for mass migrations (after clamping from MIGRATION_MAX_EMIGRATION_AS_POPULATION_FRACTION)
-	MIGRATION_MAX_PER_STATE_MASS_IMMIGRATION_MULT = 5.0						# Weekly immigration caps are multiplied by this amount by this for mass migrations (after clamping from MIGRATION_MAX_EMIGRATION_AS_POPULATION_FRACTION)
+	MIGRATION_MAX_PER_STATE_MASS_IMMIGRATION_MULT = 5.0							# Weekly immigration caps are multiplied by this amount by this for mass migrations (after clamping from MIGRATION_MAX_EMIGRATION_AS_POPULATION_FRACTION)
 	MASS_MIGRATION_NEIGHBORING_TARGET_STATE_LIMIT_FRACTION = 0.5				# Fraction of the limit a neighboring state gets compared to the main target state in a mass migration
 
 ##### End Migration #####
@@ -1787,6 +1802,7 @@ NCharacters = {
 	RECRUIT_COMMANDER_POOL_SIZE = 3
 	RECRUIT_COMMANDER_VALUE_MARGINAL = -50
 	RECRUIT_COMMANDER_VALUE_HISTORICAL = 50     # Prioritize showing historical commanders
+	HISTORICAL_USAGE_CHANCE_MULT = 2            # Multiplier applied to CCharacterTemplate chances when the template is flagged historical
 	RECRUIT_COMMANDER_VALUE_AGE_MULT = 0.5
 	RECRUIT_COMMANDER_VALUE_SAME_IGS = -40
 	RECRUIT_COMMANDER_REMOVE_AGE = 55			# removed from the recruit pool when they reach 55 years
@@ -1962,16 +1978,21 @@ NBattle = {
 	SHIP_DEFAULT_READINESS_GAIN = 10				# Default gain if not specified on template
 	SHIP_INITIAL_READINESS = 0.0					# What readiness a ship has at the start of combat
 
-	SHIP_ATTACK_BASE_MISS_CHANCE = 0.2				# Base chance for a ship to miss its attack against another ship. This is further modified by a ship's accuracy
-	SHIP_ATTACK_MIN_MISS_CHANCE = 0.01				# Minimum miss chance when a ship attacks
+	SHIP_ATTACK_BASE_MISS_CHANCE = 0.5				# Miss chance when target speed equals attacker accuracy * SHIP_ATTACK_ACCURACY_SPEED_RATIO
+	SHIP_ATTACK_MIN_MISS_CHANCE = 0.05				# Minimum miss chance (maximum 95% hit chance)
+	SHIP_ATTACK_MAX_MISS_CHANCE = 0.9				# Maximum miss chance (minimum 10% hit chance)
+	SHIP_ATTACK_ACCURACY_SPEED_RATIO = 5			# Each point of accuracy counters this many points of speed
+	SHIP_ATTACK_MISS_PER_SPEED = 0.03				# Miss chance change per point of (effective_speed - accuracy * ratio)
+	SHIP_ATTACK_VISIBILITY_DIVISOR = 15				# Target visibility is divided by this and subtracted from speed for hit calculation
 	SHIP_WITHDRAW_BASE_CHANCE = 0.5					# Base chance for a ship to successfully escape. The ship's speed is added to this.
 	SHIP_WITHDRAW_SPEED_FACTOR = 1.0				# Factor on speed when it's modifying withdraw chance.
+	SUPPLY_SHIP_WITHDRAW_CHANCE_MULT = 0.1			# Multiplier on supply ship withdraw success chance. Lower values make supply ships harder to escape with.
 
 	###### Withdraw Desire Calculation ######
 	## Withdraw desire = ( Damage Desire + Zero Damage Hit Ratio Desire ) * ( 1 + Overwhelming Odds Desire + Exposed Desire + Raiding Desire )
 	# given that each term is applicable
 
-	SHIP_LIGHT_DAMAGE = 0.8						# Damage thresholds on ships for different behaviors
+	SHIP_LIGHT_DAMAGE = 0.8							# Damage thresholds on ships for different behaviors
 	SHIP_MODERATE_DAMAGE = 0.5
 	SHIP_SEVERE_DAMAGE = 0.25
 	SHIP_WITHDRAW_DESIRE_LIGHT_DAMAGE = 0.05		# Chance for the ship to attempt withdrawing from a battle based on damage taken
@@ -1998,9 +2019,12 @@ NBattle = {
 	FLEET_INTERCEPT_CHANCE_BASE = 10.0						# The chance (0-100) that a fleet will intercept as a base
 	FLEET_RAID_SUPPLY_CHANCE_BASE = 10.0					# The chance (0-100) that a fleet will raid supply as a base
 
+	FLEET_RAID_MAX_SUPPLY_LENGTH_DIVISOR = 5				# When deciding how many supply ships can be attacked at once, we cap the divisor for targeted num ships based on supply path length by this
+
 	NAVAL_BATTLE_LOG_INITIAL_SIZE_FACTOR = 8				# Initial reserved log size factor. This is multiplied by the number of ships in a battle to estimate number of entries needed. Too large a value and you allocate too much data, too little and you need to expand the array multiple times which is slow.
-	NAVAL_BATTLE_LOG_ENTRIES_PER_PAGE = 20				# Number of naval battle log entries shown per page in the battle log UI.
+	NAVAL_BATTLE_LOG_ENTRIES_PER_PAGE = 20					# Number of naval battle log entries shown per page in the battle log UI.
 	NAVAL_BATTLE_CONDITION_DAMAGE_RANGE = 0.25 				# When a naval battle condition applies damage to a ship, the actual damage will be in a range from (1 - this) * damage to (1 + this) * damage
+	NAVAL_BATTLE_CRIT_ARMOR_REDUCTION = 1.0					# How much armor is reduced percentually on a crit. 1 = ignores armor completely, 0 = armor is factored in as usual
 
 	DEFAULT_NAVAL_BATTLE_CONDITION_TYPE = "naval_condition_calm_waters"		# If a naval battle is not able to select a valid condition due to all weights being 0 or something, it will override the selection to use this battle condition. This is a backup though and ideally all battle conditions should have a non-zero weight and there should always be at least one possible condition
 
@@ -2013,22 +2037,22 @@ NBattle = {
 
 NWar = {
 	DEVASTATION_MAX = 100.0
-	DEVASTATION_INCREASE_RATE = 0.1 # Per day, scales with level of occupation
-	DEVASTATION_DECAY_RATE = -0.025 # Per day, when there are no occupations
-	DEVASTATION_FROM_BATTLES = 0.1 # For each battle
+	DEVASTATION_INCREASE_RATE = 0.1 						# Per day, scales with level of occupation
+	DEVASTATION_DECAY_RATE = -0.025							# Per day, when there are no occupations
+	DEVASTATION_FROM_BATTLES = 0.1							# For each battle
 
-	AUTO_CAPITULATE_WAR_SUPPORT = -100 # When war support is this low, the country will auto capitulate
-	DAYS_BETWEEN_WAR_EXHAUSTION = 7 # Every this many days war support will be reduced by the war exhaustion formula
+	AUTO_CAPITULATE_WAR_SUPPORT = -100						# When war support is this low, the country will auto capitulate
+	DAYS_BETWEEN_WAR_EXHAUSTION = 7							# Every this many days war support will be reduced by the war exhaustion formula
 	WAR_EXHAUSTION_BASE = 0.2
-	WAR_EXHAUSTION_KIA_FACTOR = 4.0 # Scaled by casualties compared to total manpower
-	WAR_EXHAUSTION_KIA_BASE_MULTIPLIER = 0.25	# War Exhaustion from casualties is always multiplied by at least this
-	WAR_EXHAUSTION_KIA_BATTLES_LOST_MULTIPLIER = 0.75 	# At 100% of battles lost by our side, War Exhaustion from casualties is further multiplied by this
-	WAR_EXHAUSTION_TURMOIL_FACTOR = 1.5 # At 100% turmoil
+	WAR_EXHAUSTION_KIA_FACTOR = 4.0							# Scaled by casualties compared to total manpower
+	WAR_EXHAUSTION_KIA_BASE_MULTIPLIER = 0.25				# War Exhaustion from casualties is always multiplied by at least this
+	WAR_EXHAUSTION_KIA_BATTLES_LOST_MULTIPLIER = 0.75		# At 100% of battles lost by our side, War Exhaustion from casualties is further multiplied by this
+	WAR_EXHAUSTION_TURMOIL_FACTOR = 1.5						# At 100% turmoil
 	WAR_EXHAUSTION_CONTESTED_ENEMY_WARGOALS = 1.0
-	WAR_EXHAUSTION_ANTI_WAR_LOBBY_CLOUT_FACTOR = 1.0 # At 100% lobby clout opposed to the war
-	WAR_EXHAUSTION_PRO_WAR_LOBBY_CLOUT_FACTOR = -1.0 # At 100% lobby clout supporting to the war
-	WAR_EXHAUSTION_MAX = 100 # War Exhaustion can never exceed this
-	WAR_EXHAUSTION_MIN = 0 # War Exhaustion can never go below this
+	WAR_EXHAUSTION_ANTI_WAR_LOBBY_CLOUT_FACTOR = 1.0		# At 100% lobby clout opposed to the war
+	WAR_EXHAUSTION_PRO_WAR_LOBBY_CLOUT_FACTOR = -1.0		# At 100% lobby clout supporting to the war
+	WAR_EXHAUSTION_MAX = 100								# War Exhaustion can never exceed this
+	WAR_EXHAUSTION_MIN = 0									# War Exhaustion can never go below this
 	OCCUPATION_STATE_BASE_WEIGHT = 1
 	OCCUPATION_STATE_POP_WEIGHT = 1
 	OCCUPATION_STATE_INCORPORATED_WEIGHT = 10
@@ -2050,6 +2074,11 @@ NWar = {
 	STATE_CONQUEST_DEFAULT_DEMILITARIZATION = 0.75
 	STATE_PEACEFUL_ANNEXATION_RADICALIZATION_FACTOR = 0.25	# If the state was annexed due to an accepted diplomatic demand by the overlord, multiply by this
 	STATE_CONQUEST_KEEP_ALL = 0.0
+	STATE_PARTIAL_OCCUPATION_THRESHOLD = 0.5 # If a state is at least this % partially occupied, it's considered occupied for purposes of contesting wargoals
+	OCCUPATION_PROGRESS_DECAY = 0.7			# Monthly decay factor for occupation progress accumulators
+	OCCUPATION_PROGRESS_DECAY_ZERO_THRESHOLD = 0.1	# Occupation progress below this value is set to zero
+	FRONT_ADVANCEMENT_RATIO = 1.1 # One side on a front must have this ratio of occupation gain to the other to be considered to be advancing at all
+	FRONT_DECISIVE_ADVANCEMENT_RATIO = 1.5 # One side on a front must have this ratio of occupation gain to the other to be considered decisively advancing
 }
 
 NTravelNetwork = {
@@ -2100,6 +2129,10 @@ NText = {
 	DURATION_SHOW_YEARS_THRESHOLD = 1105	# Duration will show as years if it's at least this many days
 	DURATION_SHOW_MONTHS_THRESHOLD = 100	# Duration will show as months if it's at least this many days
 	DURATION_SHOW_WEEKS_THRESHOLD = 15		# Duration will show as weeks if it's at least this many days
+
+	TEXT_MATCHING_SCORE_PREFIX_MATCH = 1.0				# When the searched text is a prefix of the target text
+	TEXT_MATCHING_SCORE_MAX_NON_PREFIX_MATCH = 0.99		# The maximum score a non-full match can get. Including a substring non-prefix match
+	TEXT_MATCHING_SCORE_MIN_MATCHING_SCORE = 0.1		# The lowest score a match can get while fulfilling the max edit distance requirement
 }
 
 NDebug = {

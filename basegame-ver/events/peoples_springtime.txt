@@ -245,7 +245,6 @@ peoples_springtime.3 = {
 	trigger = {
 		has_journal_entry = je_springtime_of_the_peoples
 		has_technology_researched = egalitarianism
-
 		any_interest_group = {
 			OR = {
 				is_interest_group_type = ig_rural_folk
@@ -276,6 +275,33 @@ peoples_springtime.3 = {
 				}
 			}
 			save_scope_as = radical_ig
+			if = {
+				limit = {
+					any_scope_character = {
+						is_ruler_of_own_country = no
+						is_heir_of_own_country = no
+						has_ideology = ideology:ideology_radical
+					}
+				}
+				random_scope_character = {
+					limit = {
+						is_ruler_of_own_country = no
+						is_heir_of_own_country = no
+						has_ideology = ideology:ideology_radical
+					}
+					save_scope_as = radical_ig_leader
+				}
+			}
+			else = {
+				ROOT = {
+					create_character = {
+						role = character_role_politician
+						ideology = ideology_radical
+						interest_group = scope:radical_ig
+						save_scope_as = radical_ig_leader
+					}
+				}
+			}
 		}
 	}
 
@@ -288,13 +314,14 @@ peoples_springtime.3 = {
 		ai_chance = {
 			base = 25
 		}
-		custom_tooltip = {
-			text = peoples_springtime.3.a.tt
-			create_character = {
-				ig_leader = yes
-				ideology = ideology_radical
-				interest_group = scope:radical_ig
+		scope:radical_ig_leader ?= {
+			if = {
+				limit = {
+					has_role_of_type = agitator
+				}
+				replace_character_roles = { remove = { agitator } add = { politician } }
 			}
+			set_as_interest_group_leader = yes
 		}
 	}
 
@@ -317,10 +344,11 @@ peoples_springtime.3 = {
 				days = short_modifier_time
 			}
 		}
-		create_character = {
-			is_agitator = yes
-			ideology = ideology_radical
-			interest_group = scope:radical_ig
+		scope:radical_ig_leader ?= {
+			show_as_tooltip = {
+				add_character_role = character_role_agitator
+			}
+			replace_character_roles = { add = { agitator } remove_all = yes }
 		}
 		default_option = yes
 	}
@@ -703,7 +731,7 @@ peoples_springtime.8 = {
 				NOT = {
 					any_scope_character = {
 						OR = {
-							has_role_of_type = politician
+							is_interest_group_leader = yes
 							has_role_of_type = agitator
 						}
 						has_ideology = ideology:ideology_radical
@@ -749,7 +777,7 @@ peoples_springtime.8 = {
 			remove_involved_country = ROOT
 		}
 		hidden_effect = {
-			set_strategy = ai_strategy_conservative_agenda
+			set_strategy = ai_strategy_reactionary_agenda
 		}
 		if = {
 			limit = {
@@ -936,7 +964,12 @@ peoples_springtime.9 = {
 				order_by = ig_clout
 				position = 0
 				check_range_bounds = no
-				abandon_revolution = yes
+				if = {
+					limit = {
+						is_insurrectionary = yes
+					}
+					abandon_revolution = yes
+				}
 				add_ruling_interest_group = yes
 			}
 			call_election = {
@@ -1072,6 +1105,9 @@ peoples_springtime.9 = {
 			base = 2
 		}
 		random_civil_war = {
+			limit = {
+				is_civil_war_type = revolution
+			}
 			add_civil_war_progress = revolution_advance_large
 		}
 	}

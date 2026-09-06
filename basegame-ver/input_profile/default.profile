@@ -67,6 +67,12 @@ input_context={
 	}
 
 	input_action = {
+		name = "lock_tooltip"
+		text = "SETTING_INPUT_ACTION_LOCK_TOOLTIP"
+		mouse_button = MOUSE_MIDDLE
+	}
+
+	input_action = {
 		name = "music_next_track"
 		text = "SETTING_INPUT_ACTION_NEXT_MUSIC_TRACK"
 		scancode = 97	# Keypad 9
