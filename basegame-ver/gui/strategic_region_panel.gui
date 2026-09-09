@@ -15,6 +15,9 @@ types strategic_region_panel_types
 		name = "strategic_region_panel"
 		datacontext = "[StrategicRegionPanel.GetStrategicRegion]"
 
+		onmousehierarchyenter = "[AccessHighlightManager.HighlightStrategicRegion(StrategicRegion.Self)]"
+		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+
 		blockoverride "animation_state_block" {
 			state = {
 				name = _show
@@ -205,6 +208,7 @@ types strategic_region_panel_types
 
 						### Sort buttons
 						flowcontainer = {
+							visible = "[GetVariableSystem.Exists('country_interest_list')]"
 							parentanchor = hcenter
 
 							sort_button = {
@@ -229,6 +233,33 @@ types strategic_region_panel_types
 							}
 						}
 
+						### Sort buttons for per interest tier
+						flowcontainer = {
+							visible = "[Not(GetVariableSystem.Exists('country_interest_list'))]"
+							parentanchor = hcenter
+
+							sort_button = {
+								size = { 180 30 }
+								tooltip = "SORT_BY_COUNTRY"
+								text = "concept_country"
+								onclick = "[StrategicRegion.SortNonPlayerCountriesWithInterestTiers('all', 'country_name')]"
+							}
+
+							sort_button = {
+								size = { 80 30 }
+								tooltip = "SORT_BY_AI_STANCE"
+								text = "STANCE"
+								onclick = "[StrategicRegion.SortNonPlayerCountriesWithInterestTiers('all', 'ai_stance_name')]"
+							}
+
+							sort_button = {
+								size = { 280 30 }
+								tooltip = "SORT_BY_INVOLVEMENT"
+								text = "concept_involvement"
+								onclick = "[StrategicRegion.SortNonPlayerCountriesWithInterestTiers('all', 'involvement')]"
+							}
+						}
+
 						### Compact list view
 						flowcontainer = {
 							visible = "[GetVariableSystem.Exists('country_interest_list')]"
@@ -246,19 +277,246 @@ types strategic_region_panel_types
 								}
 							}
 						}
-
 						### Grid view
 						flowcontainer = {
 							visible = "[Not(GetVariableSystem.Exists('country_interest_list'))]"
 							parentanchor = hcenter
+							direction = vertical
+							spacing = 5
+
+							## TIER 1
+							section_header_button = {
+								blockoverride "left_text" {
+									text = "TIER_1"
+								}
+								
+								blockoverride "right_text" {
+									section_header_right_text = {
+										text = "[GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_observant')))]"
+									}
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle('tier_one_strategic_regions')]"
+								}
+								
+								blockoverride "onclick_showmore" {
+									visible = "[Not(GetVariableSystem.Exists('tier_one_strategic_regions'))]"
+								}
+
+								blockoverride "onclick_showless" {
+									visible = "[GetVariableSystem.Exists('tier_one_strategic_regions')]"
+								}
+							}
+
+							flowcontainer = {
+								visible = "[And(Not(GetVariableSystem.Exists('country_interest_list')), GetVariableSystem.Exists('tier_one_strategic_regions'))]"
+								parentanchor = hcenter
+								spacing = 5
+								wrap_count = 2
+								datamodel = "[StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_observant'))]"
+
+								item = {
+									container = {
+										country_interest_item = {
+											visible = "[EqualTo_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_observant'))), '(int32)1')]"
+											minimumsize = { @panel_width_minus_10 120 }
+
+											blockoverride "country_name_max_width" {
+												max_width = 400
+											}
+										}
+
+										country_interest_item = {
+											visible = "[GreaterThan_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_observant'))), '(int32)1')]"
+										}
+									}
+								}
+							}
+							## TIER 2
+							section_header_button = {
+								blockoverride "left_text" {
+									text = "TIER_2"
+								}
+
+								blockoverride "right_text" {
+									section_header_right_text = {
+										text = "[GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_engaged')))]"
+									}
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle('tier_two_strategic_regions')]"
+								}
+								
+								blockoverride "onclick_showmore" {
+									visible = "[Not(GetVariableSystem.Exists('tier_two_strategic_regions'))]"
+								}
+
+								blockoverride "onclick_showless" {
+									visible = "[GetVariableSystem.Exists('tier_two_strategic_regions')]" #
+								}
+							}
+
+							flowcontainer = {
+								visible = "[And(Not(GetVariableSystem.Exists('country_interest_list')), GetVariableSystem.Exists('tier_two_strategic_regions'))]"
+								parentanchor = hcenter
+								spacing = 5
+								wrap_count = 2
+								datamodel = "[StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_engaged'))]"
+
+								item = {
+									container = {
+										country_interest_item = {
+											visible = "[EqualTo_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_engaged'))), '(int32)1')]"
+											minimumsize = { @panel_width_minus_10 120 }
+
+											blockoverride "country_name_max_width" {
+												max_width = 400
+											}
+										}
+
+										country_interest_item = {
+											visible = "[GreaterThan_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_engaged'))), '(int32)1')]"
+										}
+									}
+								}
+							}
+							## TIER 3
+							section_header_button = {
+								blockoverride "left_text" {
+									text = "TIER_3"
+								}
+
+								blockoverride "right_text" {
+									section_header_right_text = {
+										text = "[GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_influential')))]"
+									}
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle('tier_three_strategic_regions')]"
+								}
+								
+								blockoverride "onclick_showmore" {
+									visible = "[Not(GetVariableSystem.Exists('tier_three_strategic_regions'))]"
+								}
+
+								blockoverride "onclick_showless" {
+									visible = "[GetVariableSystem.Exists('tier_three_strategic_regions')]" #
+								}
+							}
+
+							flowcontainer = {
+								visible = "[And(Not(GetVariableSystem.Exists('country_interest_list')), GetVariableSystem.Exists('tier_three_strategic_regions'))]"
+								parentanchor = hcenter
+								spacing = 5
+								wrap_count = 2
+								datamodel = "[StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_influential'))]"
+
+								item = {
+									container = {
+										country_interest_item = {
+											visible = "[EqualTo_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_influential'))), '(int32)1')]"
+											minimumsize = { @panel_width_minus_10 120 }
+
+											blockoverride "country_name_max_width" {
+												max_width = 400
+											}
+										}
+
+										country_interest_item = {
+											visible = "[GreaterThan_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_influential'))), '(int32)1')]"
+										}
+									}
+								}
+							}
+							## TIER 4
+							section_header_button = {
+								blockoverride "left_text" {
+									text = "TIER_4"
+								}
+
+								blockoverride "right_text" {
+									section_header_right_text = {
+										text = "[GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_pervasive')))]"
+									}
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle('tier_four_strategic_regions')]"
+								}
+								
+								blockoverride "onclick_showmore" {
+									visible = "[Not(GetVariableSystem.Exists('tier_four_strategic_regions'))]"
+								}
+
+								blockoverride "onclick_showless" {
+									visible = "[GetVariableSystem.Exists('tier_four_strategic_regions')]" #
+								}
+							}
+
+							flowcontainer = {
+								visible = "[And(Not(GetVariableSystem.Exists('country_interest_list')), GetVariableSystem.Exists('tier_four_strategic_regions'))]"
+								parentanchor = hcenter
+								spacing = 5
+								wrap_count = 2
+								datamodel = "[StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_pervasive'))]"
+
+								item = {
+									container = {
+										country_interest_item = {
+											visible = "[EqualTo_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_pervasive'))), '(int32)1')]"
+											minimumsize = { @panel_width_minus_10 120 }
+
+											blockoverride "country_name_max_width" {
+												max_width = 400
+											}
+										}
+
+										country_interest_item = {
+											visible = "[GreaterThan_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_pervasive'))), '(int32)1')]"
+										}
+									}
+								}
+							}
+							## TIER 5
+							section_header_button = {
+								blockoverride "left_text" {
+									text = "TIER_5"
+								}
+
+								blockoverride "right_text" {
+									section_header_right_text = {
+										text = "[GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_hegemonic')))]"
+									}
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle('tier_five_strategic_regions')]"
+								}
+								
+								blockoverride "onclick_showmore" {
+									visible = "[Not(GetVariableSystem.Exists('tier_five_strategic_regions'))]"
+								}
+
+								blockoverride "onclick_showless" {
+									visible = "[GetVariableSystem.Exists('tier_five_strategic_regions')]" #
+								}
+							}
+						}
+
+						flowcontainer = {
+							visible = "[And(Not(GetVariableSystem.Exists('country_interest_list')), GetVariableSystem.Exists('tier_five_strategic_regions'))]"
+							parentanchor = hcenter
 							spacing = 5
 							wrap_count = 2
-							datamodel = "[StrategicRegion.GetNonPlayerCountriesWithInterest]"
+							datamodel = "[StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_hegemonic'))]"
 
 							item = {
 								container = {
 									country_interest_item = {
-										visible = "[EqualTo_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterest), '(int32)1')]"
+										visible = "[EqualTo_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_hegemonic'))), '(int32)1')]"
 										minimumsize = { @panel_width_minus_10 120 }
 
 										blockoverride "country_name_max_width" {
@@ -267,7 +525,7 @@ types strategic_region_panel_types
 									}
 
 									country_interest_item = {
-										visible = "[GreaterThan_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterest), '(int32)1')]"
+										visible = "[GreaterThan_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithInterestTier(GetInterestTierType('interest_tier_hegemonic'))), '(int32)1')]"
 									}
 								}
 							}

@@ -43,6 +43,14 @@ types production_methods
 
 			### DROPDOWN / EXPAND
 			section_header_button = {
+				block "section_header_interactable" {}
+
+				blockoverride "background" {
+					block "section_header_background" {
+						using = expand_button_bg
+					}
+				}
+
 				blockoverride "layout" {
 					position = { 110 0 }
 					size = { 440 38 }
@@ -60,15 +68,21 @@ types production_methods
 				}
 
 				blockoverride "onclick" {
-					onclick = "[BuildingBrowserPanel.ToggleExpandBuildingType(BuildingBrowserBuildingTypeItem.GetBuildingType)]"
+					block "expand_onclick" {
+						onclick = "[BuildingBrowserPanel.ToggleExpandBuildingType(BuildingBrowserBuildingTypeItem.GetBuildingType)]"
+					}
 				}
 
 				blockoverride "onclick_showmore" {
-					visible = "[Not(BuildingBrowserPanel.IsBuildingTypeExpanded(BuildingBrowserBuildingTypeItem.GetBuildingType))]"
+					block "expand_showmore_visible" {
+						visible = "[Not(BuildingBrowserPanel.IsBuildingTypeExpanded(BuildingBrowserBuildingTypeItem.GetBuildingType))]"
+					}
 				}
 
 				blockoverride "onclick_showless" {
-					visible = "[BuildingBrowserPanel.IsBuildingTypeExpanded(BuildingBrowserBuildingTypeItem.GetBuildingType)]"
+					block "expand_showless_visible" {
+						visible = "[BuildingBrowserPanel.IsBuildingTypeExpanded(BuildingBrowserBuildingTypeItem.GetBuildingType)]"
+					}
 				}
 			}
 
@@ -202,8 +216,10 @@ types production_methods
 
 					onclick = "[BuildingType.ActivateExpansionLens]"
 					using = select_button_sound
-					visible = "[And(Or( BuildingType.IsBuildable, BuildingType.IsExpandable ), Not(BuildingType.GeneratesCombatUnits))]"
-					tooltip = "EXPAND"
+					block "expand_button_visible" {
+						visible = "[And(Or( BuildingType.IsBuildable, BuildingType.IsExpandable ), Not(BuildingType.GeneratesCombatUnits))]"
+					}
+					tooltip = "EXPAND_TOOLTIP_BUILDING_TYPE"
 					using = tooltip_se
 				}
 			}
@@ -222,7 +238,9 @@ types production_methods
 
 		### EXPANDED LIST OF BUILDINGS
 		expanded_list = {
-			visible = "[BuildingBrowserPanel.IsBuildingTypeExpanded(BuildingBrowserBuildingTypeItem.GetBuildingType)]"
+			block "expanded_list_visible" {
+				visible = "[BuildingBrowserPanel.IsBuildingTypeExpanded(BuildingBrowserBuildingTypeItem.GetBuildingType)]"
+			}
 			using = expanded_list_bg
 
 			blockoverride "dark_area_alpha" {
@@ -426,7 +444,7 @@ types production_methods
 					onclick = "[BuildingType.ActivateExpansionLens]"
 					using = select_button_sound
 					visible = "[And(Or( BuildingType.IsBuildable, BuildingType.IsExpandable ), Not(BuildingType.GeneratesCombatUnits))]"
-					tooltip = "EXPAND"
+					tooltip = "EXPAND_TOOLTIP_BUILDING_TYPE"
 				}
 
 				### privatize
@@ -748,7 +766,83 @@ types production_methods
 						using = entry_bg_simple
 					}
 
-					blockoverride "extra_items_in_production_methods_list" {					
+					blockoverride "building_progressbars" {
+
+						flowcontainer = {
+							parentanchor = right|vcenter
+							position = { -5 0 }
+							spacing = 10
+
+							widget = {
+								visible = "[BuildingType.IsConstructionSector]"
+								size = { 40 40 }
+								parentanchor = vcenter
+
+								icon = {
+									visible = "[Building.IsConstructionOutputPaused]"
+									using = rotate_glow_blue
+									size = { 130% 130% }
+									parentanchor = center
+									alwaystransparent = yes
+									using = default_fade_in_out
+								}
+
+								button_icon_round_action = {
+									visible = "[Not(Building.IsConstructionOutputPaused)]"
+									tooltip = "CONSTRUCTION_SECTOR_BUTTON_PAUSE_TOOLTIP"
+
+									blockoverride "size" {
+										size = { 100% 100% }
+									}
+
+									blockoverride "icon_size" {
+										size = { 75% 75% }
+									}
+
+									block "onclick" {
+										onclick = "[Execute( Building.PauseConstructionOutput )]"
+										enabled = "[IsValid( Building.PauseConstructionOutput )]"
+									}
+
+									blockoverride "icon" {
+										texture = "gfx/interface/production_methods/unpaused_government_construction.dds"
+									}
+								}
+
+								button_icon_round_action = {
+									visible = "[Building.IsConstructionOutputPaused]"
+									tooltip = "CONSTRUCTION_SECTOR_BUTTON_RESUME_TOOLTIP"
+
+									blockoverride "size" {
+										size = { 100% 100% }
+									}
+
+									blockoverride "icon_size" {
+										size = { 75% 75% }
+									}
+
+									block "onclick" {
+										onclick = "[Execute( Building.ResumeConstructionOutput )]"
+										enabled = "[IsValid( Building.ResumeConstructionOutput )]"
+									}
+
+									blockoverride "icon" {
+										texture = "gfx/interface/production_methods/paused_government_construction.dds"
+									}
+								}
+							}
+
+							building_progressbars = {
+								parentanchor = vcenter
+
+								blockoverride "progressbar_size" {
+									size = { 230 26 }
+								}
+							}
+						}
+					}
+
+					blockoverride "extra_items_in_production_methods_list" {
 						military_building_combat_unit_summary = {
 							parentanchor = right|vcenter
 
@@ -925,7 +1019,7 @@ types production_methods
 				onclick = "[BuildingType.ActivateExpansionLens]"
 				using = select_button_sound
 				visible = "[And(Or( BuildingType.IsBuildable, BuildingType.IsExpandable ), Not(BuildingType.GeneratesCombatUnits))]"
-				tooltip = "EXPAND"
+				tooltip = "EXPAND_TOOLTIP_BUILDING_TYPE"
 			}
 		}	
 	}	
@@ -1078,7 +1172,7 @@ types production_methods
 				onclick = "[BuildingType.ActivateExpansionLens]"
 				using = select_button_sound
 				visible = "[And(Or(BuildingType.IsBuildable, BuildingType.IsExpandable), Not(BuildingType.GeneratesCombatUnits))]"
-				tooltip = "EXPAND"
+				tooltip = "EXPAND_TOOLTIP_BUILDING_TYPE"
 			}
 		}
 	}

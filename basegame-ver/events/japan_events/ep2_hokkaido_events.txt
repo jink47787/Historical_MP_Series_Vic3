@@ -7,8 +7,38 @@ hokkaido_events.1 = {
 
 	duration = 3
 
-	title = hokkaido_events.1.t
-	desc = hokkaido_events.1.d
+	title = {
+		first_valid = {
+			triggered_desc = {
+				desc = hokkaido_events.1.t
+				trigger = {
+					c:JAP ?= ROOT
+				}
+			}
+			triggered_desc = {
+				desc = hokkaido_events.1.t_1
+				trigger = {
+					c:EZO ?= ROOT
+				}
+			}
+		}
+	}
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = hokkaido_events.1.d
+				trigger = {
+					c:JAP ?= ROOT
+				}
+			}
+			triggered_desc = {
+				desc = hokkaido_events.1.d_1
+				trigger = {
+					c:EZO ?= ROOT
+				}
+			}
+		}
+	}
 	flavor = hokkaido_events.1.f
 
     event_image = {
@@ -32,8 +62,11 @@ hokkaido_events.1 = {
 	}
 
 	immediate = {
-		s:STATE_HOKKAIDO.region_state:JAP = {
-			save_scope_as = hokkaido_scope
+		s:STATE_HOKKAIDO = {
+			random_scope_state = {
+				limit = { owner = root }
+				save_scope_as = hokkaido_scope
+			}
 		}
 	}
 
@@ -52,7 +85,7 @@ hokkaido_events.1 = {
 				limit = {
 					has_game_rule = no_dynamic_naming
 				}
-				s:STATE_HOKKAIDO.region_state:JAP = {
+				scope:hokkaido_scope = {
 					set_state_name = STATE_HOKKAIDO_hokkaido
 		            set_hub_name = {
 		                type = city
@@ -68,7 +101,7 @@ hokkaido_events.1 = {
 				add = 1
 			}
 		}
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_scope = {
 			add_radicals_in_state = {
 				value = small_radicals
 				culture = cu:japanese
@@ -96,7 +129,7 @@ hokkaido_events.1 = {
 				limit = {
 					has_game_rule = no_dynamic_naming
 				}
-				s:STATE_HOKKAIDO.region_state:JAP = {
+				scope:hokkaido_scope = {
 					set_state_name = STATE_HOKKAIDO_hokkaido
 		            set_hub_name = {
 		                type = city
@@ -105,7 +138,7 @@ hokkaido_events.1 = {
 				}
 			}
 		}
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_scope = {
 			add_modifier = {
 				name = modifier_breaking_new_ground
 				days = very_long_modifier_time
@@ -128,7 +161,7 @@ hokkaido_events.1 = {
 				limit = {
 					has_game_rule = no_dynamic_naming
 				}
-				s:STATE_HOKKAIDO.region_state:JAP = {
+				scope:hokkaido_scope = {
 					set_state_name = STATE_HOKKAIDO_kaitodo
 		            set_hub_name = {
 		                type = city
@@ -137,7 +170,7 @@ hokkaido_events.1 = {
 				}
 			}
 		}
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_scope = {
 			add_modifier = {
 				name = modifier_hokkaido_naval_connections
 				days = very_long_modifier_time
@@ -160,7 +193,7 @@ hokkaido_events.1 = {
 				limit = {
 					has_game_rule = no_dynamic_naming
 				}
-				s:STATE_HOKKAIDO.region_state:JAP = {
+				scope:hokkaido_scope = {
 					set_state_name = STATE_HOKKAIDO_hitakamido
 		            set_hub_name = {
 		                type = city
@@ -169,7 +202,7 @@ hokkaido_events.1 = {
 				}
 			}
 		}
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_scope = {
 			add_modifier = {
 				name = modifier_call_of_the_frontier
 				days = very_long_modifier_time
@@ -198,7 +231,7 @@ hokkaido_events.1 = {
 					has_game_rule = no_dynamic_naming
 				}
 			}
-			s:STATE_HOKKAIDO.region_state:JAP = {
+			scope:hokkaido_scope = {
 				STATE_HOKKAIDO_state_name_assign = yes
 			}
 		}
@@ -235,31 +268,83 @@ hokkaido_events.2 = {
 	}
 
 	immediate = {
-		s:STATE_HOKKAIDO.region_state:JAP = {
-			save_scope_as = hokkaido_state_scope
-		}
-		capital = {
-			save_scope_as = capital_scope
-		}
-		ordered_scope_state = {
-			order_by = {
-				value = gdp
-				multiply = -1
-			} 
-			min = 0 # One of the poorer Japanese states
-			max = 5
-			check_range_bounds = no
-			limit = {
-				is_in_geographic_region = geographic_region_home_islands
+		s:STATE_HOKKAIDO = {
+			random_scope_state = {
+				limit = { owner = root }
+				save_scope_as = hokkaido_state_scope
 			}
-			save_scope_as = hokkaido_migration_origin_scope
+		}
+		if = {
+			limit = {
+				c:EZO ?= ROOT
+				exists = c:JAP
+			}
+			c:JAP.capital ?= {
+				save_scope_as = capital_scope
+			}
+		}
+		else_if = {
+			limit = {
+				c:JAP ?= ROOT
+			}
+			capital ?= {
+				save_scope_as = capital_scope
+			}
+		}
+		else = {
+			s:STATE_KANTO ?= {
+				random_scope_state = {
+					limit = {
+						is_largest_state_in_region = yes
+					}
+					save_scope_as = capital_scope
+				}
+			}
+		}
+		if = {
+			limit = {
+				c:EZO ?= ROOT
+			}
+			ordered_state_in_home_islands = {
+				limit = {
+					NOT = {
+						state_region = s:STATE_HOKKAIDO
+					}
+				}
+				order_by = {
+					value = state_gdp_per_capita
+					multiply = -1
+				}
+				min = 0 # One of the poorer Japanese states
+				max = 5
+				check_range_bounds = no
+				save_scope_as = hokkaido_migration_origin_scope
+			}
+		}
+		else = {
+			ordered_scope_state = {
+				order_by = {
+					value = state_gdp_per_capita
+					multiply = -1
+				}
+				min = 0 # One of the poorer Japanese states
+				max = 5
+				check_range_bounds = no
+				limit = {
+					is_in_geographic_region = geographic_region_home_islands
+					NOT = {
+						state_region = s:STATE_HOKKAIDO
+					}
+				}
+				save_scope_as = hokkaido_migration_origin_scope
+			}
 		}
 	}
 
 	option = {
 		name = hokkaido_events.2.a
 		default_option = yes
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_state_scope = {
 			add_modifier = {
 				name = modifier_tondenhei_settlements
 				days = very_long_modifier_time
@@ -292,7 +377,7 @@ hokkaido_events.2 = {
 
 	option = {
 		name = hokkaido_events.2.b
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_state_scope = {
 			add_modifier = {
 				name = modifier_peasant_settlements
 				days = very_long_modifier_time
@@ -325,7 +410,7 @@ hokkaido_events.2 = {
 
 	option = {
 		name = hokkaido_events.2.c
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_state_scope = {
 			add_radicals_in_state = {
 				value = large_radicals
 				culture = cu:japanese
@@ -338,6 +423,11 @@ hokkaido_events.2 = {
 				name = modifier_restricted_settlements
 				days = very_long_modifier_time
 			}
+		}
+		add_culture_acceptance_modifier = {
+			culture = cu:ainu
+			days = very_long_modifier_time
+			multiplier = 15
 		}
 		custom_tooltip = {
 			text = the_ainu_will_appreciate_this_tt
@@ -381,11 +471,14 @@ hokkaido_events.3 = {
 	}
 
 	immediate = {
-		s:STATE_HOKKAIDO.region_state:JAP = {
-			save_scope_as = hokkaido_state_scope
-			set_variable = {
-				name = optimization_counter_var
-				value = 0
+		s:STATE_HOKKAIDO = {
+			random_scope_state = {
+				limit = { owner = root }
+				save_scope_as = hokkaido_state_scope
+				set_variable = {
+					name = optimization_counter_var
+					value = 0
+				}
 			}
 		}
 	}
@@ -398,7 +491,7 @@ hokkaido_events.3 = {
 			days = normal_modifier_time
 			multiplier = money_amount_multiplier_large
 		}
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_state_scope = {
 			if = {
 				limit = {
 					var:optimization_counter_var = 0
@@ -444,10 +537,10 @@ hokkaido_events.3 = {
 			}
 		}
 		set_variable = hokkaido_rice_var
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_state_scope = {
 			state_region = {
 				add_resource_potential = building_rice_farm
-				remove_resource_potential = building_wheat_farm				
+				remove_resource_potential = building_wheat_farm
 			}
 			if = {
 				limit = {
@@ -565,21 +658,49 @@ hokkaido_events.4 = {
 	}
 
 	immediate = {
-		s:STATE_HOKKAIDO.region_state:JAP = {
-			save_scope_as = hokkaido_state_scope
-		}
-		ordered_scope_state = {
-			order_by = {
-				value = gdp
-				multiply = -1
-			} 
-			min = 0 # One of the poorer Japanese states
-			max = 5
-			check_range_bounds = no
-			limit = {
-				is_in_geographic_region = geographic_region_home_islands
+		s:STATE_HOKKAIDO = {
+			random_scope_state = {
+				limit = { owner = root }
+				save_scope_as = hokkaido_state_scope
 			}
-			save_scope_as = hokkaido_migration_origin_scope
+		}
+		if = {
+			limit = {
+				c:EZO ?= ROOT
+			}
+			ordered_state_in_home_islands = {
+				limit = {
+					NOT = {
+						state_region = s:STATE_HOKKAIDO
+					}
+				}
+				order_by = {
+					value = state_gdp_per_capita
+					multiply = -1
+				}
+				min = 0 # One of the poorer Japanese states
+				max = 5
+				check_range_bounds = no
+				save_scope_as = hokkaido_migration_origin_scope
+			}
+		}
+		else = {
+			ordered_scope_state = {
+				order_by = {
+					value = state_gdp_per_capita
+					multiply = -1
+				}
+				min = 0 # One of the poorer Japanese states
+				max = 5
+				check_range_bounds = no
+				limit = {
+					is_in_geographic_region = geographic_region_home_islands
+					NOT = {
+						state_region = s:STATE_HOKKAIDO
+					}
+				}
+				save_scope_as = hokkaido_migration_origin_scope
+			}
 		}
 	}
 
@@ -599,7 +720,7 @@ hokkaido_events.4 = {
 				}
 			}
 		}
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_state_scope = {
 			if = { # Drain the swamp
 				limit = {
 					has_state_trait = state_trait_ishikari_wetlands_1
@@ -654,7 +775,7 @@ hokkaido_events.4 = {
 				}
 			}
 		}
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_state_scope = {
 			if = { # Drain the swamp
 				limit = {
 					has_state_trait = state_trait_ishikari_wetlands_1
@@ -754,8 +875,11 @@ hokkaido_events.5 = {
 				save_scope_as = sapporo_partner_religion_scope
 			}
 		}
-		s:STATE_HOKKAIDO.region_state:JAP = {
-			save_scope_as = hokkaido_state_scope
+		s:STATE_HOKKAIDO = {
+			random_scope_state = {
+				limit = { owner = root }
+				save_scope_as = hokkaido_state_scope
+			}
 		}
 	}
 
@@ -828,7 +952,7 @@ hokkaido_events.5 = {
 		}
 		add_modifier = {
 			name = modifier_sapporo_humanities_faculty
-			days = long_modifier_time
+			days = very_long_modifier_time
 		}
 		custom_tooltip = {
 			text = the_ainu_will_appreciate_this_tt
@@ -872,8 +996,11 @@ hokkaido_events.6 = {
 	}
 
 	immediate = {
-		s:STATE_HOKKAIDO.region_state:JAP = {
-			save_scope_as = hokkaido_state_scope
+		s:STATE_HOKKAIDO = {
+			random_scope_state = {
+				limit = { owner = root }
+				save_scope_as = hokkaido_state_scope
+			}
 		}
 	}
 
@@ -881,7 +1008,7 @@ hokkaido_events.6 = {
 		name = hokkaido_events.6.a
 		default_option = yes
 		add_primary_culture = cu:ainu
-		s:STATE_HOKKAIDO.region_state:JAP = {
+		scope:hokkaido_state_scope = {
 			add_radicals_in_state = {
 				value = large_radicals
 				culture = cu:japanese
@@ -999,7 +1126,7 @@ hokkaido_events.7 = {
             name = modifier_northern_learnings
             days = very_long_modifier_time
         }
-        s:STATE_HOKKAIDO.region_state:JAP ?= {
+        scope:hokkaido_state_scope ?= {
             add_modifier = {
                 name = modifier_tamed_north
                 days = very_long_modifier_time
@@ -1013,13 +1140,16 @@ hokkaido_events.7 = {
                 owns_entire_state_region = STATE_SAKHALIN
             }
             custom_tooltip = je_taming_the_north_additional_goal_completed
-            s:STATE_SAKHALIN.region_state:JAP ?= {
-                add_modifier = {
-                    name = modifier_tamed_north
-                    days = very_long_modifier_time
-                }
-                add_loyalists_in_state = {
-                	value = medium_radicals
+            s:STATE_SAKHALIN = {
+                every_scope_state = {
+                    limit = { owner = root }
+                    add_modifier = {
+                        name = modifier_tamed_north
+                        days = very_long_modifier_time
+                    }
+                    add_loyalists_in_state = {
+                    	value = medium_radicals
+                    }
                 }
             }
         }
@@ -1035,7 +1165,7 @@ hokkaido_events.7 = {
             name = modifier_northern_learnings
             days = very_long_modifier_time
         }
-        s:STATE_HOKKAIDO.region_state:JAP ?= {
+        scope:hokkaido_state_scope ?= {
             add_modifier = {
                 name = modifier_tamed_north
                 days = very_long_modifier_time
@@ -1049,13 +1179,16 @@ hokkaido_events.7 = {
                 owns_entire_state_region = STATE_SAKHALIN
             }
             custom_tooltip = je_taming_the_north_additional_goal_completed
-            s:STATE_SAKHALIN.region_state:JAP ?= {
-                add_modifier = {
-                    name = modifier_tamed_north
-                    days = very_long_modifier_time
-                }
-                add_loyalists_in_state = {
-                	value = medium_radicals
+            s:STATE_SAKHALIN = {
+                every_scope_state = {
+                    limit = { owner = root }
+                    add_modifier = {
+                        name = modifier_tamed_north
+                        days = very_long_modifier_time
+                    }
+                    add_loyalists_in_state = {
+                    	value = medium_radicals
+                    }
                 }
             }
         }

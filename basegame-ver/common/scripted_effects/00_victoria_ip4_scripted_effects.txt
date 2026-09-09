@@ -295,7 +295,30 @@ add_regency_modifier = { # Applied in country scope, always uses monarch_scope
 	}
 }
 
+designate_character_as_regent = {
+	set_variable = { name = regency_years value = $YEARS$ }
+	if = {
+		limit = {
+			is_immortal = no
+		}
+		set_character_immortal = yes
+		set_variable = regent_immortality_var
+	}
+}
+
 remove_regency_modifier = { # Applied in country scope
+	if = {
+		limit = {
+			ruler ?= {
+				is_immortal = yes
+				has_variable = regent_immortality_var
+			}
+		}
+		ruler ?= {
+			set_character_immortal = no
+			remove_variable = regent_immortality_var
+		}
+	}
 	if = {
 		limit = {
 			has_modifier = modifier_regency_landowners
@@ -1337,11 +1360,9 @@ country_generate_orleanist_france_ruler = {
 		}
 		custom_tooltip = {
 			text = philippe_de_orleans_of_paris_tt
-			create_character = {
-				template = FRA_philippe_de_orleans_of_paris
-				on_created = {
-					set_character_as_ruler = yes
-				}
+			country_summon_character_effect = {
+				TEMPLATE = FRA_philippe_de_orleans_of_paris
+				ON_CREATED_EFFECT = summon_generic_make_ruler_effect
 			}
 		}
 	}
@@ -1352,11 +1373,9 @@ country_generate_orleanist_france_ruler = {
 		}
 		custom_tooltip = {
 			text = philippe_de_orleans_of_orleans_tt
-			create_character = {
-				template = FRA_philippe_de_orleans_of_orleans
-				on_created = {
-					set_character_as_ruler = yes
-				}
+			country_summon_character_effect = {
+				TEMPLATE = FRA_philippe_de_orleans_of_orleans
+				ON_CREATED_EFFECT = summon_generic_make_ruler_effect
 			}
 		}
 	}
@@ -1367,11 +1386,9 @@ country_generate_orleanist_france_ruler = {
 		}
 		custom_tooltip = {
 			text = jean_de_orleans_tt
-			create_character = {
-				template = FRA_jean_de_orleans
-				on_created = {
-					set_character_as_ruler = yes
-				}
+			country_summon_character_effect = {
+				TEMPLATE = FRA_jean_de_orleans
+				ON_CREATED_EFFECT = summon_generic_make_ruler_effect
 			}
 		}
 	}
@@ -1382,11 +1399,9 @@ country_generate_orleanist_france_ruler = {
 		}
 		custom_tooltip = {
 			text = henri_de_orleans_tt
-			create_character = {
-				template = FRA_henri_de_orleans
-				on_created = {
-					set_character_as_ruler = yes
-				}
+			country_summon_character_effect = {
+				TEMPLATE = FRA_henri_de_orleans
+				ON_CREATED_EFFECT = summon_generic_make_ruler_effect
 			}
 		}
 	}
@@ -1401,35 +1416,31 @@ country_generate_bonapartist_france_ruler = {
 	}
 	if = {
 		limit = {
-			game_date <= 1856.3.16
+			game_date <= 1873.1.9
 		}
 		summon_napoleon_the_woat = yes
 	}
 	if = {
 		limit = {
-			game_date > 1856.3.16
+			game_date > 1873.1.9
 		}
 		custom_tooltip = {
 			text = napoleon_eugene_louis_bonaparte_tt
-			create_character = {
-				template = FRA_napoleon_eugene_louis_bonaparte
-				on_created = {
-					set_character_as_ruler = yes
-				}
+			country_summon_character_effect = {
+				TEMPLATE = FRA_napoleon_eugene_louis_bonaparte
+				ON_CREATED_EFFECT = summon_generic_make_ruler_effect
 			}
 		}
 	}
 	else_if = {
 		limit = {
-			game_date > 1862.7.18
+			game_date > 1879.6.1
 		}
 		custom_tooltip = {
 			text = victor_bonaparte_tt
-			create_character = {
-				template = FRA_victor_bonaparte
-				on_created = {
-					set_character_as_ruler = yes
-				}
+			country_summon_character_effect = {
+				TEMPLATE = FRA_victor_bonaparte
+				ON_CREATED_EFFECT = summon_generic_make_ruler_effect
 			}
 		}
 	}
@@ -1439,11 +1450,9 @@ country_generate_bonapartist_france_ruler = {
 		}
 		custom_tooltip = {
 			text = louis_bonaparte_tt
-			create_character = {
-				template = FRA_louis_bonaparte
-				on_created = {
-					set_character_as_ruler = yes
-				}
+			country_summon_character_effect = {
+				TEMPLATE = FRA_louis_bonaparte
+				ON_CREATED_EFFECT = summon_generic_make_ruler_effect
 			}
 		}
 	}
@@ -1462,11 +1471,9 @@ country_generate_legitimist_france_ruler = {
 		}
 		custom_tooltip = {
 			text = henri_de_bourbon_tt
-			create_character = {
-				template = FRA_henri_de_bourbon
-				on_created = {
-					set_character_as_ruler = yes
-				}
+			country_summon_character_effect = {
+				TEMPLATE = FRA_henri_de_bourbon
+				ON_CREATED_EFFECT = summon_generic_make_ruler_effect
 			}
 		}
 	}
@@ -1943,21 +1950,20 @@ summon_napoleon_the_woat = { # Special case
 				year >= 1857
 				year < 1873
 			}
-			create_character = { # As heir
-				template = FRA_napoleon_eugene_louis_bonaparte
+			country_summon_heir_effect = {
+				TEMPLATE = FRA_napoleon_eugene_louis_bonaparte
 			}
 		}
 	}
 	else_if = {
 		limit = {
 			NOT = {
-				has_global_variable = napoleon_iii_spawn
+				is_template_used = fra_napoleon_iii_character_template
 			}
 		}
 		create_character = {
 			template = fra_napoleon_iii_character_template
 			on_created = {
-				set_global_variable = napoleon_iii_spawn
 				cleanup_ruler_character_roles = yes
 				set_character_as_ruler = yes
 			}
@@ -1967,8 +1973,8 @@ summon_napoleon_the_woat = { # Special case
 				year >= 1857
 				year < 1873
 			}
-			create_character = { # As heir
-				template = FRA_napoleon_eugene_louis_bonaparte
+			country_summon_heir_effect = {
+				TEMPLATE = FRA_napoleon_eugene_louis_bonaparte
 			}
 		}
 	}
@@ -2014,6 +2020,37 @@ summon_napoleon_the_woat = { # Special case
 				on_created = {
 					$ON_CREATED_EFFECT$ = yes # I heard you like scripted effects, so I put scripted effects in your scripted effects so you can call scripted effects whilst you call scripted effects.
 				}
+			}
+		}
+	}
+}
+
+country_summon_heir_effect = {
+	save_scope_as = summoning_country
+	if = {
+		limit = {
+			any_character = {
+				has_template = $TEMPLATE$
+			}
+		}
+		random_character =  {
+			limit = {
+				has_template = $TEMPLATE$
+			}
+			save_scope_as = new_heir_scope
+			scope:summoning_country ?= {
+				set_character_of_unknown_status_as_heir = yes
+			}
+		}
+	}
+	else = {
+		hidden_effect = {
+			create_character = {
+				template = $TEMPLATE$
+				save_scope_as = new_heir_scope
+			}
+			scope:summoning_country ?= {
+				set_heir = scope:new_heir_scope
 			}
 		}
 	}
@@ -2210,7 +2247,7 @@ set_character_of_unknown_status_as_heir = { # Fired in a country scope, requires
 			}
 		}
 		scope:new_heir_scope ?= {
-			transfer_character = prev
+			transfer_character = scope:summoning_country
 			set_variable = exile_to_ruler_var
 			add_career_length = {
 				months = 60
@@ -2230,6 +2267,10 @@ summon_miguel_effect = {
 summon_legitimist_carlist_effect = {
 	set_character_as_ruler = yes
 	character_carlist_or_legitimist_switch_effect = yes
+}
+
+summon_generic_make_ruler_effect = {
+	set_character_as_ruler = yes
 }
 
 cleanup_ruler_character_roles = {

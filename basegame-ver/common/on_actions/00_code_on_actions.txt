@@ -558,6 +558,9 @@ on_monthly_pulse_country = {
 
 		# Japan
 		japan_monarchy.5
+
+		# Ezo Republic
+		ezo_republic.2
 	}
 
 	effect = {
@@ -848,7 +851,7 @@ on_monthly_pulse_country = {
 				name = peoples_springtime_recent
 				days = normal_modifier_time
 			}
-			debug_log = "Springtime of the Peoples Started"
+			debug_log = "[TimeKeeper.GetCurrentDate.GetString]: Springtime of the Peoples Started - started from [THIS.GetCountry.GetNameNoFormatting]"
 			every_country_in_europe = {
 				limit = {
 					has_technology_researched = egalitarianism
@@ -1201,6 +1204,45 @@ on_monthly_pulse_country = {
 			}
 		}
 
+		if = { # Taikunate safety - if true, this means that the Taikun has either got lost or needs to be replaced
+			limit = {
+				c:JAP ?= this
+				country_is_taikunate = yes
+				OR = {
+					NOT = {
+						any_scope_character = { # Is the Taikun alive and present?
+							has_variable = former_shogun_var
+							is_character_alive = yes
+						}
+					}
+					any_scope_character = {
+						has_variable = former_shogun_var
+						is_interest_group_leader = no
+					}
+				}
+			}
+			if = {
+				limit = {
+					any_scope_character = { # Taikun exists but has been dethroned for some reason
+						has_variable = former_shogun_var
+						is_interest_group_leader = no
+					}
+				}
+				#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: Taikun no longer serving as Interest Group leader: new Taikun designated - [THIS.GetCountry.GetNameNoFormatting]"
+				random_scope_character = {
+					limit = {
+						has_variable = former_shogun_var
+						is_interest_group_leader = no
+					}
+					character_designate_new_taikun = yes
+				}
+			}
+			else = { # Taikun doesn't exist
+				#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: Taikun not found: new Taikun designated - [THIS.GetCountry.GetNameNoFormatting]"
+				country_designate_new_taikun = yes
+			}
+		}
+
 		if = {
 			limit = {
 				NOT = {
@@ -1498,6 +1540,15 @@ on_monthly_pulse_country = {
 				NOT = {
 					modifier:country_electoral_confidence_over_time = 0
 				}
+				trigger_if = {
+					limit = {
+						modifier:country_electoral_confidence_over_time < 0
+					}
+					electoral_confidence > { # Can never drift to below 25%
+						value = 0.25
+						subtract = modifier:country_electoral_confidence_over_time
+					}
+				}
 			}
 			add_electoral_confidence = modifier:country_electoral_confidence_over_time
 		}
@@ -1761,6 +1812,17 @@ on_yearly_pulse_country = {
 					}
 				}
 				run_colonial_governor_cycle = yes
+			}
+		}
+
+		if = {
+			limit = {
+				c:JAP ?= this
+				has_variable = years_since_opening_of_japan_var
+			}
+			change_variable = {
+				name = years_since_opening_of_japan_var
+				add = 1
 			}
 		}
 	}
@@ -2474,6 +2536,29 @@ on_diplomatic_play_started = {
 				}
 			}
 		}
+		if = {
+			limit = {
+				scope:initiator = {
+					c:TUR ?= this
+					NOT = { has_variable = egyptian_crisis }
+				}
+				scope:target = {
+					c:EGY ?= this
+				}
+				OR = {
+					is_diplomatic_play_type = dp_conquer_state
+					is_diplomatic_play_type = dp_return_state
+					is_diplomatic_play_type = dp_reduce_autonomy
+					is_diplomatic_play_type = dp_make_tributary
+					is_diplomatic_play_type = dp_make_protectorate
+					is_diplomatic_play_type = dp_annex_subject
+				}
+			}
+			save_scope_as = egyptian_crisis_scope
+			scope:initiator = {
+				trigger_event = { id = egyptian_crisis_events.1 popup = yes }
+			}
+		}
 	}
 }
 
@@ -2595,7 +2680,7 @@ on_character_death = {
 		if = {
 			limit = {
 				NOT = { has_variable = caudillo_kingmaker }
-				has_role_of_type = politician
+				is_interest_group_leader = yes
 				interest_group ?= {
 					is_interest_group_type = ig_armed_forces
 					ig_counts_as_marginal = no
@@ -2728,159 +2813,30 @@ on_character_death = {
 			}
 			if = {
 				limit = {
-					has_template = JAP_ninko_yamato
-				}
-				owner = {
-					if = {
-						limit = {
-							has_dlc_feature = ep2_content
-						}
-						trigger_event = { id = japan_monarchy.1 }
-					}
-					else = {
-						if = {
-							limit = {
-								has_law = law_type:law_bakufu
-							}
-							create_character = {
-								template = JAP_komei_yamato
-								on_created = {
-									c:JAP ?= {
-										set_variable = { name = emperor_var value = PREV }
-									}
-									if = {
-										limit = {
-											c:JAP ?= { has_variable = one_emperor_one_era }
-										}
-										set_first_name = TenkyU_
-									}
-									else = {
-										set_first_name = Komei
-									}
-								}
-							}
-						}
+					OR = {
+						has_role = character_role_emperor_of_japan
+						is_ruler_of_own_country = yes
 					}
 				}
+				# Emperor Succession Events
+				character_japan_imperial_succession_chain_effect = yes
 			}
-			else_if = {
+			# Shogunate Safety - ensures that all Shoguns will be Tokugawas
+			if = {
 				limit = {
-					has_template = JAP_komei_yamato
-					game_date >= 1852.11.3
-				}
-				owner = {
-					if = {
-						limit = {
-							has_dlc_feature = ep2_content
-						}
-						trigger_event = { id = japan_monarchy.2 }
-					}
-					else = {
-						if = {
-							limit = {
-								has_law = law_type:law_bakufu
-							}
-							create_character = {
-								template = JAP_meiji_yamato
-								on_created = {
-									c:JAP ?= {
-										set_variable = { name = emperor_var value = PREV }
-									}
-									set_first_name = Meiji
-								}
-							}
-							country_switch_sonnojoi_ideology = yes
-						}
-					}
-				}
-			}
-			else_if = {
-				limit = {
-					has_template = JAP_meiji_yamato
-					game_date >= 1879.8.31
-				}
-				owner = {
-					if = {
-						limit = {
-							has_dlc_feature = ep2_content
-						}
-						trigger_event = { id = japan_monarchy.3 }
-					}
-					else = {
-						if = {
-							limit = {
-								has_law = law_type:law_bakufu
-							}
-							create_character = {
-								template = JAP_taisho_yamato
-								on_created = {
-									c:JAP ?= {
-										set_variable = { name = emperor_var value = PREV }
-									}
-									set_first_name = Taisho
-								}
-							}
-						}
-					}
-				}
-			}
-			else_if = {
-				limit = {
-					has_template = JAP_taisho_yamato
-					game_date >= 1901.4.29
-				}
-				owner = {
-					if = {
-						limit = {
-							has_dlc_feature = ep2_content
-						}
-						trigger_event = { id = japan_monarchy.4 }
-					}
-					else = {
-						if = {
-							limit = {
-								has_law = law_type:law_bakufu
-							}
-							create_character = {
-								template = JAP_showa_yamato
-								on_created = {
-									c:JAP ?= {
-										set_variable = { name = emperor_var value = PREV }
-									}
-									set_first_name = Showa
-								}
-							}
-						}
-					}
-				}
-			}
-			else_if = {
-				limit = {
+					is_ruler_of_own_country = yes
 					owner ?= {
-						has_variable = emperor_var
-						var:emperor_var ?= ROOT # The character that has just died
+						has_law = law_type:law_bakufu
+						has_gov_regency = no
 					}
-				}
-				if = {
-					limit = {
-						owner = {
-							has_law = law_type:law_bakufu
-						}
-					}
-					create_character = {
-						template = JAP_backup_emperor_template
-						on_created = {
-							c:JAP ?= {
-								set_variable = { name = emperor_var value = PREV }
-							}
+					OR = {
+						NOT = { exists = owner.heir } # Refers to the new ruler - former heir
+						owner.heir ?= {
+							NOT = { has_variable = house_tokugawa }
 						}
 					}
 				}
-				else = {
-					owner ?= {
-						set_variable = { name = emperor_var value = ruler }
-					}
-				}
+				character_appoint_new_shogun_when_no_heir = yes
 			}
 		}
 		if = {
@@ -2893,6 +2849,18 @@ on_character_death = {
 				}
 			}
 			JAP_character_generate_new_daimyo = yes
+		}
+		if = {
+			limit = {
+				has_variable = former_shogun_var # designates Taikun
+				owner ?= {
+					country_is_taikunate = yes
+				}
+			}
+			owner ?= {
+				#debug_log = "[TimeKeeper.GetCurrentDate.GetString]: Taikun died: new Taikun designated - [THIS.GetCountry.GetNameNoFormatting]"
+				country_designate_new_taikun = yes
+			}
 		}
 	}
 }
@@ -2916,6 +2884,7 @@ on_new_interest_group_leader = {
 	}
 }
 
+# Root = Character
 # Root = Character
 on_new_ruler = {
 	effect = {
@@ -2945,6 +2914,8 @@ on_new_ruler = {
 				}
 				change_character_religion = owner.religion
 			}
+
+			# Setup regencies
 			if = {
 				limit = {
 					owner = {
@@ -2962,6 +2933,8 @@ on_new_ruler = {
 					}
 				}
 			}
+
+			# For handling the Sikh Maharaja achievement
 			if = {
 				limit = {
 					owner = {
@@ -2969,23 +2942,10 @@ on_new_ruler = {
 						has_journal_entry = je_sikh_sovereignty
 					}
 				}
-				if = {
-					limit = {
-						NOT = {
-							has_variable = sikh_maharaja_enthroned
-						}
-					}
-					owner = {
-						je:je_sikh_sovereignty = {
-							set_bar_progress = { value = 0 name = sikh_empire_progress_bar }
-						}
-					}
-					set_variable = sikh_maharaja_enthroned
-					owner = {
-						change_variable = { name = sikh_dead_maharajas_var add = 1 }
-					}
-				}
+				on_new_ruler_sikh_maharaja_effect = yes
 			}
+
+			# For transitioning Zanzibar out of Arab rule
 			if = {
 				limit = {
 					owner = {
@@ -3145,68 +3105,16 @@ on_new_ruler = {
 						}
 					}
 				}
-				save_temporary_scope_as = portuguese_monarch_scope
-				c:BRZ ?= {
-					heir ?= {
-						if = {
-							limit = {
-								is_character_alive = yes
-								NOT = { c:POR.ruler ?= this  }
-							}
-							kill_character = { hidden = yes }
-						}
-					}
-					set_heir = scope:portuguese_monarch_scope
-				}
+				# For handling the Succession Rights treaty article in the case of ruler death
+				on_new_ruler_brazil_succession_rights_effect = yes
 			}
 
+			# For handling the assignment of emperor_var, shogun_var, and emperor traits
 			if = {
 				limit = {
 					c:JAP ?= owner
 				}
-				if = {
-					limit = {
-						has_variable = house_yamato
-					}
-					save_temporary_scope_as = emperor_to_be_scope
-					c:JAP ?= {
-						set_variable = { name = emperor_var value = scope:emperor_to_be_scope }
-					}
-					if = {
-						limit = {
-							NOT = {
-								has_trait = special_character_japanese_emperor
-							}
-						}
-						add_trait = special_character_japanese_emperor
-					}
-					if = {
-						limit = {
-							owner ?= {
-								has_law = law_type:law_bakufu # If a member of the Imperial Family somehow heads the Bakufu, end it instantly
-							}
-						}
-						owner ?= {
-							deactivate_law = law_type:law_bakufu
-							activate_law = law_type:law_oligarchy
-						}
-					}
-				}
-				if = { # Sitting Emperors don't need this role
-					limit = {
-						has_role = character_role_emperor_of_japan
-					}
-					remove_character_role = character_role_emperor_of_japan
-				}
-				if = { # Marks the Shogun as the Shogun
-					limit = {
-						owner = {
-							has_gov_regency = no
-							has_law = law_type:law_bakufu
-						}
-					}
-					set_variable = shogun_var
-				}
+				on_new_ruler_japan_effect = yes
 			}
 		}
 
@@ -3720,6 +3628,17 @@ on_treaty_dissolved = {
 on_treaty_article_removed = {
 	effect = {
 		post_notification = treaty_article_removed
+	}
+}
+
+# Root = New host country that inherited the treaty ports (e.g. a victorious revolution or annexation)
+# scope:target_country = Foreign power that holds the inherited treaty port(s)
+on_treaty_ports_inherited = {
+	effect = {
+		trigger_event = {
+			id = treaty_port_inheritance_events.1
+			popup = yes
+		}
 	}
 }
 
@@ -4556,6 +4475,7 @@ on_law_enactment_started = {
 			limit = {
 				has_law = law_type:law_monarchy
 				OR = {
+					is_enacting_law = law_type:law_corporate_state
 					is_enacting_law = law_type:law_presidential_republic
 					is_enacting_law = law_type:law_parliamentary_republic
 					is_enacting_law = law_type:law_council_republic
@@ -5435,7 +5355,17 @@ on_revolution_start = {
 		if = {
 			limit = {
 				has_dlc_feature = ep1_content
-				c:KOR ?= ROOT
+				c:KOR ?= {
+					this = ROOT
+					is_subject = yes
+					overlord ?= {
+						OR = {
+							country_has_primary_culture = cu:han
+							country_has_primary_culture = cu:manchu
+						}
+						has_technology_researched = electric_telegraph
+					}
+				}
 				c:JAP ?= {
 					NOT = {
 						has_law_or_variant = law_type:law_isolationism
@@ -5443,30 +5373,12 @@ on_revolution_start = {
 					has_interest_marker_in_region = sr:region_northeast_asia
 					has_technology_researched = electric_telegraph
 				}
-				any_country = {
-					OR = {
-						country_has_primary_culture = cu:han
-						country_has_primary_culture = cu:manchu
-					}
-					any_subject_or_below = {
-						c:KOR = this
-					}
-					has_technology_researched = electric_telegraph
-				}
 			}
+			add_contextless_journal_entry = je_korean_rebellion
 			c:JAP ?= {
 				trigger_event = { id = gg_korea.7 popup = yes }
 			}
-			random_country = {
-				limit = {
-					OR = {
-						country_has_primary_culture = cu:han
-						country_has_primary_culture = cu:manchu
-					}
-					any_subject_or_below = {
-						c:KOR = this
-					}
-				}
+			c:KOR.overlord ?= {
 				trigger_event = { id = gg_korea.7 popup = yes }
 			}
 		}
@@ -5825,7 +5737,6 @@ on_secession_end = {
 			days = 1
 			popup = yes
 		}
-		add_to_variable_list = { name = failed_uprisings_culture_list target = scope:rebel_culture years = 20 }
 	}
 }
 
@@ -6322,6 +6233,15 @@ on_political_movement_supported_law_cancelled = {
 # scope:wargoal_impact = the impact of the wargoal enforced
 on_wargoal_enforced = {
 	effect = {
+		# Any war victory over the country that reneged on our inherited treaty ports settles the grudge
+		if = {
+			limit = {
+				has_variable = wants_treaty_port_revenge_against
+				var:wants_treaty_port_revenge_against ?= scope:target
+			}
+			remove_variable = wants_treaty_port_revenge_against
+		}
+
 		if = {
 			limit = {
 				OR = {
@@ -6441,6 +6361,32 @@ on_wargoal_enforced = {
 					name = crushed_secession
 					days = 90
 				}
+			}
+		}
+
+		if = {
+			limit = {
+				scope:diplomatic_play ?= {
+					is_diplomatic_play_type = dp_revolution
+				}
+				ROOT = {
+					any_subject_or_below = {
+						c:EZO ?= this
+						has_variable = ezo_republic_var
+						has_variable = ezo_waiting_for_shogun
+					}
+				}
+			}
+			c:EZO ?= {
+				top_overlord ?= {
+					save_scope_as = japan_scope
+				}
+				country_ezo_set_up_as_colony = yes
+				country_ezo_generate_next_japanese_shogun = yes
+				ruler = {
+					save_scope_as = shogun_scope
+				}
+				post_notification = ezo_tokugawa_heir_arrives
 			}
 		}
 
@@ -6798,6 +6744,7 @@ on_company_established = {
 # scope:company = The company that was disbanded
 on_company_disbanded = {
 	effect = {
+		re_add_disbanded_company_prestige_good_jes = yes
 	}
 }
 
@@ -7359,7 +7306,7 @@ on_objective_completed = {
 # scope:target = Party created
 on_party_created = {
 	effect = {
-		debug_log = "[SCOPE.sParty('target').GetNameNoFormatting] Created"
+		debug_log = "[SCOPE.sParty('target').GetNameNoFormatting] Created - [THIS.GetCountry.GetNameNoFormatting]"
 	}
 }
 
@@ -7367,14 +7314,14 @@ on_party_created = {
 # scope:target = Party disbanded
 on_party_disbanded = {
 	effect = {
-		debug_log = "[SCOPE.sParty('target').GetNameNoFormatting] Disbanded"
+		debug_log = "[SCOPE.sParty('target').GetNameNoFormatting] Disbanded - [THIS.GetCountry.GetNameNoFormatting]"
 	}
 }
 
 # Root = Country
 on_election_campaign_start = {
 	effect = {
-		debug_log = "Election Campaign Started"
+		debug_log = "[TimeKeeper.GetCurrentDate.GetString]: Election Campaign Started - [THIS.GetCountry.GetNameNoFormatting]"
 		if = {
 			limit = {
 				active_law:lawgroup_distribution_of_power ?= {
@@ -7397,7 +7344,7 @@ on_election_campaign_start = {
 # Root = Country
 on_election_campaign_end = {
 	effect = {
-		debug_log = "Election Campaign Ended"
+		debug_log = "[TimeKeeper.GetCurrentDate.GetString]: Election Campaign Ended - [THIS.GetCountry.GetNameNoFormatting]"
 		if = {
 			limit = {
 				c:BRZ ?= this
@@ -7936,7 +7883,6 @@ on_national_awakening_started = {
 
 # Root = Country
 # scope:strait is the strait in question
-# TODO: PRCAL-41459 Straits Add the access level as event targets
 on_strait_access_setting_changed = {
 }
 
@@ -7944,6 +7890,20 @@ on_strait_access_setting_changed = {
 # scope:amendment = amendment being repealed
 on_amendment_repealed = {
 	effect = {}
+}
+
+# Root = Country
+# scope:amendment = amendment that timed out
+# scope:law = law the amendment was attached to
+on_amendment_timeout = {
+	effect = {
+		scope:amendment.type = {
+			save_scope_as = timed_out_amendment_type
+		}
+		scope:law = {
+			post_notification = amendment_timed_out
+		}
+	}
 }
 
 # Root = Invader Country
@@ -7982,6 +7942,21 @@ on_ship_constructed = {
 				ROOT = {
 					set_variable = son_of_varmland_var
 				}
+			}
+		}
+	}
+}
+
+# Root = Character (the promoted commander)
+# scope:count = number of IGs that received unnecessary_promotion modifier (0 if promotion was not unnecessary)
+on_commander_promoted = {
+	effect = {
+		if = {
+			limit = {
+				scope:count >= 7
+			}
+			owner = {
+				set_variable = achievement_everyone_disliked_that_var
 			}
 		}
 	}

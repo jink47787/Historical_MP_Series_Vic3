@@ -11,9 +11,11 @@
 	}
 
 	is_shown_when_inactive = {
-		has_interest_marker_in_region = sr:region_greater_persia
 		country_rank >= rank_value:great_power
 		has_dlc_feature = ep1_content
+		c:AFG ?= {
+			has_overlapping_interests = ROOT
+		}
 		NOT = {
 			has_global_variable = afghan_borders_solidified
 		}
@@ -87,268 +89,143 @@
 			}
 			set_variable = afghan_notification_sender
 		}
+		# Searches for the canonical GBR-RUS conference first
 		if = {
 			limit = {
 				c:GBR ?= this
 				exists = c:RUS
-				OR = {
-					any_country = {
-						is_subject_of = c:RUS
-						NOT = {
-							c:AFG ?= this
-						}
-						overlord ?= {
-							country_rank >= rank_value:great_power
-							has_interest_marker_in_region = sr:region_greater_persia
-							NOT = {
-								THIS = ROOT
-							}
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-					}
-					c:RUS ?= {
-						country_rank >= rank_value:great_power
-						has_interest_marker_in_region = sr:region_greater_persia
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-						NOT = {
-							THIS = ROOT
-						}
-					}
-				}
 			}
-			if = {
-				limit = {
-					c:RUS ?= {
-						country_rank >= rank_value:great_power
-						has_interest_marker_in_region = sr:region_greater_persia
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-						NOT = {
-							THIS = ROOT
-						}
-					}
-				}
-				c:RUS ?= {
-					save_scope_as = rival_gp_scope
-				}
-			}
-			else_if = {
-				limit = {
-					any_country = {
-						is_subject_of = c:RUS
-						NOT = {
-							c:AFG ?= this
-						}
-						overlord ?= {
-							country_rank >= rank_value:great_power
-							has_interest_marker_in_region = sr:region_greater_persia
-							NOT = {
-								THIS = ROOT
-							}
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-					}
-				}
-				ordered_country = {
-					limit = {
-						is_subject_of = c:RUS
-						NOT = {
-							c:AFG ?= this
-						}
-						overlord = {
-							country_rank >= rank_value:great_power
-							has_interest_marker_in_region = sr:region_greater_persia
-							NOT = {
-								THIS = ROOT
-							}
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-					}
-					order_by = gdp
-					position = 0
-					check_range_bounds = no
-					overlord = {
-						save_scope_as = rival_gp_scope
-					}
-					save_scope_as = rival_afghan_partition_proxy
-				}
-			}
+			c:RUS ?= { save_temporary_scope_as = candidate_rival }
 		}
 		else_if = {
 			limit = {
 				c:RUS ?= this
 				exists = c:GBR
-				OR = {
-					any_country = {
-						is_subject_of = c:GBR
-						NOT = {
-							c:AFG ?= this
-						}
-						overlord ?= {
-							country_rank >= rank_value:great_power
-							has_interest_marker_in_region = sr:region_greater_persia
-							NOT = {
-								THIS = ROOT
-							}
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
+			}
+			c:GBR ?= { save_temporary_scope_as = candidate_rival }
+		}
+
+		# Priority: candidate GP itself > relevant candidate GP subject > any eligible GP > any eligible GP-subject
+		if = {
+			limit = {
+				exists = scope:candidate_rival
+				scope:candidate_rival ?= {
+					country_rank >= rank_value:great_power
+					c:AFG ?= {
+						has_overlapping_interests = PREV # scope:candidate_rival
 					}
-					c:GBR ?= {
-						country_rank >= rank_value:great_power
-						has_interest_marker_in_region = sr:region_greater_persia
-						any_neighbouring_state = {
-							c:AFG ?= owner
+					OR = {
+						any_scope_state = {
+							OR = {
+								is_in_geographic_region = geographic_region_central_asia
+								is_in_geographic_region = geographic_region_india
+							}
+							any_neighbouring_state = { c:AFG ?= owner }
 						}
-						NOT = {
-							THIS = ROOT
+						any_subject_or_below = {
+							NOT = { c:AFG ?= this }
+							any_scope_state = {
+								OR = {
+									is_in_geographic_region = geographic_region_central_asia
+									is_in_geographic_region = geographic_region_india
+								}
+								any_neighbouring_state = { c:AFG ?= owner }
+							}
 						}
 					}
 				}
 			}
-			if = {
-				limit = {
-					c:GBR ?= {
-						country_rank >= rank_value:great_power
-						has_interest_marker_in_region = sr:region_greater_persia
-						any_neighbouring_state = {
-							c:AFG ?= owner
+			scope:candidate_rival = { save_scope_as = rival_gp_scope }
+		}
+		else_if = {
+			limit = {
+				any_country = {
+					country_rank >= rank_value:great_power
+					c:AFG ?= {
+						has_overlapping_interests = PREV # scope:candidate_rival
+					}
+					OR = {
+						any_scope_state = {
+							OR = {
+								is_in_geographic_region = geographic_region_central_asia
+								is_in_geographic_region = geographic_region_india
+							}
+							any_neighbouring_state = { c:AFG ?= owner }
 						}
-						NOT = {
-							THIS = ROOT
+						any_subject_or_below = {
+							NOT = { c:AFG ?= this }
+							any_scope_state = {
+								OR = {
+									is_in_geographic_region = geographic_region_central_asia
+									is_in_geographic_region = geographic_region_india
+								}
+								any_neighbouring_state = { c:AFG ?= owner }
+							}
 						}
 					}
-				}
-				c:GBR ?= {
-					save_scope_as = rival_gp_scope
+					NOT = { THIS = ROOT }
 				}
 			}
-			else_if = {
+			random_country = {
 				limit = {
-					any_country = {
-						is_subject_of = c:GBR
-						NOT = {
-							c:AFG ?= this
+					country_rank >= rank_value:great_power
+					c:AFG ?= {
+						has_overlapping_interests = PREV # scope:candidate_rival
+					}
+					OR = {
+						any_scope_state = {
+							OR = {
+								is_in_geographic_region = geographic_region_central_asia
+								is_in_geographic_region = geographic_region_india
+							}
+							any_neighbouring_state = { c:AFG ?= owner }
 						}
-						overlord ?= {
-							country_rank >= rank_value:great_power
-							has_interest_marker_in_region = sr:region_greater_persia
-							NOT = {
-								THIS = ROOT
+						any_subject_or_below = {
+							NOT = { c:AFG ?= this }
+							any_scope_state = {
+								OR = {
+									is_in_geographic_region = geographic_region_central_asia
+									is_in_geographic_region = geographic_region_india
+								}
+								any_neighbouring_state = { c:AFG ?= owner }
 							}
 						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
 					}
+					NOT = { THIS = ROOT }
 				}
-				ordered_country = {
-					limit = {
-						is_subject_of = c:GBR
-						NOT = {
-							c:AFG ?= this
-						}
-						overlord = {
-							country_rank >= rank_value:great_power
-							has_interest_marker_in_region = sr:region_greater_persia
-							NOT = {
-								THIS = ROOT
-							}
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-					}
-					order_by = gdp
-					position = 0
-					check_range_bounds = no
-					overlord = {
-						save_scope_as = rival_gp_scope
-					}
-					save_scope_as = rival_afghan_partition_proxy
-				}
+				save_scope_as = rival_gp_scope
 			}
 		}
-		else = {
-			if = {
-				limit = {
-					any_country = {
-						country_rank >= rank_value:great_power
-						has_interest_marker_in_region = sr:region_greater_persia
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-						NOT = {
-							THIS = ROOT
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						country_rank >= rank_value:great_power
-						has_interest_marker_in_region = sr:region_greater_persia
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-						NOT = {
-							THIS = ROOT
+		if = {
+			limit = {
+				scope:rival_gp_scope ?=  {
+					any_subject_or_below = {
+						NOT = { c:AFG ?= this }
+						any_scope_state = {
+							OR = {
+								is_in_geographic_region = geographic_region_central_asia
+								is_in_geographic_region = geographic_region_india
+							}
+							any_neighbouring_state = { c:AFG ?= owner }
 						}
 					}
-					save_scope_as = rival_gp_scope
 				}
 			}
-			else_if = {
-				limit = {
-					any_country = {
-						is_subject = yes
-						NOT = {
-							c:AFG ?= this
-						}
-						overlord ?= {
-							country_rank >= rank_value:great_power
-							has_interest_marker_in_region = sr:region_greater_persia
-							NOT = {
-								THIS = ROOT
-							}
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-					}
-				}
-				ordered_country = {
+			scope:rival_gp_scope ?=  {
+				ordered_subject_or_below = {
 					limit = {
-						is_subject = yes
-						NOT = {
-							c:AFG ?= this
-						}
-						overlord = {
-							country_rank >= rank_value:great_power
-							has_interest_marker_in_region = sr:region_greater_persia
-							NOT = {
-								THIS = ROOT
+						NOT = { c:AFG ?= this }
+						any_scope_state = {
+							OR = {
+								is_in_geographic_region = geographic_region_central_asia
+								is_in_geographic_region = geographic_region_india
 							}
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
+							any_neighbouring_state = { c:AFG ?= owner }
 						}
 					}
 					order_by = gdp
 					position = 0
 					check_range_bounds = no
-					overlord = {
-						save_scope_as = rival_gp_scope
-					}
 					save_scope_as = rival_afghan_partition_proxy
 				}
 			}
@@ -356,8 +233,7 @@
 
 		if = {
 			limit = {
-				any_country = {
-					is_subject_of = ROOT
+				any_subject_or_below = {
 					NOT = {
 						c:AFG ?= this
 					}
@@ -366,9 +242,8 @@
 					}
 				}
 			}
-			ordered_country = {
+			ordered_subject_or_below = {
 				limit = {
-					is_subject_of = ROOT
 					NOT = {
 						c:AFG ?= this
 					}
@@ -389,92 +264,62 @@
 			text = afghanistan_exists_tt
 			exists = c:AFG
 		}
-		custom_tooltip ={
-			text = state_is_bordering_afghanistan_tt
+		custom_tooltip = {
+			text = is_bordering_afghanistan_tt
+			country_rank >= rank_value:great_power
+			c:AFG ?= {
+				has_overlapping_interests = ROOT
+			}
 			OR = {
-				any_scope_state = {
+				any_state_in_india = {
 					OR = {
-						region = sr:region_central_asia
-						region = sr:region_north_india
-						region = sr:region_south_india
+						owner ?= ROOT
+						owner ?= { is_subject_of = ROOT }
 					}
 					any_neighbouring_state = {
 						c:AFG ?= owner
 					}
 				}
-				any_country = {
-					is_subject_of = ROOT
-					NOT = {
-						c:AFG ?= this
+				any_state_in_central_asia = {
+					OR = {
+						owner ?= ROOT
+						owner ?= { is_subject_of = ROOT }
 					}
-					any_scope_state = {
-						OR = {
-							region = sr:region_central_asia
-							region = sr:region_north_india
-							region = sr:region_south_india
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
+					any_neighbouring_state = {
+						c:AFG ?= owner
 					}
-				}
-			}
-		}
-		custom_tooltip = {
-			text = is_bordering_afghanistan_tt
-			any_country = {
-				OR = {
-					THIS = ROOT
-					is_subject_of = ROOT
-				}
-				NOT = {
-					c:AFG ?= this
-				}
-				any_neighbouring_state = {
-					c:AFG ?= owner
 				}
 			}
 		}
 		custom_tooltip = {
 			text = another_gp_is_bordering_afghanistan_tt
-			OR = {
-				any_country = {
-					country_rank >= rank_value:great_power
-					NOT = {
-						THIS = ROOT
-					}
-					has_interest_marker_in_region = sr:region_greater_persia
-					any_scope_state = {
-						OR = {
-							region = sr:region_central_asia
-							region = sr:region_north_india
-							region = sr:region_south_india
-						}
-						any_neighbouring_state = {
-							c:AFG ?= owner
-						}
-					}
+			any_country = {
+				country_rank >= rank_value:great_power
+				NOT = {
+					THIS = ROOT
 				}
-				any_country = {
-					is_subject = yes
-					NOT = {
-						c:AFG ?= this
-					}
-					overlord ?= {
-						country_rank >= rank_value:great_power
-						has_interest_marker_in_region = sr:region_greater_persia
-						NOT = {
-							THIS = ROOT
-						}
-					}
+				c:AFG ?= {
+					has_overlapping_interests = PREV # any_country
+				}
+				OR = {
 					any_scope_state = {
 						OR = {
-							region = sr:region_central_asia
-							region = sr:region_north_india
-							region = sr:region_south_india
+							is_in_geographic_region = geographic_region_central_asia
+							is_in_geographic_region = geographic_region_india
 						}
 						any_neighbouring_state = {
 							c:AFG ?= owner
+						}
+					}
+					any_subject_or_below = {
+						any_scope_state = {
+							OR = {
+								is_in_geographic_region = geographic_region_central_asia
+								is_in_geographic_region = geographic_region_india
+							}
+							any_neighbouring_state = {
+								c:AFG ?= owner
+							}
 						}
 					}
 				}
@@ -525,13 +370,13 @@
 			}
 			custom_tooltip = {
 				text = afghanistan_abandon_claims_tt
-				every_state = {
+				every_state_region = {
 					limit = {
-						has_claim_by = c:AFG
+						c:AFG ?= {
+							has_claim = prev
+						}
 					}
-					state_region = {
-						remove_claim = c:AFG
-					}
+					remove_claim = c:AFG
 				}
 			}
 		}
@@ -541,25 +386,18 @@
 					has_variable = proposed_durand_line
 				}
 			}
-			if = {
-				limit = {
-					exists = scope:rival_afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
+			c:AFG ?= {
+				every_scope_state = {
+					limit = {
+						is_in_geographic_region = geographic_region_india
+					}
+					if = {
 						limit = {
-							is_in_geographic_region = geographic_region_india
+							exists = scope:rival_afghan_partition_proxy
 						}
 						set_state_owner = scope:rival_afghan_partition_proxy
 					}
-				}
-			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-						}
+					else = {
 						set_state_owner = scope:rival_gp_scope
 					}
 				}
@@ -580,35 +418,23 @@
 					has_variable = proposed_indus_line
 				}
 			}
-			if = {
-				limit = {
-					exists = scope:rival_afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOT = {
-								state_region = {
-									is_homeland = cu:pashtun
-								}
+			c:AFG ?= {
+				every_scope_state = {
+					limit = {
+						is_in_geographic_region = geographic_region_india
+						NOT = {
+							state_region = {
+								is_homeland = cu:pashtun
 							}
+						}
+					}
+					if = {
+						limit = {
+							exists = scope:rival_afghan_partition_proxy
 						}
 						set_state_owner = scope:rival_afghan_partition_proxy
 					}
-				}
-			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOT = {
-								state_region = {
-									is_homeland = cu:pashtun
-								}
-							}
-						}
+					else = {
 						set_state_owner = scope:rival_gp_scope
 					}
 				}
@@ -638,31 +464,21 @@
 					has_variable = proposed_torkestan_line
 				}
 			}
-			if = {
-				limit = {
-					exists = scope:rival_afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
+			c:AFG ?= {
+				every_scope_state = {
+					limit = {
+						OR = {
+							is_in_geographic_region = geographic_region_central_asia
+							state_region = s:STATE_BALKH
+						}
+					}
+					if = {
 						limit = {
-							OR = {
-								is_in_geographic_region = geographic_region_central_asia
-								state_region = s:STATE_BALKH
-							}
+							exists = scope:rival_afghan_partition_proxy
 						}
 						set_state_owner = scope:rival_afghan_partition_proxy
 					}
-				}
-			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							OR = {
-								is_in_geographic_region = geographic_region_central_asia
-								state_region = s:STATE_BALKH
-							}
-						}
+					else = {
 						set_state_owner = scope:rival_gp_scope
 					}
 				}
@@ -686,25 +502,18 @@
 					has_variable = proposed_amu_darya_line
 				}
 			}
-			if = {
-				limit = {
-					exists = scope:rival_afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
+			c:AFG ?= {
+				every_scope_state = {
+					limit = {
+						is_in_geographic_region = geographic_region_central_asia
+					}
+					if = {
 						limit = {
-							is_in_geographic_region = geographic_region_central_asia
+							exists = scope:rival_afghan_partition_proxy
 						}
 						set_state_owner = scope:rival_afghan_partition_proxy
 					}
-				}
-			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_central_asia
-						}
+					else = {
 						set_state_owner = scope:rival_gp_scope
 					}
 				}
@@ -760,25 +569,18 @@
 					has_variable = proposed_durand_line
 				}
 			}
-			if = {
-				limit = {
-					exists = scope:afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
+			c:AFG ?= {
+				every_scope_state = {
+					limit = {
+						is_in_geographic_region = geographic_region_india
+					}
+					if = {
 						limit = {
-							is_in_geographic_region = geographic_region_india
+							exists = scope:afghan_partition_proxy
 						}
 						set_state_owner = scope:afghan_partition_proxy
 					}
-				}
-			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-						}
+					else = {
 						set_state_owner = ROOT
 					}
 				}
@@ -799,35 +601,23 @@
 					has_variable = proposed_indus_line
 				}
 			}
-			if = {
-				limit = {
-					exists = scope:afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOT = {
-								state_region = {
-									is_homeland = cu:pashtun
-								}
+			c:AFG ?= {
+				every_scope_state = {
+					limit = {
+						is_in_geographic_region = geographic_region_india
+						NOT = {
+							state_region = {
+								is_homeland = cu:pashtun
 							}
+						}
+					}
+					if = {
+						limit = {
+							exists = scope:afghan_partition_proxy
 						}
 						set_state_owner = scope:afghan_partition_proxy
 					}
-				}
-			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOT = {
-								state_region = {
-									is_homeland = cu:pashtun
-								}
-							}
-						}
+					else = {
 						set_state_owner = ROOT
 					}
 				}
@@ -855,31 +645,21 @@
 			limit = {
 				has_variable = proposed_torkestan_line
 			}
-			if = {
-				limit = {
-					exists = scope:afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
+			c:AFG ?= {
+				every_scope_state = {
+					limit = {
+						OR = {
+							is_in_geographic_region = geographic_region_central_asia
+							state_region = s:STATE_BALKH
+						}
+					}
+					if = {
 						limit = {
-							OR = {
-								is_in_geographic_region = geographic_region_central_asia
-								state_region = s:STATE_BALKH
-							}
+							exists = scope:afghan_partition_proxy
 						}
 						set_state_owner = scope:afghan_partition_proxy
 					}
-				}
-			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							OR = {
-								is_in_geographic_region = geographic_region_central_asia
-								state_region = s:STATE_BALKH
-							}
-						}
+					else = {
 						set_state_owner = ROOT
 					}
 				}
@@ -903,25 +683,18 @@
 					has_variable = proposed_amu_darya_line
 				}
 			}
-			if = {
-				limit = {
-					exists = scope:afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
+			c:AFG ?= {
+				every_scope_state = {
+					limit = {
+						is_in_geographic_region = geographic_region_central_asia
+					}
+					if = {
 						limit = {
-							is_in_geographic_region = geographic_region_central_asia
+							exists = scope:afghan_partition_proxy
 						}
 						set_state_owner = scope:afghan_partition_proxy
 					}
-				}
-			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_central_asia
-						}
+					else = {
 						set_state_owner = ROOT
 					}
 				}
@@ -979,58 +752,45 @@
 
 	on_timeout = {
 		custom_tooltip = negotiations_failure_tt
+		# Southeast - rival_gp_scope
 		if = {
 			limit = {
 				scope:rival_gp_scope ?= {
 					has_variable = proposed_durand_line
 				}
 			}
-			if = {
+			every_state_region_in_india = {
 				limit = {
-					exists = scope:rival_afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOT = {
-								has_claim_by = scope:rival_afghan_partition_proxy
-							}
-						}
-						state_region = {
-							add_claim = scope:rival_afghan_partition_proxy
-						}
+					any_scope_state = {
+						c:AFG ?= owner
 					}
+				}
+				if = {
+					limit = {
+						exists = scope:rival_afghan_partition_proxy
+					}
+					add_claim = scope:rival_afghan_partition_proxy
+				}
+				else = {
+					add_claim = scope:rival_gp_scope
 				}
 			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOT = {
-								has_claim_by = scope:rival_gp_scope
-							}
-						}
-						state_region = {
-							add_claim = scope:rival_gp_scope
-						}
-					}
-				}
-			}
-			every_state_in_afghanistan = {
+			every_state_region_in_afghanistan = {
 				limit = {
-					OR = {
-						scope:rival_gp_scope ?= owner
-						scope:rival_afghan_partition_proxy ?= owner
+					NOT = { 
+						any_scope_state = {
+							has_claim_by = c:AFG
+						}
 					}
-					NOT = {
-						has_claim_by = c:AFG
+					NOT = { s:STATE_BALKH ?= this }
+					any_scope_state = {
+						OR = {
+							scope:rival_gp_scope ?= owner
+							scope:rival_afghan_partition_proxy ?= owner
+						}
 					}
 				}
-				state_region = {
-					add_claim = c:AFG
-				}
+				add_claim = c:AFG
 			}
 		}
 		else_if = {
@@ -1039,126 +799,101 @@
 					has_variable = proposed_indus_line
 				}
 			}
-			if = {
+			every_state_region_in_india = {
 				limit = {
-					exists = scope:rival_afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOR = {
-								state_region = {
-									is_homeland = cu:pashtun
-								}
-								has_claim_by = scope:rival_gp_scope
-							}
-						}
-						state_region = {
-							add_claim = scope:rival_afghan_partition_proxy
-						}
+					NOT = { is_homeland = cu:pashtun }
+					any_scope_state = {
+						c:AFG ?= owner
 					}
+				}
+				if = {
+					limit = {
+						exists = scope:rival_afghan_partition_proxy
+					}
+					add_claim = scope:rival_afghan_partition_proxy
+				}
+				else = {
+					add_claim = scope:rival_gp_scope
 				}
 			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOR = {
-								state_region = {
-									is_homeland = cu:pashtun
-								}
-								has_claim_by = scope:rival_gp_scope
-							}
-						}
-						state_region = {
-							add_claim = scope:rival_gp_scope
-						}
-					}
-				}
-			}
-			every_state_in_greater_afghanistan = {
+			every_state_region_in_greater_afghanistan = {
 				limit = {
-					OR = {
-						scope:rival_gp_scope ?= owner
-						scope:rival_afghan_partition_proxy ?= owner
+					NOT = { 
+						any_scope_state = {
+							has_claim_by = c:AFG
+						}
 					}
-					NOT = {
-						has_claim_by = c:AFG
+					NOT = { s:STATE_BALKH ?= this }
+					any_scope_state = {
+						OR = {
+							scope:rival_gp_scope ?= owner
+							scope:rival_afghan_partition_proxy ?= owner
+						}
 					}
 				}
-				state_region = {
-					add_claim = c:AFG
-				}
+				add_claim = c:AFG
 			}
 		}
-		else_if = {
-			limit = {
-				scope:rival_gp_scope ?= {
-					has_variable = proposed_status_quo
-				}
-			}
-			custom_tooltip = status_quo_southeast_tt
-		}
-
+		# North - rival_gp_scope
 		if = {
 			limit = {
 				scope:rival_gp_scope ?= {
 					has_variable = proposed_torkestan_line
 				}
 			}
+			every_state_region_in_central_asia = {
+				limit = {
+					any_scope_state = {
+						c:AFG ?= owner
+					}
+				}
+				if = {
+					limit = {
+						exists = scope:rival_afghan_partition_proxy
+					}
+					add_claim = scope:rival_afghan_partition_proxy
+				}
+				else = {
+					add_claim = scope:rival_gp_scope
+				}
+			}
 			if = {
 				limit = {
-					exists = scope:rival_afghan_partition_proxy
+					c:AFG ?= {
+						has_state_in_state_region = STATE_BALKH
+					}
 				}
-				c:AFG ?= {
-					every_scope_state = {
+				s:STATE_BALKH ?= {
+					if = {
 						limit = {
-							OR = {
-								is_in_geographic_region = geographic_region_central_asia
-								state_region = s:STATE_BALKH
-							}
-							NOT = {
-								has_claim_by = scope:rival_afghan_partition_proxy
-							}
+							exists = scope:rival_afghan_partition_proxy
 						}
-						state_region = {
-							add_claim = scope:rival_afghan_partition_proxy
-						}
+						add_claim = scope:rival_afghan_partition_proxy
+					}
+					else = {
+						add_claim = scope:rival_gp_scope
 					}
 				}
 			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							OR = {
-								is_in_geographic_region = geographic_region_central_asia
-								state_region = s:STATE_BALKH
-							}
-							NOT = {
-								has_claim_by = scope:rival_gp_scope
-							}
-						}
-						state_region = {
-							add_claim = scope:rival_gp_scope
-						}
-					}
-				}
-			}
-			every_state_in_greater_afghanistan = {
+			if = {
 				limit = {
-					OR = {
-						scope:rival_gp_scope ?= owner
-						scope:rival_afghan_partition_proxy ?= owner
+					NOT = {
+						s:STATE_BALKH ?= {
+							any_scope_state = {
+								has_claim_by = c:AFG
+							}
+						}
 					}
-					NOR = {
-						state_region = s:STATE_BALKH
-						has_claim_by = c:AFG
+					OR = {
+						scope:rival_afghan_partition_proxy ?= {
+							has_state_in_state_region = STATE_BALKH
+						}
+						scope:rival_gp_scope ?= {
+							has_state_in_state_region = STATE_BALKH
+						}
 					}
 				}
-				state_region = {
+				s:STATE_BALKH ?= {
 					add_claim = c:AFG
 				}
 			}
@@ -1169,114 +904,78 @@
 					has_variable = proposed_amu_darya_line
 				}
 			}
-			if = {
+			every_state_region_in_central_asia = {
 				limit = {
-					exists = scope:rival_afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_central_asia
-							NOT = {
-								has_claim_by = scope:rival_afghan_partition_proxy
-							}
-						}
-						state_region = {
-							add_claim = scope:rival_afghan_partition_proxy
-						}
+					any_scope_state = {
+						c:AFG ?= owner
 					}
+				}
+				if = {
+					limit = {
+						exists = scope:rival_afghan_partition_proxy
+					}
+					add_claim = scope:rival_afghan_partition_proxy
+				}
+				else = {
+					add_claim = scope:rival_gp_scope
 				}
 			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_central_asia
-							NOT = {
-								has_claim_by = scope:rival_gp_scope
-							}
-						}
-						state_region = {
-							add_claim = scope:rival_gp_scope
-						}
-					}
-				}
-			}
-			every_state_in_greater_afghanistan = {
+			every_state_region_in_afghanistan = {
 				limit = {
-					OR = {
-						scope:rival_gp_scope ?= owner
-						scope:rival_afghan_partition_proxy ?= owner
-					}
 					NOT = {
-						has_claim_by = c:AFG
+						any_scope_state = {
+							has_claim_by = c:AFG
+						}
+					}
+					any_scope_state = {
+						OR = {
+							scope:rival_gp_scope ?= owner
+							scope:rival_afghan_partition_proxy ?= owner
+						}
 					}
 				}
-				state_region = {
-					add_claim = c:AFG
-				}
+				add_claim = c:AFG
 			}
 		}
-		else_if = {
-			limit = {
-				scope:rival_gp_scope ?= {
-					has_variable = proposed_status_quo_north
-				}
-			}
-			custom_tooltip = status_quo_north_tt
-		}
+		# Southeast - ROOT
 		if = {
 			limit = {
 				ROOT = {
 					has_variable = proposed_durand_line
 				}
 			}
-			if = {
+			every_state_region_in_india = {
 				limit = {
-					exists = scope:afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOT = {
-								has_claim_by = scope:afghan_partition_proxy
-							}
-						}
-						state_region = {
-							add_claim = scope:afghan_partition_proxy
-						}
+					any_scope_state = {
+						c:AFG ?= owner
 					}
+				}
+				if = {
+					limit = {
+						exists = scope:afghan_partition_proxy
+					}
+					add_claim = scope:afghan_partition_proxy
+				}
+				else = {
+					add_claim = ROOT
 				}
 			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOT = {
-								has_claim_by = ROOT
-							}
-						}
-						state_region = {
-							add_claim = ROOT
-						}
-					}
-				}
-			}
-			every_state_in_afghanistan = {
+			every_state_region_in_afghanistan = {
 				limit = {
-					OR = {
-						ROOT ?= owner
-						scope:afghan_partition_proxy ?= owner
-					}
 					NOT = {
-						has_claim_by = c:AFG
+						any_scope_state = {
+							has_claim_by = c:AFG
+						}
+					}
+					NOT = { s:STATE_BALKH ?= this }
+					any_scope_state = {
+						OR = {
+							ROOT ?= owner
+							scope:afghan_partition_proxy ?= owner
+						}
 					}
 				}
-				state_region = {
-					add_claim = c:AFG
-				}
+				add_claim = c:AFG
 			}
 		}
 		else_if = {
@@ -1285,124 +984,102 @@
 					has_variable = proposed_indus_line
 				}
 			}
-			if = {
+			every_state_region_in_india = {
 				limit = {
-					exists = scope:afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOR = {
-								state_region = {
-									is_homeland = cu:pashtun
-								}
-								has_claim_by = scope:afghan_partition_proxy
-							}
-						}
-						state_region = {
-							add_claim = scope:afghan_partition_proxy
-						}
+					NOT = { is_homeland = cu:pashtun }
+					any_scope_state = {
+						c:AFG ?= owner
 					}
+				}
+				if = {
+					limit = {
+						exists = scope:afghan_partition_proxy
+					}
+					add_claim = scope:afghan_partition_proxy
+				}
+				else = {
+					add_claim = ROOT
 				}
 			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_india
-							NOR = {
-								state_region = {
-									is_homeland = cu:pashtun
-								}
-								has_claim_by = ROOT
-							}
-						}
-						state_region = {
-							add_claim = ROOT
-						}
-					}
-				}
-			}
-			every_state_in_greater_afghanistan = {
+			every_state_region_in_greater_afghanistan = {
 				limit = {
-					OR = {
-						ROOT ?= owner
-						scope:afghan_partition_proxy ?= owner
-					}
 					NOT = {
-						has_claim_by = c:AFG
+						any_scope_state = {
+							has_claim_by = c:AFG
+						}
+					}
+					NOT = { s:STATE_BALKH ?= this }
+					any_scope_state = {
+						OR = {
+							ROOT ?= owner
+							scope:afghan_partition_proxy ?= owner
+						}
 					}
 				}
-				state_region = {
-					add_claim = c:AFG
-				}
+				add_claim = c:AFG
 			}
-		}
-		else_if = {
-			limit = {
-				ROOT = {
-					has_variable = proposed_status_quo
-				}
-			}
-			custom_tooltip = status_quo_southeast_tt
 		}
 
+		# North - ROOT
 		if = {
 			limit = {
-				has_variable = proposed_torkestan_line
+				ROOT = {
+					has_variable = proposed_torkestan_line
+				}
+			}
+			every_state_region_in_central_asia = {
+				limit = {
+					any_scope_state = {
+						c:AFG ?= owner
+					}
+				}
+				if = {
+					limit = {
+						exists = scope:afghan_partition_proxy
+					}
+					add_claim = scope:afghan_partition_proxy
+				}
+				else = {
+					add_claim = ROOT
+				}
 			}
 			if = {
 				limit = {
-					exists = scope:afghan_partition_proxy
+					c:AFG ?= {
+						has_state_in_state_region = STATE_BALKH
+					}
 				}
-				c:AFG ?= {
-					every_scope_state = {
+				s:STATE_BALKH ?= {
+					if = {
 						limit = {
-							OR = {
-								is_in_geographic_region = geographic_region_central_asia
-								state_region = s:STATE_BALKH
-							}
-							NOT = {
-								has_claim_by = scope:afghan_partition_proxy
-							}
+							exists = scope:afghan_partition_proxy
 						}
-						state_region = {
-							add_claim = scope:afghan_partition_proxy
-						}
+						add_claim = scope:afghan_partition_proxy
+					}
+					else = {
+						add_claim = ROOT
 					}
 				}
 			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							OR = {
-								is_in_geographic_region = geographic_region_central_asia
-								state_region = s:STATE_BALKH
-							}
-							NOT = {
-								has_claim_by = ROOT
-							}
-						}
-						state_region = {
-							add_claim = ROOT
-						}
-					}
-				}
-			}
-			every_state_in_greater_afghanistan = {
+			if = {
 				limit = {
-					OR = {
-						ROOT ?= owner
-						scope:afghan_partition_proxy ?= owner
+					NOT = {
+						s:STATE_BALKH ?= {
+							any_scope_state = {
+								has_claim_by = c:AFG
+							}
+						}
 					}
-					NOR = {
-						state_region = s:STATE_BALKH
-						has_claim_by = c:AFG
+					OR = {
+						scope:afghan_partition_proxy ?= {
+							has_state_in_state_region = STATE_BALKH
+						}
+						ROOT = {
+							has_state_in_state_region = STATE_BALKH
+						}
 					}
 				}
-				state_region = {
+				s:STATE_BALKH ?= {
 					add_claim = c:AFG
 				}
 			}
@@ -1413,52 +1090,37 @@
 					has_variable = proposed_amu_darya_line
 				}
 			}
-			if = {
+			every_state_region_in_central_asia = {
 				limit = {
-					exists = scope:afghan_partition_proxy
-				}
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_central_asia
-							NOT = {
-								has_claim_by = scope:afghan_partition_proxy
-							}
-						}
-						state_region = {
-							add_claim = scope:afghan_partition_proxy
-						}
+					any_scope_state = {
+						c:AFG ?= owner
 					}
+				}
+				if = {
+					limit = {
+						exists = scope:afghan_partition_proxy
+					}
+					add_claim = scope:afghan_partition_proxy
+				}
+				else = {
+					add_claim = ROOT
 				}
 			}
-			else = {
-				c:AFG ?= {
-					every_scope_state = {
-						limit = {
-							is_in_geographic_region = geographic_region_central_asia
-							NOT = {
-								has_claim_by = ROOT
-							}
-						}
-						state_region = {
-							add_claim = ROOT
-						}
-					}
-				}
-			}
-			every_state_in_greater_afghanistan = {
+			every_state_region_in_afghanistan = {
 				limit = {
-					OR = {
-						ROOT ?= owner
-						scope:afghan_partition_proxy ?= owner
+					NOT = { 
+						any_scope_state = {
+							has_claim_by = c:AFG
+						}
 					}
-					NOT = {
-						has_claim_by = c:AFG
+					any_scope_state = {
+						OR = {
+							ROOT ?= owner
+							scope:afghan_partition_proxy ?= owner
+						}
 					}
 				}
-				state_region = {
-					add_claim = c:AFG
-				}
+				add_claim = c:AFG
 			}
 		}
 
@@ -1479,9 +1141,7 @@ je_unify_afghanistan = {
 
 	is_shown_in_lobby = {
 		has_dlc_feature = ep1_content #spheres of influence
-		capital ?= {
-			region = sr:region_greater_persia
-		}
+        is_in_geographic_region = geographic_region_greater_afghanistan
 		OR = {
 			country_has_primary_culture = cu:pashtun
 			country_has_primary_culture = cu:tajik
@@ -1492,9 +1152,7 @@ je_unify_afghanistan = {
 	scripted_button = je_afghan_unification_appeal_to_britain_button
 
 	possible = {
-		capital ?= {
-			region = sr:region_greater_persia
-		}
+        is_in_geographic_region = geographic_region_greater_afghanistan
 		OR = {
 			country_has_primary_culture = cu:pashtun
 			country_has_primary_culture = cu:tajik

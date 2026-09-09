@@ -317,6 +317,7 @@ types ship_panel_types
 				direction = vertical
 				minimumsize = { @panel_width_plus_14 -1 }
 				maximumsize = { @panel_width_plus_14 -1 }
+				spacing = 2
 				datacontext = "[Ship.GetFleet]"
 
 				widget = {
@@ -434,6 +435,33 @@ types ship_panel_types
 							onclick = "[Execute( Ship.SetNextFlagshipOrnament )]"
 							tooltip = "FLAGSHIP_ORNAMENT_NEXT_TOOLTIP"
 							using = tooltip_se
+						}
+
+						textbox = {
+							visible = "[Ship.GetTemplate.HasFlagshipSignalFlagsEntity]"
+
+							background = {
+								using = dark_area
+								alpha = 0.4
+							}
+
+							checkbutton = {
+								parentanchor = vcenter
+								using = check_button
+								position = { 3 0 }
+								size = { 24 24 }
+								onclick = "[Execute(Ship.ToggleFlagshipSignalFlags)]"
+								checked = "[Ship.HasFlagshipSignalFlags]"
+							}
+
+							margin = { 35 3 }
+							parentanchor = vcenter
+							autoresize = yes
+							align = hcenter|nobaseline
+							min_width = 150
+							max_width = 220
+							default_format = "#title"
+							text = "FLAGSHIP_SIGNALFLAGS_LABEL"
 						}
 					}
 
@@ -558,6 +586,83 @@ types ship_panel_types
 							}
 
 							blockoverride "entire_icon" {}
+						}
+					}
+				}
+
+				#SHIP MODIFICATIONS
+				container = {
+					parentanchor = hcenter
+					minimumsize = { @panel_width_minus_10 -1 }
+					maximumsize = { @panel_width_minus_10 -1 }
+
+					background = {
+						using = entry_bg_simple
+					}
+
+					flowcontainer = {
+						direction = vertical
+						spacing = 1
+						margin = { 20 10 }
+						datamodel = "[Ship.GetModifications]"
+
+						item = {
+							flowcontainer = {
+								spacing = 2
+
+								icon = {
+									size = { 24 24 }
+									texture = "[ShipModificationType.GetIcon]"
+								}
+
+								textbox = {
+									parentanchor = vcenter
+									autoresize = yes
+									max_width = 220
+									text = "[ShipModificationType.GetName]"
+								}
+							}
+						}
+					}
+
+					flowcontainer = {
+						parentanchor = right
+						direction = vertical
+						spacing = 1
+						margin = { 25 10 }
+
+						textbox = {
+							visible = "[IsDataModelEmpty(Ship.GetUtilityModifications)]"
+							autoresize = yes
+							align = nobaseline
+							using = elide_fontsize_min
+							using = empty_state_text_properties
+							text = "NO_UTILITY_MODIFICATIONS"
+						}
+
+						flowcontainer = {
+							visible = "[Not(IsDataModelEmpty(Ship.GetUtilityModifications))]"
+							direction = vertical
+							spacing = 2
+							datamodel = "[Ship.GetUtilityModifications]"
+
+							item = {
+								flowcontainer = {
+									spacing = 2
+
+									icon = {
+										size = { 24 24 }
+										texture = "[ShipModificationType.GetIcon]"
+									}
+
+									textbox = {
+										parentanchor = vcenter
+										autoresize = yes
+										max_width = 220
+										text = "[ShipModificationType.GetName]"
+									}
+								}
+							}
 						}
 					}
 				}
@@ -1298,7 +1403,7 @@ types ship_types
 		}
 
 		blockoverride "stat_value" {
-			text = "[Modifier.GetShipSupplyEfficiency|vD%]"
+			text = "[Modifier.GetShipSupplyEfficiency|v0%]"
 		}
 	}
 
@@ -1469,7 +1574,7 @@ types ship_types
 		}
 
 		blockoverride "stat_value" {
-			text = "[ShipTemplate.GetSupplyEfficiency|vD%]"
+			text = "[ShipTemplate.GetSupplyEfficiency|v0%]"
 		}
 	}
 
@@ -1725,7 +1830,7 @@ types ship_types
 		}
 
 		blockoverride "stat_value" {
-			text = "[Ship.GetSupplyEfficiency|vD%]"
+			text = "[Ship.GetSupplyEfficiency|v0%]"
 		}
 	}
 
@@ -1881,7 +1986,7 @@ types ship_types
 		}
 
 		blockoverride "stat_value" {
-			text = "[Modifier.GetValueFor('ship_suffered_accuracy_mult')|+=v0%]"
+			text = "[Modifier.GetValueFor('ship_suffered_accuracy_mult')|-=v0%]"
 		}
 
 		blockoverride "stat_label" {

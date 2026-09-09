@@ -435,7 +435,7 @@ ai_strategy_colonial_expansion = {
 		if = {
 			limit = {
 				NOT = { is_country_type = unrecognized }
-				scope:target_country = { is_country_type = unrecognized }
+				scope:target_country = { ai_country_is_valid_colonization_target = yes }
 				has_technology_researched = colonization
 				institution_investment_level = {
 					institution = institution_colonial_affairs
@@ -474,19 +474,6 @@ ai_strategy_colonial_expansion = {
 					}
 					add = 10
 				}
-			}
-
-			if = {
-				limit = {
-					scope:target_country = {
-						is_subject = yes
-						is_country_type = unrecognized
-						top_overlord ?= {
-							NOT = { is_country_type = unrecognized }
-						}
-					}
-				}
-				multiply = 0.0
 			}
 		}
 		if = {
@@ -588,15 +575,13 @@ ai_strategy_colonial_expansion = {
 			score = {
 				if = {
 					limit = {
-						scope:target_country = { NOT = { is_country_type = unrecognized } }
+						scope:target_country = { ai_country_is_valid_colonization_target = no }
 					}
 					add = -100
 				}
-				if = {
+				else_if = {
 					limit = {
-						NOT = { scope:target_country = { is_subject_of = root } }
-						has_strategic_adjacency = scope:target_country
-						scope:target_country = { is_country_type = unrecognized }
+						ai_country_is_valid_colonization_target = yes
 					}
 					add = 200
 
@@ -610,6 +595,8 @@ ai_strategy_colonial_expansion = {
 						add = 600
 					}
 				}
+
+				# Cleaning up Boers and Zulu
 				if = {
 					limit = {
 						country_has_primary_culture = cu:british
@@ -649,6 +636,19 @@ ai_strategy_colonial_expansion = {
 							}
 						}
 						add = 600
+					}
+
+					if = {
+						limit = {
+							scope:target_country = {
+								is_subject = yes
+								is_country_type = unrecognized
+								top_overlord ?= {
+									NOT = { is_country_type = unrecognized }
+								}
+							}
+						}
+						multiply = 0.0
 					}
 				}
 				if = {
@@ -1128,10 +1128,9 @@ ai_strategy_economic_imperialism = {
 						NOT = { scope:target_country = { is_subject_of = root } }
 						has_strategic_adjacency = scope:target_country
 						scope:target_country = {
-							country_has_primary_culture = cu:japanese
 							has_law_or_variant = law_type:law_isolationism
 							gdp >= 2000000
-							NOT = { capital.region = sr:region_northeast_asia }
+							NOT = { country_has_primary_culture = cu:japanese }
 						}
 					}
 					add = 100
@@ -1220,6 +1219,16 @@ ai_strategy_economic_imperialism = {
 					multiply = 2.0
 				}
 			}
+		}
+
+		# Eager to reclaim a treaty port from a country that recently reneged on the agreement we inherited to them
+		if = {
+			limit = {
+				can_reach_target_state = yes
+				has_variable = wants_treaty_port_revenge_against
+				var:wants_treaty_port_revenge_against ?= scope:target_country
+			}
+			add = 100
 		}
 	}
 

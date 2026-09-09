@@ -1,0 +1,176 @@
+﻿# These are split into two pieces for flexibility in layout and due to layer rendering order constraints.
+# I.e. to avoid the dropdown being rendered under other content.
+
+types SearchBarTypes
+{
+	### INPUT FIELD
+	type search_bar = widget {
+		size = { 360 40 }
+
+		hbox = {
+			parentanchor = top
+			layoutpolicy_horizontal = expanding
+			size = { 100% 40 }
+			margin = { 8 4 }
+
+			icon = {
+            	size = { 40 40 }
+            	texture = "gfx/interface/buttons/button_icons/search.dds"
+            	alpha = 0.6
+        	}
+
+			editbox = {
+				block "editbox_name" {
+					name = "search_edit" # default name for code to find the editbox; override only when two search bars share a parent widget.
+				}
+				layoutpolicy_horizontal = expanding
+				size = { 0 32 }
+				margin = { 12 0 }
+				alwaystransparent = no
+				focuspolicy = all
+				align = nobaseline
+
+				background = {
+					using = text_edit_bg
+				}
+
+				text_single = {
+					size = { 100% 100% }
+					margin = { 12 0 }
+					parentanchor = vcenter
+					autoresize = no
+					alpha = 0.5
+					alwaystransparent = yes
+					align = nobaseline
+					visible = "[SearchBar.IsQueryEmpty]"
+
+					block "editbox_label" {
+						text = "SEARCHBAR_SEARCH_TEXT"
+					}
+				}
+
+			}
+
+			button_icon_cancel = {
+				size = { 22 22 }
+				visible = "[Not(SearchBar.IsQueryEmpty)]"
+				onclick = "[SearchBar.ClearText]"
+				tooltip = "SEARCH_CLEAR"
+			}
+		}
+
+		button = {
+			size = { 0 0 }
+			shortcut = "focus_search"
+			onclick = "[SearchBar.FocusEditBox]"
+		}
+	}
+
+	### RESULT DROPDOWN
+	type search_bar_results = scrollarea {
+		maximumsize = { 360 320 }
+		autoresizescrollarea = yes
+		alwaystransparent = yes
+		focuspolicy = none
+		scrollbarpolicy_horizontal = always_off
+		visible = "[And3(Or(SearchBar.HasFocus, SearchBar.IsMouseOverResults), Not(SearchBar.IsQueryEmpty), Not(IsDataModelEmpty(SearchBar.GetResults)))]"
+		onmousehierarchyenter = "[SearchBar.OnResultsMouseEnter]"
+		onmousehierarchyleave = "[SearchBar.OnResultsMouseLeave]"
+
+		background = {
+			using = entry_bg_simple
+		}
+
+		scrollwidget = {
+			vbox = {
+				vbox = {
+					datamodel = "[SearchBar.GetResults]"
+					resizeparent = yes
+					item = {
+						### One result = card + its snippet nook, as a single connected unit.
+
+						vbox = {
+
+							### CARD (clickable)
+							button = {
+								using = default_button
+								using = zoom_button_sound
+								size = { 360 40 }
+								onclick = "[SearchResult.Select]"
+
+								block "result_tooltip" {}
+
+								icon = {
+									parentanchor = vcenter
+									position = { 10 0 }
+									size = { 32 32 }
+									texture = "[SearchResult.GetIcon]"
+								}
+
+								### NAME
+								textbox = {
+									parentanchor = vcenter
+									position = { 50 0 }
+									autoresize = yes
+									max_width = 180
+									elide = right
+									raw_text = "[SearchResult.GetName]"
+									align = nobaseline
+									using = fontsize_large
+								}
+
+								### CATEGORY (right-aligned)
+								textbox = {
+									parentanchor = right|vcenter
+									position = { -12 0 }
+									autoresize = yes
+									max_width = 110
+									elide = right
+									raw_text = "[SearchResult.GetCategory]"
+									align = right|nobaseline
+									alpha = 0.5
+									using = fontsize_small
+								}
+
+								icon = {
+									visible = "[SearchResult.IsHighlighted]"
+									using = highlighted_square_selection
+								}
+							}
+
+							### SNIPPET NOOK (own field beneath the card; absent entirely when there's no snippet)
+							button = {
+								using = zoom_button_sound
+								size = { 360 24 }
+								onclick = "[SearchResult.Select]"
+								visible = "[Not(StringIsEmpty(SearchResult.GetMatchSnippet))]"
+
+								background = {
+									texture = "gfx/interface/backgrounds/white.dds"
+									color = { 0.07 0.07 0.08 0.85 }
+								}
+
+								textbox = {
+									parentanchor = vcenter
+									position = { 20 0 }
+									autoresize = yes
+									max_width = 320
+									elide = right
+									raw_text = "[SearchResult.GetMatchSnippet]"
+									align = nobaseline
+									alpha = 0.6
+									using = fontsize_small
+								}
+							}
+						}
+					}
+				}
+				expand = {}
+			}
+		}
+
+		scrollbar_vertical = {
+			using = vertical_scrollbar
+		}
+	}
+}

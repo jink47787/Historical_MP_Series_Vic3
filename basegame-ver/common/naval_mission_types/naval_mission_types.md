@@ -17,8 +17,12 @@
     # What targets intercept behavior will target
     intercept_targets = <none/hostile/piracy/all>
 
-    # What targets piracy behavior will target
+    # What targets piracy behavior will target. Shorthand that sets both the import and export targets below
     piracy_targets = <none/hostile/neutral/allies/non_allies/all>
+    # Overrides piracy_targets for the importing side (the trade center whose imports are pirated)
+    piracy_import_targets = <none/hostile/neutral/allies/non_allies/all>
+    # Overrides piracy_targets for the exporting side (the trade center the goods are shipped from)
+    piracy_export_targets = <none/hostile/neutral/allies/non_allies/all>
 
     modifier = {} # The modifier that will apply to the fleet when they are active in the mission area
     command_modifier = {} # Is applied to the commander of the fleet

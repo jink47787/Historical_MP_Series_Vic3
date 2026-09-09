@@ -1,0 +1,881 @@
+﻿# COPY-PASTED FOR NOW
+@panel_width_minus_10 = 530			# used to be 450
+@panel_width = 540  				# used to be 460
+@panel_width_half = 270				# used to be 230
+@panel_width_plus_10 = 550  		# used to be 470
+@panel_width_plus_14 = 554			# used to be 474
+@panel_width_plus_14_half = 277		# used to be 237
+@panel_width_plus_20 = 560			# used to be 480
+@panel_width_plus_30 = 570			# used to be 490
+@panel_width_plus_70 = 610			# used to be 530
+
+types market_panel
+{
+	type market_panel = default_block_window {
+		name = "market_panel"
+		state = {
+			name = _show
+			duration = 0
+			on_start = "[GetScriptedGui('trade_partners_scripted_gui').Execute(GuiScope.SetRoot(MarketPanel.GetMarket.MakeScope).End)]"
+		}
+		blockoverride "animation_state_block" {
+			state = {
+				name = _show
+				start_sound = {
+					soundeffect = "event:/SFX/UI/SideBar/markets"
+				}
+			}
+
+			state = {
+				name = _hide
+				start_sound = {
+					soundeffect = "event:/SFX/UI/SideBar/markets_stop"
+				}
+			}
+		}
+		
+		datacontext = "[MarketPanel.GetMarket]"
+		
+		blockoverride "window_header_name"
+		{
+			raw_text = "[LabelingHelper.CapitalizeOnlyFirst(Market.GetNameNoFormatting)]"
+
+			tooltipwidget = {
+				FancyTooltip_Market = {}
+			}
+		}
+
+		blockoverride "header_texts_before" {
+			flowcontainer = {
+				parentanchor = vcenter
+				margin_right = 15
+				market_flag = {}
+			}
+
+			blockoverride "header_texts_maximum_size" {
+				maximumsize = { 332 70 } #395 - 63 (width of the flag + margin)
+			}
+		}
+
+		blockoverride "map_modes_button" {
+			map_modes_single_button_minimized = {
+				datacontext = "[MarketPanel.GetMapModeList]"
+				using = map_modes_button_position
+			}
+		}
+		
+		blockoverride "fixed_top"
+		{
+			tab_buttons = {
+				blockoverride "first_button" {
+					text = "MARKET_PANEL_DETAILS_TAB_LABEL"
+				}
+				blockoverride "first_button_tooltip" {
+					tooltip = "MARKET_PANEL_DETAILS_TAB_LABEL" 
+				}
+				blockoverride "first_button_click" {
+					onclick = "[InformationPanel.SelectTab('default')]"
+				}
+				blockoverride "first_button_visibility" {
+					visible = "[InformationPanel.IsTabSelected('default')]"
+				}
+				blockoverride "first_button_visibility_checked" {
+					visible = "[Not( InformationPanel.IsTabSelected('default') )]"
+				}
+				blockoverride "first_button_selected" {
+					text = "MARKET_PANEL_DETAILS_TAB_LABEL_BOLD"
+				}
+				blockoverride "first_button_name" {
+					name = "tutorial_highlight_market_details"
+				}
+
+				blockoverride "second_button" {
+					text = "MARKET_PANEL_WORLD_MARKET_TRADE"
+				}
+				blockoverride "second_button_tooltip" {
+					tooltip = "MARKET_PANEL_WORLD_MARKET_TRADE" 
+				}
+				blockoverride "second_button_click" {
+					onclick = "[InformationPanel.SelectTab('world_market_trade')]"
+				}
+				blockoverride "second_button_visibility" {
+					visible = "[InformationPanel.IsTabSelected('world_market_trade')]"
+				}
+				blockoverride "second_button_visibility_checked" {
+					visible = "[Not( InformationPanel.IsTabSelected('world_market_trade') )]"
+				}
+				blockoverride "second_button_selected" {
+					text = "MARKET_PANEL_WORLD_MARKET_TRADE"
+				}
+
+				blockoverride "third_button" {
+					text = "MARKET_PANEL_FOOD_SECURITY_TAB_LABEL"
+				}
+				blockoverride "third_button_tooltip" {
+					tooltip = "MARKET_PANEL_FOOD_SECURITY_TAB_LABEL" 
+				}
+				blockoverride "third_button_click" {
+					onclick = "[InformationPanel.SelectTab('food_security')]"
+				}
+				blockoverride "third_button_visibility" {
+					visible = "[InformationPanel.IsTabSelected('food_security')]"
+				}
+				blockoverride "third_button_visibility_checked" {
+					visible = "[Not( InformationPanel.IsTabSelected('food_security') )]"
+				}
+				blockoverride "third_button_selected" {
+					text = "MARKET_PANEL_FOOD_SECURITY_TAB_LABEL"
+				}
+
+				blockoverride "fourth_button" {
+					text = "MARKET_PANEL_STATES_TAB_LABEL"
+				}
+				blockoverride "fourth_button_click" {
+					onclick = "[InformationPanel.SelectTab('states')]"
+				}
+				blockoverride "fourth_button_visibility" {
+					visible = "[InformationPanel.IsTabSelected('states')]"
+				}
+				blockoverride "fourth_button_visibility_checked" {
+					visible = "[Not( InformationPanel.IsTabSelected('states') )]"
+				}
+				blockoverride "fourth_button_selected" {
+					text = "MARKET_PANEL_STATES_TAB_LABEL_BOLD"
+				}
+			}
+			
+			flowcontainer = {
+				visible = "[Or(InformationPanel.IsTabSelected('default'), InformationPanel.IsTabSelected('world_market_trade'))]"
+				direction = vertical
+
+				flowcontainer = {
+					direction = vertical
+					parentanchor = hcenter
+					visible = "[InformationPanel.IsTabSelected('world_market_trade')]"
+
+					textbox = {
+						datacontext = "[GetMetaPlayer.GetPlayedOrObservedCountry]"
+						visible = "[GreaterThan_int32(Market.GetCountryTradeCapacity(Country.Self), '(int32)0')]"
+						text = "MARKET_COUNTRY_TRADE_CAPACITY"
+						tooltip = "[Market.GetCountryTradeCapacityDesc(Country.Self)]"
+						margin = { 10 10 }
+						margin_bottom = 5
+						autoresize = yes
+						align = nobaseline
+						parentanchor = hcenter
+						maximumsize = { @panel_width -1 }
+						multiline = yes
+					}
+
+					section_header_button = {					
+						blockoverride "left_text" {
+							text = "CHARTS"
+							fontsize_min = 12
+							elide = right
+						}
+
+						blockoverride "onclick" {
+							onclick = "[GetVariableSystem.Toggle( 'market_world_market_charts' )]"
+						}
+						
+						blockoverride "onclick_showmore" {
+							visible = "[GetVariableSystem.Exists( 'market_world_market_charts' )]" # Flipped to show by Default
+						}
+
+						blockoverride "onclick_showless" {
+							visible = "[Not(GetVariableSystem.Exists( 'market_world_market_charts' ))]" # Flipped to show by Default
+						}
+					}
+
+					flowcontainer = {
+						visible = "[Not(GetVariableSystem.Exists( 'market_world_market_charts' ))]" # Flipped to show by Default
+						
+						spacing = 10
+						margin_bottom = 10
+						margin_top = 10
+						parentanchor = hcenter
+
+						compact_chart = {
+							blockoverride "datamodel" {
+								datamodel = "[Market.AccessMarketGoodsSortedOnExports( MarketPanel.GetFilters )]"
+							}
+
+							blockoverride "show_more_button_visibility" {
+								visible = "[GreaterThan_int32(GetDataModelSize(Market.AccessMarketGoods( MarketPanel.GetFilters )), '(int32)3')]"
+							}
+
+							blockoverride "heading" {
+								text = "EXPORTS"
+							}
+
+							blockoverride "tooltip" {
+								tooltip = "WORLD_MARKET_GOODS_EXPORT_TOOLTIP"
+
+								tooltipwidget = {
+									RegularTooltip_MarketWorldMarketExportsTo = {}
+								}
+							}
+
+							blockoverride "pieslice" {
+								value = "[Market.GetExportedAmount(Goods.Self)]"
+							}
+
+							blockoverride "color" {
+								color = "[Goods.GetColor]"
+							}
+							
+							blockoverride "pie_item_goto_button" {
+								button = {
+									using = clean_button
+									size = { 100% 100% }
+									onclick = "[InformationPanelBar.OpenGoodsPanel(Market.Self, Goods.Self)]"
+								}
+							}
+
+							blockoverride "leftside_info" {
+								text = "[Goods.GetName]"
+							}
+
+							blockoverride "rightside1_info" {
+								text = "[Goods.GetTextIcon] [Market.GetExportedAmount(Goods.Self)|vD]"
+							}
+
+							blockoverride "rightside2_info" {
+								visible = no
+							}
+						}
+
+						compact_chart = {
+							blockoverride "datamodel" {
+								datamodel = "[Market.AccessMarketGoodsSortedOnImports( MarketPanel.GetFilters )]"
+							}
+
+							blockoverride "show_more_button_visibility" {
+								visible = "[GreaterThan_int32(GetDataModelSize(Market.AccessMarketGoods( MarketPanel.GetFilters )), '(int32)3')]"
+							}
+
+							blockoverride "heading" {
+								text = "IMPORTS"
+							}
+
+							blockoverride "tooltip" {
+								tooltip = "WORLD_MARKET_GOODS_IMPORT_TOOLTIP"
+
+								tooltipwidget = {
+									RegularTooltip_MarketWorldMarketImportsFrom = {}
+								}
+							}
+
+							blockoverride "pieslice" {
+								value = "[Market.GetImportedAmount(Goods.Self)]"
+							}
+
+							blockoverride "color" {
+								color = "[Goods.GetColor]"
+							}
+							
+							blockoverride "pie_item_goto_button" {
+								button = {
+									using = clean_button
+									size = { 100% 100% }
+									onclick = "[InformationPanelBar.OpenGoodsPanel(Market.Self, Goods.Self)]"
+								}
+							}
+
+							blockoverride "leftside_info" {
+								text = "[Goods.GetName]"
+							}
+
+							blockoverride "rightside1_info" {
+								text = "[Goods.GetTextIcon] [Market.GetImportedAmount(Goods.Self)|vD]"
+							}
+
+							blockoverride "rightside2_info" {
+								visible = no
+							}
+						}
+					}
+  					flowcontainer = {
+						visible = "[Not(GetVariableSystem.Exists( 'market_world_market_charts' ))]"
+						spacing = 10
+						margin_bottom = 10
+						parentanchor = hcenter
+						state = {
+							name = recalc_trade
+							next = recalc_trade
+							duration = 5
+							trigger_on_create = yes
+							on_finish = "[GetScriptedGui('trade_partners_scripted_gui').Execute(GuiScope.SetRoot(MarketPanel.GetMarket.MakeScope).End)]"
+						}
+						trade_partners_charts = {}
+					}
+				}
+
+				section_header_button = {
+					datacontext = "[GetMetaPlayer.GetPlayedOrObservedCountry]"
+					visible = "[InformationPanel.IsTabSelected('default')]"
+					
+					blockoverride "left_text" {
+						text = "MONTHLY_PRICE_REPORT"
+						fontsize_min = 12
+						elide = right
+					}
+
+					blockoverride "onclick" {
+						onclick = "[GetVariableSystem.Toggle( 'monthly_price_report_dropdown' )]"
+						enabled = "[GreaterThan_CFixedPoint(Market.GetMarketSharePercentageFor( Country.Self ), '(CFixedPoint)0')]"
+					}
+					
+					blockoverride "onclick_showmore" {
+						visible = "[Not(GetVariableSystem.Exists( 'monthly_price_report_dropdown' ))]"
+					}
+
+					blockoverride "onclick_showless" {
+						visible = "[GetVariableSystem.Exists( 'monthly_price_report_dropdown' )]"
+					}
+				}
+
+				flowcontainer = {
+					visible = "[And(GetVariableSystem.Exists( 'monthly_price_report_dropdown' ), InformationPanel.IsTabSelected('default'))]"
+					margin_top = 10
+					margin_bottom = 10
+					parentanchor = hcenter
+
+					flowcontainer = {
+						direction = vertical
+						datacontext = "[GetMetaPlayer.GetPlayedOrObservedCountry]"
+
+						minimumsize = { @panel_width -1 }
+						margin_top = 10
+						margin_bottom = 10
+
+						background = {
+							using = entry_bg
+						}
+
+						textbox = {
+							text = "MONTHLY_PRICE_REPORT"
+							autoresize = yes
+							default_format = "#title"
+							align = nobaseline
+							margin_left = 10
+							maximumsize = { @panel_width -1 }
+						}
+
+						textbox = {
+							text = "[Country.GetPriceReportDesc]"
+							margin = { 10 10 }
+							margin_bottom = 5
+							autoresize = yes
+							align = nobaseline
+							maximumsize = { @panel_width -1 }
+							multiline = yes
+						}
+					}
+				}
+
+				section_header_button = {					
+					blockoverride "left_text" {
+						text = "FILTERS"
+						fontsize_min = 12
+						elide = right
+					}
+
+					blockoverride "right_text" {
+						section_header_right_text = {
+							text = "CURRENT_GOODS_FILTERS"
+						}
+					}
+
+					blockoverride "onclick" {
+						onclick = "[GetVariableSystem.Toggle( 'market_filters' )]"
+					}
+					
+					blockoverride "onclick_showmore" {
+						visible = "[GetVariableSystem.Exists( 'market_filters' )]" # Flipped to show by Default
+					}
+
+					blockoverride "onclick_showless" {
+						visible = "[Not(GetVariableSystem.Exists( 'market_filters' ))]" # Flipped to show by Default
+					}
+				}
+
+				### SEARCH
+				search_bar = {
+					parentanchor = hcenter
+					datacontext = "[MarketPanel.GetSearchBar]"
+				}
+
+				flowcontainer = {
+					visible = "[Not(GetVariableSystem.Exists( 'market_filters' ))]" # Flipped to show by Default
+					minimumsize = { @panel_width_plus_14 -1 }
+					using = default_list_position
+					margin_bottom = 10
+					margin_top = 5
+					spacing = 10
+
+					background = {
+						using = dark_area
+					}
+
+					### LIST
+					flowcontainer = {
+						direction = vertical
+
+						textbox = {
+							text = "GOODS_CATEGORY"
+							multiline = yes
+							size = { 95 75 }
+							align = right|nobaseline
+							margin_right = 10
+							margin_left = 10
+							using = elide_fontsize_min
+						}
+
+						textbox = {
+							text = "SHOW_ZERO_TRADE"
+							visible = "[InformationPanel.IsTabSelected('world_market_trade')]"
+							size = { 95 60 }
+							align = right|nobaseline
+							margin_right = 10
+							margin_left = 10
+							using = elide_fontsize_min
+							multiline = yes
+						}
+
+						textbox = {
+							text = "concept_prestige_goods"
+							visible = "[And(InformationPanel.IsTabSelected('default'), HasDlcFeature('mp1_prestige_goods'))]"
+							size = { 95 60 }
+							align = right|nobaseline
+							margin_right = 10
+							margin_left = 10
+							using = elide_fontsize_min
+							multiline = yes
+						}
+					}
+
+					vertical_divider = {}
+
+					flowcontainer = {
+						margin_left = 10
+						direction = vertical
+
+						goods_filters = {}
+
+						flowcontainer = {
+							visible = "[InformationPanel.IsTabSelected('world_market_trade')]"
+							spacing = 5
+							margin_top = 13
+
+							filter_button = {
+								visible = "[GetVariableSystem.Exists( 'tariffs_show_all' )]"
+								tooltip = "TARIFFS_SHOW_ONLY_TRADED_TT"
+
+								blockoverride "text" {
+									text = "TARIFFS_SHOW_ONLY_TRADED"
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle( 'tariffs_show_all' )]"
+								}
+							}
+
+							filter_background_selected = {
+								visible = "[Not(GetVariableSystem.Exists( 'tariffs_show_all' ))]"
+								tooltip = "TARIFFS_SHOW_ONLY_TRADED_TT"
+
+								blockoverride "text" {
+									text = "TARIFFS_SHOW_ONLY_TRADED"
+								}
+							}
+
+							filter_button = {
+								visible = "[Not(GetVariableSystem.Exists( 'tariffs_show_all' ))]"
+								tooltip = "TARIFFS_SHOW_ALL_TT"
+							
+								blockoverride "text" {
+									text = "TARIFFS_SHOW_ALL"
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle( 'tariffs_show_all' )]"
+								}
+							}
+
+							filter_background_selected = {
+								visible = "[GetVariableSystem.Exists( 'tariffs_show_all' )]" 
+								tooltip = "TARIFFS_SHOW_ALL_TT"
+
+								blockoverride "text" {
+									text = "TARIFFS_SHOW_ALL"
+								}
+							}
+						}
+
+						flowcontainer = {
+							visible = "[And(InformationPanel.IsTabSelected('default'), HasDlcFeature('mp1_prestige_goods'))]"
+							spacing = 5
+							margin_top = 13
+
+
+							filter_button = {
+								visible = "[GetVariableSystem.Exists( 'hide_prestige_goods' )]"
+
+								blockoverride "text" {
+									text = "SHOW"
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle( 'hide_prestige_goods' )]"
+								}
+							}
+
+							filter_background_selected = {
+								visible = "[Not(GetVariableSystem.Exists( 'hide_prestige_goods' ))]"
+
+								blockoverride "text" {
+									text = "SHOW"
+								}
+							}
+
+							filter_button = {
+								visible = "[Not(GetVariableSystem.Exists( 'hide_prestige_goods' ))]"
+							
+								blockoverride "text" {
+									text = "HIDE"
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle( 'hide_prestige_goods' )]"
+								}
+							}
+
+							filter_background_selected = {
+								visible = "[GetVariableSystem.Exists( 'hide_prestige_goods' )]" 
+
+								blockoverride "text" {
+									text = "HIDE"
+								}
+							}
+
+						}
+					}
+				}
+			}
+
+			flowcontainer = {
+				visible = "[InformationPanel.IsTabSelected('default')]"
+
+				sort_button = {
+					onclick = "[Market.Sort('name')]"
+					onclick = "[Market.RestoreSort]"
+					tooltip = "SORT_BY_MARKET_GOODS"
+					size = { 50 20 }
+
+					button = {
+						texture = "gfx/interface/buttons/sort_button_icons/sort_icon_good.dds"
+						size = { 25 25 }
+						parentanchor = center
+						alwaystransparent = yes
+					}
+				}
+
+				sort_button = {
+					text = "[concept_market_price]"
+					onclick = "[Market.Sort('price')]"
+					onclick = "[Market.RestoreSort]"
+					
+					size = { 210 20 }
+					align = hcenter|nobaseline
+				}
+
+				sort_button = {
+					#text = "BALANCE"
+					onclick = "[Market.Sort('balance')]"
+					onclick = "[Market.RestoreSort]"
+					tooltip = "SORT_BY_BALANCE_TOOLTIP"
+					
+					align = hcenter|nobaseline
+					size = { 100 20 }
+					margin_right = 7
+					elide = right
+
+					button = {
+						texture = "gfx/interface/buttons/sort_button_icons/sort_balance.dds"
+						size = { 25 25 }
+						parentanchor = center
+						alwaystransparent = yes
+					}
+				}
+
+				sort_button = {
+					name = "tutorial_highlight_market_details_panel_sell_orders"
+					onclick = "[Market.Sort('sell')]"
+					onclick = "[Market.RestoreSort]"
+					tooltip = "SORT_BY_SELL_ORDERS"
+					
+					size = { 90 20 }
+					align = hcenter|nobaseline
+					elide = right
+
+					button = {
+						texture = "gfx/interface/buttons/sort_button_icons/sort_sell_orders.dds"
+						size = { 25 25 }
+						parentanchor = center
+						alwaystransparent = yes
+					}
+				}
+
+				sort_button = {
+					name = "tutorial_highlight_market_details_panel_buy_orders"
+					onclick = "[Market.Sort('buy')]"
+					onclick = "[Market.RestoreSort]"
+					tooltip = "SORT_BY_BUY_ORDERS"
+					
+					align = hcenter|nobaseline
+					size = { 90 20 }
+					margin_right = 7
+					elide = right
+
+					button = {
+						texture = "gfx/interface/buttons/sort_button_icons/sort_buy_orders.dds"
+						size = { 25 25 }
+						parentanchor = center
+						alwaystransparent = yes
+					}
+				}
+			}
+
+			flowcontainer = {
+				visible = "[InformationPanel.IsTabSelected('world_market_trade')]"
+
+				sort_button = {
+					onclick = "[Market.Sort('name')]"
+					onclick = "[Market.RestoreSort]"
+					tooltip = "SORT_BY_MARKET_GOODS"
+					size = { 60 20 }
+
+					button = {
+						texture = "gfx/interface/buttons/sort_button_icons/sort_icon_good.dds"
+						size = { 25 25 }
+						parentanchor = center
+						alwaystransparent = yes
+					}
+				}
+
+				sort_button = {
+					name = "tutorial_highlight_market_details_panel_buy_orders"
+					onclick = "[Market.Sort('imports')]"
+					onclick = "[Market.RestoreSort]"
+					tooltip = "SORT_BY_IMPORTS"
+
+					button = {
+						texture = "gfx/interface/buttons/sort_button_icons/sort_imports.dds"
+						size = { 25 25 }
+						parentanchor = center
+						alwaystransparent = yes
+					}
+					
+					align = hcenter|nobaseline
+					size = { 80 20 }
+					margin_right = 7
+					elide = right
+
+					button = {
+						texture = "gfx/interface/buttons/sort_button_icons/sort_imports.dds"
+						size = { 25 25 }
+						parentanchor = center
+						alwaystransparent = yes
+					}
+				}
+
+				sort_button = {
+					onclick = "[Market.Sort('exports')]"
+					onclick = "[Market.RestoreSort]"
+					tooltip = "SORT_BY_EXPORTS"
+					
+					size = { 80 20 }
+					align = hcenter|nobaseline
+					elide = right
+
+					button = {
+						texture = "gfx/interface/buttons/sort_button_icons/sort_exports.dds"
+						size = { 25 25 }
+						parentanchor = center
+						alwaystransparent = yes
+					}
+				}
+
+				sort_button = {
+					text = "concept_market_price"
+					onclick = "[Market.Sort('price')]"
+					onclick = "[Market.RestoreSort]"
+					
+					align = hcenter|nobaseline
+					size = { 120 20 }
+					margin_right = 7
+					elide = right
+				}
+
+				sort_button = {
+					text = "WORLD_MARKET_PRICE"
+					onclick = "[Market.Sort('world_market_price')]"
+					onclick = "[Market.RestoreSort]"
+					
+					align = hcenter|nobaseline
+					size = { 80 20 }
+					margin_right = 7
+					elide = right
+				}
+
+				sort_button = {
+					text = "TARIFFS"
+					onclick = "[Market.Sort('tariffs_balance')]"
+					onclick = "[Market.RestoreSort]"
+					tooltip = "SORT_BY_BALANCE_TOOLTIP"
+					
+					align = hcenter|nobaseline
+					size = { 120 20 }
+					margin_right = 7
+					elide = right
+				}
+			}
+		}
+
+		### BUTTONS TO OPEN LENSBAR WITH OPTIONS
+		blockoverride "fixed_bottom"{
+			divider_clean = {
+				size = { @panel_width_plus_14 4 }		
+			}
+			
+			flowcontainer = {
+				direction = vertical
+				spacing = 5
+
+				button = {
+					raw_text = "concept_world_market"
+					onclick = "[InformationPanelBar.OpenPanel('world_market')]"
+					
+					using = default_button_primary_big
+					align = center|nobaseline
+					size = { @panel_width 50 }
+					using = fontsize_large
+				}
+			}
+		}
+		
+		blockoverride "scrollarea_content"
+		{
+			container = {
+				parentanchor = hcenter
+				
+				market_panel_details_content = {
+					visible = "[InformationPanel.IsTabSelected('default')]"
+					using = default_fade_in_out
+
+					state = {
+						name = _show
+						on_start = "[MarketPanel.GetMapModeList.SelectDefault]"
+					}
+				}
+
+				flowcontainer = {
+					visible = "[InformationPanel.IsTabSelected('world_market_trade')]"
+					using = default_fade_in_out
+					direction = vertical
+
+					flowcontainer = {
+						datamodel = "[Market.AccessMarketGoods( MarketPanel.GetFilters )]"
+						direction = vertical
+						parentanchor = hcenter
+						spacing = 8
+						margin_top = 8
+						margin_bottom = 4
+						
+						item = {
+							market_world_market_goods_list_item = {}
+						}
+					}
+
+					default_header_2texts = {
+						visible = "[GetVariableSystem.Exists( 'tariffs_show_all' )]"
+						parentanchor = hcenter
+
+						blockoverride "text1" {
+							text = "GOODS_WITHOUT_WORLD_MARKET_TRADE"
+						}
+					}	
+
+					flowcontainer = {
+						visible = "[GetVariableSystem.Exists( 'tariffs_show_all' )]"
+						datamodel = "[Market.AccessMarketGoods( MarketPanel.GetFilters )]"
+						
+						direction = vertical
+						spacing = 8
+						margin_top = 8
+						margin_bottom = 4
+						parentanchor = hcenter
+						
+						item = {
+							market_world_market_goods_list_item = {
+								blockoverride "market_world_market_goods_list_item_visibility" {
+									visible = "[And(IsZero_CFixedPoint(Market.GetImportedAmount(Goods.Self)), IsZero_CFixedPoint(Market.GetExportedAmount(Goods.Self)))]"
+								}
+							}
+						}
+					}
+				}
+
+				market_panel_food_security_content = {
+					visible = "[InformationPanel.IsTabSelected('food_security')]"
+					using = default_fade_in_out
+
+					state = {
+						name = _show
+						on_start = "[MarketPanel.GetMapModeList.SelectByKey('mm_global_starvation')]"
+					}
+				}
+
+				market_panel_states_content = {
+					visible = "[InformationPanel.IsTabSelected('states')]"
+					using = default_fade_in_out
+
+					state = {
+						name = _show
+						on_start = "[MarketPanel.GetMapModeList.SelectDefault]"
+					}
+				}
+			}
+		}
+
+		blockoverride "pin_visibility" {
+			visible = yes
+		}
+
+		blockoverride "pin_properties" {
+			visible = "[MarketPanel.GetMarket.IsPinnedInOutliner]"
+			onclick = "[MarketPanel.GetMarket.TogglePinInOutliner]"
+			datacontext = "[MarketPanel.GetMarket]"
+			tooltip = "UNPIN_MARKET"
+		}
+
+		blockoverride "unpin_properties" {
+			visible = "[Not(MarketPanel.GetMarket.IsPinnedInOutliner)]"
+			onclick = "[MarketPanel.GetMarket.TogglePinInOutliner]"
+			datacontext = "[MarketPanel.GetMarket]"
+			tooltip = "PIN_MARKET"
+		}
+
+		blockoverride "goto_visibility" {
+			visible = yes
+		}
+
+		blockoverride "goto_properties" {
+			onclick = "[Market.AccessMarketCapital.ZoomToCapital]"
+			tooltip = "ZOOM_TO_MARKET_CAPITAL"
+			enabled = "[Not( Market.AccessMarketCapital.IsZoomingToCapital )]"
+		}
+	}
+}
+

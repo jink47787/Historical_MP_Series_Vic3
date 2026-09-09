@@ -601,14 +601,14 @@ types budget
 
 						tax_exp_frame = {
 							datacontext = "[GetPlayer]"
-							visible = "[GreaterThan_CFixedPoint(Country.GetShipConstructionGoodsExpenses, '(CFixedPoint)0')]"
+							visible = "[GreaterThan_CFixedPoint(Country.GetMilitaryShipConstructionGoodsExpenses, '(CFixedPoint)0')]"
 
 							blockoverride "text" {
 								text = "[concept_ship_construction]"
 							}
 
 							blockoverride "text_2" {
-								raw_text = "@money![Negate(Country.GetShipConstructionGoodsExpenses)|D+]"
+								raw_text = "@money![Negate(Country.GetMilitaryShipConstructionGoodsExpenses)|D+]"
 								tooltip = "SHIP_CONSTRUCTION_GOODS_EXPENSES_BREAKDOWN"
 							}
 
@@ -866,6 +866,21 @@ types budget
 						}
 
 						tax_exp_frame = {
+							visible = "[GreaterThan_CFixedPoint(GetPlayer.GetSupplyShipConstructionGoodsExpenses, '(CFixedPoint)0')]"
+
+							blockoverride "text" {
+								text = "BUDGET_SUPPLY_SHIP_CONSTRUCTION"
+							}
+
+							blockoverride "text_2" {
+								raw_text = "#N @money!-[GetPlayer.GetSupplyShipConstructionGoodsExpenses|D-]"
+								alpha = "[TransparentIfZero(GetPlayer.GetSupplyShipConstructionGoodsExpenses)]"
+							}
+
+							blockoverride "divider" {}
+						}
+
+						tax_exp_frame = {
 							visible = "[GreaterThan_CFixedPoint(GetPlayer.GetSupplyShipMaintenanceExpenses, '(CFixedPoint)0')]"
 
 							blockoverride "text" {
@@ -985,7 +1000,7 @@ types budget
 							}
 
 							blockoverride "text_2" {
-								raw_text = "#variable @money![GetPlayer.PredictTreatyExpenses|D-]#!"
+								raw_text = "#N @money!-[GetPlayer.PredictTreatyExpenses|D-]"
 								using = treaty_expense_tooltip_with_graph
 								alpha = "[TransparentIfZero(GetPlayer.PredictTreatyExpenses)]"
 							}
@@ -1289,16 +1304,47 @@ types budget
 					}
 				}
 
-				button = {
-					datacontext = "[GetPlayer]"
-					using = default_button_action
+				widget = {
+					name = "declare_bankruptcy_button"
 					size = { 250 75 }
-					text = "DECLARE_BANKRUPTCY"
-					onclick = "[PopupManager.AskConfirmation(Country.DeclareBankruptcy)]"
-					enabled = "[IsValid(Country.DeclareBankruptcy)]"
-					tooltip = "DECLARE_BANKRUPTCY_TOOLTIP"
-					using = tooltip_below
 					parentanchor = hcenter
+
+					button = {
+						visible = "[Or(IsValid(Country.DeclareBankruptcy), Not(GetPlayer.HasTimedModifier('declared_bankruptcy')))]"
+						datacontext = "[GetPlayer]"
+						using = default_button_action
+						size = { 100% 100% }
+						onclick = "[PopupManager.AskConfirmation(Country.DeclareBankruptcy)]"
+						enabled = "[IsValid(Country.DeclareBankruptcy)]"
+						tooltip = "DECLARE_BANKRUPTCY_TOOLTIP"
+						using = tooltip_below
+						text = "DECLARE_BANKRUPTCY"
+					}
+
+					widget = {
+						visible = "[And(GetPlayer.HasTimedModifier('declared_bankruptcy'), Not(IsValid(Country.DeclareBankruptcy)))]"
+						datacontext = "[GetPlayer]"
+						size = { 100% 100% }
+						alwaystransparent = no
+						tooltip = "DECLARE_BANKRUPTCY_TOOLTIP"
+						using = tooltip_below
+
+						background = {
+							using = paper_bg
+						}
+
+						icon = {
+							size = { 100% 100% }
+							using = highlighted_selected_square_selection
+						}
+
+						textbox = {
+							parentanchor = center
+							align = hcenter|nobaseline
+							using = fontsize_large
+							text = "DECLARED_BANKRUPTCY"
+						}
+					}
 				}
 
 				flowcontainer = {
@@ -1321,6 +1367,44 @@ types budget
 						tooltip = "[GetPlayer.GetCreditTooltip]"
 						align = nobaseline
 						parentanchor = vcenter
+					}
+				}
+
+				widget = {
+					name = "bankruptcy_progress_bar"
+					visible = "[GetPlayer.HasTimedModifier('declared_bankruptcy')]"
+					size = { @panel_width_minus_10 45 }
+					parentanchor = hcenter
+					tooltip = "[GetPlayer.GetTimedModifier('declared_bankruptcy').GetTooltip]"
+
+					bad_progressbar_horizontal = {
+						parentanchor = vcenter
+						name = "bankruptcy_progressbar"
+						size = { 100% 100% }
+
+						blockoverride "values" {
+							value = "[GetPlayer.GetTimedModifier('declared_bankruptcy').GetPercentageRemainingDays]"
+							min = 0
+							max = 1
+						}
+					}
+
+					textbox = {
+						autoresize = yes
+						align = nobaseline
+						parentanchor = vcenter
+						margin_left = 20
+						using = fontsize_large
+						text = "BANKRUPTCY_AFFECTED_BY"
+					}
+
+					textbox = {
+						using = fontsize_large
+						autoresize = yes
+						parentanchor = right|vcenter
+						align = right|nobaseline
+						margin_right = 20
+						text = "BANKRUPTCY_TIME_REMAINING"
 					}
 				}
 

@@ -128,7 +128,7 @@ types ongoing_outliner_items {
 
 	type diplomatic_play_item_impl = widget {
 		name = "diplo_play_item"
-		size = { 350 62 }
+		size = { 340 62 }
 		tooltip = "DIPLOMATIC_PLAY_OUTLINER_TOOLTIP"
 		
 		button = {
@@ -337,19 +337,66 @@ types ongoing_outliner_items {
 	type outliner_diplomatic_plays = flowcontainer {
 		direction = vertical
 		parentanchor = right
+
+		background = {
+			using = default_background
+			alpha = 1
+			margin_right = 15
+			
+			modify_texture = {
+				texture = "gfx/interface/masks/fade_horizontal_left.dds"
+				spriteType = Corneredstretched
+				spriteborder = { 0 0 }
+				blend_mode = alphamultiply
+				alpha = 0.5
+			}
+		}
 		
 		datamodel_reuse_widgets = yes
 		datacontext = "[Outliner.AccessCategory('diplo_plays')]"
 		datamodel = "[OutlinerEntry.GetSubEntries]"
 		visible = "[OutlinerEntry.IsShown]"
-		spacing = 3
-		margin_top = 3
 
-		item = {
-			diplomatic_play_item = {
-				datacontext = "[OutlinerEntry.AccessScope.AccessDiplomaticPlay]"
+		outliner_group = {
+			spacing = 5
+			margin_left = 5
+			blockoverride "visibility" {
+				visible = "[GreaterThan_int32(OutlinerEntry.GetNumSubEntries, '(int32)1')]"
+			}
+
+			blockoverride "title_text" {
+				text = "ONGOING_DIPLOMATIC_PLAYS_CONCEPT"
+				default_format = "#v"
+			}
+
+			blockoverride "item" {
+				diplomatic_play_item = {
+					datacontext = "[OutlinerEntry.AccessScope.AccessDiplomaticPlay]"
+				}
+			}
+
+			blockoverride "fixedgridbox_cell_size" {
+				addcolumn = 350
+				addrow = 65
+			}
+
+			blockoverride "pin_button_onhover_animation" {}
+		}
+
+		flowcontainer = {
+			visible = "[Not(GreaterThan_int32(OutlinerEntry.GetNumSubEntries, '(int32)1'))]"
+			parentanchor = hcenter
+			direction = vertical
+			margin_right = 10
+			datamodel = "[OutlinerEntry.GetSubEntries]"
+
+			item = {
+				diplomatic_play_item = {
+					datacontext = "[OutlinerEntry.AccessScope.AccessDiplomaticPlay]"
+				}
 			}
 		}
+
 	}
 
 	### LAW ENACTMENT
@@ -986,7 +1033,7 @@ types ongoing_outliner_items {
 
 	### DIPLO PACTS ITEM
 	type outliner_diplomatic_pact_item = button {
-		size = { 350 35 }
+		size = { 345 35 }
 		using = default_button
 		tooltip = "[DiplomaticPact.GetTooltip]"
 
@@ -1014,6 +1061,17 @@ types ongoing_outliner_items {
 				spacing = 5
 				
 				textbox = {
+					visible = "[Not(StringIsEmpty(DiplomaticPact.GetOutlinerEffectDesc))]"
+					layoutpolicy_horizontal = expanding
+					size = { 0 20 }
+					raw_text = "[DiplomaticPact.GetOutlinerEffectDesc]"
+					elide = right
+					fontsize_min = 10
+					align = nobaseline
+				}				
+				
+				textbox = {
+					visible = "[StringIsEmpty(DiplomaticPact.GetOutlinerEffectDesc)]"
 					layoutpolicy_horizontal = expanding
 					size = { 0 20 }
 					raw_text = "#BOLD [Country.GetRelationsWithDesc( GetPlayer )]#! ([Country.GetRelationsWith(GetPlayer)|+])"
@@ -1024,7 +1082,7 @@ types ongoing_outliner_items {
 				
 				default_progressbar_horizontal = {
 					# if no daily progress - show total relations level
-					visible = "[Not( DiplomaticPact.HasDailyRelationsProgress )]"
+					visible = "[And(Not( DiplomaticPact.HasDailyRelationsProgress ), StringIsEmpty(DiplomaticPact.GetOutlinerEffectDesc))]"
 					size = { 90 4 }
 					
 					blockoverride "values" {
@@ -1036,7 +1094,7 @@ types ongoing_outliner_items {
 				
 				changed_value_increased_progressbar_horizontal = {
 					# if improving relations - show relations progress between 0 --> 100
-					visible = "[GreaterThan_CFixedPoint( DiplomaticPact.GetDailyRelationsProgress, '(CFixedPoint)0' )]"
+					visible = "[And(StringIsEmpty(DiplomaticPact.GetOutlinerEffectDesc), GreaterThan_CFixedPoint( DiplomaticPact.GetDailyRelationsProgress, '(CFixedPoint)0' ))]"
 					size = { 90 4 }
 					
 					blockoverride "values" {
@@ -1048,7 +1106,7 @@ types ongoing_outliner_items {
 				
 				changed_value_decreased_progressbar_horizontal = {
 					# if damaging relations - show relations progress between -100 <-- 0
-					visible = "[LessThan_CFixedPoint( DiplomaticPact.GetDailyRelationsProgress, '(CFixedPoint)0' )]"
+					visible = "[And(StringIsEmpty(DiplomaticPact.GetOutlinerEffectDesc), LessThan_CFixedPoint( DiplomaticPact.GetDailyRelationsProgress, '(CFixedPoint)0' ))]"
 					size = { 90 4 }
 					
 					blockoverride "values" {
@@ -1083,6 +1141,7 @@ types ongoing_outliner_items {
 		}
 
 		outliner_group = {
+			margin_left = 5
 			blockoverride "visibility" {
 				visible = "[GreaterThan_int32(OutlinerEntry.GetNumSubEntries, '(int32)1')]"
 			}
@@ -1101,7 +1160,7 @@ types ongoing_outliner_items {
 
 			blockoverride "fixedgridbox_cell_size" {
 				addcolumn = 350
-				addrow = 35
+				addrow = 40
 			}
 
 			blockoverride "pin_button_onhover_animation" {}
@@ -1111,6 +1170,7 @@ types ongoing_outliner_items {
 			visible = "[Not(GreaterThan_int32(OutlinerEntry.GetNumSubEntries, '(int32)1'))]"
 			parentanchor = hcenter
 			direction = vertical
+			margin_right = 5
 			datamodel = "[OutlinerEntry.GetSubEntries]"
 
 			item = {
@@ -1647,6 +1707,7 @@ types ongoing_outliner_items {
 		flowcontainer = {
 			direction = vertical
 			parentanchor = hcenter
+			max_update_rate = 8
 			visible = "[Not(IsDataModelEmpty(AccessPlayer.AccessActivePinnedNonPlayerObjectiveJournalEntries))]"
 			datamodel = "[AccessPlayer.AccessActivePinnedNonPlayerObjectiveJournalEntries]"
 

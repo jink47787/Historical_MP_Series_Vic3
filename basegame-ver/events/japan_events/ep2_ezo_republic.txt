@@ -1,0 +1,469 @@
+﻿namespace = ezo_republic
+
+ezo_republic.1 = { # Ezo Republic - Imperial Government
+	type = country_event
+	placement = scope:ezo_state
+
+	duration = 1 # Happens during a war
+
+	title = ezo_republic.1.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_variable = ezo_no_compromise
+				}
+				desc = ezo_republic.1.d
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { has_variable = ezo_no_compromise }
+				}
+				desc = ezo_republic.1.d_1
+			}
+		}
+	}
+	flavor = {
+		first_valid = {
+			triggered_desc = {
+				trigger = {
+					has_variable = ezo_no_compromise
+				}
+				desc = ezo_republic.1.f
+			}
+			triggered_desc = {
+				trigger = {
+					NOT = { has_variable = ezo_no_compromise }
+				}
+				desc = ezo_republic.1.f_1
+			}
+		}
+	}
+
+    event_image = {
+		video = "ep2_japanese_artillery"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		# Triggered by event ep2_meiji.11
+	}
+
+	immediate = {
+		save_scope_as = imperial_government_scope
+		c:EZO ?= {
+			save_scope_as = ezo_scope
+			capital = {
+				save_scope_as = ezo_state
+			}
+			ruler ?= {
+				save_scope_as = tokugawa_exile_leader_scope
+			}
+		}
+	}
+
+	option = { # Rejection - historical
+		name = ezo_republic.1.a
+		trigger = {
+			NOT = { has_variable = ezo_no_compromise }
+		}
+		ai_chance = {
+			base = 7
+		}
+		default_option = yes
+		c:EZO ?= {
+			make_independent = yes
+			hidden_effect = {
+				random_scope_war = {
+					diplomatic_play = {
+						remove_initiator_backers = { c:EZO } # Ezo leaves this diplomatic play
+					}
+				}
+			}
+		}
+		create_diplomatic_play = { # Starts a separate war with Ezo
+			target_country = c:EZO
+			escalation = 60
+			type = dp_annex_war
+
+			add_war_goal = {
+				holder = c:EZO
+				type = revoke_all_claims
+				target_country = scope:imperial_government_scope
+				primary_demand = yes
+			}
+		}
+	}
+
+	option = { # Rejection
+		name = ezo_republic.1.a_1
+		trigger = {
+			has_variable = ezo_no_compromise
+		}
+		ai_chance = {
+			base = 7
+		}
+		default_option = yes
+		c:EZO ?= {
+			make_independent = yes
+			hidden_effect = {
+				random_scope_war = {
+					diplomatic_play = {
+						remove_initiator_backers = { c:EZO } # Ezo leaves this diplomatic play
+					}
+				}
+			}
+		}
+		create_diplomatic_play = { # Starts a separate war with Ezo
+			target_country = c:EZO
+			escalation = 60
+			type = dp_annex_war
+
+			add_war_goal = {
+				holder = c:EZO
+				type = revoke_all_claims
+				target_country = scope:imperial_government_scope
+				primary_demand = yes
+			}
+		}
+	}
+
+	option = { # Separate peace - ahistorical
+		name = ezo_republic.1.b
+		ai_chance = {
+			base = 3
+			modifier = {
+				trigger = {
+					c:EZO ?= {
+						is_player = yes
+					}
+				}
+				add = 10
+			}
+		}
+		trigger = {
+			NOT = {
+				has_variable = ezo_no_compromise
+			}
+		}
+		transfer_subject = c:EZO
+		custom_tooltip = settle_tokugawa_here_after_the_war_tt
+		c:EZO ?= {
+			hidden_effect = {
+				random_scope_war = {
+					diplomatic_play = {
+						remove_initiator_backers = { c:EZO } # Ezo leaves this diplomatic play
+					}
+				}
+			}
+			set_variable = ezo_waiting_for_shogun
+			post_notification = ezo_japan_accepts_terms
+		}
+	}
+
+	option = { # Separate peace - ahistorical - play as Ezo
+		name = ezo_republic.1.c
+		trigger = {
+			NOT = {
+				has_variable = ezo_no_compromise
+			}
+			is_player = yes
+		}
+		transfer_subject = c:EZO
+		custom_tooltip = settle_tokugawa_here_after_the_war_tt
+		c:EZO ?= {
+			hidden_effect = {
+				random_scope_war = {
+					diplomatic_play = {
+						remove_initiator_backers = { c:EZO } # Ezo leaves this diplomatic play
+					}
+				}
+			}
+			set_variable = ezo_waiting_for_shogun
+			post_notification = ezo_japan_accepts_terms
+		}
+		play_as = c:EZO
+	}
+}
+
+ezo_republic.2 = { # Ezo Republic - Shogunate
+	type = country_event
+	placement = scope:ezo_state
+
+	duration = 1 # Happens during a war
+
+	title = ezo_republic.2.t
+	desc = ezo_republic.2.d
+	flavor = ezo_republic.2.f
+
+    event_image = {
+		video = "ep2_japanese_artillery"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_military.dds"
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		# Triggered by on_action [on_monthly_pulse_country]
+		OR = { # Can either be a Sabaku revolt or a Bakufu Japan losing to a Restorationist revolt
+			AND = {
+				c:JAP ?= this
+				has_revolution = yes
+				has_journal_entry = je_meiji_restoration
+			}
+			AND = {
+				civil_war_origin_country ?= c:JAP
+				var:civil_war_type_var ?= movement_type:movement_tokugawa_loyalist
+				c:JAP ?= {
+					has_journal_entry = je_meiji_restoration
+				}
+			}
+		}
+		NOT = {
+			c:EZO ?= {
+				is_player = yes
+			}
+		}
+		country_has_tokugawa_in_power = yes
+		any_subject_or_below = {
+			c:EZO ?= this
+			enemy_occupation <= 0
+		}
+		any_country_in_japan = {
+			has_war_with = ROOT
+			OR = {
+				AND = {
+					c:JAP ?= this
+					has_revolution = yes
+				}
+				civil_war_origin_country ?= c:JAP
+			}
+			country_has_tokugawa_in_power = no
+		}
+		OR = {
+			capital ?= {
+				market_access <= 0 # Occupied
+			}
+			any_scope_war = {
+				has_war_support = {
+					target = PREV
+					value < 0
+				}
+			}
+		}
+	}
+
+	immediate = {
+		save_scope_as = tokugawa_scope
+		random_subject_or_below = {
+			limit = {
+				c:EZO ?= this
+				enemy_occupation <= 0
+			}
+			save_scope_as = ezo_scope
+			capital = {
+				save_scope_as = ezo_state
+			}
+		}
+		random_country_in_japan = {
+			limit = {
+				has_war_with = ROOT
+				OR = {
+					AND = {
+						c:JAP ?= this
+						has_revolution = yes
+					}
+					civil_war_origin_country ?= c:JAP
+				}
+				country_has_tokugawa_in_power = no
+			}
+			save_scope_as = imperial_government_scope
+		}
+		random_scope_character = { # Matsumae go automatically
+			limit = {
+				var:daimyo_var ?= s:STATE_HOKKAIDO
+			}
+			set_variable = tokugawa_exile
+		}
+		random_scope_character = { # At least one commander - preferably an admiral
+			limit = {
+				is_historical = yes
+				has_role_of_type = admiral
+				NOR = {
+					is_ruler_of_own_country = yes
+					is_heir_of_own_country = yes
+				}
+			}
+			alternative_limit = {
+				is_historical = yes
+				has_role_of_type = general
+				NOR = {
+					is_ruler_of_own_country = yes
+					is_heir_of_own_country = yes
+				}
+			}
+			alternative_limit = {
+				has_role_of_type = admiral
+				NOR = {
+					is_ruler_of_own_country = yes
+					is_heir_of_own_country = yes
+				}
+			}
+			alternative_limit = {
+				has_role_of_type = general
+				NOR = {
+					is_ruler_of_own_country = yes
+					is_heir_of_own_country = yes
+				}
+			}
+			set_variable = tokugawa_exile
+		}
+		ordered_scope_character = { # Some other characters do as well
+			limit = {
+				is_historical = yes
+				NOR = {
+					is_ruler_of_own_country = yes
+					is_heir_of_own_country = yes
+				}
+			}
+			alternative_limit = {
+				NOR = {
+					is_ruler_of_own_country = yes
+					is_heir_of_own_country = yes
+				}
+			}
+			order_by = prominence
+			min = 0
+			max = 1
+			set_variable = tokugawa_exile
+		}
+		random_scope_character = {
+			limit = {
+				is_historical = yes
+				has_role_of_type = admiral
+				has_variable = tokugawa_exile
+			}
+			alternative_limit = {
+				is_historical = yes
+				has_role_of_type = general
+				has_variable = tokugawa_exile
+			}
+			alternative_limit = {
+				is_historical = yes
+				has_variable = tokugawa_exile
+			}
+			alternative_limit = {
+				has_variable = tokugawa_exile
+			}
+			save_scope_as = tokugawa_exile_leader_scope
+		}
+	}
+
+	option = { # Flight to Hakodate - historical
+		name = ezo_republic.2.a
+		default_option = yes
+		ai_chance = {
+			base = 7 # This is generally more interesting than the other option
+		}
+		if = {
+			limit = {
+				any_scope_ship = {
+					count > 0
+				}
+			}
+			custom_tooltip = {
+				text = navy_defects_to_ezo_tt
+				every_scope_ship = {
+					set_ship_owner_multiple = c:EZO
+				}
+			}
+		}
+		country_ezo_setup = yes
+		if = {
+			limit = {
+				is_player = yes
+			}
+			play_as = c:EZO
+		}
+		custom_tooltip = chance_of_subjugation_tt
+		custom_tooltip = tokugawa_settle_here_tt
+		scope:imperial_government_scope ?= {
+			trigger_event = { id = ezo_republic.1 days = 7 popup = yes}
+		}
+	}
+
+	option = { # Yes, but no compromise
+		name = ezo_republic.2.b
+		ai_chance = {
+			base = 5
+		}
+		highlighted_option = yes
+		trigger = {
+			any_scope_state = {
+				state_region = s:STATE_HOKKAIDO
+				has_building = building_naval_fortification
+			}
+		}
+		if = {
+			limit = {
+				any_scope_ship = {
+					count > 0
+				}
+			}
+			custom_tooltip = {
+				text = navy_defects_to_ezo_tt
+				every_scope_ship = {
+					set_ship_owner_multiple = c:EZO
+				}
+			}
+		}
+		country_ezo_setup = yes
+		c:EZO ?= {
+			add_modifier = {
+				name = modifier_last_stand_goryokaku
+				years = 1
+				is_decaying = yes
+			}
+		}
+		if = {
+			limit = {
+				is_player = yes
+			}
+			play_as = c:EZO
+		}
+		scope:imperial_government_scope ?= {
+			set_variable = { name = ezo_no_compromise months = 4 }
+			trigger_event = { id = ezo_republic.1 days = 7 popup = yes}
+		}
+	}
+
+	option = { # No beta we die like the Shinsengumi
+		name = ezo_republic.2.c
+		ai_chance = {
+			base = 5
+			modifier = {
+				trigger = {
+					scope:imperial_government_scope ?= {
+						is_player = yes # The player should have a much greater chance of needing to deal with this
+					}
+				}
+				add = -5
+			}
+		}
+		custom_tooltip = no_retreat_to_ezo_tt
+		every_scope_character = {
+			limit = {
+				has_variable = tokugawa_exile
+			}
+			remove_variable = tokugawa_exile
+		}
+	}
+}

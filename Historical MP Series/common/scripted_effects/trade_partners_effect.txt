@@ -1,0 +1,72 @@
+﻿trade_partners_set_import_partners = {
+	save_temporary_scope_as = base_market
+
+	owner = {
+		save_temporary_scope_as = base_market_owner
+		clear_variable_list = trade_partners_all_markets_import
+	}
+	
+	ordered_market = {
+		limit = {
+			AND = {
+				NOT = { this = scope:base_market }
+				trade_partners_total_exports_to_target > 0 
+			}
+		}
+		order_by = trade_partners_total_exports_to_target
+
+		save_temporary_scope_as = iter_market 
+		scope:base_market_owner = {
+			add_to_variable_list = {
+				name = trade_partners_all_markets_import
+				target = scope:iter_market
+			}
+		}
+	}
+}
+
+trade_partners_set_export_partners = {
+	save_temporary_scope_as = base_market
+	
+	owner = {
+		save_temporary_scope_as = base_market_owner
+		clear_variable_list = trade_partners_all_markets_export
+	}
+	
+	ordered_market = {
+		limit = {
+			AND = { 
+				NOT = { this = scope:base_market }
+				trade_partners_total_imports_from_target > 0
+			}
+		}
+		order_by = trade_partners_total_imports_from_target
+
+		save_temporary_scope_as = iter_market 
+		scope:base_market_owner = {
+			add_to_variable_list = {
+				name = trade_partners_all_markets_export
+				target = scope:iter_market
+			}
+		}
+	}
+}
+
+trade_partners_market_update = {
+	trade_partners_set_export_partners = yes
+	trade_partners_set_import_partners = yes
+}
+
+trade_partners_market_update_observer = {
+	if = {
+		limit = {
+			NOT = { any_country = { is_player = yes } }
+		}
+		every_market = {
+			limit = {
+				market_trade = { value > 0 }
+			}
+			trade_partners_market_update = yes
+		}
+	}
+}
