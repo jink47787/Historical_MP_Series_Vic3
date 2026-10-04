@@ -524,3 +524,547 @@ INJECT:ideology_traditionalist = {
 		law_concentrated_industry = disapprove
 	}
 }
+
+REPLACE:ideology_pacifist = { # Average Progressiveness - 0 #HMPS: REPLACE to move the Colonial Exploitation stance to the Colonial Institutions law group
+	icon = "gfx/interface/icons/ideology_icons/ideology_leader/ideology_leader_pacifist.dds"
+
+	character_ideology = yes
+
+	lawgroup_army_model = {
+		law_national_militia = approve
+		law_professional_army = disapprove
+		law_peasant_levies = disapprove
+		law_mass_conscription = disapprove
+	}
+
+	lawgroup_navy_model = {
+		law_merchant_navy = approve
+		law_jeune_ecole = neutral
+		law_professional_navy = disapprove
+		law_diplomatic_navy = approve
+	}
+
+	lawgroup_colonization = {
+		law_no_colonial_affairs = approve
+		law_colonial_resettlement = strongly_disapprove
+		law_frontier_colonization = strongly_disapprove
+	}
+
+	lawgroup_colonial_institutions = { #HMPS
+		law_ad_hoc_administration = approve
+		law_indirect_rule = neutral
+		law_mission_schools = neutral
+		law_colonial_constabulary = strongly_disapprove
+		law_colonial_exploitation = strongly_disapprove
+	}
+
+	interest_group_leader_trigger = {
+		ideology_pacifist_valid_trigger = yes
+	}
+
+	non_interest_group_leader_trigger = { # No pacifist agitators
+		NOT = { has_role_of_type = agitator }
+	}
+
+	interest_group_leader_weight = {
+		value = {
+			add = 50
+			desc = "base_value"
+		}
+		# emerges to counter powerful armed forces
+		if = {
+			limit = {
+				owner = {
+					exists = ig:ig_armed_forces
+					ig:ig_armed_forces ?= {
+						is_powerful = yes
+					}
+				}
+			}
+			value = {
+				add = 50
+				desc = "POWERFUL_ARMED_FORCES"
+			}
+		}
+		# less likely if issues are not relevant
+		if = {
+			limit = {
+				owner = {
+					NOR = {
+						has_law_or_variant = law_type:law_colonial_resettlement
+						has_law_or_variant = law_type:law_colonial_exploitation
+						has_law_or_variant = law_type:law_peasant_levies
+						has_law_or_variant = law_type:law_mass_conscription
+					}
+				}
+			}
+			value = {
+				add = -25
+				desc = "FAVORED_LAWS"
+			}
+		}
+		# more likely if a war you started isn't going well
+		if = {
+			limit = {
+				owner = {
+					is_at_war = yes
+					any_scope_war = {
+						attacker_warleader ?= { this = ROOT.owner }
+						has_war_support = {
+							target = root.owner
+							value < 0
+						}
+					}
+				}
+			}
+			value = {
+				add = 100
+				desc = "LOSING_WAR"
+			}
+		}
+		# more likely with devastation in incorporated states
+		if = {
+			limit = {
+				owner = {
+					any_scope_state = {
+						is_incorporated = yes
+						devastation > 0.2
+					}
+				}
+			}
+			value = {
+				add = 50
+				desc = "DEVASTATED_STATES"
+			}
+		}
+		# liberal and/or radical leaders have a higher spawn chance if the Dreyfusards won.
+		if = {
+			limit = {
+				has_variable = dreyfusard_victory
+			}
+			add = {
+				value = 50
+				desc = "DREYFUSARD_VICTORY"
+			}
+		}
+		# liberal and/or radical leaders have a higher spawn chance if you win the Two Spains as the liberals.
+		if = {
+			limit = {
+				has_variable = spa_two_spains_liberal_victory
+			}
+			add = {
+				value = 50
+				desc = "SPA_LIBERAL_VICTORY"
+			}
+		}
+		# liberal and/or radical leaders have a higher spawn chance if you succeed in Portugal's Second Liberalism.
+		if = {
+			limit = {
+				has_variable = por_second_liberalism_victory
+			}
+			add = {
+				value = 50
+				desc = "POR_LIBERAL_VICTORY"
+			}
+		}
+		# liberal and/or radical leaders have a higher spawn chance if the Hungarian Revolution was successful.
+		if = {
+			limit = {
+				has_variable = hungarian_revolution_increased_liberalism
+			}
+			add = {
+				value = 50
+				desc = "HUNGARIAN_REVOLUTION"
+			}
+		}
+		if = {
+			limit = {
+				OR = {
+					has_variable = communist_ig_var
+					has_variable = chose_vanguardism
+					has_variable = chose_anarchism
+					has_variable = chose_communism
+					has_variable = chose_ethno_nationalism
+					has_variable = chose_conservatism
+					has_variable = chose_fascism
+				}
+			}
+			multiply = {
+				value = 0.1
+				desc = "CHOSE_A_DIFFERENT_PATH"
+			}
+		}
+	}
+
+	non_interest_group_leader_weight = {
+		value = 50
+		# emerges to counter powerful armed forces
+		if = {
+			limit = {
+				owner = {
+					exists = ig:ig_armed_forces
+					ig:ig_armed_forces ?= {
+						is_powerful = yes
+					}
+				}
+			}
+			add = 50
+		}
+		# less likely if issues are not relevant
+		if = {
+			limit = {
+				owner = {
+					NOR = {
+						has_law_or_variant = law_type:law_colonial_resettlement
+						has_law_or_variant = law_type:law_colonial_exploitation
+						has_law_or_variant = law_type:law_peasant_levies
+						has_law_or_variant = law_type:law_mass_conscription
+					}
+				}
+			}
+			add = -25
+		}
+		# more likely if a war you started isn't going well
+		if = {
+			limit = {
+				owner = {
+					is_at_war = yes
+					any_scope_war = {
+						attacker_warleader ?= { this = ROOT.owner }
+						has_war_support = {
+							target = root.owner
+							value < 0
+						}
+					}
+				}
+			}
+			add = 100
+		}
+		# more likely with devastation in incorporated states
+		if = {
+			limit = {
+				owner = {
+					any_scope_state = {
+						is_incorporated = yes
+						devastation > 0.2
+					}
+				}
+			}
+			add = 50
+		}
+		# liberal and/or radical leaders have a higher spawn chance if you win the Two Spains as the liberals and choose to have woke commanders.
+		if = {
+			limit = {
+				OR = {
+					has_role_of_type = general
+					has_role_of_type = admiral
+				}
+				has_variable = spa_liberal_military_var
+			}
+			add = 50
+		}
+		if = { # Fewer pacifist generals/admirals
+			limit = {
+				OR = {
+					has_role_of_type = general
+					has_role_of_type = admiral
+				}
+			}
+			multiply = 0.25
+		}
+		if = {
+			limit = {
+				interest_group ?= {
+					OR = {
+						has_variable = communist_ig_var
+						has_variable = chose_vanguardism
+						has_variable = chose_anarchism
+						has_variable = chose_communism
+						has_variable = chose_ethno_nationalism
+						has_variable = chose_conservatism
+						has_variable = chose_fascism
+					}
+				}
+			}
+			multiply = 0.1
+		}
+	}
+}
+
+REPLACE:ideology_jingoist_leader = { # Average Progressiveness - 12.5 #HMPS: REPLACE to move the Colonial Exploitation stance to the Colonial Institutions law group
+	icon = "gfx/interface/icons/ideology_icons/ideology_leader/ideology_leader_jingoist.dds"
+
+	character_ideology = yes
+
+	lawgroup_army_model = {
+		law_mass_conscription = strongly_approve
+		law_professional_army = approve
+		law_national_militia = neutral
+		law_peasant_levies = disapprove
+	}
+
+	lawgroup_navy_model = {
+		law_merchant_navy = strongly_disapprove
+		law_jeune_ecole = neutral
+		law_professional_navy = strongly_approve
+		law_diplomatic_navy = approve
+	}
+
+	lawgroup_colonization = {
+		law_no_colonial_affairs = neutral
+		law_colonial_resettlement = approve
+		law_frontier_colonization = approve
+	}
+
+	lawgroup_colonial_institutions = { #HMPS
+		law_ad_hoc_administration = neutral
+		law_indirect_rule = neutral
+		law_mission_schools = neutral
+		law_colonial_constabulary = approve
+		law_colonial_exploitation = strongly_approve
+	}
+
+	interest_group_leader_trigger = {
+		ideology_jingoist_leader_valid_trigger = yes
+	}
+
+	non_interest_group_leader_trigger = {
+		# Agitators should have an ideology at odds with current laws
+		NAND = {
+			has_role_of_type = agitator
+			owner = {
+				has_law_or_variant = law_type:law_mass_conscription
+				has_law_or_variant = law_type:law_colonial_exploitation
+			}
+		}
+		interest_group ?= {
+			ideology_jingoist_leader_valid_trigger = yes
+		}
+	}
+
+	interest_group_leader_weight = {
+		value = {
+			add = 50
+			desc = "base_value"
+		}
+		# less likely if issues are not relevant
+		if = {
+			limit = {
+				owner = {
+					has_law_or_variant = law_type:law_colonial_exploitation
+					has_law_or_variant = law_type:law_mass_conscription
+				}
+			}
+			add = {
+				value = -50
+				desc = "FAVORED_LAWS"
+			}
+		}
+		# more likely if there's something to colonize nearby
+		if = {
+			limit = {
+				any_decentralized_country = {
+					has_overlapping_interests = ROOT.owner
+				}
+			}
+			add = {
+				value = 50
+				desc = "NEARBY_DECENTRALIZED_COUNTRY"
+			}
+		}
+		# more likely if you border a rival
+		if = {
+			limit = {
+				owner = {
+					any_rival_country = {
+						any_neighbouring_state = {
+							owner = root.owner
+						}
+					}
+				}
+			}
+			add = {
+				value = 25
+				desc = "BORDERS_RIVAL"
+			}
+		}
+		# more likely if you're the defender in a war
+		if = {
+			limit = {
+				owner = {
+					is_at_war = yes
+					any_scope_war = {
+						defender_warleader ?= { this = ROOT.owner }
+					}
+				}
+			}
+			add = {
+				value = 25
+				desc = "DEFENDING_IN_WAR"
+			}
+		}
+		# less likely for conservative French IG's
+		if = {
+			limit = {
+				owner = {
+					exists = c:FRA
+					c:FRA ?= THIS
+					has_journal_entry = je_divided_monarchists
+				}
+				OR = {
+					is_interest_group_type = ig_landowners
+					is_interest_group_type = ig_petty_bourgeoisie
+					is_interest_group_type = ig_devout
+				}
+			}
+			add = {
+				value = -50
+				desc = "CONSERVATIVE_IG"
+			}
+		}
+		# conservative and/or reactionary leaders have a higher spawn chance if the Anti-Dreyfusards won.
+		if = {
+			limit = {
+				has_variable = anti_dreyfusard_victory
+			}
+			add = {
+				value = 50
+				desc = "ANTI_DREYFUSARD_VICTORY"
+			}
+		}
+		# conservative and/or reactionary leaders have a higher spawn chance if you win the Two Spains as the conservatives.
+		if = {
+			limit = {
+				has_variable = spa_two_spains_conservative_victory
+			}
+			add = {
+				value = 50
+				desc = "SPA_CONSERVATIVE_VICTORY"
+			}
+		}
+		# More likely under Alexei II
+		if = {
+			limit = {
+				owner = {
+					any_scope_character = {
+						has_template = RUS_alexei_ii
+						is_ruler_of_own_country = yes
+					}
+				}
+			}
+			add = {
+				value = 50
+				desc = "ALEXEI_II"
+			}
+		}
+		if = {
+			limit = {
+				OR = {
+					has_variable = communist_ig_var
+					has_variable = chose_vanguardism
+					has_variable = chose_anarchism
+					has_variable = chose_communism
+					has_variable = chose_ethno_nationalism
+					has_variable = chose_conservatism
+					has_variable = chose_fascism
+				}
+			}
+			multiply = {
+				value = 0.1
+				desc = "CHOSE_A_DIFFERENT_PATH"
+			}
+		}
+	}
+
+	non_interest_group_leader_weight = {
+		value = 50
+		# less likely if issues are not relevant
+		if = {
+			limit = {
+				owner = {
+					has_law_or_variant = law_type:law_colonial_exploitation
+					has_law_or_variant = law_type:law_mass_conscription
+				}
+			}
+			add = -50
+		}
+		# more likely if there's something to colonize nearby
+		if = {
+			limit = {
+				any_decentralized_country = {
+					has_overlapping_interests = ROOT.owner
+				}
+			}
+			add = 50
+		}
+		# more likely if you border a rival
+		if = {
+			limit = {
+				owner = {
+					any_rival_country = {
+						any_neighbouring_state = {
+							owner = root.owner
+						}
+					}
+				}
+			}
+			add = 25
+		}
+		# more likely if you're the defender in a war
+		if = {
+			limit = {
+				owner = {
+					is_at_war = yes
+					any_scope_war = {
+						defender_warleader ?= { this = ROOT.owner }
+					}
+				}
+			}
+			add = 25
+		}
+		# less likely for conservative French IG's
+		if = {
+			limit = {
+				owner = {
+					exists = c:FRA
+					c:FRA ?= THIS
+					has_journal_entry = je_divided_monarchists
+				}
+				OR = {
+					is_interest_group_type = ig_landowners
+					is_interest_group_type = ig_petty_bourgeoisie
+					is_interest_group_type = ig_devout
+				}
+			}
+			add = -50
+		}
+		# More likely under Alexei II
+		if = {
+			limit = {
+				owner = {
+					any_scope_character = {
+						has_template = RUS_alexei_ii
+						is_ruler_of_own_country = yes
+					}
+				}
+			}
+			add = 50
+		}
+		if = {
+			limit = {
+				interest_group ?= {
+					OR = {
+						has_variable = communist_ig_var
+						has_variable = chose_vanguardism
+						has_variable = chose_anarchism
+						has_variable = chose_communism
+						has_variable = chose_ethno_nationalism
+						has_variable = chose_conservatism
+						has_variable = chose_fascism
+					}
+				}
+			}
+			multiply = 0.1
+		}
+	}
+}
