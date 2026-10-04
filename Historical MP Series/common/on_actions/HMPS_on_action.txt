@@ -118,6 +118,7 @@ on_monthly_pulse_state = {
 	on_actions = {
 		HMPS_Slave_State_Migration
 		HMPS_colonial_institutions_state_effects
+		HMPS_railroad_bubble_state_cleanup
 	}
 }
 on_building_expanded = {
@@ -535,6 +536,24 @@ HMPS_Coastal_Capital = {
 				}
 			}
 			remove_modifier = near_coastal_capital
+		}
+	}
+}
+
+# The railroad bubble's state and railway modifiers are permanent and only removed from the bubble country's own states when the bubble pops (railroad_bubble.6),
+# so states that changed owner during the bubble kept them forever. The country-level railroad_bubble modifier lasts until the pop, so this clears states whose owner has no bubble running
+HMPS_railroad_bubble_state_cleanup = {
+	effect = {
+		if = {
+			limit = {
+				has_modifier = overvalued_railroads_state
+				owner ?= { NOT = { has_modifier = railroad_bubble } }
+			}
+			remove_modifier = overvalued_railroads_state
+			every_scope_building = {
+				limit = { has_modifier = overvalued_railroads_building }
+				remove_modifier = overvalued_railroads_building
+			}
 		}
 	}
 }
