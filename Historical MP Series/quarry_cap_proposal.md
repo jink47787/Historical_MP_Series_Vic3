@@ -4,13 +4,14 @@ Scored on geology, exposure and cover only. Ignores 1836 demand and the existing
 
 Scale: 0 none | 5 delta/alluvium | 10-15 plain, thin cover | 20-25 mixed | 30-35 significant ranges | 40-45 karst, massif, volcanic highland | 50-55 prime multi-stone district.
 
-Total: 16401 current -> 20825 proposed.
+Total: 16401 current -> 21300 proposed.
 
 
 ## 00_west_europe
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| SVEALAND | ? | 40 | Shield gneiss and granite, Stockholm |
 | GOTALAND | 42 | 40 | Shield gneiss, Bohuslän granite |
 | SCANIA | 0 | 25 | Mostly till plain; limestone and sandstone pockets |
 | NORRLAND | 0 | 40 | Vast shield granite and gneiss |
@@ -90,6 +91,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| LOMBARDY | ? | 35 | Botticino limestone, Candoglia marble; Po plain |
 | PIEDMONT | 38 | 45 | Alpine granite and gneiss, Langhe |
 | SARDINIA | 38 | 45 | Gallura granite, limestone, trachyte |
 | MALTA | 0 | 20 | Globigerina limestone, tiny |
@@ -158,6 +160,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| MAZOVIA | ? | 10 | Vistula till plain |
 | LOWER_SILESIA | 32 | 45 | Strzegom granite, Sudeten marble, sandstone |
 | UPPER_SILESIA | 32 | 30 | Muschelkalk dolomite, sandstone |
 | GREATER_POLAND | 0 | 10 | Till plain |
@@ -185,6 +188,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| LOWER_EGYPT | ? | 5 | Nile delta |
 | UPPER_EGYPT | 25 | 50 | Aswan granite, Nubian sandstone, limestone cliffs |
 | MIDDLE_EGYPT | 25 | 40 | Tura limestone, alabaster |
 | EGYPTIAN_DESERT | 20 | 40 | Porphyry, granite, quartzite |
@@ -221,6 +225,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| IVORY_COAST | ? | 25 | Shield, deep weathering |
 | WINDWARD_COAST | 30 | 20 | Shield, laterite cover |
 | SENEGAL | 18 | 10 | Thin-cover sedimentary basin |
 | SIERRA_LEONE | 30 | 30 | Granite |
@@ -285,6 +290,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| DISTRICT_OF_COLUMBIA | ? | 10 | Tiny; Piedmont edge |
 | LOUISIANA | 8 | 5 | Delta, alluvium |
 | NEW_YORK | 35 | 45 | Adirondacks, bluestone, limestone, Rosendale |
 | VIRGINIA | 40 | 40 | Piedmont granite, Valley limestone |
@@ -367,6 +373,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| SAN_SALVADOR | ? | 30 | Volcanics |
 | GUATEMALA | 40 | 40 | Volcanics, Petén and Verapaz limestone |
 | HONDURAS | 35 | 35 | Volcanics, limestone |
 | NICARAGUA | 35 | 35 | Volcanics, basement |
@@ -386,6 +393,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| ECUADOR | ? | 40 | Andean volcanics, limestone |
 | GUAYANA | 42 | 35 | Guiana Shield, rainforest cover |
 | ZULIA | 28 | 20 | Basin; Perijá ranges |
 | MIRANDA | 28 | 35 | Coastal Range gneiss, marble |
@@ -443,6 +451,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| NEJD | ? | 30 | Tuwaiq limestone escarpment; sand cover |
 | OMAN | 22 | 45 | Hajar ophiolite, limestone |
 | ABU_DHABI | 8 | 15 | Dunes, sabkha; Jebel Hafeet |
 | YEMEN | 25 | 40 | Volcanic and limestone highlands |
@@ -487,6 +496,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| DAGESTAN | ? | 45 | Caucasus limestone |
 | KUBAN | 15 | 20 | Plain; Adygea limestone |
 | ARMENIA | 55 | 50 | Volcanic tuff, basalt, marble |
 | AZERBAIJAN | 42 | 35 | Absheron limestone, Caucasus |
@@ -516,6 +526,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| BIHAR | ? | 20 | Gangetic plain; Kaimur sandstone |
 | WEST_BENGAL | 16 | 15 | Delta; Rajmahal and laterite hills |
 | EAST_BENGAL | 8 | 5 | Ganges delta |
 | ASSAM | 42 | 25 | Shillong limestone and granite; alluvium |
@@ -552,6 +563,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| DZUNGARIA | ? | 30 | Tian Shan and Altai margins; basin |
 | TIANSHAN | 40 | 45 | Tian Shan granite, marble |
 | SICHUAN | 40 | 45 | Red sandstone, Longmen limestone |
 | YUNNAN | 48 | 55 | Karst, Dali marble |
@@ -619,6 +631,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| MALAYA | ? | 35 | Granite, Kinta limestone karst |
 | NORTH_BORNEO | 35 | 30 | Karst, crystalline; rainforest |
 | WEST_BORNEO | 35 | 30 | Granite; peat coast |
 | EAST_BORNEO | 25 | 35 | Kutai karst |
@@ -651,6 +664,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| NEW_SOUTH_WALES | ? | 40 | Sydney sandstone, granite, Blue Mountains |
 | VICTORIA | 0 | 40 | Bluestone basalt, granite, sandstone |
 | TASMANIA | 0 | 40 | Dolerite, sandstone, limestone |
 | QUEENSLAND | 0 | 35 | Granite, sandstone, basalt |
@@ -664,6 +678,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| URAL | ? | 45 | Ural granite and marble |
 | TOMSK | 15 | 15 | West Siberian plain edge |
 | TUVA | 20 | 40 | Sayan granite |
 | TOBOLSK | 15 | 10 | West Siberian plain |
@@ -680,6 +695,7 @@ Total: 16401 current -> 20825 proposed.
 
 | State | Current | Proposed | Reason |
 |---|---|---|---|
+| TALINN | ? | 35 | Estonian limestone and dolomite |
 | TARTU | 0 | 25 | Estonian limestone and dolomite |
 | RIGA | 0 | 20 | Devonian dolomite and sandstone |
 | COURLAND | 0 | 15 | Till plain |
