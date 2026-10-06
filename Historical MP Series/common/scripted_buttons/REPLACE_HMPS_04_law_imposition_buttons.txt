@@ -1,0 +1,98 @@
+﻿# HMPS: Copy of the vanilla button from 04_law_imposition_buttons.txt. Only change: player subjects don't get Agreeable to Imposition (Control F "HMPS")
+REPLACE:button_implement_law_imposition = {
+	name = "button_implement_law_imposition"
+	desc = "button_implement_law_imposition_desc"
+
+	visible = {
+		scope:journal_entry = {
+			NOT = { has_variable = has_been_abandoned }
+		}
+		OR = {
+			has_journal_entry = je_law_imposition
+			has_journal_entry = je_british_dictate_law
+		}
+		NOT = {
+			has_law = scope:foreign_imposition_law.type
+		}
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = law_imposition_already_enacting_law
+			NOT = { currently_enacting_law ?= imposed_law }
+		}
+	}
+
+	effect = {
+		if = {
+			limit = {
+				NOT = { currently_enacting_law ?= imposed_law }
+				enacting_any_law = yes
+			}
+			cancel_enactment = yes
+		}
+		start_enactment = imposed_law.type
+		if = { #HMPS: player subjects don't get Agreeable to Imposition
+			limit = { is_player = no }
+			add_enactment_modifier = {
+				name = agreeable_to_imposition
+			}
+		}
+		hidden_effect = {
+			scope:journal_entry = {
+				if = {
+					limit = {
+						has_modifier = foreign_legislative_interference
+					}
+					remove_modifier = foreign_legislative_interference
+					add_modifier = foreign_legislative_interference_enactment
+				}
+			}
+		}
+	}
+
+	ai_chance = {
+		value = 0
+
+		if = {
+			limit = { "enactment_chance_for_law(imposed_law.type)" > 0.1 }
+			add = 10
+		}
+
+		if = {
+			limit = { "enactment_chance_for_law(imposed_law.type)" > 0.2 }
+			add = 20
+		}
+
+		if = {
+			limit = { "enactment_chance_for_law(imposed_law.type)" > 0.3 }
+			add = 30
+		}
+
+		if = {
+			limit = { "enactment_chance_for_law(imposed_law.type)" > 0.4 }
+			add = 40
+		}
+
+		if = {
+			limit = { "enactment_chance_for_law(imposed_law.type)" > 0.5 }
+			add = 50
+		}
+
+		if = {
+			limit = {
+				is_subject = yes
+				liberty_desire > 50
+			}
+			add = -25
+		}
+
+		if = {
+			limit = {
+				is_subject = yes
+				liberty_desire > 75
+			}
+			add = -25
+		}
+	}
+}
