@@ -1,0 +1,160 @@
+﻿namespace = HMPS_sakhalin
+
+# Japanese Encroachment in Sakhalin: fires once for Russia, when Japan starts colonizing Sakhalin or from 1855 (listed in on_monthly_pulse_country in HMPS_on_action.txt)
+HMPS_sakhalin.1 = {
+	type = country_event
+	placement = ROOT
+	title = HMPS_sakhalin.1.t
+	desc = HMPS_sakhalin.1.d
+	flavor = HMPS_sakhalin.1.f
+
+	duration = 3
+
+	event_image = {
+		video = "ep2_important_japanese_men_negotiating"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	trigger = {
+		c:RUS ?= ROOT
+		NOT = { has_global_variable = HMPS_sakhalin_encroachment_fired }
+		OR = {
+			game_date >= 1855.1.1
+			s:STATE_SAKHALIN = {
+				any_scope_state = {
+					is_under_colonization = yes
+					owner = {
+						c:JAP ?= this
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		set_global_variable = HMPS_sakhalin_encroachment_fired
+	}
+
+	option = { # Claim and colonize: there is no script effect to start a colony, so this only makes sure Russia can colonize from the map
+		name = HMPS_sakhalin.1.a
+		default_option = yes
+		s:STATE_SAKHALIN = {
+			add_claim = ROOT
+		}
+		if = {
+			limit = {
+				NOR = {
+					has_law_or_variant = law_type:law_frontier_colonization
+					has_law_or_variant = law_type:law_colonial_resettlement
+				}
+			}
+			activate_law = law_type:law_frontier_colonization
+		}
+		custom_tooltip = HMPS_sakhalin.1.a.tt
+		c:JAP ?= {
+			if = {
+				limit = { # only if Japan is not already colonizing Sakhalin
+					NOT = {
+						s:STATE_SAKHALIN = {
+							any_scope_state = {
+								is_under_colonization = yes
+								owner = c:JAP
+							}
+						}
+					}
+				}
+				trigger_event = {
+					id = HMPS_sakhalin.2
+					days = 7
+				}
+			}
+		}
+	}
+
+	option = { # Back down: improve relations with Japan
+		name = HMPS_sakhalin.1.b
+		if = {
+			limit = {
+				exists = c:JAP
+			}
+			change_relations = {
+				country = c:JAP
+				value = 30
+			}
+		}
+	}
+}
+
+# Russian Encroachment in Karafuto: fired for Japan 7 days after Russia picks "Sakhalin is Russian land" in HMPS_sakhalin.1
+HMPS_sakhalin.2 = {
+	type = country_event
+	placement = ROOT
+	title = HMPS_sakhalin.2.t
+	desc = HMPS_sakhalin.2.d
+	flavor = HMPS_sakhalin.2.f
+
+	duration = 3
+
+	event_image = {
+		video = "ep2_important_japanese_men_negotiating"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	trigger = { # re-checked when the 7-day delay ends: skip if Japan started colonizing Sakhalin in the meantime
+		NOT = {
+			s:STATE_SAKHALIN = {
+				any_scope_state = {
+					is_under_colonization = yes
+					owner = ROOT
+				}
+			}
+		}
+	}
+
+	option = { # Contest the island: end Sakoku (Sakoku disallows the colonization laws), then switch to State-Sponsored Colonization
+		name = HMPS_sakhalin.2.a
+		default_option = yes
+		if = {
+			limit = {
+				has_law = law_type:law_sakoku
+			}
+			activate_law = law_type:law_mercantilism
+		}
+		if = {
+			limit = {
+				NOT = { has_law_or_variant = law_type:law_colonial_resettlement }
+			}
+			activate_law = law_type:law_colonial_resettlement
+		}
+		add_modifier = {
+			name = HMPS_karafuto_settlement_costs
+			years = 2
+		}
+	}
+
+	option = { # Abandon Karafuto: drop the claim, anger the upper strata, improve relations with Russia
+		name = HMPS_sakhalin.2.b
+		s:STATE_SAKHALIN = {
+			remove_claim = ROOT
+		}
+		add_radicals = {
+			value = 0.05
+			strata = upper
+		}
+		if = {
+			limit = {
+				exists = c:RUS
+			}
+			change_relations = {
+				country = c:RUS
+				value = 30
+			}
+		}
+	}
+}
