@@ -94,26 +94,60 @@
 				value = 1
 			}
 			
-			if = {
+				
+			if = { ### If "Confessional State"
 				limit = {
 					#tax_level <= low
 					#has_law_or_variant = law_type:law_theocracy
-					OR = {
-						AND = {
-							has_law_or_variant = law_type:law_state_religion
-							has_law_or_variant = law_type:law_charitable_health_system 
+					has_law_or_variant = law_type:law_state_religion
+					has_law_or_variant = law_type:law_charitable_health_system 
+					has_law_or_variant = law_type:law_religious_schools 
+				}
+				
+				### SCHOOL AMENDMENT
+				if = {
+					limit = {
+						NOT = {
+							any_active_law = {
+								has_amendment = amendment_type:hmps_french_baby_bust_religious_schools_amendment
+							}
 						}
-						AND = {
-							has_law_or_variant = law_type:law_state_religion
-							has_law_or_variant = law_type:law_religious_schools 
-						}
-						AND = {
-							has_law_or_variant = law_type:law_charitable_health_system 
-							has_law_or_variant = law_type:law_religious_schools 
+					}
+					active_law:lawgroup_education_system ?= { # Wealth Voting - Reform Act
+						add_amendment = {
+							type = hmps_french_baby_bust_religious_schools_amendment
+							sponsor = PREV.ig:ig_devout
 						}
 					}
 				}
 				
+				### HEALTH AMENDMENT
+				if = {
+					limit = {
+						NOT = {
+							any_active_law = {
+								has_amendment = amendment_type:hmps_french_baby_bust_religious_health_amendment
+							}
+						}
+					}
+					active_law:lawgroup_health_system ?= { # Wealth Voting - Reform Act
+						add_amendment = {
+							type = hmps_french_baby_bust_religious_health_amendment
+							sponsor = PREV.ig:ig_devout
+						}
+					}
+				}
+				
+				### Tax Slider
+				if = {
+					limit = {
+						tax_level = very_low
+					}
+					change_variable = {
+						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+						add = 2
+					}
+				}
 				if = {
 					limit = {
 						tax_level = low
@@ -125,13 +159,49 @@
 				}
 				if = {
 					limit = {
-						tax_level = very_low
+						tax_level = high
+					}
+					change_variable = {
+						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+						add = -1
+					}
+				}
+				if = {
+					limit = {
+						tax_level = very_high
+					}
+					change_variable = {
+						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+						add = -2
+					}
+				}
+				
+				### General Tax law
+				if = {
+					limit = {
+						OR = {
+							has_law_or_variant = law_type:law_consumption_based_taxation
+							has_law_or_variant = law_type:law_proportional_taxation
+						}
+					}
+					change_variable = {
+						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+						add = 1
+					}
+				}
+				if = {
+					limit = {
+						OR = {
+							has_law_or_variant = law_type:law_graduated_taxation
+						}
 					}
 					change_variable = {
 						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
 						add = 2
 					}
 				}
+				
+				### Income Tax law
 				if = {
 					limit = {
 						has_law_or_variant = law_type:law_no_income_taxes
@@ -152,17 +222,29 @@
 				}
 				if = {
 					limit = {
-						NOT = {
-							any_scope_state = {
-								has_decree = decree_additional_taxes
-							}
-						}
+						has_law_or_variant = law_type:law_high_income_tax
 					}
 					change_variable = {
 						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
-						add = 0.1
+						add = -0.5
 					}
 				}
+				
+				### Tax Decree
+				every_state_in_france = {
+					limit = {
+						owner = ROOT
+						has_decree = decree_additional_taxes
+					}
+					prev = {
+						change_variable = {
+							name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+							add = -0.1
+						}
+					}
+				}
+				
+				### Consuption Taxes
 				if = {
 					limit = {
 						NOR = {
@@ -173,23 +255,14 @@
 					}
 					change_variable = {
 						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
-						add = 0.3
-					}
-				}
-				if = {
-					limit = {
-						NOR = {
-							has_law_or_variant = law_type:law_land_based_taxation
-							has_law_or_variant = law_type:law_per_capita_based_taxation
-						}
-					}
-					change_variable = {
-						name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
-						add = 1
+						add = 0.5
 					}
 				}
 			}
-			
+			change_variable = {
+				name = hmps_french_baby_bust_progress_cached_weekly_progress_rate
+				min = 1
+			}
 			change_global_variable = {
 				name = hmps_french_baby_bust_progress
 				add = {
@@ -214,6 +287,9 @@
 					}
 				}
 			}
+			
+			
+				
 		}
 	}
 
