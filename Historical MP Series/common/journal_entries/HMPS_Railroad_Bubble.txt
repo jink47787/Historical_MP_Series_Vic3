@@ -5,7 +5,6 @@
 	
 	is_shown_when_inactive = {
 		has_technology_researched = railways
-		#has_variable = rr_built
 		OR = {
 			NOT = { has_global_variable = num_rr_busts }
 			global_var:num_rr_busts < 4
@@ -30,17 +29,14 @@
 	
 
 	immediate = {
-		trigger_event = {
-			id = railroad_bubble.3
-			popup = yes
-		}
 		change_variable = {
 			name = rr_built
 			multiply = 0
 		}
+		# num_rr_busts counts bubbles started, not busts (name kept for save compatibility)
 		if = {
 			limit = {
-				exists = global_var:num_rr_busts 
+				exists = global_var:num_rr_busts
 			}
 			change_global_variable = {
 				name = num_rr_busts
@@ -58,10 +54,6 @@
 			value = 0
 		}
 		set_variable = {
-			name = railroad_bubble_progress
-			value = 0
-		}
-		set_variable = {
 			name = railroad_bubble_pops
 			value = 40
 		}
@@ -69,9 +61,23 @@
 			name = rr_time_limit
 			value = 0
 		}
+		# strength of the boom and bust; railroad_bubble.3 sets 0.75 when the exchanges are regulated
+		set_variable = {
+			name = rr_bubble_scale
+			value = 1
+		}
+		if = {
+			limit = { has_variable = rr_railway_king_fired }
+			remove_variable = rr_railway_king_fired
+		}
+		# last, so the start event's choice can't be overwritten by the setup above
+		trigger_event = {
+			id = railroad_bubble.3
+			popup = yes
+		}
 	}
 	
-	#Takes 18 months to finish normally, or if you have a very big bubble
+	# Ends when the bubble reaches size 40 or after 18 months
 	complete = {
 		OR = {
 			scope:journal_entry = {
@@ -95,7 +101,7 @@
 		}
 	}
 	
-	# Every month, a variable will make the bubble bigger. If you are subsidizing RRs, or if transportation is expensive, bubble will increase more
+	# Every month the bubble grows by 1, plus 1 per railway level expanded, plus 1 if any railway is subsidized, plus 1 if transportation sells over 10% above base price in the market. Capped at 40
 	on_monthly_pulse = {
 		effect = {
 			change_variable = {
@@ -109,10 +115,6 @@
 			change_variable = {
 				name = railroad_bubble_mult
 				add = root.var:rr_built
-			}
-			change_variable = {
-				name = railroad_bubble_progress
-				add = 1
 			}
 			if = {
 				limit = {
@@ -128,7 +130,42 @@
 					add = 1
 				}
 			}
-			#I'm trying to replace event 4 with this
+			if = {
+				limit = {
+					market_capital.market = {
+						mg:transportation = {
+							market_goods_pricier > 0.1
+						}
+					}
+				}
+				change_variable = {
+					name = railroad_bubble_mult
+					add = 1
+				}
+			}
+			# Cap at the goal size (railroad_bubble_pops = 40); the modifier maximums assume 40
+			clamp_variable = {
+				name = railroad_bubble_mult
+				max = 40
+				min = 0
+			}
+			# Effective modifier size = bubble size x strength (bubbles started before rr_bubble_scale existed count as full strength)
+			if = {
+				limit = { NOT = { has_variable = rr_bubble_scale } }
+				set_variable = {
+					name = rr_bubble_scale
+					value = 1
+				}
+			}
+			set_variable = {
+				name = rr_bubble_effect
+				value = var:railroad_bubble_mult
+			}
+			change_variable = {
+				name = rr_bubble_effect
+				multiply = var:rr_bubble_scale
+			}
+			# Re-apply the railway and state modifiers at the new size
 			every_scope_building = {
 				limit = {
 					has_modifier = overvalued_railroads_building
@@ -141,14 +178,32 @@
 				}
 				add_modifier = {
 					name = overvalued_railroads_building
-					multiplier = var:railroad_bubble_mult
+					multiplier = var:rr_bubble_effect
 				}
 			}
 			every_scope_state = {
 				remove_modifier = overvalued_railroads_state
 				add_modifier = {
 					name = overvalued_railroads_state
-					multiplier = var:railroad_bubble_mult
+					multiplier = var:rr_bubble_effect
+				}
+			}
+			# The Railway King appears once, halfway to the peak, and not in the month the entry ends; no private railway promoters under Command Economy or Cooperative Ownership
+			if = {
+				limit = {
+					var:railroad_bubble_mult >= 20
+					var:railroad_bubble_mult < 40
+					var:rr_time_limit < 18
+					NOT = { has_variable = rr_railway_king_fired }
+					NOR = {
+						has_law = law_type:law_command_economy
+						has_law = law_type:law_cooperative_ownership
+					}
+				}
+				set_variable = rr_railway_king_fired
+				trigger_event = {
+					id = railroad_bubble.7
+					popup = yes
 				}
 			}
 			change_variable = {
