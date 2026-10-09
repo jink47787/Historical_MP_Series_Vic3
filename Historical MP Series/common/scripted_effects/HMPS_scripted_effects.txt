@@ -323,8 +323,41 @@ hmps_congo_update_nominees = {
 	}
 }
 
-# Country scope: SLOT = option number (0 = leave unorganized), VOTES = global tally of that option
+# Country scope: SLOT = option number (0 = leave unorganized), VOTES = global tally of that option. A changed vote is taken off the old option first
 hmps_congo_cast_vote = {
+	if = {
+		limit = {
+			has_variable = congo_vote
+		}
+		if = {
+			limit = { var:congo_vote = 0 }
+			change_global_variable = { name = congo_votes_0 add = -1 }
+		}
+		else_if = {
+			limit = { var:congo_vote = 1 }
+			change_global_variable = { name = congo_votes_1 add = -1 }
+		}
+		else_if = {
+			limit = { var:congo_vote = 2 }
+			change_global_variable = { name = congo_votes_2 add = -1 }
+		}
+		else_if = {
+			limit = { var:congo_vote = 3 }
+			change_global_variable = { name = congo_votes_3 add = -1 }
+		}
+		else_if = {
+			limit = { var:congo_vote = 4 }
+			change_global_variable = { name = congo_votes_4 add = -1 }
+		}
+		else_if = {
+			limit = { var:congo_vote = 5 }
+			change_global_variable = { name = congo_votes_5 add = -1 }
+		}
+		else_if = {
+			limit = { var:congo_vote = 6 }
+			change_global_variable = { name = congo_votes_6 add = -1 }
+		}
+	}
 	set_variable = {
 		name = congo_vote
 		value = $SLOT$
@@ -353,6 +386,49 @@ hmps_congo_check_slot = {
 	}
 }
 
+# Country scope: an AI Great Power casts its vote. Belgium always votes for itself while it is a nominee (it can only hold slot 1);
+# everyone else picks with the weights of the old vote event. Called weekly by je_congo_conference and at the deadline
+hmps_congo_ai_vote = {
+	if = {
+		limit = {
+			c:BEL ?= THIS
+			has_variable = congo_nominee
+		}
+		hmps_congo_cast_vote = { SLOT = 1 VOTES = congo_votes_1 }
+	}
+	else = {
+		random_list = {
+			10 = {
+				hmps_congo_cast_vote = { SLOT = 0 VOTES = congo_votes_0 }
+			}
+			35 = {
+				trigger = { hmps_congo_nominee_active = { SLOT = 1 } }
+				hmps_congo_cast_vote = { SLOT = 1 VOTES = congo_votes_1 }
+			}
+			10 = {
+				trigger = { hmps_congo_nominee_active = { SLOT = 2 } }
+				hmps_congo_cast_vote = { SLOT = 2 VOTES = congo_votes_2 }
+			}
+			20 = {
+				trigger = { hmps_congo_nominee_active = { SLOT = 3 } }
+				hmps_congo_cast_vote = { SLOT = 3 VOTES = congo_votes_3 }
+			}
+			10 = {
+				trigger = { hmps_congo_nominee_active = { SLOT = 4 } }
+				hmps_congo_cast_vote = { SLOT = 4 VOTES = congo_votes_4 }
+			}
+			5 = {
+				trigger = { hmps_congo_nominee_active = { SLOT = 5 } }
+				hmps_congo_cast_vote = { SLOT = 5 VOTES = congo_votes_5 }
+			}
+			5 = {
+				trigger = { hmps_congo_nominee_active = { SLOT = 6 } }
+				hmps_congo_cast_vote = { SLOT = 6 VOTES = congo_votes_6 }
+			}
+		}
+	}
+}
+
 # Counts the votes and hands over the Congo. Runs once, from whichever country's JE ends first
 hmps_congo_resolve_conference = {
 	if = {
@@ -361,42 +437,14 @@ hmps_congo_resolve_conference = {
 		}
 		set_global_variable = congo_resolved
 
-		# AI Great Powers that have not voted vote now, with the weights of the old vote event
+		# AI Great Powers that have not voted by the deadline vote now
 		every_country = {
 			limit = {
 				has_variable = congo_voter
 				is_player = no
 				NOT = { has_variable = congo_vote }
 			}
-			random_list = {
-				10 = {
-					hmps_congo_cast_vote = { SLOT = 0 VOTES = congo_votes_0 }
-				}
-				35 = {
-					trigger = { hmps_congo_nominee_active = { SLOT = 1 } }
-					hmps_congo_cast_vote = { SLOT = 1 VOTES = congo_votes_1 }
-				}
-				10 = {
-					trigger = { hmps_congo_nominee_active = { SLOT = 2 } }
-					hmps_congo_cast_vote = { SLOT = 2 VOTES = congo_votes_2 }
-				}
-				20 = {
-					trigger = { hmps_congo_nominee_active = { SLOT = 3 } }
-					hmps_congo_cast_vote = { SLOT = 3 VOTES = congo_votes_3 }
-				}
-				10 = {
-					trigger = { hmps_congo_nominee_active = { SLOT = 4 } }
-					hmps_congo_cast_vote = { SLOT = 4 VOTES = congo_votes_4 }
-				}
-				5 = {
-					trigger = { hmps_congo_nominee_active = { SLOT = 5 } }
-					hmps_congo_cast_vote = { SLOT = 5 VOTES = congo_votes_5 }
-				}
-				5 = {
-					trigger = { hmps_congo_nominee_active = { SLOT = 6 } }
-					hmps_congo_cast_vote = { SLOT = 6 VOTES = congo_votes_6 }
-				}
-			}
+			hmps_congo_ai_vote = yes
 		}
 
 		# "Leave unorganized" starts in the lead; votes for nominees that no longer exist are ignored
@@ -447,6 +495,30 @@ hmps_congo_resolve_conference = {
 		}
 		else = {
 			set_global_variable = congo_no_winner
+		}
+
+		# Every remaining nominee gains 20 relations with each power whose final vote was for it, and learns who they were
+		every_country = {
+			limit = {
+				has_variable = congo_nominee
+			}
+			save_scope_as = congo_nominee_scope
+			every_country = {
+				limit = {
+					has_variable = congo_vote
+					var:congo_vote = scope:congo_nominee_scope.var:congo_nominee
+					NOT = { THIS = scope:congo_nominee_scope }
+				}
+				change_relations = {
+					country = scope:congo_nominee_scope
+					value = 20
+				}
+			}
+			trigger_event = {
+				id = congo_free_state.3
+				days = 1
+				popup = yes
+			}
 		}
 	}
 }

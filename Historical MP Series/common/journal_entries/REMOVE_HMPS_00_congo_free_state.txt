@@ -3,7 +3,7 @@
 }
 
 # HMPS: Congo Conference. Added by congo_free_state.1 to the Great Powers (voters), the nominees and the countries holding Congo states
-# Days 0-60: land decisions and withdrawals. Days 60-150: Great Powers vote. Day 150: votes counted, congo_free_state.2 announces the result
+# Days 0-60 (2 months): land decisions and withdrawals. Days 60-240 (6 months): Great Powers vote. Day 240: votes counted, congo_free_state.2 announces the result
 je_congo_conference = {
 	icon = "gfx/interface/icons/event_icons/event_map.dds"
 
@@ -58,10 +58,15 @@ je_congo_conference = {
 	}
 
 	on_complete = {
-		hmps_congo_resolve_conference = yes
-		trigger_event = {
-			id = congo_free_state.2
-			popup = yes
+		custom_tooltip = {
+			text = je_congo_conference_result_tt
+			hidden_effect = {
+				hmps_congo_resolve_conference = yes
+				trigger_event = {
+					id = congo_free_state.2
+					popup = yes
+				}
+			}
 		}
 	}
 
@@ -81,27 +86,37 @@ je_congo_conference = {
 	}
 
 	on_fail = {
-		# Every remaining nominee ceased to exist
-		if = {
-			limit = {
-				NOT = { has_global_variable = congo_conference_collapsed }
+		custom_tooltip = {
+			text = je_congo_conference_collapse_result_tt
+			hidden_effect = {
+				# Every remaining nominee ceased to exist
+				if = {
+					limit = {
+						NOT = { has_global_variable = congo_conference_collapsed }
+					}
+					set_global_variable = congo_no_nominees
+					set_global_variable = congo_conference_collapsed
+				}
+				trigger_event = {
+					id = congo_free_state.2
+					popup = yes
+				}
 			}
-			set_global_variable = congo_no_nominees
-			set_global_variable = congo_conference_collapsed
-		}
-		trigger_event = {
-			id = congo_free_state.2
-			popup = yes
 		}
 	}
 
-	timeout = 150
+	timeout = 240
 
 	on_timeout = {
-		hmps_congo_resolve_conference = yes
-		trigger_event = {
-			id = congo_free_state.2
-			popup = yes
+		custom_tooltip = {
+			text = je_congo_conference_result_tt
+			hidden_effect = {
+				hmps_congo_resolve_conference = yes
+				trigger_event = {
+					id = congo_free_state.2
+					popup = yes
+				}
+			}
 		}
 	}
 
@@ -118,6 +133,33 @@ je_congo_conference = {
 
 	on_weekly_pulse = {
 		effect = {
+			# Day counters for the status line, counted down once a week by whichever JE pulses first
+			if = {
+				limit = {
+					NOT = { has_global_variable = congo_week_tick }
+					has_global_variable = congo_days_left
+				}
+				set_global_variable = {
+					name = congo_week_tick
+					days = 6
+				}
+				if = {
+					limit = { global_var:congo_days_left >= 7 }
+					change_global_variable = { name = congo_days_left add = -7 }
+				}
+				else = {
+					set_global_variable = { name = congo_days_left value = 0 }
+				}
+				if = {
+					limit = { global_var:congo_days_to_vote >= 7 }
+					change_global_variable = { name = congo_days_to_vote add = -7 }
+				}
+				else = {
+					set_global_variable = { name = congo_days_to_vote value = 0 }
+				}
+				# Catches nominees that ceased to exist: names a sole nominee, or ends the conference if none remain
+				hmps_congo_update_nominees = yes
+			}
 			# Landholders that did not keep their Congo states have ceded them once voting opens
 			if = {
 				limit = {
@@ -130,6 +172,19 @@ je_congo_conference = {
 				}
 				set_variable = congo_ceded
 				change_infamy = -10
+			}
+			# AI Great Powers vote at a random point in the voting period (20% a week); the rest vote at the deadline
+			if = {
+				limit = {
+					has_variable = congo_voter
+					is_player = no
+					NOT = { has_variable = congo_vote }
+					NOT = { has_global_variable = congo_land_phase }
+				}
+				random = {
+					chance = 20
+					hmps_congo_ai_vote = yes
+				}
 			}
 		}
 	}

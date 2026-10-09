@@ -58,14 +58,16 @@ africa_colonial_events.1 = {
 			limit = {
 				has_variable = first_to_scramble
 			}
-			every_country = { 
-				limit = {
-					hmps_africa_scramble_offer_eligible = yes
-				}
-				trigger_event = {
-					id = africa_colonial_events.8
-					days = 0
-					popup = yes
+			hidden_effect = { #HMPS: explained by africa_colonial_events.1.a.t; raw script would show in the tooltip
+				every_country = {
+					limit = {
+						hmps_africa_scramble_offer_eligible = yes
+					}
+					trigger_event = {
+						id = africa_colonial_events.8
+						days = 0
+						popup = yes
+					}
 				}
 			}
 			custom_tooltip = {
@@ -105,6 +107,12 @@ africa_colonial_events.1 = {
 			add_modifier = {
 				name = scrambling_for_africa
 				days = 3650 #HMPS: 10 years
+			}
+		}
+		hidden_effect = { #HMPS: last, after the bonus checks above; so a restarted journal entry can't give the first-scrambler bonus twice
+			if = {
+				limit = { has_variable = first_to_scramble }
+				remove_variable = first_to_scramble
 			}
 		}
 	}
@@ -664,12 +672,27 @@ africa_colonial_events.8 = {
 		else = {
 			custom_tooltip = {
 				text = africa_colonial_events.8.a.tt_mp
+				set_variable = has_mp # gives the 1.5x scrambling_for_africa in africa_colonial_events.1
 			}
-			set_variable = has_mp # gives the 1.5x scrambling_for_africa in africa_colonial_events.1
 			add_technology_researched = malaria_prevention
 		}
 		ai_chance = {
 			base = 90
+			modifier = { # Great Powers with nothing in Africa: 50/50, as Germany joined but Russia and Austria never did
+				trigger = {
+					NOT = {
+						any_scope_state = {
+							is_in_geographic_region = geographic_region_africa
+						}
+					}
+					NOT = {
+						any_subject_or_below = {
+							is_in_geographic_region = geographic_region_africa
+						}
+					}
+				}
+				add = -40
+			}
 		}
 	}
 	option = {
@@ -680,6 +703,21 @@ africa_colonial_events.8 = {
 		}
 		ai_chance = {
 			base = 10
+			modifier = { # see option a
+				trigger = {
+					NOT = {
+						any_scope_state = {
+							is_in_geographic_region = geographic_region_africa
+						}
+					}
+					NOT = {
+						any_subject_or_below = {
+							is_in_geographic_region = geographic_region_africa
+						}
+					}
+				}
+				add = 40
+			}
 		}
 	}
 }
