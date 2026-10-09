@@ -265,3 +265,188 @@ hmps_player_subject_imposition_effect = {
 		}
 	}
 }
+
+# HMPS Congo Conference (je_congo_conference, events/HMPS_00_Congo_Voting.txt)
+
+# SLOT = nominee slot number, NOMINEE = global variable that points to the slot's country (used in loc)
+hmps_congo_pick_nominee = {
+	ordered_country = {
+		limit = {
+			hmps_congo_nominee_eligible = yes
+		}
+		order_by = country_rank
+		position = 0
+		check_range_bounds = no
+
+		set_variable = {
+			name = congo_nominee
+			value = $SLOT$
+		}
+		set_global_variable = {
+			name = $NOMINEE$
+			value = THIS
+		}
+	}
+}
+
+# Run after the nominee list changes: no nominees ends the conference, one nominee is named in the JE
+hmps_congo_update_nominees = {
+	if = {
+		limit = {
+			NOT = {
+				any_country = {
+					has_variable = congo_nominee
+				}
+			}
+		}
+		set_global_variable = congo_no_nominees
+		set_global_variable = congo_conference_collapsed
+	}
+	else_if = {
+		limit = {
+			NOT = {
+				any_country = {
+					count >= 2
+					has_variable = congo_nominee
+				}
+			}
+		}
+		random_country = {
+			limit = {
+				has_variable = congo_nominee
+			}
+			set_global_variable = {
+				name = congo_sole_nominee
+				value = THIS
+			}
+		}
+	}
+}
+
+# Country scope: SLOT = option number (0 = leave unorganized), VOTES = global tally of that option
+hmps_congo_cast_vote = {
+	set_variable = {
+		name = congo_vote
+		value = $SLOT$
+	}
+	change_global_variable = {
+		name = $VOTES$
+		add = 1
+	}
+}
+
+# SLOT, VOTES as above. Options are checked top to bottom and only a strictly higher tally takes the lead, so ties go to the higher option
+hmps_congo_check_slot = {
+	if = {
+		limit = {
+			hmps_congo_nominee_active = { SLOT = $SLOT$ }
+			global_var:$VOTES$ > global_var:congo_best_votes
+		}
+		set_global_variable = {
+			name = congo_best_slot
+			value = $SLOT$
+		}
+		set_global_variable = {
+			name = congo_best_votes
+			value = global_var:$VOTES$
+		}
+	}
+}
+
+# Counts the votes and hands over the Congo. Runs once, from whichever country's JE ends first
+hmps_congo_resolve_conference = {
+	if = {
+		limit = {
+			NOT = { has_global_variable = congo_resolved }
+		}
+		set_global_variable = congo_resolved
+
+		# AI Great Powers that have not voted vote now, with the weights of the old vote event
+		every_country = {
+			limit = {
+				has_variable = congo_voter
+				is_player = no
+				NOT = { has_variable = congo_vote }
+			}
+			random_list = {
+				10 = {
+					hmps_congo_cast_vote = { SLOT = 0 VOTES = congo_votes_0 }
+				}
+				35 = {
+					trigger = { hmps_congo_nominee_active = { SLOT = 1 } }
+					hmps_congo_cast_vote = { SLOT = 1 VOTES = congo_votes_1 }
+				}
+				10 = {
+					trigger = { hmps_congo_nominee_active = { SLOT = 2 } }
+					hmps_congo_cast_vote = { SLOT = 2 VOTES = congo_votes_2 }
+				}
+				20 = {
+					trigger = { hmps_congo_nominee_active = { SLOT = 3 } }
+					hmps_congo_cast_vote = { SLOT = 3 VOTES = congo_votes_3 }
+				}
+				10 = {
+					trigger = { hmps_congo_nominee_active = { SLOT = 4 } }
+					hmps_congo_cast_vote = { SLOT = 4 VOTES = congo_votes_4 }
+				}
+				5 = {
+					trigger = { hmps_congo_nominee_active = { SLOT = 5 } }
+					hmps_congo_cast_vote = { SLOT = 5 VOTES = congo_votes_5 }
+				}
+				5 = {
+					trigger = { hmps_congo_nominee_active = { SLOT = 6 } }
+					hmps_congo_cast_vote = { SLOT = 6 VOTES = congo_votes_6 }
+				}
+			}
+		}
+
+		# "Leave unorganized" starts in the lead; votes for nominees that no longer exist are ignored
+		set_global_variable = {
+			name = congo_best_slot
+			value = 0
+		}
+		set_global_variable = {
+			name = congo_best_votes
+			value = global_var:congo_votes_0
+		}
+		hmps_congo_check_slot = { SLOT = 1 VOTES = congo_votes_1 }
+		hmps_congo_check_slot = { SLOT = 2 VOTES = congo_votes_2 }
+		hmps_congo_check_slot = { SLOT = 3 VOTES = congo_votes_3 }
+		hmps_congo_check_slot = { SLOT = 4 VOTES = congo_votes_4 }
+		hmps_congo_check_slot = { SLOT = 5 VOTES = congo_votes_5 }
+		hmps_congo_check_slot = { SLOT = 6 VOTES = congo_votes_6 }
+
+		if = {
+			limit = {
+				global_var:congo_best_slot > 0
+			}
+			random_country = {
+				limit = {
+					has_variable = congo_nominee
+					var:congo_nominee = global_var:congo_best_slot
+				}
+				save_scope_as = congo_winner_scope
+				set_variable = congo_winner
+				set_global_variable = {
+					name = congo_winner
+					value = THIS
+				}
+				add_modifier = {
+					name = received_congo
+					months = 241
+				}
+			}
+			# Every Congo state except those kept with "Keep Our Congo States"
+			every_state = {
+				limit = {
+					hmps_is_congo_state = yes
+					NOT = { has_variable = greedy_power }
+					NOT = { owner = scope:congo_winner_scope }
+				}
+				set_state_owner = scope:congo_winner_scope
+			}
+		}
+		else = {
+			set_global_variable = congo_no_winner
+		}
+	}
+}

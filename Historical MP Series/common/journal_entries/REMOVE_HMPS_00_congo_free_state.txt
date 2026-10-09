@@ -1,3 +1,139 @@
 ﻿REPLACE:je_free_state = { #HMPS: Removed vanilla content
 	group = je_group_foreign_affairs
 }
+
+# HMPS: Congo Conference. Added by congo_free_state.1 to the Great Powers (voters), the nominees and the countries holding Congo states
+# Days 0-60: land decisions and withdrawals. Days 60-150: Great Powers vote. Day 150: votes counted, congo_free_state.2 announces the result
+je_congo_conference = {
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	group = je_group_historical_content
+
+	scripted_button = hmps_congo_hold_bas_congo_button
+	scripted_button = hmps_congo_keep_states_button
+	scripted_button = hmps_congo_withdraw_button
+	scripted_button = hmps_congo_vote_0_button
+	scripted_button = hmps_congo_vote_1_button
+	scripted_button = hmps_congo_vote_2_button
+	scripted_button = hmps_congo_vote_3_button
+	scripted_button = hmps_congo_vote_4_button
+	scripted_button = hmps_congo_vote_5_button
+	scripted_button = hmps_congo_vote_6_button
+
+	status_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = je_congo_conference_status_land_sole
+				trigger = {
+					has_global_variable = congo_land_phase
+					has_global_variable = congo_sole_nominee
+				}
+			}
+			triggered_desc = {
+				desc = je_congo_conference_status_land
+				trigger = {
+					has_global_variable = congo_land_phase
+				}
+			}
+			triggered_desc = {
+				desc = je_congo_conference_status_vote_sole
+				trigger = {
+					has_global_variable = congo_sole_nominee
+				}
+			}
+			triggered_desc = {
+				desc = je_congo_conference_status_vote
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = je_congo_conference_resolved_tt
+			has_global_variable = congo_resolved
+		}
+	}
+
+	on_complete = {
+		hmps_congo_resolve_conference = yes
+		trigger_event = {
+			id = congo_free_state.2
+			popup = yes
+		}
+	}
+
+	fail = {
+		custom_tooltip = {
+			text = je_congo_conference_collapsed_tt
+			NOT = { has_global_variable = congo_resolved }
+			OR = {
+				has_global_variable = congo_conference_collapsed
+				NOT = {
+					any_country = {
+						has_variable = congo_nominee
+					}
+				}
+			}
+		}
+	}
+
+	on_fail = {
+		# Every remaining nominee ceased to exist
+		if = {
+			limit = {
+				NOT = { has_global_variable = congo_conference_collapsed }
+			}
+			set_global_variable = congo_no_nominees
+			set_global_variable = congo_conference_collapsed
+		}
+		trigger_event = {
+			id = congo_free_state.2
+			popup = yes
+		}
+	}
+
+	timeout = 150
+
+	on_timeout = {
+		hmps_congo_resolve_conference = yes
+		trigger_event = {
+			id = congo_free_state.2
+			popup = yes
+		}
+	}
+
+	event_outcome_timeout_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = je_congo_conference_timeout_outcome
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+
+	on_weekly_pulse = {
+		effect = {
+			# Landholders that did not keep their Congo states have ceded them once voting opens
+			if = {
+				limit = {
+					has_variable = congo_landholder
+					NOR = {
+						has_variable = congo_kept_land
+						has_variable = congo_ceded
+						has_global_variable = congo_land_phase
+					}
+				}
+				set_variable = congo_ceded
+				change_infamy = -10
+			}
+		}
+	}
+
+	weight = 10000
+	should_be_pinned_by_default_uninvolved_or_context = yes
+}
