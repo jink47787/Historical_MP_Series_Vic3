@@ -17,9 +17,10 @@ railroad_bubble.1 = {
 			limit = {
 				NOT = { has_variable = rr_built }
 			}
+			# the first expansion counts too
 			set_variable = {
 				name = rr_built
-				value = 0
+				value = 1
 			}
 		}
 		else = {
@@ -76,14 +77,18 @@ railroad_bubble.3 = {
 		# triggered by je_starting
 	}
 
-	# Embrace the mania: full-strength boom and bust. Not under Command Economy or Cooperative Ownership
+	# Embrace the mania: full-strength boom and bust. Not under Command Economy or Cooperative Ownership,
+	# unless legitimacy is too low to regulate (so the event always has an option)
 	option = {
 		name = railroad_bubble.3.a
 		default_option = yes
 		trigger = {
-			NOR = {
-				has_law = law_type:law_command_economy
-				has_law = law_type:law_cooperative_ownership
+			OR = {
+				NOR = {
+					has_law = law_type:law_command_economy
+					has_law = law_type:law_cooperative_ownership
+				}
+				legitimacy < 75
 			}
 		}
 		#add modifier to country
@@ -111,42 +116,84 @@ railroad_bubble.3 = {
 		}
 	}
 
-	# Regulate the exchanges: boom and bust at 75%. Not under Laissez-Faire
+	# Regulate the exchanges: always costs bureaucracy (until the burst, removed in railroad_bubble.6) and Industrialists -5 for 2 years.
+	# 50%: it works - boom and bust at 75%. 50%: speculators evade it - full-strength boom and bust.
+	# The two regulator modifiers have the same effect; their names show the player which outcome happened. Not under Laissez-Faire; needs 75 legitimacy
 	option = {
 		name = railroad_bubble.3.b
 		trigger = {
 			NOT = { has_law = law_type:law_laissez_faire }
-		}
-		set_variable = {
-			name = rr_bubble_scale
-			value = 0.75
-		}
-		add_modifier = {
-			name = railroad_bubble
-			multiplier = 0.75
-		}
-		custom_tooltip = {
-			text = railroad_bubble.3.b.t
-			every_scope_building = {
-				limit = {
-					is_building_type = building_railway
-				}
-				add_modifier = {
-					name = overvalued_railroads_building
-					multiplier = 0.75
-				}
+			custom_tooltip = {
+				text = railroad_bubble_legitimacy_tt
+				legitimacy >= 75
 			}
-			every_scope_state = {
-				add_modifier = {
-					name = overvalued_railroads_state
-					multiplier = 0.75
-				}
-			}
+		}
+		show_as_unavailable = {
+			NOT = { has_law = law_type:law_laissez_faire }
 		}
 		ig:ig_industrialists = {
 			add_modifier = {
 				name = rr_bubble_regulated_exchanges
-				months = 24
+				days = 730
+			}
+		}
+		random_list = {
+			50 = {
+				custom_tooltip = railroad_bubble.3.b.success_tt
+				add_modifier = {
+					name = rr_exchange_regulators
+				}
+				set_variable = {
+					name = rr_bubble_scale
+					value = 0.75
+				}
+				add_modifier = {
+					name = railroad_bubble
+					multiplier = 0.75
+				}
+				custom_tooltip = {
+					text = railroad_bubble.3.b.t
+					every_scope_building = {
+						limit = {
+							is_building_type = building_railway
+						}
+						add_modifier = {
+							name = overvalued_railroads_building
+							multiplier = 0.75
+						}
+					}
+					every_scope_state = {
+						add_modifier = {
+							name = overvalued_railroads_state
+							multiplier = 0.75
+						}
+					}
+				}
+			}
+			50 = {
+				custom_tooltip = railroad_bubble.3.b.failure_tt
+				add_modifier = {
+					name = rr_exchange_regulators_evaded
+				}
+				add_modifier = {
+					name = railroad_bubble
+				}
+				custom_tooltip = {
+					text = railroad_bubble.3.a.t
+					every_scope_building = {
+						limit = {
+							is_building_type = building_railway
+						}
+						add_modifier = {
+							name = overvalued_railroads_building
+						}
+					}
+					every_scope_state = {
+						add_modifier = {
+							name = overvalued_railroads_state
+						}
+					}
+				}
 			}
 		}
 		every_primary_culture = {
@@ -198,7 +245,7 @@ railroad_bubble.5 = {
 		}
 	}
 
-	# Let it run: bursts in 150 days at full strength
+	# Let it run: bursts in 183 days (6 months) at full strength
 	option = {
 		name = railroad_bubble.5.a
 		default_option = yes
@@ -206,23 +253,33 @@ railroad_bubble.5 = {
 			text = railroad_bubble.5.a.t
 			trigger_event = {
 				id = railroad_bubble.6
-				days = 150
+				days = 183
 				popup = yes
 			}
 		}
 	}
 
-	# Cool the market: bursts now at half strength. Not under Laissez-Faire
+	# Cool the market: bursts now at 75% strength, but a flat 12-month credit squeeze (rr_tight_money) and Industrialists -5 approval for 2 years. Not under Laissez-Faire
 	option = {
 		name = railroad_bubble.5.b
 		trigger = {
 			NOT = { has_law = law_type:law_laissez_faire }
 		}
+		add_modifier = {
+			name = rr_tight_money
+			days = 365
+		}
+		ig:ig_industrialists = {
+			add_modifier = {
+				name = rr_market_cooled
+				days = 730
+			}
+		}
 		custom_tooltip = {
 			text = railroad_bubble.5.b.t
 			change_variable = {
 				name = rr_bust_size
-				multiply = 0.5
+				multiply = 0.75
 			}
 			trigger_event = {
 				id = railroad_bubble.6
@@ -231,15 +288,28 @@ railroad_bubble.5 = {
 		}
 	}
 
-	# Prop up the shares: costs 2% of GDP from the treasury, bursts in 330 days at 125% strength. Interventionism only
+	# Prop up the shares: weekly expense for the 365 days (12 months) until the burst, 5% of GDP in total (rr_shares_propped); bursts at 125% strength. Interventionism only, and needs room to borrow
 	option = {
 		name = railroad_bubble.5.c
 		trigger = {
 			has_law = law_type:law_interventionism
+			custom_tooltip = {
+				text = railroad_bubble_fiscal_room_tt
+				scaled_debt < 0.5
+			}
 		}
-		add_treasury = {
-			value = root.gdp
-			multiply = -0.02
+		show_as_unavailable = {
+			has_law = law_type:law_interventionism
+		}
+		add_modifier = {
+			name = rr_shares_propped
+			days = 365
+			# weekly amount: 5% of GDP spread over 52 weeks
+			multiplier = {
+				value = root.gdp
+				multiply = 0.05
+				divide = 52
+			}
 		}
 		custom_tooltip = {
 			text = railroad_bubble.5.c.t
@@ -249,20 +319,23 @@ railroad_bubble.5 = {
 			}
 			trigger_event = {
 				id = railroad_bubble.6
-				days = 330
+				days = 365
 				popup = yes
 			}
 		}
 	}
 
-	# Private bank bailout: as Prop up the shares, but paid from the investment pool. Laissez-Faire only
+	# Private bank bailout: paid from the investment pool (5% of GDP, needs that much in the pool), bursts in 365 days (12 months) at 125% strength. Laissez-Faire only
 	option = {
 		name = railroad_bubble.5.e
 		trigger = {
 			has_law = law_type:law_laissez_faire
-			investment_pool >= {
-				value = root.gdp
-				multiply = 0.02
+			custom_tooltip = {
+				text = railroad_bubble_investment_pool_tt
+				investment_pool >= {
+					value = root.gdp
+					multiply = 0.05
+				}
 			}
 		}
 		show_as_unavailable = {
@@ -270,7 +343,7 @@ railroad_bubble.5 = {
 		}
 		add_investment_pool = {
 			value = root.gdp
-			multiply = -0.02
+			multiply = -0.05
 		}
 		custom_tooltip = {
 			text = railroad_bubble.5.c.t
@@ -280,14 +353,15 @@ railroad_bubble.5 = {
 			}
 			trigger_event = {
 				id = railroad_bubble.6
-				days = 330
+				days = 365
 				popup = yes
 			}
 		}
 	}
 }
 
-# Railroad bubble burst event - the rr_bubble_pop penalties scale with rr_bust_size (set in railroad_bubble.5) and decay over 36 months
+# Railroad bubble burst event - the crash scales with rr_bust_size (set in railroad_bubble.5):
+# rr_bubble_crash at full strength for 12 months, then railroad_bubble.8 adds rr_bubble_pop fading over 24 months
 
 railroad_bubble.6 = {
 	type = country_event
@@ -322,27 +396,23 @@ railroad_bubble.6 = {
 		}
 	}
 
+	# We can rebuild: the bust as set at the peak
 	option = {
 		name = railroad_bubble.6.a
-		# at full strength the bust is 18-40: 18-25 small, 26-32 medium, 33-40 large
+		default_option = yes
+		# only remove what the country has: a missing timed modifier logs an error (repeatedly, while the event's tooltips are shown)
 		if = {
-			limit = { root.var:rr_bust_size < 26 }
-			add_radicals = {
-				value = small_radicals
-			}
+			limit = { has_modifier = railroad_bubble }
+			remove_modifier = railroad_bubble
 		}
-		else_if = {
-			limit = { root.var:rr_bust_size < 33 }
-			add_radicals = {
-				value = medium_radicals
-			}	
+		if = {
+			limit = { has_modifier = rr_exchange_regulators }
+			remove_modifier = rr_exchange_regulators
 		}
-		else = {
-			add_radicals = {
-				value = large_radicals
-			}	
+		if = {
+			limit = { has_modifier = rr_exchange_regulators_evaded }
+			remove_modifier = rr_exchange_regulators_evaded
 		}
-		remove_modifier = railroad_bubble
 		custom_tooltip = {
 			text = railroad_bubble.6.a.t
 			every_scope_building = {
@@ -350,16 +420,27 @@ railroad_bubble.6 = {
 					has_modifier = overvalued_railroads_building
 				}
 				remove_modifier = overvalued_railroads_building
-				}
+			}
 			every_scope_state = {
+				limit = { has_modifier = overvalued_railroads_state }
 				remove_modifier = overvalued_railroads_state
 			}
 		}
 		add_modifier = {
-			name = rr_bubble_pop
+			name = rr_bubble_crash
 			multiplier = root.var:rr_bust_size
-			months = 36
-			is_decaying = yes
+			days = 365
+		}
+		custom_tooltip = {
+			text = railroad_bubble.6.recovery_tt
+			set_variable = {
+				name = rr_crash_size
+				value = root.var:rr_bust_size
+			}
+			trigger_event = {
+				id = railroad_bubble.8
+				days = 365
+			}
 		}
 		every_primary_culture = {
 			remove_cultural_obsession = transportation
@@ -367,6 +448,103 @@ railroad_bubble.6 = {
 		hidden_effect = {
 			remove_variable = rr_bust_size
 		}
+	}
+
+	# Fund relief works: weekly expense of 0.1% of GDP for 12 months (rr_relief_works, about 5% of GDP in total) and a flat +15% dependents' wage for those months (rr_relief_works_wages). Needs room to borrow; not under Laissez-Faire.
+	# The crash itself is the same as railroad_bubble.6.a - keep the two in step
+	option = {
+		name = railroad_bubble.6.b
+		trigger = {
+			NOT = { has_law = law_type:law_laissez_faire }
+			custom_tooltip = {
+				text = railroad_bubble_fiscal_room_tt
+				scaled_debt < 0.5
+			}
+		}
+		show_as_unavailable = {
+			NOT = { has_law = law_type:law_laissez_faire }
+		}
+		add_modifier = {
+			name = rr_relief_works
+			days = 365
+			multiplier = money_amount_multiplier_large
+		}
+		# flat +15% dependents' wage for the 12 full-strength months (the smallest possible crash wage loss, see z_HMPS_flavor_modifiers.txt)
+		custom_tooltip = railroad_bubble.6.b.t
+		add_modifier = {
+			name = rr_relief_works_wages
+			days = 365
+		}
+		# only remove what the country has: a missing timed modifier logs an error (repeatedly, while the event's tooltips are shown)
+		if = {
+			limit = { has_modifier = railroad_bubble }
+			remove_modifier = railroad_bubble
+		}
+		if = {
+			limit = { has_modifier = rr_exchange_regulators }
+			remove_modifier = rr_exchange_regulators
+		}
+		if = {
+			limit = { has_modifier = rr_exchange_regulators_evaded }
+			remove_modifier = rr_exchange_regulators_evaded
+		}
+		custom_tooltip = {
+			text = railroad_bubble.6.a.t
+			every_scope_building = {
+				limit = {
+					has_modifier = overvalued_railroads_building
+				}
+				remove_modifier = overvalued_railroads_building
+			}
+			every_scope_state = {
+				limit = { has_modifier = overvalued_railroads_state }
+				remove_modifier = overvalued_railroads_state
+			}
+		}
+		add_modifier = {
+			name = rr_bubble_crash
+			multiplier = root.var:rr_bust_size
+			days = 365
+		}
+		custom_tooltip = {
+			text = railroad_bubble.6.recovery_tt
+			set_variable = {
+				name = rr_crash_size
+				value = root.var:rr_bust_size
+			}
+			trigger_event = {
+				id = railroad_bubble.8
+				days = 365
+			}
+		}
+		every_primary_culture = {
+			remove_cultural_obsession = transportation
+		}
+		hidden_effect = {
+			remove_variable = rr_bust_size
+		}
+	}
+}
+
+# Crash phase 2 - fired by railroad_bubble.6 365 days after the burst: the same penalties, fading over 24 months
+
+railroad_bubble.8 = {
+	type = country_event
+	placement = ROOT
+	hidden = yes
+
+	trigger = {
+		has_variable = rr_crash_size
+	}
+
+	immediate = {
+		add_modifier = {
+			name = rr_bubble_pop
+			multiplier = var:rr_crash_size
+			days = 730
+			is_decaying = yes
+		}
+		remove_variable = rr_crash_size
 	}
 }
 
@@ -413,7 +591,7 @@ railroad_bubble.7 = {
 		ig:ig_industrialists = {
 			add_modifier = {
 				name = rr_railway_king_charters
-				months = 24
+				days = 730
 			}
 		}
 	}
@@ -439,7 +617,7 @@ railroad_bubble.7 = {
 		ig:ig_industrialists = {
 			add_modifier = {
 				name = rr_railway_king_investigated
-				months = 24
+				days = 730
 			}
 		}
 	}

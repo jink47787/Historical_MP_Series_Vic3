@@ -13,6 +13,7 @@
 
 	possible = { #just for Tooltip
 		country_rank >= rank_value:major_power
+		NOT = { has_law = law_type:law_command_economy }
 		custom_tooltip = { 
 			text = je_railroad_bubble_activation_5_rr_tt
 			has_variable = rr_built
@@ -34,9 +35,10 @@
 	
 
 	immediate = {
-		change_variable = {
+		# set, not reset: rr_built only exists after the country's first railway expansion, and a console-started entry may not have one
+		set_variable = {
 			name = rr_built
-			multiply = 0
+			value = 0
 		}
 		# num_rr_busts counts bubbles started, not busts (name kept for save compatibility)
 		if = {
@@ -82,20 +84,14 @@
 		}
 	}
 	
-	# Ends when the bubble reaches size 40 or after 18 months
+	# Peaks when the bubble reaches size 40 (complete), or after 18 months (timeout, 548 days; the journal panel shows the countdown).
+	# Both lead to the peak, railroad_bubble.5. rr_time_limit still counts the months for the Railway King
 	complete = {
-		OR = {
-			scope:journal_entry = {
-				is_goal_complete = yes
-			}
-			custom_tooltip = {
-				text = je_railroad_bubble.c.t
-				var:rr_time_limit = 18
-			}
+		scope:journal_entry = {
+			is_goal_complete = yes
 		}
 	}
-	
-	# happens when variable gets too high or enough time passes
+
 	on_complete = {
 		trigger_event = {
 			id = railroad_bubble.5
@@ -105,8 +101,20 @@
 			text = je_railroad_bubble.c.tt
 		}
 	}
+
+	timeout = 548
+
+	on_timeout = {
+		trigger_event = {
+			id = railroad_bubble.5
+			popup = yes
+		}
+		custom_tooltip = {
+			text = je_railroad_bubble.c.tt
+		}
+	}
 	
-	# Every month the bubble grows by 1, plus 1 per railway level expanded, plus 1 if any railway is subsidized, plus 1 if transportation sells over 10% above base price in the market. Capped at 40
+	# Every month the bubble grows by 1, plus 1 per railway level expanded, plus 1 if transportation costs over 10% above base price in at least half of the incorporated states with railways. Capped at 40
 	on_monthly_pulse = {
 		effect = {
 			change_variable = {
@@ -121,27 +129,64 @@
 				name = railroad_bubble_mult
 				add = root.var:rr_built
 			}
-			if = {
+			# Transportation is a local good (priced per state): +1 if it costs over 10% above base price in at least half
+			# of the country's incorporated states that have at least one railway level
+			set_variable = {
+				name = rr_rail_states
+				value = 0
+			}
+			set_variable = {
+				name = rr_rail_states_expensive
+				value = 0
+			}
+			every_scope_state = {
 				limit = {
-					any_scope_state = {
-						any_scope_building = {
-							is_building_type = building_railway
-							is_subsidized = yes
+					is_incorporated = yes
+					any_scope_building = {
+						is_building_type = building_railway
+						level > 0
+					}
+				}
+				root = {
+					change_variable = {
+						name = rr_rail_states
+						add = 1
+					}
+				}
+				if = {
+					limit = {
+						sg:transportation = {
+							state_goods_pricier > 0.1
+						}
+					}
+					root = {
+						change_variable = {
+							name = rr_rail_states_expensive
+							add = 1
 						}
 					}
 				}
+			}
+			# Share of those states with expensive transportation (0-1), shown as a percentage in je_railroad_bubble_reason
+			set_variable = {
+				name = rr_rail_states_expensive_share
+				value = 0
+			}
+			if = {
+				limit = { var:rr_rail_states > 0 }
+				set_variable = {
+					name = rr_rail_states_expensive_share
+					value = var:rr_rail_states_expensive
+				}
 				change_variable = {
-					name = railroad_bubble_mult
-					add = 1
+					name = rr_rail_states_expensive_share
+					divide = var:rr_rail_states
 				}
 			}
 			if = {
 				limit = {
-					market_capital.market = {
-						mg:transportation = {
-							market_goods_pricier > 0.1
-						}
-					}
+					var:rr_rail_states > 0
+					var:rr_rail_states_expensive_share >= 0.5
 				}
 				change_variable = {
 					name = railroad_bubble_mult
@@ -170,7 +215,7 @@
 				name = rr_bubble_effect
 				multiply = var:rr_bubble_scale
 			}
-			# Re-apply the railway and state modifiers at the new size
+			# Re-apply the railway and state modifiers at the new size. root.var: because var: inside a building/state loop reads that building/state, not the country
 			every_scope_building = {
 				limit = {
 					has_modifier = overvalued_railroads_building
@@ -183,14 +228,18 @@
 				}
 				add_modifier = {
 					name = overvalued_railroads_building
-					multiplier = var:rr_bubble_effect
+					multiplier = root.var:rr_bubble_effect
 				}
 			}
 			every_scope_state = {
-				remove_modifier = overvalued_railroads_state
+				# states gained during the bubble don't have it yet
+				if = {
+					limit = { has_modifier = overvalued_railroads_state }
+					remove_modifier = overvalued_railroads_state
+				}
 				add_modifier = {
 					name = overvalued_railroads_state
-					multiplier = var:rr_bubble_effect
+					multiplier = root.var:rr_bubble_effect
 				}
 			}
 			# The Railway King appears once, halfway to the peak, and not in the month the entry ends; no private railway promoters under Command Economy or Cooperative Ownership
