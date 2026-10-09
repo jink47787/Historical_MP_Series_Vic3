@@ -1,0 +1,115 @@
+﻿# HMPS Balance of Trade. Every country, monthly.
+# Net trade = yearly exports - yearly imports (world market values, weekly x 52), as a share of yearly GDP.
+# Within +-1% of GDP: no effect. Beyond: the leading side loses 5% advantage per 1% of GDP (cap -50%) and the other side
+# gains 2.5% per 1% of GDP (cap +25%); both caps are reached at 10% of GDP.
+# A surplus lowers export and raises import advantage; a deficit lowers import and raises export advantage.
+# The variables are shown in the Market panel's trade tab (gui/market_panel.gui, gui/00_trade_partners_market_panel.gui).
+on_monthly_pulse_country = {
+	on_actions = {
+		hmps_balance_of_trade_update
+	}
+}
+
+hmps_balance_of_trade_update = {
+	effect = {
+		set_variable = {
+			name = hmps_bot_exports_weekly
+			value = total_export_value
+		}
+		set_variable = {
+			name = hmps_bot_exports
+			value = {
+				value = var:hmps_bot_exports_weekly
+				multiply = 52
+			}
+		}
+		set_variable = {
+			name = hmps_bot_imports_weekly
+			value = total_import_value
+		}
+		set_variable = {
+			name = hmps_bot_imports
+			value = {
+				value = var:hmps_bot_imports_weekly
+				multiply = 52
+			}
+		}
+		set_variable = {
+			name = hmps_bot_balance
+			value = {
+				value = var:hmps_bot_exports
+				subtract = var:hmps_bot_imports
+			}
+		}
+		if = {
+			limit = { gdp > 0 }
+			set_variable = {
+				name = hmps_bot_share
+				value = {
+					value = var:hmps_bot_balance
+					divide = gdp
+				}
+			}
+		}
+		else = {
+			set_variable = { name = hmps_bot_share value = 0 }
+		}
+
+		# Penalty in percentage points: 5 per 1% of GDP (500 per 1.0 share), max 50
+		set_variable = { name = hmps_bot_penalty value = 0 }
+		if = {
+			limit = { var:hmps_bot_share > 0.01 }
+			set_variable = {
+				name = hmps_bot_penalty
+				value = {
+					value = var:hmps_bot_share
+					multiply = 500
+					max = 50
+				}
+			}
+		}
+		else_if = {
+			limit = { var:hmps_bot_share < -0.01 }
+			set_variable = {
+				name = hmps_bot_penalty
+				value = {
+					value = var:hmps_bot_share
+					multiply = -500
+					max = 50
+				}
+			}
+		}
+
+		# Buff on the other side: half the penalty (max 25)
+		set_variable = {
+			name = hmps_bot_buff
+			value = {
+				value = var:hmps_bot_penalty
+				divide = 2
+			}
+		}
+
+		if = {
+			limit = { has_modifier = hmps_trade_surplus_penalty }
+			remove_modifier = hmps_trade_surplus_penalty
+		}
+		if = {
+			limit = { has_modifier = hmps_trade_deficit_penalty }
+			remove_modifier = hmps_trade_deficit_penalty
+		}
+		if = {
+			limit = { var:hmps_bot_share > 0.01 }
+			add_modifier = {
+				name = hmps_trade_surplus_penalty
+				multiplier = var:hmps_bot_penalty
+			}
+		}
+		else_if = {
+			limit = { var:hmps_bot_share < -0.01 }
+			add_modifier = {
+				name = hmps_trade_deficit_penalty
+				multiplier = var:hmps_bot_penalty
+			}
+		}
+	}
+}
