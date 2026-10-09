@@ -27,6 +27,7 @@ africa_colonial_events.1 = {
 			}
 			save_scope_as = african_colony_state
 		}
+		hmps_save_african_colony_state_fallback = yes #HMPS: countries that only have African subjects have no colony to place the event on
 		#HMPS
 		if = {
 			limit = {
@@ -38,6 +39,10 @@ africa_colonial_events.1 = {
 				name = global_africa_scramble
 			}
 			set_variable = first_to_scramble
+			set_global_variable = { #HMPS: africa_colonial_events.8 is offered to newly eligible powers while this lasts
+				name = africa_scramble_offer_window
+				years = 10
+			}
 			trigger_event = {
 				id = congo_free_state.1
 				days = 45
@@ -55,18 +60,7 @@ africa_colonial_events.1 = {
 			}
 			every_country = { 
 				limit = {
-					is_country_type = recognized
-					any_scope_state = {
-						is_incorporated = no
-						is_in_geographic_region = geographic_region_africa
-					}
-					has_technology_researched = nationalism
-					has_technology_researched = pharmaceuticals
-					NOT = { has_technology_researched = malaria_prevention }
-					OR = {
-						has_law_or_variant = law_type:law_colonial_resettlement
-						has_law_or_variant = law_type:law_colonial_exploitation
-					}
+					hmps_africa_scramble_offer_eligible = yes
 				}
 				trigger_event = {
 					id = africa_colonial_events.8
@@ -80,6 +74,7 @@ africa_colonial_events.1 = {
 			add_modifier = {
 				name = scrambling_for_africa
 				multiplier = 2
+				days = 3650 #HMPS: 10 years
 			}
 			add_modifier = {
 				name = first_scrambler
@@ -99,6 +94,7 @@ africa_colonial_events.1 = {
 			add_modifier = {
 				name = scrambling_for_africa
 				multiplier = 1.5
+				days = 3650 #HMPS: 10 years
 			}
 		}
 		if = {
@@ -108,6 +104,7 @@ africa_colonial_events.1 = {
 			}
 			add_modifier = {
 				name = scrambling_for_africa
+				days = 3650 #HMPS: 10 years
 			}
 		}
 	}
@@ -141,6 +138,7 @@ africa_colonial_events.2 = {
 			}
 			save_scope_as = african_colony_state
 		}
+		hmps_save_african_colony_state_fallback = yes #HMPS
 
 		set_variable = scramble_for_africa_complete
 	}
@@ -608,6 +606,80 @@ africa_colonial_events.7 = {
 				country = root
 				value = -10
 			}
+		}
+	}
+}
+
+#HMPS Flavor: sent by africa_colonial_events.1 to the other colonial powers when the first country joins the Scramble, then monthly (HMPS_on_action.txt) to powers that become eligible within 10 years
+africa_colonial_events.8 = {
+	type = country_event
+	placement = scope:african_colony_state
+
+	title = africa_colonial_events.8.t
+	desc = africa_colonial_events.8.d
+	flavor = africa_colonial_events.8.f
+
+	event_image = {
+		video = "africa_diplomats_negotiating"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+
+	duration = 3
+
+	trigger = { # offered once per country, while the window set by africa_colonial_events.1 lasts
+		has_global_variable = africa_scramble_offer_window
+		NOT = { has_variable = africa_scramble_offered }
+		hmps_africa_scramble_offer_eligible = yes
+	}
+
+	immediate = {
+		set_variable = africa_scramble_offered
+		clear_saved_scope = african_colony_state # drop the first scrambler's state passed on by africa_colonial_events.1
+		random_scope_state = {
+			limit = {
+				is_incorporated = no
+				is_in_geographic_region = geographic_region_africa
+			}
+			save_scope_as = african_colony_state
+		}
+		hmps_save_african_colony_state_fallback = yes
+	}
+
+	option = {
+		name = africa_colonial_events.8.a
+		default_option = yes
+		if = {
+			limit = {
+				NOT = { has_technology_researched = civilizing_mission }
+			}
+			custom_tooltip = {
+				text = africa_colonial_events.8.a.tt
+			}
+			add_technology_researched = civilizing_mission
+			add_technology_researched = malaria_prevention
+		}
+		else = {
+			custom_tooltip = {
+				text = africa_colonial_events.8.a.tt_mp
+			}
+			set_variable = has_mp # gives the 1.5x scrambling_for_africa in africa_colonial_events.1
+			add_technology_researched = malaria_prevention
+		}
+		ai_chance = {
+			base = 90
+		}
+	}
+	option = {
+		name = africa_colonial_events.8.b
+		add_modifier = {
+			name = reject_colonialism
+			days = 1825 # 5 years
+		}
+		ai_chance = {
+			base = 10
 		}
 	}
 }
