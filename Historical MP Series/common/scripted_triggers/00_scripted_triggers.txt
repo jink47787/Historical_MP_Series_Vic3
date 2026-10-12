@@ -539,7 +539,7 @@ owned_pacific_coast_region_states = {
 	owns_entire_state_region = STATE_NEVADA
 	owns_entire_state_region = STATE_UTAH
 	owns_entire_state_region = STATE_ARIZONA
-	owns_entire_state_region = STATE_CALIFORNIA
+	hmps_owns_california = yes
 	owns_entire_state_region = STATE_BAJA_CALIFORNIA
 }
 
@@ -2464,6 +2464,34 @@ hmps_congo_can_vote = {
 		trigger_if = {
 			limit = { has_variable = congo_vote }
 			NOT = { var:congo_vote = $SLOT$ }
+		}
+	}
+}
+
+# Fort Ross (province x3F27C8): the split state is still a Russian or Alaskan enclave of one province. Scope: state
+hmps_is_russian_fort_ross_state = {
+	this = p:x3F27C8.state
+	NOT = { any_province = { count > 1 } }
+	owner = {
+		OR = {
+			c:RUS ?= this
+			c:ALK ?= this
+		}
+	}
+}
+
+# Owns all of California, apart from a Russian or Alaskan Fort Ross enclave (HMPS_fort_ross.1 sells it around 1841, but Russia may refuse).
+# Scope: country. Compares state owners with ROOT, so use it only where ROOT is the country being checked
+hmps_owns_california = {
+	any_scope_state = {
+		state_region = s:STATE_CALIFORNIA
+	}
+	s:STATE_CALIFORNIA = {
+		NOT = {
+			any_scope_state = {
+				NOT = { owner = ROOT }
+				NOT = { hmps_is_russian_fort_ross_state = yes }
+			}
 		}
 	}
 }

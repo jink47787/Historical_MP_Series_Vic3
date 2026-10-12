@@ -1,0 +1,119 @@
+﻿namespace = HMPS_fort_ross
+
+# Sale of Fort Ross: fires once from 1841 (listed in on_monthly_pulse_country in HMPS_on_action.txt). Fort Ross starts as an Alaskan state (HMPS_fort_ross_to_alaska).
+# The owner decides, or its top overlord when the owner is an AI subject (Russia for Alaska). The AI always sells; a player may refuse
+HMPS_fort_ross.1 = {
+	type = country_event
+	placement = ROOT
+	title = HMPS_fort_ross.1.t
+	desc = HMPS_fort_ross.1.d
+	flavor = HMPS_fort_ross.1.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+
+	trigger = {
+		NOT = { has_global_variable = HMPS_fort_ross_sale_fired }
+		game_date >= 1841.1.1
+		p:x3F27C8.state ?= {
+			hmps_is_russian_fort_ross_state = yes
+		}
+		OR = {
+			AND = {
+				this = p:x3F27C8.state.owner
+				OR = {
+					is_player = yes
+					is_subject = no
+				}
+			}
+			p:x3F27C8.state.owner = {
+				is_player = no
+				is_subject = yes
+				top_overlord = ROOT
+			}
+		}
+		s:STATE_CALIFORNIA = { # someone else holds the rest of California
+			any_scope_state = {
+				NOT = { this = p:x3F27C8.state }
+				NOT = { owner = p:x3F27C8.state.owner }
+			}
+		}
+	}
+
+	immediate = {
+		set_global_variable = HMPS_fort_ross_sale_fired
+		p:x3F27C8.state = {
+			save_scope_as = fort_ross_state
+			owner = {
+				save_scope_as = fort_ross_seller
+			}
+		}
+		s:STATE_CALIFORNIA = { # the buyer is the owner of the most populous other state in California
+			ordered_scope_state = {
+				limit = {
+					NOT = { this = scope:fort_ross_state }
+					NOT = { owner = scope:fort_ross_seller }
+				}
+				order_by = state_population
+				owner = {
+					save_scope_as = fort_ross_buyer
+				}
+			}
+		}
+	}
+
+	option = { # Sell the post
+		name = HMPS_fort_ross.1.a
+		default_option = yes
+		scope:fort_ross_state = {
+			set_state_owner = scope:fort_ross_buyer
+		}
+		scope:fort_ross_buyer = {
+			trigger_event = {
+				id = HMPS_fort_ross.2
+				popup = yes
+			}
+		}
+		ai_chance = {
+			base = 100
+		}
+	}
+
+	option = { # Keep it: only a player can choose this
+		name = HMPS_fort_ross.1.b
+		ai_chance = {
+			base = 0
+		}
+	}
+}
+
+# Fort Ross Purchased: tells the buyer, fired from HMPS_fort_ross.1
+HMPS_fort_ross.2 = {
+	type = country_event
+	placement = scope:fort_ross_state
+	title = HMPS_fort_ross.2.t
+	desc = HMPS_fort_ross.2.d
+	flavor = HMPS_fort_ross.2.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+
+	option = {
+		name = HMPS_fort_ross.2.a
+		default_option = yes
+	}
+}
