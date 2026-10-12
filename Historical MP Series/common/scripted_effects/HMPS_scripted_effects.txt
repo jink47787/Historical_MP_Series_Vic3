@@ -582,6 +582,31 @@ hmps_save_african_colony_state_fallback = {
 # A surplus lowers export and raises import advantage; a deficit lowers import and raises export advantage.
 # Any future Balance of Trade flavor (decisions, events) should target the market owner.
 # The variables are shown in the Market panel's trade tab (gui/market_panel.gui, gui/00_trade_partners_market_panel.gui).
+# Exports are scaled by the world's imports / exports (global_var:hmps_bot_world_ratio, set by
+# hmps_balance_of_trade_world_totals_effect) because the game values imports above exports, which left almost every
+# market in deficit. After scaling, the world's balances sum to zero.
+hmps_balance_of_trade_world_totals_effect = {
+	set_global_variable = { name = hmps_bot_world_exports value = 0 }
+	set_global_variable = { name = hmps_bot_world_imports value = 0 }
+	every_country = {
+		change_global_variable = { name = hmps_bot_world_exports add = total_export_value }
+		change_global_variable = { name = hmps_bot_world_imports add = total_import_value }
+	}
+	if = {
+		limit = { global_var:hmps_bot_world_exports > 0 }
+		set_global_variable = {
+			name = hmps_bot_world_ratio
+			value = {
+				value = global_var:hmps_bot_world_imports
+				divide = global_var:hmps_bot_world_exports
+			}
+		}
+	}
+	else = {
+		set_global_variable = { name = hmps_bot_world_ratio value = 1 }
+	}
+}
+
 hmps_balance_of_trade_update_effect = {
 	set_variable = {
 		name = hmps_bot_exports_weekly
@@ -598,6 +623,7 @@ hmps_balance_of_trade_update_effect = {
 		value = {
 			value = var:hmps_bot_exports_weekly
 			multiply = 52
+			multiply = global_var:hmps_bot_world_ratio
 		}
 	}
 	set_variable = {
