@@ -3,7 +3,7 @@
 Copies vanilla common/history/states/00_states.txt to the mod and replaces each
 state block that draft_states_north_america.txt defines. Nothing else changes.
 
-python3 -I apply_map.py --game <basegame-ver> --draft ../draft_states_north_america.txt --mod "../../../Historical MP Series"
+python3 -I apply_map.py --game <basegame-ver> --draft ../draft_states_north_america.txt --mod "../../../../Historical MP Series"
 """
 import argparse, os, re
 
