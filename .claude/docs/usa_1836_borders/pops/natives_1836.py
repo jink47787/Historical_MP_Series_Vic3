@@ -116,11 +116,11 @@ PEOPLES = {
     'OSG': {'STATE_KANSAS': [('siouan', 6500)],         # Osage and Kansa
             'STATE_OKLAHOMA': [('siouan', 600)]},       # Osage bands on the Verdigris
     'CLF': {'STATE_CALIFORNIA': [('hokan', 130000)],    # interior and northern California, after the 1833 malaria epidemic
-            'STATE_ARIZONA': [('hokan', 8000)],         # Yuman peoples of the Colorado: Mohave, Quechan, Halchidhoma, Yavapai
-            'STATE_NEVADA': [('hokan', 200)]},
+            'STATE_ARIZONA': [('hokan', 8000)]},        # Yuman peoples of the Colorado: Mohave, Quechan, Halchidhoma, Yavapai
     'INU': {'STATE_NUNAVUT': [('inuit', 5500)], 'STATE_NORTHWEST_TERRITORIES': [('inuit', 2000)],
             'STATE_YUKON_TERRITORY': [('inuit', 500)], 'STATE_QUEBEC': [('inuit', 2500)],
-            'STATE_NEWFOUNDLAND': [('inuit', 2000)]},   # Labrador: Moravian mission counts plus the northern coast
+            'STATE_NEWFOUNDLAND': [('inuit', 2000)],    # Labrador: Moravian mission counts plus the northern coast
+            'STATE_MANITOBA': [('inuit', 200)]},        # Hudson Bay coast north of Churchill
     'INN': {'STATE_QUEBEC': [('cree', 4500)],           # Innu (Montagnais), Naskapi, inland East James Bay Cree
             'STATE_NEWFOUNDLAND': [('cree', 1500)],     # Labrador Innu and Naskapi
             'STATE_ONTARIO': [('cree', 2000)],          # Omushkego (Swampy and Moose) Cree of the lowland
