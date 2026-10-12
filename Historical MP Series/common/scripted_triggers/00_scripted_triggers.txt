@@ -539,7 +539,7 @@ owned_pacific_coast_region_states = {
 	owns_entire_state_region = STATE_NEVADA
 	owns_entire_state_region = STATE_UTAH
 	owns_entire_state_region = STATE_ARIZONA
-	owns_entire_state_region = STATE_CALIFORNIA
+	hmps_owns_california = yes
 	owns_entire_state_region = STATE_BAJA_CALIFORNIA
 }
 
@@ -2464,6 +2464,56 @@ hmps_congo_can_vote = {
 		trigger_if = {
 			limit = { has_variable = congo_vote }
 			NOT = { var:congo_vote = $SLOT$ }
+		}
+	}
+}
+
+# Fort Ross (province x3F27C8): the split state is still a Russian or Alaskan enclave of one province. Scope: state
+hmps_is_russian_fort_ross_state = {
+	this = p:x3F27C8.state
+	NOT = { num_provinces > 1 }
+	owner = {
+		OR = {
+			c:RUS ?= this
+			c:ALK ?= this
+		}
+	}
+}
+
+# Owns all of California, apart from a Russian or Alaskan Fort Ross enclave (HMPS_fort_ross.1 sells it around 1841, but Russia may refuse).
+# Scope: country. Compares state owners with ROOT, so use it only where ROOT is the country being checked
+hmps_owns_california = {
+	any_scope_state = {
+		state_region = s:STATE_CALIFORNIA
+	}
+	s:STATE_CALIFORNIA = {
+		NOT = {
+			any_scope_state = {
+				NOT = { owner = ROOT }
+				NOT = { hmps_is_russian_fort_ross_state = yes }
+			}
+		}
+	}
+}
+
+# Holds the state region in all but native land: has a state there, and no other country apart from its own subjects,
+# decentralized nations and a Russian or Alaskan Fort Ross enclave holds any of it. Use instead of owns_entire_state_region
+# where 1836 native land would otherwise block flavor (the 1836 North America rework).
+# Scope: country. Call: hmps_holds_region_bar_natives = { REGION = STATE_TEXAS }; each REGION needs the loc key hmps_holds_REGION_bar_natives_tt
+hmps_holds_region_bar_natives = {
+	custom_tooltip = {
+		text = hmps_holds_$REGION$_bar_natives_tt
+		has_state_in_state_region = $REGION$
+		NOT = {
+			any_country = {
+				NOT = { this = prev }
+				NOT = { is_subject_of = prev }
+				NOT = { is_country_type = decentralized }
+				any_scope_state = {
+					state_region = s:$REGION$
+					NOT = { hmps_is_russian_fort_ross_state = yes }
+				}
+			}
 		}
 	}
 }
