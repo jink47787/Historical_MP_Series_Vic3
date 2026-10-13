@@ -5,3 +5,43 @@
     multiply = -0.10
     add = 0.10
 }
+
+# HMPS AI: weekly loan interest as a share of weekly income (0.05 = 5%)
+# Principal = scaled_debt * credit; annual rate = add * ( 1 + mult ); weekly = annual / 52
+hmps_ai_interest_share = {
+	value = scaled_debt
+	multiply = credit
+	multiply = modifier:country_loan_interest_rate_add
+	multiply = {
+		value = 1
+		add = modifier:country_loan_interest_rate_mult
+		min = 0
+	}
+	divide = 52
+	divide = {
+		value = income
+		min = 1
+	}
+}
+
+# HMPS AI: extra wanted construction output, doubling vanilla's 1 point per 5000 income (cap 200 -> 400)
+hmps_ai_extra_construction_output = {
+	value = fixed_income
+	divide = 5000
+	min = 0
+	max = 200
+}
+
+# HMPS AI: every AI borrows to build until interest reaches 15% of income, then tightens
+hmps_ai_construction_debt_balance = {
+	value = 0
+	if = {
+		limit = {
+			hmps_ai_interest_share < 0.15
+		}
+		add = 0.5
+	}
+	else = {
+		add = -0.5
+	}
+}
