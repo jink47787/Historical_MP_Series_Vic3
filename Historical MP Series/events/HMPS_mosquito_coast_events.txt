@@ -152,3 +152,116 @@ HMPS_mosquito.2 = {
 		default_option = yes
 	}
 }
+
+namespace = HMPS_guiana
+
+# Guiana Boundary Commission: fires once, for the first of Britain, the Netherlands and France to have Quinine (listed in on_acquired_technology in HMPS_on_action.txt)
+# STATE_GUAYANA has severe malaria, so nobody can colonize the native interior before Quinine
+# The choice applies to all three powers: each one that still owns a Guiana colony gets its historical share of the native interior
+# The AI always accepts; a player may refuse, at a cost
+HMPS_guiana.1 = {
+	type = country_event
+	placement = ROOT
+	title = HMPS_guiana.1.t
+	desc = HMPS_guiana.1.d
+	flavor = HMPS_guiana.1.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	trigger = {
+		OR = {
+			c:GBR ?= ROOT
+			c:NET ?= ROOT
+			c:FRA ?= ROOT
+		}
+		has_technology_researched = quinine
+		NOT = { has_global_variable = HMPS_guiana_commission_fired }
+		c:ORN ?= {
+			any_scope_state = {
+				state_region = s:STATE_GUAYANA
+			}
+		}
+	}
+
+	immediate = {
+		set_global_variable = HMPS_guiana_commission_fired
+	}
+
+	option = { # Accept the line: every power gets its historical share
+		name = HMPS_guiana.1.a
+		default_option = yes
+		if = { # British Guiana: west of the Courantyne
+			limit = {
+				c:GBR ?= {
+					any_scope_state = {
+						state_region = s:STATE_GUAYANA
+					}
+				}
+			}
+			s:STATE_GUAYANA = {
+				set_owner_of_provinces = {
+					country = c:GBR
+					provinces = {
+						x9A88B5 x24A66B x805A8C xFAE8C5 xAA1153 x518580 x9FEDF7 xE85635 xB21306 x41552E xB3512B
+						x6816FF x4AE8F7 xADE6C2 x350473 xC0C0D0 xD0678B xB1960A x3A069F x734F81 xA52CE3 x719492
+						xA00111 xE600F3 x218011 x1F5190 xA299AE xA22A4C x7B4B5E x4B427A x19A3D9 xBB88B5
+					}
+				}
+			}
+		}
+		if = { # Suriname: between the Courantyne and the Maroni
+			limit = {
+				c:NET ?= {
+					any_scope_state = {
+						state_region = s:STATE_GUAYANA
+					}
+				}
+			}
+			s:STATE_GUAYANA = {
+				set_owner_of_provinces = {
+					country = c:NET
+					provinces = {
+						x3EC2E7 xDB86CE xA9777B xF1E3BF x27E268 x0753FE x771D68 x210190 xE8D6CB x58ABBF xD8362B
+						xF6408F xE18467 xB6F7B4 xCD1A5A x063557 xE6BBD3 x43E136 x102B13 xC2E46E x822364 xA082D3
+					}
+				}
+			}
+		}
+		if = { # French Guiana: east of the Maroni
+			limit = {
+				c:FRA ?= {
+					any_scope_state = {
+						state_region = s:STATE_GUAYANA
+					}
+				}
+			}
+			s:STATE_GUAYANA = {
+				set_owner_of_provinces = {
+					country = c:FRA
+					provinces = {
+						x9F0090 x049E29 x148FB5 xF20136 x20DD27 xC591AC
+					}
+				}
+			}
+		}
+		ai_chance = {
+			base = 100
+		}
+	}
+
+	option = { # Leave the interior unsettled: open to normal colonization; only a player can choose this
+		name = HMPS_guiana.1.b
+		change_infamy = 10
+		ai_chance = {
+			base = 0
+		}
+	}
+}
