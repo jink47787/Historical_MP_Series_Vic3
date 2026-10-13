@@ -1,0 +1,154 @@
+namespace = HMPS_mosquito
+
+# Treaty of Managua: fires once for Britain from 1860 while the Mosquito Kingdom is its subject (listed in on_monthly_pulse_country in HMPS_on_action.txt)
+# Each Mosquito state goes to the owner of the most populous other non-native state in its state region; a state with no such owner stays Mosquito and the kingdom becomes independent
+# The AI always cedes; a player may refuse, at a cost
+HMPS_mosquito.1 = {
+	type = country_event
+	placement = ROOT
+	title = HMPS_mosquito.1.t
+	desc = HMPS_mosquito.1.d
+	flavor = HMPS_mosquito.1.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	trigger = {
+		c:GBR ?= ROOT
+		NOT = { has_global_variable = HMPS_mosquito_treaty_fired }
+		game_date >= 1860.1.1
+		c:MKT ?= {
+			is_subject_of = ROOT
+		}
+	}
+
+	immediate = {
+		set_global_variable = HMPS_mosquito_treaty_fired
+	}
+
+	option = { # Cede the Mosquito Shore
+		name = HMPS_mosquito.1.a
+		default_option = yes
+		c:MKT = {
+			every_scope_state = {
+				save_temporary_scope_as = mosquito_state
+				state_region = {
+					ordered_scope_state = {
+						limit = {
+							NOT = { owner = c:MKT }
+							NOT = { owner = ROOT }
+							NOT = { owner = { is_country_type = decentralized } }
+						}
+						order_by = state_population
+						owner = {
+							save_temporary_scope_as = mosquito_receiver
+						}
+						scope:mosquito_state = {
+							set_variable = {
+								name = HMPS_mosquito_ceded
+								months = 1
+							}
+							set_state_owner = scope:mosquito_receiver
+						}
+					}
+				}
+			}
+			if = { # land nobody else could take: the kingdom keeps it and leaves British protection
+				limit = {
+					is_subject_of = ROOT
+				}
+				make_independent = yes
+			}
+		}
+		every_country = {
+			limit = {
+				any_scope_state = {
+					has_variable = HMPS_mosquito_ceded
+				}
+			}
+			trigger_event = {
+				id = HMPS_mosquito.2
+				popup = yes
+			}
+		}
+		ai_chance = {
+			base = 100
+		}
+	}
+
+	option = { # Keep the protectorate: only a player can choose this
+		name = HMPS_mosquito.1.b
+		change_infamy = 25
+		c:USA ?= {
+			change_relations = {
+				country = ROOT
+				value = -50
+			}
+		}
+		every_country = { # the countries that would have received the land: worse relations and a claim on it
+			limit = {
+				NOT = { this = ROOT }
+				NOT = { this = c:MKT }
+				NOT = { is_country_type = decentralized }
+				any_scope_state = {
+					state_region = {
+						any_scope_state = {
+							owner = c:MKT
+						}
+					}
+				}
+			}
+			save_temporary_scope_as = mosquito_claimant
+			change_relations = {
+				country = ROOT
+				value = -50
+			}
+			every_scope_state = {
+				limit = {
+					state_region = {
+						any_scope_state = {
+							owner = c:MKT
+						}
+					}
+				}
+				state_region = {
+					add_claim = scope:mosquito_claimant
+				}
+			}
+		}
+		ai_chance = {
+			base = 0
+		}
+	}
+}
+
+# Mosquito Shore Ceded: tells each country that received Mosquito land, fired from HMPS_mosquito.1
+HMPS_mosquito.2 = {
+	type = country_event
+	placement = ROOT
+	title = HMPS_mosquito.2.t
+	desc = HMPS_mosquito.2.d
+	flavor = HMPS_mosquito.2.f
+
+	duration = 3
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	option = {
+		name = HMPS_mosquito.2.a
+		default_option = yes
+	}
+}
