@@ -142,6 +142,7 @@ Thanks to Yyyman for his Italy company changes.
 - Colonial oil PMs with lower qualification thresholds
 - Added new automobile PMs to more precisely decide how many cars you want to build
 - Conveyor belts require rubber
+- Assembly line PMs (furniture, tooling, motor, arms, munition) use 2 more oil per worker
 
 #### Infrastructure
 - Halved base state infrastructure
@@ -252,3 +253,5 @@ Thanks to Yyyman for his Italy company changes.
 - Canal companies no longer require occupancy or incorporation. Suez Canal Company only needs a level 5 trade center or port somewhere and no longer gives tax income when prosperous
 - Added straits to Hokkaido
 - Adjusted populating the Americas JE
+- Reverted experimental AI construction and budget changes that were driving AI countries like Mexico into bankruptcy
+- AI now upgrades construction sector production methods quickly once unlocked (the higher methods are cheaper per construction point)
