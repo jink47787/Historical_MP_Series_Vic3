@@ -249,6 +249,6 @@ Thanks to Yyyman for his Italy company changes.
 - Krakatoa event effect reduced
 - Sepoy war does not give infamy
 - Reduced rate of both radical and loyalist gain
-- Canal companies no long require occupancy or incorporation
+- Canal companies no longer require occupancy or incorporation. Suez Canal Company only needs a level 5 trade center or port somewhere and no longer gives tax income when prosperous
 - Added straits to Hokkaido
 - Adjusted populating the Americas JE
