@@ -142,7 +142,7 @@ Thanks to Yyyman for his Italy company changes.
 - Colonial oil PMs with lower qualification thresholds
 - Added new automobile PMs to more precisely decide how many cars you want to build
 - Conveyor belts require rubber
-- Assembly line PMs (furniture, tooling, motor, arms, munition) use 2 more oil per worker
+- Assembly line PMs (furniture, tooling, motor, arms, munition) use 1 more oil and 1 less rubber per worker than before
 
 #### Infrastructure
 - Halved base state infrastructure
@@ -229,6 +229,11 @@ Thanks to Yyyman for his Italy company changes.
 - Cuba annexed at game start
 - Gave all British subjects colonization laws
 - Mexico can now accept natives with a decision
+- Mexico starts with a claim on Colorado, and Texas no longer starts with a claim on New Mexico
+- Initiate Manifest Destiny now also claims Colorado, so the USA can still take it if Mexico colonizes it first
+- Repudiate Manifest Destiny now also removes the US claim on Colorado
+- Manifest Destiny now has 40 years to finish (was 20) and needs 6 US-owned states instead of 7, which no longer have to be incorporated (was incorporated or 50% towards it)
+- Manifest Destiny goal is now California, Nevada, Utah, Arizona, New Mexico and Texas; Colorado moved to the Frontier Wars journal entry
 
 ## Map
 #### Resources
@@ -255,3 +260,4 @@ Thanks to Yyyman for his Italy company changes.
 - Adjusted populating the Americas JE
 - Reverted experimental AI construction and budget changes that were driving AI countries like Mexico into bankruptcy
 - AI now upgrades construction sector production methods quickly once unlocked (the higher methods are cheaper per construction point)
+- Fixed the Oregon journal entry re-adding the US claim on Idaho, Oregon and Washington every month
