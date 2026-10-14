@@ -233,6 +233,11 @@ Thanks to Yyyman for his Italy company changes.
 - Repudiate Manifest Destiny now also removes the US claim on Colorado
 - Manifest Destiny now has 40 years to finish (was 20) and needs 6 US-owned states instead of 7, which no longer have to be incorporated (was incorporated or 50% towards it)
 - Manifest Destiny goal is now California, Nevada, Utah, Arizona, New Mexico and Texas; Colorado moved to the Frontier Wars journal entry
+- Paraguay starts with the Frontier Colonization law, and Paraguay and Bolivia start with claims on Alto Paraguay (the Gran Chaco)
+- Colombia starts with a claim on Antioquia, so it can colonize the one province there held by the Wayuu
+- New "The Unconquered Interior" journal entry for non-native South American countries that claim at least one Latin American state held by a decentralized nation: colonies grow 75% slower until Railways and Electric Telegraph are researched or none of the country's Latin American claims are still held by a decentralized nation
+- Completing The Unconquered Interior gives +10% state migration attraction for 5 years
+- Peru and Bolivia start with level 1 trade centers in Lima, Cajamarca, Ica and La Paz
 
 ## Map
 #### Resources
@@ -242,6 +247,7 @@ Thanks to Yyyman for his Italy company changes.
 - Added areas that can easily do hydro power
 - Cold water ports mod integrated
 - Added MAPI to more rivers
+- Added Malaria to eight Amazon states: Guayana, Guaviare, Pastaza, Santa Cruz, Pará, Amazonas, Acre and Mato Grosso
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
