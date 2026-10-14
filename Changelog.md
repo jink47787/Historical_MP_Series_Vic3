@@ -142,6 +142,8 @@ Thanks to Yyyman for his Italy company changes.
 - Added new automobile PMs to more precisely decide how many cars you want to build
 - Conveyor belts require rubber
 - Assembly line PMs (furniture, tooling, motor, arms, munition) use 1 more oil and 1 less rubber per worker than before
+- Guano Harvestry is no longer self-owned: whoever builds it (government or investors) owns it and takes the profits, like Peru's state guano monopoly
+- Guano Harvestry employs 250 shopkeepers and 750 laborers per level (was 75 and 500), output unchanged
 
 #### Infrastructure
 - Halved base state infrastructure
@@ -237,17 +239,20 @@ Thanks to Yyyman for his Italy company changes.
 - Colombia starts with a claim on Antioquia, so it can colonize the one province there held by the Wayuu
 - New "The Unconquered Interior" journal entry for non-native South American countries that claim at least one Latin American state held by a decentralized nation: colonies grow 75% slower until Railways and Electric Telegraph are researched or none of the country's Latin American claims are still held by a decentralized nation
 - Completing The Unconquered Interior gives +10% state migration attraction for 5 years
-- Peru and Bolivia start with level 1 trade centers in Lima, Cajamarca, Ica and La Paz
+- Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz
+- New "The Guano Islands Act" journal entry for the USA: becomes active when the USA researches Ironclads and completes when it has 5 FULLY CREWED ironclads (early or modern) in its fleets; reward is 300 fertilizer sell orders in the US capital's market, shrinking steadily to zero over 30 years; it opens with an event ("The Guano Islands Act") when it begins and is pinned by default
 
 ## Map
 #### Resources
 - Oil rebalance
+- Guano is now a discoverable and depletable resource, like gold: hidden deposits are found at random over time and worked deposits run out at 75% of the vanilla gold-field rate. In 1836 only Peru's coast is known: Ica 30 known + 20 hidden (Chincha Islands), Cajamarca 10 + 10, Lima 10, Tarapacá 10 + 10. Everything else starts hidden: Antofagasta, Baja California, Namaqualand (Ichaboe), Haiti (Navassa), Santo Domingo, Bahamas, West Indies, Puerto Rico, West Micronesia and Nauru 10 each; East Micronesia 15; Oman 5; Hawaiian Islands 10 (Laysan, Lisianski, Johnston Atoll); Tahiti 10 (Makatea, Malden and Starbuck); Western Australia 10 (Houtman Abrolhos, Lacepede Islands); Jamaica 5 (Pedro and Morant Cays); Honduras 5 (Swan Islands); Queensland 5 (Raine Island); Cape Colony 5 (Saldanha Bay islands); Patagonia 5 (Patagonian coast islands). Total 275 levels (was 109, before depletion was added). Florida, Solomon Islands, Fiji and Vanuatu have none
 #### State Modifiers
 - Added Black Belt to represent Cretaceous soil
 - Added areas that can easily do hydro power
 - Cold water ports mod integrated
 - Added MAPI to more rivers
 - Added Malaria to eight Amazon states: Guayana, Guaviare, Pastaza, Santa Cruz, Pará, Amazonas, Acre and Mato Grosso
+- Pacific islands have severe malaria again: Micronesia, Solomon Islands, Nauru, Fiji, Vanuatu, New Caledonia, Bougainville, Tahiti and Tonga
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
