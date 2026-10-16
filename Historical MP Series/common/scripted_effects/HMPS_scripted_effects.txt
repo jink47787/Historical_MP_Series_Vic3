@@ -729,6 +729,294 @@ hmps_balance_of_trade_update_effect = {
 	}
 }
 
+# HMPS Bank Rate and Reserves, phase 1 (ledger). Runs once a week from HMPS_utility_je's on_weekly_pulse
+# (common/journal_entries/z_HMPS_utility.txt), right after the Balance of Trade update. No gameplay effects yet: it only keeps each market's FX reserves.
+# Money is stored on the market owner, in £:
+#   hmps_fx_reserves     FX reserves (may go below zero in later phases)
+#   hmps_fx_exports, hmps_fx_imports, hmps_fx_net   last week's market trade (weekly values), exports scaled by
+#                        global_var:hmps_bot_world_ratio as in the Balance of Trade, so the world's net exports sum to zero
+#   hmps_fx_gdp          market GDP; also the base for GDP shares when a country changes market
+#   hmps_fx_import_bill  monthly imports (weekly x 52 / 12), at least 5% of market GDP a year / 12, so markets without trade
+#                        never divide by zero
+#   hmps_fx_gold         last week's gold credit: each gold mine and field's goods_output_gold_add (counts staffing) x 100
+#   hmps_fx_topup        last week's world top-up
+#   hmps_fx_months       reserves in months of imports
+# Every country stores its market owner in hmps_fx_owner. When it changes, a former owner hands its whole pool to the new
+# owner and a former member carries its GDP share of the old pool. A new owner with no reserves starts at 12 months.
+# Globals: hmps_fx_world_months (import-weighted average), running totals hmps_fx_world_gold_total,
+# hmps_fx_world_imports_total, hmps_fx_topup_count, hmps_fx_topup_total (read from saves by the campaign recorder).
+# Whenever the world average falls below 12 months, every market gains the same number of months of its own imports.
+# Markets owned by decentralized countries are skipped.
+# Known gap: an annexed market owner's reserves are lost, because no hook fires for annexation.
+hmps_fx_weekly_effect = {
+	hmps_balance_of_trade_world_totals_effect = yes
+
+	# 1. Market moves (uses last week's hmps_fx_gdp)
+	every_country = {
+		limit = {
+			NOT = { is_country_type = decentralized }
+			has_variable = hmps_fx_owner
+		}
+		save_scope_as = hmps_fx_mover
+		market = {
+			owner = { save_scope_as = hmps_fx_new_owner }
+		}
+		if = {
+			limit = {
+				NOT = { scope:hmps_fx_new_owner = var:hmps_fx_owner }
+				scope:hmps_fx_new_owner = {
+					NOT = { is_country_type = decentralized }
+				}
+			}
+			scope:hmps_fx_new_owner = {
+				if = {
+					limit = { NOT = { has_variable = hmps_fx_reserves } }
+					set_variable = { name = hmps_fx_reserves value = 0 }
+				}
+			}
+			if = {
+				# A former market owner: its whole pool moves
+				limit = {
+					scope:hmps_fx_mover = var:hmps_fx_owner
+					has_variable = hmps_fx_reserves
+				}
+				scope:hmps_fx_new_owner = {
+					change_variable = { name = hmps_fx_reserves add = scope:hmps_fx_mover.var:hmps_fx_reserves }
+				}
+			}
+			else_if = {
+				# A former member: carries its GDP share of the old pool
+				limit = {
+					var:hmps_fx_owner = {
+						is_country_alive = yes
+						has_variable = hmps_fx_reserves
+						has_variable = hmps_fx_gdp
+						var:hmps_fx_gdp > 0
+					}
+				}
+				set_variable = {
+					name = hmps_fx_move
+					value = {
+						value = gdp
+						divide = var:hmps_fx_owner.var:hmps_fx_gdp
+						max = 1
+						multiply = var:hmps_fx_owner.var:hmps_fx_reserves
+					}
+				}
+				var:hmps_fx_owner = {
+					change_variable = { name = hmps_fx_reserves subtract = scope:hmps_fx_mover.var:hmps_fx_move }
+				}
+				scope:hmps_fx_new_owner = {
+					change_variable = { name = hmps_fx_reserves add = scope:hmps_fx_mover.var:hmps_fx_move }
+				}
+				remove_variable = hmps_fx_move
+			}
+			# A former owner keeps nothing
+			if = {
+				limit = {
+					NOT = { scope:hmps_fx_mover = scope:hmps_fx_new_owner }
+					has_variable = hmps_fx_reserves
+				}
+				remove_variable = hmps_fx_reserves
+			}
+		}
+	}
+	every_country = {
+		limit = { NOT = { is_country_type = decentralized } }
+		market = {
+			owner = { save_scope_as = hmps_fx_new_owner }
+		}
+		set_variable = { name = hmps_fx_owner value = scope:hmps_fx_new_owner }
+	}
+
+	# 2. Trade, GDP and gold per market; new owners start at 12 months; reserves credited
+	set_global_variable = { name = hmps_fx_world_reserves value = 0 }
+	set_global_variable = { name = hmps_fx_world_bill value = 0 }
+	if = {
+		limit = { NOT = { has_global_variable = hmps_fx_world_gold_total } }
+		set_global_variable = { name = hmps_fx_world_gold_total value = 0 }
+		set_global_variable = { name = hmps_fx_world_imports_total value = 0 }
+		set_global_variable = { name = hmps_fx_topup_count value = 0 }
+		set_global_variable = { name = hmps_fx_topup_total value = 0 }
+	}
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		save_scope_as = hmps_fx_market
+		owner = {
+			set_variable = {
+				name = hmps_fx_exports
+				value = {
+					every_country = {
+						limit = { market = scope:hmps_fx_market }
+						add = total_export_value
+					}
+				}
+			}
+			set_variable = {
+				name = hmps_fx_exports
+				value = {
+					value = var:hmps_fx_exports
+					multiply = global_var:hmps_bot_world_ratio
+				}
+			}
+			set_variable = {
+				name = hmps_fx_imports
+				value = {
+					every_country = {
+						limit = { market = scope:hmps_fx_market }
+						add = total_import_value
+					}
+				}
+			}
+			set_variable = {
+				name = hmps_fx_net
+				value = {
+					value = var:hmps_fx_exports
+					subtract = var:hmps_fx_imports
+				}
+			}
+			set_variable = {
+				name = hmps_fx_gdp
+				value = {
+					every_country = {
+						limit = { market = scope:hmps_fx_market }
+						add = gdp
+					}
+				}
+			}
+			# Weekly floor first (5% of GDP a year / 52), then converted to a monthly bill
+			set_variable = {
+				name = hmps_fx_import_bill
+				value = {
+					value = var:hmps_fx_gdp
+					multiply = 0.05
+					divide = 52
+				}
+			}
+			if = {
+				limit = { var:hmps_fx_imports > var:hmps_fx_import_bill }
+				set_variable = { name = hmps_fx_import_bill value = var:hmps_fx_imports }
+			}
+			set_variable = {
+				name = hmps_fx_import_bill
+				value = {
+					value = var:hmps_fx_import_bill
+					multiply = 52
+					divide = 12
+				}
+			}
+			set_variable = {
+				name = hmps_fx_gold
+				value = {
+					every_country = {
+						limit = { market = scope:hmps_fx_market }
+						every_scope_building = {
+							limit = {
+								OR = {
+									is_building_type = building_gold_mine
+									is_building_type = building_gold_field
+								}
+							}
+							add = modifier:goods_output_gold_add
+						}
+					}
+				}
+			}
+			set_variable = {
+				name = hmps_fx_gold
+				value = {
+					value = var:hmps_fx_gold
+					multiply = 100
+				}
+			}
+			if = {
+				limit = { NOT = { has_variable = hmps_fx_reserves } }
+				set_variable = {
+					name = hmps_fx_reserves
+					value = {
+						value = var:hmps_fx_import_bill
+						multiply = 12
+					}
+				}
+			}
+			change_variable = { name = hmps_fx_reserves add = var:hmps_fx_net }
+			change_variable = { name = hmps_fx_reserves add = var:hmps_fx_gold }
+			set_variable = { name = hmps_fx_topup value = 0 }
+			change_global_variable = { name = hmps_fx_world_reserves add = var:hmps_fx_reserves }
+			change_global_variable = { name = hmps_fx_world_bill add = var:hmps_fx_import_bill }
+			change_global_variable = { name = hmps_fx_world_gold_total add = var:hmps_fx_gold }
+			change_global_variable = { name = hmps_fx_world_imports_total add = var:hmps_fx_imports }
+		}
+	}
+
+	# 3. World average and top-up
+	if = {
+		limit = { global_var:hmps_fx_world_bill > 0 }
+		set_global_variable = {
+			name = hmps_fx_world_months
+			value = {
+				value = global_var:hmps_fx_world_reserves
+				divide = global_var:hmps_fx_world_bill
+			}
+		}
+	}
+	else = {
+		set_global_variable = { name = hmps_fx_world_months value = 12 }
+	}
+	if = {
+		limit = { global_var:hmps_fx_world_months < 12 }
+		change_global_variable = { name = hmps_fx_topup_count add = 1 }
+		every_market = {
+			limit = {
+				owner = {
+					NOT = { is_country_type = decentralized }
+				}
+			}
+			owner = {
+				set_variable = {
+					name = hmps_fx_topup
+					value = {
+						value = 12
+						subtract = global_var:hmps_fx_world_months
+						multiply = var:hmps_fx_import_bill
+					}
+				}
+				change_variable = { name = hmps_fx_reserves add = var:hmps_fx_topup }
+				change_global_variable = { name = hmps_fx_topup_total add = var:hmps_fx_topup }
+			}
+		}
+		set_global_variable = { name = hmps_fx_world_months value = 12 }
+	}
+
+	# 4. Months of imports
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			if = {
+				limit = { var:hmps_fx_import_bill > 0 }
+				set_variable = {
+					name = hmps_fx_months
+					value = {
+						value = var:hmps_fx_reserves
+						divide = var:hmps_fx_import_bill
+					}
+				}
+			}
+			else = {
+				set_variable = { name = hmps_fx_months value = 0 }
+			}
+		}
+	}
+}
+
 # Oregon Trail (oregon.5): gives PROVINCE (ID without p:, e.g. xE5842F) to the USA only if a decentralized country owns it
 hmps_oregon_trail_take_province = {
 	if = {

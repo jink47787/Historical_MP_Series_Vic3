@@ -113,6 +113,7 @@ Thanks to Yyyman for his Italy company changes.
 - Added era 1 company 
 - Added new State Capitalism law
 - MAPI readjusted to be harder to get and more spread out around techs
+- Market owners now track FX reserves in £ and months of imports, fed by net exports and gold mining, updated weekly alongside the balance of trade, and starting at 12 months. Shown as a new Reserves line in the market panel, no gameplay effect yet
 #### Goods
 - Hardwood made into its own resource
 - Added canals
