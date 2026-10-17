@@ -730,7 +730,9 @@ hmps_balance_of_trade_update_effect = {
 }
 
 # HMPS Bank Rate and Reserves, phase 1 (ledger). Runs once a week from HMPS_utility_je's on_weekly_pulse
-# (common/journal_entries/z_HMPS_utility.txt), right after the Balance of Trade update. No gameplay effects yet: it only keeps each market's FX reserves.
+# (common/journal_entries/z_HMPS_utility.txt), right after the Balance of Trade update, and once on day 0 from HMPS_balance_of_trade_start
+# (common/on_actions/HMPS_on_action.txt) to fill the panel; the first weekly run then resets the starting reserves from real trade.
+# Steps 1-4 keep each market's FX reserves (no effects yet); step 5 is the bank rate.
 # Money is stored on the market owner, in £:
 #   hmps_fx_reserves     FX reserves (may go below zero in later phases)
 #   hmps_fx_exports, hmps_fx_imports, hmps_fx_net   last week's market trade (weekly values), exports scaled by
@@ -748,6 +750,12 @@ hmps_balance_of_trade_update_effect = {
 # Whenever the world average falls below 12 months, every market gains the same number of months of its own imports.
 # Markets owned by decentralized countries are skipped.
 # Known gap: an annexed market owner's reserves are lost, because no hook fires for annexation.
+# Phase 2 (bank rate), also on the market owner:
+#   hmps_fx_rate         bank rate, 2 to 10 (4 = neutral, no effects); set by the market panel buttons (hmps_fx_rate_change_effect)
+#   hmps_fx_rate_steps   steps from 4% (rate - 4); every rate effect follows it at once (no phase-in, so a hike can't be dropped before its costs arrive)
+#   hmps_fx_rate_lock    timed (30 days) after a change, so the rate moves one step per month
+# Step 5 gives new owners a rate, then hmps_bot.2 refreshes every country's rate modifiers (hmps_fx_rate_modifiers_effect).
+# Known gap: a country that leaves a market starts at 4%.
 hmps_fx_weekly_effect = {
 	hmps_balance_of_trade_world_totals_effect = yes
 
@@ -832,8 +840,14 @@ hmps_fx_weekly_effect = {
 	# 2. Trade, GDP and gold per market; new owners start at 12 months; reserves credited
 	set_global_variable = { name = hmps_fx_world_reserves value = 0 }
 	set_global_variable = { name = hmps_fx_world_bill value = 0 }
+	# The first weekly run after day 0 (hmps_fx_start_pending) starts the running totals and reserves again from real trade
 	if = {
-		limit = { NOT = { has_global_variable = hmps_fx_world_gold_total } }
+		limit = {
+			OR = {
+				NOT = { has_global_variable = hmps_fx_world_gold_total }
+				has_global_variable = hmps_fx_start_pending
+			}
+		}
 		set_global_variable = { name = hmps_fx_world_gold_total value = 0 }
 		set_global_variable = { name = hmps_fx_world_imports_total value = 0 }
 		set_global_variable = { name = hmps_fx_topup_count value = 0 }
@@ -934,7 +948,12 @@ hmps_fx_weekly_effect = {
 				}
 			}
 			if = {
-				limit = { NOT = { has_variable = hmps_fx_reserves } }
+				limit = {
+					OR = {
+						NOT = { has_variable = hmps_fx_reserves }
+						has_global_variable = hmps_fx_start_pending
+					}
+				}
 				set_variable = {
 					name = hmps_fx_reserves
 					value = {
@@ -951,6 +970,10 @@ hmps_fx_weekly_effect = {
 			change_global_variable = { name = hmps_fx_world_gold_total add = var:hmps_fx_gold }
 			change_global_variable = { name = hmps_fx_world_imports_total add = var:hmps_fx_imports }
 		}
+	}
+	if = {
+		limit = { has_global_variable = hmps_fx_start_pending }
+		remove_global_variable = hmps_fx_start_pending
 	}
 
 	# 3. World average and top-up
@@ -1015,6 +1038,115 @@ hmps_fx_weekly_effect = {
 			}
 		}
 	}
+
+	# 5. Bank rate: every market owner has a rate
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			hmps_fx_rate_init_effect = yes
+		}
+	}
+	every_country = {
+		limit = { NOT = { is_country_type = decentralized } }
+		trigger_event = { id = hmps_bot.2 }
+	}
+}
+
+# HMPS Bank Rate and Reserves, phase 2. Market owner scope: a rate of 4%, if the owner has none yet
+hmps_fx_rate_init_effect = {
+	if = {
+		limit = { NOT = { has_variable = hmps_fx_rate } }
+		set_variable = { name = hmps_fx_rate value = 4 }
+		set_variable = { name = hmps_fx_rate_steps value = 0 }
+	}
+}
+
+# Market owner scope; STEP = 1 (hike) or -1 (cut). Called by the market panel's rate buttons (common/scripted_guis/HMPS_scripted_gui.txt).
+# Locks the rate for 30 days and refreshes every member's modifiers at once (all rate effects change the same day)
+hmps_fx_rate_change_effect = {
+	hmps_fx_rate_init_effect = yes
+	change_variable = { name = hmps_fx_rate add = $STEP$ }
+	set_variable = {
+		name = hmps_fx_rate_steps
+		value = {
+			value = var:hmps_fx_rate
+			subtract = 4
+		}
+	}
+	set_variable = { name = hmps_fx_rate_lock days = 30 }
+	market = { save_scope_as = hmps_fx_rate_market }
+	every_country = {
+		limit = {
+			market = scope:hmps_fx_rate_market
+			NOT = { is_country_type = decentralized }
+		}
+		trigger_event = { id = hmps_bot.2 }
+	}
+}
+
+# Country scope; root must be the country (add_modifier's multiplier reads var: from root), so it is only called from the
+# hidden event hmps_bot.2 (events/00_HMPS_utility.txt). Copies the market owner's steps and re-applies the rate modifier
+# (common/static_modifiers/z_HMPS_other_modifiers.txt) only when they changed, because re-applying makes the game recalculate.
+hmps_fx_rate_modifiers_effect = {
+	market = {
+		owner = { save_scope_as = hmps_fx_rate_owner }
+	}
+	set_variable = { name = hmps_fx_rate_steps_new value = 0 }
+	if = {
+		limit = {
+			NOT = { is_country_type = decentralized }
+			scope:hmps_fx_rate_owner = {
+				NOT = { is_country_type = decentralized }
+				has_variable = hmps_fx_rate
+			}
+		}
+		set_variable = { name = hmps_fx_rate_steps_new value = scope:hmps_fx_rate_owner.var:hmps_fx_rate_steps }
+	}
+	if = {
+		limit = {
+			OR = {
+				NOT = { has_variable = hmps_fx_rate_steps_here }
+				var:hmps_fx_rate_steps_here != var:hmps_fx_rate_steps_new
+			}
+		}
+		set_variable = { name = hmps_fx_rate_steps_here value = var:hmps_fx_rate_steps_new }
+		if = {
+			limit = { has_modifier = hmps_fx_rate_hike }
+			remove_modifier = hmps_fx_rate_hike
+		}
+		if = {
+			limit = { has_modifier = hmps_fx_rate_cut }
+			remove_modifier = hmps_fx_rate_cut
+		}
+		# Multipliers must be positive, so cuts use their own modifiers
+		if = {
+			limit = { var:hmps_fx_rate_steps_here > 0 }
+			set_variable = { name = hmps_fx_rate_mult value = var:hmps_fx_rate_steps_here }
+			add_modifier = {
+				name = hmps_fx_rate_hike
+				multiplier = var:hmps_fx_rate_mult
+			}
+		}
+		else_if = {
+			limit = { var:hmps_fx_rate_steps_here < 0 }
+			set_variable = {
+				name = hmps_fx_rate_mult
+				value = {
+					value = var:hmps_fx_rate_steps_here
+					multiply = -1
+				}
+			}
+			add_modifier = {
+				name = hmps_fx_rate_cut
+				multiplier = var:hmps_fx_rate_mult
+			}
+		}
+	}
+	remove_variable = hmps_fx_rate_steps_new
 }
 
 # Oregon Trail (oregon.5): gives PROVINCE (ID without p:, e.g. xE5842F) to the USA only if a decentralized country owns it

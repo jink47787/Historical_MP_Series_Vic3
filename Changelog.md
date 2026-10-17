@@ -113,7 +113,8 @@ Thanks to Yyyman for his Italy company changes.
 - Added era 1 company 
 - Added new State Capitalism law
 - MAPI readjusted to be harder to get and more spread out around techs
-- Market owners now track FX reserves in £ and months of imports, fed by net exports and gold mining, updated weekly alongside the balance of trade, and starting at 12 months. Shown as a new Reserves line in the market panel, no gameplay effect yet
+- Market owners now track FX reserves in £ and months of imports, fed by net exports and gold mining, updated weekly alongside the balance of trade, and starting at 12 months (set from the first full week of trade). Shown from day 0 of a new game as a new Reserves line in the market panel (the Bank Rate too), with a hoverable World Top-up explanation in its tooltip (the world average line was removed). Market owners (players only, AI stays at 4%) can set a Bank Rate from 2% to 10% with a row of 9 coins under Reserves, styled like the vanilla tax level selector. The current rate is framed, and only the coins next to it can be clicked, one point per month, which applies to every country in the market. Bank Rate is now a game concept with a description, and each coin's tooltip lists every effect at that rate (loan interest, throughput, investment pool contribution per pop type, export and import advantage), with (Current Level) on the current rate. 4% is neutral. All Bank Rate effects now apply at once when the rate changes, with no 6-month build-up. Each point above 4%: +1 point loan interest, -2% throughput, -2% wages (all acceptance levels), +2 points investment pool contribution, +5% export advantage, -5% import advantage. Each point below 4%: -1 point loan interest, -2 points pool contribution, -5% export advantage, +5% import advantage. Cuts don't change wages. Balance of Trade penalties stay for now
+- Investment pool contribution lines in the Bank Rate tooltips and modifiers (per pop type) now link to the Reinvestment explanation instead of the general Investment Pool one
 #### Goods
 - Hardwood made into its own resource
 - Added canals
@@ -258,6 +259,7 @@ Thanks to Yyyman for his Italy company changes.
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
 - More decimals shown
+- Trade tab in the market panel has a new Trade and Reserves header that collapses or expands the Balance of Trade, Reserves and Bank Rate lines (open by default)
 
 ## Stability/Bug Fixes
 - Removed ability to pause/change speed without submod
