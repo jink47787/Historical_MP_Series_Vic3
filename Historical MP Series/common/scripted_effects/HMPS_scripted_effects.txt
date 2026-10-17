@@ -671,40 +671,7 @@ hmps_balance_of_trade_update_effect = {
 		set_variable = { name = hmps_bot_share value = 0 }
 	}
 
-	# Penalty in percentage points: 5 per 1% of GDP (500 per 1.0 share), max 50
-	set_variable = { name = hmps_bot_penalty value = 0 }
-	if = {
-		limit = { var:hmps_bot_share > 0.01 }
-		set_variable = {
-			name = hmps_bot_penalty
-			value = {
-				value = var:hmps_bot_share
-				multiply = 500
-				max = 50
-			}
-		}
-	}
-	else_if = {
-		limit = { var:hmps_bot_share < -0.01 }
-		set_variable = {
-			name = hmps_bot_penalty
-			value = {
-				value = var:hmps_bot_share
-				multiply = -500
-				max = 50
-			}
-		}
-	}
-
-	# Buff on the other side: half the penalty (max 25)
-	set_variable = {
-		name = hmps_bot_buff
-		value = {
-			value = var:hmps_bot_penalty
-			divide = 2
-		}
-	}
-
+	# The trade-advantage penalties were replaced by the price level (bank rate phase 3b); this clears them from older saves
 	if = {
 		limit = { has_modifier = hmps_trade_surplus_penalty }
 		remove_modifier = hmps_trade_surplus_penalty
@@ -714,18 +681,9 @@ hmps_balance_of_trade_update_effect = {
 		remove_modifier = hmps_trade_deficit_penalty
 	}
 	if = {
-		limit = { var:hmps_bot_share > 0.01 }
-		add_modifier = {
-			name = hmps_trade_surplus_penalty
-			multiplier = var:hmps_bot_penalty
-		}
-	}
-	else_if = {
-		limit = { var:hmps_bot_share < -0.01 }
-		add_modifier = {
-			name = hmps_trade_deficit_penalty
-			multiplier = var:hmps_bot_penalty
-		}
+		limit = { has_variable = hmps_bot_penalty }
+		remove_variable = hmps_bot_penalty
+		remove_variable = hmps_bot_buff
 	}
 }
 
@@ -753,29 +711,35 @@ hmps_balance_of_trade_update_effect = {
 # Phase 2 (bank rate), also on the market owner:
 #   hmps_fx_rate         bank rate, 2 to 10 (4 = neutral, no effects); set by the market panel buttons (hmps_fx_rate_change_effect)
 #   hmps_fx_rate_steps   steps from 4% (rate - 4); every rate effect follows it at once (no phase-in, so a hike can't be dropped before its costs arrive)
-#   hmps_fx_rate_lock    timed (30 days) after a change, so the rate moves one step per month
-# Step 6 gives new owners a rate, then hmps_bot.2 refreshes every country's rate modifiers (hmps_fx_rate_modifiers_effect).
+#   hmps_fx_rate_lock    timed (30 days) after a change, so the rate moves at most two points per month
+# Step 6 gives new owners a rate; after step 7, hmps_bot.2 refreshes every country's rate modifiers (hmps_fx_rate_modifiers_effect).
 # Known gap: a country that leaves a market starts at 4%.
 # Phase 3 (capital flow), weekly, so every yearly figure is divided by 52. On the market owner, in £ (last week's values):
-#   hmps_fx_trade        total trade (scaled exports + imports); the reference-rate weight (= GDP x openness)
+#   hmps_fx_trade        total trade (scaled exports + imports); picks the leader and sets the commission
 #   hmps_fx_foreign      foreign money held: inflows add, outflows subtract (positive = owed abroad, negative = lent abroad);
 #                        moves with the reserves when a country changes market
 #   hmps_fx_interest     interest: debtors pay foreign money x own rate / 52 from reserves, creditors share it by what each lent
-#   hmps_fx_flow         capital flow: total trade x (rate - reference) x 1% x world GDP / world trade / 52 (= 1% of GDP a year per
-#                        point at average openness), capped at 5% of GDP a year, then the larger side (inflows or outflows) is scaled
-#                        down to match the smaller. Reserves and foreign money move by the full flow
+#   hmps_fx_flow         capital flow: (rate + pull - reference) x 1% of GDP a year / 52, no cap; sums to zero against the GDP-weighted
+#                        reference. 0 for an isolationist market owner. Reserves and foreign money move by the full flow
+#   hmps_fx_pull         safe-haven pull on the issuer (its share of 1 point) and a former issuer (its fading share); kept for the previews
 #   hmps_fx_pool_moved   investment pool moved: senders owe 50% of their outflow, split among member countries by GDP share; a country
 #                        pays only if its own investment_pool covers its full share (a negative pool is reset to 0, so money would be
 #                        lost); receivers share only what was paid, by inflow, then by GDP share
-#   hmps_fx_pool_share   on every member country: its own part of hmps_fx_pool_moved, for the panel
+#   hmps_fx_pool_share   on every member country: its own part of hmps_fx_pool_moved, for the Investment Pool tooltip
 #   hmps_fx_commission   London's commission: every other market pays 0.5% of its total trade to the issuer (split with a fading
 #                        former issuer). Safe-haven pull: in the capital flow the issuer's rate counts 1 point higher (same split)
 # Globals: hmps_fx_issuer (reserve currency; Britain's market at the start), hmps_fx_leader (largest total trade), hmps_fx_challenger and
 # hmps_fx_lead_weeks (the role passes after 104 weeks = 24 months in the lead), hmps_fx_old_issuer and hmps_fx_old_issuer_weeks (its
-# commission and pull fade over 52 weeks; shares in hmps_fx_old_share and hmps_fx_issuer_share during the week), hmps_fx_ref_rate (rates weighted by total trade, the issuer's weight doubled), and the test lines
+# commission and pull fade over 52 weeks; shares in hmps_fx_old_share and hmps_fx_issuer_share during the week), hmps_fx_ref_rate (rates +
+# pull weighted by GDP, isolationist owners left out), hmps_fx_world_gdp (GDP of the markets in that average), and the test lines
 # hmps_fx_left_flow, hmps_fx_left_pool and hmps_fx_left_interest (rounding remainders given to the largest receiver each week, near 0).
 #   hmps_fx_change       change in reserves: net exports + gold + capital flow + interest + commission + top-up (not market moves)
-# Phases 4-5 add the Defend, Suspend and on-paper multipliers on inflows (marked in step 3d).
+# Phase 3b (price level), on the market owner:
+#   hmps_fx_price_target  (months - world average) / 3 + (4 - rate) / 2, capped at -4 to 4, not rounded
+#   hmps_fx_price_level   whole steps, -4 to 4 (positive = inflation); a new owner, or a country that leaves a market, starts at 0
+#   hmps_fx_price_weeks   weeks in a row with the target at least 1 step away; at 26 the level steps toward it and the count restarts
+# Step 7 sets these; hmps_bot.2 then pushes the level to every member as the Inflation or Deflation modifier (hmps_fx_price_modifiers_effect).
+# Phases 4-5 add the Defend, Suspend and on-paper multipliers on inflows (marked in step 3d), and the crisis freeze in step 7.
 hmps_fx_weekly_effect = {
 	hmps_balance_of_trade_world_totals_effect = yes
 
@@ -1191,10 +1155,10 @@ hmps_fx_weekly_effect = {
 		set_global_variable = { name = hmps_fx_issuer_share value = 1 }
 	}
 
-	# b) Reference rate: rates weighted by total trade (= GDP x openness), the issuer's weight doubled
-	set_global_variable = { name = hmps_fx_ref_weight value = 0 }
+	# b) Reference rate: the world average of effective rates, weighted by GDP. Effective rate = rate + safe-haven pull (hmps_fx_pull: the
+	#    issuer's rate counts 1 point higher x its share; a former issuer's fades the same way). Isolationist market owners stay out of the
+	#    average and have no flow. hmps_fx_world_gdp (the included markets) is kept for the coin previews (hmps_fx_flow_at_N script values)
 	set_global_variable = { name = hmps_fx_ref_sum value = 0 }
-	set_global_variable = { name = hmps_fx_world_trade value = 0 }
 	set_global_variable = { name = hmps_fx_world_gdp value = 0 }
 	every_market = {
 		limit = {
@@ -1203,48 +1167,51 @@ hmps_fx_weekly_effect = {
 			}
 		}
 		owner = {
-			set_variable = { name = hmps_fx_tmp value = var:hmps_fx_trade }
 			if = {
 				limit = { this = global_var:hmps_fx_issuer }
-				change_variable = { name = hmps_fx_tmp multiply = 2 }
+				set_variable = { name = hmps_fx_pull value = global_var:hmps_fx_issuer_share }
 			}
-			change_global_variable = { name = hmps_fx_ref_weight add = var:hmps_fx_tmp }
-			change_variable = { name = hmps_fx_tmp multiply = var:hmps_fx_rate }
-			change_global_variable = { name = hmps_fx_ref_sum add = var:hmps_fx_tmp }
-			remove_variable = hmps_fx_tmp
-			change_global_variable = { name = hmps_fx_world_trade add = var:hmps_fx_trade }
-			change_global_variable = { name = hmps_fx_world_gdp add = var:hmps_fx_gdp }
+			else_if = {
+				limit = {
+					has_global_variable = hmps_fx_old_issuer
+					this = global_var:hmps_fx_old_issuer
+				}
+				set_variable = { name = hmps_fx_pull value = global_var:hmps_fx_old_share }
+			}
+			else_if = {
+				limit = { has_variable = hmps_fx_pull }
+				remove_variable = hmps_fx_pull
+			}
+			if = {
+				limit = {
+					NOT = { has_law_or_variant = law_type:law_isolationism }
+				}
+				set_variable = { name = hmps_fx_tmp value = var:hmps_fx_rate }
+				if = {
+					limit = { has_variable = hmps_fx_pull }
+					change_variable = { name = hmps_fx_tmp add = var:hmps_fx_pull }
+				}
+				change_variable = { name = hmps_fx_tmp multiply = var:hmps_fx_gdp }
+				change_global_variable = { name = hmps_fx_ref_sum add = var:hmps_fx_tmp }
+				remove_variable = hmps_fx_tmp
+				change_global_variable = { name = hmps_fx_world_gdp add = var:hmps_fx_gdp }
+			}
 		}
 	}
 	if = {
-		limit = { global_var:hmps_fx_ref_weight > 0 }
+		limit = { global_var:hmps_fx_world_gdp > 0 }
 		set_global_variable = {
 			name = hmps_fx_ref_rate
 			value = {
 				value = global_var:hmps_fx_ref_sum
-				divide = global_var:hmps_fx_ref_weight
+				divide = global_var:hmps_fx_world_gdp
 			}
 		}
 	}
 	else = {
 		set_global_variable = { name = hmps_fx_ref_rate value = 4 }
 	}
-	remove_global_variable = hmps_fx_ref_weight
 	remove_global_variable = hmps_fx_ref_sum
-	# World GDP per £ of weekly world trade: turns a market's trade into its GDP x openness / world average openness
-	if = {
-		limit = { global_var:hmps_fx_world_trade > 0 }
-		set_global_variable = {
-			name = hmps_fx_flow_scale
-			value = {
-				value = global_var:hmps_fx_world_gdp
-				divide = global_var:hmps_fx_world_trade
-			}
-		}
-	}
-	else = {
-		set_global_variable = { name = hmps_fx_flow_scale value = 0 }
-	}
 
 	# c) Interest on last week's foreign money held: debtors pay their own rate / 52 from reserves; creditors share it by what each lent.
 	#    Rounding leaves a small remainder, which goes to the largest creditor
@@ -1338,10 +1305,7 @@ hmps_fx_weekly_effect = {
 		remove_global_variable = hmps_fx_top_amount
 	}
 
-	# d) Capital flow: 1% of GDP a year per point of gap at average openness, capped at 5% of GDP a year either way.
-	#    Safe-haven pull: the issuer's rate counts 1 point higher (x its share; a former issuer's fades the same way)
-	set_global_variable = { name = hmps_fx_world_inflow value = 0 }
-	set_global_variable = { name = hmps_fx_world_outflow value = 0 }
+	# d) Capital flow: (effective rate - reference rate) x 1% of GDP a year, no cap. Against a GDP-weighted average the flows sum to zero
 	every_market = {
 		limit = {
 			owner = {
@@ -1349,108 +1313,31 @@ hmps_fx_weekly_effect = {
 			}
 		}
 		owner = {
-			set_variable = { name = hmps_fx_tmp value = var:hmps_fx_rate }
 			if = {
-				limit = { this = global_var:hmps_fx_issuer }
-				change_variable = { name = hmps_fx_tmp add = global_var:hmps_fx_issuer_share }
-			}
-			else_if = {
-				limit = {
-					has_global_variable = hmps_fx_old_issuer
-					this = global_var:hmps_fx_old_issuer
-				}
-				change_variable = { name = hmps_fx_tmp add = global_var:hmps_fx_old_share }
-			}
-			set_variable = {
-				name = hmps_fx_flow
-				value = {
-					value = var:hmps_fx_tmp
-					subtract = global_var:hmps_fx_ref_rate
-					multiply = var:hmps_fx_trade
-					multiply = global_var:hmps_fx_flow_scale
-					divide = 5200
-				}
-			}
-			remove_variable = hmps_fx_tmp
-			set_variable = {
-				name = hmps_fx_flow_cap
-				value = {
-					value = var:hmps_fx_gdp
-					multiply = 0.05
-					divide = 52
-				}
-			}
-			if = {
-				limit = { var:hmps_fx_flow > var:hmps_fx_flow_cap }
-				set_variable = { name = hmps_fx_flow value = var:hmps_fx_flow_cap }
-			}
-			change_variable = { name = hmps_fx_flow_cap multiply = -1 }
-			if = {
-				limit = { var:hmps_fx_flow < var:hmps_fx_flow_cap }
-				set_variable = { name = hmps_fx_flow value = var:hmps_fx_flow_cap }
-			}
-			remove_variable = hmps_fx_flow_cap
-			# Phases 4-5: the Defend (x2), Suspend (x0.5) and on-paper (-25%) multipliers apply to positive flows here
-			if = {
-				limit = { var:hmps_fx_flow > 0 }
-				change_global_variable = { name = hmps_fx_world_inflow add = var:hmps_fx_flow }
+				limit = { has_law_or_variant = law_type:law_isolationism }
+				set_variable = { name = hmps_fx_flow value = 0 }
 			}
 			else = {
-				change_global_variable = { name = hmps_fx_world_outflow subtract = var:hmps_fx_flow }
-			}
-		}
-	}
-	# The larger side is scaled down to match the smaller, so the flows sum to zero
-	if = {
-		limit = { global_var:hmps_fx_world_inflow > global_var:hmps_fx_world_outflow }
-		set_global_variable = {
-			name = hmps_fx_flow_ratio
-			value = {
-				value = global_var:hmps_fx_world_outflow
-				divide = global_var:hmps_fx_world_inflow
-			}
-		}
-		every_market = {
-			limit = {
-				owner = {
-					NOT = { is_country_type = decentralized }
-				}
-			}
-			owner = {
+				set_variable = { name = hmps_fx_tmp value = var:hmps_fx_rate }
 				if = {
-					limit = { var:hmps_fx_flow > 0 }
-					change_variable = { name = hmps_fx_flow multiply = global_var:hmps_fx_flow_ratio }
+					limit = { has_variable = hmps_fx_pull }
+					change_variable = { name = hmps_fx_tmp add = var:hmps_fx_pull }
 				}
+				set_variable = {
+					name = hmps_fx_flow
+					value = {
+						value = var:hmps_fx_tmp
+						subtract = global_var:hmps_fx_ref_rate
+						multiply = var:hmps_fx_gdp
+						divide = 5200
+					}
+				}
+				remove_variable = hmps_fx_tmp
+				# Phases 4-5: the Defend (x2), Suspend (x0.5) and on-paper (-25%) multipliers apply to positive flows here
 			}
 		}
-		remove_global_variable = hmps_fx_flow_ratio
 	}
-	else_if = {
-		limit = { global_var:hmps_fx_world_outflow > global_var:hmps_fx_world_inflow }
-		set_global_variable = {
-			name = hmps_fx_flow_ratio
-			value = {
-				value = global_var:hmps_fx_world_inflow
-				divide = global_var:hmps_fx_world_outflow
-			}
-		}
-		every_market = {
-			limit = {
-				owner = {
-					NOT = { is_country_type = decentralized }
-				}
-			}
-			owner = {
-				if = {
-					limit = { var:hmps_fx_flow < 0 }
-					change_variable = { name = hmps_fx_flow multiply = global_var:hmps_fx_flow_ratio }
-				}
-			}
-		}
-		remove_global_variable = hmps_fx_flow_ratio
-	}
-	remove_global_variable = hmps_fx_world_outflow
-	# Reserves and foreign money held move by the full flow. Rescaling rounds, so the small remainder goes to the largest inflow
+	# Reserves and foreign money held move by the full flow. Rounding leaves a small remainder, which goes to the largest inflow
 	set_global_variable = { name = hmps_fx_world_inflow value = 0 }
 	set_global_variable = { name = hmps_fx_left_flow value = 0 }
 	set_global_variable = { name = hmps_fx_top_amount value = 0 }
@@ -1623,9 +1510,6 @@ hmps_fx_weekly_effect = {
 	remove_global_variable = hmps_fx_interest_pot
 	remove_global_variable = hmps_fx_world_inflow
 	remove_global_variable = hmps_fx_pool_paid
-	remove_global_variable = hmps_fx_world_trade
-	remove_global_variable = hmps_fx_world_gdp
-	remove_global_variable = hmps_fx_flow_scale
 
 	# 4. World average and top-up
 	if = {
@@ -1712,10 +1596,86 @@ hmps_fx_weekly_effect = {
 			hmps_fx_rate_init_effect = yes
 		}
 	}
+
+	# 7. Price level: the target from reserves against the world average plus the rate; the level steps toward it after
+	# 26 weeks in a row at least 1 step away. Phase 4 adds the crisis freeze here
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			hmps_fx_price_level_effect = yes
+		}
+	}
+
+	# Every country's rate and price-level modifiers, re-applied only where they changed
 	every_country = {
 		limit = { NOT = { is_country_type = decentralized } }
 		trigger_event = { id = hmps_bot.2 }
 	}
+}
+
+# HMPS Bank Rate and Reserves, phase 3b. Market owner scope, called by hmps_fx_weekly_effect (step 7) after the months and the rate.
+# Target = (months - world average) / 3 + (4 - rate) / 2, capped at -4 to 4. The level moves one whole step toward it once the
+# target has been at least 1 step away for 26 weeks in a row; the count restarts when the gap drops below 1 or the level steps
+hmps_fx_price_level_effect = {
+	if = {
+		limit = { NOT = { has_variable = hmps_fx_price_level } }
+		set_variable = { name = hmps_fx_price_level value = 0 }
+		set_variable = { name = hmps_fx_price_weeks value = 0 }
+	}
+	set_variable = {
+		name = hmps_fx_price_target
+		value = {
+			value = 4
+			subtract = var:hmps_fx_rate
+			divide = 2
+		}
+	}
+	set_variable = {
+		name = hmps_fx_price_target
+		value = {
+			value = var:hmps_fx_months
+			subtract = global_var:hmps_fx_world_months
+			divide = 3
+			add = var:hmps_fx_price_target
+			max = 4
+			min = -4
+		}
+	}
+	set_variable = {
+		name = hmps_fx_price_gap
+		value = {
+			value = var:hmps_fx_price_target
+			subtract = var:hmps_fx_price_level
+		}
+	}
+	if = {
+		limit = {
+			OR = {
+				var:hmps_fx_price_gap >= 1
+				var:hmps_fx_price_gap <= -1
+			}
+		}
+		change_variable = { name = hmps_fx_price_weeks add = 1 }
+		if = {
+			limit = { var:hmps_fx_price_weeks >= 26 }
+			if = {
+				limit = { var:hmps_fx_price_gap > 0 }
+				change_variable = { name = hmps_fx_price_level add = 1 }
+			}
+			else = {
+				change_variable = { name = hmps_fx_price_level subtract = 1 }
+			}
+			set_variable = { name = hmps_fx_price_weeks value = 0 }
+		}
+	}
+	else = {
+		set_variable = { name = hmps_fx_price_weeks value = 0 }
+	}
+	remove_variable = hmps_fx_price_gap
 }
 
 # HMPS Bank Rate and Reserves, phase 3. Called by hmps_fx_weekly_effect (step 3f) after step a set global_var:hmps_fx_old_share.
@@ -1784,11 +1744,12 @@ hmps_fx_rate_init_effect = {
 	}
 }
 
-# Market owner scope; STEP = 1 (hike) or -1 (cut). Called by the market panel's rate buttons (common/scripted_guis/HMPS_scripted_gui.txt).
+# Market owner scope; RATE = the new rate (2 to 10, at most two points from the current one). Called by the bank rate coins
+# (common/scripted_guis/HMPS_scripted_gui.txt).
 # Locks the rate for 30 days and refreshes every member's modifiers at once (all rate effects change the same day)
 hmps_fx_rate_change_effect = {
 	hmps_fx_rate_init_effect = yes
-	change_variable = { name = hmps_fx_rate add = $STEP$ }
+	set_variable = { name = hmps_fx_rate value = $RATE$ }
 	set_variable = {
 		name = hmps_fx_rate_steps
 		value = {
@@ -1866,6 +1827,67 @@ hmps_fx_rate_modifiers_effect = {
 		}
 	}
 	remove_variable = hmps_fx_rate_steps_new
+}
+
+# Country scope; root must be the country, so it is only called from hmps_bot.2 (same reason as hmps_fx_rate_modifiers_effect).
+# Copies the market owner's price level and re-applies hmps_fx_price_inflation or hmps_fx_price_deflation
+# (common/static_modifiers/z_HMPS_other_modifiers.txt), multiplied by the steps, only when the level changed
+hmps_fx_price_modifiers_effect = {
+	market = {
+		owner = { save_scope_as = hmps_fx_price_owner }
+	}
+	set_variable = { name = hmps_fx_price_level_new value = 0 }
+	if = {
+		limit = {
+			NOT = { is_country_type = decentralized }
+			scope:hmps_fx_price_owner = {
+				NOT = { is_country_type = decentralized }
+				has_variable = hmps_fx_price_level
+			}
+		}
+		set_variable = { name = hmps_fx_price_level_new value = scope:hmps_fx_price_owner.var:hmps_fx_price_level }
+	}
+	if = {
+		limit = {
+			OR = {
+				NOT = { has_variable = hmps_fx_price_level_here }
+				var:hmps_fx_price_level_here != var:hmps_fx_price_level_new
+			}
+		}
+		set_variable = { name = hmps_fx_price_level_here value = var:hmps_fx_price_level_new }
+		if = {
+			limit = { has_modifier = hmps_fx_price_inflation }
+			remove_modifier = hmps_fx_price_inflation
+		}
+		if = {
+			limit = { has_modifier = hmps_fx_price_deflation }
+			remove_modifier = hmps_fx_price_deflation
+		}
+		# Multipliers must be positive, so deflation uses its own modifier
+		if = {
+			limit = { var:hmps_fx_price_level_here > 0 }
+			set_variable = { name = hmps_fx_price_mult value = var:hmps_fx_price_level_here }
+			add_modifier = {
+				name = hmps_fx_price_inflation
+				multiplier = var:hmps_fx_price_mult
+			}
+		}
+		else_if = {
+			limit = { var:hmps_fx_price_level_here < 0 }
+			set_variable = {
+				name = hmps_fx_price_mult
+				value = {
+					value = var:hmps_fx_price_level_here
+					multiply = -1
+				}
+			}
+			add_modifier = {
+				name = hmps_fx_price_deflation
+				multiplier = var:hmps_fx_price_mult
+			}
+		}
+	}
+	remove_variable = hmps_fx_price_level_new
 }
 
 # Oregon Trail (oregon.5): gives PROVINCE (ID without p:, e.g. xE5842F) to the USA only if a decentralized country owns it
