@@ -732,7 +732,7 @@ hmps_balance_of_trade_update_effect = {
 # HMPS Bank Rate and Reserves, phase 1 (ledger). Runs once a week from HMPS_utility_je's on_weekly_pulse
 # (common/journal_entries/z_HMPS_utility.txt), right after the Balance of Trade update, and once on day 0 from HMPS_balance_of_trade_start
 # (common/on_actions/HMPS_on_action.txt) to fill the panel; the first weekly run then resets the starting reserves from real trade.
-# Steps 1-4 keep each market's FX reserves (no effects yet); step 5 is the bank rate.
+# Steps 1-2 and 4-5 keep each market's FX reserves (no effects yet); step 3 is the capital flow; step 6 is the bank rate.
 # Money is stored on the market owner, in £:
 #   hmps_fx_reserves     FX reserves (may go below zero in later phases)
 #   hmps_fx_exports, hmps_fx_imports, hmps_fx_net   last week's market trade (weekly values), exports scaled by
@@ -754,8 +754,28 @@ hmps_balance_of_trade_update_effect = {
 #   hmps_fx_rate         bank rate, 2 to 10 (4 = neutral, no effects); set by the market panel buttons (hmps_fx_rate_change_effect)
 #   hmps_fx_rate_steps   steps from 4% (rate - 4); every rate effect follows it at once (no phase-in, so a hike can't be dropped before its costs arrive)
 #   hmps_fx_rate_lock    timed (30 days) after a change, so the rate moves one step per month
-# Step 5 gives new owners a rate, then hmps_bot.2 refreshes every country's rate modifiers (hmps_fx_rate_modifiers_effect).
+# Step 6 gives new owners a rate, then hmps_bot.2 refreshes every country's rate modifiers (hmps_fx_rate_modifiers_effect).
 # Known gap: a country that leaves a market starts at 4%.
+# Phase 3 (capital flow), weekly, so every yearly figure is divided by 52. On the market owner, in £ (last week's values):
+#   hmps_fx_trade        total trade (scaled exports + imports); the reference-rate weight (= GDP x openness)
+#   hmps_fx_foreign      foreign money held: inflows add, outflows subtract (positive = owed abroad, negative = lent abroad);
+#                        moves with the reserves when a country changes market
+#   hmps_fx_interest     interest: debtors pay foreign money x own rate / 52 from reserves, creditors share it by what each lent
+#   hmps_fx_flow         capital flow: total trade x (rate - reference) x 1% x world GDP / world trade / 52 (= 1% of GDP a year per
+#                        point at average openness), capped at 5% of GDP a year, then the larger side (inflows or outflows) is scaled
+#                        down to match the smaller. Reserves and foreign money move by the full flow
+#   hmps_fx_pool_moved   investment pool moved: senders owe 50% of their outflow, split among member countries by GDP share; a country
+#                        pays only if its own investment_pool covers its full share (a negative pool is reset to 0, so money would be
+#                        lost); receivers share only what was paid, by inflow, then by GDP share
+#   hmps_fx_pool_share   on every member country: its own part of hmps_fx_pool_moved, for the panel
+#   hmps_fx_commission   London's commission: every other market pays 0.5% of its total trade to the issuer (split with a fading
+#                        former issuer). Safe-haven pull: in the capital flow the issuer's rate counts 1 point higher (same split)
+# Globals: hmps_fx_issuer (reserve currency; Britain's market at the start), hmps_fx_leader (largest total trade), hmps_fx_challenger and
+# hmps_fx_lead_weeks (the role passes after 104 weeks = 24 months in the lead), hmps_fx_old_issuer and hmps_fx_old_issuer_weeks (its
+# commission and pull fade over 52 weeks; shares in hmps_fx_old_share and hmps_fx_issuer_share during the week), hmps_fx_ref_rate (rates weighted by total trade, the issuer's weight doubled), and the test lines
+# hmps_fx_left_flow, hmps_fx_left_pool and hmps_fx_left_interest (rounding remainders given to the largest receiver each week, near 0).
+#   hmps_fx_change       change in reserves: net exports + gold + capital flow + interest + commission + top-up (not market moves)
+# Phases 4-5 add the Defend, Suspend and on-paper multipliers on inflows (marked in step 3d).
 hmps_fx_weekly_effect = {
 	hmps_balance_of_trade_world_totals_effect = yes
 
@@ -781,15 +801,25 @@ hmps_fx_weekly_effect = {
 					limit = { NOT = { has_variable = hmps_fx_reserves } }
 					set_variable = { name = hmps_fx_reserves value = 0 }
 				}
+				if = {
+					limit = { NOT = { has_variable = hmps_fx_foreign } }
+					set_variable = { name = hmps_fx_foreign value = 0 }
+				}
 			}
 			if = {
-				# A former market owner: its whole pool moves
+				# A former market owner: its whole pool moves, with its foreign money held
 				limit = {
 					scope:hmps_fx_mover = var:hmps_fx_owner
 					has_variable = hmps_fx_reserves
 				}
 				scope:hmps_fx_new_owner = {
 					change_variable = { name = hmps_fx_reserves add = scope:hmps_fx_mover.var:hmps_fx_reserves }
+				}
+				if = {
+					limit = { has_variable = hmps_fx_foreign }
+					scope:hmps_fx_new_owner = {
+						change_variable = { name = hmps_fx_foreign add = scope:hmps_fx_mover.var:hmps_fx_foreign }
+					}
 				}
 			}
 			else_if = {
@@ -818,6 +848,28 @@ hmps_fx_weekly_effect = {
 					change_variable = { name = hmps_fx_reserves add = scope:hmps_fx_mover.var:hmps_fx_move }
 				}
 				remove_variable = hmps_fx_move
+				# ...and the same share of the old market's foreign money held
+				if = {
+					limit = {
+						var:hmps_fx_owner = { has_variable = hmps_fx_foreign }
+					}
+					set_variable = {
+						name = hmps_fx_move
+						value = {
+							value = gdp
+							divide = var:hmps_fx_owner.var:hmps_fx_gdp
+							max = 1
+							multiply = var:hmps_fx_owner.var:hmps_fx_foreign
+						}
+					}
+					var:hmps_fx_owner = {
+						change_variable = { name = hmps_fx_foreign subtract = scope:hmps_fx_mover.var:hmps_fx_move }
+					}
+					scope:hmps_fx_new_owner = {
+						change_variable = { name = hmps_fx_foreign add = scope:hmps_fx_mover.var:hmps_fx_move }
+					}
+					remove_variable = hmps_fx_move
+				}
 			}
 			# A former owner keeps nothing
 			if = {
@@ -826,6 +878,13 @@ hmps_fx_weekly_effect = {
 					has_variable = hmps_fx_reserves
 				}
 				remove_variable = hmps_fx_reserves
+			}
+			if = {
+				limit = {
+					NOT = { scope:hmps_fx_mover = scope:hmps_fx_new_owner }
+					has_variable = hmps_fx_foreign
+				}
+				remove_variable = hmps_fx_foreign
 			}
 		}
 	}
@@ -891,6 +950,13 @@ hmps_fx_weekly_effect = {
 				value = {
 					value = var:hmps_fx_exports
 					subtract = var:hmps_fx_imports
+				}
+			}
+			set_variable = {
+				name = hmps_fx_trade
+				value = {
+					value = var:hmps_fx_exports
+					add = var:hmps_fx_imports
 				}
 			}
 			set_variable = {
@@ -976,7 +1042,592 @@ hmps_fx_weekly_effect = {
 		remove_global_variable = hmps_fx_start_pending
 	}
 
-	# 3. World average and top-up
+	# 3. Capital flow (phase 3). Every transfer moves money between markets, so the world total from step 2 is unchanged
+	# a) Issuer: Britain's market holds the role at the start; the market with the largest total trade is the leader
+	set_global_variable = { name = hmps_fx_top_trade value = -1 }
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			hmps_fx_rate_init_effect = yes
+			if = {
+				limit = { var:hmps_fx_trade > global_var:hmps_fx_top_trade }
+				set_global_variable = { name = hmps_fx_top_trade value = var:hmps_fx_trade }
+				save_scope_as = hmps_fx_leader_scope
+				set_global_variable = { name = hmps_fx_leader value = scope:hmps_fx_leader_scope }
+			}
+		}
+	}
+	remove_global_variable = hmps_fx_top_trade
+	if = {
+		limit = { NOT = { has_global_variable = hmps_fx_issuer } }
+		if = {
+			limit = {
+				exists = c:GBR
+				c:GBR = {
+					is_country_alive = yes
+					NOT = { is_country_type = decentralized }
+				}
+			}
+			c:GBR = {
+				market = {
+					owner = { save_scope_as = hmps_fx_issuer_scope }
+				}
+			}
+		}
+		else = {
+			global_var:hmps_fx_leader = { save_scope_as = hmps_fx_issuer_scope }
+		}
+		set_global_variable = { name = hmps_fx_issuer value = scope:hmps_fx_issuer_scope }
+	}
+	# The issuer no longer owns a counted market: the role passes at once to its market's owner, else to the leader (no fade)
+	if = {
+		limit = {
+			NOT = {
+				global_var:hmps_fx_issuer = {
+					is_country_alive = yes
+					NOT = { is_country_type = decentralized }
+					has_variable = hmps_fx_owner
+					var:hmps_fx_owner = global_var:hmps_fx_issuer
+				}
+			}
+		}
+		if = {
+			limit = {
+				global_var:hmps_fx_issuer = {
+					is_country_alive = yes
+					NOT = { is_country_type = decentralized }
+					has_variable = hmps_fx_owner
+				}
+			}
+			global_var:hmps_fx_issuer = {
+				var:hmps_fx_owner = { save_scope_as = hmps_fx_issuer_scope }
+			}
+		}
+		else = {
+			global_var:hmps_fx_leader = { save_scope_as = hmps_fx_issuer_scope }
+		}
+		set_global_variable = { name = hmps_fx_issuer value = scope:hmps_fx_issuer_scope }
+	}
+	# Challenger: weeks in a row in the lead (the notification comes with the final panel, phase 7)
+	if = {
+		limit = { global_var:hmps_fx_leader = global_var:hmps_fx_issuer }
+		set_global_variable = { name = hmps_fx_lead_weeks value = 0 }
+		if = {
+			limit = { has_global_variable = hmps_fx_challenger }
+			remove_global_variable = hmps_fx_challenger
+		}
+	}
+	else_if = {
+		limit = {
+			has_global_variable = hmps_fx_challenger
+			global_var:hmps_fx_leader = global_var:hmps_fx_challenger
+		}
+		change_global_variable = { name = hmps_fx_lead_weeks add = 1 }
+	}
+	else = {
+		global_var:hmps_fx_leader = { save_scope_as = hmps_fx_challenger_scope }
+		set_global_variable = { name = hmps_fx_challenger value = scope:hmps_fx_challenger_scope }
+		set_global_variable = { name = hmps_fx_lead_weeks value = 1 }
+	}
+	# Handover after 104 weeks (24 months) in the lead; the old issuer's commission fades over 52 weeks (12 months)
+	if = {
+		limit = { global_var:hmps_fx_lead_weeks >= 104 }
+		global_var:hmps_fx_issuer = { save_scope_as = hmps_fx_old_issuer_scope }
+		global_var:hmps_fx_challenger = { save_scope_as = hmps_fx_issuer_scope }
+		set_global_variable = { name = hmps_fx_old_issuer value = scope:hmps_fx_old_issuer_scope }
+		set_global_variable = { name = hmps_fx_old_issuer_weeks value = 52 }
+		set_global_variable = { name = hmps_fx_issuer value = scope:hmps_fx_issuer_scope }
+		remove_global_variable = hmps_fx_challenger
+		set_global_variable = { name = hmps_fx_lead_weeks value = 0 }
+	}
+	# A former issuer that wins the role back stops fading
+	if = {
+		limit = {
+			has_global_variable = hmps_fx_old_issuer
+			global_var:hmps_fx_old_issuer = global_var:hmps_fx_issuer
+		}
+		remove_global_variable = hmps_fx_old_issuer
+		remove_global_variable = hmps_fx_old_issuer_weeks
+	}
+	# A former issuer that died, fell apart or no longer owns a market stops fading at once
+	if = {
+		limit = {
+			has_global_variable = hmps_fx_old_issuer
+			NOT = {
+				global_var:hmps_fx_old_issuer = {
+					is_country_alive = yes
+					NOT = { is_country_type = decentralized }
+					has_variable = hmps_fx_owner
+					var:hmps_fx_owner = global_var:hmps_fx_old_issuer
+				}
+			}
+		}
+		remove_global_variable = hmps_fx_old_issuer
+		remove_global_variable = hmps_fx_old_issuer_weeks
+	}
+	# Shares of London's commission (step f) and the safe-haven pull (step d): a former issuer keeps weeks left / 52, the issuer gets the rest
+	if = {
+		limit = { has_global_variable = hmps_fx_old_issuer }
+		set_global_variable = {
+			name = hmps_fx_old_share
+			value = {
+				value = global_var:hmps_fx_old_issuer_weeks
+				divide = 52
+			}
+		}
+		set_global_variable = {
+			name = hmps_fx_issuer_share
+			value = {
+				value = 1
+				subtract = global_var:hmps_fx_old_share
+			}
+		}
+	}
+	else = {
+		set_global_variable = { name = hmps_fx_issuer_share value = 1 }
+	}
+
+	# b) Reference rate: rates weighted by total trade (= GDP x openness), the issuer's weight doubled
+	set_global_variable = { name = hmps_fx_ref_weight value = 0 }
+	set_global_variable = { name = hmps_fx_ref_sum value = 0 }
+	set_global_variable = { name = hmps_fx_world_trade value = 0 }
+	set_global_variable = { name = hmps_fx_world_gdp value = 0 }
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			set_variable = { name = hmps_fx_tmp value = var:hmps_fx_trade }
+			if = {
+				limit = { this = global_var:hmps_fx_issuer }
+				change_variable = { name = hmps_fx_tmp multiply = 2 }
+			}
+			change_global_variable = { name = hmps_fx_ref_weight add = var:hmps_fx_tmp }
+			change_variable = { name = hmps_fx_tmp multiply = var:hmps_fx_rate }
+			change_global_variable = { name = hmps_fx_ref_sum add = var:hmps_fx_tmp }
+			remove_variable = hmps_fx_tmp
+			change_global_variable = { name = hmps_fx_world_trade add = var:hmps_fx_trade }
+			change_global_variable = { name = hmps_fx_world_gdp add = var:hmps_fx_gdp }
+		}
+	}
+	if = {
+		limit = { global_var:hmps_fx_ref_weight > 0 }
+		set_global_variable = {
+			name = hmps_fx_ref_rate
+			value = {
+				value = global_var:hmps_fx_ref_sum
+				divide = global_var:hmps_fx_ref_weight
+			}
+		}
+	}
+	else = {
+		set_global_variable = { name = hmps_fx_ref_rate value = 4 }
+	}
+	remove_global_variable = hmps_fx_ref_weight
+	remove_global_variable = hmps_fx_ref_sum
+	# World GDP per £ of weekly world trade: turns a market's trade into its GDP x openness / world average openness
+	if = {
+		limit = { global_var:hmps_fx_world_trade > 0 }
+		set_global_variable = {
+			name = hmps_fx_flow_scale
+			value = {
+				value = global_var:hmps_fx_world_gdp
+				divide = global_var:hmps_fx_world_trade
+			}
+		}
+	}
+	else = {
+		set_global_variable = { name = hmps_fx_flow_scale value = 0 }
+	}
+
+	# c) Interest on last week's foreign money held: debtors pay their own rate / 52 from reserves; creditors share it by what each lent.
+	#    Rounding leaves a small remainder, which goes to the largest creditor
+	set_global_variable = { name = hmps_fx_world_lent value = 0 }
+	set_global_variable = { name = hmps_fx_interest_pot value = 0 }
+	set_global_variable = { name = hmps_fx_left_interest value = 0 }
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			if = {
+				limit = { NOT = { has_variable = hmps_fx_foreign } }
+				set_variable = { name = hmps_fx_foreign value = 0 }
+			}
+			set_variable = { name = hmps_fx_interest value = 0 }
+			set_variable = { name = hmps_fx_pool_moved value = 0 }
+			set_variable = { name = hmps_fx_commission value = 0 }
+			if = {
+				limit = { var:hmps_fx_foreign < 0 }
+				change_global_variable = { name = hmps_fx_world_lent subtract = var:hmps_fx_foreign }
+			}
+		}
+	}
+	if = {
+		limit = { global_var:hmps_fx_world_lent > 0 }
+		every_market = {
+			limit = {
+				owner = {
+					NOT = { is_country_type = decentralized }
+				}
+			}
+			owner = {
+				if = {
+					limit = { var:hmps_fx_foreign > 0 }
+					set_variable = {
+						name = hmps_fx_interest
+						value = {
+							value = var:hmps_fx_foreign
+							multiply = var:hmps_fx_rate
+							divide = 5200
+							multiply = -1
+						}
+					}
+					change_variable = { name = hmps_fx_reserves add = var:hmps_fx_interest }
+					change_global_variable = { name = hmps_fx_interest_pot subtract = var:hmps_fx_interest }
+				}
+			}
+		}
+		set_global_variable = { name = hmps_fx_left_interest value = global_var:hmps_fx_interest_pot }
+		set_global_variable = { name = hmps_fx_top_amount value = 0 }
+		every_market = {
+			limit = {
+				owner = {
+					NOT = { is_country_type = decentralized }
+				}
+			}
+			owner = {
+				if = {
+					limit = { var:hmps_fx_foreign < 0 }
+					set_variable = {
+						name = hmps_fx_interest
+						value = {
+							value = var:hmps_fx_foreign
+							divide = global_var:hmps_fx_world_lent
+							multiply = global_var:hmps_fx_interest_pot
+							multiply = -1
+						}
+					}
+					change_variable = { name = hmps_fx_reserves add = var:hmps_fx_interest }
+					change_global_variable = { name = hmps_fx_left_interest subtract = var:hmps_fx_interest }
+					if = {
+						limit = { var:hmps_fx_interest > global_var:hmps_fx_top_amount }
+						save_scope_as = hmps_fx_top_scope
+						set_global_variable = { name = hmps_fx_top value = scope:hmps_fx_top_scope }
+						set_global_variable = { name = hmps_fx_top_amount value = var:hmps_fx_interest }
+					}
+				}
+			}
+		}
+		if = {
+			limit = { has_global_variable = hmps_fx_top }
+			global_var:hmps_fx_top = {
+				change_variable = { name = hmps_fx_interest add = global_var:hmps_fx_left_interest }
+				change_variable = { name = hmps_fx_reserves add = global_var:hmps_fx_left_interest }
+			}
+			remove_global_variable = hmps_fx_top
+		}
+		remove_global_variable = hmps_fx_top_amount
+	}
+
+	# d) Capital flow: 1% of GDP a year per point of gap at average openness, capped at 5% of GDP a year either way.
+	#    Safe-haven pull: the issuer's rate counts 1 point higher (x its share; a former issuer's fades the same way)
+	set_global_variable = { name = hmps_fx_world_inflow value = 0 }
+	set_global_variable = { name = hmps_fx_world_outflow value = 0 }
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			set_variable = { name = hmps_fx_tmp value = var:hmps_fx_rate }
+			if = {
+				limit = { this = global_var:hmps_fx_issuer }
+				change_variable = { name = hmps_fx_tmp add = global_var:hmps_fx_issuer_share }
+			}
+			else_if = {
+				limit = {
+					has_global_variable = hmps_fx_old_issuer
+					this = global_var:hmps_fx_old_issuer
+				}
+				change_variable = { name = hmps_fx_tmp add = global_var:hmps_fx_old_share }
+			}
+			set_variable = {
+				name = hmps_fx_flow
+				value = {
+					value = var:hmps_fx_tmp
+					subtract = global_var:hmps_fx_ref_rate
+					multiply = var:hmps_fx_trade
+					multiply = global_var:hmps_fx_flow_scale
+					divide = 5200
+				}
+			}
+			remove_variable = hmps_fx_tmp
+			set_variable = {
+				name = hmps_fx_flow_cap
+				value = {
+					value = var:hmps_fx_gdp
+					multiply = 0.05
+					divide = 52
+				}
+			}
+			if = {
+				limit = { var:hmps_fx_flow > var:hmps_fx_flow_cap }
+				set_variable = { name = hmps_fx_flow value = var:hmps_fx_flow_cap }
+			}
+			change_variable = { name = hmps_fx_flow_cap multiply = -1 }
+			if = {
+				limit = { var:hmps_fx_flow < var:hmps_fx_flow_cap }
+				set_variable = { name = hmps_fx_flow value = var:hmps_fx_flow_cap }
+			}
+			remove_variable = hmps_fx_flow_cap
+			# Phases 4-5: the Defend (x2), Suspend (x0.5) and on-paper (-25%) multipliers apply to positive flows here
+			if = {
+				limit = { var:hmps_fx_flow > 0 }
+				change_global_variable = { name = hmps_fx_world_inflow add = var:hmps_fx_flow }
+			}
+			else = {
+				change_global_variable = { name = hmps_fx_world_outflow subtract = var:hmps_fx_flow }
+			}
+		}
+	}
+	# The larger side is scaled down to match the smaller, so the flows sum to zero
+	if = {
+		limit = { global_var:hmps_fx_world_inflow > global_var:hmps_fx_world_outflow }
+		set_global_variable = {
+			name = hmps_fx_flow_ratio
+			value = {
+				value = global_var:hmps_fx_world_outflow
+				divide = global_var:hmps_fx_world_inflow
+			}
+		}
+		every_market = {
+			limit = {
+				owner = {
+					NOT = { is_country_type = decentralized }
+				}
+			}
+			owner = {
+				if = {
+					limit = { var:hmps_fx_flow > 0 }
+					change_variable = { name = hmps_fx_flow multiply = global_var:hmps_fx_flow_ratio }
+				}
+			}
+		}
+		remove_global_variable = hmps_fx_flow_ratio
+	}
+	else_if = {
+		limit = { global_var:hmps_fx_world_outflow > global_var:hmps_fx_world_inflow }
+		set_global_variable = {
+			name = hmps_fx_flow_ratio
+			value = {
+				value = global_var:hmps_fx_world_inflow
+				divide = global_var:hmps_fx_world_outflow
+			}
+		}
+		every_market = {
+			limit = {
+				owner = {
+					NOT = { is_country_type = decentralized }
+				}
+			}
+			owner = {
+				if = {
+					limit = { var:hmps_fx_flow < 0 }
+					change_variable = { name = hmps_fx_flow multiply = global_var:hmps_fx_flow_ratio }
+				}
+			}
+		}
+		remove_global_variable = hmps_fx_flow_ratio
+	}
+	remove_global_variable = hmps_fx_world_outflow
+	# Reserves and foreign money held move by the full flow. Rescaling rounds, so the small remainder goes to the largest inflow
+	set_global_variable = { name = hmps_fx_world_inflow value = 0 }
+	set_global_variable = { name = hmps_fx_left_flow value = 0 }
+	set_global_variable = { name = hmps_fx_top_amount value = 0 }
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			change_variable = { name = hmps_fx_reserves add = var:hmps_fx_flow }
+			change_variable = { name = hmps_fx_foreign add = var:hmps_fx_flow }
+			change_global_variable = { name = hmps_fx_left_flow subtract = var:hmps_fx_flow }
+			if = {
+				limit = { var:hmps_fx_flow > 0 }
+				change_global_variable = { name = hmps_fx_world_inflow add = var:hmps_fx_flow }
+				if = {
+					limit = { var:hmps_fx_flow > global_var:hmps_fx_top_amount }
+					save_scope_as = hmps_fx_top_scope
+					set_global_variable = { name = hmps_fx_top value = scope:hmps_fx_top_scope }
+					set_global_variable = { name = hmps_fx_top_amount value = var:hmps_fx_flow }
+				}
+			}
+		}
+	}
+	if = {
+		limit = { has_global_variable = hmps_fx_top }
+		global_var:hmps_fx_top = {
+			change_variable = { name = hmps_fx_flow add = global_var:hmps_fx_left_flow }
+			change_variable = { name = hmps_fx_reserves add = global_var:hmps_fx_left_flow }
+			change_variable = { name = hmps_fx_foreign add = global_var:hmps_fx_left_flow }
+		}
+		change_global_variable = { name = hmps_fx_world_inflow add = global_var:hmps_fx_left_flow }
+		remove_global_variable = hmps_fx_top
+	}
+	remove_global_variable = hmps_fx_top_amount
+
+	# e) Investment pool: senders owe 50% of their outflow, split among member countries by GDP share. A country pays only if its
+	#    pool covers its full share (a negative pool is reset to 0, so money would be lost); receivers share only what was paid
+	set_global_variable = { name = hmps_fx_pool_paid value = 0 }
+	every_country = {
+		limit = { has_variable = hmps_fx_owner }
+		set_variable = { name = hmps_fx_pool_share value = 0 }
+	}
+	every_country = {
+		limit = {
+			NOT = { is_country_type = decentralized }
+			has_variable = hmps_fx_owner
+			var:hmps_fx_owner = {
+				NOT = { is_country_type = decentralized }
+				has_variable = hmps_fx_flow
+				has_variable = hmps_fx_gdp
+				var:hmps_fx_flow < 0
+				var:hmps_fx_gdp > 0
+			}
+		}
+		save_scope_as = hmps_fx_pool_payer
+		set_variable = {
+			name = hmps_fx_pool_owed
+			value = {
+				value = gdp
+				divide = var:hmps_fx_owner.var:hmps_fx_gdp
+				max = 1
+				multiply = var:hmps_fx_owner.var:hmps_fx_flow
+				multiply = -0.5
+			}
+		}
+		if = {
+			limit = {
+				var:hmps_fx_pool_owed > 0
+				investment_pool >= var:hmps_fx_pool_owed
+			}
+			add_investment_pool = {
+				value = var:hmps_fx_pool_owed
+				multiply = -1
+			}
+			change_global_variable = { name = hmps_fx_pool_paid add = var:hmps_fx_pool_owed }
+			change_variable = { name = hmps_fx_pool_share subtract = var:hmps_fx_pool_owed }
+			var:hmps_fx_owner = {
+				change_variable = { name = hmps_fx_pool_moved subtract = scope:hmps_fx_pool_payer.var:hmps_fx_pool_owed }
+			}
+		}
+		remove_variable = hmps_fx_pool_owed
+	}
+	set_global_variable = { name = hmps_fx_left_pool value = global_var:hmps_fx_pool_paid }
+	if = {
+		limit = {
+			global_var:hmps_fx_pool_paid > 0
+			global_var:hmps_fx_world_inflow > 0
+		}
+		set_global_variable = { name = hmps_fx_top_amount value = 0 }
+		every_country = {
+			limit = {
+				NOT = { is_country_type = decentralized }
+				has_variable = hmps_fx_owner
+				var:hmps_fx_owner = {
+					NOT = { is_country_type = decentralized }
+					has_variable = hmps_fx_flow
+					has_variable = hmps_fx_gdp
+					var:hmps_fx_flow > 0
+					var:hmps_fx_gdp > 0
+				}
+			}
+			save_scope_as = hmps_fx_pool_payee
+			set_variable = {
+				name = hmps_fx_pool_due
+				value = {
+					value = gdp
+					divide = var:hmps_fx_owner.var:hmps_fx_gdp
+					max = 1
+					multiply = var:hmps_fx_owner.var:hmps_fx_flow
+					divide = global_var:hmps_fx_world_inflow
+					multiply = global_var:hmps_fx_pool_paid
+				}
+			}
+			add_investment_pool = var:hmps_fx_pool_due
+			change_variable = { name = hmps_fx_pool_share add = var:hmps_fx_pool_due }
+			change_global_variable = { name = hmps_fx_left_pool subtract = var:hmps_fx_pool_due }
+			var:hmps_fx_owner = {
+				change_variable = { name = hmps_fx_pool_moved add = scope:hmps_fx_pool_payee.var:hmps_fx_pool_due }
+			}
+			if = {
+				limit = { var:hmps_fx_pool_due > global_var:hmps_fx_top_amount }
+				set_global_variable = { name = hmps_fx_top value = scope:hmps_fx_pool_payee }
+				set_global_variable = { name = hmps_fx_top_amount value = var:hmps_fx_pool_due }
+			}
+			remove_variable = hmps_fx_pool_due
+		}
+		# Rounding leaves a small remainder, which goes to the largest receiver. It just gained far more, so a negative remainder
+		# can't take its pool below zero (checked: its gain plus the remainder must not be negative)
+		change_global_variable = { name = hmps_fx_top_amount add = global_var:hmps_fx_left_pool }
+		if = {
+			limit = {
+				has_global_variable = hmps_fx_top
+				global_var:hmps_fx_top_amount >= 0
+			}
+			global_var:hmps_fx_top = {
+				add_investment_pool = global_var:hmps_fx_left_pool
+				change_variable = { name = hmps_fx_pool_share add = global_var:hmps_fx_left_pool }
+				var:hmps_fx_owner = {
+					change_variable = { name = hmps_fx_pool_moved add = global_var:hmps_fx_left_pool }
+				}
+			}
+		}
+		if = {
+			limit = { has_global_variable = hmps_fx_top }
+			remove_global_variable = hmps_fx_top
+		}
+		remove_global_variable = hmps_fx_top_amount
+	}
+
+	# f) London's commission: every other market pays 0.5% of its weekly total trade, split between the issuer and a former issuer
+	#    (weeks left / 52, fading over 52 weeks)
+	hmps_fx_commission_effect = yes
+	if = {
+		limit = { has_global_variable = hmps_fx_old_issuer }
+		change_global_variable = { name = hmps_fx_old_issuer_weeks subtract = 1 }
+		if = {
+			limit = { global_var:hmps_fx_old_issuer_weeks <= 0 }
+			remove_global_variable = hmps_fx_old_issuer
+			remove_global_variable = hmps_fx_old_issuer_weeks
+		}
+	}
+	remove_global_variable = hmps_fx_issuer_share
+	if = {
+		limit = { has_global_variable = hmps_fx_old_share }
+		remove_global_variable = hmps_fx_old_share
+	}
+	remove_global_variable = hmps_fx_world_lent
+	remove_global_variable = hmps_fx_interest_pot
+	remove_global_variable = hmps_fx_world_inflow
+	remove_global_variable = hmps_fx_pool_paid
+	remove_global_variable = hmps_fx_world_trade
+	remove_global_variable = hmps_fx_world_gdp
+	remove_global_variable = hmps_fx_flow_scale
+
+	# 4. World average and top-up
 	if = {
 		limit = { global_var:hmps_fx_world_bill > 0 }
 		set_global_variable = {
@@ -1015,7 +1666,7 @@ hmps_fx_weekly_effect = {
 		set_global_variable = { name = hmps_fx_world_months value = 12 }
 	}
 
-	# 4. Months of imports
+	# 5. Months of imports, and the week's change in reserves for the panel
 	every_market = {
 		limit = {
 			owner = {
@@ -1023,6 +1674,17 @@ hmps_fx_weekly_effect = {
 			}
 		}
 		owner = {
+			set_variable = {
+				name = hmps_fx_change
+				value = {
+					value = var:hmps_fx_net
+					add = var:hmps_fx_gold
+					add = var:hmps_fx_flow
+					add = var:hmps_fx_interest
+					add = var:hmps_fx_commission
+					add = var:hmps_fx_topup
+				}
+			}
 			if = {
 				limit = { var:hmps_fx_import_bill > 0 }
 				set_variable = {
@@ -1039,7 +1701,7 @@ hmps_fx_weekly_effect = {
 		}
 	}
 
-	# 5. Bank rate: every market owner has a rate
+	# 6. Bank rate: every market owner has a rate
 	every_market = {
 		limit = {
 			owner = {
@@ -1054,6 +1716,63 @@ hmps_fx_weekly_effect = {
 		limit = { NOT = { is_country_type = decentralized } }
 		trigger_event = { id = hmps_bot.2 }
 	}
+}
+
+# HMPS Bank Rate and Reserves, phase 3. Called by hmps_fx_weekly_effect (step 3f) after step a set global_var:hmps_fx_old_share.
+# Every market except the issuer and a former issuer pays 0.5% of its weekly total trade. A former issuer gets old_share of the
+# payments and the issuer gets the rest, so the world total is unchanged and each market pays once
+hmps_fx_commission_effect = {
+	if = {
+		limit = { has_global_variable = hmps_fx_old_issuer }
+		global_var:hmps_fx_old_issuer = { save_scope_as = hmps_fx_old_earner }
+	}
+	else = {
+		global_var:hmps_fx_issuer = { save_scope_as = hmps_fx_old_earner }
+	}
+	set_global_variable = { name = hmps_fx_commission_paid value = 0 }
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+				NOT = { this = global_var:hmps_fx_issuer }
+				NOT = { this = scope:hmps_fx_old_earner }
+			}
+		}
+		owner = {
+			set_variable = {
+				name = hmps_fx_tmp
+				value = {
+					value = var:hmps_fx_trade
+					multiply = 0.005
+				}
+			}
+			change_variable = { name = hmps_fx_reserves subtract = var:hmps_fx_tmp }
+			change_variable = { name = hmps_fx_commission subtract = var:hmps_fx_tmp }
+			change_global_variable = { name = hmps_fx_commission_paid add = var:hmps_fx_tmp }
+			remove_variable = hmps_fx_tmp
+		}
+	}
+	if = {
+		limit = { has_global_variable = hmps_fx_old_issuer }
+		set_global_variable = {
+			name = hmps_fx_commission_old
+			value = {
+				value = global_var:hmps_fx_commission_paid
+				multiply = global_var:hmps_fx_old_share
+			}
+		}
+		scope:hmps_fx_old_earner = {
+			change_variable = { name = hmps_fx_reserves add = global_var:hmps_fx_commission_old }
+			change_variable = { name = hmps_fx_commission add = global_var:hmps_fx_commission_old }
+		}
+		change_global_variable = { name = hmps_fx_commission_paid subtract = global_var:hmps_fx_commission_old }
+		remove_global_variable = hmps_fx_commission_old
+	}
+	global_var:hmps_fx_issuer = {
+		change_variable = { name = hmps_fx_reserves add = global_var:hmps_fx_commission_paid }
+		change_variable = { name = hmps_fx_commission add = global_var:hmps_fx_commission_paid }
+	}
+	remove_global_variable = hmps_fx_commission_paid
 }
 
 # HMPS Bank Rate and Reserves, phase 2. Market owner scope: a rate of 4%, if the owner has none yet
