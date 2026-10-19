@@ -735,7 +735,9 @@ hmps_balance_of_trade_update_effect = {
 # hmps_fx_left_flow, hmps_fx_left_pool and hmps_fx_left_interest (rounding remainders given to the largest receiver each week, near 0).
 #   hmps_fx_change       change in reserves: net exports + gold + capital flow + interest + commission + top-up (not market moves)
 # Phase 3b (price level), on the market owner:
-#   hmps_fx_price_target  (months - world average) / 3 + (4 - rate) / 2, capped at -4 to 4, not rounded
+#   hmps_fx_price_ratio   (reserves / market GDP) / the world's (global_var:hmps_fx_world_money_ratio); 1 if either is 0 or less
+#   hmps_fx_price_money   money part, (ratio - 1) x 4; hmps_fx_price_rate: rate part, (4 - rate) / 2 (placeholder scales)
+#   hmps_fx_price_target  money part + rate part, capped at -4 to 4, not rounded
 #   hmps_fx_price_level   whole steps, -4 to 4 (positive = inflation); a new owner, or a country that leaves a market, starts at 0
 #   hmps_fx_price_weeks   weeks in a row with the target at least 1 step away; at 26 the level steps toward it and the count restarts
 # Step 7 sets these; hmps_bot.2 then pushes the level to every member as the Inflation or Deflation modifier (hmps_fx_price_modifiers_effect).
@@ -1597,8 +1599,37 @@ hmps_fx_weekly_effect = {
 		}
 	}
 
-	# 7. Price level: the target from reserves against the world average plus the rate; the level steps toward it after
+	# 7. Price level: the target from reserves per GDP against the world's plus the rate; the level steps toward it after
 	# 26 weeks in a row at least 1 step away. Phase 4 adds the crisis freeze here
+	set_global_variable = { name = hmps_fx_tmp_reserves value = 0 }
+	set_global_variable = { name = hmps_fx_tmp_gdp value = 0 }
+	every_market = {
+		limit = {
+			owner = {
+				NOT = { is_country_type = decentralized }
+			}
+		}
+		owner = {
+			change_global_variable = { name = hmps_fx_tmp_reserves add = var:hmps_fx_reserves }
+			change_global_variable = { name = hmps_fx_tmp_gdp add = var:hmps_fx_gdp }
+		}
+	}
+	set_global_variable = { name = hmps_fx_world_money_ratio value = 0 }
+	if = {
+		limit = {
+			global_var:hmps_fx_tmp_reserves > 0
+			global_var:hmps_fx_tmp_gdp > 0
+		}
+		set_global_variable = {
+			name = hmps_fx_world_money_ratio
+			value = {
+				value = global_var:hmps_fx_tmp_reserves
+				divide = global_var:hmps_fx_tmp_gdp
+			}
+		}
+	}
+	remove_global_variable = hmps_fx_tmp_reserves
+	remove_global_variable = hmps_fx_tmp_gdp
 	every_market = {
 		limit = {
 			owner = {
@@ -1618,16 +1649,40 @@ hmps_fx_weekly_effect = {
 }
 
 # HMPS Bank Rate and Reserves, phase 3b. Market owner scope, called by hmps_fx_weekly_effect (step 7) after the months and the rate.
-# Target = (months - world average) / 3 + (4 - rate) / 2, capped at -4 to 4. The level moves one whole step toward it once the
-# target has been at least 1 step away for 26 weeks in a row; the count restarts when the gap drops below 1 or the level steps
+# Money ratio = (reserves / market GDP) / the world's (global_var:hmps_fx_world_money_ratio). Target = money part (ratio - 1) x 4
+# + rate part (4 - rate) / 2, capped at -4 to 4. Placeholder scales, not balanced yet. The level moves one whole step toward it once
+# the target has been at least 1 step away for 26 weeks in a row; the count restarts when the gap drops below 1 or the level steps
 hmps_fx_price_level_effect = {
 	if = {
 		limit = { NOT = { has_variable = hmps_fx_price_level } }
 		set_variable = { name = hmps_fx_price_level value = 0 }
 		set_variable = { name = hmps_fx_price_weeks value = 0 }
 	}
+	set_variable = { name = hmps_fx_price_ratio value = 1 }
+	if = {
+		limit = {
+			global_var:hmps_fx_world_money_ratio > 0
+			var:hmps_fx_gdp > 0
+		}
+		set_variable = {
+			name = hmps_fx_price_ratio
+			value = {
+				value = var:hmps_fx_reserves
+				divide = var:hmps_fx_gdp
+				divide = global_var:hmps_fx_world_money_ratio
+			}
+		}
+	}
 	set_variable = {
-		name = hmps_fx_price_target
+		name = hmps_fx_price_money
+		value = {
+			value = var:hmps_fx_price_ratio
+			subtract = 1
+			multiply = 4
+		}
+	}
+	set_variable = {
+		name = hmps_fx_price_rate
 		value = {
 			value = 4
 			subtract = var:hmps_fx_rate
@@ -1637,10 +1692,8 @@ hmps_fx_price_level_effect = {
 	set_variable = {
 		name = hmps_fx_price_target
 		value = {
-			value = var:hmps_fx_months
-			subtract = global_var:hmps_fx_world_months
-			divide = 3
-			add = var:hmps_fx_price_target
+			value = var:hmps_fx_price_money
+			add = var:hmps_fx_price_rate
 			max = 4
 			min = -4
 		}
