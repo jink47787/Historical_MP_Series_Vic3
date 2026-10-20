@@ -113,6 +113,7 @@ Thanks to Yyyman for his Italy company changes.
 - Added era 1 company 
 - Added new State Capitalism law
 - MAPI readjusted to be harder to get and more spread out around techs
+- Railroad bubble "Regulate the exchanges" option now shows why it is locked when legitimacy is below 75, and works 67% of the time (was 50%); otherwise speculators evade it and the bubble runs at full strength
 #### Goods
 - Hardwood made into its own resource
 - Added canals
@@ -142,7 +143,6 @@ Thanks to Yyyman for his Italy company changes.
 - Added new automobile PMs to more precisely decide how many cars you want to build
 - Conveyor belts require rubber
 - Assembly line PMs (furniture, tooling, motor, arms, munition) use 1 more oil and 1 less rubber per worker than before
-- Guano Harvestry is no longer self-owned: whoever builds it (government or investors) owns it and takes the profits, like Peru's state guano monopoly
 - Guano Harvestry employs 250 shopkeepers and 750 laborers per level (was 75 and 500), output unchanged
 
 #### Infrastructure
@@ -257,6 +257,7 @@ Thanks to Yyyman for his Italy company changes.
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
 - More decimals shown
+- Technology Research Speed tooltip shows one decimal place (e.g. +2.5% instead of +2%), no gameplay change
 
 ## Stability/Bug Fixes
 - Removed ability to pause/change speed without submod
