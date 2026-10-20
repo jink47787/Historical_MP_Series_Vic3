@@ -266,7 +266,8 @@ Thanks to Yyyman for his Italy company changes.
 - NGF, SGF, GER, KUK country colours more like vic2
 - More decimals shown
 - Technology Research Speed tooltip shows one decimal place (e.g. +2.5% instead of +2%), no gameplay change
-- Topbar shows the market's Balance of Trade in place of Prestige (updated weekly); clicking it opens the market panel. Prestige is still shown in the country panel
+- Topbar shows the market's Balance of Trade in place of Prestige; clicking it opens the market panel. Prestige is still shown in the country panel
+- Balance of Trade tooltip has a bar graph of the market's last 52 weeks as narrow light columns (up for surplus, down for deficit, scaled to the largest week). The right-most column is the current balance, shown from the first day of the game. The axis runs from "1 year ago" to today's date. The "Updated weekly." line was removed
 
 ## Stability/Bug Fixes
 - Removed ability to pause/change speed without submod

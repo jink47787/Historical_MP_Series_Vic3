@@ -608,6 +608,16 @@ hmps_balance_of_trade_world_totals_effect = {
 }
 
 hmps_balance_of_trade_update_effect = {
+	# Graph history: before this week's balance replaces it, last week's moves into the market owner's history
+	if = {
+		limit = {
+			market.owner = root
+			has_variable = hmps_bot_hist_51
+			has_variable = hmps_bot_balance
+		}
+		hmps_bot_history_shift_effect = yes
+	}
+
 	set_variable = {
 		name = hmps_bot_exports_weekly
 		value = {
@@ -727,6 +737,265 @@ hmps_balance_of_trade_update_effect = {
 			multiplier = var:hmps_bot_penalty
 		}
 	}
+
+	# Graph history (hmps_bot_history_shift_effect) is kept only on the market owner: start it empty when a country becomes
+	# one, and drop it when it stops being one so an old history is never shown later
+	if = {
+		limit = { market.owner = root }
+		if = {
+			limit = { NOT = { has_variable = hmps_bot_hist_51 } }
+			hmps_bot_history_start_effect = yes
+		}
+		hmps_bot_history_scale_effect = yes
+	}
+	else_if = {
+		limit = { has_variable = hmps_bot_hist_51 }
+		hmps_bot_history_clear_effect = yes
+	}
+}
+
+# HMPS Balance of Trade graph (topbar tooltip, gui/topbar.gui): 52 weekly columns. The last is the live hmps_bot_balance;
+# hmps_bot_hist_1 (oldest) to hmps_bot_hist_51 (last week) hold the balances of the 51 weeks before it (0 until recorded),
+# and hmps_bot_hist_max is the largest size of all 52 (at least 1) for the graph's scale. Market owner only; moved on
+# weekly by hmps_balance_of_trade_update_effect.
+hmps_bot_history_shift_effect = {
+	hmps_bot_history_step_effect = { K = 1 NEXT = 2 }
+	hmps_bot_history_step_effect = { K = 2 NEXT = 3 }
+	hmps_bot_history_step_effect = { K = 3 NEXT = 4 }
+	hmps_bot_history_step_effect = { K = 4 NEXT = 5 }
+	hmps_bot_history_step_effect = { K = 5 NEXT = 6 }
+	hmps_bot_history_step_effect = { K = 6 NEXT = 7 }
+	hmps_bot_history_step_effect = { K = 7 NEXT = 8 }
+	hmps_bot_history_step_effect = { K = 8 NEXT = 9 }
+	hmps_bot_history_step_effect = { K = 9 NEXT = 10 }
+	hmps_bot_history_step_effect = { K = 10 NEXT = 11 }
+	hmps_bot_history_step_effect = { K = 11 NEXT = 12 }
+	hmps_bot_history_step_effect = { K = 12 NEXT = 13 }
+	hmps_bot_history_step_effect = { K = 13 NEXT = 14 }
+	hmps_bot_history_step_effect = { K = 14 NEXT = 15 }
+	hmps_bot_history_step_effect = { K = 15 NEXT = 16 }
+	hmps_bot_history_step_effect = { K = 16 NEXT = 17 }
+	hmps_bot_history_step_effect = { K = 17 NEXT = 18 }
+	hmps_bot_history_step_effect = { K = 18 NEXT = 19 }
+	hmps_bot_history_step_effect = { K = 19 NEXT = 20 }
+	hmps_bot_history_step_effect = { K = 20 NEXT = 21 }
+	hmps_bot_history_step_effect = { K = 21 NEXT = 22 }
+	hmps_bot_history_step_effect = { K = 22 NEXT = 23 }
+	hmps_bot_history_step_effect = { K = 23 NEXT = 24 }
+	hmps_bot_history_step_effect = { K = 24 NEXT = 25 }
+	hmps_bot_history_step_effect = { K = 25 NEXT = 26 }
+	hmps_bot_history_step_effect = { K = 26 NEXT = 27 }
+	hmps_bot_history_step_effect = { K = 27 NEXT = 28 }
+	hmps_bot_history_step_effect = { K = 28 NEXT = 29 }
+	hmps_bot_history_step_effect = { K = 29 NEXT = 30 }
+	hmps_bot_history_step_effect = { K = 30 NEXT = 31 }
+	hmps_bot_history_step_effect = { K = 31 NEXT = 32 }
+	hmps_bot_history_step_effect = { K = 32 NEXT = 33 }
+	hmps_bot_history_step_effect = { K = 33 NEXT = 34 }
+	hmps_bot_history_step_effect = { K = 34 NEXT = 35 }
+	hmps_bot_history_step_effect = { K = 35 NEXT = 36 }
+	hmps_bot_history_step_effect = { K = 36 NEXT = 37 }
+	hmps_bot_history_step_effect = { K = 37 NEXT = 38 }
+	hmps_bot_history_step_effect = { K = 38 NEXT = 39 }
+	hmps_bot_history_step_effect = { K = 39 NEXT = 40 }
+	hmps_bot_history_step_effect = { K = 40 NEXT = 41 }
+	hmps_bot_history_step_effect = { K = 41 NEXT = 42 }
+	hmps_bot_history_step_effect = { K = 42 NEXT = 43 }
+	hmps_bot_history_step_effect = { K = 43 NEXT = 44 }
+	hmps_bot_history_step_effect = { K = 44 NEXT = 45 }
+	hmps_bot_history_step_effect = { K = 45 NEXT = 46 }
+	hmps_bot_history_step_effect = { K = 46 NEXT = 47 }
+	hmps_bot_history_step_effect = { K = 47 NEXT = 48 }
+	hmps_bot_history_step_effect = { K = 48 NEXT = 49 }
+	hmps_bot_history_step_effect = { K = 49 NEXT = 50 }
+	hmps_bot_history_step_effect = { K = 50 NEXT = 51 }
+	set_variable = { name = hmps_bot_hist_51 value = var:hmps_bot_balance }
+}
+
+hmps_bot_history_step_effect = {
+	set_variable = { name = hmps_bot_hist_$K$ value = var:hmps_bot_hist_$NEXT$ }
+}
+
+hmps_bot_history_scale_effect = {
+	set_variable = { name = hmps_bot_hist_max value = 1 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_balance }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_1 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_2 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_3 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_4 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_5 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_6 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_7 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_8 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_9 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_10 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_11 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_12 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_13 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_14 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_15 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_16 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_17 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_18 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_19 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_20 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_21 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_22 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_23 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_24 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_25 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_26 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_27 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_28 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_29 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_30 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_31 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_32 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_33 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_34 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_35 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_36 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_37 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_38 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_39 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_40 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_41 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_42 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_43 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_44 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_45 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_46 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_47 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_48 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_49 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_50 }
+	hmps_bot_history_scale_step_effect = { VAR = hmps_bot_hist_51 }
+	remove_variable = hmps_bot_hist_abs
+}
+
+# Widens the graph's scale to VAR's size if it is larger
+hmps_bot_history_scale_step_effect = {
+	set_variable = {
+		name = hmps_bot_hist_abs
+		value = {
+			value = var:$VAR$
+			abs = yes
+		}
+	}
+	if = {
+		limit = { var:hmps_bot_hist_abs > var:hmps_bot_hist_max }
+		set_variable = { name = hmps_bot_hist_max value = var:hmps_bot_hist_abs }
+	}
+}
+
+hmps_bot_history_start_effect = {
+	set_variable = { name = hmps_bot_hist_1 value = 0 }
+	set_variable = { name = hmps_bot_hist_2 value = 0 }
+	set_variable = { name = hmps_bot_hist_3 value = 0 }
+	set_variable = { name = hmps_bot_hist_4 value = 0 }
+	set_variable = { name = hmps_bot_hist_5 value = 0 }
+	set_variable = { name = hmps_bot_hist_6 value = 0 }
+	set_variable = { name = hmps_bot_hist_7 value = 0 }
+	set_variable = { name = hmps_bot_hist_8 value = 0 }
+	set_variable = { name = hmps_bot_hist_9 value = 0 }
+	set_variable = { name = hmps_bot_hist_10 value = 0 }
+	set_variable = { name = hmps_bot_hist_11 value = 0 }
+	set_variable = { name = hmps_bot_hist_12 value = 0 }
+	set_variable = { name = hmps_bot_hist_13 value = 0 }
+	set_variable = { name = hmps_bot_hist_14 value = 0 }
+	set_variable = { name = hmps_bot_hist_15 value = 0 }
+	set_variable = { name = hmps_bot_hist_16 value = 0 }
+	set_variable = { name = hmps_bot_hist_17 value = 0 }
+	set_variable = { name = hmps_bot_hist_18 value = 0 }
+	set_variable = { name = hmps_bot_hist_19 value = 0 }
+	set_variable = { name = hmps_bot_hist_20 value = 0 }
+	set_variable = { name = hmps_bot_hist_21 value = 0 }
+	set_variable = { name = hmps_bot_hist_22 value = 0 }
+	set_variable = { name = hmps_bot_hist_23 value = 0 }
+	set_variable = { name = hmps_bot_hist_24 value = 0 }
+	set_variable = { name = hmps_bot_hist_25 value = 0 }
+	set_variable = { name = hmps_bot_hist_26 value = 0 }
+	set_variable = { name = hmps_bot_hist_27 value = 0 }
+	set_variable = { name = hmps_bot_hist_28 value = 0 }
+	set_variable = { name = hmps_bot_hist_29 value = 0 }
+	set_variable = { name = hmps_bot_hist_30 value = 0 }
+	set_variable = { name = hmps_bot_hist_31 value = 0 }
+	set_variable = { name = hmps_bot_hist_32 value = 0 }
+	set_variable = { name = hmps_bot_hist_33 value = 0 }
+	set_variable = { name = hmps_bot_hist_34 value = 0 }
+	set_variable = { name = hmps_bot_hist_35 value = 0 }
+	set_variable = { name = hmps_bot_hist_36 value = 0 }
+	set_variable = { name = hmps_bot_hist_37 value = 0 }
+	set_variable = { name = hmps_bot_hist_38 value = 0 }
+	set_variable = { name = hmps_bot_hist_39 value = 0 }
+	set_variable = { name = hmps_bot_hist_40 value = 0 }
+	set_variable = { name = hmps_bot_hist_41 value = 0 }
+	set_variable = { name = hmps_bot_hist_42 value = 0 }
+	set_variable = { name = hmps_bot_hist_43 value = 0 }
+	set_variable = { name = hmps_bot_hist_44 value = 0 }
+	set_variable = { name = hmps_bot_hist_45 value = 0 }
+	set_variable = { name = hmps_bot_hist_46 value = 0 }
+	set_variable = { name = hmps_bot_hist_47 value = 0 }
+	set_variable = { name = hmps_bot_hist_48 value = 0 }
+	set_variable = { name = hmps_bot_hist_49 value = 0 }
+	set_variable = { name = hmps_bot_hist_50 value = 0 }
+	set_variable = { name = hmps_bot_hist_51 value = 0 }
+	set_variable = { name = hmps_bot_hist_max value = 1 }
+}
+
+hmps_bot_history_clear_effect = {
+	remove_variable = hmps_bot_hist_1
+	remove_variable = hmps_bot_hist_2
+	remove_variable = hmps_bot_hist_3
+	remove_variable = hmps_bot_hist_4
+	remove_variable = hmps_bot_hist_5
+	remove_variable = hmps_bot_hist_6
+	remove_variable = hmps_bot_hist_7
+	remove_variable = hmps_bot_hist_8
+	remove_variable = hmps_bot_hist_9
+	remove_variable = hmps_bot_hist_10
+	remove_variable = hmps_bot_hist_11
+	remove_variable = hmps_bot_hist_12
+	remove_variable = hmps_bot_hist_13
+	remove_variable = hmps_bot_hist_14
+	remove_variable = hmps_bot_hist_15
+	remove_variable = hmps_bot_hist_16
+	remove_variable = hmps_bot_hist_17
+	remove_variable = hmps_bot_hist_18
+	remove_variable = hmps_bot_hist_19
+	remove_variable = hmps_bot_hist_20
+	remove_variable = hmps_bot_hist_21
+	remove_variable = hmps_bot_hist_22
+	remove_variable = hmps_bot_hist_23
+	remove_variable = hmps_bot_hist_24
+	remove_variable = hmps_bot_hist_25
+	remove_variable = hmps_bot_hist_26
+	remove_variable = hmps_bot_hist_27
+	remove_variable = hmps_bot_hist_28
+	remove_variable = hmps_bot_hist_29
+	remove_variable = hmps_bot_hist_30
+	remove_variable = hmps_bot_hist_31
+	remove_variable = hmps_bot_hist_32
+	remove_variable = hmps_bot_hist_33
+	remove_variable = hmps_bot_hist_34
+	remove_variable = hmps_bot_hist_35
+	remove_variable = hmps_bot_hist_36
+	remove_variable = hmps_bot_hist_37
+	remove_variable = hmps_bot_hist_38
+	remove_variable = hmps_bot_hist_39
+	remove_variable = hmps_bot_hist_40
+	remove_variable = hmps_bot_hist_41
+	remove_variable = hmps_bot_hist_42
+	remove_variable = hmps_bot_hist_43
+	remove_variable = hmps_bot_hist_44
+	remove_variable = hmps_bot_hist_45
+	remove_variable = hmps_bot_hist_46
+	remove_variable = hmps_bot_hist_47
+	remove_variable = hmps_bot_hist_48
+	remove_variable = hmps_bot_hist_49
+	remove_variable = hmps_bot_hist_50
+	remove_variable = hmps_bot_hist_51
+	remove_variable = hmps_bot_hist_max
 }
 
 # Oregon Trail (oregon.5): gives PROVINCE (ID without p:, e.g. xE5842F) to the USA only if a decentralized country owns it
