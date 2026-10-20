@@ -144,6 +144,14 @@ Thanks to Yyyman for his Italy company changes.
 - Conveyor belts require rubber
 - Assembly line PMs (furniture, tooling, motor, arms, munition) use 1 more oil and 1 less rubber per worker than before
 - Guano Harvestry employs 250 shopkeepers and 750 laborers per level (was 75 and 500), output unchanged
+- Builders' Yards employ 5,000 workers per level (was 10,000), output and value added unchanged
+- Builders' Yard production lines employ 1,250 workers per level with no shopkeepers, with machinists and engineers replacing some laborers in higher tiers; Standardisation methods employ 2,000 laborers (was 4,500) alongside their 500 shopkeepers
+- Yard Tramways reduce laborer employment by 1,500 (was 3,000) and use 5 transportation (was 15)
+- Mechanical Handling reduces laborer employment by 2,000 (was 4,500) and uses 5 transportation (was 15) and 3 electricity (was 10)
+- Brick clamps use 10 stone and 5 wood (was 5 stone and 10 wood) and Hoffmann kilns use 17.5 stone and 5 coal (was 10 stone and 10 coal), output and value added unchanged
+- Starting buildings regenerated for the new Builders' Yard stone inputs: starting quarries go from 48 to 59 levels and Builders' Yards from 111 to 112 levels (Hardwood Forestries unchanged at 69)
+- Steam Cranes renamed Steam Plant and unlocked by Steam Donkey (era 3) instead of Atmospheric Engine (era 2); still uses 5 coal and reduces laborer employment by 500
+- Motorised Plant now uses 5 oil (was 5 automobiles and 5 tools) and no longer employs 250 machinists; still reduces laborer employment by 750
 
 #### Infrastructure
 - Halved base state infrastructure
@@ -258,6 +266,7 @@ Thanks to Yyyman for his Italy company changes.
 - NGF, SGF, GER, KUK country colours more like vic2
 - More decimals shown
 - Technology Research Speed tooltip shows one decimal place (e.g. +2.5% instead of +2%), no gameplay change
+- Topbar shows the market's Balance of Trade in place of Prestige (updated weekly); clicking it opens the market panel. Prestige is still shown in the country panel
 
 ## Stability/Bug Fixes
 - Removed ability to pause/change speed without submod
