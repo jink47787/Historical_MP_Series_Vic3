@@ -150,7 +150,6 @@ Thanks to Yyyman for his Italy company changes.
 - Yard Tramways reduce laborer employment by 1,500 (was 3,000) and use 5 transportation (was 15)
 - Mechanical Handling reduces laborer employment by 2,000 (was 4,500) and uses 5 transportation (was 15) and 3 electricity (was 10)
 - Brick clamps use 10 stone and 5 wood (was 5 stone and 10 wood) and Hoffmann kilns use 17.5 stone and 5 coal (was 10 stone and 10 coal), output and value added unchanged
-- Starting buildings regenerated for the new Builders' Yard stone inputs: starting quarries go from 48 to 59 levels and Builders' Yards from 111 to 112 levels (Hardwood Forestries unchanged at 69)
 - Steam Cranes renamed Steam Plant and unlocked by Steam Donkey (era 3) instead of Atmospheric Engine (era 2); still uses 5 coal and reduces laborer employment by 500
 - Motorised Plant now uses 5 oil (was 5 automobiles and 5 tools) and no longer employs 250 machinists; still reduces laborer employment by 750
 
@@ -262,6 +261,7 @@ Thanks to Yyyman for his Italy company changes.
 - Added MAPI to more rivers
 - Added Malaria to eight Amazon states: Guayana, Guaviare, Pastaza, Santa Cruz, Pará, Amazonas, Acre and Mato Grosso
 - Pacific islands have severe malaria again: Micronesia, Solomon Islands, Nauru, Fiji, Vanuatu, New Caledonia, Bougainville, Tahiti and Tonga
+- York Factory now starts owned by the Hudson's Bay Company instead of the Innu and Cree; in exchange, a neighbouring province goes from the Hudson's Bay Company to the Innu and Cree
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
