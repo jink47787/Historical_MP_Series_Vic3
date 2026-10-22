@@ -152,6 +152,7 @@ Thanks to Yyyman for his Italy company changes.
 - Brick clamps use 10 stone and 5 wood (was 5 stone and 10 wood) and Hoffmann kilns use 17.5 stone and 5 coal (was 10 stone and 10 coal), output and value added unchanged
 - Steam Cranes renamed Steam Plant and unlocked by Steam Donkey (era 3) instead of Atmospheric Engine (era 2); still uses 5 coal and reduces laborer employment by 500
 - Motorised Plant now uses 5 oil (was 5 automobiles and 5 tools) and no longer employs 250 machinists; still reduces laborer employment by 750
+- Jaw Crushers no longer use coal, raising their value added to about 200 (was about 50); output and laborer employment unchanged
 
 #### Infrastructure
 - Halved base state infrastructure
