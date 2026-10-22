@@ -50,7 +50,7 @@ Thanks to Yyyman for his Italy company changes.
 - Legitimacy rebalance
 - Movements to change tax laws or army laws are prevented (in the works)
 #### Decrees
-- Added SoL malus to throughput, renamed them exploit X industry
+- Added SoL malus (-0.5) to throughput, renamed them exploit X industry
 - Added Suppress Nationalism and Expanded Taxation
 - Rebalanced other decrees to make them better or worse
 #### Laws
