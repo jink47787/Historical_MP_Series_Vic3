@@ -107,14 +107,13 @@ Thanks to Yyyman for his Italy company changes.
 
 ## Economic
 - Pops are more likely to consume oil and cars when they are widely available
-- Added railroad bubble journal entry and event chain for a lateish game economic crisis
+- Added railroad bubble journal entry and event chain for a lateish game economic crisis: the crash cuts workers' wages and adds radicals, and "Regulate the exchanges" needs 75 legitimacy
 - Agriculture goods now vary in states depending on year, this applies to a small extent on mines as well (Inspired by HARF mod)
 - Gold fields don't use infrastructure
 - Added era 1 company 
 - Added new State Capitalism law
 - MAPI readjusted to be harder to get and more spread out around techs
-- Railroad bubble "Regulate the exchanges" option now shows why it is locked when legitimacy is below 75, and works 67% of the time (was 50%); otherwise speculators evade it and the bubble runs at full strength
-- Railroad bubble's Railway King event at size 20 now has a 50% chance to fire, rolled once per bubble (was always)
+- Relief Works now gives +3% wages for 12 months instead of +15% dependents' wage
 #### Goods
 - Hardwood made into its own resource
 - Added canals
