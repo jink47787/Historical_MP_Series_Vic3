@@ -152,6 +152,7 @@ Thanks to Yyyman for his Italy company changes.
 - Steam Cranes renamed Steam Plant and unlocked by Steam Donkey (era 3) instead of Atmospheric Engine (era 2); still uses 5 coal and reduces laborer employment by 500
 - Motorised Plant now uses 5 oil (was 5 automobiles and 5 tools) and no longer employs 250 machinists; still reduces laborer employment by 750
 - Jaw Crushers no longer use coal, raising their value added to about 200 (was about 50); output and laborer employment unchanged
+- Guano Harvestries work like gold fields: placed automatically on known guano deposits at game start and when new guano is found, no longer buildable, expandable or downsizable by players, and laid-off workers from a depleted deposit no longer become radicals
 
 #### Infrastructure
 - Halved base state infrastructure
@@ -249,6 +250,8 @@ Thanks to Yyyman for his Italy company changes.
 - Completing The Unconquered Interior gives +10% state migration attraction for 5 years
 - Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz
 - New "The Guano Islands Act" journal entry for the USA: becomes active when the USA researches Ironclads and completes when it has 5 FULLY CREWED ironclads (early or modern) in its fleets; reward is 300 fertilizer sell orders in the US capital's market, shrinking steadily to zero over 30 years; it opens with an event ("The Guano Islands Act") when it begins and is pinned by default
+- Russian Alaska can no longer colonize California from Fort Ross: the Fort Ross state starts with a "Fort Ross Trading Post" modifier (-100% colony growth speed) that ends when the Fort Ross sale event transfers the post
+- Russian-American Company starts with a one-line infantry battalion in Alaska, in an army called "Sitka Garrison"
 
 ## Map
 #### Resources
