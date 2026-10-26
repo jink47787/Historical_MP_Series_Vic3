@@ -250,7 +250,7 @@ Thanks to Yyyman for his Italy company changes.
 - Colombia starts with a claim on Antioquia, so it can colonize the one province there held by the Wayuu
 - New "The Unconquered Interior" journal entry for non-native South American countries that claim at least one Latin American state held by a decentralized nation: colonies grow 75% slower until Railways and Electric Telegraph are researched or none of the country's Latin American claims are still held by a decentralized nation
 - Completing The Unconquered Interior gives +10% state migration attraction for 5 years
-- Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz
+- Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz; Bolivia also starts with them in Potosí, Antofagasta, Arequipa and Tarapacá (South Peru, annexed on day 1)
 - New "The Guano Islands Act" journal entry for the USA: becomes active when the USA researches Ironclads and completes when it has 5 FULLY CREWED ironclads (early or modern) in its fleets; reward is 300 fertilizer sell orders in the US capital's market, shrinking steadily to zero over 30 years; it opens with an event ("The Guano Islands Act") when it begins and is pinned by default
 - Russian Alaska can no longer colonize California from Fort Ross: the Fort Ross state starts with a "Fort Ross Trading Post" modifier (-100% colony growth speed) that ends when the Fort Ross sale event transfers the post
 - Russian-American Company starts with a one-line infantry battalion in Alaska, in an army called "Sitka Garrison"
