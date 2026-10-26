@@ -158,6 +158,8 @@ Thanks to Yyyman for his Italy company changes.
 - Halved base state infrastructure
 - Ports now provide infrastructure and transportation
 - Railroads now provide max transportation from pops to represent benefit of population density
+- Added minor canals (unlocked by Urbanization) that raise state infrastructure and provide transportation, limited by resources in 65 states
+- Minor canals start in 1836 at 24 historical sites (35 levels) in China, Britain, France, the Low Countries, Hannover, Sweden, Russia and the USA
 
 ## Diplomacy
 - North America Strategic Region Rework
