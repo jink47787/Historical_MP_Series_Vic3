@@ -1,60 +1,164 @@
-﻿trade_partners_set_import_partners = {
-	save_temporary_scope_as = base_market
-
-	owner = {
-		save_temporary_scope_as = base_market_owner
-		clear_variable_list = trade_partners_all_markets_import
-	}
-	
-	ordered_market = {
-		limit = {
-			AND = {
-				NOT = { this = scope:base_market }
-				trade_partners_total_exports_to_target > 0 
-			}
-		}
-		order_by = trade_partners_total_exports_to_target
-
-		save_temporary_scope_as = iter_market 
-		scope:base_market_owner = {
-			add_to_variable_list = {
-				name = trade_partners_all_markets_import
-				target = scope:iter_market
-			}
-		}
-	}
-}
-
-trade_partners_set_export_partners = {
-	save_temporary_scope_as = base_market
-	
-	owner = {
-		save_temporary_scope_as = base_market_owner
-		clear_variable_list = trade_partners_all_markets_export
-	}
-	
-	ordered_market = {
-		limit = {
-			AND = { 
-				NOT = { this = scope:base_market }
-				trade_partners_total_imports_from_target > 0
-			}
-		}
-		order_by = trade_partners_total_imports_from_target
-
-		save_temporary_scope_as = iter_market 
-		scope:base_market_owner = {
-			add_to_variable_list = {
-				name = trade_partners_all_markets_export
-				target = scope:iter_market
-			}
-		}
-	}
-}
-
+﻿# Market scope. Fills the market owner's export and import partner lists (trade_partners_export_partners,
+# trade_partners_import_partners), largest trade value first, and stores each partner's value on the owner as
+# trade_partners_<export/import>_value_<list position>. The Market panel's trade tab reads them by list position
+# (gui/00_trade_partners_charts.gui), so the charts cost nothing per frame.
+# Value = units of each good traded with the partner x that good's price in this market, like the Exports/Imports charts.
+# Script can only compare per-partner, per-good units (market_exports/market_imports with target and goods), so each
+# amount is measured by doubling a threshold until it is passed, then halving the gap 5 times (within about 1.5%).
+# Runs weekly for player markets (trade_partners_weekly_update, HMPS_utility_je), monthly for every market in observer
+# games (common/on_actions/trade_partners_on_actions.txt) and when a Market panel opens (trade_partners_scripted_gui).
 trade_partners_market_update = {
-	trade_partners_set_export_partners = yes
-	trade_partners_set_import_partners = yes
+	save_temporary_scope_as = base_market
+	owner = {
+		save_temporary_scope_as = base_market_owner
+	}
+	trade_partners_update_direction = { DIR = exports LIST = export CANDIDATE = trade_partners_total_imports_from_target }
+	trade_partners_update_direction = { DIR = imports LIST = import CANDIDATE = trade_partners_total_exports_to_target }
+}
+
+# Market scope (scope:base_market). DIR = exports/imports (the market_ trigger), LIST = export/import (variable names),
+# CANDIDATE = script value that is above 0 for markets this market trades with in that direction
+trade_partners_update_direction = {
+	scope:base_market_owner = {
+		clear_variable_list = trade_partners_candidates
+	}
+	every_market = {
+		limit = {
+			NOT = { this = scope:base_market }
+			$CANDIDATE$ > 0
+		}
+		save_temporary_scope_as = trade_partners_candidate
+		owner = {
+			set_variable = { name = trade_partners_acc value = 0 }
+		}
+		scope:base_market_owner = {
+			add_to_variable_list = { name = trade_partners_candidates target = scope:trade_partners_candidate }
+		}
+	}
+
+	# Adds each good's value to the candidates' owners' trade_partners_acc (common/scripted_effects/trade_partners_goods_effects.txt)
+	trade_partners_measure_all_goods = { DIR = $DIR$ }
+
+	scope:base_market_owner = {
+		clear_variable_list = trade_partners_$LIST$_partners
+		set_variable = { name = trade_partners_rank value = 0 }
+		# Positions 0-99, the most trade_partners_store_rank_value has variables for
+		ordered_in_list = {
+			variable = trade_partners_candidates
+			limit = { trade_partners_acc > 0 }
+			order_by = trade_partners_acc
+			max = 99
+			check_range_bounds = no
+
+			save_temporary_scope_as = trade_partners_ranked
+			scope:base_market_owner = {
+				add_to_variable_list = { name = trade_partners_$LIST$_partners target = scope:trade_partners_ranked }
+				set_variable = { name = trade_partners_current value = scope:trade_partners_ranked.owner.var:trade_partners_acc }
+				trade_partners_store_rank_value = { LIST = $LIST$ }
+				change_variable = { name = trade_partners_rank add = 1 }
+			}
+		}
+	}
+}
+
+# Market scope (scope:base_market). Called once per good by trade_partners_measure_all_goods
+trade_partners_measure_goods = {
+	if = {
+		limit = {
+			market_$DIR$ = { goods = $GOODS$ value >= 1 }
+		}
+		mg:$GOODS$ = {
+			save_temporary_scope_as = trade_partners_market_goods
+		}
+		scope:base_market_owner = {
+			set_variable = { name = trade_partners_price value = trade_partners_market_goods_price }
+			every_in_list = {
+				variable = trade_partners_candidates
+				save_temporary_scope_as = trade_partners_partner
+				if = {
+					limit = {
+						scope:base_market = {
+							market_$DIR$ = { target = scope:trade_partners_partner goods = $GOODS$ value >= 1 }
+						}
+					}
+					scope:base_market_owner = {
+						trade_partners_measure_amount = { DIR = $DIR$ GOODS = $GOODS$ }
+					}
+					owner = {
+						change_variable = { name = trade_partners_acc add = scope:base_market_owner.var:trade_partners_estimate }
+					}
+				}
+			}
+		}
+	}
+}
+
+# Country scope (scope:base_market_owner), with scope:trade_partners_partner traded at least 1 unit of GOODS.
+# Sets trade_partners_estimate = units x trade_partners_price
+trade_partners_measure_amount = {
+	set_variable = { name = trade_partners_lo value = 1 }
+	set_variable = { name = trade_partners_probe value = 2 }
+	while = {
+		limit = {
+			scope:base_market = {
+				market_$DIR$ = { target = scope:trade_partners_partner goods = $GOODS$ value >= trade_partners_probe }
+			}
+		}
+		set_variable = { name = trade_partners_lo value = var:trade_partners_probe }
+		change_variable = { name = trade_partners_probe multiply = 2 }
+	}
+	set_variable = { name = trade_partners_hi value = var:trade_partners_probe }
+	while = {
+		count = 5
+		set_variable = {
+			name = trade_partners_probe
+			value = {
+				value = var:trade_partners_lo
+				add = var:trade_partners_hi
+				divide = 2
+			}
+		}
+		if = {
+			limit = {
+				scope:base_market = {
+					market_$DIR$ = { target = scope:trade_partners_partner goods = $GOODS$ value >= trade_partners_probe }
+				}
+			}
+			set_variable = { name = trade_partners_lo value = var:trade_partners_probe }
+		}
+		else = {
+			set_variable = { name = trade_partners_hi value = var:trade_partners_probe }
+		}
+	}
+	set_variable = {
+		name = trade_partners_estimate
+		value = {
+			value = var:trade_partners_lo
+			add = var:trade_partners_hi
+			divide = 2
+			multiply = var:trade_partners_price
+		}
+	}
+}
+
+# No root scope. Updates each market with a player in it, once
+trade_partners_weekly_update = {
+	every_country = {
+		limit = { is_player = yes }
+		market ?= {
+			if = {
+				limit = {
+					owner = {
+						NOT = { has_variable = trade_partners_updated }
+					}
+				}
+				owner = {
+					set_variable = { name = trade_partners_updated value = yes days = 1 }
+				}
+				trade_partners_market_update = yes
+			}
+		}
+	}
 }
 
 trade_partners_market_update_observer = {
