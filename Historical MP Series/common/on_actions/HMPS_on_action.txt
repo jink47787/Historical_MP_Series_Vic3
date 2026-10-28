@@ -614,18 +614,30 @@ HMPS_Slave_State_Migration = {
 # multiplied by the owner's Colonial Affairs investment level. Runs per state so it also clears within a month after incorporation or a change of owner
 HMPS_colonial_institutions_state_effects = {
 	effect = {
-		remove_modifier = colonial_institutions_indirect_rule
-		remove_modifier = colonial_institutions_mission_schools
-		remove_modifier = colonial_institutions_constabulary
-		remove_modifier = colonial_institutions_exploitation
+		# The modifier is only swapped when the law or the multiplier changed (re-adding it makes the game recalculate the state's modifiers).
+		# colonial_institutions_level is the multiplier in place
 		if = {
 			limit = {
 				is_incorporated = no
 				owner ?= { has_law = law_type:law_indirect_rule }
 			}
-			add_modifier = {
-				name = colonial_institutions_indirect_rule
-				multiplier = colonial_affairs_level_sv
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = colonial_institutions_indirect_rule }
+						NOT = { has_variable = colonial_institutions_level }
+						var:colonial_institutions_level != colonial_affairs_level_sv
+					}
+				}
+				remove_modifier = colonial_institutions_indirect_rule
+				remove_modifier = colonial_institutions_mission_schools
+				remove_modifier = colonial_institutions_constabulary
+				remove_modifier = colonial_institutions_exploitation
+				add_modifier = {
+					name = colonial_institutions_indirect_rule
+					multiplier = colonial_affairs_level_sv
+				}
+				set_variable = { name = colonial_institutions_level value = colonial_affairs_level_sv }
 			}
 		}
 		else_if = {
@@ -633,9 +645,23 @@ HMPS_colonial_institutions_state_effects = {
 				is_incorporated = no
 				owner ?= { has_law = law_type:law_mission_schools }
 			}
-			add_modifier = {
-				name = colonial_institutions_mission_schools
-				multiplier = colonial_affairs_level_sv
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = colonial_institutions_mission_schools }
+						NOT = { has_variable = colonial_institutions_level }
+						var:colonial_institutions_level != colonial_affairs_level_sv
+					}
+				}
+				remove_modifier = colonial_institutions_indirect_rule
+				remove_modifier = colonial_institutions_mission_schools
+				remove_modifier = colonial_institutions_constabulary
+				remove_modifier = colonial_institutions_exploitation
+				add_modifier = {
+					name = colonial_institutions_mission_schools
+					multiplier = colonial_affairs_level_sv
+				}
+				set_variable = { name = colonial_institutions_level value = colonial_affairs_level_sv }
 			}
 		}
 		else_if = {
@@ -643,9 +669,23 @@ HMPS_colonial_institutions_state_effects = {
 				is_incorporated = no
 				owner ?= { has_law = law_type:law_colonial_constabulary }
 			}
-			add_modifier = {
-				name = colonial_institutions_constabulary
-				multiplier = colonial_affairs_level_sv
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = colonial_institutions_constabulary }
+						NOT = { has_variable = colonial_institutions_level }
+						var:colonial_institutions_level != colonial_affairs_level_sv
+					}
+				}
+				remove_modifier = colonial_institutions_indirect_rule
+				remove_modifier = colonial_institutions_mission_schools
+				remove_modifier = colonial_institutions_constabulary
+				remove_modifier = colonial_institutions_exploitation
+				add_modifier = {
+					name = colonial_institutions_constabulary
+					multiplier = colonial_affairs_level_sv
+				}
+				set_variable = { name = colonial_institutions_level value = colonial_affairs_level_sv }
 			}
 		}
 		else_if = {
@@ -653,9 +693,42 @@ HMPS_colonial_institutions_state_effects = {
 				is_incorporated = no
 				owner ?= { has_law = law_type:law_colonial_exploitation }
 			}
-			add_modifier = {
-				name = colonial_institutions_exploitation
-				multiplier = colonial_affairs_level_sv
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = colonial_institutions_exploitation }
+						NOT = { has_variable = colonial_institutions_level }
+						var:colonial_institutions_level != colonial_affairs_level_sv
+					}
+				}
+				remove_modifier = colonial_institutions_indirect_rule
+				remove_modifier = colonial_institutions_mission_schools
+				remove_modifier = colonial_institutions_constabulary
+				remove_modifier = colonial_institutions_exploitation
+				add_modifier = {
+					name = colonial_institutions_exploitation
+					multiplier = colonial_affairs_level_sv
+				}
+				set_variable = { name = colonial_institutions_level value = colonial_affairs_level_sv }
+			}
+		}
+		else_if = {
+			limit = {
+				OR = {
+					has_variable = colonial_institutions_level
+					has_modifier = colonial_institutions_indirect_rule
+					has_modifier = colonial_institutions_mission_schools
+					has_modifier = colonial_institutions_constabulary
+					has_modifier = colonial_institutions_exploitation
+				}
+			}
+			remove_modifier = colonial_institutions_indirect_rule
+			remove_modifier = colonial_institutions_mission_schools
+			remove_modifier = colonial_institutions_constabulary
+			remove_modifier = colonial_institutions_exploitation
+			if = {
+				limit = { has_variable = colonial_institutions_level }
+				remove_variable = colonial_institutions_level
 			}
 		}
 	}

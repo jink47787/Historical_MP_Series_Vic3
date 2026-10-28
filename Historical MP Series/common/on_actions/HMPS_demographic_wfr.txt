@@ -8,17 +8,11 @@ HMPS_handle_demographic_shifts = {
 	effect = {
 		if = {
 			limit = {
-				has_modifier = modifier_hmps_demographic_workforce_ratio
-			}
-			remove_modifier = modifier_hmps_demographic_workforce_ratio
-		}
-		if = {
-			limit = {
 				average_sol >= 15
 			}
-			add_modifier = {
-				name = modifier_hmps_demographic_workforce_ratio
-				multiplier = {
+			set_variable = {
+				name = hmps_demographic_workforce_ratio_new
+				value = {
 					add = average_sol
 					subtract = 15 #When does increase start
 					multiply = 5 #What is Cap WFR?
@@ -26,7 +20,47 @@ HMPS_handle_demographic_shifts = {
 					#min = 0
 					max = 5 #What is Cap WFR?
 				}
-				days = -1
+			}
+			# The modifier is only swapped when its value changed (re-adding it makes the game recalculate the state's modifiers).
+			# hmps_demographic_workforce_ratio_value is the value in place
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = modifier_hmps_demographic_workforce_ratio }
+						NOT = { has_variable = hmps_demographic_workforce_ratio_value }
+						var:hmps_demographic_workforce_ratio_value != var:hmps_demographic_workforce_ratio_new
+					}
+				}
+				if = {
+					limit = {
+						has_modifier = modifier_hmps_demographic_workforce_ratio
+					}
+					remove_modifier = modifier_hmps_demographic_workforce_ratio
+				}
+				add_modifier = {
+					name = modifier_hmps_demographic_workforce_ratio
+					multiplier = var:hmps_demographic_workforce_ratio_new
+					days = -1
+				}
+				set_variable = {
+					name = hmps_demographic_workforce_ratio_value
+					value = var:hmps_demographic_workforce_ratio_new
+				}
+			}
+			remove_variable = hmps_demographic_workforce_ratio_new
+		}
+		else = {
+			if = {
+				limit = {
+					has_modifier = modifier_hmps_demographic_workforce_ratio
+				}
+				remove_modifier = modifier_hmps_demographic_workforce_ratio
+			}
+			if = {
+				limit = {
+					has_variable = hmps_demographic_workforce_ratio_value
+				}
+				remove_variable = hmps_demographic_workforce_ratio_value
 			}
 		}
 	}

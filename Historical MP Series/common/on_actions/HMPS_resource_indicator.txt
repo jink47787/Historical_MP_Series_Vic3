@@ -10,60 +10,146 @@ on_monthly_pulse_state = {
 }
 HMPS_add_resource_indicators = { #State Scope
 	effect = {
-		if = {
-			limit = {
-				has_modifier = modifier_max_oil_indicator
-			}
-			remove_modifier = modifier_max_oil_indicator
-		}
-		if = {
-			limit = {
-				has_modifier = modifier_max_rubber_indicator
-			}
-			remove_modifier = modifier_max_rubber_indicator
-		}
-		if = {
-			limit = {
-				has_modifier = modifier_max_gold_indicator
-			}
-			remove_modifier = modifier_max_gold_indicator
-		}
-		
+		# Each indicator is only swapped when its value changed (re-adding it makes the game recalculate the state's modifiers).
+		# hmps_<resource>_indicator_value is the value in place
 		if = {
 			limit = {
 				"num_potential_resources(bt:building_oil_rig)" > 0
 			}
-			add_modifier = { 
-				name = modifier_max_oil_indicator
-				multiplier = "num_potential_resources(bt:building_oil_rig)"
-				days = -1
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = modifier_max_oil_indicator }
+						NOT = { has_variable = hmps_oil_indicator_value }
+						"num_potential_resources(bt:building_oil_rig)" != var:hmps_oil_indicator_value
+					}
+				}
+				if = {
+					limit = {
+						has_modifier = modifier_max_oil_indicator
+					}
+					remove_modifier = modifier_max_oil_indicator
+				}
+				add_modifier = {
+					name = modifier_max_oil_indicator
+					multiplier = "num_potential_resources(bt:building_oil_rig)"
+					days = -1
+				}
+				set_variable = {
+					name = hmps_oil_indicator_value
+					value = "num_potential_resources(bt:building_oil_rig)"
+				}
 			}
 		}
+		else = {
+			if = {
+				limit = {
+					has_modifier = modifier_max_oil_indicator
+				}
+				remove_modifier = modifier_max_oil_indicator
+			}
+			if = {
+				limit = {
+					has_variable = hmps_oil_indicator_value
+				}
+				remove_variable = hmps_oil_indicator_value
+			}
+		}
+
 		if = {
 			limit = {
 				"num_potential_resources(bt:building_rubber_plantation)" > 0
 			}
-			add_modifier = { 
-				name = modifier_max_rubber_indicator
-				multiplier = "num_potential_resources(bt:building_rubber_plantation)"
-				days = -1
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = modifier_max_rubber_indicator }
+						NOT = { has_variable = hmps_rubber_indicator_value }
+						"num_potential_resources(bt:building_rubber_plantation)" != var:hmps_rubber_indicator_value
+					}
+				}
+				if = {
+					limit = {
+						has_modifier = modifier_max_rubber_indicator
+					}
+					remove_modifier = modifier_max_rubber_indicator
+				}
+				add_modifier = {
+					name = modifier_max_rubber_indicator
+					multiplier = "num_potential_resources(bt:building_rubber_plantation)"
+					days = -1
+				}
+				set_variable = {
+					name = hmps_rubber_indicator_value
+					value = "num_potential_resources(bt:building_rubber_plantation)"
+				}
+			}
+		}
+		else = {
+			if = {
+				limit = {
+					has_modifier = modifier_max_rubber_indicator
+				}
+				remove_modifier = modifier_max_rubber_indicator
+			}
+			if = {
+				limit = {
+					has_variable = hmps_rubber_indicator_value
+				}
+				remove_variable = hmps_rubber_indicator_value
+			}
+		}
+
+		set_variable = {
+			name = hmps_gold_indicator_new
+			value = {
+				value = "num_potential_resources(bt:building_gold_field)"
+				add = "num_potential_resources(bt:building_gold_mine)"
 			}
 		}
 		if = {
 			limit = {
-				OR = {
-					"num_potential_resources(bt:building_gold_field)" > 0
-					"num_potential_resources(bt:building_gold_mine)" > 0
-				}
+				var:hmps_gold_indicator_new > 0
 			}
-			add_modifier = { 
-				name = modifier_max_gold_indicator
-				multiplier = {
-					value = "num_potential_resources(bt:building_gold_field)"
-					add = "num_potential_resources(bt:building_gold_mine)"
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = modifier_max_gold_indicator }
+						NOT = { has_variable = hmps_gold_indicator_value }
+						var:hmps_gold_indicator_value != var:hmps_gold_indicator_new
+					}
 				}
-				days = -1
+				if = {
+					limit = {
+						has_modifier = modifier_max_gold_indicator
+					}
+					remove_modifier = modifier_max_gold_indicator
+				}
+				add_modifier = {
+					name = modifier_max_gold_indicator
+					multiplier = var:hmps_gold_indicator_new
+					days = -1
+				}
+				set_variable = {
+					name = hmps_gold_indicator_value
+					value = var:hmps_gold_indicator_new
+				}
 			}
 		}
+		else = {
+			if = {
+				limit = {
+					has_modifier = modifier_max_gold_indicator
+				}
+				remove_modifier = modifier_max_gold_indicator
+			}
+			if = {
+				limit = {
+					has_variable = hmps_gold_indicator_value
+				}
+				remove_variable = hmps_gold_indicator_value
+			}
+		}
+		remove_variable = hmps_gold_indicator_new
 	}
 }

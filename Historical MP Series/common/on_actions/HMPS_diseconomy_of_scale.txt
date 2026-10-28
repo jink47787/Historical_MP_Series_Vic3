@@ -6,15 +6,9 @@
 
 HMPS_handle_diseconomies_of_scale = {
 	effect = {
-		if = {
-			limit = {
-				has_modifier = modifier_hmps_diseconomies_of_scale
-			}
-			remove_modifier = modifier_hmps_diseconomies_of_scale
-		}
-		add_modifier = {
-			name = modifier_hmps_diseconomies_of_scale
-			multiplier = {
+		set_variable = {
+			name = hmps_diseconomies_of_scale_new
+			value = {
 				add = total_urbanization
 				divide = 100
 				multiply = modifier:state_diseconomies_of_scale_per_hundred_urbanization_add
@@ -25,7 +19,52 @@ HMPS_handle_diseconomies_of_scale = {
 				max = modifier:state_diseconomies_of_scale_max_add
 				min = 0 #To stop ppl getting positive construction efficency if we ever add more ways to reduce it
 			}
-			days = -1
 		}
+		# The modifier is only swapped when its value changed (re-adding it makes the game recalculate the state's modifiers),
+		# and left off while the value is 0. hmps_diseconomies_of_scale_value is the value in place
+		if = {
+			limit = {
+				var:hmps_diseconomies_of_scale_new > 0
+			}
+			if = {
+				limit = {
+					OR = {
+						NOT = { has_modifier = modifier_hmps_diseconomies_of_scale }
+						NOT = { has_variable = hmps_diseconomies_of_scale_value }
+						var:hmps_diseconomies_of_scale_value != var:hmps_diseconomies_of_scale_new
+					}
+				}
+				if = {
+					limit = {
+						has_modifier = modifier_hmps_diseconomies_of_scale
+					}
+					remove_modifier = modifier_hmps_diseconomies_of_scale
+				}
+				add_modifier = {
+					name = modifier_hmps_diseconomies_of_scale
+					multiplier = var:hmps_diseconomies_of_scale_new
+					days = -1
+				}
+				set_variable = {
+					name = hmps_diseconomies_of_scale_value
+					value = var:hmps_diseconomies_of_scale_new
+				}
+			}
+		}
+		else = {
+			if = {
+				limit = {
+					has_modifier = modifier_hmps_diseconomies_of_scale
+				}
+				remove_modifier = modifier_hmps_diseconomies_of_scale
+			}
+			if = {
+				limit = {
+					has_variable = hmps_diseconomies_of_scale_value
+				}
+				remove_variable = hmps_diseconomies_of_scale_value
+			}
+		}
+		remove_variable = hmps_diseconomies_of_scale_new
 	}
 }

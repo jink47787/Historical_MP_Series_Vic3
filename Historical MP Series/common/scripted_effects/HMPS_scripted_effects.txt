@@ -593,9 +593,31 @@ hmps_save_african_colony_state_fallback = {
 hmps_balance_of_trade_world_totals_effect = {
 	set_global_variable = { name = hmps_bot_world_exports value = 0 }
 	set_global_variable = { name = hmps_bot_world_imports value = 0 }
+	# Each market's weekly exports, imports and GDP are summed here once, onto the market owner, and hmps_balance_of_trade_update_effect
+	# reads them for every member (one pass over the countries instead of three per country). A country that no longer owns a market drops its sums
+	every_country = {
+		if = {
+			limit = { market.owner ?= this }
+			set_variable = { name = hmps_bot_market_exports_weekly value = 0 }
+			set_variable = { name = hmps_bot_market_imports_weekly value = 0 }
+			set_variable = { name = hmps_bot_market_gdp value = 0 }
+		}
+		else_if = {
+			limit = { has_variable = hmps_bot_market_gdp }
+			remove_variable = hmps_bot_market_exports_weekly
+			remove_variable = hmps_bot_market_imports_weekly
+			remove_variable = hmps_bot_market_gdp
+		}
+	}
 	every_country = {
 		change_global_variable = { name = hmps_bot_world_exports add = total_export_value }
 		change_global_variable = { name = hmps_bot_world_imports add = total_import_value }
+		save_temporary_scope_as = hmps_bot_member
+		market.owner ?= {
+			change_variable = { name = hmps_bot_market_exports_weekly add = scope:hmps_bot_member.total_export_value }
+			change_variable = { name = hmps_bot_market_imports_weekly add = scope:hmps_bot_member.total_import_value }
+			change_variable = { name = hmps_bot_market_gdp add = scope:hmps_bot_member.gdp }
+		}
 	}
 	if = {
 		limit = { global_var:hmps_bot_world_exports > 0 }
@@ -623,14 +645,10 @@ hmps_balance_of_trade_update_effect = {
 		hmps_bot_history_shift_effect = yes
 	}
 
+	# The market's sums, from hmps_balance_of_trade_world_totals_effect
 	set_variable = {
 		name = hmps_bot_exports_weekly
-		value = {
-			every_country = {
-				limit = { market = root.market }
-				add = total_export_value
-			}
-		}
+		value = market.owner.var:hmps_bot_market_exports_weekly
 	}
 	set_variable = {
 		name = hmps_bot_exports
@@ -642,12 +660,7 @@ hmps_balance_of_trade_update_effect = {
 	}
 	set_variable = {
 		name = hmps_bot_imports_weekly
-		value = {
-			every_country = {
-				limit = { market = root.market }
-				add = total_import_value
-			}
-		}
+		value = market.owner.var:hmps_bot_market_imports_weekly
 	}
 	set_variable = {
 		name = hmps_bot_imports
@@ -665,12 +678,7 @@ hmps_balance_of_trade_update_effect = {
 	}
 	set_variable = {
 		name = hmps_bot_gdp
-		value = {
-			every_country = {
-				limit = { market = root.market }
-				add = gdp
-			}
-		}
+		value = market.owner.var:hmps_bot_market_gdp
 	}
 	if = {
 		limit = { var:hmps_bot_gdp > 0 }
@@ -720,28 +728,55 @@ hmps_balance_of_trade_update_effect = {
 		}
 	}
 
-	if = {
-		limit = { has_modifier = hmps_trade_surplus_penalty }
-		remove_modifier = hmps_trade_surplus_penalty
-	}
-	if = {
-		limit = { has_modifier = hmps_trade_deficit_penalty }
-		remove_modifier = hmps_trade_deficit_penalty
-	}
+	# The modifier is only swapped when the penalty changed (re-adding it makes the game recalculate the country's modifiers).
+	# hmps_bot_applied_penalty is the penalty in place: positive for a surplus, negative for a deficit, 0 for none
+	set_variable = { name = hmps_bot_signed_penalty value = 0 }
 	if = {
 		limit = { var:hmps_bot_share > 0.01 }
-		add_modifier = {
-			name = hmps_trade_surplus_penalty
-			multiplier = var:hmps_bot_penalty
-		}
+		set_variable = { name = hmps_bot_signed_penalty value = var:hmps_bot_penalty }
 	}
 	else_if = {
 		limit = { var:hmps_bot_share < -0.01 }
-		add_modifier = {
-			name = hmps_trade_deficit_penalty
-			multiplier = var:hmps_bot_penalty
+		set_variable = {
+			name = hmps_bot_signed_penalty
+			value = {
+				value = var:hmps_bot_penalty
+				multiply = -1
+			}
 		}
 	}
+	if = {
+		limit = {
+			OR = {
+				NOT = { has_variable = hmps_bot_applied_penalty }
+				var:hmps_bot_applied_penalty != var:hmps_bot_signed_penalty
+			}
+		}
+		if = {
+			limit = { has_modifier = hmps_trade_surplus_penalty }
+			remove_modifier = hmps_trade_surplus_penalty
+		}
+		if = {
+			limit = { has_modifier = hmps_trade_deficit_penalty }
+			remove_modifier = hmps_trade_deficit_penalty
+		}
+		if = {
+			limit = { var:hmps_bot_share > 0.01 }
+			add_modifier = {
+				name = hmps_trade_surplus_penalty
+				multiplier = var:hmps_bot_penalty
+			}
+		}
+		else_if = {
+			limit = { var:hmps_bot_share < -0.01 }
+			add_modifier = {
+				name = hmps_trade_deficit_penalty
+				multiplier = var:hmps_bot_penalty
+			}
+		}
+		set_variable = { name = hmps_bot_applied_penalty value = var:hmps_bot_signed_penalty }
+	}
+	remove_variable = hmps_bot_signed_penalty
 
 	# Graph history (hmps_bot_history_shift_effect) is kept only on the market owner: start it empty when a country becomes
 	# one, and drop it when it stops being one so an old history is never shown later

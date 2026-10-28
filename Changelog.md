@@ -290,3 +290,4 @@ Thanks to Yyyman for his Italy company changes.
 - AI wants a high supply of building materials, stone, oil and rubber
 - AI gives higher priority to building steel mills, glassworks, logging camps, quarries and building materials yards
 - Fixed the Oregon journal entry re-adding the US claim on Idaho, Oregon and Washington every month
+- Cut background script work for trade balance, Revanchism, diseconomies of scale and modifier updates to help performance, with no change to game values
