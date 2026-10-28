@@ -42,6 +42,54 @@ Thanks to Yyyman for his Italy company changes.
 ---
 <br/>~~~~~~
 
+# Major Changes Since the Last Workshop Update (7 October 2026)
+
+## Economic
+#### Stone & Building Materials
+- Two new goods: Stone and Building Materials. Building Materials are now the main input of the construction sector, and every urban building uses a small amount as upkeep
+- New Quarries produce Stone. How many a state can build depends on its geology; 12 famous stone districts (e.g. Carrara Marble, Welsh Slate, Aswan Granite) boost quarries, and Silica Sands states boost glassworks and quarries
+- New Builders' Yards turn wood, hardwood, stone, coal and steel into Building Materials, with Timber, Masonry, Standardisation and Handling methods that improve with tech
+- Construction sector reworked into three groups: Foundations (Timber Footings, Brick Footings, Concrete Foundations, Piles and Caissons), Fittings (Bare Finish, Fitted Interiors, Electric Lifts) and Site Machinery (Manual Labour, Steam Plant, Motorised Plant). Better foundations and fittings add construction points; site machinery only saves labour
+- Steel mills, glassworks and railways now use Stone; subsistence farms, orchards, pastures, rice farms and fishing villages produce a little Building Materials
+#### Hardwood
+- Hardwood is back as its own resource: Hardwood Forestry can be built in 208 states, and hardwood is used by Builders' Yards and Fitted Interiors
+#### Trade
+- New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -50% at 10%) and the other side gains 2.5% per 1% (up to +25%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
+#### Guano
+- Guano works like gold: deposits are discovered over time and run out, and Guano Harvestries are placed automatically on known deposits instead of being built. In 1836 only Peru's coast is known
+#### Infrastructure
+- Added minor canals (unlocked by Urbanization) that raise state infrastructure and provide transportation, available in 65 states; 24 historical canals already exist in 1836
+#### Railroad Bubble
+- Railroad Bubble reworked: it starts when a major power expands its railways quickly, grows with railway building and expensive transportation, and boosts railway throughput and construction while it lasts. Choices at the start (embrace or regulate), at the peak (let it run, cool the market, prop it up or let the banks carry it) and at the crash (rebuild or relief works). The crash cuts wages and adds radicals. New "The Railway King" event
+
+## Political
+- Multiculturalism reworked and renamed Multinationalism; ideologies that strongly disapproved of it now only disapprove
+
+## Flava
+#### Europe
+- French Baby Bust: France can now end it faster by becoming a Confessional State, with two new amendments (Publicly Funded Religious Schools and Publicly Funded Religious Hospitals)
+- German unification: Austria can no longer back a German candidate while it is a great power, and the Austria-Hungary dual monarchy now requires Germany to exist
+#### East Asia
+- New Sakhalin events: Russia can assert its claim against Japanese encroachment, and Japan can answer by settling Karafuto or abandoning it
+#### The Americas
+- North America map rework: 1836 borders follow who actually controlled the land, with new native nations (Sauk and Meskwaki, Osage, Californian Peoples, Inuit, Innu and Cree), new Canada journal entries, Oregon dispute fixes and a new Oregon Trail event
+- Latin America border rework: new native nations (Gê Peoples, Kaingang, Shuar, Tukanoan Peoples), new claims, and new Mosquito Shore and Guiana Boundary Commission events
+- New "The Unconquered Interior" journal entry for South American countries with claims on native-held land: colonies grow 75% slower until Railways and Electric Telegraph are researched or the native land is taken; completing it gives +10% migration attraction for 5 years
+- New "The Guano Islands Act" journal entry for the USA: build 5 fully crewed ironclads to get guano fertilizer sell orders that shrink over 30 years
+- Manifest Destiny reworked: 40 years to finish, needs 6 US-owned states (California, Nevada, Utah, Arizona, New Mexico, Texas) that no longer have to be incorporated; Colorado moved to the Frontier Wars journal entry and Mexico starts with a claim on it
+
+## UI
+- Topbar shows the market's Balance of Trade in place of Prestige, with a graph of the last 52 weeks in its tooltip; the market panel shows the market's exports, imports and balance
+
+## AI & Performance
+- AI builds more construction goods: it wants a high supply of building materials, stone, oil and rubber, prioritises steel mills, glassworks, logging camps, quarries and Builders' Yards, and upgrades construction sector methods soon after unlocking them
+- Performance: about 17% faster in early game tests (1836-1839 ran in 1:56 instead of 2:20)
+
+---
+<br/>
+
+# Mod Overview
+
 ## Political
 #### Government Types
 - Republic is one government type
@@ -107,13 +155,12 @@ Thanks to Yyyman for his Italy company changes.
 
 ## Economic
 - Pops are more likely to consume oil and cars when they are widely available
-- Added railroad bubble journal entry and event chain for a lateish game economic crisis: the crash cuts workers' wages and adds radicals, and "Regulate the exchanges" needs 75 legitimacy
+- Added railroad bubble journal entry and event chain for a lateish game economic crisis
 - Agriculture goods now vary in states depending on year, this applies to a small extent on mines as well (Inspired by HARF mod)
 - Gold fields don't use infrastructure
 - Added era 1 company 
 - Added new State Capitalism law
 - MAPI readjusted to be harder to get and more spread out around techs
-- Relief Works now gives +3% wages for 12 months instead of +15% dependents' wage
 #### Goods
 - Hardwood made into its own resource
 - Added canals
@@ -142,24 +189,11 @@ Thanks to Yyyman for his Italy company changes.
 - Colonial oil PMs with lower qualification thresholds
 - Added new automobile PMs to more precisely decide how many cars you want to build
 - Conveyor belts require rubber
-- Assembly line PMs (furniture, tooling, motor, arms, munition) use 1 more oil and 1 less rubber per worker than before
-- Guano Harvestry employs 250 shopkeepers and 750 laborers per level (was 75 and 500), output unchanged
-- Builders' Yards employ 5,000 workers per level (was 10,000), output and value added unchanged
-- Builders' Yard production lines employ 1,250 workers per level with no shopkeepers, with machinists and engineers replacing some laborers in higher tiers; Standardisation methods employ 2,000 laborers (was 4,500) alongside their 500 shopkeepers
-- Yard Tramways reduce laborer employment by 1,500 (was 3,000) and use 5 transportation (was 15)
-- Mechanical Handling reduces laborer employment by 2,000 (was 4,500) and uses 5 transportation (was 15) and 3 electricity (was 10)
-- Brick clamps use 10 stone and 5 wood (was 5 stone and 10 wood) and Hoffmann kilns use 17.5 stone and 5 coal (was 10 stone and 10 coal), output and value added unchanged
-- Steam Cranes renamed Steam Plant and unlocked by Steam Donkey (era 3) instead of Atmospheric Engine (era 2); still uses 5 coal and reduces laborer employment by 500
-- Motorised Plant now uses 5 oil (was 5 automobiles and 5 tools) and no longer employs 250 machinists; still reduces laborer employment by 750
-- Jaw Crushers no longer use coal, raising their value added to about 200 (was about 50); output and laborer employment unchanged
-- Guano Harvestries work like gold fields: placed automatically on known guano deposits at game start and when new guano is found, no longer buildable, expandable or downsizable by players, and laid-off workers from a depleted deposit no longer become radicals
 
 #### Infrastructure
 - Halved base state infrastructure
 - Ports now provide infrastructure and transportation
 - Railroads now provide max transportation from pops to represent benefit of population density
-- Added minor canals (unlocked by Urbanization) that raise state infrastructure and provide transportation, limited by resources in 65 states
-- Minor canals start in 1836 at 24 historical sites (35 levels) in China, Britain, France, the Low Countries, Hannover, Sweden, Russia and the USA
 
 ## Diplomacy
 - North America Strategic Region Rework
@@ -241,39 +275,19 @@ Thanks to Yyyman for his Italy company changes.
 - Cuba annexed at game start
 - Gave all British subjects colonization laws
 - Mexico can now accept natives with a decision
-- Mexico starts with a claim on Colorado, and Texas no longer starts with a claim on New Mexico
-- Initiate Manifest Destiny now also claims Colorado, so the USA can still take it if Mexico colonizes it first
-- Repudiate Manifest Destiny now also removes the US claim on Colorado
-- Manifest Destiny now has 40 years to finish (was 20) and needs 6 US-owned states instead of 7, which no longer have to be incorporated (was incorporated or 50% towards it)
-- Manifest Destiny goal is now California, Nevada, Utah, Arizona, New Mexico and Texas; Colorado moved to the Frontier Wars journal entry
-- Paraguay starts with the Frontier Colonization law, and Paraguay and Bolivia start with claims on Alto Paraguay (the Gran Chaco)
-- Colombia starts with a claim on Antioquia, so it can colonize the one province there held by the Wayuu
-- New "The Unconquered Interior" journal entry for non-native South American countries that claim at least one Latin American state held by a decentralized nation: colonies grow 75% slower until Railways and Electric Telegraph are researched or none of the country's Latin American claims are still held by a decentralized nation
-- Completing The Unconquered Interior gives +10% state migration attraction for 5 years
-- Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz; Bolivia also starts with them in Potosí, Antofagasta, Arequipa and Tarapacá (South Peru, annexed on day 1)
-- New "The Guano Islands Act" journal entry for the USA: becomes active when the USA researches Ironclads and completes when it has 5 FULLY CREWED ironclads (early or modern) in its fleets; reward is 300 fertilizer sell orders in the US capital's market, shrinking steadily to zero over 30 years; it opens with an event ("The Guano Islands Act") when it begins and is pinned by default
-- Russian Alaska can no longer colonize California from Fort Ross: the Fort Ross state starts with a "Fort Ross Trading Post" modifier (-100% colony growth speed) that ends when the Fort Ross sale event transfers the post
-- Russian-American Company starts with a one-line infantry battalion in Alaska, in an army called "Sitka Garrison"
 
 ## Map
 #### Resources
 - Oil rebalance
-- Guano is now a discoverable and depletable resource, like gold: hidden deposits are found at random over time and worked deposits run out at 75% of the vanilla gold-field rate. In 1836 only Peru's coast is known: Ica 30 known + 20 hidden (Chincha Islands), Cajamarca 10 + 10, Lima 10, Tarapacá 10 + 10. Everything else starts hidden: Antofagasta, Baja California, Namaqualand (Ichaboe), Haiti (Navassa), Santo Domingo, Bahamas, West Indies, Puerto Rico, West Micronesia and Nauru 10 each; East Micronesia 15; Oman 5; Hawaiian Islands 10 (Laysan, Lisianski, Johnston Atoll); Tahiti 10 (Makatea, Malden and Starbuck); Western Australia 10 (Houtman Abrolhos, Lacepede Islands); Jamaica 5 (Pedro and Morant Cays); Honduras 5 (Swan Islands); Queensland 5 (Raine Island); Cape Colony 5 (Saldanha Bay islands); Patagonia 5 (Patagonian coast islands). Total 275 levels (was 109, before depletion was added). Florida, Solomon Islands, Fiji and Vanuatu have none
 #### State Modifiers
 - Added Black Belt to represent Cretaceous soil
 - Added areas that can easily do hydro power
 - Cold water ports mod integrated
 - Added MAPI to more rivers
-- Added Malaria to eight Amazon states: Guayana, Guaviare, Pastaza, Santa Cruz, Pará, Amazonas, Acre and Mato Grosso
-- Pacific islands have severe malaria again: Micronesia, Solomon Islands, Nauru, Fiji, Vanuatu, New Caledonia, Bougainville, Tahiti and Tonga
-- York Factory now starts owned by the Hudson's Bay Company instead of the Innu and Cree; in exchange, a neighbouring province goes from the Hudson's Bay Company to the Innu and Cree
 
 ## UI
 - NGF, SGF, GER, KUK country colours more like vic2
 - More decimals shown
-- Technology Research Speed tooltip shows one decimal place (e.g. +2.5% instead of +2%), no gameplay change
-- Topbar shows the market's Balance of Trade in place of Prestige; clicking it opens the market panel. Prestige is still shown in the country panel
-- Balance of Trade tooltip has a bar graph of the market's last 52 weeks as narrow light columns (up for surplus, down for deficit, scaled to the largest week). The right-most column is the current balance, shown from the first day of the game. The axis runs from "1 year ago" to today's date. The "Updated weekly." line was removed
 
 ## Stability/Bug Fixes
 - Removed ability to pause/change speed without submod
@@ -282,12 +296,70 @@ Thanks to Yyyman for his Italy company changes.
 - Krakatoa event effect reduced
 - Sepoy war does not give infamy
 - Reduced rate of both radical and loyalist gain
-- Canal companies no longer require occupancy or incorporation. Suez Canal Company only needs a level 5 trade center or port somewhere and no longer gives tax income when prosperous
+- Canal companies no longer require occupancy or incorporation
 - Added straits to Hokkaido
 - Adjusted populating the Americas JE
-- Reverted experimental AI construction and budget changes that were driving AI countries like Mexico into bankruptcy
-- AI now upgrades construction sector production methods quickly once unlocked (the higher methods are cheaper per construction point)
-- AI wants a high supply of building materials, stone, oil and rubber
-- AI gives higher priority to building steel mills, glassworks, logging camps, quarries and building materials yards
+
+---
+<br/>
+
+# Minor Changes Since the Last Workshop Update (7 October 2026)
+
+## Political
+- Exploit X Industry decrees now cost -0.5 SoL in the affected buildings (was -1)
+- The Indirect Rule tooltip lists its effects per level of Colonial Affairs
+- Player subjects (puppets, colonies and crown lands) no longer get the +10% bonus to enact laws imposed on them
+- Stamp Out Monarchism no longer fires at game start or for countries that were not monarchies
+- Stamp Out Theocracy is no longer cancelled by enacting Council Republic
+- Removed the old extra acceptance modifier from embracing Ottomanism
+
+## Population
+- When any pops assimilate or convert, at least 20 do at a time (was 1)
+
+## Economic
+- Builders' Yards employ 5,000 workers per level: Standardisation methods 500 shopkeepers and 2,000 laborers, each production line 1,250 workers (machinists and engineers replace some laborers at higher tiers)
+- Yard Tramways cut 1,500 laborers and use 5 transportation; Mechanical Handling cuts 2,000 laborers and uses 5 transportation and 3 electricity
+- Brick Clamps use 10 stone and 5 wood; Hoffmann Kilns use 17.5 stone and 5 coal
+- Quarry Jaw Crushers use no coal
+- Steam Plant (Steam Donkey, era 3) uses 5 coal and cuts 500 laborers; Motorised Plant uses 5 oil and cuts 750 laborers
+- The market capital sells 10 Building Materials
+- New Stone and Brick Consortium company for Builders' Yards and Quarries
+- Assembly line PMs (furniture, tooling, motor, arms, munition) use 1 more oil and 1 less rubber per worker than before
+- Guano Harvestry employs 250 shopkeepers and 750 laborers per level (was 75 and 500), output unchanged; laid-off workers from a depleted deposit no longer become radicals
+- Synthetic oil plants can no longer be built by private investors
+- Railroad Bubble: Relief Works gives +3% wages for 12 months, "Regulate the exchanges" needs 75 legitimacy, and the Railway King appears in half of all bubbles
+- Suez Canal Company only needs a level 5 trade center or port somewhere and no longer gives tax income when prosperous
+
+## Diplomacy
+- Regional investment rights tooltip clarified: the investor can build only in the chosen state but can buy privatized buildings anywhere in the country
+- Revanchism fixes, including state transfers
+
+## Military
+- Forts that are not naval forts no longer add blockade resistance
+
+## Flava
+- Initiate Manifest Destiny also claims Colorado, so the USA can still take it if Mexico colonizes it first; Repudiate Manifest Destiny removes that claim. Texas no longer starts with a claim on New Mexico
+- Paraguay starts with the Frontier Colonization law, and Paraguay and Bolivia start with claims on Alto Paraguay (the Gran Chaco)
+- Colombia starts with a claim on Antioquia, so it can colonize the one province there held by the Wayuu
+- Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz; Bolivia also starts with them in Potosí, Antofagasta, Arequipa and Tarapacá (South Peru, annexed on day 1)
+- Russian Alaska can no longer colonize California from Fort Ross: the Fort Ross state starts with a "Fort Ross Trading Post" modifier (-100% colony growth speed) that ends when the Fort Ross sale event transfers the post
+- Russian-American Company starts with a one-line infantry battalion in Alaska, in an army called "Sitka Garrison"
+
+## Map
+- Guano deposits: in 1836 only Peru's coast is known (Ica 30 known + 20 hidden, Cajamarca 10 + 10, Lima 10, Tarapacá 10 + 10). Everything else starts hidden: Antofagasta, Baja California, Namaqualand, Haiti, Santo Domingo, Bahamas, West Indies, Puerto Rico, West Micronesia and Nauru 10 each; East Micronesia 15; Oman 5; Hawaiian Islands 10; Tahiti 10; Western Australia 10; Jamaica 5; Honduras 5; Queensland 5; Cape Colony 5; Patagonia 5. Total 275 levels. Worked deposits run out at 75% of the vanilla gold-field rate
+- Added Malaria to eight Amazon states: Guayana, Guaviare, Pastaza, Santa Cruz, Pará, Amazonas, Acre and Mato Grosso
+- Pacific islands have severe malaria again: Micronesia, Solomon Islands, Nauru, Fiji, Vanuatu, New Caledonia, Bougainville, Tahiti and Tonga
+- York Factory now starts owned by the Hudson's Bay Company instead of the Innu and Cree; in exchange, a neighbouring province goes from the Hudson's Bay Company to the Innu and Cree
+- Spain's mineral resources redistributed between its states
+- Ingria no longer has a cold water port
+- Cuba has hardwood
+
+## UI
+- Technology Research Speed tooltip shows one decimal place (e.g. +2.5% instead of +2%)
+- Trade partner lists show the value of trade instead of the quantity
+- The GM no longer gets leverage alerts about AI countries
+
+## Stability/Bug Fixes
 - Fixed the Oregon journal entry re-adding the US claim on Idaho, Oregon and Washington every month
-- Cut background script work for trade balance, Revanchism, diseconomies of scale and modifier updates to help performance, with no change to game values
+- Fixes to the Congo vote and the Scramble for Africa events
+- Fixed script errors in the Russian tsar events and the ACW segregation events; removed an unreachable Spanish event
