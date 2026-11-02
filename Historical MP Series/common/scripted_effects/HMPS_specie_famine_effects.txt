@@ -1,0 +1,696 @@
+﻿# HMPS Specie Famine, Inflationary Period and Reserve Currency (common/journal_entries/HMPS_Specie_Famine.txt, common/journal_entries/HMPS_Reserve_Currency.txt).
+# Figures are in common/script_values/HMPS_specie_famine_values.txt, modifiers in common/static_modifiers/HMPS_specie_famine_modifiers.txt
+
+### Specie Famine
+# The market leader holds je_specie_famine and every variable (sf_reserves, sf_bank_rate_stacks, sf_suspended...). Members hold the
+# read-only je_specie_famine_member, and var:sf_leader on every participant points at the leader (the leader points at itself).
+
+# Country scope (a member). Adds one Bank Rate raise: sf_bank_rate_$N$, or tax waste instead of investment efficiency under Command Economy
+sf_add_bank_rate_modifier = {
+	if = {
+		limit = { has_law = law_type:law_command_economy }
+		add_modifier = { name = sf_bank_rate_command_$N$ }
+	}
+	else = {
+		add_modifier = { name = sf_bank_rate_$N$ }
+	}
+}
+
+# Country scope (the leader). Adds raise $N$ to every member of the market
+sf_every_member_add_bank_rate_modifier = {
+	save_scope_as = sf_leader_scope
+	market = {
+		every_scope_country = {
+			limit = {
+				has_journal_entry = je_specie_famine_member
+				var:sf_leader ?= scope:sf_leader_scope
+			}
+			sf_add_bank_rate_modifier = { N = $N$ }
+		}
+	}
+}
+
+# Country scope (a country in the market that hasn't joined yet). scope:sf_leader_scope = the leader.
+# Shares the crisis, including the Bank Rate raises and the suspension already in force
+sf_add_member = {
+	set_variable = { name = sf_leader value = scope:sf_leader_scope }
+	if = {
+		limit = { scope:sf_leader_scope.var:sf_bank_rate_stacks >= 1 }
+		sf_add_bank_rate_modifier = { N = 1 }
+	}
+	if = {
+		limit = { scope:sf_leader_scope.var:sf_bank_rate_stacks >= 2 }
+		sf_add_bank_rate_modifier = { N = 2 }
+	}
+	if = {
+		limit = { scope:sf_leader_scope.var:sf_bank_rate_stacks >= 3 }
+		sf_add_bank_rate_modifier = { N = 3 }
+	}
+	if = {
+		limit = { scope:sf_leader_scope = { has_variable = sf_suspended } }
+		add_modifier = { name = sf_suspension_member }
+	}
+	add_journal_entry = { type = je_specie_famine_member target = scope:sf_leader_scope }
+}
+
+# Country scope (the leader). Brings every country in the market into the crisis; run at the start and weekly for countries that join later
+sf_add_new_members = {
+	save_scope_as = sf_leader_scope
+	market = {
+		every_scope_country = {
+			limit = {
+				NOT = { this = scope:sf_leader_scope }
+				NOT = { has_journal_entry = je_specie_famine_member }
+				NOT = { has_journal_entry = je_specie_famine }
+			}
+			sf_add_member = yes
+		}
+	}
+}
+
+# Country scope (any participant). Removes the Bank Rate and suspension modifiers; sf_tight_credit goes with the journal entry
+sf_remove_crisis_modifiers = {
+	remove_modifier = sf_bank_rate_1
+	remove_modifier = sf_bank_rate_2
+	remove_modifier = sf_bank_rate_3
+	remove_modifier = sf_bank_rate_command_1
+	remove_modifier = sf_bank_rate_command_2
+	remove_modifier = sf_bank_rate_command_3
+	remove_modifier = sf_suspension_leader
+	remove_modifier = sf_suspension_member
+}
+
+# Country scope (the leader). Suspend Convertibility: the reserves stop moving until payments resume
+sf_suspend_convertibility = {
+	save_scope_as = sf_leader_scope
+	add_modifier = { name = sf_suspension_leader }
+	custom_tooltip = sf_suspension_members_tt
+	custom_tooltip = sf_suspension_frozen_tt
+	hidden_effect = {
+		set_variable = sf_suspended
+		set_variable = sf_suspended_once
+		set_variable = { name = sf_suspension_weeks value = 0 }
+		set_variable = { name = sf_peace_weeks value = 0 }
+		# weeks of surplus only count with convertibility in force, so they start again after payments resume
+		set_variable = { name = sf_surplus_weeks value = 0 }
+		market = {
+			every_scope_country = {
+				limit = {
+					has_journal_entry = je_specie_famine_member
+					var:sf_leader ?= scope:sf_leader_scope
+				}
+				add_modifier = { name = sf_suspension_member }
+			}
+		}
+	}
+}
+
+# Country scope (the leader). Resume Specie Payments, from the button or automatically (sf_leader_weekly_update)
+sf_resume_specie_payments = {
+	save_scope_as = sf_leader_scope
+	remove_modifier = sf_suspension_leader
+	# money_amount_multiplier_large reads root.gdp: root is the leader in the button and in the journal entry pulse
+	add_modifier = {
+		name = sf_resumption_payments
+		days = 365
+		multiplier = money_amount_multiplier_large
+	}
+	custom_tooltip = sf_resumption_members_tt
+	hidden_effect = {
+		remove_variable = sf_suspended
+		remove_variable = sf_suspension_weeks
+		remove_variable = sf_peace_weeks
+		market = {
+			every_scope_country = {
+				limit = {
+					has_journal_entry = je_specie_famine_member
+					var:sf_leader ?= scope:sf_leader_scope
+				}
+				remove_modifier = sf_suspension_member
+			}
+		}
+	}
+}
+
+# Country scope (the leader or a member). The crisis fails: radicals spread to every country hit, prestige (sf_credit_collapse_prestige) does not
+sf_apply_failure = {
+	add_modifier = {
+		name = sf_trade_collapse
+		days = 7
+	}
+	add_modifier = {
+		name = sf_import_collapse
+		days = 180
+		is_decaying = yes
+	}
+	# Every good's import and export tariff level goes back to none; sf_import_collapse then blocks export tariffs and import subventions
+	custom_tooltip = {
+		text = sf_tariff_reset_tt
+		save_temporary_scope_as = sf_tariff_country
+		market = {
+			every_market_goods = {
+				goods = { save_temporary_scope_as = sf_reset_goods }
+				scope:sf_tariff_country = {
+					set_import_tariff_level = { goods = scope:sf_reset_goods level = no_tariffs_or_subventions }
+					set_export_tariff_level = { goods = scope:sf_reset_goods level = no_tariffs_or_subventions }
+				}
+			}
+		}
+	}
+	add_radicals = {
+		value = very_large_radicals
+		strata = upper
+	}
+	add_radicals = {
+		value = very_large_radicals
+		strata = middle
+	}
+	if = {
+		limit = { has_law = law_type:law_command_economy }
+		add_modifier = {
+			name = sf_credit_collapse_command
+			days = 912
+			is_decaying = yes
+		}
+	}
+	else = {
+		add_modifier = {
+			name = sf_credit_collapse
+			days = 912
+			is_decaying = yes
+		}
+	}
+}
+
+# Country scope (any participant). Adds the fading Bank Rate for $N$ raises: sf_bank_rate_aftermath, or the tax waste version under Command Economy
+sf_add_bank_rate_aftermath_modifier = {
+	if = {
+		limit = { has_law = law_type:law_command_economy }
+		add_modifier = {
+			name = sf_bank_rate_aftermath_command
+			days = 730
+			multiplier = $N$
+			is_decaying = yes
+		}
+	}
+	else = {
+		add_modifier = {
+			name = sf_bank_rate_aftermath
+			days = 730
+			multiplier = $N$
+			is_decaying = yes
+		}
+	}
+}
+
+# Country scope (any participant), before the raises are removed. However the crisis ends, its raises fade over 2 years.
+# Raises are always added in order, so the highest one held is the number of raises
+sf_add_bank_rate_aftermath = {
+	if = {
+		limit = {
+			OR = {
+				has_modifier = sf_bank_rate_3
+				has_modifier = sf_bank_rate_command_3
+			}
+		}
+		sf_add_bank_rate_aftermath_modifier = { N = 3 }
+	}
+	else_if = {
+		limit = {
+			OR = {
+				has_modifier = sf_bank_rate_2
+				has_modifier = sf_bank_rate_command_2
+			}
+		}
+		sf_add_bank_rate_aftermath_modifier = { N = 2 }
+	}
+	else_if = {
+		limit = {
+			OR = {
+				has_modifier = sf_bank_rate_1
+				has_modifier = sf_bank_rate_command_1
+			}
+		}
+		sf_add_bank_rate_aftermath_modifier = { N = 1 }
+	}
+}
+
+# Country scope (any participant). Clears the crisis when its journal entry ends
+sf_end_cleanup = {
+	sf_add_bank_rate_aftermath = yes
+	sf_remove_crisis_modifiers = yes
+	remove_variable = sf_leader
+}
+
+# Country scope (the leader). Also clears the leader's figures and starts the 5-year cooldown
+sf_leader_end_cleanup = {
+	sf_end_cleanup = yes
+	remove_variable = sf_active
+	remove_variable = sf_reserves
+	remove_variable = sf_bank_rate_stacks
+	remove_variable = sf_suspended
+	remove_variable = sf_suspended_once
+	remove_variable = sf_suspension_weeks
+	remove_variable = sf_peace_weeks
+	remove_variable = sf_surplus_weeks
+	remove_variable = sf_paid_recently
+	set_variable = { name = sf_deficit_months value = 0 }
+	set_variable = { name = sf_cooldown days = 1825 }
+}
+
+# Country scope (the leader). Sets the leader's bar and every member's bar to the true figure, var:sf_reserves. Run after anything moves it:
+# the weekly update, and Pay from the Treasury. Each member's own weekly pulse does the same, for members that joined this week
+sf_sync_reserve_bars = {
+	je:je_specie_famine ?= {
+		set_bar_progress = {
+			name = sf_reserves_bar
+			value = owner.sf_reserve_weeks
+		}
+	}
+	save_scope_as = sf_leader_scope
+	market = {
+		every_scope_country = {
+			limit = {
+				has_journal_entry = je_specie_famine_member
+				var:sf_leader ?= scope:sf_leader_scope
+			}
+			je:je_specie_famine_member ?= {
+				set_bar_progress = {
+					name = sf_reserves_bar_member
+					value = owner.sf_reserve_weeks
+				}
+			}
+		}
+	}
+}
+
+# Country scope (the leader), from je_specie_famine on_weekly_pulse
+sf_leader_weekly_update = {
+	# The week's balance of trade drains or refills the reserves, unless convertibility is suspended
+	if = {
+		limit = { NOT = { has_variable = sf_suspended } }
+		change_variable = { name = sf_reserves add = sf_weekly_change_weeks }
+		# no floor-only clamp_variable: its max then defaults to 0, which emptied the reserves in the first week
+		if = {
+			limit = { var:sf_reserves < 0 }
+			set_variable = { name = sf_reserves value = 0 }
+		}
+	}
+	# 26 straight weeks of surplus with convertibility in force pass the crisis
+	if = {
+		limit = {
+			NOT = { has_variable = sf_suspended }
+			has_variable = hmps_bot_share
+			var:hmps_bot_share > 0
+		}
+		change_variable = { name = sf_surplus_weeks add = 1 }
+	}
+	else = {
+		set_variable = { name = sf_surplus_weeks value = 0 }
+	}
+	# Payments resume by themselves after 208 weeks of suspension, or after 26 weeks of peace
+	if = {
+		limit = { has_variable = sf_suspended }
+		change_variable = { name = sf_suspension_weeks add = 1 }
+		if = {
+			limit = { is_at_war = no }
+			change_variable = { name = sf_peace_weeks add = 1 }
+		}
+		else = {
+			set_variable = { name = sf_peace_weeks value = 0 }
+		}
+		if = {
+			limit = {
+				OR = {
+					var:sf_suspension_weeks >= 208
+					var:sf_peace_weeks >= 26
+				}
+			}
+			sf_resume_specie_payments = yes
+			trigger_event = {
+				id = specie_famine.6
+				popup = yes
+			}
+		}
+	}
+	sf_add_new_members = yes
+	sf_sync_reserve_bars = yes
+}
+
+# Country scope, monthly from on_monthly_pulse_country (HMPS_specie_famine_monthly). hmps_bot_share is updated weekly by HMPS_utility_je.
+# Counts deficit months and rolls the Specie Famine and Inflationary Period for market leaders.
+# hmps_bot_share is the whole market's balance of trade / market GDP
+sf_monthly_check = {
+	if = {
+		limit = {
+			sf_is_market_leader = yes
+			has_variable = hmps_bot_share
+		}
+		if = {
+			limit = { var:hmps_bot_share <= -0.05 }
+			if = {
+				limit = { has_variable = sf_deficit_months }
+				change_variable = { name = sf_deficit_months add = 1 }
+			}
+			else = {
+				set_variable = { name = sf_deficit_months value = 1 }
+			}
+		}
+		else = {
+			set_variable = { name = sf_deficit_months value = 0 }
+		}
+		if = {
+			limit = {
+				sf_can_start_famine = yes
+				sf_famine_chance > 0
+			}
+			random = {
+				chance = sf_famine_chance
+				add_journal_entry = { type = je_specie_famine }
+			}
+		}
+		if = {
+			limit = {
+				ip_can_fire = yes
+				ip_inflation_chance > 0
+			}
+			random = {
+				chance = ip_inflation_chance
+				set_variable = { name = ip_cooldown days = 180 }
+				trigger_event = {
+					id = inflationary_period.1
+					popup = yes
+				}
+			}
+		}
+	}
+	else_if = {
+		limit = { has_variable = sf_deficit_months }
+		remove_variable = sf_deficit_months
+	}
+}
+
+### Inflationary Period
+# Country scope (the market leader), from inflationary_period.1. Gives every other country in the market the chosen modifier and tells players
+ip_apply_to_members = {
+	save_scope_as = ip_leader_scope
+	custom_tooltip = ip_market_wide_tt
+	hidden_effect = {
+		market = {
+			every_scope_country = {
+				limit = { NOT = { this = scope:ip_leader_scope } }
+				add_modifier = {
+					name = $MODIFIER$
+					days = 730
+				}
+				if = {
+					limit = { is_player = yes }
+					trigger_event = { id = inflationary_period.2 }
+				}
+			}
+		}
+	}
+}
+
+### Reserve Currency
+# Global variables: reserve_currency_holder (the holder; unset while vacant), rc_previous_holder (for the change notice),
+# rc_top_challenger (for loc), rc_vacant_candidate and rc_vacant_months (while vacant). Each challenger counts its own rc_challenge_months.
+
+# No scope needed. Applies the tiered modifiers: rc_market_N to every country in the holder's market, rc_holder_N to the holder.
+# rc_market_tier_applied / rc_holder_tier_applied remember the tier given, so modifiers only change when the tier or the market does
+rc_refresh_modifiers = {
+	every_country = {
+		limit = {
+			OR = {
+				has_variable = rc_market_tier_applied
+				has_variable = rc_holder_tier_applied
+				rc_desired_market_tier > 0
+				rc_desired_holder_tier > 0
+			}
+		}
+		if = {
+			limit = {
+				NOT = { rc_desired_market_tier = rc_market_tier_applied_value }
+			}
+			remove_modifier = rc_market_1
+			remove_modifier = rc_market_2
+			remove_modifier = rc_market_3
+			if = {
+				limit = { rc_desired_market_tier = 1 }
+				add_modifier = { name = rc_market_1 }
+			}
+			else_if = {
+				limit = { rc_desired_market_tier = 2 }
+				add_modifier = { name = rc_market_2 }
+			}
+			else_if = {
+				limit = { rc_desired_market_tier = 3 }
+				add_modifier = { name = rc_market_3 }
+			}
+			if = {
+				limit = { rc_desired_market_tier > 0 }
+				set_variable = { name = rc_market_tier_applied value = rc_desired_market_tier }
+			}
+			else = {
+				remove_variable = rc_market_tier_applied
+			}
+		}
+		if = {
+			limit = {
+				NOT = { rc_desired_holder_tier = rc_holder_tier_applied_value }
+			}
+			remove_modifier = rc_holder_1
+			remove_modifier = rc_holder_2
+			remove_modifier = rc_holder_3
+			if = {
+				limit = { rc_desired_holder_tier = 1 }
+				add_modifier = { name = rc_holder_1 }
+			}
+			else_if = {
+				limit = { rc_desired_holder_tier = 2 }
+				add_modifier = { name = rc_holder_2 }
+			}
+			else_if = {
+				limit = { rc_desired_holder_tier = 3 }
+				add_modifier = { name = rc_holder_3 }
+			}
+			if = {
+				limit = { rc_desired_holder_tier > 0 }
+				set_variable = { name = rc_holder_tier_applied value = rc_desired_holder_tier }
+			}
+			else = {
+				remove_variable = rc_holder_tier_applied
+			}
+		}
+	}
+}
+
+# No scope needed. scope:rc_new_holder takes over the Reserve Currency. The old holder's je_reserve_currency invalidates itself
+rc_set_holder = {
+	set_global_variable = { name = reserve_currency_holder value = scope:rc_new_holder }
+	remove_global_variable = rc_top_challenger
+	remove_global_variable = rc_vacant_candidate
+	remove_global_variable = rc_vacant_months
+	every_country = {
+		limit = { has_variable = rc_challenge_months }
+		remove_variable = rc_challenge_months
+	}
+	scope:rc_new_holder = {
+		if = {
+			limit = { NOT = { has_journal_entry = je_reserve_currency } }
+			add_journal_entry = { type = je_reserve_currency }
+		}
+	}
+	rc_refresh_modifiers = yes
+}
+
+# No scope needed. Tells every player who holds the Reserve Currency now (reserve_currency.1); popups for the new and previous holder only
+rc_notify_new_holder = {
+	every_country = {
+		limit = { is_player = yes }
+		if = {
+			limit = {
+				OR = {
+					this = scope:rc_new_holder
+					global_var:rc_previous_holder ?= this
+				}
+			}
+			trigger_event = {
+				id = reserve_currency.1
+				popup = yes
+			}
+		}
+		else = {
+			trigger_event = { id = reserve_currency.1 }
+		}
+	}
+}
+
+# No scope needed. Tells every player the Reserve Currency is vacant (reserve_currency.2)
+rc_notify_vacant = {
+	every_country = {
+		limit = { is_player = yes }
+		if = {
+			limit = { global_var:rc_previous_holder ?= this }
+			trigger_event = {
+				id = reserve_currency.2
+				popup = yes
+			}
+		}
+		else = {
+			trigger_event = { id = reserve_currency.2 }
+		}
+	}
+}
+
+# No scope needed, from on_game_started_after_lobby, or the first monthly update of a save that predates the Reserve Currency.
+# Britain starts with it; if it can't hold it, the status starts vacant
+rc_initialize = {
+	set_global_variable = rc_initialized
+	if = {
+		limit = { c:GBR ?= { rc_can_hold = yes } }
+		c:GBR = { save_scope_as = rc_new_holder }
+		rc_set_holder = yes
+	}
+}
+
+# No scope needed, from on_monthly_pulse (HMPS_reserve_currency_monthly)
+rc_monthly_update = {
+	if = {
+		limit = { NOT = { has_global_variable = rc_initialized } }
+		rc_initialize = yes
+	}
+	# Lost: the holder was annexed, became unrecognized, went bankrupt or stopped leading its own market.
+	# The recognized market leader with the most imports takes over; a bankrupt holder can't win it back for 5 years
+	if = {
+		limit = {
+			has_global_variable = reserve_currency_holder
+			NOT = { global_var:reserve_currency_holder ?= { rc_can_hold = yes } }
+		}
+		remove_global_variable = rc_previous_holder
+		global_var:reserve_currency_holder ?= {
+			if = {
+				limit = {
+					is_country_alive = yes
+					in_default = yes
+				}
+				set_variable = { name = rc_barred days = 1825 }
+			}
+			if = {
+				limit = { is_country_alive = yes }
+				set_global_variable = { name = rc_previous_holder value = this }
+			}
+		}
+		remove_global_variable = reserve_currency_holder
+		if = {
+			limit = { any_country = { rc_can_hold = yes } }
+			ordered_country = {
+				limit = { rc_can_hold = yes }
+				order_by = rc_market_imports
+				save_scope_as = rc_new_holder
+			}
+			rc_set_holder = yes
+			rc_notify_new_holder = yes
+		}
+		else = {
+			rc_notify_vacant = yes
+		}
+	}
+	# Challenged: a recognized market leader whose market out-imports the holder's for 12 months straight
+	else_if = {
+		limit = { has_global_variable = reserve_currency_holder }
+		global_var:reserve_currency_holder = { save_scope_as = rc_holder_scope }
+		every_country = {
+			limit = {
+				OR = {
+					has_variable = rc_challenge_months
+					rc_can_hold = yes
+				}
+			}
+			if = {
+				limit = {
+					rc_can_hold = yes
+					NOT = { this = scope:rc_holder_scope }
+					rc_market_imports > scope:rc_holder_scope.rc_market_imports
+				}
+				if = {
+					limit = { has_variable = rc_challenge_months }
+					change_variable = { name = rc_challenge_months add = 1 }
+				}
+				else = {
+					set_variable = { name = rc_challenge_months value = 1 }
+				}
+			}
+			else_if = {
+				limit = { has_variable = rc_challenge_months }
+				remove_variable = rc_challenge_months
+			}
+		}
+		if = {
+			limit = {
+				any_country = {
+					has_variable = rc_challenge_months
+					var:rc_challenge_months >= 12
+				}
+			}
+			ordered_country = {
+				limit = {
+					has_variable = rc_challenge_months
+					var:rc_challenge_months >= 12
+				}
+				order_by = rc_market_imports
+				save_scope_as = rc_new_holder
+			}
+			set_global_variable = { name = rc_previous_holder value = scope:rc_holder_scope }
+			rc_set_holder = yes
+			rc_notify_new_holder = yes
+		}
+		else_if = {
+			limit = { any_country = { has_variable = rc_challenge_months } }
+			ordered_country = {
+				limit = { has_variable = rc_challenge_months }
+				order_by = rc_challenge_months_value
+				save_scope_as = rc_top_challenger_scope
+			}
+			set_global_variable = { name = rc_top_challenger value = scope:rc_top_challenger_scope }
+		}
+		else = {
+			remove_global_variable = rc_top_challenger
+		}
+	}
+	# Vacant: the recognized market leader with the most imports takes it once it has led for 12 months straight
+	else = {
+		if = {
+			limit = { any_country = { rc_can_hold = yes } }
+			ordered_country = {
+				limit = { rc_can_hold = yes }
+				order_by = rc_market_imports
+				save_scope_as = rc_vacant_top
+			}
+		}
+		if = {
+			limit = { exists = scope:rc_vacant_top }
+			if = {
+				limit = { global_var:rc_vacant_candidate ?= scope:rc_vacant_top }
+				change_global_variable = { name = rc_vacant_months add = 1 }
+			}
+			else = {
+				set_global_variable = { name = rc_vacant_candidate value = scope:rc_vacant_top }
+				set_global_variable = { name = rc_vacant_months value = 1 }
+			}
+			if = {
+				limit = { global_var:rc_vacant_months >= 12 }
+				scope:rc_vacant_top = { save_scope_as = rc_new_holder }
+				remove_global_variable = rc_previous_holder
+				rc_set_holder = yes
+				rc_notify_new_holder = yes
+			}
+		}
+		else = {
+			remove_global_variable = rc_vacant_candidate
+			remove_global_variable = rc_vacant_months
+		}
+	}
+	# Every month: tiers follow the holder's technology and countries joining or leaving its market
+	rc_refresh_modifiers = yes
+}

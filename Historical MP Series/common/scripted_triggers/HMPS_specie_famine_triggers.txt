@@ -1,0 +1,63 @@
+﻿# HMPS Specie Famine, Inflationary Period and Reserve Currency (common/journal_entries/HMPS_Specie_Famine.txt, common/journal_entries/HMPS_Reserve_Currency.txt)
+
+# Country scope. Leads its own market
+sf_is_market_leader = {
+	market.owner ?= this
+}
+
+# Country scope. Recognized: not an unrecognized or decentralized country
+rc_is_recognized = {
+	NOT = { is_country_type = unrecognized }
+	NOT = { is_country_type = decentralized }
+}
+
+# Country scope. The Reserve Currency holder stops suffering Specie Famines once it has Mutual Funds
+rc_immune_to_specie_famine = {
+	has_global_variable = reserve_currency_holder
+	this = global_var:reserve_currency_holder
+	has_technology_researched = mutual_funds
+}
+
+# Country scope. Can a Specie Famine start here this month? (the roll itself is sf_famine_chance)
+# Players only, market leaders only, one at a time per market, 5 years after the last one ended
+sf_can_start_famine = {
+	is_ai = no
+	sf_is_market_leader = yes
+	has_variable = hmps_bot_share
+	has_variable = sf_deficit_months
+	var:sf_deficit_months >= 6
+	NOT = { has_variable = sf_cooldown }
+	NOT = { has_journal_entry = je_specie_famine }
+	NOT = { has_journal_entry = je_specie_famine_member }
+	NOT = { rc_immune_to_specie_famine = yes }
+}
+
+# Country scope. Can an Inflationary Period event fire here this month? Market leaders only, 6 months apart, never during a Specie Famine
+ip_can_fire = {
+	sf_is_market_leader = yes
+	has_variable = hmps_bot_share
+	var:hmps_bot_share >= 0.05
+	NOT = { has_variable = ip_cooldown }
+	# not while its market is in a Specie Famine
+	NOT = { has_journal_entry = je_specie_famine }
+	NOT = { has_journal_entry = je_specie_famine_member }
+}
+
+# Country scope (the market leader). Suspend Convertibility: at war, and this country has suffered at least 100,000 casualties in that war
+sf_has_heavy_war_casualties = {
+	any_scope_war = {
+		num_country_casualties = {
+			target = root
+			value >= 100000
+		}
+	}
+}
+
+# Country scope. Could hold the Reserve Currency: alive, recognized, leads its own market, not bankrupt and not barred after losing it to bankruptcy
+rc_can_hold = {
+	is_country_alive = yes
+	rc_is_recognized = yes
+	sf_is_market_leader = yes
+	in_default = no
+	NOT = { has_variable = rc_barred }
+}

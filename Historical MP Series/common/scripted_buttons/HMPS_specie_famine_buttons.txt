@@ -1,0 +1,141 @@
+﻿# HMPS Specie Famine (common/journal_entries/HMPS_Specie_Famine.txt). Only the market leader's je_specie_famine has buttons; root = the leader.
+# The AI never gets the crisis, so ai_chance is 0
+
+# Up to 3 times. Each raise adds sf_bank_rate_N (sf_bank_rate_command_N under Command Economy) to every country in the market until the crisis ends
+sf_raise_bank_rate_button = {
+	name = "sf_raise_bank_rate_button"
+	desc = "sf_raise_bank_rate_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = sf_raise_bank_rate_max_tt
+			var:sf_bank_rate_stacks < 3
+		}
+	}
+
+	effect = {
+		if = {
+			limit = { var:sf_bank_rate_stacks = 0 }
+			sf_add_bank_rate_modifier = { N = 1 }
+			hidden_effect = { sf_every_member_add_bank_rate_modifier = { N = 1 } }
+		}
+		else_if = {
+			limit = { var:sf_bank_rate_stacks = 1 }
+			sf_add_bank_rate_modifier = { N = 2 }
+			hidden_effect = { sf_every_member_add_bank_rate_modifier = { N = 2 } }
+		}
+		else = {
+			sf_add_bank_rate_modifier = { N = 3 }
+			hidden_effect = { sf_every_member_add_bank_rate_modifier = { N = 3 } }
+		}
+		# the Command Economy variant only matters to a leader that has it
+		if = {
+			limit = { has_law = law_type:law_command_economy }
+			custom_tooltip = sf_bank_rate_market_command_tt
+		}
+		else = {
+			custom_tooltip = sf_bank_rate_market_tt
+		}
+		hidden_effect = {
+			change_variable = { name = sf_bank_rate_stacks add = 1 }
+		}
+	}
+
+	ai_chance = {
+		value = 0
+	}
+}
+
+# Once a month. 7.5% of GDP leaves the treasury (gold reserves, then debt), 5% of GDP reaches the foreign reserves
+sf_pay_from_treasury_button = {
+	name = "sf_pay_from_treasury_button"
+	desc = "sf_pay_from_treasury_button_desc"
+
+	visible = {
+		always = yes
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = sf_pay_from_treasury_cooldown_tt
+			NOT = { has_variable = sf_paid_recently }
+		}
+		custom_tooltip = {
+			text = sf_pay_from_treasury_funds_tt
+			sf_available_funds >= sf_treasury_payment
+		}
+	}
+
+	effect = {
+		add_treasury = sf_treasury_payment_negative
+		custom_tooltip = sf_pay_from_treasury_reserves_tt
+		add_radicals = {
+			value = medium_radicals
+		}
+		hidden_effect = {
+			change_variable = { name = sf_reserves add = sf_treasury_reserve_gain_weeks }
+			set_variable = { name = sf_paid_recently days = 30 }
+			# move the bars now rather than at the next weekly update
+			sf_sync_reserve_bars = yes
+		}
+	}
+
+	ai_chance = {
+		value = 0
+	}
+}
+
+# Once per crisis, only in a war where the leader has suffered 100,000 casualties. The reserves stop moving until payments resume
+sf_suspend_convertibility_button = {
+	name = "sf_suspend_convertibility_button"
+	desc = "sf_suspend_convertibility_button_desc"
+
+	visible = {
+		NOT = { has_variable = sf_suspended }
+	}
+
+	possible = {
+		custom_tooltip = {
+			text = sf_suspend_once_tt
+			NOT = { has_variable = sf_suspended_once }
+		}
+		custom_tooltip = {
+			text = sf_suspend_war_tt
+			sf_has_heavy_war_casualties = yes
+		}
+	}
+
+	effect = {
+		sf_suspend_convertibility = yes
+	}
+
+	ai_chance = {
+		value = 0
+	}
+}
+
+# Replaces the suspend button while suspended. Payments also resume by themselves after 208 weeks, or after 26 weeks of peace
+sf_resume_specie_payments_button = {
+	name = "sf_resume_specie_payments_button"
+	desc = "sf_resume_specie_payments_button_desc"
+
+	visible = {
+		has_variable = sf_suspended
+	}
+
+	possible = {
+		always = yes
+	}
+
+	effect = {
+		sf_resume_specie_payments = yes
+	}
+
+	ai_chance = {
+		value = 0
+	}
+}

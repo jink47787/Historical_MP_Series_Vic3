@@ -1,0 +1,56 @@
+﻿# HMPS Specie Famine (common/journal_entries/HMPS_Specie_Famine.txt). Foreign reserves in weeks of the market's imports: 0 fails, 26 passes.
+# Journal entries show their bars in the outliner too. The real figure is the leader's var:sf_reserves; the bars only display it.
+# weekly_progress runs before the journal entries' on_weekly_pulse, and adds this week's balance of trade so the tooltip can show it.
+# The pulse then sets every bar to var:sf_reserves (sf_sync_reserve_bars), which also catches Pay from the Treasury.
+# A bar can't read its own progress here ("scripted_bar_progress" is none outside a journal entry scope), so it never corrects itself
+
+# The market leader's bar
+sf_reserves_bar = {
+	name = "sf_reserves_bar"
+	desc = "sf_reserves_bar_desc"
+	second_desc = "sf_reserves_bar_second_desc"
+
+	default_green = yes
+
+	weekly_progress = {
+		owner = {
+			# frozen while convertibility is suspended
+			if = {
+				limit = { sf_is_suspended = 0 }
+				add = {
+					desc = "sf_reserves_bar_trade_balance"
+					value = sf_weekly_change_weeks
+				}
+			}
+		}
+	}
+
+	start_value = 10
+	min_value = 0
+	max_value = 26
+}
+
+# Members' bar: the same figure, read from the leader
+sf_reserves_bar_member = {
+	name = "sf_reserves_bar"
+	desc = "sf_reserves_bar_desc"
+	second_desc = "sf_reserves_bar_second_desc"
+
+	default_green = yes
+
+	weekly_progress = {
+		owner = {
+			if = {
+				limit = { sf_is_suspended = 0 }
+				add = {
+					desc = "sf_reserves_bar_trade_balance"
+					value = sf_weekly_change_weeks
+				}
+			}
+		}
+	}
+
+	start_value = 10
+	min_value = 0
+	max_value = 26
+}
