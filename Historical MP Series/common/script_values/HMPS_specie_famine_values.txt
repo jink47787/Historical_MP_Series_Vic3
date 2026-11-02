@@ -1,0 +1,382 @@
+﻿# HMPS Specie Famine, Inflationary Period and Reserve Currency (common/journal_entries/HMPS_Specie_Famine.txt,
+# common/journal_entries/HMPS_Reserve_Currency.txt, events/HMPS_00_Specie_Famine.txt).
+# Trade figures come from HMPS Balance of Trade (hmps_balance_of_trade_update_effect, common/scripted_effects/HMPS_scripted_effects.txt):
+# every country holds its market's totals, so each check is market wide. hmps_bot_share = yearly balance / market GDP,
+# hmps_bot_balance = yearly balance, hmps_bot_imports_weekly = the market's weekly imports.
+
+### Specie Famine: the crisis itself
+# Country scope (the market leader or a member). var:sf_leader is the market leader; the leader points to itself,
+# so leader and member journal entries read the same reserves. The leader's var:sf_reserves is in weeks of the market's imports,
+# so only the balance of trade (and Pay from the Treasury) moves it, never a change in the size of a week
+
+# The market's weekly imports (at least 1, so money can always be turned into weeks)
+sf_weekly_imports = {
+	value = 1
+	if = {
+		limit = {
+			has_variable = sf_leader
+			var:sf_leader ?= { has_variable = hmps_bot_imports_weekly }
+		}
+		value = var:sf_leader.var:hmps_bot_imports_weekly
+		min = 1
+	}
+}
+
+# Foreign reserves remaining, in weeks of imports
+sf_reserve_weeks = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = sf_leader
+			var:sf_leader ?= { has_variable = sf_reserves }
+		}
+		value = var:sf_leader.var:sf_reserves
+	}
+}
+
+# Foreign reserves remaining, in money at this week's imports (for loc)
+sf_reserves_money = {
+	value = sf_reserve_weeks
+	multiply = sf_weekly_imports
+}
+
+# 1 while convertibility is suspended, else 0
+sf_is_suspended = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = sf_leader
+			var:sf_leader ?= { has_variable = sf_suspended }
+		}
+		value = 1
+	}
+}
+
+# This week's change to the reserves, in money: a 52nd of the market's yearly balance of trade. 0 while suspended
+sf_weekly_change_money = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = sf_leader
+			var:sf_leader ?= {
+				has_variable = hmps_bot_balance
+				NOT = { has_variable = sf_suspended }
+			}
+		}
+		value = var:sf_leader.var:hmps_bot_balance
+		divide = 52
+	}
+}
+
+# This week's change to the reserves, in weeks of imports
+sf_weekly_change_weeks = {
+	value = sf_weekly_change_money
+	divide = sf_weekly_imports
+}
+
+# Weekly updates until the reserves run out at this week's rate, rounded up (0 when they are not falling)
+sf_weeks_to_empty = {
+	value = 0
+	if = {
+		limit = { sf_weekly_change_weeks < 0 }
+		value = sf_reserve_weeks
+		divide = {
+			value = sf_weekly_change_weeks
+			multiply = -1
+		}
+		ceiling = yes
+	}
+}
+
+# Weekly updates until the reserves reach the 26-week target at this week's rate, rounded up (0 when they are not rising)
+sf_weeks_to_target = {
+	value = 0
+	if = {
+		limit = { sf_weekly_change_weeks > 0 }
+		value = 26
+		subtract = sf_reserve_weeks
+		divide = sf_weekly_change_weeks
+		min = 0
+		ceiling = yes
+	}
+}
+
+# Market balance of trade as a share of GDP, for loc
+sf_market_bop_share = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = sf_leader
+			var:sf_leader ?= { has_variable = hmps_bot_share }
+		}
+		value = var:sf_leader.var:hmps_bot_share
+	}
+}
+
+# Weeks of surplus so far towards the 26 needed to pass
+sf_surplus_weeks = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = sf_leader
+			var:sf_leader ?= { has_variable = sf_surplus_weeks }
+		}
+		value = var:sf_leader.var:sf_surplus_weeks
+	}
+}
+
+# Times the Bank Rate has been raised (0-3)
+sf_bank_rate_stacks = {
+	value = 0
+	if = {
+		limit = {
+			has_variable = sf_leader
+			var:sf_leader ?= { has_variable = sf_bank_rate_stacks }
+		}
+		value = var:sf_leader.var:sf_bank_rate_stacks
+	}
+}
+
+### Specie Famine: Pay from Treasury
+# Country scope (the market leader)
+
+# Money the country can spend without defaulting: gold reserves + unused credit (as in the old grant code, grants.3 in events/HMPS_00_Grants.txt)
+sf_available_funds = {
+	value = gold_reserves
+	add = {
+		value = credit
+		multiply = {
+			value = 1
+			subtract = scaled_debt
+		}
+	}
+}
+
+# 10% of GDP leaves the treasury
+sf_treasury_payment = {
+	value = gdp
+	multiply = 0.1
+}
+
+sf_treasury_payment_negative = {
+	value = sf_treasury_payment
+	multiply = -1
+}
+
+# Only 5% of GDP reaches the reserves
+sf_treasury_reserve_gain = {
+	value = gdp
+	multiply = 0.05
+}
+
+sf_treasury_reserve_gain_weeks = {
+	value = sf_treasury_reserve_gain
+	divide = sf_weekly_imports
+}
+
+### Specie Famine: the starting roll
+# Country scope (a market leader). After 6 straight months of a deficit of 5% of GDP or more, the monthly chance is
+# 1 in this many months, by the size of the deficit (0 = no chance)
+sf_famine_base_denominator = {
+	value = 0
+	if = {
+		limit = { has_variable = hmps_bot_share }
+		if = {
+			limit = { var:hmps_bot_share <= -0.13 }
+			value = 6
+		}
+		else_if = {
+			limit = { var:hmps_bot_share <= -0.12 }
+			value = 9
+		}
+		else_if = {
+			limit = { var:hmps_bot_share <= -0.11 }
+			value = 18
+		}
+		else_if = {
+			limit = { var:hmps_bot_share <= -0.10 }
+			value = 30
+		}
+		else_if = {
+			limit = { var:hmps_bot_share <= -0.09 }
+			value = 48
+		}
+		else_if = {
+			limit = { var:hmps_bot_share <= -0.08 }
+			value = 60
+		}
+		else_if = {
+			limit = { var:hmps_bot_share <= -0.07 }
+			value = 72
+		}
+		else_if = {
+			limit = { var:hmps_bot_share <= -0.06 }
+			value = 90
+		}
+		else_if = {
+			limit = { var:hmps_bot_share <= -0.05 }
+			value = 120
+		}
+	}
+}
+
+# Contagion: for 2 months after another market's Specie Famine fails, the denominator is 10 times smaller
+# (global_var:sf_contagion_source, set by je_specie_famine on_fail)
+sf_famine_odds_denominator = {
+	value = sf_famine_base_denominator
+	if = {
+		limit = {
+			has_global_variable = sf_contagion_source
+			NOT = { this = global_var:sf_contagion_source }
+		}
+		divide = 10
+	}
+}
+
+# Monthly chance in percent (0-100)
+sf_famine_chance = {
+	value = 0
+	if = {
+		limit = { sf_famine_base_denominator > 0 }
+		value = 100
+		divide = sf_famine_odds_denominator
+		max = 100
+	}
+}
+
+### Inflationary Period: the roll
+# Country scope (a market leader). With a surplus of 5% of GDP or more, the monthly chance is 1 in this many months
+ip_inflation_odds_denominator = {
+	value = 0
+	if = {
+		limit = { has_variable = hmps_bot_share }
+		if = {
+			limit = { var:hmps_bot_share >= 0.13 }
+			value = 6
+		}
+		else_if = {
+			limit = { var:hmps_bot_share >= 0.12 }
+			value = 9
+		}
+		else_if = {
+			limit = { var:hmps_bot_share >= 0.11 }
+			value = 18
+		}
+		else_if = {
+			limit = { var:hmps_bot_share >= 0.10 }
+			value = 30
+		}
+		else_if = {
+			limit = { var:hmps_bot_share >= 0.09 }
+			value = 48
+		}
+		else_if = {
+			limit = { var:hmps_bot_share >= 0.08 }
+			value = 60
+		}
+		else_if = {
+			limit = { var:hmps_bot_share >= 0.07 }
+			value = 72
+		}
+		else_if = {
+			limit = { var:hmps_bot_share >= 0.06 }
+			value = 90
+		}
+		else_if = {
+			limit = { var:hmps_bot_share >= 0.05 }
+			value = 120
+		}
+	}
+}
+
+ip_inflation_chance = {
+	value = 0
+	if = {
+		limit = { ip_inflation_odds_denominator > 0 }
+		value = 100
+		divide = ip_inflation_odds_denominator
+		max = 100
+	}
+}
+
+### Reserve Currency
+# Country scope (a market leader): the market's weekly imports, summed over every member
+# (hmps_balance_of_trade_world_totals_effect keeps this sum on the market owner)
+rc_market_imports = {
+	value = 0
+	if = {
+		limit = { has_variable = hmps_bot_market_imports_weekly }
+		add = var:hmps_bot_market_imports_weekly
+	}
+}
+
+# No scope needed: the current holder's tier. 1 base, 2 with Mutual Funds, 3 with International Exchange Standards (0 when vacant)
+rc_tier = {
+	value = 0
+	if = {
+		limit = { has_global_variable = reserve_currency_holder }
+		value = 1
+		if = {
+			limit = {
+				global_var:reserve_currency_holder = { has_technology_researched = international_exchange_standards }
+			}
+			value = 3
+		}
+		else_if = {
+			limit = {
+				global_var:reserve_currency_holder = { has_technology_researched = mutual_funds }
+			}
+			value = 2
+		}
+	}
+}
+
+# Country scope: the Reserve Currency tier this country's market should get (0 outside the holder's market)
+rc_desired_market_tier = {
+	value = 0
+	if = {
+		limit = {
+			has_global_variable = reserve_currency_holder
+			market.owner ?= global_var:reserve_currency_holder
+		}
+		value = rc_tier
+	}
+}
+
+# Country scope: the holder's own tier (0 for everyone else)
+rc_desired_holder_tier = {
+	value = 0
+	if = {
+		limit = {
+			has_global_variable = reserve_currency_holder
+			this = global_var:reserve_currency_holder
+		}
+		value = rc_tier
+	}
+}
+
+# Country scope: the tiers rc_refresh_modifiers last gave this country (0 = none)
+rc_market_tier_applied_value = {
+	value = 0
+	if = {
+		limit = { has_variable = rc_market_tier_applied }
+		value = var:rc_market_tier_applied
+	}
+}
+
+rc_holder_tier_applied_value = {
+	value = 0
+	if = {
+		limit = { has_variable = rc_holder_tier_applied }
+		value = var:rc_holder_tier_applied
+	}
+}
+
+# Country scope: months in a row this country has out-imported the holder (12 takes over)
+rc_challenge_months_value = {
+	value = 0
+	if = {
+		limit = { has_variable = rc_challenge_months }
+		value = var:rc_challenge_months
+	}
+}

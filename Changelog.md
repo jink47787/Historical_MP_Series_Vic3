@@ -54,7 +54,7 @@ Thanks to Yyyman for his Italy company changes.
 #### Hardwood
 - Hardwood is back as its own resource: Hardwood Forestry can be built in 208 states, and hardwood is used by Builders' Yards and Fitted Interiors
 #### Trade
-- New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -50% at 10%) and the other side gains 2.5% per 1% (up to +25%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
+- New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -100% at 20%) and the other side gains 2.5% per 1% (up to +50%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
 #### Guano
 - Guano works like gold: deposits are discovered over time and run out, and Guano Harvestries are placed automatically on known deposits instead of being built. In 1836 only Peru's coast is known
 #### Infrastructure

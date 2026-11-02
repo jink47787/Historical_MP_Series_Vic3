@@ -1,0 +1,262 @@
+﻿# HMPS Specie Famine. A player market leader whose market runs a deficit of 5% of GDP or more for 6 straight months may lose its
+# foreign reserves (sf_monthly_check, common/scripted_effects/HMPS_specie_famine_effects.txt, rolled monthly from on_monthly_pulse_country).
+# The crisis itself runs weekly. The leader's var:sf_reserves is in weeks of the market's imports; the progress bars only display it.
+# The leader holds je_specie_famine and every decision; every other country in the market shares the crisis through je_specie_famine_member.
+# Values: common/script_values/HMPS_specie_famine_values.txt. Events: events/HMPS_00_Specie_Famine.txt
+
+je_specie_famine = {
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+
+	group = je_group_crises
+
+	scripted_progress_bar = sf_reserves_bar
+
+	scripted_button = sf_raise_bank_rate_button
+	scripted_button = sf_pay_from_treasury_button
+	scripted_button = sf_suspend_convertibility_button
+	scripted_button = sf_resume_specie_payments_button
+
+	modifiers_while_active = {
+		sf_tight_credit
+	}
+
+	status_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = je_specie_famine_status_suspended
+				trigger = { has_variable = sf_suspended }
+			}
+			triggered_desc = {
+				desc = je_specie_famine_status_surplus
+				trigger = {
+					has_variable = sf_surplus_weeks
+					var:sf_surplus_weeks > 0
+				}
+			}
+			triggered_desc = {
+				desc = je_specie_famine_status
+				trigger = { always = yes }
+			}
+		}
+	}
+
+	immediate = {
+		set_variable = { name = sf_leader value = root }
+		set_variable = sf_active
+		# 10 weeks of imports, the bars' start_value
+		set_variable = { name = sf_reserves value = 10 }
+		set_variable = { name = sf_bank_rate_stacks value = 0 }
+		set_variable = { name = sf_surplus_weeks value = 0 }
+		remove_variable = sf_outcome_failed
+		remove_variable = sf_outcome_passed
+		sf_add_new_members = yes
+		trigger_event = {
+			id = specie_famine.1
+			popup = yes
+		}
+	}
+
+	# Passed: payments in force, and either 26 weeks of imports in reserve (the bars' max) or 26 straight weeks of surplus. No reward
+	complete = {
+		custom_tooltip = {
+			text = je_specie_famine_resumed_tt
+			NOT = { has_variable = sf_suspended }
+		}
+		OR = {
+			custom_tooltip = {
+				text = je_specie_famine_target_tt
+				sf_reserve_weeks >= 26
+			}
+			custom_tooltip = {
+				text = je_specie_famine_surplus_tt
+				has_variable = sf_surplus_weeks
+				var:sf_surplus_weeks >= 26
+			}
+		}
+	}
+
+	on_complete = {
+		custom_tooltip = je_specie_famine_complete_tt
+		hidden_effect = {
+			set_variable = { name = sf_outcome_passed days = 30 }
+			trigger_event = {
+				id = specie_famine.5
+				popup = yes
+			}
+			sf_leader_end_cleanup = yes
+		}
+	}
+
+	# Failed: the reserves ran out, or the leader joined another market
+	fail = {
+		OR = {
+			custom_tooltip = {
+				text = je_specie_famine_empty_tt
+				has_variable = sf_reserves
+				var:sf_reserves <= 0
+			}
+			custom_tooltip = {
+				text = je_specie_famine_left_market_tt
+				NOT = { sf_is_market_leader = yes }
+			}
+		}
+	}
+
+	on_fail = {
+		sf_apply_failure = yes
+		add_modifier = {
+			name = sf_credit_collapse_prestige
+			days = 912
+			is_decaying = yes
+		}
+		# Only an empty reserve takes the market down with the leader; a leader that joined another market suffers alone
+		if = {
+			limit = { sf_is_market_leader = yes }
+			custom_tooltip = je_specie_famine_fail_market_tt
+			hidden_effect = {
+				set_variable = { name = sf_outcome_failed days = 30 }
+			}
+		}
+		custom_tooltip = je_specie_famine_contagion_tt
+		hidden_effect = {
+			set_global_variable = {
+				name = sf_contagion_source
+				value = root
+				days = 60
+			}
+			trigger_event = {
+				id = specie_famine.3
+				popup = yes
+			}
+			sf_leader_end_cleanup = yes
+		}
+	}
+
+	on_weekly_pulse = {
+		effect = {
+			sf_leader_weekly_update = yes
+		}
+	}
+
+	weight = 1000
+	should_be_pinned_by_default_uninvolved_or_context = yes
+	can_revolution_inherit = no
+	transferable = no
+}
+
+# Every other country in a market in a Specie Famine. No decisions: it shows the leader's reserves and ends with the leader's crisis
+je_specie_famine_member = {
+	icon = "gfx/interface/icons/event_icons/event_trade.dds"
+
+	group = je_group_crises
+
+	scripted_progress_bar = sf_reserves_bar_member
+
+	modifiers_while_active = {
+		sf_tight_credit
+	}
+
+	status_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = je_specie_famine_member_status_suspended
+				trigger = {
+					var:sf_leader ?= { has_variable = sf_suspended }
+				}
+			}
+			triggered_desc = {
+				desc = je_specie_famine_member_status
+				trigger = { always = yes }
+			}
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = { is_player = yes }
+			trigger_event = {
+				id = specie_famine.2
+				popup = yes
+			}
+		}
+	}
+
+	complete = {
+		custom_tooltip = {
+			text = je_specie_famine_member_complete_tt
+			var:sf_leader ?= { has_variable = sf_outcome_passed }
+		}
+	}
+
+	on_complete = {
+		custom_tooltip = je_specie_famine_complete_tt
+		hidden_effect = {
+			if = {
+				limit = { is_player = yes }
+				trigger_event = {
+					id = specie_famine.5
+					popup = yes
+				}
+			}
+			sf_end_cleanup = yes
+		}
+	}
+
+	fail = {
+		custom_tooltip = {
+			text = je_specie_famine_member_fail_tt
+			var:sf_leader ?= { has_variable = sf_outcome_failed }
+			market.owner ?= var:sf_leader
+		}
+	}
+
+	on_fail = {
+		sf_apply_failure = yes
+		hidden_effect = {
+			if = {
+				limit = { is_player = yes }
+				trigger_event = {
+					id = specie_famine.4
+					popup = yes
+				}
+			}
+			sf_end_cleanup = yes
+		}
+	}
+
+	# Left the market, or the leader's crisis ended without taking the market with it (the leader was annexed, or joined another market)
+	invalid = {
+		OR = {
+			NOT = { has_variable = sf_leader }
+			NOT = { market.owner ?= var:sf_leader }
+			var:sf_leader ?= {
+				NOT = { has_variable = sf_active }
+				NOT = { has_variable = sf_outcome_failed }
+				NOT = { has_variable = sf_outcome_passed }
+			}
+		}
+	}
+
+	on_invalid = {
+		hidden_effect = {
+			sf_end_cleanup = yes
+		}
+	}
+
+	# The leader's weekly update also sets this bar (sf_sync_reserve_bars); this covers a member that joined this week
+	on_weekly_pulse = {
+		effect = {
+			scope:journal_entry = {
+				set_bar_progress = {
+					name = sf_reserves_bar_member
+					value = root.sf_reserve_weeks
+				}
+			}
+		}
+	}
+
+	weight = 1000
+	should_be_pinned_by_default_uninvolved_or_context = yes
+	can_revolution_inherit = no
+	transferable = no
+}
