@@ -31,6 +31,7 @@ demand_conquest = {
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -42,32 +43,44 @@ demand_conquest = {
 	second_state_trigger = {
 		owner = scope:target_country
 		is_under_colonization = no
-		
+		NOT = { is_target_of_wargoal = scope:country } # a state already targeted would conflict and make the charge check below unreliable
+
 	}
-	
+
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		if = {
-			limit = { exists = scope:second_state }	
-			random_diplomatic_play = { 
-				limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
-				add_war_goal = { holder = root type = conquer_state target_state = scope:second_state primary_demand = no target_country = scope:target_country }
+			limit = { exists = scope:second_state }
+			random_diplomatic_play = {
+				limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
+				if = { # conquer_state is invalid on a state we have a claim on, so claimed states use return_state
+					limit = { scope:second_state = { has_claim_by = root } }
+					add_war_goal = { holder = root type = return_state target_state = scope:second_state primary_demand = no target_country = scope:target_country }
+				}
+				else = {
+					add_war_goal = { holder = root type = conquer_state target_state = scope:second_state primary_demand = no target_country = scope:target_country }
+				}
 			}
 
-			create_incident = {
-				country = root
-				value = {
-					value = "scope:second_state.ai_state_value(scope:target_country)"
-					divide = 10
-					max = 50
-					min = 10						
+			if = { # only charge cooldown and infamy if the war goal was actually added
+				limit = {
+					scope:second_state = { is_target_of_wargoal = root }
 				}
-			}		
+				ROOT = {
+					set_variable = {
+						name = war_goal_add_cooldown
+						months = 12
+					}
+				}
+				create_incident = {
+					country = root
+					value = {
+						value = "scope:second_state.ai_state_value(scope:target_country)"
+						divide = 10
+						max = 50
+						min = 10
+					}
+				}
+			}
 		}
 	}
 	
@@ -113,6 +126,7 @@ demand_treaty_port = {
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -125,29 +139,35 @@ demand_treaty_port = {
 		owner = scope:target_country
 		is_coastal = yes
 		is_under_colonization = no
-		
+		NOT = { is_target_of_wargoal = scope:country } # a state already targeted would conflict and make the charge check below unreliable
+
 	}
-	
+
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		if = {
-			limit = { exists = scope:second_state }	
-			random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { exists = scope:second_state }
+			random_diplomatic_play = {
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = take_treaty_port target_state = scope:second_state primary_demand = no target_country = scope:target_country }
 			}
 
-			create_incident = {
-				country = root
-				value = {
-					value = 15					
+			if = { # only charge cooldown and infamy if the war goal was actually added
+				limit = {
+					scope:second_state = { is_target_of_wargoal = root }
 				}
-			}		
+				ROOT = {
+					set_variable = {
+						name = war_goal_add_cooldown
+						months = 12
+					}
+				}
+				create_incident = {
+					country = root
+					value = {
+						value = 15
+					}
+				}
+			}
 		}
 	}
 	
@@ -273,6 +293,7 @@ demand_ban_slavery = {
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -282,25 +303,33 @@ demand_ban_slavery = {
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = ban_slavery primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 9
-				divide = 1
-				max = 12
-				min = 5						
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = ban_slavery
+					target = scope:target_country
+				}
 			}
-		}		
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 9
+					divide = 1
+					max = 12
+					min = 5
+				}
+			}
+		}
 	}
 	
 	ai = {
@@ -348,6 +377,7 @@ demand_iraqi_freedom = {
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -357,25 +387,33 @@ demand_iraqi_freedom = {
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = regime_change primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 16
-				divide = 1
-				max = 16
-				min = 12					
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = regime_change
+					target = scope:target_country
+				}
 			}
-		}		
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 16
+					divide = 1
+					max = 16
+					min = 12
+				}
+			}
+		}
 	}
 	
 	ai = {
@@ -424,6 +462,7 @@ demand_containment = {
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -433,24 +472,32 @@ demand_containment = {
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = contain_threat primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 0
-				max = 0
-				min = 0						
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = contain_threat
+					target = scope:target_country
+				}
 			}
-		}		
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 0
+					max = 0
+					min = 0
+				}
+			}
+		}
 	}
 	
 	ai = {
@@ -498,6 +545,7 @@ demand_standard_oil = { #investment rights
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -507,24 +555,32 @@ demand_standard_oil = { #investment rights
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = foreign_investment_rights primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 16
-				max = 21
-				min = 14						
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = foreign_investment_rights
+					target = scope:target_country
+				}
 			}
-		}		
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 16
+					max = 21
+					min = 14
+				}
+			}
+		}
 	}
 	
 	ai = {
@@ -572,6 +628,7 @@ demand_humiliation = {
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -581,25 +638,33 @@ demand_humiliation = {
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = humiliation primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 16
-				divide = 1
-				max = 18
-				min = 4					
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = humiliation
+					target = scope:target_country
+				}
 			}
-		}		
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 16
+					divide = 1
+					max = 18
+					min = 4
+				}
+			}
+		}
 	}
 	
 	ai = {
@@ -629,6 +694,7 @@ demand_dominion = { #dominion
 		scope:target_country = {
 			is_secessionist = no is_revolutionary = no
 			country_rank < rank_value:great_power
+			is_country_type = colonial # vanilla dominions only accept colonial countries
 		}
 	}
 	
@@ -649,6 +715,7 @@ demand_dominion = { #dominion
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -658,25 +725,33 @@ demand_dominion = { #dominion
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = make_dominion primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 40
-				divide = 1
-				max = 46
-				min = 32						
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = make_dominion
+					target = scope:target_country
+				}
 			}
-		}		
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 40
+					divide = 1
+					max = 46
+					min = 32
+				}
+			}
+		}
 	}
 	
 	ai = {
@@ -699,22 +774,24 @@ demand_protectorate2 = { #protectorate
 	should_notify_third_parties = yes
 	show_effect_in_tooltip = yes
 	can_use_obligations = no
-	custom_tooltip = {
-		text = "WARGOAL_ON_COOLDOWN"
-		ROOT = {
-			NOT = { has_variable = war_goal_add_cooldown }
-		}
-	 }
+
 	potential = {
 		country_rank = rank_value:great_power
 		has_war_with = scope:target_country
 		scope:target_country = {
 			is_secessionist = no is_revolutionary = no
 			country_rank < rank_value:great_power
+			OR = { is_country_type = recognized is_country_type = unrecognized } # vanilla protectorates only accept these
 		}
 	}
 	
 	possible = {
+		custom_tooltip = {
+			text = "WARGOAL_ON_COOLDOWN"
+			ROOT = {
+				NOT = { has_variable = war_goal_add_cooldown }
+			}
+		}
 		ROOT = {
 			NOT = {
 				war_participant_has_war_goal_of_type_against = {
@@ -725,6 +802,7 @@ demand_protectorate2 = { #protectorate
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -734,25 +812,33 @@ demand_protectorate2 = { #protectorate
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = make_protectorate primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 42
-				divide = 1
-				max = 45
-				min = 36						
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = make_protectorate
+					target = scope:target_country
+				}
 			}
-		}		
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 42
+					divide = 1
+					max = 45
+					min = 36
+				}
+			}
+		}
 	}
 	
 	ai = {
@@ -802,6 +888,7 @@ demand_transfer_subject = {
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -811,23 +898,31 @@ demand_transfer_subject = {
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = {
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = transfer_subject primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 26
-				divide = 1
-				max = 32
-				min = 16						
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = transfer_subject
+					target = scope:target_country
+				}
+			}
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 26
+					divide = 1
+					max = 32
+					min = 16
+				}
 			}
 		}
 	}
@@ -883,6 +978,7 @@ demand_liberate_subject = {
 		}
 		scope:target_country = {
 			any_scope_war = {
+				is_war_participant = root
 				has_war_support = {
 					target = scope:target_country
 					value >= -50
@@ -892,25 +988,33 @@ demand_liberate_subject = {
 	}
 	
 	accept_effect = {
-		ROOT = {
-			set_variable = {
-				name = war_goal_add_cooldown
-				months = 12
-			}
-		}
 		random_diplomatic_play = { 
-			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } }
+			limit = { is_war = yes any_scope_play_involved = { THIS = scope:target_country } any_scope_play_involved = { THIS = root } }
 			add_war_goal = { holder = root type = liberate_subject primary_demand = no target_country = scope:target_country }
 		}
-		create_incident = {
-			country = root
-			value = {
-				value = 22
-				divide = 1
-				max = 23
-				min = 16					
+		if = { # only charge cooldown and infamy if the war goal was actually added
+			limit = {
+				war_participant_has_war_goal_of_type_against = {
+					type = liberate_subject
+					target = scope:target_country
+				}
 			}
-		}		
+			ROOT = {
+				set_variable = {
+					name = war_goal_add_cooldown
+					months = 12
+				}
+			}
+			create_incident = {
+				country = root
+				value = {
+					value = 22
+					divide = 1
+					max = 23
+					min = 16
+				}
+			}
+		}
 	}
 		
 	
