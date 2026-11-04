@@ -1,7 +1,7 @@
 ﻿# HMPS: full copy of vanilla gui/map_list_panel.gui (the Ledger). A GUI type can only be changed by overriding the whole
 # file, so it was brought over to add the HMPS Balance of Trade to the Ledger's Markets list. Only the markets_map_list_panel
-# type (search "HMPS") differs from vanilla: Market column narrowed from 430 to 170, GDP from 110 to 90 and shown yearly, and new Exports,
-# Imports and Net exports columns (90 each). Re-sync this file with vanilla after game patches.
+# type and the two hmps_ledger types above it (search "HMPS") differ from vanilla: Market column narrowed from 430 to 170, GDP from
+# 110 to 90 and shown yearly, and new sortable Imports, Exports and Balance columns (90 each). Re-sync this file with vanilla after game patches.
 # COPY-PASTED FOR NOW
 @panel_width_minus_10 = 530			# used to be 450
 @panel_width = 540  				# used to be 460
@@ -3586,6 +3586,76 @@ types map_list_panel_types {
 	}
 
 	### MARKETS
+	# HMPS: one Markets ledger row's columns, read from the market owner (datacontext Country): Market, GDP and the HMPS
+	# Balance of Trade's Imports, Exports and Balance, all yearly. Imports, Exports and Balance are variables set weekly on
+	# every country in the market by hmps_balance_of_trade_update_effect (common/scripted_effects/HMPS_scripted_effects.txt),
+	# the same figures as the Market panel's trade tab; exports include the world-ratio scaling. Used by both row types below
+	type hmps_ledger_market_values = flowcontainer {
+		textbox = {
+			margin = { 5 0 }
+			size = { 170 25 }
+			align = nobaseline
+			text = "[Country.GetMarket.GetName]"
+			parentanchor = vcenter
+			elide = right
+		}
+
+		# GetMarketGDPValue is weekly; x52 shows it yearly like the other columns (vanilla showed the weekly value)
+		textbox = {
+			margin = { 5 0 }
+			size = { 90 25 }
+			align = hcenter|nobaseline
+			raw_text = "@money![Multiply_CFixedPoint(Country.GetMarket.GetMarketGDPValue, '(CFixedPoint)52')|Dv]"
+			parentanchor = vcenter
+			elide = right
+		}
+
+		textbox = {
+			margin = { 5 0 }
+			size = { 90 25 }
+			align = hcenter|nobaseline
+			raw_text = "@money![Country.MakeScope.Var('hmps_bot_imports').GetValue|Dv]"
+			parentanchor = vcenter
+			elide = right
+		}
+
+		textbox = {
+			margin = { 5 0 }
+			size = { 90 25 }
+			align = hcenter|nobaseline
+			raw_text = "@money![Country.MakeScope.Var('hmps_bot_exports').GetValue|Dv]"
+			parentanchor = vcenter
+			elide = right
+		}
+
+		textbox = {
+			margin = { 5 0 }
+			size = { 90 25 }
+			align = hcenter|nobaseline
+			raw_text = "@money![Country.MakeScope.Var('hmps_bot_balance').GetValue|D+]"
+			parentanchor = vcenter
+			elide = right
+		}
+	}
+
+	# HMPS: a Markets ledger row in the HMPS-sorted lists, whose entries are market owners. Hidden if the country no
+	# longer owns a market since the weekly rebuild
+	type hmps_ledger_market_item = button {
+		using = clean_button
+		size = { @panel_width 40 }
+		datacontext = "[Scope.GetCountry]"
+		visible = "[ObjectsEqual(Country.GetMarket.GetOwner, Country.Self)]"
+		onclick = "[InformationPanelBar.OpenMarketPanel(Country.GetMarket)]"
+		onrightclick = "[RightClickMenuManager.ShowForMarket(Country.GetMarket.AccessSelf)]"
+		onmousehierarchyenter = "[AccessHighlightManager.HighlightMarket(Country.GetMarket)]"
+		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+
+		hmps_ledger_market_values = {
+			position = { 5 0 }
+			parentanchor = vcenter
+		}
+	}
+
 	type markets_map_list_panel = map_list_panel {
 		name = "markets_map_list_panel"
 
@@ -3594,109 +3664,135 @@ types map_list_panel_types {
 		}
 
 		# HMPS: vanilla had only Market (430 wide) and GDP (110). Market is now 170 and GDP 90 to make room for three
-		# HMPS Balance of Trade columns (90 each): yearly Exports, Imports and Net exports of the whole market, the same
-		# figures as the Market panel's trade tab. They are variables set weekly on every country in the market by
-		# hmps_balance_of_trade_update_effect (common/scripted_effects/HMPS_scripted_effects.txt) and read here from the
-		# market owner. Exports include the world-ratio scaling. The new headers are sort buttons with no onclick, only so their
-		# text sits at the same height as GDP's: the engine only sorts this list by 'name' and 'gdp'. Number headers are
-		# right-aligned to line up with the right-aligned figures.
+		# HMPS Balance of Trade columns (90 each): Imports, Exports and Balance (see hmps_ledger_market_values). Numbers and
+		# their headers are centered. The engine sorts this list only by 'name' and 'gdp', so the HMPS headers instead
+		# show global lists that hmps_balance_of_trade_world_totals_effect rebuilds weekly in order: the GUI variable
+		# hmps_ledger_sort names the list shown (a first click sorts largest first, a second smallest first), and the
+		# Market and GDP headers clear it to return to the engine's list.
 		blockoverride "headers" {
 			sort_button = {
 				align = nobaseline
 				text = "MARKET"
 				size = { 170 20 }
 				onclick = "[MapListPanel.Sort('name')]"
+				onclick = "[GetVariableSystem.Clear('hmps_ledger_sort')]"
 			}
 			sort_button = {
-				align = right|nobaseline
+				align = hcenter|nobaseline
 				text = "GDP_SHORT"
 				tooltip = "GDP"
 				size = { 90 20 }
 				onclick = "[MapListPanel.Sort('gdp')]"
+				onclick = "[GetVariableSystem.Clear('hmps_ledger_sort')]"
 			}
 			sort_button = {
-				align = right|nobaseline
-				text = "HMPS_LEDGER_EXPORTS"
-				tooltip = "HMPS_LEDGER_EXPORTS_TT"
-				size = { 90 20 }
-			}
-			sort_button = {
-				align = right|nobaseline
+				align = hcenter|nobaseline
 				text = "HMPS_LEDGER_IMPORTS"
 				tooltip = "HMPS_LEDGER_IMPORTS_TT"
 				size = { 90 20 }
+				onclick = "[GetVariableSystem.Set('hmps_ledger_sort', Select_CString(GetVariableSystem.HasValue('hmps_ledger_sort', 'imports'), 'imports_asc', 'imports'))]"
 			}
 			sort_button = {
-				align = right|nobaseline
+				align = hcenter|nobaseline
+				text = "HMPS_LEDGER_EXPORTS"
+				tooltip = "HMPS_LEDGER_EXPORTS_TT"
+				size = { 90 20 }
+				onclick = "[GetVariableSystem.Set('hmps_ledger_sort', Select_CString(GetVariableSystem.HasValue('hmps_ledger_sort', 'exports'), 'exports_asc', 'exports'))]"
+			}
+			sort_button = {
+				align = hcenter|nobaseline
 				text = "HMPS_LEDGER_NET_EXPORTS"
 				tooltip = "HMPS_LEDGER_NET_EXPORTS_TT"
 				size = { 90 20 }
+				onclick = "[GetVariableSystem.Set('hmps_ledger_sort', Select_CString(GetVariableSystem.HasValue('hmps_ledger_sort', 'balance'), 'balance_asc', 'balance'))]"
 			}
 		}
 
-		blockoverride "values" {
-			textbox = {
-				margin = { 5 0 }
-				size = { 170 25 }
-				align = nobaseline
-				text = "[MapListOption.GetMarketData.GetMarket.GetName]"
-				parentanchor = vcenter
-				elide = right
+		# HMPS: the vanilla list (shown unless an HMPS column is sorted), then one list per HMPS sort (see above)
+		blockoverride "scrollarea_content" {
+			flowcontainer = {
+				visible = "[Not(GetVariableSystem.Exists('hmps_ledger_sort'))]"
+				onmousehierarchyenter = "[SetCanOpenRightClickContextMenu( Not(MapListPanelManager.HasCurrentInteraction) )]"
+				onmousehierarchyleave = "[SetCanOpenRightClickContextMenu( '(bool)yes' )]"
+				parentanchor = hcenter
+				direction = vertical
+				datamodel = "[MapListPanel.AccessValidOptions]"
+				datamodel_reuse_widgets = yes
+
+				item = {
+					map_list_panel_item = {
+						blockoverride "values" {
+							hmps_ledger_market_values = {
+								datacontext = "[MapListOption.GetMarketData.GetMarket.GetOwner]"
+							}
+						}
+
+						# HMPS: hide markets owned by decentralized nations, as vanilla does in the country ledgers
+						blockoverride "itemvisibility" {
+							visible = "[Not(MapListOption.GetMarketData.GetMarket.GetOwner.IsColonizable)]"
+						}
+
+						blockoverride "interaction" {
+							onclick = "[InformationPanelBar.OpenMarketPanel(MapListOption.AccessMarketData.GetMarket)]"
+							onrightclick = "[RightClickMenuManager.ShowForMarket(MapListOption.AccessMarketData.AccessMarket)]"
+							onmousehierarchyenter = "[AccessHighlightManager.HighlightMarket(MapListOption.GetMarketData.GetMarket)]"
+							onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+						}
+					}
+				}
+
+				empty_state = {
+					blockoverride "visible" {
+						visible = "[IsDataModelEmpty(MapListPanel.AccessValidOptions)]"
+					}
+					blockoverride "text" {
+						text = "MAP_LIST_NO_AVAILABLE_OPTIONS"
+					}
+				}
 			}
 
-			# HMPS: GetMarketGDPValue is weekly; x52 shows it yearly like the other columns (vanilla showed the weekly value)
-			textbox = {
-				datacontext = "[MapListOption.GetMarketData.GetMarket]"
-				margin = { 5 0 }
-				size = { 90 25 }
-				align = right|nobaseline
-				raw_text = "@money![Multiply_CFixedPoint(Market.GetMarketGDPValue, '(CFixedPoint)52')|Dv]"
-				parentanchor = vcenter
-				elide = right
+			flowcontainer = {
+				visible = "[GetVariableSystem.HasValue('hmps_ledger_sort', 'imports')]"
+				parentanchor = hcenter
+				direction = vertical
+				datamodel = "[GetGlobalList('hmps_ledger_imports')]"
+				item = { hmps_ledger_market_item = {} }
 			}
-
-			# HMPS Balance of Trade columns (see the comment above the headers)
-			textbox = {
-				datacontext = "[MapListOption.GetMarketData.GetMarket.GetOwner]"
-				margin = { 5 0 }
-				size = { 90 25 }
-				align = right|nobaseline
-				raw_text = "@money![Country.MakeScope.Var('hmps_bot_exports').GetValue|Dv]"
-				parentanchor = vcenter
-				elide = right
+			flowcontainer = {
+				visible = "[GetVariableSystem.HasValue('hmps_ledger_sort', 'imports_asc')]"
+				parentanchor = hcenter
+				direction = vertical
+				datamodel = "[GetGlobalList('hmps_ledger_imports_asc')]"
+				item = { hmps_ledger_market_item = {} }
 			}
-
-			textbox = {
-				datacontext = "[MapListOption.GetMarketData.GetMarket.GetOwner]"
-				margin = { 5 0 }
-				size = { 90 25 }
-				align = right|nobaseline
-				raw_text = "@money![Country.MakeScope.Var('hmps_bot_imports').GetValue|Dv]"
-				parentanchor = vcenter
-				elide = right
+			flowcontainer = {
+				visible = "[GetVariableSystem.HasValue('hmps_ledger_sort', 'exports')]"
+				parentanchor = hcenter
+				direction = vertical
+				datamodel = "[GetGlobalList('hmps_ledger_exports')]"
+				item = { hmps_ledger_market_item = {} }
 			}
-
-			textbox = {
-				datacontext = "[MapListOption.GetMarketData.GetMarket.GetOwner]"
-				margin = { 5 0 }
-				size = { 90 25 }
-				align = right|nobaseline
-				raw_text = "@money![Country.MakeScope.Var('hmps_bot_balance').GetValue|D+]"
-				parentanchor = vcenter
-				elide = right
+			flowcontainer = {
+				visible = "[GetVariableSystem.HasValue('hmps_ledger_sort', 'exports_asc')]"
+				parentanchor = hcenter
+				direction = vertical
+				datamodel = "[GetGlobalList('hmps_ledger_exports_asc')]"
+				item = { hmps_ledger_market_item = {} }
 			}
-		}
-
-		# HMPS: hide markets owned by decentralized nations, as vanilla does in the country ledgers
-		blockoverride "itemvisibility" {
-			visible = "[Not(MapListOption.GetMarketData.GetMarket.GetOwner.IsColonizable)]"
-		}
-
-		blockoverride "interaction" {
-			onclick = "[InformationPanelBar.OpenMarketPanel(MapListOption.AccessMarketData.GetMarket)]"
-			onrightclick = "[RightClickMenuManager.ShowForMarket(MapListOption.AccessMarketData.AccessMarket)]"
-			onmousehierarchyenter = "[AccessHighlightManager.HighlightMarket(MapListOption.GetMarketData.GetMarket)]"
-			onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+			flowcontainer = {
+				visible = "[GetVariableSystem.HasValue('hmps_ledger_sort', 'balance')]"
+				parentanchor = hcenter
+				direction = vertical
+				datamodel = "[GetGlobalList('hmps_ledger_balance')]"
+				item = { hmps_ledger_market_item = {} }
+			}
+			flowcontainer = {
+				visible = "[GetVariableSystem.HasValue('hmps_ledger_sort', 'balance_asc')]"
+				parentanchor = hcenter
+				direction = vertical
+				datamodel = "[GetGlobalList('hmps_ledger_balance_asc')]"
+				item = { hmps_ledger_market_item = {} }
+			}
 		}
 	}
 
