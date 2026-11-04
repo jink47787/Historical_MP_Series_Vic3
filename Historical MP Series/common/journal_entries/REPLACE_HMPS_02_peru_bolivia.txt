@@ -1,4 +1,4 @@
-﻿REPLACE:je_peru_bolivia = { #only hmps change is to remove reference to Peru-Bolivain subjects that would autofail the JE
+﻿REPLACE:je_peru_bolivia = { # HMPS: only change is goal_add_value 120 -> 60 (5 years instead of 10)
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
 	group = je_group_global_international_situations
@@ -70,11 +70,38 @@
 	custom_completion_header = je_peru_bolivia_confederation_victory
 
 	complete = {
-		scope:journal_entry = { is_goal_complete = yes } #HMPS REMOVES PB SUBJECTS
+		scope:journal_entry = { is_goal_complete = yes }
 		c:BOL ?= {
 			is_at_war = no
-			hmps_holds_region_bar_natives = { REGION = STATE_LIMA } # HMPS: AMZ natives hold eastern Lima and La Paz
-			hmps_holds_region_bar_natives = { REGION = STATE_LA_PAZ }
+		}
+		OR = {
+			c:SPU ?= {
+				is_subject_of = c:BOL
+			}
+			c:NPU ?= {
+				is_subject_of = c:BOL
+			}
+			c:IQU ?= {
+				is_subject_of = c:BOL
+			}
+			c:PEU ?= {
+				is_subject_of = c:BOL
+			}
+		}
+		custom_tooltip = {
+			text = bol_no_revolutions_tt
+			NOT = {
+				c:BOL ?={
+					any_subject_or_below = {
+						OR = {
+							country_has_primary_culture = cu:south_andean
+							country_has_primary_culture = cu:quechua
+							country_has_primary_culture = cu:peruvian
+						}
+						has_revolution = yes
+					}
+				}
+			}
 		}
 	}
 
@@ -109,20 +136,76 @@
 		}
 	}
 
-	is_progressing = { #HMPS REMOVES PB SUBJECTS
+	is_progressing = {
 		c:BOL ?= {
 			government_legitimacy >= 50
-			hmps_holds_region_bar_natives = { REGION = STATE_LIMA }
-			hmps_holds_region_bar_natives = { REGION = STATE_LA_PAZ }
+			NOT = {
+				any_subject_or_below = {
+					OR = {
+						country_has_primary_culture = cu:south_andean
+						country_has_primary_culture = cu:quechua
+						country_has_primary_culture = cu:peruvian
+					}
+					has_revolution = yes
+				}
+			}
+		}
+		OR = {
+			c:SPU ?= {
+				is_subject_of = c:BOL
+			}
+			c:NPU ?= {
+				is_subject_of = c:BOL
+			}
+			c:IQU ?= {
+				is_subject_of = c:BOL
+			}
+			c:PEU ?= {
+				is_subject_of = c:BOL
+			}
 		}
 	}
 
 	custom_failure_header = je_peru_bolivia_restorer_victory
 
-	fail = { #HMPS REMOVES PB SUBJECTS
+	fail = {
 		OR = {
 			NOT = {
 				exists = c:BOL
+			}
+			AND = {
+				OR = {
+					NOT = {
+						exists = c:SPU
+					}
+					c:SPU ?= {
+						NOT = { is_subject_of = c:BOL }
+					}
+				}
+				OR = {
+					NOT = {
+						exists = c:NPU
+					}
+					c:NPU ?= {
+						NOT = { is_subject_of = c:BOL }
+					}
+				}
+				OR = {
+					NOT = {
+						exists = c:IQU
+					}
+					c:IQU ?= {
+						NOT = { is_subject_of = c:BOL }
+					}
+				}
+				OR = {
+					NOT = {
+						exists = c:PEU
+					}
+					c:PEU ?= {
+						NOT = { is_subject_of = c:BOL }
+					}
+				}
 			}
 			c:BOL ?= {
 				is_subject = yes
@@ -258,7 +341,7 @@
 	}
 
 	goal_add_value = {
-		value = 120
+		value = 60 # HMPS: 5 years (vanilla 120)
 	}
 
 	progressbar = yes
