@@ -49,12 +49,14 @@ Thanks to Yyyman for his Italy company changes.
 - Two new goods: Stone and Building Materials. Building Materials are now the main input of the construction sector, and every urban building uses a small amount as upkeep
 - New Quarries produce Stone. How many a state can build depends on its geology; 12 famous stone districts (e.g. Carrara Marble, Welsh Slate, Aswan Granite) boost quarries, and Silica Sands states boost glassworks and quarries
 - New Builders' Yards turn wood, hardwood, stone, coal and steel into Building Materials, with Timber, Masonry, Standardisation and Handling methods that improve with tech
-- Construction sector reworked into three groups: Foundations (Timber Footings, Brick Footings, Concrete Foundations, Piles and Caissons), Fittings (Bare Finish, Fitted Interiors, Electric Lifts) and Site Machinery (Manual Labour, Steam Plant, Motorised Plant). Better foundations and fittings add construction points; site machinery only saves labour
+- Construction sector reworked into three groups: Foundations (Timber Footings, Brick Footings, Concrete Foundations, Piles and Caissons), Fittings (Bare Finish, Fitted Interiors, Electric Lifts) and Site Machinery (Manual Labour, Steam Plant, Motorised Plant). Better foundations and fittings add construction points; site machinery only saves labour. Construction now pays normal industry wages and employs far more workers, so it is a much bigger cost to the government
 - Steel mills, glassworks and railways now use Stone; subsistence farms, orchards, pastures, rice farms and fishing villages produce a little Building Materials
 #### Hardwood
 - Hardwood is back as its own resource: Hardwood Forestry can be built in 208 states, and hardwood is used by Builders' Yards and Fitted Interiors
 #### Trade
 - New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -100% at 20%) and the other side gains 2.5% per 1% (up to +50%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
+#### Reserve Currency
+- New Reserve Currency: one market at a time holds it. A rival takes it over once its leader has been the biggest importer for 12 months in a row, and a vacant Reserve Currency goes the same way. The holder gets a trade advantage bonus on its imports and a penalty on its exports
 #### Guano
 - Guano works like gold: deposits are discovered over time and run out, and Guano Harvestries are placed automatically on known deposits instead of being built. In 1836 only Peru's coast is known
 #### Infrastructure
@@ -74,12 +76,13 @@ Thanks to Yyyman for his Italy company changes.
 #### The Americas
 - North America map rework: 1836 borders follow who actually controlled the land, with new native nations (Sauk and Meskwaki, Osage, Californian Peoples, Inuit, Innu and Cree), new Canada journal entries, Oregon dispute fixes and a new Oregon Trail event
 - Latin America border rework: new native nations (Gê Peoples, Kaingang, Shuar, Tukanoan Peoples), new claims, and new Mosquito Shore and Guiana Boundary Commission events
-- New "The Unconquered Interior" journal entry for South American countries with claims on native-held land: colonies grow 75% slower until Railways and Electric Telegraph are researched or the native land is taken; completing it gives +10% migration attraction for 5 years
+- New "The Unconquered Interior" journal entry for South American countries with claims on native-held land: colonies grow 90% slower until Railways and Electric Telegraph are researched or the native land is taken. Once any South American country completes it, the slowdown ends for all of them, and they all get the 5-year Open Frontier bonus
 - New "The Guano Islands Act" journal entry for the USA: build 5 fully crewed ironclads to get guano fertilizer sell orders that shrink over 30 years
 - Manifest Destiny reworked: 40 years to finish, needs 6 US-owned states (California, Nevada, Utah, Arizona, New Mexico, Texas) that no longer have to be incorporated; Colorado moved to the Frontier Wars journal entry and Mexico starts with a claim on it
 
 ## UI
 - Topbar shows the market's Balance of Trade in place of Prestige, with a graph of the last 52 weeks in its tooltip; the market panel shows the market's exports, imports and balance
+- New Reserve Currency alert in the topbar, next to the vanilla alerts: green when your market is about to take it, red when you hold it and a rival is about to take it. Clicking it opens the market panel
 
 ## AI & Performance
 - AI builds more construction goods: it wants a high supply of building materials, stone, oil and rubber, prioritises steel mills, glassworks, logging camps, quarries and Builders' Yards, and upgrades construction sector methods soon after unlocking them
@@ -312,23 +315,29 @@ Thanks to Yyyman for his Italy company changes.
 - Stamp Out Monarchism no longer fires at game start or for countries that were not monarchies
 - Stamp Out Theocracy is no longer cancelled by enacting Council Republic
 - Removed the old extra acceptance modifier from embracing Ottomanism
+- Age of Caudillos: when the armed forces side with the Liberals, the journal entry progress goes down by 100
 
 ## Population
 - When any pops assimilate or convert, at least 20 do at a time (was 1)
 
 ## Economic
 - Builders' Yards employ 5,000 workers per level: Standardisation methods 500 shopkeepers and 2,000 laborers, each production line 1,250 workers (machinists and engineers replace some laborers at higher tiers)
-- Yard Tramways cut 1,500 laborers and use 5 transportation; Mechanical Handling cuts 2,000 laborers and uses 5 transportation and 3 electricity
+- Yard Tramways cut 1,500 laborers and use 5 coal; Mechanical Handling cuts 2,000 laborers and uses 5 tools and 3 electricity
 - Brick Clamps use 10 stone and 5 wood; Hoffmann Kilns use 17.5 stone and 5 coal
 - Quarry Jaw Crushers use no coal
-- Steam Plant (Steam Donkey, era 3) uses 5 coal and cuts 500 laborers; Motorised Plant uses 5 oil and cuts 750 laborers
+- Construction methods employ 5,000 workers per level, keeping each method's worker mix: Timber Footings 5,000 laborers; Brick Footings 500 bureaucrats, 500 clerks, 750 machinists and 3,250 laborers; Concrete Foundations and Piles and Caissons 500 bureaucrats, 500 clerks, 750 machinists, 750 engineers and 2,500 laborers; Electric Lifts add 750 engineers
+- Steam Plant (Steam Donkey, era 3) uses 5 coal and cuts 1,750 laborers; Motorised Plant uses 5 oil and cuts 2,500 laborers
 - The market capital sells 10 Building Materials
 - New Stone and Brick Consortium company for Builders' Yards and Quarries
 - Assembly line PMs (furniture, tooling, motor, arms, munition) use 1 more oil and 1 less rubber per worker than before
 - Guano Harvestry employs 250 shopkeepers and 750 laborers per level (was 75 and 500), output unchanged; laid-off workers from a depleted deposit no longer become radicals
+- Chincha Islands state trait is in Ica, where the guano deposit is, and gives +20% guano mine throughput (was +20% sulfur mine throughput, in Lima)
 - Synthetic oil plants can no longer be built by private investors
 - Railroad Bubble: Relief Works gives +3% wages for 12 months, "Regulate the exchanges" needs 75 legitimacy, and the Railway King appears in half of all bubbles
 - Suez Canal Company only needs a level 5 trade center or port somewhere and no longer gives tax income when prosperous
+- Specie Famines and Inflationary Periods can't start before 1 January 1837; a player-led market can roll for a Specie Famine in any month its balance-of-trade deficit is at least 4% of GDP
+- Atacama Desert no longer has the -10% construction efficiency malus
+- Reserve Currency holder gets +10% trade advantage for imports and -10% for exports, at every tier
 
 ## Diplomacy
 - Regional investment rights tooltip clarified: the investor can build only in the chosen state but can buy privatized buildings anywhere in the country
@@ -341,9 +350,11 @@ Thanks to Yyyman for his Italy company changes.
 - Initiate Manifest Destiny also claims Colorado, so the USA can still take it if Mexico colonizes it first; Repudiate Manifest Destiny removes that claim. Texas no longer starts with a claim on New Mexico
 - Paraguay starts with the Frontier Colonization law, and Paraguay and Bolivia start with claims on Alto Paraguay (the Gran Chaco)
 - Colombia starts with a claim on Antioquia, so it can colonize the one province there held by the Wayuu
-- Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz; Bolivia also starts with them in Potosí, Antofagasta, Arequipa and Tarapacá (South Peru, annexed on day 1)
+- Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz; Bolivia also starts with them in Potosí and Antofagasta, and South Peru in Arequipa and Tarapacá
 - Russian Alaska can no longer colonize California from Fort Ross: the Fort Ross state starts with a "Fort Ross Trading Post" modifier (-100% colony growth speed) that ends when the Fort Ross sale event transfers the post
 - Russian-American Company starts with a one-line infantry battalion in Alaska, in an army called "Sitka Garrison"
+- Peru-Bolivian Confederation: Bolivia no longer annexes North and South Peru on day 1; they start as its puppets, as in vanilla. Bolivia must keep legitimacy over 50 and hold its subjects for 5 years to complete it (was 10 years)
+- The Fall of Salaverry event is now sent only to AI South American countries; players no longer get it (was sent to players too)
 
 ## Map
 - Guano deposits: in 1836 only Peru's coast is known (Ica 30 known + 20 hidden, Cajamarca 10 + 10, Lima 10, Tarapacá 10 + 10). Everything else starts hidden: Antofagasta, Baja California, Namaqualand, Haiti, Santo Domingo, Bahamas, West Indies, Puerto Rico, West Micronesia and Nauru 10 each; East Micronesia 15; Oman 5; Hawaiian Islands 10; Tahiti 10; Western Australia 10; Jamaica 5; Honduras 5; Queensland 5; Cape Colony 5; Patagonia 5. Total 275 levels. Worked deposits run out at 75% of the vanilla gold-field rate
@@ -353,11 +364,18 @@ Thanks to Yyyman for his Italy company changes.
 - Spain's mineral resources redistributed between its states
 - Ingria no longer has a cold water port
 - Cuba has hardwood
+- Removed Pará's four isolated Brazilian fort enclaves in Amazonas. Each province now belongs to the native nation around it: Rio Branco to ORN, two Rio Negro and central provinces to TKN, and the Tabatinga area to AMZ. Pará keeps its river block toward Barra (Manaus)
 
 ## UI
 - Technology Research Speed tooltip shows one decimal place (e.g. +2.5% instead of +2%)
 - Trade partner lists show the value of trade instead of the quantity
 - The GM no longer gets leverage alerts about AI countries
+- The market panel's "Inflationary Period Possible" warning is yellow
+- The topbar Balance of Trade number is green when the balance is within 1% of GDP either way (no modifier applies); it is red at -4% or lower, yellow at +4% or higher, and white in between. The market panel's "Trade is balanced: no effect" line is green to match
+- Ledger Markets list: Imports column comes before Exports, number columns are centered, and "Net exports" is renamed "Balance" so the header is no longer cut off
+- Ledger Markets list: clicking the Imports, Exports or Balance header sorts by that column (first click largest first, second click smallest first); the sorted order refreshes weekly
+- The market panel's "Specie Famine Possible!" warning no longer shows for the Reserve Currency holder once it has researched Mutual Funds, as it is immune to Specie Famines
+- Reserve Currency tooltips (market panel and alert) list the top 5 importing markets that could hold it, ranked monthly, with the holder's and challengers' months marked, plus your market's weekly imports. The market panel says "(you)" when you hold it
 
 ## Stability/Bug Fixes
 - Fixed the Oregon journal entry re-adding the US claim on Idaho, Oregon and Washington every month
