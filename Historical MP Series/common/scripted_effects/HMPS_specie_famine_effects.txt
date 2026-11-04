@@ -1,4 +1,4 @@
-﻿# HMPS Specie Famine, Inflationary Period and Reserve Currency (common/journal_entries/HMPS_Specie_Famine.txt, common/journal_entries/HMPS_Reserve_Currency.txt).
+﻿# HMPS Specie Famine, Inflationary Period and Reserve Currency (common/journal_entries/HMPS_Specie_Famine.txt).
 # Figures are in common/script_values/HMPS_specie_famine_values.txt, modifiers in common/static_modifiers/HMPS_specie_famine_modifiers.txt
 
 ### Specie Famine
@@ -254,7 +254,6 @@ sf_leader_end_cleanup = {
 	remove_variable = sf_peace_weeks
 	remove_variable = sf_surplus_weeks
 	remove_variable = sf_paid_recently
-	set_variable = { name = sf_deficit_months value = 0 }
 	set_variable = { name = sf_cooldown days = 1825 }
 }
 
@@ -338,26 +337,13 @@ sf_leader_weekly_update = {
 }
 
 # Country scope, monthly from on_monthly_pulse_country (HMPS_specie_famine_monthly). hmps_bot_share is updated weekly by HMPS_utility_je.
-# Counts deficit months and rolls the Specie Famine and Inflationary Period for market leaders.
+# Rolls the Specie Famine and Inflationary Period for market leaders.
 # hmps_bot_share is the whole market's balance of trade / market GDP
 sf_monthly_check = {
 	if = {
 		limit = {
 			sf_is_market_leader = yes
 			has_variable = hmps_bot_share
-		}
-		if = {
-			limit = { var:hmps_bot_share <= -0.05 }
-			if = {
-				limit = { has_variable = sf_deficit_months }
-				change_variable = { name = sf_deficit_months add = 1 }
-			}
-			else = {
-				set_variable = { name = sf_deficit_months value = 1 }
-			}
-		}
-		else = {
-			set_variable = { name = sf_deficit_months value = 0 }
 		}
 		if = {
 			limit = {
@@ -383,10 +369,6 @@ sf_monthly_check = {
 				}
 			}
 		}
-	}
-	else_if = {
-		limit = { has_variable = sf_deficit_months }
-		remove_variable = sf_deficit_months
 	}
 }
 
@@ -485,23 +467,67 @@ rc_refresh_modifiers = {
 	}
 }
 
-# No scope needed. scope:rc_new_holder takes over the Reserve Currency. The old holder's je_reserve_currency invalidates itself
-rc_set_holder = {
-	set_global_variable = { name = reserve_currency_holder value = scope:rc_new_holder }
+# No scope needed. Ends every challenge, when the holder changes or the status falls vacant
+# (the top-of-screen alert in gui/topfrontend.gui reads these variables)
+rc_clear_challenges = {
 	remove_global_variable = rc_top_challenger
-	remove_global_variable = rc_vacant_candidate
-	remove_global_variable = rc_vacant_months
 	every_country = {
 		limit = { has_variable = rc_challenge_months }
 		remove_variable = rc_challenge_months
 	}
-	scope:rc_new_holder = {
-		if = {
-			limit = { NOT = { has_journal_entry = je_reserve_currency } }
-			add_journal_entry = { type = je_reserve_currency }
-		}
-	}
+}
+
+# No scope needed. scope:rc_new_holder takes over the Reserve Currency
+rc_set_holder = {
+	set_global_variable = { name = reserve_currency_holder value = scope:rc_new_holder }
+	remove_global_variable = rc_vacant_candidate
+	remove_global_variable = rc_vacant_months
+	rc_clear_challenges = yes
 	rc_refresh_modifiers = yes
+}
+
+# No scope needed, monthly from rc_monthly_update. Lists the 5 markets with the most imports whose leaders could hold the
+# Reserve Currency (rc_can_hold), best first, in the global list rc_top_importers for the tooltips (rc_top_importers_sgui)
+rc_rank_top_importers = {
+	if = {
+		limit = { has_global_variable_list = rc_top_importers }
+		clear_global_variable_list = rc_top_importers
+	}
+	ordered_country = {
+		limit = { rc_can_hold = yes }
+		order_by = rc_market_imports
+		position = 0
+		check_range_bounds = no
+		add_to_global_variable_list = { name = rc_top_importers target = this }
+	}
+	ordered_country = {
+		limit = { rc_can_hold = yes }
+		order_by = rc_market_imports
+		position = 1
+		check_range_bounds = no
+		add_to_global_variable_list = { name = rc_top_importers target = this }
+	}
+	ordered_country = {
+		limit = { rc_can_hold = yes }
+		order_by = rc_market_imports
+		position = 2
+		check_range_bounds = no
+		add_to_global_variable_list = { name = rc_top_importers target = this }
+	}
+	ordered_country = {
+		limit = { rc_can_hold = yes }
+		order_by = rc_market_imports
+		position = 3
+		check_range_bounds = no
+		add_to_global_variable_list = { name = rc_top_importers target = this }
+	}
+	ordered_country = {
+		limit = { rc_can_hold = yes }
+		order_by = rc_market_imports
+		position = 4
+		check_range_bounds = no
+		add_to_global_variable_list = { name = rc_top_importers target = this }
+	}
 }
 
 # No scope needed. Tells every player who holds the Reserve Currency now (reserve_currency.1); popups for the new and previous holder only
@@ -593,6 +619,7 @@ rc_monthly_update = {
 			rc_notify_new_holder = yes
 		}
 		else = {
+			rc_clear_challenges = yes
 			rc_notify_vacant = yes
 		}
 	}
@@ -693,4 +720,5 @@ rc_monthly_update = {
 	}
 	# Every month: tiers follow the holder's technology and countries joining or leaving its market
 	rc_refresh_modifiers = yes
+	rc_rank_top_importers = yes
 }
