@@ -3,6 +3,10 @@
 
 	group = je_group_usa_american_civil_war
 
+	activation_description = {
+		always = yes
+	}
+
 	immediate = {
 		set_variable = {
 			name = acw_progress_var
@@ -10,36 +14,46 @@
 		}
 	}
 
-	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
-		}
-		has_law_or_variant = law_type:law_slavery_banned
-	}
-
-	on_complete = {
-		set_variable = je_acw_countdown_complete
-		remove_modifier = missouri_compromise
-		trigger_event = { id = slavery_law_events.7 days = 0 popup = yes }
-	}
-
-	fail = {
-		OR = {
-			has_civil_war_from_movement_type = movement_type:movement_pro_slavery
-			has_civil_war_from_movement_type = movement_type:movement_anti_slavery
-		}
-	}
-
-	on_fail = {
-		if = {
-			limit = {
-				has_civil_war_from_movement_type = movement_type:movement_pro_slavery
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = {
+				is_goal_complete = yes
 			}
-			set_variable = csa_will_spawn_var
+			has_law_or_variant = law_type:law_slavery_banned
 		}
-		custom_tooltip = {
-			text = acw_will_happen_tt
-			trigger_event = { id = acw_je_events.1 }
+		effect = {
+			set_variable = je_acw_countdown_complete
+			remove_modifier = missouri_compromise
+			trigger_event = { id = slavery_law_events.7 days = 0 popup = yes }
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				has_civil_war_from_movement_type = movement_type:movement_pro_slavery
+				has_civil_war_from_movement_type = movement_type:movement_anti_slavery
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					has_civil_war_from_movement_type = movement_type:movement_pro_slavery
+				}
+				set_variable = csa_will_spawn_var
+			}
+			custom_tooltip = {
+				text = acw_will_happen_tt
+				trigger_event = { id = acw_je_events.1 }
+			}
 		}
 	}
 
@@ -83,7 +97,7 @@
 
 	weight = 100
 
-		
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -92,25 +106,34 @@ je_acw_war = {
 
 	group = je_group_usa_american_civil_war
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_in_lobby = {
 		c:USA ?= THIS
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = acw_war_tt_complete
-			scope:target = { is_country_alive = no }
-		}
-	}
-
-	on_complete = {
-		trigger_event = { id = acw_je_events.2 }
-		if = {
-			limit = {
-				has_variable = csa_will_spawn_var
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = acw_war_tt_complete
+				scope:target = { is_country_alive = no }
 			}
-			ruler = {
-				set_variable = abraham_lincoln
+		}
+		effect = {
+			trigger_event = { id = acw_je_events.2 }
+			if = {
+				limit = {
+					has_variable = csa_will_spawn_var
+				}
+				ruler = {
+					set_variable = abraham_lincoln
+				}
 			}
 		}
 	}
@@ -121,7 +144,7 @@ je_acw_war = {
 		}
 	}
 
-		
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 
 	can_revolution_inherit = no
@@ -135,19 +158,38 @@ je_acw_reconstruction = {
 
 	group = je_group_usa_american_civil_war
 
-	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
+	activation_description = {
+		always = yes
+	}
+
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+		}
+		effect = {
+			trigger_event = { id = acw_je_events.3 }
+			hidden_effect = { # sanity check just in case something somehow falls through the cracks
+				every_scope_state = {
+					limit = { has_modifier = unreconstructed_state }
+					remove_modifier = unreconstructed_state
+				}
+			}
 		}
 	}
 
-	on_complete = {
-		trigger_event = { id = acw_je_events.3 }
-		hidden_effect = { # sanity check just in case something somehow falls through the cracks
-			every_scope_state = {
-				limit = { has_modifier = unreconstructed_state }
-				remove_modifier = unreconstructed_state
-			}
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			trigger_event = { id = acw_je_events.3 }
 		}
 	}
 
@@ -161,18 +203,18 @@ je_acw_reconstruction = {
 
 	timeout = 4380
 
-	
-	should_be_pinned_by_default_uninvolved_or_context = yes
 
-	on_timeout = {
-		trigger_event = { id = acw_je_events.3 }
-	}
+	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
 je_acw_reincorporate = {
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
 	group = je_group_usa_american_civil_war
+
+	activation_description = {
+		always = yes
+	}
 
 	immediate = {
 		every_scope_state = {
@@ -194,42 +236,191 @@ je_acw_reincorporate = {
 		}
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = "ACW_REINCORPORATE_TT"
-
-			any_scope_state = {
-				filter = {
-					state_region = {
-						is_homeland = cu:dixie
-					}
-					culture_percent_state = {
-						target = cu:dixie
-						value > 0
-					}
-				}
-				count = all
-				is_incorporated = yes
-				loyalist_fraction = {
-					value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
-					culture = cu:dixie
+	map_color = {
+		if = {
+			limit = {
+				owner = {
+					has_journal_entry = je_acw_reincorporate
+					NOT = { is_target_in_variable_list = { name = acw_dixie_states target = root } }
 				}
 			}
+			value = "reconstruction_unionist_blue"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				AND = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			value = "reconstruction_completed_green"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				OR = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			value = "reconstruction_partial_yellow"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				NOR = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			value = "reconstruction_not_completed_red"
 		}
 	}
 
-	on_complete = {
-		clear_variable_list = acw_dixie_states
-		custom_tooltip = {
-			text = dont_lose_dixie_culture
-			set_variable = acw_keep_dixie
-		}
-		custom_tooltip = {
-			text = reconstruction_progress
-			change_variable = {
-				name = reconstruction_var
-				add = 1
+	map_tooltip = {
+		if = {
+			limit = {
+				owner = {
+					has_journal_entry = je_acw_reincorporate
+					NOT = { is_target_in_variable_list = { name = acw_dixie_states target = root } }
+				}
 			}
+			custom_tooltip_no_bullet = "je_acw_reincorporate_state_unionist"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				AND = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "je_acw_reincorporate_state_completed"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				OR = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "je_acw_reincorporate_state_partial"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				NOR = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "je_acw_reincorporate_state_not_completed"
+		}
+	}
+
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = "ACW_REINCORPORATE_TT"
+
+				any_scope_state = {
+					filter = {
+						state_region = {
+							is_homeland = cu:dixie
+						}
+						culture_percent_state = {
+							target = cu:dixie
+							value > 0
+						}
+					}
+					count = all
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+		}
+		effect = {
+			clear_variable_list = acw_dixie_states
+			custom_tooltip = {
+				text = dont_lose_dixie_culture
+				set_variable = acw_keep_dixie
+			}
+			custom_tooltip = {
+				text = reconstruction_progress
+				change_variable = {
+					name = reconstruction_var
+					add = 1
+				}
+			}
+			je_acw_reincorporate_cleanup = yes
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:dixie
+					}
+				}
+			}
+		}
+		effect = {
+			clear_variable_list = acw_dixie_states
+			je_acw_reincorporate_cleanup = yes
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			clear_variable_list = acw_dixie_states
+			je_acw_reincorporate_cleanup = yes
 		}
 	}
 
@@ -278,27 +469,9 @@ je_acw_reincorporate = {
 		}
 	}
 
-	invalid = {
-		NOT = {
-			any_scope_state = {
-				state_region = {
-					is_homeland = cu:dixie
-				}
-			}
-		}
-	}
-
-	on_invalid = {
-		clear_variable_list = acw_dixie_states
-	}
-
 	timeout = 4380
 
-	on_timeout = {
-		clear_variable_list = acw_dixie_states
-	}
 
-		
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -307,28 +480,65 @@ je_acw_equality = {
 
 	group = je_group_usa_american_civil_war
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_in_lobby = {
 		c:USA = THIS
 	}
 
-	complete = {
-		country_average_culture_pop_acceptance = {
-			culture = cu:afro_american
-			value >= 60
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			country_average_culture_pop_acceptance = {
+				culture = cu:afro_american
+				value >= 60
+			}
+		}
+		effect = {
+			custom_tooltip = {
+				text = acw_african_american_culture
+				set_variable = acw_gain_african_american
+			}
+			custom_tooltip = {
+				text = reconstruction_progress
+				change_variable = {
+					name = reconstruction_var
+					add = 1
+				}
+			}
+			je_acw_equality_cleanup = yes
 		}
 	}
 
-	on_complete = {
-		custom_tooltip = {
-			text = acw_african_american_culture
-			set_variable = acw_gain_african_american
-		}
-		custom_tooltip = {
-			text = reconstruction_progress
-			change_variable = {
-				name = reconstruction_var
-				add = 1
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:afro_american
+					}
+				}
 			}
+		}
+		effect = {
+			je_acw_equality_cleanup = yes
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_acw_equality_cleanup = yes
 		}
 	}
 
@@ -343,17 +553,7 @@ je_acw_equality = {
 
 	timeout = 4380
 
-	invalid = {
-		NOT = {
-			any_scope_state = {
-				state_region = {
-					is_homeland = cu:afro_american
-				}
-			}
-		}
-	}
 
-		
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -362,34 +562,74 @@ je_acw_wild_wild_west = {
 
 	group = je_group_usa_american_civil_war
 
-	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
-		}
-		NOT = {
-			any_scope_state = {
-				state_region = {
-					OR = {
-						is_homeland = cu:dixie
-						is_homeland = cu:yankee
-					}
-				}
-				devastation > 0.1
-				turmoil > 0.1
+	activation_description = {
+		always = yes
+	}
+
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = {
+				is_goal_complete = yes
 			}
+			NOT = {
+				any_scope_state = {
+					state_region = {
+						OR = {
+							is_homeland = cu:dixie
+							is_homeland = cu:yankee
+						}
+					}
+					devastation > 0.1
+					turmoil > 0.1
+				}
+			}
+		}
+		effect = {
+			custom_tooltip = {
+				text = acw_no_outlaw_crisis
+			}
+			custom_tooltip = {
+				text = reconstruction_progress
+				change_variable = {
+					name = reconstruction_var
+					add = 1
+				}
+			}
+			je_acw_wild_wild_west_cleanup = yes
 		}
 	}
 
-	on_complete = {
-		custom_tooltip = {
-			text = acw_no_outlaw_crisis
-		}
-		custom_tooltip = {
-			text = reconstruction_progress
-			change_variable = {
-				name = reconstruction_var
-				add = 1
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_scope_state = {
+					state_region = {
+						OR = {
+							is_homeland = cu:dixie
+							is_homeland = cu:yankee
+						}
+					}
+				}
 			}
+		}
+		effect = {
+			je_acw_wild_wild_west_cleanup = yes
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_acw_wild_wild_west_cleanup = yes
 		}
 	}
 
@@ -425,19 +665,6 @@ je_acw_wild_wild_west = {
 		}
 	}
 
-	invalid = {
-		NOT = {
-			any_scope_state = {
-				state_region = {
-					OR = {
-						is_homeland = cu:dixie
-						is_homeland = cu:yankee
-					}
-				}
-			}
-		}
-	}
-
 	current_value = {
 		value = var:je_acw_wild_west_var
 	}
@@ -449,6 +676,6 @@ je_acw_wild_wild_west = {
 	progressbar = yes
 
 	timeout = 4380
-		
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }

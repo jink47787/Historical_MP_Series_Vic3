@@ -1,6 +1,11 @@
 ﻿je_the_grand_collapse = {
 
 	group = je_group_historical_content
+
+	activation_description = {
+		always = yes
+	}
+
 	icon = "gfx/interface/icons/event_icons/event_skull.dds"
 
 	scripted_button = je_the_grand_collapse_bribe_politicians_button
@@ -57,106 +62,112 @@
 		set_variable = grand_collapse_started
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = is_not_in_civil_war_tt
-			any_civil_war = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = is_not_in_civil_war_tt
+				any_civil_war = {
+					count = 0
+				}
+			}
+			trigger_if = {
+				limit = {
+					is_player = yes
+				}
+				OR = {
+					has_law = law_type:law_monarchy
+					has_law_or_variant = law_type:law_theocracy
+				}
+				radical_fraction = {
+					value < 0.1
+				}
+				ig:ig_intelligentsia ?= {
+					is_in_government = no
+				}
+			}
+			government_legitimacy > 80
+			trigger_if =  {
+				limit = {
+					any_subject_or_below = {
+						count > 0
+					}
+				}
+				any_subject_or_below = {
+					relations:root >= relations_threshold:cordial
+				}
+			}
+			any_interest_group = {
+				ig_approval >= happy
+				count >= 3
+			}
+		}
+		effect = {
+			trigger_event = the_grand_collapse.4
+			hidden_effect = {
+				the_grand_collapse_mod_cleanser = yes
+			}
+		}
+		event_outcome_desc = {
+			first_valid = {
+				triggered_desc = {
+					desc = event_effects_the_grand_collapse.4_tt
+				}
+			}
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			is_at_war = no
+			any_scope_state = {
+				NOT = {
+					region = sr:region_near_east
+				}
 				count = 0
 			}
 		}
-		trigger_if = {
-			limit = {
-				is_player = yes
-			}
-			OR = {
-				has_law = law_type:law_monarchy
-				has_law_or_variant = law_type:law_theocracy
-			}
-			radical_fraction = {
-				value < 0.1
-			}
-			ig:ig_intelligentsia ?= {
-				is_in_government = no
-			}
-		}
-		government_legitimacy > 80
-		trigger_if =  {
-			limit = {
-				any_subject_or_below = {
-					count > 0
-				}
-			}
-			any_subject_or_below = {
-				relations:root >= relations_threshold:cordial
-			}
-		}
-		any_interest_group = {
-			ig_approval >= happy
-			count >= 3
-		}
-	}
-
-	on_complete = {
-		trigger_event = the_grand_collapse.4
-		hidden_effect = {
+		effect = {
+			je_the_grand_collapse_cleanup = yes
 			the_grand_collapse_mod_cleanser = yes
 		}
 	}
 
-	event_outcome_completed_desc = {
-		first_valid = {
-			triggered_desc = {
-				desc = event_effects_the_grand_collapse.4_tt
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			trigger_event = the_grand_collapse.5
+			hidden_effect = {
+				the_grand_collapse_mod_cleanser = yes
 			}
 		}
-	}
-
-	fail = {
-
-	}
-
-	on_fail = {
-
-	}
-
-	invalid = {
-		any_scope_state = {
-			NOT = {
-				region = sr:region_near_east
+		event_outcome_desc = {
+			first_valid = {
+				triggered_desc = {
+					trigger = {
+						has_law = law_type:law_autocracy
+					}
+					desc = event_effects_the_grand_collapse.5_autocracy_tt
+				}
+				triggered_desc = {
+					trigger = {
+						NOT = {
+							has_law = law_type:law_autocracy
+						}
+					}
+					desc = event_effects_the_grand_collapse.5_tt
+				}
 			}
-			count = 0
 		}
-	}
-
-	on_invalid = {
-
 	}
 
 	timeout = 3650
-
-	on_timeout = {
-		trigger_event = the_grand_collapse.5
-		hidden_effect = {
-			the_grand_collapse_mod_cleanser = yes
-		}
-	}
-
-	event_outcome_timeout_desc = {
-		first_valid = {
-			triggered_desc = {
-				trigger = {
-					has_law = law_type:law_autocracy
-				}
-				desc = event_effects_the_grand_collapse.5_autocracy_tt
-			}
-			triggered_desc = {
-				trigger = {
-					NOT = {
-						has_law = law_type:law_autocracy
-					}
-				}
-				desc = event_effects_the_grand_collapse.5_tt
-			}
-		}
-	}
 }

@@ -1,0 +1,380 @@
+﻿# Generic objectives
+ai_regional_objective_acquire_states = {
+	stances = { stance_conquer_region stance_colonize_region }
+
+	possible = {
+		scope:target_region = {
+			any_scope_state = {
+				aro_is_acquire_states_candidate = yes
+			}
+		}
+	}
+
+	on_create = {
+		scope:target_region = {
+			ordered_scope_state = {
+				limit = {
+					aro_is_acquire_states_candidate = yes
+				}
+				order_by = "root.military_reach(this)"
+				max = 3
+				check_range_bounds = no
+				root = {
+					add_to_variable_map = {
+						name = aro_acquire_states_targets
+						key = prev.state_region
+						value = scope:target_region
+					}
+				}
+			}
+		}
+	}
+
+	complete = {
+		scope:target_region = {
+			any_scope_state = {
+				owner = root
+				aro_is_acquire_states_target = yes
+			}
+		}
+	}
+
+	invalid = {
+		NOT = {
+			scope:target_region = {
+				any_scope_state = {
+					NOT = { owner = root }
+					aro_is_acquire_states_target = yes
+				}
+			}
+		}
+	}
+
+	state_target = {
+		scope:target_state = {
+			NOT = { owner = root }
+			aro_is_acquire_states_target = yes
+		}
+	}
+
+	on_complete = {
+		scope:target_region = {
+			every_scope_state = {
+				limit = {
+					aro_is_acquire_states_target = yes
+				}
+				root = {
+					remove_from_variable_map = {
+						name = aro_acquire_states_targets
+						key = prev.state_region
+					}
+				}
+			}
+		}
+	}
+
+	on_invalid = {
+		scope:target_region = {
+			every_scope_state = {
+				limit = {
+					aro_is_acquire_states_target = yes
+				}
+				root = {
+					remove_from_variable_map = {
+						name = aro_acquire_states_targets
+						key = prev.state_region
+					}
+				}
+			}
+		}
+	}
+
+	weight = {
+		value = 10
+
+		if = {
+			limit = { scope:target_stance = srs:stance_conquer_region }
+			add = 10
+		}
+	}
+}
+
+ai_regional_objective_recover_claims = {
+	stances = { stance_conquer_region stance_colonize_region stance_protect_region }
+
+	possible = {
+		scope:target_region = {
+			any_scope_state = {
+				has_claim_by = root
+			}
+		}
+	}
+
+	complete = { # TODO: check for success/failure?
+		scope:target_region = {
+			NOT = {
+				any_scope_state = {
+					has_claim_by = root
+				}
+			}
+		}
+	}
+
+	state_target = {
+		scope:target_state = {
+			has_claim_by = root
+		}
+	}
+
+	weight = {
+		value = 10
+
+		if = {
+			limit = {
+				scope:target_stance = {
+					OR = {
+						this = srs:stance_conquer_region
+						this = srs:stance_colonize_region
+					}
+				}
+			}
+			add = 90 # Prioritize if available
+		}
+	}
+}
+
+ai_regional_objective_subjugate_country = {
+	stances = { stance_conquer_region stance_colonize_region }
+
+	possible = {
+		scope:target_region = {
+			any_scope_country = {
+				is_local_country = scope:target_region
+				is_subject = no
+				country_rank < root.country_rank
+				ai_subject_value:root > 0
+			}
+		}
+	}
+
+	on_create = {
+		scope:target_region = {
+			ordered_scope_country = {
+				limit = {
+					is_local_country = scope:target_region
+					is_subject = no
+					country_rank < root.country_rank
+				}
+				order_by = ai_subject_value:root
+				position = 0
+				save_temporary_scope_as = aro_subjugate_country_target
+			}
+		}
+		add_to_variable_map = {
+			name = aro_subjugate_country_map
+			key = scope:target_region
+			value = scope:aro_subjugate_country_target
+		}
+	}
+
+	complete = {
+		"variable_map(aro_subjugate_country_map|scope:target_region)" ?= {
+			is_subject_of = root
+		}
+	}
+
+	invalid = {
+		NOT = {
+			"variable_map(aro_subjugate_country_map|scope:target_region)" ?= {
+				is_local_country = scope:target_region
+				any_scope_state = { region = scope:target_region }
+			}
+		}
+	}
+
+	country_target = {
+		"variable_map(aro_subjugate_country_map|scope:target_region)" ?= scope:target_country
+	}
+
+	on_complete = {
+		remove_from_variable_map = {
+			name = aro_subjugate_country_map
+			key = scope:target_region
+		}
+	}
+
+	on_invalid = {
+		remove_from_variable_map = {
+			name = aro_subjugate_country_map
+			key = scope:target_region
+		}
+	}
+
+	weight = {
+		value = 10
+
+		if = {
+			limit = {
+				scope:target_stance = srs:stance_colonize_region
+			}
+			add = 10
+		}
+	}
+}
+
+ai_regional_objective_befriend_countries = {
+	stances = { stance_protect_region }
+
+	possible = {
+		scope:target_region = {
+			any_scope_country = {
+				aro_is_befriend_countries_target = { REGION = scope:target_region }
+			}
+		}
+	}
+
+	on_create = {
+		save_temporary_scope_value_as = {
+			name = aro_befriend_countries_num
+			value = {
+				scope:target_region = {
+					every_scope_country = {
+						limit = {
+							aro_is_befriend_countries_target = { REGION = scope:target_region }
+						}
+						add = 1
+					}
+				}
+				min = 0
+			}
+		}
+		add_to_variable_map = {
+			name = aro_befriend_countries_map
+			key = scope:target_region
+			value = scope:aro_befriend_countries_num
+		}
+	}
+
+	complete = {
+		scope:target_region = {
+			any_scope_country = {
+				aro_is_befriend_countries_target = { REGION = scope:target_region }
+				count < "root.variable_map(aro_befriend_countries_map|scope:target_region)"
+			}
+		}
+	}
+
+	country_target = {
+		scope:target_country = {
+			aro_is_befriend_countries_target = { REGION = scope:target_region }
+		}
+	}
+
+	on_complete = {
+		remove_from_variable_map = {
+			name = aro_befriend_countries_map
+			key = scope:target_region
+		}
+	}
+
+	on_invalid = {
+		remove_from_variable_map = {
+			name = aro_befriend_countries_map
+			key = scope:target_region
+		}
+	}
+
+	weight = {
+		value = 10
+	}
+}
+
+ai_regional_objective_protect_country = {
+	stances = { stance_protect_region }
+
+	possible = {
+		scope:target_region = {
+			any_scope_country = {
+				is_local_country = scope:target_region
+				country_rank < root.country_rank
+				is_subject = no
+				any_neighbouring_state = {
+					owner = {
+						has_diplomatic_pact = {
+							who = root
+							type = rivalry
+						}
+					}
+				}
+			}
+		}
+	}
+
+	on_create = {
+		scope:target_region = {
+			random_scope_country = {
+				limit = {
+					is_local_country = scope:target_region
+					country_rank < root.country_rank
+					is_subject = no
+					any_neighbouring_state = {
+						owner = {
+							has_diplomatic_pact = {
+								who = root
+								type = rivalry
+							}
+						}
+					}
+				}
+				save_temporary_scope_as = aro_protect_country_target
+			}
+		}
+		add_to_variable_map = {
+			name = aro_protect_country_map
+			key = scope:target_region
+			value = scope:aro_protect_country_target
+		}
+	}
+
+	complete = {
+		"variable_map(aro_protect_country_map|scope:target_region)" ?= {
+			OR = {
+				has_treaty_alliance_with = { TARGET = root }
+				has_treaty_defensive_pact_with = { TARGET = root }
+				has_treaty_guarantee_independence_with = { TARGET = root }
+				is_subject_of = root
+			}
+		}
+	}
+
+	invalid = {
+		NOT = {
+			"variable_map(aro_protect_country_map|scope:target_region)" ?= {
+				is_local_country = scope:target_region
+				any_scope_state = { region = scope:target_region }
+			}
+		}
+	}
+
+	country_target = {
+		"variable_map(aro_protect_country_map|scope:target_region)" ?= scope:target_country
+	}
+
+	on_complete = {
+		remove_from_variable_map = {
+			name = aro_protect_country_map
+			key = scope:target_region
+		}
+	}
+
+	on_invalid = {
+		remove_from_variable_map = {
+			name = aro_protect_country_map
+			key = scope:target_region
+		}
+	}
+
+	weight = {
+		value = 10
+	}
+}

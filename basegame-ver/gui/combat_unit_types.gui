@@ -489,6 +489,27 @@ types combat_unit_types
 					blockoverride "onclick_showless" {
 						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
 					}
+
+					### Not enough sailors to crew the ships in this group or what it has queued
+					flowcontainer = {
+						visible = "[Or(ShipList.HasAnyShipShortOfSailorCapacityOfGroup(ShipGroup.Self), And(Country.HasSailorDeficitWithShipConstruction, ShipList.HasShipConstructionQueuedOfGroup(ShipGroup.Self)))]"
+						parentanchor = vcenter|right
+						spacing = 2
+						using = tooltip_ne
+						tooltip = "SHIP_GROUP_INSUFFICIENT_SAILORS_TOOLTIP"
+
+						icon = {
+							parentanchor = vcenter
+							size = { 25 25 }
+							texture = "gfx/interface/icons/generic_icons/warning.dds"
+						}
+
+						icon = {
+							parentanchor = vcenter
+							size = { 25 25 }
+							texture = "gfx/interface/icons/military_icons/navy_icons/total_crew_navy.dds"
+						}
+					}
 				}
 
 				# SHIPS DROPDOWN BUTTON - when open
@@ -516,12 +537,34 @@ types combat_unit_types
 					blockoverride "onclick_showless" {
 						visible = "[GetVariableSystem.Exists(Concatenate(ShipGroup.GetKey, '_construction'))]"
 					}
+
+					### Not enough sailors to crew the ships in this group or what it has queued
+					flowcontainer = {
+						visible = "[Or(ShipList.HasAnyShipShortOfSailorCapacityOfGroup(ShipGroup.Self), And(Country.HasSailorDeficitWithShipConstruction, ShipList.HasShipConstructionQueuedOfGroup(ShipGroup.Self)))]"
+						parentanchor = vcenter|right
+						spacing = 2
+						using = tooltip_ne
+						tooltip = "SHIP_GROUP_INSUFFICIENT_SAILORS_TOOLTIP"
+
+						icon = {
+							parentanchor = vcenter
+							size = { 25 25 }
+							texture = "gfx/interface/icons/generic_icons/warning.dds"
+						}
+
+						icon = {
+							parentanchor = vcenter
+							size = { 25 25 }
+							texture = "gfx/interface/icons/military_icons/navy_icons/total_crew_navy.dds"
+						}
+					}
 				}
 
 				flowcontainer = {
 					datacontext = "[Country.GetShipList]"
 					parentanchor = vcenter
 					spacing = 5
+					max_update_rate = 8
 
 					### Has outdated ships
 					icon = {
@@ -946,9 +989,8 @@ types combat_unit_types
 							compact_ship_template = {
 								size = { 110 40 }
 
-								background = {
-									using = dark_area
-									alpha = 0.01
+								blockoverride "background_visibility" {
+									visible = no
 								}
 
 								blockoverride "button_visibility" {
@@ -1134,9 +1176,10 @@ types combat_unit_types
 			parentanchor = hcenter
 			margin = { 0 5 }
 			spacing = 5
+			wrap_count = 2
 
 			button = {
-				size = { 160 40 }
+				size = { 242 40 }
 				using = default_button_action
 				using = tooltip_ne
 				tooltip = "DELETE_SELECTED_TOOLTIP"
@@ -1146,7 +1189,7 @@ types combat_unit_types
 			}
 
 			button = {
-				size = { 160 40 }
+				size = { 242 40 }
 				using = default_button_action
 				using = tooltip_ne
 				tooltip = "RETROFIT_SELECTED_TOOLTIP"
@@ -1156,7 +1199,7 @@ types combat_unit_types
 			}
 			
 			button = {
-				size = { 160 40 }
+				size = { 242 40 }
 				using = default_button
 				using = tooltip_ne
 				tooltip = "CHANGE_SELECTED_TOOLTIP"
@@ -1175,6 +1218,16 @@ types combat_unit_types
 						text = "[ShipSelection.GetNumTemplatesAvailable|+]"
 					}
 				}
+			}
+
+			button = {
+				size = { 242 40 }
+				using = default_button
+				using = tooltip_ne
+				tooltip = "REPAIR_SELECTED_TOOLTIP"
+				text = "REPAIR_SELECTED"
+				enabled = "[IsValid(ShipSelection.Repair)]"
+				onclick = "[Execute(ShipSelection.Repair)]"
 			}
 		}
 	}
@@ -1325,6 +1378,8 @@ types combat_unit_types
 		background = {
 			using = dark_area
 			alpha = 0.25
+
+			block "background_visibility" {}
 		}
 
 		background = {
@@ -1353,13 +1408,23 @@ types combat_unit_types
 		}
 
 		button = {
-			parentanchor = right|vcenter
+			parentanchor = hcenter|vcenter
 			size = { 90% 66% }
 			alwaystransparent = yes
 
 			background = {
 				fittype = center
 				texture = "[ShipType.GetProfileTexture]"
+			}
+
+			icon = {
+				size = { 20 20 }
+				parentanchor = right|vcenter
+				texture = "gfx/interface/icons/generic_icons/warning.dds"
+
+				block "obsolete_visibility" {
+					visible = no
+				}
 			}
 		}
 
@@ -1390,6 +1455,65 @@ types combat_unit_types
 			
 			block "highlight_visibility" {
 				visible = no
+			}
+		}
+	}
+
+	type country_ship_types = flowcontainer {
+		spacing = 2
+		datacontext = "[Country.GetShipList]"
+
+		block "wrap_count" {
+			wrap_count = 5
+		}
+
+		block "ship_types_datamodel" {
+			datamodel = "[ShipList.GetShipTypesWithShips]"
+		}
+
+		item = {
+			compact_ship_template = {
+				block "ship_type_size" {
+					size = { 105 40 }
+				}
+
+				blockoverride "widget_datacontext" {}
+
+				blockoverride "tooltip" {
+					block "filter_tooltip" {
+						tooltip = "COMPACT_SHIP_TYPE_TOOLTIP"
+					}
+				}
+
+				blockoverride "ship_number" {
+					block "filter_ship_number" {
+						raw_text = "#v [ShipList.GetNumShipsOfType(ShipType.Self)]#!"
+					}
+				}
+
+				blockoverride "number_minimumsize" {
+					minimumsize = { -1 40 }
+				}
+
+				blockoverride "obsolete_visibility" {
+					visible = "[And(Country.IsPlayer, ShipType.IsObsolete(Country.Self))]"
+				}
+
+				blockoverride "button_visibility" {
+					block "filter_button_visibility" {
+						visible = no
+					}
+				}
+
+				blockoverride "onclick" {
+					block "filter_onclick" {}
+				}
+
+				blockoverride "highlight_visibility" {
+					block "filter_highlight_visibility" {
+						visible = no
+					}
+				}
 			}
 		}
 	}
@@ -1631,11 +1755,11 @@ types combat_unit_types
 			spacing = 2
 
 			flowcontainer = {
-				spacing = 5
+				spacing = 2
 
 				ship_type_silhouette = {
 					datacontext = "[Ship.GetType]"
-					size = { 93 30 }
+					size = { 102 30 }
 
 					blockoverride "fittype" {
 						fittype = start
@@ -1643,14 +1767,16 @@ types combat_unit_types
 				}
 
 				icon = {
+					parentanchor = bottom
 					size = { 24 24 }
-					texture = "[Ship.GetVeterancyLevel.GetTexture]"
 					using = highlighted_circle_selection_small
+					texture = "[Ship.GetVeterancyLevel.GetTexture]"
 				}
 
 				white_progressbar_vertical = {
 					visible = "[Not(Ship.IsAtMaxVeterancy)]"
 					size = { 6 24 }
+					parentanchor = vcenter
 
 					blockoverride "values" {
 						min = "[Ship.GetVeterancyLevel.GetExperienceThreshold]"
@@ -1664,34 +1790,70 @@ types combat_unit_types
 				}
 			}
 
-			bar_horizontal_with_background = {
+			flowcontainer = {
+				direction = vertical
 				parentanchor = hcenter
-				size = { 140 14 }
+				margin_right = 5
 
-				blockoverride "values" {
-					min = 0
-					max = "[Ship.GetHitPointsMax]"
-					value = "[Ship.GetHitPoints]"
-				}
+				bar_horizontal_with_background = {
+					size = { 140 14 }
 
-				blockoverride "color" {
-					using = color_green_approval
-				}
+					blockoverride "values" {
+						min = 0
+						max = "[Ship.GetHitPointsMax]"
+						value = "[Ship.GetHitPoints]"
+					}
 
-				blockoverride "frame_texture_density" {
-					texture_density = 3
-				}
+					blockoverride "color" {
+						using = color_green_approval
+					}
 
-				flowcontainer = {
-					parentanchor = vcenter
-					position = { 5 0 }
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
 
-					textbox = {
+					flowcontainer = {
 						parentanchor = vcenter
-						autoresize = yes
-						align = nobaseline
-						using = fontsize_small
-						raw_text = "#b [Ship.GetHitPoints|0]#!/[Ship.GetHitPointsMax]"
+						position = { 5 0 }
+
+						textbox = {
+							parentanchor = vcenter
+							autoresize = yes
+							align = nobaseline
+							using = fontsize_small
+							raw_text = "#b [Ship.GetHitPoints|0]#!/[Ship.GetHitPointsMax]"
+						}
+					}
+				}
+
+				bar_horizontal_with_background = {
+					size = { 140 7 }
+
+					blockoverride "color" {
+						using = color_blue_negative
+					}
+
+					blockoverride "frame_texture_density" {
+						texture_density = 3
+					}
+
+					blockoverride "values" {
+						block "second_bar_values" {
+							min = 0
+							max = "[Ship.GetCrewMax]"
+							value = "[Ship.GetTotalCrew]"
+						}
+					}
+
+					icon = {
+						visible = "[Ship.IsInactiveFromInsufficientCrew]"
+						size = { 100% 100% }
+						using = look_at_me_animation
+
+						background = {
+							using = fade_center_colored_red
+							alpha = 1
+						}
 					}
 				}
 			}

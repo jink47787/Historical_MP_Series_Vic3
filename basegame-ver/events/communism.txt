@@ -55,10 +55,6 @@ communism.1 = {
 				}
 			}
 		}
-		set_variable = {
-			name = je_communism_2_var
-			value = 0
-		}
 		add_journal_entry = {
 			type = je_communism_2
 		}
@@ -79,6 +75,9 @@ communism.1 = {
 			}
 			custom_tooltip = communist_unions.tt
 		}
+		ai_chance = {
+			base = 40
+		}
 	}
 	option = { # ban slavery
 		name = communism.1.b
@@ -93,6 +92,9 @@ communism.1 = {
 				}
 			}
 			custom_tooltip = communist_unions.tt
+		}
+		ai_chance = {
+			base = 50
 		}
 	}
 	option = { # Regulatory bodies
@@ -109,6 +111,9 @@ communism.1 = {
 				}
 			}
 			custom_tooltip = communist_unions.tt
+		}
+		ai_chance = {
+			base = 40
 		}
 	}
 	option = {
@@ -127,7 +132,7 @@ communism.1 = {
 				leader = {
 					OR = {
 						has_ideology = ideology:ideology_vanguardist
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_anarchist
 					}
 				}
@@ -140,6 +145,15 @@ communism.1 = {
 		add_loyalists = {
 			value = medium_radicals
 			strata = upper
+		}
+		ai_chance = {
+			base = 20
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
 		}
 	}
 }
@@ -155,7 +169,7 @@ communism.2 = {
 	duration = 3
 
 	event_image = {
-		video = "votp_agitator_speaking"
+		video = "ip5_soviet_deliberation"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
@@ -166,51 +180,54 @@ communism.2 = {
 		# triggered by communsim JE 2
 	}
 
+	fire_only_once = yes
+
 	immediate = {
 		ig:ig_trade_unions ?= {
 			save_scope_as = unions
 			leader = {
 				save_scope_as = union_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
+		}
+	}
+
+	option = { # communism
+		name = communism.2.b
+		default_option = yes
+		ig:ig_trade_unions ?= {
+			set_variable = chose_communism
+		}
+		custom_tooltip = chose_communism.tt
+		if = {
+			limit = {
+				scope:union_leader = {
+					NOT = { has_ideology = ideology:ideology_communist_leader }
+				}
+			}
+			scope:union_leader = {
+				set_ideology = ideology:ideology_communist_leader
+			}
+		}
+		ai_chance = {
+			base = 50
 		}
 	}
 	option = { # vanguardism
 		name = communism.2.a
 		trigger = {
 			has_technology_researched = political_agitation
-			any_political_movement = {
-				OR = {
-					is_political_movement_type = movement_communist
-					is_political_movement_type = movement_socialist
-				}
+			custom_tooltip = {
+				text = vanguardism_viable_tt
+				vanguardism_coefficient > 1
 			}
 		}
+		show_as_unavailable = {
+			has_technology_researched = political_agitation
+		}
+		highlighted_option = yes
 		ig:ig_trade_unions ?= {
 			set_variable = chose_vanguardism
-		}
-		if = {
-			limit = {
-				NOT = {
-					any_political_movement = {
-						is_political_movement_type = movement_communist
-					}
-				}
-			}
-			create_political_movement = { type = movement_communist }
-		}
-		if = {
-			limit = {
-				any_political_movement = {
-					is_political_movement_type = movement_communist
-				}
-			}
-			random_political_movement = {
-				limit = {
-					is_political_movement_type = movement_communist
-				}
-				set_core_ideology = ideology_vanguardist_movement
-				remove_character_ideology = ideology_communist
-			}
 		}
 		custom_tooltip = chose_vanguardism.tt
 		if = {
@@ -223,245 +240,31 @@ communism.2 = {
 				set_ideology = ideology:ideology_vanguardist
 			}
 		}
-		add_modifier = {
-			name = path_to_vanguardism
-			days = normal_modifier_time
-		}
-		if = {
-			limit = {
-				any_interest_group = {
-					leader = {
-						OR = {
-							has_ideology = ideology:ideology_vanguardist
-							has_ideology = ideology:ideology_communist
-							has_ideology = ideology:ideology_anarchist
-						}
-					}
-					count >= 3
+		ai_chance = {
+			base = 10
+			modifier = {
+				trigger = {
+					vanguardism_coefficient >= 2
 				}
-				custom_tooltip = {
-					text = vanguard_custom_tooltip
-					NOT = {
-						any_interest_group = {
-							is_powerful = yes
-							leader = {
-								NOR = {
-									has_ideology = ideology:ideology_vanguardist
-									has_ideology = ideology:ideology_communist
-									has_ideology = ideology:ideology_anarchist
-								}
-							}
-						}
-					}
-				}
+				add = 40
 			}
-			trigger_event = { id = communism.5 }
-		}
-		else = {
-			add_journal_entry = {
-				type = je_vanguard
-			}
-		}
-		add_journal_entry = {
-			type = je_5_year_plan
-		}
-	}
-	option = { # communism
-		name = communism.2.b
-		default_option = yes
-		trigger = {
-			OR = {
-				NOT = { exists = c:RUS }
-				NOT = { c:RUS = ROOT }
-			}
-		}
-		ig:ig_trade_unions ?= {
-			set_variable = chose_communism
-		}
-		if = {
-			limit = {
-				NOT = {
-					any_political_movement = {
-						is_political_movement_type = movement_communist
-					}
-				}
-			}
-			create_political_movement = { type = movement_communist }
-		}
-		if = {
-			limit = {
-				any_political_movement = {
-					is_political_movement_type = movement_communist
-				}
-			}
-			random_political_movement = {
-				limit = {
-					is_political_movement_type = movement_communist
-				}
-				remove_character_ideology = ideology_vanguardist
-			}
-		}
-		custom_tooltip = chose_communism.tt
-		if = {
-			limit = {
-				scope:union_leader = {
-					NOT = { has_ideology = ideology:ideology_communist }
-				}
-			}
-			scope:union_leader = {
-				set_ideology = ideology:ideology_communist
-			}
-		}
-		add_modifier = {
-			name = path_to_communism
-			days = normal_modifier_time
-		}
-		if = {
-			limit = {
-				root.bureaucracy > 0
-				approaching_bureaucracy_shortage = no
-				has_law_or_variant = law_type:law_public_schools
-				institution_investment_level = {
-					institution = institution_schools
-					value = 5
-				}
-				has_law_or_variant = law_type:law_public_health_insurance
-				institution_investment_level = {
-					institution = institution_health_system
-					value = 5
-				}
-				has_law_or_variant = law_type:law_old_age_pension
-				institution_investment_level = {
-					institution = institution_social_security
-					value = 5
-				}
-				has_law_or_variant = law_type:law_worker_protections
-				institution_investment_level = {
-					institution = institution_workplace_safety
-					value = 5
-				}
-			}
-			trigger_event = {
-				id = communism.6
-			}
-		}
-		else = {
-			add_journal_entry = {
-				type = je_communist_welfare
-			}
-		}
-		add_journal_entry = {
-			type = je_5_year_plan
-		}
-	}
-	option = { # russian communism
-		name = communism.2.b2
-		trigger = {
-			exists = c:RUS
-			c:RUS = ROOT
-		}
-		ig:ig_trade_unions ?= {
-			set_variable = chose_communism
-		}
-		custom_tooltip = chose_communism.tt
-		if = {
-			limit = {
-				scope:union_leader = {
-					NOT = { has_ideology = ideology:ideology_communist }
-				}
-			}
-			scope:union_leader = {
-				set_ideology = ideology:ideology_communist
-			}
-		}
-		if = {
-			limit = {
-				NOT = {
-					any_political_movement = {
-						is_political_movement_type = movement_communist
-					}
-				}
-			}
-			create_political_movement = { type = movement_communist }
-		}
-		if = {
-			limit = {
-				any_political_movement = {
-					is_political_movement_type = movement_communist
-				}
-			}
-			random_political_movement = {
-				limit = {
-					is_political_movement_type = movement_communist
-				}
-				remove_character_ideology = ideology_vanguardist
-			}
-		}
-		add_modifier = {
-			name = path_to_communism
-			days = normal_modifier_time
-		}
-		if = {
-			limit = {
-				approaching_bureaucracy_shortage = no
-				has_law_or_variant = law_type:law_public_schools
-				institution_investment_level = {
-					institution = institution_schools
-					value = 5
-				}
-				has_law_or_variant = law_type:law_public_health_insurance
-				institution_investment_level = {
-					institution = institution_health_system
-					value = 5
-				}
-				has_law_or_variant = law_type:law_old_age_pension
-				institution_investment_level = {
-					institution = institution_social_security
-					value = 5
-				}
-				has_law_or_variant = law_type:law_worker_protections
-				institution_investment_level = {
-					institution = institution_workplace_safety
-					value = 5
-				}
-			}
-			trigger_event = {
-				id = communism.6
-			}
-		}
-		else = {
-			add_journal_entry = {
-				type = je_communist_welfare
-			}
-		}
-		add_journal_entry = {
-			type = je_5_year_plan
 		}
 	}
 	option = { # anarchism
 		name = communism.2.c
 		trigger = {
 			any_political_movement = {
-				OR = {
-					is_political_movement_type = movement_anarchist
-					is_political_movement_type = movement_socialist
-				}
+				is_political_movement_type = movement_anarchist
 			}
 		}
+		show_as_unavailable = {
+			has_technology_researched = anarchism
+		}
+		highlighted_option = yes
 		ig:ig_trade_unions ?= {
 			set_variable = chose_anarchism
 		}
 		custom_tooltip = chose_anarchism.tt
-		if = {
-			limit = {
-				NOT = {
-					any_political_movement = {
-						is_political_movement_type = movement_anarchist
-					}
-				}
-			}
-			create_political_movement = { type = movement_anarchist }
-		}
 		if = {
 			limit = {
 				scope:union_leader = {
@@ -472,27 +275,49 @@ communism.2 = {
 				set_ideology = ideology:ideology_anarchist
 			}
 		}
-		add_modifier = {
-			name = path_to_anarchy
-			days = normal_modifier_time
+		ai_chance = {
+			base = 0
+			modifier = {
+				trigger = {
+					any_political_movement = {
+						is_political_movement_type = movement_anarchist
+						political_movement_support >= 0.1
+					}
+				}
+				add = 25
+			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:union_leader }
 		if = {
 			limit = {
-				has_law_or_variant = law_type:law_anarchy
-				average_sol >= 15
+				NOT = { has_global_variable = socialist_world_republic }
 			}
-			trigger_event = {
-				id = communism.4
-			}
-		}
-		else = {
 			add_journal_entry = {
-				type = je_anarchy
+				type = je_state_and_revolution
 			}
 		}
 		add_journal_entry = {
-			type = je_5_year_plan
+			type = je_social_revolution
 		}
+		custom_tooltip = {
+			text = form_white_movement_tt
+			if = {
+				limit = {
+					NOT = {
+						any_political_movement = {
+							is_political_movement_type = movement_anti_communist
+						}
+					}
+				}
+				create_political_movement = {
+					type = movement_anti_communist
+				}
+			}
+		}
+		je_communism_2_cleanup = yes
 	}
 }
 
@@ -507,14 +332,17 @@ communism.3 = {
 	duration = 3
 
 	event_image = {
-		video = "europenorthamerica_capitalists_meeting"
+		video = "votp_agitator_speaking"
 	}
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
+	cooldown = { days = short_modifier_time }
+
 	trigger = {
+		# triggered by journal entry - je_extraordinary_commission [on_weekly_pulse]
 		has_technology_researched = political_agitation
 		any_interest_group = {
 			ig_counts_as_marginal = yes
@@ -522,6 +350,7 @@ communism.3 = {
 				is_interest_group_type = ig_rural_folk
 				is_interest_group_type = ig_intelligentsia
 				is_interest_group_type = ig_armed_forces
+				is_interest_group_type = ig_trade_unions
 			}
 			any_scope_character = {
 				NOR = {
@@ -533,7 +362,7 @@ communism.3 = {
 			leader = {
 				NOR = {
 					has_ideology = ideology:ideology_vanguardist
-					has_ideology = ideology:ideology_communist
+					has_ideology = ideology:ideology_communist_leader
 					has_ideology = ideology:ideology_anarchist
 				}
 			}
@@ -548,18 +377,26 @@ communism.3 = {
 					is_interest_group_type = ig_rural_folk
 					is_interest_group_type = ig_intelligentsia
 					is_interest_group_type = ig_armed_forces
+					is_interest_group_type = ig_trade_unions
+				}
+				any_scope_character = {
+					NOR = {
+						has_role_of_type = agitator
+						has_role_of_type = ruler
+					}
+					has_ideology = ideology:ideology_vanguardist
 				}
 				leader = {
 					NOR = {
 						has_ideology = ideology:ideology_vanguardist
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_anarchist
 					}
 				}
 			}
 			save_scope_as = new_vanguard_ig
 			set_variable = chose_vanguardism
-			random_scope_character = {
+			ordered_scope_character = {
 				limit = {
 					NOR = {
 						has_role_of_type = agitator
@@ -567,10 +404,23 @@ communism.3 = {
 					}
 					has_ideology = ideology:ideology_vanguardist
 				}
+				order_by = prominence
+				position = 0
 				save_scope_as = new_vanguard_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 				set_as_interest_group_leader = yes
 			}
 		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_journal_entry = je_extraordinary_commission
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:new_vanguard_leader }
 	}
 
 	option = {
@@ -583,6 +433,9 @@ communism.3 = {
 				days = normal_modifier_time
 			}
 		}
+		ai_chance = {
+			base = 40
+		}
 	}
 	option = {
 		name = communism.3.b
@@ -592,6 +445,9 @@ communism.3 = {
 				name = new_vanguard_clout
 				days = normal_modifier_time
 			}
+		}
+		ai_chance = {
+			base = 60
 		}
 	}
 }
@@ -624,6 +480,9 @@ communism.4 = {
 			days = normal_modifier_time
 		}
 	}
+	after = {
+		je_anarchy_cleanup = yes
+	}
 }
 
 # vanguard completion
@@ -654,6 +513,9 @@ communism.5 = {
 			days = normal_modifier_time
 		}
 	}
+	after = {
+		je_extraordinary_commission_cleanup = yes
+	}
 }
 
 # communist completion
@@ -680,9 +542,12 @@ communism.6 = {
 	option = {
 		name = communism.6.a
 		add_modifier = {
-			name = institutions_of_socialism_modifier
-			days = long_modifier_time
+			name = modifier_social_revolution
+			days = very_long_modifier_time
 		}
+	}
+	after = {
+		je_social_revolution_cleanup = yes
 	}
 }
 
@@ -707,6 +572,8 @@ communism.7 = {
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
 	trigger = {
+		# triggered by journal entry - je_communism_1 [on_monthly_pulse]
+		# triggered by on_action - on_yearly_events
 		NOT = { has_law_or_variant = law_type:law_council_republic }
 		any_interest_group = {
 			ig_counts_as_marginal = no
@@ -717,7 +584,7 @@ communism.7 = {
 				}
 				NOT = { has_modifier = popular_socialist_leader }
 				OR = {
-					has_ideology = ideology:ideology_communist
+					has_ideology = ideology:ideology_communist_leader
 					has_ideology = ideology:ideology_anarchist
 					has_ideology = ideology:ideology_vanguardist
 				}
@@ -736,7 +603,7 @@ communism.7 = {
 					}
 					NOT = { has_modifier = popular_socialist_leader }
 					OR = {
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_anarchist
 						has_ideology = ideology:ideology_vanguardist
 					}
@@ -751,18 +618,32 @@ communism.7 = {
 					}
 					NOT = { has_modifier = popular_socialist_leader }
 					OR = {
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_anarchist
 						has_ideology = ideology:ideology_vanguardist
 					}
 				}
 				save_scope_as = popular_socialist_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
 
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:popular_socialist_leader }
+	}
+
 	option = {
 		name = communism.7.a
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		trigger = {
 			scope:popular_socialist_ig = {
 				is_in_government = yes
@@ -779,6 +660,15 @@ communism.7 = {
 
 	option = {
 		name = communism.7.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		trigger = {
 			scope:popular_socialist_ig = {
 				is_in_government = no
@@ -821,27 +711,54 @@ communism.8 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	fire_only_once = yes
+
 	trigger = {
+		# triggered by on_action - on_monthly_pulse_country
 		has_law_or_variant = law_type:law_council_republic
-		NOT = {	has_variable = red_army_var }
-		ig:ig_armed_forces ?= {
-			leader = {
-				OR = {
-					has_ideology = ideology:ideology_communist
-					has_ideology = ideology:ideology_vanguardist
+		has_law_or_variant = law_type:law_revolutionary_guard
+		any_scope_character = {
+			OR = {
+				has_variable = red_army_candidate
+				AND = {
+					OR = {
+						is_interest_group_type = ig_trade_unions
+						has_socialist_ideology = yes
+					}
+					OR = {
+						has_role_of_type = general
+						has_role_of_type = admiral
+					}
 				}
 			}
 		}
 	}
 
 	immediate = {
-		ig:ig_armed_forces ?= {
-			save_scope_as = red_army_ig
-			leader = {
-				save_scope_as = red_army_general
+		ordered_scope_character = {
+			limit = {
+				OR = {
+					has_variable = red_army_candidate
+					AND = {
+						OR = {
+							is_interest_group_type = ig_trade_unions
+							has_socialist_ideology = yes
+						}
+						OR = {
+							has_role_of_type = general
+							has_role_of_type = admiral
+						}
+					}
+				}
 			}
+			order_by = prominence
+			position = 0
+			save_scope_as = red_army_general
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
-		set_variable = red_army_var
+		ig:ig_armed_forces ?= {
+			save_scope_as = armed_forces_ig
+		}
 	}
 
 	option = {
@@ -850,10 +767,107 @@ communism.8 = {
 			custom_tooltip = red_army_tt
 			hidden_effect = {
 				set_interest_group_name = ig_red_army
+				if = {
+					limit = {
+						has_ideology = ideology:ideology_tsarist
+					}
+					remove_ideology = ideology_tsarist
+				}
+				if = {
+					limit = {
+						has_ideology = ideology:ideology_jingoist
+					}
+					remove_ideology = ideology_jingoist
+				}
+				if = {
+					limit = {
+						has_ideology = ideology:ideology_militarist
+					}
+					remove_ideology = ideology_militarist
+					add_ideology = ideology_militant
+				}
+				if = {
+					limit = {
+						has_ideology = ideology:ideology_republican
+					}
+					remove_ideology = ideology_republican
+					add_ideology = ideology_militant
+				}
+				custom_tooltip = {
+					text = loyalist_change_stances_tt
+					if = {
+						limit = {
+							has_ideology = ideology:ideology_loyalist
+						}
+						remove_ideology = ideology_loyalist
+						add_ideology = ideology_disciplinarian
+					}
+				}
+				add_ideology = ideology_internationalist
+				owner = {
+					set_variable = ig_red_army_active
+				}
 			}
-			remove_ideology= ideology_loyalist
-			add_ideology = ideology_proletarian
 		}
+		if = {
+			limit = {
+				NOT = {
+					scope:red_army_general ?= {
+						is_interest_group_type = ig_armed_forces
+					}
+				}
+			}
+			scope:red_army_general ?= {
+				set_interest_group = scope:armed_forces_ig
+				custom_tooltip = {
+					text = leader_of_red_army_tt
+					set_as_interest_group_leader = yes
+				}
+			}
+		}
+		every_scope_character = {
+			limit = {
+				OR = {
+					has_variable = red_army_candidate
+					AND = {
+						OR = {
+							is_interest_group_type = ig_trade_unions
+							has_socialist_ideology = yes
+						}
+						OR = {
+							has_role_of_type = general
+							has_role_of_type = admiral
+						}
+					}
+				}
+				NOT = {
+					scope:red_army_general ?= this
+				}
+			}
+			if = {
+				limit = {
+					has_variable = red_army_candidate
+				}
+				set_interest_group = scope:armed_forces_ig
+			}
+			else = {
+				random = {
+					chance = {
+						value = 50
+					}
+					set_interest_group = scope:armed_forces_ig
+				}
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			scope:red_army_general ?= {
+				set_as_interest_group_leader = yes
+			}
+		}
+		revoke_temporary_event_immortality = { CHARACTER = scope:red_army_general }
 	}
 }
 
@@ -949,6 +963,15 @@ communism.8 = {
  	option = {
  		name = communism.9.a
  		default_option = yes
+ 		ai_chance = {
+ 			base = 1
+ 			modifier = {
+ 				trigger = {
+ 					ai_avoids_radicals = yes
+ 				}
+ 				add = 10
+ 			}
+ 		}
  		scope:coop_state = {
  			add_modifier = {
  				name = coop_loyalty_modifier
@@ -999,19 +1022,35 @@ communism.10 = {
 				pop_type = laborers
 			}
 		}
+		ai_chance = {
+			base = 50
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 15
+			}
+		}
 	}
 	option = {
 		name = communism.10.b
 		trigger = {
-			any_interest_group = {
-				is_in_government = yes
-				OR = {
-					has_ideology = ideology:ideology_socialist
-					leader = {
-						has_socialist_ideology = yes
+			custom_description = {
+				text = communism_10_b_option_trigger
+				any_interest_group = {
+					is_in_government = yes
+					OR = {
+						is_interest_group_type = ig_trade_unions
+						leader = {
+							has_socialist_ideology = yes
+						}
 					}
 				}
 			}
+		}
+		highlighted_option = yes
+		show_as_unavailable = {
+			always = yes
 		}
 		capital = {
 			add_radicals_in_state = {
@@ -1022,6 +1061,45 @@ communism.10 = {
 		custom_tooltip = {
 			text = communism_var_tick_05_tt
 			set_variable = { name = communism_progress_var_add value = 0.5 }
+		}
+		ai_chance = {
+			base = 100
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				has_technology_researched = socialism
+				country_has_laws_in_need_of_critical_modernization = no
+				NOT = {
+					any_political_movement = {
+						is_political_movement_type = movement_socialist
+					}
+				}
+			}
+			create_political_movement = { type = movement_socialist }
+		}
+		else_if = {
+			limit = {
+				has_technology_researched = anarchism
+				country_has_laws_in_need_of_critical_modernization = no
+				NOT = {
+					any_political_movement = {
+						OR = {
+							is_political_movement_type = movement_socialist
+							is_political_movement_type = movement_anarchist
+						}
+					}
+				}
+			}
+			create_political_movement = { type = movement_anarchist }
 		}
 	}
 }
@@ -1067,6 +1145,9 @@ communism.11 = {
 			value = small_radicals
 			strata = middle
 		}
+		ai_chance = {
+			base = 75
+		}
 	}
 	option = {
 		name = communism.11.b
@@ -1082,5 +1163,118 @@ communism.11 = {
 			value = medium_radicals
 			strata = middle
 		}
+		ai_chance = {
+			base = 25
+		}
+	}
+	after = {
+		je_communism_1_cleanup = yes
+	}
+}
+
+communism.12 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = communism.12.t
+	desc = communism.12.d
+	flavor = communism.12.f
+
+	event_image = {
+		video = "ep1_clandestine_meeting"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_protest.dds"
+
+	trigger = {
+		# Fired by the Five-Year Plan cheat button
+	}
+
+	immediate = {
+		ig:ig_trade_unions ?= {
+			save_scope_as = proletariat_ig
+		}
+		generate_1_common_name = {
+			CULTURE_1 = primary_culture
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_journal_entry = je_five_year_plan
+		}
+	}
+
+	option = {
+		name = communism.12.a
+		default_option = yes
+		add_modifier = {
+			name = modifier_falsified_plan_figures
+			days = normal_modifier_time
+		}
+		kill_population_percent = {
+			pop_type = bureaucrats
+			percent = 0.025
+		}
+		add_radicals = {
+			value = medium_radicals
+			interest_group = ig:ig_trade_unions
+		}
+		ai_chance = {
+			base = 50
+		}
+	}
+
+	option = {
+		name = communism.12.b
+		trigger = {
+			OR = {
+				has_law_or_variant = law_type:law_censorship
+				has_law_or_variant = law_type:law_outlawed_dissent
+			}
+			NAND = {
+				has_law_or_variant = law_type:law_factory_councils
+				has_law_or_variant = law_type:law_communal_administration
+			}
+		}
+		highlighted_option = yes
+		show_as_unavailable = {
+			always = yes
+		}
+		custom_tooltip = {
+			text = je_five_year_plan_cheat_button_success_tt
+			je:je_five_year_plan ?= {
+				set_variable = five_year_plan_creative_accounting_var
+			}
+		}
+		add_radicals = {
+			value = large_radicals
+			interest_group = ig:ig_trade_unions
+		}
+		add_loyalists = {
+			value = large_radicals
+			pop_type = bureaucrats
+		}
+		add_modifier = {
+			name = modifier_fyp_censorship_campaign
+			days = normal_modifier_time
+		}
+	}
+
+	after = {
+		clear_generated_names = yes
+	}
+}
+
+communism.13 = {
+	type = country_event
+	hidden = yes
+
+	immediate = {
+		add_journal_entry = { type = je_five_year_plan }
 	}
 }

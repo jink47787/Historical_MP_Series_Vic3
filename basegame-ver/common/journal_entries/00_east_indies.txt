@@ -3,6 +3,10 @@
 
 	group = je_group_british_india
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_in_lobby = {
 		c:BIC = THIS
 	}
@@ -13,60 +17,75 @@
 		}
 	}
 
-	complete = {
-		any_state_in_indian_frontier = {
-			OR = {
-				owner = ROOT
-				owner = {
-					is_subject_of = ROOT
-				}
-				trigger_if = {
-					limit = {
-						exists = ROOT.top_overlord
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			any_state_in_indian_frontier = {
+				OR = {
+					owner = ROOT
+					owner = {
+						is_subject_of = ROOT
 					}
-					OR = {
-						owner = ROOT.top_overlord
-						owner = {
-							is_subject_of = ROOT.top_overlord
+					trigger_if = {
+						limit = {
+							exists = ROOT.top_overlord
+						}
+						OR = {
+							owner = ROOT.top_overlord
+							owner = {
+								is_subject_of = ROOT.top_overlord
+							}
 						}
 					}
 				}
+				percent >= 0.80
+				list_scopes = yes
+				show_trigger_per_scope = yes
 			}
-			percent >= 0.80
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+			highest_secession_progress < 0.5
 		}
-		scope:journal_entry = {
-			is_goal_complete = yes
+		effect = {
+			trigger_event = { id = east_indies.1 }
+			set_variable = consolidated_colonial_rule
 		}
-		highest_secession_progress < 0.5
+		event_outcome_desc = {
+			first_valid = {
+				triggered_desc = {
+					desc = event_effects_east_indies.1_tt
+				}
+			}
+		}
 	}
 
-	on_complete = {
-		trigger_event = { id = east_indies.1 }
-		set_variable = consolidated_colonial_rule
-	}
-
-    event_outcome_completed_desc = {
-        first_valid = {
-            triggered_desc = {
-                desc = event_effects_east_indies.1_tt
-            }
-        }
-    }
-
-	fail = {
-		OR = {
-			NOT = {
-				exists = c:GBR
-			}
-			trigger_if = {
-				limit = {
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = {
 					exists = c:GBR
 				}
-				NOT = {
-					is_subject_of = c:GBR
+				trigger_if = {
+					limit = {
+						exists = c:GBR
+					}
+					NOT = {
+						is_subject_of = c:GBR
+					}
 				}
+				is_subject_type = subject_type_colony
 			}
-			is_subject_type = subject_type_colony
+		}
+		effect = {
+			je_consolidate_colonial_rule_cleanup = yes
 		}
 	}
 
@@ -85,8 +104,15 @@
 		}
 	}
 
-	invalid = {
-		has_variable = bic_collapse_var
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			has_variable = bic_collapse_var
+		}
+		effect = {
+			je_consolidate_colonial_rule_cleanup = yes
+		}
 	}
 
 	current_value = {
@@ -108,6 +134,10 @@ je_reform_indies = {
 
 	group = je_group_internal_affairs
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_when_inactive = {
 		AND = {
 			exists = c:DEI
@@ -124,32 +154,43 @@ je_reform_indies = {
 		}
 	}
 
-	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+			OR = {
+				has_law_or_variant = law_type:law_free_trade
+				has_law_or_variant = law_type:law_mercantilism
+			}
+			NOT = { has_law_or_variant = law_type:law_land_based_taxation }
+			NOT = { has_law_or_variant = law_type:law_serfdom }
+			has_law_or_variant = law_type:law_slavery_banned
 		}
-		OR = {
-			has_law_or_variant = law_type:law_free_trade
-			has_law_or_variant = law_type:law_mercantilism
-		}
-		NOT = { has_law_or_variant = law_type:law_land_based_taxation }
-		NOT = { has_law_or_variant = law_type:law_serfdom }
-		has_law_or_variant = law_type:law_slavery_banned
-	}
-
-	on_complete = {
-		trigger_event = { id = east_indies.2 }
-		show_as_tooltip = {
-			add_journal_entry = {
-				type = je_ethical_policy
+		effect = {
+			trigger_event = { id = east_indies.2 }
+			show_as_tooltip = {
+				add_journal_entry = {
+					type = je_ethical_policy
+				}
 			}
 		}
 	}
 
-	invalid = {
-		has_variable = bic_collapse_var
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			has_variable = bic_collapse_var
+		}
+		effect = {
+			je_reform_indies_cleanup = yes
+		}
 	}
-
 
 	current_value = {
 		value = root.gdp
@@ -170,17 +211,33 @@ je_ethical_policy = {
 
 	group = je_group_internal_affairs
 
-	complete = {
-		literacy_rate > 0.5
-		root.average_sol > 15
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		trigger_event = { id = east_indies.3 }
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			literacy_rate > 0.5
+			root.average_sol > 15
+		}
+		effect = {
+			trigger_event = { id = east_indies.3 }
+		}
 	}
 
-	invalid = {
-		has_variable = bic_collapse_var
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			has_variable = bic_collapse_var
+		}
+		effect = {
+			je_ethical_policy_cleanup = yes
+		}
 	}
 
 	weight = 100

@@ -61,7 +61,7 @@ types goods_world_market_panel_tyes
 					visible = "[And(GoodsWorldMarketPanel.GetGoods.HasMarketContext,Not(GoodsWorldMarketPanel.GetGoods.IsLocal))]"
 				}
 				blockoverride "second_button_click" {
-					onclick = "[InformationPanelBar.OpenGoodsPanel( GoodsWorldMarketPanel.GetGoods.GetMarket, GoodsWorldMarketPanel.GetGoods.Self )]"
+					onclick = "[InformationPanelBar.SwitchToGoodsPanel( GoodsWorldMarketPanel.GetGoods.GetMarket, GoodsWorldMarketPanel.GetGoods.Self )]"
 				}
 				
 				# selected state
@@ -75,7 +75,7 @@ types goods_world_market_panel_tyes
 					visible = "[GoodsWorldMarketPanel.GetGoods.HasStateContext]"
 				}
 				blockoverride "third_button_click" {
-					onclick = "[InformationPanelBar.OpenGoodsStatePanel( GoodsWorldMarketPanel.GetGoods.GetState, GoodsWorldMarketPanel.GetGoods.Self )]"
+					onclick = "[InformationPanelBar.SwitchToGoodsStatePanel( GoodsWorldMarketPanel.GetGoods.GetState, GoodsWorldMarketPanel.GetGoods.Self )]"
 				}			
 				
 				# states in market
@@ -89,7 +89,7 @@ types goods_world_market_panel_tyes
 					visible = "[GoodsWorldMarketPanel.GetGoods.HasMarketContext]"
 				}			
 				blockoverride "fourth_button_click" {
-					onclick = "[InformationPanelBar.OpenGoodsLocalPricesPanel(GoodsWorldMarketPanel.GetGoods.Self)]"
+					onclick = "[InformationPanelBar.SwitchToGoodsLocalPricesPanel(GoodsWorldMarketPanel.GetGoods.Self)]"
 				}					
 				
 				# usage / application
@@ -100,7 +100,7 @@ types goods_world_market_panel_tyes
 					tooltip = "USAGE"
 				}
 				blockoverride "fifth_button_click" {
-					onclick = "[InformationPanelBar.OpenGoodsUsagePanel(GoodsWorldMarketPanel.GetGoods.Self)]"
+					onclick = "[InformationPanelBar.SwitchToGoodsUsagePanel(GoodsWorldMarketPanel.GetGoods.Self)]"
 				}
 				blockoverride "fifth_button_visibility_checked" {
 					visible = yes
@@ -111,12 +111,11 @@ types goods_world_market_panel_tyes
 		blockoverride "scrollarea_content"
 		{
 			flowcontainer = {
-				margin_top = 10
-				minimumsize = { @panel_width -1 }
-				using = default_list_position
 				direction = vertical
-				datacontext = "[GoodsWorldMarketPanel.GetBaseGoods]"
-				
+				minimumsize = { @panel_width -1 }
+				margin_top = 10
+				using = default_list_position
+
 				container = {
 					parentanchor = hcenter
 					minimumsize = { @panel_width -1 }
@@ -145,62 +144,47 @@ types goods_world_market_panel_tyes
 					}
 				}
 
-				flowcontainer = {
-					visible = "[Not(IsDataModelEmpty(Goods.GetWorldMarketPrestigeGoods))]"
-					parentanchor = hcenter
-					direction = vertical
-					margin_bottom = 5
-					margin_top = 5
-
-					default_header = {
-						parentanchor = hcenter
-
-						blockoverride "text"
-						{
-							text = "concept_prestige_goods"
-						}
+				goods_prestige_goods_distribution = {
+					blockoverride "prestige_goods_distribution_datacontext" {
+						datacontext = "[GoodsWorldMarketPanel.GetGoods.GetBaseGoods]"
 					}
 
-					goods_prestige_goods_breakdown_list_item = {						
-						parentanchor = hcenter
-
-						blockoverride "prestige_goods_item_name_size" {
-							minimumsize = { 300 -1 }
-							maximumsize = { 300 -1 }
-						}
-
-						blockoverride "prestige_goods_item_text_1" {
-							raw_text = "BASE_GOODS_WORLD_MARKET_EXPORTS"
-						}
-
-						blockoverride "prestige_goods_item_text_2" {
-							raw_text = "BASE_GOODS_WORLD_MARKET_IMPORTS"
-						}
+					blockoverride "prestige_goods_distribution_visibility" {
+						visible = "[Not(IsDataModelEmpty(Goods.GetWorldMarketPrestigeGoods))]"
 					}
 
-					flowcontainer = {
-						direction = vertical
-						parentanchor = hcenter
+					blockoverride "prestige_goods_distribution_datamodel" {
 						datamodel = "[Goods.GetWorldMarketPrestigeGoods]"
-						
-						item = {
-							goods_prestige_goods_breakdown_list_item = {
-								blockoverride "prestige_goods_item_name_size" {
-									minimumsize = { 260 -1 }
-									maximumsize = { 260 -1 }
-								}
+					}
 
-								blockoverride "prestige_goods_item_text_1" {
-									raw_text = "PRESTIGE_GOODS_WORLD_EXPORTS"
-									alpha = "[TransparentIfZero(Goods.GetWorldMarketExports)]"
-								}
+					blockoverride "prestige_goods_not_selected_visibility" {
+						visible = "[Not(Goods.IsSameGoodsAs(GoodsWorldMarketPanel.GetGoods.Self))]"
+					}
 
-								blockoverride "prestige_goods_item_text_2" {
-									raw_text = "PRESTIGE_GOODS_WORLD_IMPORTS"
-									alpha = "[TransparentIfZero(Goods.GetWorldMarketImports)]"
-								}
-							}
-						}
+					blockoverride "prestige_goods_selected_visibility" {
+						visible = "[Goods.IsSameGoodsAs(GoodsWorldMarketPanel.GetGoods.Self)]"
+					}
+
+					blockoverride "prestige_goods_onclick" {
+						onclick = "[InformationPanelBar.SwitchToGoodsWorldMarketPanel(Goods.Self)]"
+					}
+
+					blockoverride "base_goods_item_text_1" {
+						raw_text = "BASE_GOODS_WORLD_MARKET_EXPORTS"
+					}
+
+					blockoverride "base_goods_item_text_2" {
+						raw_text = "BASE_GOODS_WORLD_MARKET_IMPORTS"
+					}
+
+					blockoverride "prestige_goods_variant_text_1" {
+						alpha = "[TransparentIfZero(Goods.GetWorldMarketExports)]"
+						raw_text = "PRESTIGE_GOODS_WORLD_EXPORTS"
+					}
+
+					blockoverride "prestige_goods_variant_text_2" {
+						alpha = "[TransparentIfZero(Goods.GetWorldMarketImports)]"
+						raw_text = "PRESTIGE_GOODS_WORLD_IMPORTS"
 					}
 				}
 
@@ -269,9 +253,9 @@ types goods_world_market_panel_tyes
 				}
 
 				flowcontainer = {
-					datamodel = "[GoodsWorldMarketPanel.GetMarkets]"
 					direction = vertical
 					parentanchor = hcenter
+					datamodel = "[GoodsWorldMarketPanel.GetMarkets]"
 
 					item = {
 						flowcontainer = {
@@ -334,16 +318,16 @@ types goods_world_market_panel_tyes
 								}
 
 								textbox = {
-									text = "[Market.GetImportAdvantage(Goods.Self)|0v]"
-									tooltip = "[Market.GetRelativeExportAdvantageDesc(Goods.Self)]"
-									alpha = "[TransparentIfTrue(IsZero_CFixedPoint(Market.GetImportedAmount(Goods.Self)))]"
 									visible = "[Not(IsZero_CFixedPoint(Market.GetImportedAmount(Goods.Self)))]"
-									autoresize = yes
-									align = center|nobaseline
 									minimumsize = { 50 -1 }
 									maximumsize = { 50 -1 }
-									margin_right = 5
 									parentanchor = vcenter
+									autoresize = yes
+									align = center|nobaseline
+									margin_right = 5
+									alpha = "[TransparentIfTrue(IsZero_CFixedPoint(Market.GetImportedAmount(Goods.Self)))]"
+									tooltip = "[Market.GetRelativeImportAdvantageDesc(Goods.Self)]"
+									text = "[Market.GetImportAdvantage(Goods.Self)|0v]"
 								}
 
 								textbox = {

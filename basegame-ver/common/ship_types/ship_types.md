@@ -4,6 +4,9 @@
 	# Which group the ship type belongs to
 	ship_group = <ship group key>
 
+	# Which AI-only category the ship type belongs to, see common/ai_ship_categories
+	ai_ship_category = <ai ship category key>
+
 	# Goods cost for a ship when built
 	construction_goods = { modifier }
 
@@ -27,6 +30,9 @@
 	
 	# Optional multiplier on the perceived combat power of a ship, primarily used by the AI to evaluate the combat prowess of one ship vs another, default 1.0
 	combat_power_multiplier = x
+
+	# [Optional] The most target vulnerability this ship type can exploit for extra damage against a side lacking screening. If not specified, it can exploit all of it
+	vulnerability_exploitation = x
 
 	icon = <texture>
 

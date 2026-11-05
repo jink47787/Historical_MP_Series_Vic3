@@ -23,6 +23,7 @@ positivism.1 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_monthly_pulse_country
 		NOT = {
 			has_global_variable = positivism_invented
 		}
@@ -36,6 +37,9 @@ positivism.1 = {
 		create_character = {
 			template = fra_auguste_comte_character_template
 			save_scope_as = comte_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
 		random_scope_state = {
 			limit = {
@@ -56,6 +60,7 @@ positivism.1 = {
 			}
 		}
 		hidden_effect = {
+			revoke_temporary_event_immortality = { CHARACTER = scope:comte_scope }
 			scope:comte_scope ?= {
 				retire_character = yes
 			}
@@ -80,6 +85,7 @@ positivism.1 = {
 			add_technology_progress = { progress = 4150 technology = philosophical_pragmatism }
 		}
 		hidden_effect = {
+			revoke_temporary_event_immortality = { CHARACTER = scope:comte_scope }
 			scope:comte_scope ?= {
 				retire_character = yes
 			}
@@ -94,6 +100,10 @@ positivism.1 = {
 				replace_character_roles = { add = { agitator } remove_all = yes }
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:comte_scope }
 	}
 }
 
@@ -141,6 +151,7 @@ positivism.2 = {
 			ideology = ideology:ideology_positivist
 			interest_group = scope:positivist_ig
 			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
 				add_modifier = {
 					name = modifier_positivist_doctrinaire
 				}
@@ -216,6 +227,10 @@ positivism.2 = {
 			}
 			create_political_movement = { type = movement_positivist }
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:positivist_agitator }
 	}
 }
 
@@ -385,6 +400,10 @@ positivism.3 = {
 			text = positivist_leaders_spawn_tt
 			set_variable = positivist_leaders_reward_var
 		}
+	}
+
+	after = {
+		je_positivist_movement_cleanup = yes
 	}
 }
 
@@ -635,6 +654,7 @@ positivism_pulse.1 = {
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_positivist_movement [on_monthly_pulse]
 
 	}
 
@@ -703,6 +723,7 @@ positivism_pulse.2 = {
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_positivist_movement [on_monthly_pulse]
 		ig:ig_armed_forces ?= {
 			ig_counts_as_marginal = no
 		}
@@ -713,6 +734,7 @@ positivism_pulse.2 = {
 			save_scope_as = armed_forces_ig
 			leader = {
 				save_scope_as = armed_forces_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -755,7 +777,7 @@ positivism_pulse.2 = {
 		trigger = {
 			scope:armed_forces_leader = {
 				NOR = {
-					has_ideology = ideology:ideology_communist
+					has_ideology = ideology:ideology_communist_leader
 					has_ideology = ideology:ideology_vanguardist
 					has_ideology = ideology:ideology_fascist
 					has_ideology = ideology:ideology_ethno_nationalist
@@ -785,6 +807,10 @@ positivism_pulse.2 = {
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:armed_forces_leader }
+	}
 }
 
 positivism_pulse.3 = {
@@ -810,6 +836,7 @@ positivism_pulse.3 = {
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_positivist_movement [on_monthly_pulse]
 		has_variable = military_academy_positivists
 		ig:ig_armed_forces ?= {
 			ig_counts_as_marginal = no
@@ -889,6 +916,7 @@ positivism_pulse.4 = {
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_positivist_movement [on_monthly_pulse]
 		any_interest_group = {
 			any_scope_character = {
 				OR = {
@@ -964,6 +992,7 @@ positivism_pulse.5 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_positivist_movement [on_monthly_pulse]
 		any_scope_state = {
 			is_incorporated = yes
 			any_scope_building = {
@@ -998,6 +1027,15 @@ positivism_pulse.5 = {
 	option = {
 		name = positivism_pulse.5.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:temple_of_humanity_state = {
 			add_modifier = {
 				name = modifier_positivist_church
@@ -1014,6 +1052,15 @@ positivism_pulse.5 = {
 
 	option = {
 		name = positivism_pulse.5.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		random_interest_group = {
 			limit = {
 				any_scope_character = {

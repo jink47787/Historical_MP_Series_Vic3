@@ -152,34 +152,41 @@ types tech_tree
 						spacing = 5
 						
 						hbox = {
+							layoutpolicy_horizontal = expanding
+
 							textbox = {
-								layoutstretchfactor_horizontal = 3
-								layoutpolicy_horizontal = growing
-								size = { 0 30 }
+								max_width = 250
+								autoresize = yes
+								align = nobaseline
 								raw_text = "#variable [Technology.GetNameNoFormatting]#!"
 								using = fontsize_large
-								align = left|nobaseline
-								fontsize_min = 14
+								using = elide_fontsize_min
+
+								tooltipwidget = {
+									FancyTooltip_Technology = {}
+								}
 							}
-							
+
+							expand = {}
+
 							textbox = {
 								visible = "[Or(And(GreaterThan_CFixedPoint(Technology.GetProgress(GetPlayer.Self), '(CFixedPoint)0'), Not(Technology.HasResearchedTech(GetPlayer.Self))), GreaterThan_CFixedPoint(GetPlayer.GetMinWeeklyTechnologyProgressForTech(Technology.Self), '(CFixedPoint)0'))]"
-								layoutstretchfactor_horizontal = 2
-								layoutpolicy_horizontal = growing
-								size = { 0 30 }
-								text = "TECHNOLOGY_PROGRESS_WITH_GAIN"
+								max_width = 150
+								autoresize = yes
+								margin_left = 10
 								align = right|nobaseline
-								using = fontsize_large
-								fontsize_min = 14
+								using = elide_fontsize_min
+								tooltip = "TECHNOLOGY_GAIN_BREAKDOWN"
+								text = "TECHNOLOGY_PROGRESS_TIME_LEFT"
 							}
 						}
 
 						### PROGRESS
 						default_progressbar_horizontal = {
-							tooltip = "TECHNOLOGY_GAIN_BREAKDOWN"
 							visible = "[Or(And(GreaterThan_CFixedPoint(Technology.GetProgress(GetPlayer.Self), '(CFixedPoint)0'), Not(Technology.HasResearchedTech(GetPlayer.Self))), GreaterThan_CFixedPoint(GetPlayer.GetMinWeeklyTechnologyProgressForTech(Technology.Self), '(CFixedPoint)0'))]"
 							layoutpolicy_horizontal = growing
-							size = { 500 25 }
+							size = { 400 25 }
+							tooltip = "TECHNOLOGY_GAIN_BREAKDOWN"
 
 							blockoverride "values" {
 								max = "[FixedPointToFloat(Technology.GetCost(GetPlayer.Self))]"
@@ -188,11 +195,10 @@ types tech_tree
 
 							textbox = {
 								margin_right = 10
-								text = "TECHNOLOGY_PROGRESS_TIME_LEFT"
 								parentanchor = vcenter|right
 								align = nobaseline
 								autoresize = yes
-
+								text = "TECHNOLOGY_PROGRESS_WITH_GAIN_NO_TOOLTIP"
 							}
 						}
 					}
@@ -246,6 +252,7 @@ types tech_tree
 				vbox = {
 					layoutstretchfactor_horizontal = 2
 					layoutpolicy_horizontal = growing
+					minimumsize = { 320 -1 }
 					margin = { 22 16 }
 					
 					background = {
@@ -272,11 +279,6 @@ types tech_tree
 						text = "TECHNOLOGY_SPREAD_RATE_DESCRIPTION"
 						tooltip = "TECHNOLOGY_SPREAD_RATE_TOOLTIP"
 					}
-				}
-
-				### SEARCH
-				search_bar = {
-					datacontext = "[TechTreePanel.GetSearchBar]"
 				}
 			}
 			
@@ -455,22 +457,6 @@ types tech_tree
 			}
 		}
 
-		### SEARCH RESULTS DROPDOWN
-		# Direct child of the derived window type so it is rendered above the tech tree and other buttons
-		search_bar_results = {
-			parentanchor = top|right
-			position = { -73 245 }
-			datacontext = "[TechTreePanel.GetSearchBar]"
-
-			blockoverride "result_tooltip" {
-				visible = "[Not(StringIsEmpty(SearchResult.GetKey))]"
-				datacontext = "[GetTechnology(SearchResult.GetKey)]"
-				tooltipwidget = {
-					FancyTooltip_Technology = {}
-				}
-			}
-		}
-
 		### CONTENT
 		blockoverride "scrollarea_content"
 		{
@@ -607,23 +593,63 @@ types tech_tree
 					}
 				}
 
-				container = {
+				### SEARCH
+				search_bar = {
 					parentanchor = top|right
+					position = { -62 11 }
+					datacontext = "[TechTreePanel.GetSearchBar]"
+
+					blockoverride "editbox_background" {
+						background = {
+							margin = { -1 -1 }
+							using = entry_bg_simple_solid
+						}
+
+						background = {
+							using = text_edit_bg
+						}
+					}
+				}
+
+				### SEARCH RESULTS DROPDOWN
+				search_bar_results = {
+					parentanchor = top|right
+					position = { -62 56 }
+					datacontext = "[TechTreePanel.GetSearchBar]"
+
+					blockoverride "result_tooltip" {
+						visible = "[Not(StringIsEmpty(SearchResult.GetKey))]"
+						datacontext = "[GetTechnology(SearchResult.GetKey)]"
+
+						tooltipwidget = {
+							FancyTooltip_Technology = {}
+						}
+					}
+				}
+
+				container = {
+					parentanchor = right
 					position = { -10 10 }
+
 					button_icon_reset = {
 						visible = "[InformationPanel.IsTabSelected('production')]"
+						using = tooltip_se
 						tooltip = "TOOLTIP_RESET"
 						onclick = "[TechTreePanel.ResetProductionView]"
 						size = { 42 42 }
 					}
+
 					button_icon_reset = {
 						visible = "[InformationPanel.IsTabSelected('military')]"
+						using = tooltip_se
 						tooltip = "TOOLTIP_RESET"
 						onclick = "[TechTreePanel.ResetMilitaryView]"
 						size = { 42 42 }
 					}
+
 					button_icon_reset = {
 						visible = "[InformationPanel.IsTabSelected('society')]"
+						using = tooltip_se
 						tooltip = "TOOLTIP_RESET"
 						onclick = "[TechTreePanel.ResetSocietyView]"
 						size = { 42 42 }
@@ -858,7 +884,7 @@ types tech_tree
 											value = "[FixedPointToFloat(Technology.GetProgress(GetPlayer.Self))]"
 										}
 										textbox = {
-											text = "TECHNOLOGY_PROGRESS_WITH_GAIN"
+											text = "TECHNOLOGY_PROGRESS_WITH_GAIN_NO_TOOLTIP"
 											align = nobaseline
 											parentanchor = center
 											autoresize = yes

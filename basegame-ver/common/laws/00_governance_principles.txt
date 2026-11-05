@@ -173,7 +173,7 @@ law_monarchy = {
 		if = {
 			limit = {
 				AND = {
-					has_law = law_type:law_subjecthood
+					has_law_or_variant = law_type:law_subjecthood
 					NOR = {
 						has_law = law_type:law_theocracy
 						is_enacting_law = law_type:law_theocracy
@@ -187,6 +187,7 @@ law_monarchy = {
 						is_in_government = yes
 						any_preferred_law = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}
@@ -198,6 +199,7 @@ law_monarchy = {
 						is_in_government = yes
 						any_preferred_law = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}
@@ -209,6 +211,7 @@ law_monarchy = {
 					ordered_preferred_law = {
 						limit = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}
@@ -348,6 +351,12 @@ law_presidential_republic = {
 				is_subject = no
 			}
 			NOT = { has_government_type = gov_chartered_company }
+		}
+		trigger_if = {
+			limit = {
+				c:POL ?= THIS
+			}
+			NOT = { has_journal_entry = je_congress_poland }
 		}
 	}
 
@@ -494,6 +503,12 @@ law_parliamentary_republic = {
 			}
 			NOT = { has_government_type = gov_chartered_company }
 		}
+		trigger_if = {
+			limit = {
+				c:POL ?= THIS
+			}
+			NOT = { has_journal_entry = je_congress_poland }
+		}
 	}
 
 	unlocking_technologies = {
@@ -635,6 +650,12 @@ law_theocracy = {
 			}
 			NOT = { has_government_type = gov_chartered_company }
 		}
+		trigger_if = {
+			limit = {
+				c:POL ?= THIS
+			}
+			NOT = { has_journal_entry = je_congress_poland }
+		}
 	}
 
 	can_impose = {
@@ -651,14 +672,20 @@ law_theocracy = {
 	}
 
 	on_activate = {
-		transition_off_of_monarchy_law_effects = yes # Reduced version of the effect that only removes Bakufu
+		if = {
+			limit = {
+				has_law = law_type:law_caesaropapism
+			}
+			activate_law = law_type:law_state_religion
+		}
+		transition_off_of_monarchy_law_effects = yes # Reduced version of the effect that only removes laws
 	}
 
 	on_deactivate = {
 		if = {
 			limit = {
 				AND = {
-					has_law = law_type:law_subjecthood
+					has_law_or_variant = law_type:law_subjecthood
 					NOR = {
 						has_law = law_type:law_monarchy
 						is_enacting_law = law_type:law_monarchy
@@ -671,6 +698,7 @@ law_theocracy = {
 						is_in_government = yes
 						any_preferred_law = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}
@@ -682,6 +710,7 @@ law_theocracy = {
 						is_in_government = yes
 						any_preferred_law = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}
@@ -693,6 +722,7 @@ law_theocracy = {
 					ordered_preferred_law = {
 						limit = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}
@@ -791,7 +821,7 @@ law_council_republic = {
 
 	icon = "gfx/interface/icons/law_icons/council_republic.dds"
 
-	progressiveness = 200
+	progressiveness = 150
 
 	unlocking_technologies = {
 		socialism
@@ -804,15 +834,26 @@ law_council_republic = {
 			}
 			NOT = { has_government_type = gov_chartered_company }
 		}
+		trigger_if = {
+			limit = {
+				c:POL ?= THIS
+			}
+			NOT = { has_journal_entry = je_congress_poland }
+		}
+		custom_tooltip = {
+			text = has_factory_councils_law_or_amendment_tt
+			has_factory_councils_law_or_amendment = yes
+		}
+		custom_tooltip = {
+			text = had_proletarian_revolution_tt
+			has_global_variable_map = first_proletarian_revolution
+		}
 	}
 
 	on_activate = {
-		custom_tooltip = {
-			text = enact_law_radical_leftist_government_warning_desc
-		}
 		if = {
 			limit = {
-				has_global_variable = lenin_spawn
+				is_template_used = rus_lenin_character_template
 				country_has_primary_culture = cu:russian
 				any_scope_state = {
 					state_region = s:STATE_INGRIA
@@ -822,20 +863,10 @@ law_council_republic = {
 				limit = {
 					state_region = s:STATE_INGRIA
 				}
-				if = {
-					limit = {
-						has_global_variable = lenin_spawn
-
-						owner = {
-							country_has_primary_culture = cu:russian
-							has_law_or_variant = law_type:law_council_republic
-						}
-					}
-
-			        set_hub_name = {
-			            type = city
-			            name = HUB_NAME_STATE_INGRIA_city_russian_sov # St. Petersburg only becomes Leningrad if Lenin has been around to be a namesake
-			        }
+				reset_state_name = yes
+				set_hub_name = {
+					type = city
+					name = HUB_NAME_STATE_INGRIA_city_russian_sov # St. Petersburg only becomes Leningrad if Lenin has been around to be a namesake
 				}
 			}
 		}
@@ -848,6 +879,122 @@ law_council_republic = {
 				}
 			}
 			trigger_event = { id = portuguese_monarchs.3 }
+		}
+		if = {
+			limit = {
+				active_law:lawgroup_labour_associations ?= {
+					has_amendment = amendment_type:amendment_factory_councils
+				}
+			}
+			activate_law = law_type:law_factory_councils
+		}
+		custom_tooltip = {
+			text = enact_law_radical_leftist_government_warning_desc
+			every_country = {
+				limit = {
+					has_overlapping_interests = ROOT
+				}
+				create_diplomatic_catalyst = {
+					type = catalyst_socialist_government
+					target = root
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOR = {
+					has_journal_entry = je_communism_1
+					has_journal_entry = je_communism_2
+					has_journal_entry = je_state_and_revolution
+					has_variable = rcw_russian_faction
+				}
+			}
+			trigger_event = { id = communism.2 popup = yes }
+			if = {
+				limit = {
+					NOT = {
+						has_global_variable = socialist_world_republic
+					}
+				}
+				custom_tooltip = enact_law_interest_rates_and_trade_advantage_warning_desc
+			}
+		}
+	}
+
+	on_deactivate = {
+		if = {
+			limit = {
+				has_variable = ig_nomenklatura_active
+			}
+			ig:ig_intelligentsia ?= {
+				custom_tooltip = nomenklatura_dissolved_tt
+				hidden_effect = {
+					set_interest_group_name = ig_intelligentsia
+					if = {
+						limit = {
+							has_ideology = ideology:ideology_managerial
+						}
+						remove_ideology = ideology_managerial
+					}
+					if = {
+						limit = {
+							has_ideology = ideology:ideology_materialist
+						}
+						remove_ideology = ideology_materialist
+					}
+					if = {
+						limit = {
+							has_ideology = ideology:ideology_defensist
+						}
+						remove_ideology = ideology_defensist
+					}
+					add_ideology = ideology_liberal
+					add_ideology = ideology_anti_clerical
+					add_ideology = ideology_republican
+				}
+			}
+			remove_variable = ig_nomenklatura_active
+			recalculate_pop_ig_support = yes
+		}
+		if = {
+			limit = {
+				has_variable = ig_red_army_active
+			}
+			ig:ig_armed_forces ?= {
+				custom_tooltip = red_army_dissolved_tt
+				hidden_effect = {
+					set_interest_group_name = ig_armed_forces
+					if = {
+						limit = {
+							has_ideology = ideology:ideology_internationalist
+						}
+						remove_ideology = ideology_internationalist
+					}
+					if = {
+						limit = {
+							has_ideology = ideology:ideology_defensist
+						}
+						remove_ideology = ideology_defensist
+					}
+					if = {
+						limit = {
+							has_ideology = ideology:ideology_militant
+						}
+						remove_ideology = ideology_militant
+					}
+					if = {
+						limit = {
+							has_ideology = ideology:ideology_disciplinarian
+						}
+						remove_ideology = ideology_disciplinarian
+					}
+					add_ideology = ideology_jingoist
+					add_ideology = ideology_loyalist
+					add_ideology = ideology_militarist
+				}
+			}
+			remove_variable = ig_red_army_active
+			recalculate_pop_ig_support = yes
 		}
 	}
 
@@ -869,6 +1016,7 @@ law_council_republic = {
 		country_legitimacy_govt_size_add = 1
 		country_legitimacy_ideological_incoherence_mult = -0.1
 		interest_group_ig_trade_unions_pol_str_mult = 0.25
+		country_other_country_socialist_government_hostility_impact_add = 50
 	}
 
 	ai_will_do = {
@@ -934,6 +1082,12 @@ law_corporate_state = {
 			}
 			NOT = { has_government_type = gov_chartered_company }
 		}
+		trigger_if = {
+			limit = {
+				c:POL ?= THIS
+			}
+			NOT = { has_journal_entry = je_congress_poland }
+		}
 	}
 
 	on_activate = {
@@ -946,31 +1100,6 @@ law_corporate_state = {
 				}
 			}
 			trigger_event = { id = portuguese_monarchs.3 }
-		}
-	}
-
-	on_enact = {
-
-	}
-
-	on_deactivate = {
-		if = {
-			limit = {
-				has_modifier = modifier_corporate_state_trade_unions_bias
-			}
-			remove_modifier = modifier_corporate_state_trade_unions_bias
-		}
-		if = {
-			limit = {
-				has_modifier = modifier_corporate_state_industrialists_bias
-			}
-			remove_modifier = modifier_corporate_state_industrialists_bias
-		}
-		if = {
-			limit = {
-				has_modifier = modifier_corporate_state_intelligentsia_bias
-			}
-			remove_modifier = modifier_corporate_state_intelligentsia_bias
 		}
 	}
 
@@ -1080,6 +1209,12 @@ law_social_monarchy = {
 			}
 			NOT = { has_government_type = gov_chartered_company }
 		}
+		trigger_if = {
+			limit = {
+				c:POL ?= THIS
+			}
+			NOT = { has_journal_entry = je_congress_poland }
+		}
 	}
 
 	on_activate = {
@@ -1170,7 +1305,7 @@ law_social_monarchy = {
 		if = {
 			limit = {
 				AND = {
-					has_law = law_type:law_subjecthood
+					has_law_or_variant = law_type:law_subjecthood
 					NOR = {
 						has_law = law_type:law_theocracy
 						is_enacting_law = law_type:law_theocracy
@@ -1184,6 +1319,7 @@ law_social_monarchy = {
 						is_in_government = yes
 						any_preferred_law = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}
@@ -1195,6 +1331,7 @@ law_social_monarchy = {
 						is_in_government = yes
 						any_preferred_law = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}
@@ -1206,6 +1343,7 @@ law_social_monarchy = {
 					ordered_preferred_law = {
 						limit = {
 							is_citizenship_law = yes
+							law_is_available = yes
 							NOT = {
 								type ?= law_type:law_subjecthood
 							}

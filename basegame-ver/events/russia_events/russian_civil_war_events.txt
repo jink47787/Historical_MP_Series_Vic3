@@ -1,0 +1,1094 @@
+﻿namespace = rcw
+
+# Russian Civil War intro event
+rcw.1 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc019
+
+	title = rcw.1.t
+	desc = rcw.1.d
+	flavor = rcw.1.f
+
+	event_image = {
+		video = "europenorthamerica_before_the_battle"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	trigger = {
+		# triggered by journal entry
+		has_variable = rcw_russian_faction
+	}
+
+	cancellation_trigger = {
+		OR = {
+			NOT = { exists = scope:rcw_opposition_country }
+			NOT = { exists = scope:rcw_dp }
+			NOT = { exists = scope:scariest_russian_warlord_country }
+			NOT = { exists = scope:scariest_russian_warlord }
+			NOT = { exists = scope:friendliest_russian_warlord_country }
+			NOT = { exists = scope:friendliest_russian_warlord }
+		}
+	}
+
+	immediate = {
+		random_diplomatic_play = {
+			limit = {
+				is_diplomatic_play_type = dp_revolution
+				exists = c:RUS
+				target_is = c:RUS
+			}
+			save_scope_as = rcw_dp
+			initiator = {
+				save_scope_as = rcw_opposition_country
+			}
+			ordered_scope_initiator_ally = {
+				limit = {
+					has_variable = rcw_russian_faction
+				}
+				order_by = rcw_faction_size
+				position = 0
+				check_range_bounds = no
+				save_scope_as = scariest_russian_warlord_country
+				ruler = {
+					save_scope_as = scariest_russian_warlord
+					set_temporary_event_immortality = { DURATION = 3 }
+				}
+			}
+			ordered_scope_target_ally = {
+				limit = {
+					has_variable = rcw_russian_faction
+				}
+				order_by = rcw_faction_size
+				position = 0
+				check_range_bounds = no
+				save_scope_as = friendliest_russian_warlord_country
+				ruler = {
+					save_scope_as = friendliest_russian_warlord
+					set_temporary_event_immortality = { DURATION = 3 }
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = { exists = scope:scariest_russian_warlord_country }
+				exists = scope:rcw_opposition_country
+			}
+			scope:rcw_opposition_country = {
+				save_scope_as = scariest_russian_warlord_country
+				ruler ?= {
+					save_scope_as = scariest_russian_warlord
+					set_temporary_event_immortality = { DURATION = 3 }
+				}
+			}
+		}
+		if = {
+			limit = {
+				NOT = { exists = scope:friendliest_russian_warlord_country }
+			}
+			c:RUS ?= {
+				save_scope_as = friendliest_russian_warlord_country
+				ruler ?= {
+					save_scope_as = friendliest_russian_warlord
+					set_temporary_event_immortality = { DURATION = 3 }
+				}
+			}
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = {
+			CHARACTER = scope:friendliest_russian_warlord
+			CHARACTER = scope:scariest_russian_warlord
+		}
+	}
+
+	option = {
+		name = rcw.1.a
+		default_option = yes
+	}
+
+	option = {
+		name = rcw_switch_country_button_1
+		trigger = {
+			c:RUS ?= this
+			is_player = yes
+			has_global_variable = rcw_switch_window
+			global_var:rcw_switch_target_1 ?= {
+				is_player = no
+			}
+		}
+		play_as = global_var:rcw_switch_target_1
+		ai_chance = {
+			base = 0
+		}
+	}
+
+	option = {
+		name = rcw_switch_country_button_2
+		trigger = {
+			c:RUS ?= this
+			is_player = yes
+			has_global_variable = rcw_switch_window
+			global_var:rcw_switch_target_2 ?= {
+				is_player = no
+			}
+		}
+		play_as = global_var:rcw_switch_target_2
+		ai_chance = {
+			base = 0
+		}
+	}
+
+	option = {
+		name = rcw_switch_country_button_3
+		trigger = {
+			c:RUS ?= this
+			is_player = yes
+			has_global_variable = rcw_switch_window
+			global_var:rcw_switch_target_3 ?= {
+				is_player = no
+			}
+		}
+		play_as = global_var:rcw_switch_target_3
+		ai_chance = {
+			base = 0
+		}
+	}
+
+	option = {
+		name = rcw_switch_country_button_4
+		trigger = {
+			c:RUS ?= this
+			is_player = yes
+			has_global_variable = rcw_switch_window
+			global_var:rcw_switch_target_4 ?= {
+				is_player = no
+			}
+		}
+		play_as = global_var:rcw_switch_target_4
+		ai_chance = {
+			base = 0
+		}
+	}
+}
+
+# End of the RCW
+rcw.3 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc019
+
+	fire_only_once = yes
+
+	title = rcw.3.t
+	desc = rcw.3.d
+	flavor = rcw.3.f
+
+	event_image = {
+		video = "ip5_harsh_winter"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	trigger = {
+		# triggered by journal entry
+	}
+
+	cancellation_trigger = {
+	}
+
+	immediate = {
+		ordered_scope_homeland_state = {
+			order_by = devastation
+			position = 0
+			check_range_bounds = no
+			save_scope_as = rcw_devastated
+		}
+	}
+
+	after = {
+		custom_tooltip = {
+			text = rcw_3_b_claim_lost_territories_tt
+			every_state = {
+				limit = {
+					has_variable = rcw_pre_war_russian_state
+					NOT = { owner = ROOT }
+					owner = { NOT = { is_subject_of = ROOT } }
+					NOT = { has_claim_by = ROOT }
+				}
+				state_region = { add_claim = ROOT }
+			}
+			if = {
+				limit = {
+					any_country = {
+						has_variable = russian_national_minority_state
+						NOT = { is_subject_of = ROOT }
+					}
+				}
+				every_country = {
+					limit = {
+						has_variable = russian_national_minority_state
+						NOT = { is_subject_of = ROOT }
+					}
+					every_scope_state = {
+						limit = {
+							NOT = { has_claim_by = ROOT }
+						}
+						state_region = { add_claim = ROOT }
+					}
+				}
+			}
+		}
+		every_state = {
+			limit = { has_variable = rcw_pre_war_russian_state }
+			remove_variable = rcw_pre_war_russian_state
+		}
+	}
+
+	option = {
+		name = rcw.3.a
+		default_option = yes
+		add_modifier = {
+			name = rcw_reward_construction
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+		add_loyalists = {
+			value = 0.1
+		}
+	}
+
+	option = {
+		name = rcw.3.b
+		add_modifier = {
+			name = rcw_reward_warfare
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+
+	option = {
+		name = rcw.3.c
+		add_modifier = {
+			name = rcw_reward_enactment
+			days = very_long_modifier_time
+			is_decaying = yes
+		}
+	}
+}
+
+# The Red/White Terror
+	# Kill a bunch of civilians to reduce radicals/turmoil.obstinence in a state
+		# state must have turmoil/radicals/obstinence
+	# Or only kill some civilians and get nothing
+rcw.4 = {
+	type = country_event
+	placement = scope:rcw_terror_state
+
+	duration = 3
+
+	dlc = dlc019
+
+	title = {
+		first_valid = {
+			triggered_desc = {
+				desc = rcw.4.t1
+				trigger = {
+					has_law_or_variant = law_type:law_council_republic
+				}
+			}
+			triggered_desc = {
+				desc = rcw.4.t2
+				trigger = {
+					NOT = { has_law_or_variant = law_type:law_council_republic }
+					any_country = {
+						country_has_primary_culture = cu:russian
+						has_law_or_variant = law_type:law_council_republic
+					}
+				}
+			}
+			triggered_desc = {
+				desc = rcw.4.t3
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+	desc = rcw.4.d
+	flavor = rcw.4.f
+
+	event_image = {
+		video = "unspecific_devastation"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	trigger = {
+		# triggered by journal entry
+		is_at_war = yes
+		any_scope_state = {
+			state_region = { is_homeland = cu:russian }
+			turmoil > 0.15
+			NOT = {
+				has_modifier = rcw_terror
+			}
+		}
+		any_scope_character = {
+			has_role_of_type = general
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = { exists = scope:rcw_terror_general }
+		NOT = { exists = scope:rcw_terror_state }
+	}
+
+	cooldown = { days = very_short_modifier_time }
+
+	immediate = {
+		ordered_scope_state = {
+			limit = {
+				#turmoil > 0.15
+				state_region = { is_homeland = cu:russian }
+				NOT = {
+					has_modifier = rcw_terror
+				}
+			}
+			order_by = turmoil
+			position = 0
+			save_scope_as = rcw_terror_state
+		}
+		random_scope_character = {
+			limit = {
+				has_role_of_type = general
+			}
+			save_scope_as = rcw_terror_general
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:rcw_terror_general }
+	}
+
+	option = {
+		name = rcw.4.a
+		default_option = yes
+		scope:rcw_terror_state = {
+			add_modifier = {
+				name = rcw_terror
+				days = normal_modifier_time
+				is_decaying = yes
+			}
+			if = {
+				limit = {
+					scope:rcw_terror_general = {
+						OR = {
+							has_trait = ruthless
+							has_trait = imperious
+							has_trait = wrathful
+							has_trait = cruel
+						}
+					}
+				}
+				kill_population_percent_in_state = {
+					percent = 0.1
+				}
+			}
+			else = {
+				kill_population_percent_in_state = {
+					percent = 0.06
+				}
+			}
+		}
+	}
+
+	option = {
+		name = rcw.4.b
+		scope:rcw_terror_state = {
+			add_modifier = {
+				name = rcw_terror
+				days = normal_modifier_time
+				is_decaying = yes
+				multiplier = 0.5
+			}
+			if = {
+				limit = {
+					scope:rcw_terror_general = {
+						OR = {
+							has_trait = cautious
+							has_trait = tactful
+							has_trait = reserved
+							has_trait = honorable
+						}
+					}
+				}
+				kill_population_percent_in_state = {
+					percent = 0.02
+				}
+			}
+			else = {
+				kill_population_percent_in_state = {
+					percent = 0.04
+				}
+			}
+		}
+	}
+}
+
+# Russian gold reserves start event
+rcw.5 = {
+	type = country_event
+	placement = scope:kazan_state
+
+	duration = 3
+
+	dlc = dlc019
+
+	fire_only_once = yes
+
+	title = rcw.5.t
+	desc = rcw.5.d
+	flavor = rcw.5.f
+
+	event_image = {
+		video = "unspecific_armored_train"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	trigger = {
+		# triggered by journal entry
+		c:RUS ?= THIS
+		NOT = { owns_entire_state_region = STATE_KAZAN }
+		s:STATE_KAZAN = {
+			any_scope_state = {
+				owner = {
+					OR = {
+						has_war_with = ROOT
+						is_diplomatic_play_enemy_of = ROOT
+					}
+				}
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			NOT = {	exists = scope:kazan_state }
+			NOT = {	exists = scope:kazan_owner }
+			NOT = {	exists = scope:kazan_owner_capital }
+			NOT = {	exists = scope:kazan_ruler }
+		}
+	}
+
+	immediate = {
+		s:STATE_KAZAN = {
+			random_scope_state = {
+				save_scope_as = kazan_state
+				owner = {
+					save_scope_as = kazan_owner
+					capital = {
+						save_scope_as = kazan_owner_capital
+						state_region = {
+							set_variable = russian_gold_state_region
+						}
+					}
+					ruler = {
+						save_scope_as = kazan_ruler
+						set_temporary_event_immortality = { DURATION = 3 }
+					}
+				}
+			}
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:kazan_ruler }
+	}
+
+	option = {
+		name = rcw.5.a
+		default_option = yes
+		custom_tooltip = {
+			text = capture_gold_reserves_capital_tt
+		}
+		if = {
+			limit = {
+				gold_reserves >= 5
+			}
+			set_variable = {
+				name = rus_gold_var
+				value = {
+					add = root.gold_reserves
+					divide = 2
+				}
+			}
+			add_treasury = {
+				value = {
+					add = root.gold_reserves
+					divide = 2
+					multiply = -1
+				}
+			}
+		}
+
+		add_modifier = {
+			name = russian_gold_reserves_lost
+			days = long_modifier_time
+			is_decaying = yes
+		}
+	}
+}
+
+
+# Recapture of the gold reserves
+rcw.6 = {
+	type = country_event
+	placement = scope:russian_gold_state
+
+	duration = 3
+
+	dlc = dlc019
+
+	fire_only_once = yes
+
+	title = rcw.6.t
+	desc = rcw.6.d
+	flavor = rcw.6.f
+
+	event_image = {
+		video = "unspecific_trains"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	trigger = {
+		# triggered by journal entry
+		c:RUS ?= THIS
+		any_state_region = {
+			has_variable = russian_gold_state_region
+			any_scope_state = {
+				owner = c:RUS
+				is_split_state = no
+			}
+		}
+		OR = {
+			has_modifier = russian_gold_reserves_lost
+			has_variable = rus_gold_var
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = { exists = scope:russian_gold_state }
+	}
+
+	immediate = {
+		random_state_region = {
+			limit = {
+				has_variable = russian_gold_state_region
+				any_scope_state = {
+					owner = c:RUS
+					is_split_state = no
+				}
+			}
+			random_scope_state = {
+				save_scope_as = russian_gold_state
+			}
+		}
+	}
+
+	after = {
+	}
+
+	option = {
+		name = rcw.6.a
+		if = {
+			limit = {
+				has_variable = rus_gold_var
+			}
+			add_treasury = {
+				value = {
+					add = var:rus_gold_var
+					divide = 2
+				}
+			}
+		}
+		if = {
+			limit = {
+				has_modifier = russian_gold_reserves_lost
+			}
+			remove_modifier = russian_gold_reserves_lost
+		}
+	}
+}
+
+# Fate of the Tsar
+rcw.7 = {
+	type = country_event
+	placement = scope:tsar_temp_state
+
+	duration = 3
+
+	dlc = dlc019
+
+	fire_only_once = yes
+
+	title = rcw.7.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = rcw.7.d
+				trigger = {
+					has_journal_entry = je_russia_civil_war
+					OR = {
+						has_law = law_type:law_council_republic
+						any_interest_group = {
+							is_in_government = yes
+							leader = {
+								has_ideology = ideology:ideology_radical
+							}
+						}
+					}
+				}
+			}
+			triggered_desc = {
+				desc = rcw.7.d2
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+	flavor = {
+		first_valid = {
+			triggered_desc = {
+				desc = rcw.7.f
+				trigger = {
+					has_journal_entry = je_russia_civil_war
+					OR = {
+						has_law = law_type:law_council_republic
+						any_interest_group = {
+							is_in_government = yes
+							leader = {
+								has_ideology = ideology:ideology_radical
+							}
+						}
+					}
+				}
+			}
+			triggered_desc = {
+				desc = rcw.7.f2
+				trigger = {
+					always = yes
+				}
+			}
+		}
+	}
+
+	event_image = {
+		video = "ip4_abdication"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	# Note that the Tsar is voided (if applicable) in the outcome of je_russian_revolution
+
+	trigger = {
+		# triggered by completing prov gov je
+		# triggered randomly by rcw je
+		any_character_in_void = {
+			has_variable = void_tsar
+		}
+		any_scope_state = {
+			state_region = {
+				is_homeland = cu:russian
+			}
+			any_scope_building = {
+				OR = {
+					is_building_group = bg_agriculture
+					is_building_group = bg_ranching
+					is_building_group = bg_plantations
+				}
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = { exists = scope:void_tsar_scope }
+	}
+
+	immediate = {
+		random_character_in_void = {
+			limit = {
+				has_variable = void_tsar
+			}
+			save_scope_as = void_tsar_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		random_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:russian
+				}
+				any_scope_building = {
+					OR = {
+						is_building_group = bg_agriculture
+						is_building_group = bg_ranching
+						is_building_group = bg_plantations
+					}
+				}
+			}
+			save_scope_as = tsar_temp_state
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = {
+			CHARACTER = scope:void_tsar_scope
+		}
+	}
+
+	option = { # trial and execution
+		name = rcw.7.a
+		default_option = yes
+		trigger = {
+			NOT = {
+				has_journal_entry = je_russia_civil_war
+			}
+			OR = {
+				has_law = law_type:law_council_republic
+				any_interest_group = {
+					is_in_government = yes
+					leader = {
+						has_ideology = ideology:ideology_radical
+					}
+				}
+			}
+		}
+		scope:void_tsar_scope = {
+			kill_character = yes
+		}
+		add_modifier = {
+			name = fate_of_the_tsar
+			days = long_modifier_time
+			is_decaying = yes
+		}
+		create_incident = {
+			country = ROOT
+			value = 10
+		}
+	}
+
+	option = { # forced retirement
+		name = rcw.7.b
+		trigger = {
+			NOR = {
+				has_law = law_type:law_council_republic
+				any_interest_group = {
+					is_in_government = yes
+					leader = {
+						has_ideology = ideology:ideology_radical
+					}
+				}
+			}
+		}
+		add_modifier = {
+			name = fate_of_the_tsar
+			days = normal_modifier_time
+			is_decaying = yes
+			multiplier = 0.5
+		}
+		hidden_effect = {
+			scope:void_tsar_scope = {
+				kill_character = {
+					hidden = yes
+				}
+			}
+		}
+	}
+
+	option = { # just shoot him
+		name = rcw.7.c
+		trigger = {
+			has_journal_entry = je_russia_civil_war
+			OR = {
+				has_law = law_type:law_council_republic
+				any_interest_group = {
+					is_in_government = yes
+					leader = {
+						has_ideology = ideology:ideology_radical
+					}
+				}
+			}
+		}
+		scope:void_tsar_scope = {
+			kill_character = yes
+		}
+		add_modifier = {
+			name = fate_of_the_tsar
+			days = normal_modifier_time
+			is_decaying = yes
+			multiplier = -1
+		}
+		create_incident = {
+			country = ROOT
+			value = 20
+		}
+	}
+}
+
+# Implosion of Russia event, formerly used the ID test.122
+# check common/scripted_effects/05_russian_civil_war_scripted_effects.txt for specifics of how Russia is partitioned.
+rcw.100 = {
+	type = country_event
+	hidden = yes
+	dlc = dlc019
+	immediate = {
+		every_subject_or_below = {
+			limit = {
+				NOT = { any_overlord_or_above = { NOT = { ROOT = this } } }
+				NOT = { is_subject_type = subject_type_personal_union }
+			}
+			make_independent = yes
+			if = {
+				limit = {
+					capital ?= { rcw_is_in_any_theatre = yes }
+				}
+				set_variable = rcw_freed_russian_subject
+			}
+		}
+
+		# We need to make new leaders for countries that were previously in personal unions (i.e. Finland)
+		every_subject_or_below = {
+			limit = {
+				is_subject_type = subject_type_personal_union
+			}
+			make_independent = yes
+			if = {
+				limit = {
+					capital ?= { rcw_is_in_any_theatre = yes }
+				}
+				set_variable = rcw_freed_russian_subject
+			}
+
+			random_primary_culture = {
+				save_temporary_scope_as = independent_culture
+			}
+
+			# Pick the most powerful politician that isn't Russian
+			ordered_interest_group = {
+				order_by = ig_clout
+				position = 0
+				check_range_bounds = no
+				if = {
+					limit = {
+						leader = { culture != cu:russian }
+					}
+					leader = {
+						set_character_as_ruler = yes
+					}
+				}
+				else = {
+					save_temporary_scope_as = most_powerful_ig
+					owner = {
+						create_character = {
+							ig_leader = yes
+							interest_group = scope:most_powerful_ig
+							culture = scope:independent_culture
+							on_created = {
+								set_character_as_ruler = yes
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if = {
+			limit = {
+				NOT = { has_global_variable = rcw_share_red }
+			}
+			rcw_snapshot_effect = yes
+		}
+		rcw_mark_partition_owners = yes
+		rcw_build_leader_candidates_effect = yes
+		scope:rcw_revolution_country ?= {
+			rcw_revolution_upgrade_leader = yes
+		}
+		rcw_reserve_black_heartland = yes
+		rcw_mark_revolution_exclaves = yes
+		rcw_release_elevated_ukraine = yes
+		rcw_release_separatists = yes
+		rcw_hand_non_russian_states_to_separatists = yes
+		rcw_spin_off_aligned_separatists = yes
+		rcw_mark_freed_separatists = yes
+		rcw_tag_theatres = yes
+		rcw_retain_core_theatre = { ALWAYS_PARTNER = yes }
+		every_country = {
+			limit = {
+				has_variable = rcw_partition_owner
+				NOT = { this = ROOT }
+			}
+			rcw_retain_core_theatre = { ALWAYS_PARTNER = no }
+		}
+		rcw_drop_unviable_black_reservation = yes
+		rcw_roll_theatre_merges = yes
+		rcw_assign_state_faction_keys = yes
+		rcw_create_theatre_factions = yes
+		rcw_release_revolution_pockets = yes
+		rcw_exclave_pass = { SPARE_PLAYER = no }
+		rcw_allocate_seats = yes
+		rcw_place_factions = yes
+		rcw_setup_factions = yes
+		rcw_distribute_commanders = yes
+		rcw_distribute_agitators = yes
+		rcw_pick_switch_targets = yes
+		set_global_variable = rcw_v2
+		rcw_partition_cleanup = yes
+		add_contextless_journal_entry = je_russia_civil_war
+	}
+}
+
+# Event that triggers nationalities autonomy during the Russian Provisional Government, formerly used the ID test.123
+rcw.101 = {
+	type = country_event
+	hidden = yes
+	dlc = dlc019
+	immediate = {
+		ordered_scope_culture = {
+			limit = {
+				is_specific_stateless_russian_empire_nationality = yes
+				OR = {
+					culture_current_fervor >= 20
+					AND = {
+						this = cu:ukrainian
+						rcw_ukraine_renaissance_elevated = yes
+					}
+				}
+				any_scope_homeland_state = {
+					owner = ROOT
+				}
+			}
+			order_by = {
+				value = culture_current_fervor
+				if = {
+					limit = {
+						this = cu:ukrainian
+						rcw_ukraine_renaissance_elevated = yes
+					}
+					add = 1000
+				}
+			}
+			position = 0
+			check_range_bounds = no
+			save_scope_as = national_state_candidate_culture
+		}
+		if = {
+			limit = {
+				exists = scope:national_state_candidate_culture
+			}
+			create_russian_national_state_for_culture = { CULTURE = scope:national_state_candidate_culture }
+		}
+	}
+}
+
+rcw.102 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	dlc = dlc019
+
+	title = rcw.102.t
+	desc = rcw.102.d
+	flavor = rcw.102.f
+
+	event_image = {
+		video = "ip5_soviet_deliberation"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	trigger = {
+		# triggered by journal entry
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			is_in_power_bloc = yes
+			power_bloc ?= {
+				power_bloc_leader ?= ROOT
+			}
+		}
+	}
+
+	immediate = {
+		set_variable = {
+			name = russian_power_bloc_mandates
+			value = ROOT.power_bloc.total_used_principle_levels
+		}
+		change_variable = {
+			name = russian_power_bloc_mandates
+			add = -1
+		}
+		power_bloc ?= {
+			save_scope_as = russian_power_bloc
+		}
+	}
+
+	option = {
+		name = rcw.102.a
+		default_option = yes
+
+		scope:russian_power_bloc = {
+			destroy_power_bloc = yes
+		}
+		custom_tooltip = {
+			text = refund_mandates_tooltip
+		}
+
+		add_modifier = {
+			name = russian_mandates_refund
+			multiplier = russian_mandates_refund_value
+		}
+
+		ai_chance = {
+			base = 1
+		}
+	}
+
+	option = {
+		name = rcw.102.b
+		highlighted_option = yes
+		trigger = { is_player = yes }
+
+		ai_chance = {
+			base = 0
+		}
+	}
+}

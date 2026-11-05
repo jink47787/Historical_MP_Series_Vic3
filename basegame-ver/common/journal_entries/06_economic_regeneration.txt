@@ -2,6 +2,11 @@
     icon = "gfx/interface/icons/event_icons/event_industry.dds"
 
     group = je_group_spa_economic_regeneration
+    dlc = dlc016
+
+    activation_description = {
+        always = yes
+    }
 
     is_shown_in_lobby = {
         OR = {
@@ -104,139 +109,94 @@
     on_monthly_pulse = {
     }
 
-    invalid = {
-        has_modifier = modifier_economic_regeneration_postponed
+    outcome = {
+        flags = { hidden invalid_outcome }
+        conclusion_desc = je_standard_failure_conclusion_desc
+        trigger = {
+            has_modifier = modifier_economic_regeneration_postponed
+        }
+        effect = {
+            je_spa_economic_regeneration_master_cleanup = yes
+        }
     }
 
-    complete = {
-        hidden_trigger = {
-            exists = var:spa_economic_regeneration_goal_var
-        }
-        trigger_if = {
-            limit = {
-                exists = var:spa_economic_regeneration_var
+    outcome = {
+        header = je_standard_completion_header
+        effect_header = je_standard_on_completion_header
+        color = "gold_positive"
+        conclusion_desc = je_standard_completion_conclusion_desc
+        trigger = {
+            hidden_trigger = {
+                exists = var:spa_economic_regeneration_goal_var
             }
             trigger_if = {
                 limit = {
-                    NOT = {
+                    exists = var:spa_economic_regeneration_var
+                }
+                trigger_if = {
+                    limit = {
+                        NOT = {
+                            has_variable = reduced_economic_objectives_var
+                        }
+                    }
+                    custom_tooltip = {
+                        text = je_spa_economic_regeneration_master_completion_tt_1
+                        var:spa_economic_regeneration_var >= var:spa_economic_regeneration_goal_var
+                    }
+                }
+                trigger_if = {
+                    limit = {
                         has_variable = reduced_economic_objectives_var
+                    }
+                    custom_tooltip = {
+                        text = je_spa_economic_regeneration_master_completion_tt_2
+                        var:spa_economic_regeneration_var >= var:spa_economic_regeneration_goal_var
+                    }
+                }
+            }
+            trigger_else_if = {
+                limit = {
+                    NOT = {
+                        exists = var:spa_economic_regeneration_var
                     }
                 }
                 custom_tooltip = {
                     text = je_spa_economic_regeneration_master_completion_tt_1
-                    var:spa_economic_regeneration_var >= var:spa_economic_regeneration_goal_var
-                }
-            }
-            trigger_if = {
-                limit = {
-                    has_variable = reduced_economic_objectives_var
-                }
-                custom_tooltip = {
-                    text = je_spa_economic_regeneration_master_completion_tt_2
-                    var:spa_economic_regeneration_var >= var:spa_economic_regeneration_goal_var
+                    always = no
                 }
             }
         }
-        trigger_else_if = {
-            limit = {
-                NOT = {
-                    exists = var:spa_economic_regeneration_var
-                }
-            }
-            custom_tooltip = {
-                text = je_spa_economic_regeneration_master_completion_tt_1
-                always = no
-            }
-        }
-    }
-
-    event_outcome_completed_effect_desc = {
-        header = spa_economic_regeneration_events.5.a
         effect = {
-            if = {
-                limit = {
-                    NOT = {
-                        has_variable = reduced_economic_objectives_var
-                    }
-                }
-                add_modifier = {
-                    name = modifier_economic_regeneration_reward_greater
-			        days = very_long_modifier_time
-                    is_decaying = yes
-                }
-                ruler = {
-                    add_modifier = {
-                        name = modifier_great_reformer
-                    }
-                }
-                active_law:lawgroup_economic_system ?= {
-                    add_amendment = {
-                        type = amendment_economic_regeneration_1
-                        sponsor = PREV.ig:ig_industrialists
-                        cooldown = 240
-                    }
-                }
-            }
-            else_if = {
-                limit = {
-                    has_variable = reduced_economic_objectives_var
-                }
-                add_modifier = {
-                    name = modifier_economic_regeneration_reward_lesser
-			        days = very_long_modifier_time
-                    is_decaying = yes
-                }
-                ruler = {
-                    add_modifier = {
-                        name = modifier_capable_reformer
-                    }
-                }
-                active_law:lawgroup_economic_system ?= {
-                    add_amendment = {
-                        type = amendment_economic_regeneration_2
-                        sponsor = PREV.ig:ig_industrialists
-                        cooldown = 240
-                    }
-                }
+            set_variable = je_spa_economic_regeneration_master_completed_var
+            trigger_event = {
+                id = spa_economic_regeneration_events.5
+                popup = yes
             }
         }
-    }
-
-    on_complete = {
-        set_variable = je_spa_economic_regeneration_master_completed_var
-        trigger_event = {
-            id = spa_economic_regeneration_events.5
-            popup = yes
-        }
-    }
-
-    event_outcome_timeout_effect_desc = {
-        header = spa_economic_regeneration_events.6.a
-        effect = {
-            if = {
-                limit = {
-                    exists = var:spa_economic_regeneration_var
-                }
+        event_outcome_effect_desc = {
+            header = spa_economic_regeneration_events.5.a
+            effect = {
                 if = {
                     limit = {
                         NOT = {
                             has_variable = reduced_economic_objectives_var
                         }
                     }
-                    if = {
-                        limit = {
-                            var:spa_economic_regeneration_var >= 4
-                        }
+                    add_modifier = {
+                        name = modifier_economic_regeneration_reward_greater
+				        days = very_long_modifier_time
+                        is_decaying = yes
+                    }
+                    ruler = {
                         add_modifier = {
-                            name = modifier_failed_economic_regeneration
-                            days = long_modifier_time
-                            multiplier = 0.5
+                            name = modifier_great_reformer
                         }
                     }
-                    else = {
-                        add_modifier = {
-                            name = modifier_failed_economic_regeneration
-                            days = long_modifier_time
+                    active_law:lawgroup_economic_system ?= {
+                        add_amendment = {
+                            type = amendment_economic_regeneration_1
+                            sponsor = PREV.ig:ig_industrialists
+                            cooldown = 240
                         }
                     }
                 }
@@ -244,48 +204,105 @@
                     limit = {
                         has_variable = reduced_economic_objectives_var
                     }
+                    add_modifier = {
+                        name = modifier_economic_regeneration_reward_lesser
+				        days = very_long_modifier_time
+                        is_decaying = yes
+                    }
+                    ruler = {
+                        add_modifier = {
+                            name = modifier_capable_reformer
+                        }
+                    }
+                    active_law:lawgroup_economic_system ?= {
+                        add_amendment = {
+                            type = amendment_economic_regeneration_2
+                            sponsor = PREV.ig:ig_industrialists
+                            cooldown = 240
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    outcome = {
+        header = JOURNAL_ENTRY_TIMEOUT
+        effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+        flags = { timeout }
+        conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+        effect = {
+            trigger_event = {
+                id = spa_economic_regeneration_events.6
+                popup = yes
+            }
+        }
+        event_outcome_effect_desc = {
+            header = spa_economic_regeneration_events.6.a
+            effect = {
+                if = {
+                    limit = {
+                        exists = var:spa_economic_regeneration_var
+                    }
                     if = {
                         limit = {
-                            var:spa_economic_regeneration_var >= 2
+                            NOT = {
+                                has_variable = reduced_economic_objectives_var
+                            }
                         }
-                        add_modifier = {
-                            name = modifier_failed_economic_regeneration
-                            days = long_modifier_time
-                            multiplier = 0.5
+                        if = {
+                            limit = {
+                                var:spa_economic_regeneration_var >= 4
+                            }
+                            add_modifier = {
+                                name = modifier_failed_economic_regeneration
+                                days = long_modifier_time
+                                multiplier = 0.5
+                            }
                         }
-                        custom_tooltip = je_spa_economic_regeneration_master_timeout_tt_2
+                        else = {
+                            add_modifier = {
+                                name = modifier_failed_economic_regeneration
+                                days = long_modifier_time
+                            }
+                        }
                     }
-                    else = {
-                        add_modifier = {
-                            name = modifier_failed_economic_regeneration
-                            days = long_modifier_time
+                    else_if = {
+                        limit = {
+                            has_variable = reduced_economic_objectives_var
+                        }
+                        if = {
+                            limit = {
+                                var:spa_economic_regeneration_var >= 2
+                            }
+                            add_modifier = {
+                                name = modifier_failed_economic_regeneration
+                                days = long_modifier_time
+                                multiplier = 0.5
+                            }
+                            custom_tooltip = je_spa_economic_regeneration_master_timeout_tt_2
+                        }
+                        else = {
+                            add_modifier = {
+                                name = modifier_failed_economic_regeneration
+                                days = long_modifier_time
+                            }
                         }
                     }
                 }
-            }
-            else = {
-                add_modifier = {
-                    name = modifier_failed_economic_regeneration
-                    days = long_modifier_time
+                else = {
+                    add_modifier = {
+                        name = modifier_failed_economic_regeneration
+                        days = long_modifier_time
+                    }
                 }
             }
         }
-    }
-
-    on_timeout = {
-        trigger_event = {
-            id = spa_economic_regeneration_events.6
-            popup = yes
-        }
-    }
-
-    on_fail = {
-
     }
 
     weight = 100
 
-    	
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -293,6 +310,11 @@ je_spa_economic_regeneration_mining = {
     icon = "gfx/interface/icons/invention_icons/prospecting_tech.dds"
 
     group = je_group_spa_economic_regeneration
+    dlc = dlc016
+
+    activation_description = {
+        always = yes
+    }
 
     scripted_button = je_spa_economic_regeneration_cheat_button
 
@@ -315,105 +337,117 @@ je_spa_economic_regeneration_mining = {
 
     }
 
-    complete = {
-        trigger_if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
+    outcome = {
+        header = je_standard_completion_header
+        effect_header = je_standard_on_completion_header
+        color = "gold_positive"
+        conclusion_desc = je_standard_completion_conclusion_desc
+        trigger = {
+            trigger_if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
+                    }
+                }
+                OR = {
+                    leading_producer_of = g:iron
+                    leading_producer_of = g:lead
+                    leading_producer_of = g:coal
+                    leading_producer_of = g:sulfur
+                }
+                country_has_building_group_levels = {
+                    type = bg_mining
+                    value  >= 40
+                }
+            }
+            trigger_if = {
+                limit = {
+                    scope:journal_entry = {
                         has_variable = je_spa_economic_regeneration_creative_accounting_var
                     }
                 }
+                country_has_building_group_levels = {
+                    type = bg_mining
+                    value  >= 20
+                }
             }
+        }
+        effect = {
+            change_variable = {
+                name = spa_economic_regeneration_var
+                add = 1
+            }
+            trigger_event = {
+                id = spa_economic_regeneration_events.3
+                popup = yes
+            }
+            if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
+                    }
+                }
+                custom_tooltip = je_spa_economic_regeneration_mining_upgrade_state_trait_tt_1
+                show_as_tooltip = {
+                    add_modifier = {
+                        name = modifier_spa_mineral_boom
+                        days = long_modifier_time
+                    }
+                }
+                set_variable = je_spa_economic_regeneration_mining_success_var
+            }
+            else_if = {
+                limit = {
+                    scope:journal_entry = {
+                        has_variable = je_spa_economic_regeneration_creative_accounting_var
+                    }
+                }
+                custom_tooltip = je_spa_economic_regeneration_mining_upgrade_state_trait_tt_2
+                show_as_tooltip = {
+                    add_modifier = {
+                        name = modifier_spa_mineral_boom
+                        days = normal_modifier_time
+                        multiplier = 0.5
+                    }
+                }
+            }
+        }
+    }
+
+    outcome = {
+        header = je_standard_failure_header
+        effect_header = je_standard_on_failure_header
+        color = "blue_negative"
+        conclusion_desc = je_standard_failure_conclusion_desc
+        trigger = {
             OR = {
-                leading_producer_of = g:iron
-                leading_producer_of = g:lead
-                leading_producer_of = g:coal
-                leading_producer_of = g:sulfur
-            }
-            country_has_building_group_levels = {
-                type = bg_mining
-                value  >= 40
-            }
-        }
-        trigger_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
+                NOT = {
+                    has_journal_entry = je_spa_economic_regeneration_master
                 }
-            }
-            country_has_building_group_levels = {
-                type = bg_mining
-                value  >= 20
-            }
-        }
-    }
-    on_complete = {
-        change_variable = {
-            name = spa_economic_regeneration_var
-            add = 1
-        }
-        trigger_event = {
-            id = spa_economic_regeneration_events.3
-            popup = yes
-        }
-        if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
-                        has_variable = je_spa_economic_regeneration_creative_accounting_var
-                    }
-                }
-            }
-            custom_tooltip = je_spa_economic_regeneration_mining_upgrade_state_trait_tt_1
-            show_as_tooltip = {
-                add_modifier = {
-                    name = modifier_spa_mineral_boom
-                    days = long_modifier_time
-                }
-            }
-            set_variable = je_spa_economic_regeneration_mining_success_var
-        }
-        else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
-                }
-            }
-            custom_tooltip = je_spa_economic_regeneration_mining_upgrade_state_trait_tt_2
-            show_as_tooltip = {
-                add_modifier = {
-                    name = modifier_spa_mineral_boom
-                    days = normal_modifier_time
-                    multiplier = 0.5
+                NOT = {
+                    has_or_is_contesting_state_in_state_region = STATE_BASQUE_COUNTRY
+                    has_or_is_contesting_state_in_state_region = STATE_ASTURIAS
+                    has_or_is_contesting_state_in_state_region = STATE_LOWER_ANDALUSIA
+                    has_or_is_contesting_state_in_state_region = STATE_MURCIA
                 }
             }
         }
-    }
-
-    fail = {
-        OR = {
-            NOT = {
-                has_journal_entry = je_spa_economic_regeneration_master
+        effect = {
+            add_modifier = {
+                name = modifier_mineral_investment_dearth
+                days = normal_modifier_time
             }
-            NOT = {
-                has_state_in_state_region = STATE_BASQUE_COUNTRY
-                has_state_in_state_region = STATE_ASTURIAS
-                has_state_in_state_region = STATE_LOWER_ANDALUSIA
-                has_state_in_state_region = STATE_MURCIA
-            }
-        }
-    }
-
-    on_fail = {
-        add_modifier = {
-            name = modifier_mineral_investment_dearth
-            days = normal_modifier_time
+            je_spa_economic_regeneration_mining_cleanup = yes
         }
     }
 
     weight = 100
 
-    	
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -421,6 +455,11 @@ je_spa_economic_regeneration_light_industry = {
     icon = "gfx/interface/icons/invention_icons/manufacturies.dds"
 
     group = je_group_spa_economic_regeneration
+    dlc = dlc016
+
+    activation_description = {
+        always = yes
+    }
 
     scripted_button = je_spa_economic_regeneration_cheat_button
 
@@ -434,198 +473,211 @@ je_spa_economic_regeneration_light_industry = {
 
     }
 
-    complete = {
-        trigger_if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
-                        has_variable = je_spa_economic_regeneration_creative_accounting_var
-                    }
-                }
-            }
-            any_scope_state = {
-                OR = {
-                    state_has_building_group_levels = {
-                        type = bg_light_industry
-                        value >= 16
-                    }
-                    state_has_building_group_levels = {
-                        type = bg_heavy_industry
-                        value >= 8
-                    }
-                    state_has_building_group_levels = {
-                        type = bg_military_industry
-                        value >= 8
-                    }
-                }
-                count >= 4
-            }
-            any_company = {
-                company_is_prosperous = yes
-                count >= 2
-            }
-        }
-        trigger_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
-                }
-            }
-            country_has_building_group_levels = {
-                type = bg_mining
-                value  >= 20
-            }
-            any_scope_state = {
-                OR = {
-                    state_has_building_group_levels = {
-                        type = bg_light_industry
-                        value >= 7
-                    }
-                    state_has_building_group_levels = {
-                        type = bg_heavy_industry
-                        value >= 4
-                    }
-                    state_has_building_group_levels = {
-                        type = bg_military_industry
-                        value >= 4
-                    }
-                }
-                count >= 4
-            }
-            any_company = {
-                company_is_prosperous = yes
-            }
-        }
-    }
-    on_complete = {
-        change_variable = {
-            name = spa_economic_regeneration_var
-            add = 1
-        }
-        if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
-                        has_variable = je_spa_economic_regeneration_creative_accounting_var
-                    }
-                }
-            }
-            ig:ig_industrialists ?= {
-                add_modifier = {
-                    name = modifier_facilitated_manufacturing_boom
-                    days = long_modifier_time
-                }
-            }
-            show_as_tooltip = {
-                custom_tooltip = {
-                    text = every_state_following_requirements_tt
-                }
-                ordered_scope_state = {
-                    order_by = gdp
-					position = 0
-					check_range_bounds = no
-                    add_modifier = {
-                        name = modifier_manufactoring_boom
-                        days = long_modifier_time
-                    }
-                }
-            }
-            hidden_effect = {
-                every_scope_state = {
-                    limit = {
-                        OR = {
-                            state_has_building_group_levels = {
-                                type = bg_light_industry
-                                value >= 16
-                            }
-                            state_has_building_group_levels = {
-                                type = bg_heavy_industry
-                                value >= 8
-                            }
-                            state_has_building_group_levels = {
-                                type = bg_military_industry
-                                value >= 8
-                            }
+    outcome = {
+        header = je_standard_completion_header
+        effect_header = je_standard_on_completion_header
+        color = "gold_positive"
+        conclusion_desc = je_standard_completion_conclusion_desc
+        trigger = {
+            trigger_if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
                         }
                     }
-                    add_modifier = {
-                        name = modifier_manufactoring_boom
-                        days = long_modifier_time
+                }
+                any_scope_state = {
+                    OR = {
+                        state_has_building_group_levels = {
+                            type = bg_light_industry
+                            value >= 16
+                        }
+                        state_has_building_group_levels = {
+                            type = bg_heavy_industry
+                            value >= 8
+                        }
+                        state_has_building_group_levels = {
+                            type = bg_military_industry
+                            value >= 8
+                        }
                     }
+                    count >= 4
+                }
+                any_company = {
+                    company_is_prosperous = yes
+                    count >= 2
+                }
+            }
+            trigger_if = {
+                limit = {
+                    scope:journal_entry = {
+                        has_variable = je_spa_economic_regeneration_creative_accounting_var
+                    }
+                }
+                country_has_building_group_levels = {
+                    type = bg_mining
+                    value  >= 20
+                }
+                any_scope_state = {
+                    OR = {
+                        state_has_building_group_levels = {
+                            type = bg_light_industry
+                            value >= 7
+                        }
+                        state_has_building_group_levels = {
+                            type = bg_heavy_industry
+                            value >= 4
+                        }
+                        state_has_building_group_levels = {
+                            type = bg_military_industry
+                            value >= 4
+                        }
+                    }
+                    count >= 4
+                }
+                any_company = {
+                    company_is_prosperous = yes
                 }
             }
         }
-        else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
-                }
+        effect = {
+            change_variable = {
+                name = spa_economic_regeneration_var
+                add = 1
             }
-            ig:ig_industrialists ?= {
-                add_modifier = {
-                    name = modifier_facilitated_manufacturing_boom
-                    days = normal_modifier_time
-                    multiplier = 0.5
+            if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
+                    }
                 }
-            }
-            show_as_tooltip = {
-                custom_tooltip = every_state_following_requirements_tt
-                ordered_scope_state = {
-                    order_by = gdp
-					position = 0
-					check_range_bounds = no
+                ig:ig_industrialists ?= {
                     add_modifier = {
-                        name = modifier_manufactoring_boom
+                        name = modifier_facilitated_manufacturing_boom
+                        days = long_modifier_time
+                    }
+                }
+                show_as_tooltip = {
+                    custom_tooltip = {
+                        text = every_state_following_requirements_tt
+                    }
+                    ordered_scope_state = {
+                        order_by = gdp
+						position = 0
+						check_range_bounds = no
+                        add_modifier = {
+                            name = modifier_manufactoring_boom
+                            days = long_modifier_time
+                        }
+                    }
+                }
+                hidden_effect = {
+                    every_scope_state = {
+                        limit = {
+                            OR = {
+                                state_has_building_group_levels = {
+                                    type = bg_light_industry
+                                    value >= 16
+                                }
+                                state_has_building_group_levels = {
+                                    type = bg_heavy_industry
+                                    value >= 8
+                                }
+                                state_has_building_group_levels = {
+                                    type = bg_military_industry
+                                    value >= 8
+                                }
+                            }
+                        }
+                        add_modifier = {
+                            name = modifier_manufactoring_boom
+                            days = long_modifier_time
+                        }
+                    }
+                }
+            }
+            else_if = {
+                limit = {
+                    scope:journal_entry = {
+                        has_variable = je_spa_economic_regeneration_creative_accounting_var
+                    }
+                }
+                ig:ig_industrialists ?= {
+                    add_modifier = {
+                        name = modifier_facilitated_manufacturing_boom
                         days = normal_modifier_time
                         multiplier = 0.5
                     }
                 }
-            }
-            hidden_effect = {
-                every_scope_state = {
-                    limit = {
-                        OR = {
-                            state_has_building_group_levels = {
-                                type = bg_light_industry
-                                value >= 7
-                            }
-                            state_has_building_group_levels = {
-                                type = bg_heavy_industry
-                                value >= 4
-                            }
-                            state_has_building_group_levels = {
-                                type = bg_military_industry
-                                value >= 4
-                            }
+                show_as_tooltip = {
+                    custom_tooltip = every_state_following_requirements_tt
+                    ordered_scope_state = {
+                        order_by = gdp
+						position = 0
+						check_range_bounds = no
+                        add_modifier = {
+                            name = modifier_manufactoring_boom
+                            days = normal_modifier_time
+                            multiplier = 0.5
                         }
                     }
-                    add_modifier = {
-                        name = modifier_manufactoring_boom
-                        days = normal_modifier_time
+                }
+                hidden_effect = {
+                    every_scope_state = {
+                        limit = {
+                            OR = {
+                                state_has_building_group_levels = {
+                                    type = bg_light_industry
+                                    value >= 7
+                                }
+                                state_has_building_group_levels = {
+                                    type = bg_heavy_industry
+                                    value >= 4
+                                }
+                                state_has_building_group_levels = {
+                                    type = bg_military_industry
+                                    value >= 4
+                                }
+                            }
+                        }
+                        add_modifier = {
+                            name = modifier_manufactoring_boom
+                            days = normal_modifier_time
+                        }
                     }
                 }
             }
+            je_spa_economic_regeneration_light_industry_cleanup = yes
         }
     }
 
-    fail = {
-        OR = {
-            NOT = {
-                has_journal_entry = je_spa_economic_regeneration_master
+    outcome = {
+        header = je_standard_failure_header
+        effect_header = je_standard_on_failure_header
+        color = "blue_negative"
+        conclusion_desc = je_standard_failure_conclusion_desc
+        trigger = {
+            OR = {
+                NOT = {
+                    has_journal_entry = je_spa_economic_regeneration_master
+                }
             }
         }
-    }
-
-    on_fail = {
-        add_modifier = {
-            name = modifier_industrial_investment_dearth
-            days = normal_modifier_time
+        effect = {
+            add_modifier = {
+                name = modifier_industrial_investment_dearth
+                days = normal_modifier_time
+            }
+            je_spa_economic_regeneration_light_industry_cleanup = yes
         }
     }
 
     weight = 100
 
-    	
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -633,6 +685,11 @@ je_spa_economic_regeneration_land_reform = {
     icon = "gfx/interface/icons/invention_icons/bureaucracy.dds"
 
     group = je_group_spa_economic_regeneration
+    dlc = dlc016
+
+    activation_description = {
+        always = yes
+    }
 
     scripted_button = je_spa_economic_regeneration_cheat_button
 
@@ -649,117 +706,29 @@ je_spa_economic_regeneration_land_reform = {
 
     }
 
-    complete = {
-        trigger_if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
-                        has_variable = je_spa_economic_regeneration_creative_accounting_var
+    outcome = {
+        header = je_standard_completion_header
+        effect_header = je_standard_on_completion_header
+        color = "gold_positive"
+        conclusion_desc = je_standard_completion_conclusion_desc
+        trigger = {
+            trigger_if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
                     }
                 }
-            }
-            any_scope_state = {
-                state_region = {
-                    is_homeland = cu:spanish
-                }
-                average_sol > 15
-                count >= 12
-            }
-            OR = {
-                AND = {
-                    NOR = {
-                        has_law = law_type:law_latifundias
-                        has_law = law_type:law_serfdom
+                any_scope_state = {
+                    state_region = {
+                        is_homeland = cu:spanish
                     }
-                    ig:ig_landowners ?= {
-                        is_in_government = no
-                    }
-                    government_legitimacy > 75
+                    average_sol > 15
+                    count >= 12
                 }
-                AND = {
-                    OR = {
-                        has_law = law_type:law_latifundias
-                        has_law = law_type:law_serfdom
-                    }
-                    ig:ig_landowners ?= {
-                        is_in_government = yes
-                        is_strongest_ig_in_government = yes
-                    }
-                    government_legitimacy > 75
-                }
-            }
-        }
-        trigger_else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
-                }
-            }
-            any_scope_state = {
-                state_region = {
-                    is_homeland = cu:spanish
-                }
-                average_sol > 10
-                count >= 12
-            }
-            OR = {
-                AND = {
-                    NOR = {
-                        has_law = law_type:law_latifundias
-                        has_law = law_type:law_serfdom
-                    }
-                    ig:ig_landowners ?= {
-                        is_in_government = no
-                    }
-                    government_legitimacy > 50
-                }
-                AND = {
-                    OR = {
-                        has_law = law_type:law_latifundias
-                        has_law = law_type:law_serfdom
-                    }
-                    ig:ig_landowners ?= {
-                        is_in_government = yes
-                        is_strongest_ig_in_government = yes
-                    }
-                    government_legitimacy > 50
-                }
-            }
-        }
-    }
-    on_complete = {
-        change_variable = {
-            name = spa_economic_regeneration_var
-            add = 1
-        }
-        if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
-                        has_variable = je_spa_economic_regeneration_creative_accounting_var
-                    }
-                }
-            }
-            show_as_tooltip = {
-                custom_tooltip = {
-                    text = je_spa_economic_regeneration_land_reform_tt_1
-                }
-                add_modifier = {
-                    name = modifier_entrepreneurial_latifundistas
-                    days = very_long_modifier_time
-                }
-                activate_law = law_type:law_expanded_latifundias
-                custom_tooltip = {
-                    text = je_spa_economic_regeneration_land_reform_tt_2
-                }
-                add_modifier = {
-                    name = modifier_marginalized_latifundistas
-                    days = very_long_modifier_time
-                }
-            }
-            hidden_effect = {
-                if = {
-                    limit = {
+                OR = {
+                    AND = {
                         NOR = {
                             has_law = law_type:law_latifundias
                             has_law = law_type:law_serfdom
@@ -769,13 +738,7 @@ je_spa_economic_regeneration_land_reform = {
                         }
                         government_legitimacy > 75
                     }
-                    add_modifier = {
-                        name = modifier_marginalized_latifundistas
-                        days = very_long_modifier_time
-                    }
-                }
-                else_if = {
-                    limit = {
+                    AND = {
                         OR = {
                             has_law = law_type:law_latifundias
                             has_law = law_type:law_serfdom
@@ -786,43 +749,23 @@ je_spa_economic_regeneration_land_reform = {
                         }
                         government_legitimacy > 75
                     }
-                    set_variable = upgraded_latifundias_law_var
-                    add_modifier = {
-                        name = modifier_entrepreneurial_latifundistas
-                        days = very_long_modifier_time
+                }
+            }
+            trigger_else_if = {
+                limit = {
+                    scope:journal_entry = {
+                        has_variable = je_spa_economic_regeneration_creative_accounting_var
                     }
-                    activate_law = law_type:law_expanded_latifundias
                 }
-            }
-        }
-        else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
+                any_scope_state = {
+                    state_region = {
+                        is_homeland = cu:spanish
+                    }
+                    average_sol > 10
+                    count >= 12
                 }
-            }
-            show_as_tooltip = {
-                custom_tooltip = {
-                    text = je_spa_economic_regeneration_land_reform_tt_1
-                }
-                add_modifier = {
-                    name = modifier_entrepreneurial_latifundistas
-                    days = long_modifier_time
-                    multiplier = 0.5
-                }
-                activate_law = law_type:law_expanded_latifundias
-                custom_tooltip = {
-                    text = je_spa_economic_regeneration_land_reform_tt_2
-                }
-                add_modifier = {
-                    name = modifier_marginalized_latifundistas
-                    days = long_modifier_time
-                    multiplier = 0.5
-                }
-            }
-            hidden_effect = {
-                if = {
-                    limit = {
+                OR = {
+                    AND = {
                         NOR = {
                             has_law = law_type:law_latifundias
                             has_law = law_type:law_serfdom
@@ -832,14 +775,7 @@ je_spa_economic_regeneration_land_reform = {
                         }
                         government_legitimacy > 50
                     }
-                    add_modifier = {
-                        name = modifier_marginalized_latifundistas
-                        days = long_modifier_time
-                        multiplier = 0.5
-                    }
-                }
-                else_if = {
-                    limit = {
+                    AND = {
                         OR = {
                             has_law = law_type:law_latifundias
                             has_law = law_type:law_serfdom
@@ -850,29 +786,166 @@ je_spa_economic_regeneration_land_reform = {
                         }
                         government_legitimacy > 50
                     }
-                    set_variable = upgraded_latifundias_law_var
+                }
+            }
+        }
+        effect = {
+            change_variable = {
+                name = spa_economic_regeneration_var
+                add = 1
+            }
+            if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
+                    }
+                }
+                show_as_tooltip = {
+                    custom_tooltip = {
+                        text = je_spa_economic_regeneration_land_reform_tt_1
+                    }
+                    add_modifier = {
+                        name = modifier_entrepreneurial_latifundistas
+                        days = very_long_modifier_time
+                    }
+                    activate_law = law_type:law_expanded_latifundias
+                    custom_tooltip = {
+                        text = je_spa_economic_regeneration_land_reform_tt_2
+                    }
+                    add_modifier = {
+                        name = modifier_marginalized_latifundistas
+                        days = very_long_modifier_time
+                    }
+                }
+                hidden_effect = {
+                    if = {
+                        limit = {
+                            NOR = {
+                                has_law = law_type:law_latifundias
+                                has_law = law_type:law_serfdom
+                            }
+                            ig:ig_landowners ?= {
+                                is_in_government = no
+                            }
+                            government_legitimacy > 75
+                        }
+                        add_modifier = {
+                            name = modifier_marginalized_latifundistas
+                            days = very_long_modifier_time
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            OR = {
+                                has_law = law_type:law_latifundias
+                                has_law = law_type:law_serfdom
+                            }
+                            ig:ig_landowners ?= {
+                                is_in_government = yes
+                                is_strongest_ig_in_government = yes
+                            }
+                            government_legitimacy > 75
+                        }
+                        set_variable = upgraded_latifundias_law_var
+                        add_modifier = {
+                            name = modifier_entrepreneurial_latifundistas
+                            days = very_long_modifier_time
+                        }
+                        activate_law = law_type:law_expanded_latifundias
+                    }
+                }
+            }
+            else_if = {
+                limit = {
+                    scope:journal_entry = {
+                        has_variable = je_spa_economic_regeneration_creative_accounting_var
+                    }
+                }
+                show_as_tooltip = {
+                    custom_tooltip = {
+                        text = je_spa_economic_regeneration_land_reform_tt_1
+                    }
                     add_modifier = {
                         name = modifier_entrepreneurial_latifundistas
                         days = long_modifier_time
                         multiplier = 0.5
                     }
                     activate_law = law_type:law_expanded_latifundias
+                    custom_tooltip = {
+                        text = je_spa_economic_regeneration_land_reform_tt_2
+                    }
+                    add_modifier = {
+                        name = modifier_marginalized_latifundistas
+                        days = long_modifier_time
+                        multiplier = 0.5
+                    }
+                }
+                hidden_effect = {
+                    if = {
+                        limit = {
+                            NOR = {
+                                has_law = law_type:law_latifundias
+                                has_law = law_type:law_serfdom
+                            }
+                            ig:ig_landowners ?= {
+                                is_in_government = no
+                            }
+                            government_legitimacy > 50
+                        }
+                        add_modifier = {
+                            name = modifier_marginalized_latifundistas
+                            days = long_modifier_time
+                            multiplier = 0.5
+                        }
+                    }
+                    else_if = {
+                        limit = {
+                            OR = {
+                                has_law = law_type:law_latifundias
+                                has_law = law_type:law_serfdom
+                            }
+                            ig:ig_landowners ?= {
+                                is_in_government = yes
+                                is_strongest_ig_in_government = yes
+                            }
+                            government_legitimacy > 50
+                        }
+                        set_variable = upgraded_latifundias_law_var
+                        add_modifier = {
+                            name = modifier_entrepreneurial_latifundistas
+                            days = long_modifier_time
+                            multiplier = 0.5
+                        }
+                        activate_law = law_type:law_expanded_latifundias
+                    }
                 }
             }
+            je_spa_economic_regeneration_land_reform_cleanup = yes
         }
     }
 
-    fail = {
-        OR = {
-            NOT = {
-                has_journal_entry = je_spa_economic_regeneration_master
+    outcome = {
+        header = je_standard_failure_header
+        effect_header = je_standard_on_failure_header
+        color = "blue_negative"
+        conclusion_desc = je_standard_failure_conclusion_desc
+        trigger = {
+            OR = {
+                NOT = {
+                    has_journal_entry = je_spa_economic_regeneration_master
+                }
             }
+        }
+        effect = {
+            je_spa_economic_regeneration_land_reform_cleanup = yes
         }
     }
 
     weight = 100
 
-    	
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -880,6 +953,11 @@ je_spa_economic_regeneration_railways = {
     icon = "gfx/interface/icons/invention_icons/railways.dds"
 
     group = je_group_spa_economic_regeneration
+    dlc = dlc016
+
+    activation_description = {
+        always = yes
+    }
 
     scripted_button = je_spa_economic_regeneration_cheat_button
 
@@ -893,99 +971,112 @@ je_spa_economic_regeneration_railways = {
 
     }
 
-    complete = {
-        trigger_if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
+    outcome = {
+        header = je_standard_completion_header
+        effect_header = je_standard_on_completion_header
+        color = "gold_positive"
+        conclusion_desc = je_standard_completion_conclusion_desc
+        trigger = {
+            trigger_if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
+                    }
+                }
+                any_scope_state = {
+                    is_in_geographic_region = geographic_region_iberia_old
+                    any_scope_building = {
+                        is_building_type = building_railway
+                        level >= 3
+                    }
+                    count >= 12
+                }
+            }
+            trigger_else_if = {
+                limit = {
+                    scope:journal_entry = {
                         has_variable = je_spa_economic_regeneration_creative_accounting_var
                     }
                 }
-            }
-            any_scope_state = {
-                is_in_geographic_region = geographic_region_iberia_old
-                any_scope_building = {
-                    is_building_type = building_railway
-                    level >= 3
-                }
-                count >= 12
-            }
-        }
-        trigger_else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
+                any_scope_state = {
+                    is_in_geographic_region = geographic_region_iberia_old
+                    any_scope_building = {
+                        is_building_type = building_railway
+                        level >= 1
+                    }
+                    count >= 12
                 }
             }
-            any_scope_state = {
-                is_in_geographic_region = geographic_region_iberia_old
-                any_scope_building = {
-                    is_building_type = building_railway
-                    level >= 1
-                }
-                count >= 12
+        }
+        effect = {
+            change_variable = {
+                name = spa_economic_regeneration_var
+                add = 1
             }
-        }
-    }
-    on_complete = {
-        change_variable = {
-            name = spa_economic_regeneration_var
-            add = 1
-        }
-        if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
+            if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
+                    }
+                }
+                add_modifier = {
+                    name = modifier_arteries_of_the_nation
+                    days = very_long_modifier_time
+                }
+                add_modifier = {
+                    name = modifier_railway_magnates
+                    days = very_long_modifier_time
+                }
+            }
+            else_if = {
+                limit = {
+                    scope:journal_entry = {
                         has_variable = je_spa_economic_regeneration_creative_accounting_var
                     }
                 }
-            }
-            add_modifier = {
-                name = modifier_arteries_of_the_nation
-                days = very_long_modifier_time
-            }
-            add_modifier = {
-                name = modifier_railway_magnates
-                days = very_long_modifier_time
-            }
-        }
-        else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
+                add_modifier = {
+                    name = modifier_arteries_of_the_nation
+                    days = long_modifier_time
+                    multiplier = 0.5
+                }
+                add_modifier = {
+                    name = modifier_railway_magnates
+                    days = long_modifier_time
+                    multiplier = 0.5
                 }
             }
-            add_modifier = {
-                name = modifier_arteries_of_the_nation
-                days = long_modifier_time
-                multiplier = 0.5
-            }
-            add_modifier = {
-                name = modifier_railway_magnates
-                days = long_modifier_time
-                multiplier = 0.5
-            }
+            je_spa_economic_regeneration_railways_cleanup = yes
         }
     }
 
-    fail = {
-        OR = {
-            NOT = {
-                has_journal_entry = je_spa_economic_regeneration_master
+    outcome = {
+        header = je_standard_failure_header
+        effect_header = je_standard_on_failure_header
+        color = "blue_negative"
+        conclusion_desc = je_standard_failure_conclusion_desc
+        trigger = {
+            OR = {
+                NOT = {
+                    has_journal_entry = je_spa_economic_regeneration_master
+                }
             }
         }
-    }
-
-    on_fail = {
-        add_modifier = {
-            name = modifier_entrenchment_of_local_power
-            days = normal_modifier_time
+        effect = {
+            add_modifier = {
+                name = modifier_entrenchment_of_local_power
+                days = normal_modifier_time
+            }
+            je_spa_economic_regeneration_railways_cleanup = yes
         }
     }
 
     weight = 100
 
-    	
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -993,6 +1084,11 @@ je_spa_economic_regeneration_modernise_agriculture = {
     icon = "gfx/interface/icons/invention_icons/threshing_machine.dds"
 
     group = je_group_spa_economic_regeneration
+    dlc = dlc016
+
+    activation_description = {
+        always = yes
+    }
 
     scripted_button = je_spa_economic_regeneration_cheat_button
 
@@ -1111,212 +1207,225 @@ je_spa_economic_regeneration_modernise_agriculture = {
         }
     }
 
-    complete = {
-        trigger_if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
+    outcome = {
+        header = je_standard_completion_header
+        effect_header = je_standard_on_completion_header
+        color = "gold_positive"
+        conclusion_desc = je_standard_completion_conclusion_desc
+        trigger = {
+            trigger_if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
+                    }
+                }
+                custom_tooltip = {
+                    text = je_spa_economic_regeneration_modernise_agriculture_tt_1
+                    var:je_spa_economic_regeneration_modernise_agriculture_timer_var >= 24
+                }
+                any_scope_building = {
+                    filter = {
+                        is_building_group = bg_staple_crops
+                        state = {
+                            state_region = {
+                                is_homeland = cu:spanish
+                            }
+                        }
+                    }
+                    OR = {
+                        has_active_production_method = pm_fertilization
+                        hidden_trigger = {
+                            has_active_production_method = pm_fertilization_building_rice_farm
+                        }
+                    }
+                    percent >= 0.8
+                }
+                any_scope_building = {
+                    filter = {
+                        is_building_group = bg_staple_crops
+                        state = {
+                            state_region = {
+                                is_homeland = cu:spanish
+                            }
+                        }
+                    }
+                    OR = {
+                        has_active_production_method = pm_steam_threshers
+                        hidden_trigger = {
+                            has_active_production_method = pm_steam_threshers_building_rice_farm
+                        }
+                    }
+                    percent >= 0.8
+                }
+            }
+            trigger_else_if = {
+                limit = {
+                    scope:journal_entry = {
                         has_variable = je_spa_economic_regeneration_creative_accounting_var
                     }
                 }
-            }
-            custom_tooltip = {
-                text = je_spa_economic_regeneration_modernise_agriculture_tt_1
-                var:je_spa_economic_regeneration_modernise_agriculture_timer_var >= 24
-            }
-            any_scope_building = {
-                filter = {
-                    is_building_group = bg_staple_crops
-                    state = {
-                        state_region = {
-                            is_homeland = cu:spanish
+                custom_tooltip = {
+                    text = je_spa_economic_regeneration_modernise_agriculture_tt_2
+                    var:je_spa_economic_regeneration_modernise_agriculture_timer_var >= 12
+                }
+                any_scope_building = {
+                    filter = {
+                        is_building_group = bg_staple_crops
+                        state = {
+                            state_region = {
+                                is_homeland = cu:spanish
+                            }
                         }
                     }
-                }
-                OR = {
-                    has_active_production_method = pm_fertilization
-                    hidden_trigger = {
-                        has_active_production_method = pm_fertilization_building_rice_farm
-                    }
-                }
-                percent >= 0.8
-            }
-            any_scope_building = {
-                filter = {
-                    is_building_group = bg_staple_crops
-                    state = {
-                        state_region = {
-                            is_homeland = cu:spanish
+                    OR = {
+                        has_active_production_method = pm_fertilization
+                        hidden_trigger = {
+                            has_active_production_method = pm_fertilization_building_rice_farm
                         }
                     }
+                    percent >= 0.4
                 }
-                OR = {
-                    has_active_production_method = pm_steam_threshers
-                    hidden_trigger = {
-                        has_active_production_method = pm_steam_threshers_building_rice_farm
+                any_scope_building = {
+                    filter = {
+                        is_building_group = bg_staple_crops
+                        state = {
+                            state_region = {
+                                is_homeland = cu:spanish
+                            }
+                        }
                     }
+                    OR = {
+                        has_active_production_method = pm_steam_threshers
+                        hidden_trigger = {
+                            has_active_production_method = pm_steam_threshers_building_rice_farm
+                        }
+                    }
+                    percent >= 0.4
                 }
-                percent >= 0.8
             }
         }
-        trigger_else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
-                }
+        effect = {
+            change_variable = {
+                name = spa_economic_regeneration_var
+                add = 1
             }
-            custom_tooltip = {
-                text = je_spa_economic_regeneration_modernise_agriculture_tt_2
-                var:je_spa_economic_regeneration_modernise_agriculture_timer_var >= 12
-            }
-            any_scope_building = {
-                filter = {
-                    is_building_group = bg_staple_crops
-                    state = {
-                        state_region = {
-                            is_homeland = cu:spanish
+            if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
                         }
                     }
                 }
-                OR = {
-                    has_active_production_method = pm_fertilization
-                    hidden_trigger = {
-                        has_active_production_method = pm_fertilization_building_rice_farm
+                show_as_tooltip = {
+                    custom_tooltip = {
+                        text = every_state_following_requirements_tt
                     }
-                }
-                percent >= 0.4
-            }
-            any_scope_building = {
-                filter = {
-                    is_building_group = bg_staple_crops
-                    state = {
-                        state_region = {
-                            is_homeland = cu:spanish
+                    ordered_scope_state = {
+                        order_by = gdp
+						position = 0
+						check_range_bounds = no
+                        add_modifier = {
+                            name = modifier_population_boom
+                            days = long_modifier_time
                         }
                     }
                 }
-                OR = {
-                    has_active_production_method = pm_steam_threshers
-                    hidden_trigger = {
-                        has_active_production_method = pm_steam_threshers_building_rice_farm
+                hidden_effect = {
+                    every_scope_state = {
+                        limit = {
+                            any_scope_building = {
+                                OR = {
+                                    has_active_production_method = pm_steam_threshers
+                                    hidden_trigger = {
+                                        has_active_production_method = pm_steam_threshers_building_rice_farm
+                                    }
+                                }
+                            }
+                            state_region = {
+                                is_homeland = cu:spanish
+                            }
+                        }
+                        add_modifier = {
+                            name = modifier_population_boom
+                            days = long_modifier_time
+                        }
                     }
                 }
-                percent >= 0.4
             }
-        }
-    }
-    on_complete = {
-        change_variable = {
-            name = spa_economic_regeneration_var
-            add = 1
-        }
-        if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
+            else_if = {
+                limit = {
+                    scope:journal_entry = {
                         has_variable = je_spa_economic_regeneration_creative_accounting_var
                     }
                 }
-            }
-            show_as_tooltip = {
-                custom_tooltip = {
-                    text = every_state_following_requirements_tt
-                }
-                ordered_scope_state = {
-                    order_by = gdp
-					position = 0
-					check_range_bounds = no
-                    add_modifier = {
-                        name = modifier_population_boom
-                        days = long_modifier_time
+                show_as_tooltip = {
+                    custom_tooltip = {
+                        text = every_state_following_requirements_tt
+                    }
+                    ordered_scope_state = {
+                        order_by = gdp
+						position = 0
+						check_range_bounds = no
+                        add_modifier = {
+                            name = modifier_population_boom
+                            days = long_modifier_time
+                        }
                     }
                 }
-            }
-            hidden_effect = {
-                every_scope_state = {
-                    limit = {
-                        any_scope_building = {
-                            OR = {
-                                has_active_production_method = pm_steam_threshers
-                                hidden_trigger = {
-                                    has_active_production_method = pm_steam_threshers_building_rice_farm
+                hidden_effect = {
+                    every_scope_state = {
+                        limit = {
+                            any_scope_building = {
+                                OR = {
+                                    has_active_production_method = pm_steam_threshers
+                                    hidden_trigger = {
+                                        has_active_production_method = pm_steam_threshers_building_rice_farm
+                                    }
                                 }
                             }
-                        }
-                        state_region = {
-                            is_homeland = cu:spanish
-                        }
-                    }
-                    add_modifier = {
-                        name = modifier_population_boom
-                        days = long_modifier_time
-                    }
-                }
-            }
-        }
-        else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
-                }
-            }
-            show_as_tooltip = {
-                custom_tooltip = {
-                    text = every_state_following_requirements_tt
-                }
-                ordered_scope_state = {
-                    order_by = gdp
-					position = 0
-					check_range_bounds = no
-                    add_modifier = {
-                        name = modifier_population_boom
-                        days = long_modifier_time
-                    }
-                }
-            }
-            hidden_effect = {
-                every_scope_state = {
-                    limit = {
-                        any_scope_building = {
-                            OR = {
-                                has_active_production_method = pm_steam_threshers
-                                hidden_trigger = {
-                                    has_active_production_method = pm_steam_threshers_building_rice_farm
-                                }
+                            state_region = {
+                                is_homeland = cu:spanish
                             }
                         }
-                        state_region = {
-                            is_homeland = cu:spanish
+                        add_modifier = {
+                            name = modifier_population_boom
+                            days = normal_modifier_time
+                            multiplier = 0.5
                         }
-                    }
-                    add_modifier = {
-                        name = modifier_population_boom
-                        days = normal_modifier_time
-                        multiplier = 0.5
                     }
                 }
             }
+            je_spa_economic_regeneration_modernise_agriculture_cleanup = yes
         }
     }
 
-    fail = {
-        OR = {
-            NOT = {
-                has_journal_entry = je_spa_economic_regeneration_master
+    outcome = {
+        header = je_standard_failure_header
+        effect_header = je_standard_on_failure_header
+        color = "blue_negative"
+        conclusion_desc = je_standard_failure_conclusion_desc
+        trigger = {
+            OR = {
+                NOT = {
+                    has_journal_entry = je_spa_economic_regeneration_master
+                }
             }
         }
-    }
-
-    on_fail = {
-        add_modifier = {
-            name = modifier_falling_birthrates
-            days = normal_modifier_time
+        effect = {
+            add_modifier = {
+                name = modifier_falling_birthrates
+                days = normal_modifier_time
+            }
+            je_spa_economic_regeneration_modernise_agriculture_cleanup = yes
         }
     }
 
     weight = 100
 
-    	
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -1324,6 +1433,11 @@ je_spa_economic_regeneration_ultramar = {
     icon = "gfx/interface/icons/invention_icons/colonization.dds"
 
     group = je_group_spa_economic_regeneration
+    dlc = dlc016
+
+    activation_description = {
+        always = yes
+    }
 
     scripted_button = je_spa_economic_regeneration_cheat_button
 
@@ -1337,163 +1451,175 @@ je_spa_economic_regeneration_ultramar = {
 
     }
 
-    complete = {
-        trigger_if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
-                        has_variable = je_spa_economic_regeneration_creative_accounting_var
-                    }
-                }
-            }
-            any_subject_or_below = {
-                country_is_colonial_or_company = yes
-                count >= 4
-            }
-            any_subject_or_below = {
-                country_is_colonial_or_company = yes
-                liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
-                country_has_building_group_levels = {
-                    type = bg_plantations
-                    value >= 40
-                }
-            }
-        }
-        trigger_else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
-                }
-            }
-            any_subject_or_below = {
-                country_is_colonial_or_company = yes
-                count >= 2
-            }
-            any_subject_or_below = {
-                country_is_colonial_or_company = yes
-                liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
-                country_has_building_group_levels = {
-                    type = bg_plantations
-                    value >= 20
-                }
-            }
-        }
-    }
-
-    on_complete = {
-        change_variable = {
-            name = spa_economic_regeneration_var
-            add = 1
-        }
-        if = {
-            limit = {
-                scope:journal_entry = {
-                    NOT = {
-                        has_variable = je_spa_economic_regeneration_creative_accounting_var
-                    }
-                }
-            }
-            show_as_tooltip = {
-                custom_tooltip = {
-                    text = every_colonial_subject_following_requirements_tt
-                }
-                ordered_subject_or_below = {
-                    order_by = gdp
-					position = 0
-					check_range_bounds = no
-                    add_modifier = {
-                        name = modifier_integrated_colony
-                        days = long_modifier_time
-                    }
-                }
-            }
-            hidden_effect = {
-                every_subject_or_below = {
-                    limit = {
-                        country_is_colonial_or_company = yes
-                        liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
-                        country_has_building_group_levels = {
-                            type = bg_plantations
-                            value >= 40
+    outcome = {
+        header = je_standard_completion_header
+        effect_header = je_standard_on_completion_header
+        color = "gold_positive"
+        conclusion_desc = je_standard_completion_conclusion_desc
+        trigger = {
+            trigger_if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
                         }
                     }
-                    add_modifier = {
-                        name = modifier_integrated_colony
-                        days = long_modifier_time
-                    }
                 }
-            }
-        }
-        else_if = {
-            limit = {
-                scope:journal_entry = {
-                    has_variable = je_spa_economic_regeneration_creative_accounting_var
-                }
-            }
-            show_as_tooltip = {
-                custom_tooltip = {
-                    text = every_colonial_subject_following_requirements_tt
-                }
-                ordered_subject_or_below = {
-                    order_by = gdp
-					position = 0
-					check_range_bounds = no
-                    add_modifier = {
-                        name = modifier_integrated_colony
-                        days = normal_modifier_time
-                        multiplier = 0.5
-                    }
-                }
-            }
-            hidden_effect = {
-                every_subject_or_below = {
-                    limit = {
-                        country_is_colonial_or_company = yes
-                        liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
-                        country_has_building_group_levels = {
-                            type = bg_plantations
-                            value >= 20
-                        }
-                    }
-                    add_modifier = {
-                        name = modifier_integrated_colony
-                        days = normal_modifier_time
-                        multiplier = 0.5
-                    }
-                }
-            }
-        }
-    }
-
-    fail = {
-        OR = {
-            NOT = {
-                has_journal_entry = je_spa_economic_regeneration_master
-            }
-        }
-    }
-
-    on_fail = {
-        if = {
-            limit = {
                 any_subject_or_below = {
                     country_is_colonial_or_company = yes
+                    count >= 4
                 }
-            }
-            every_subject_or_below = {
-                limit = {
+                any_subject_or_below = {
                     country_is_colonial_or_company = yes
-                }
-                add_modifier = {
-                    name = modifier_neglected_colony
-                    days = normal_modifier_time
+                    liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
+                    country_has_building_group_levels = {
+                        type = bg_plantations
+                        value >= 40
+                    }
                 }
             }
+            trigger_else_if = {
+                limit = {
+                    scope:journal_entry = {
+                        has_variable = je_spa_economic_regeneration_creative_accounting_var
+                    }
+                }
+                any_subject_or_below = {
+                    country_is_colonial_or_company = yes
+                    count >= 2
+                }
+                any_subject_or_below = {
+                    country_is_colonial_or_company = yes
+                    liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
+                    country_has_building_group_levels = {
+                        type = bg_plantations
+                        value >= 20
+                    }
+                }
+            }
+        }
+        effect = {
+            change_variable = {
+                name = spa_economic_regeneration_var
+                add = 1
+            }
+            if = {
+                limit = {
+                    scope:journal_entry = {
+                        NOT = {
+                            has_variable = je_spa_economic_regeneration_creative_accounting_var
+                        }
+                    }
+                }
+                show_as_tooltip = {
+                    custom_tooltip = {
+                        text = every_colonial_subject_following_requirements_tt
+                    }
+                    ordered_subject_or_below = {
+                        order_by = gdp
+						position = 0
+						check_range_bounds = no
+                        add_modifier = {
+                            name = modifier_integrated_colony
+                            days = long_modifier_time
+                        }
+                    }
+                }
+                hidden_effect = {
+                    every_subject_or_below = {
+                        limit = {
+                            country_is_colonial_or_company = yes
+                            liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
+                            country_has_building_group_levels = {
+                                type = bg_plantations
+                                value >= 40
+                            }
+                        }
+                        add_modifier = {
+                            name = modifier_integrated_colony
+                            days = long_modifier_time
+                        }
+                    }
+                }
+            }
+            else_if = {
+                limit = {
+                    scope:journal_entry = {
+                        has_variable = je_spa_economic_regeneration_creative_accounting_var
+                    }
+                }
+                show_as_tooltip = {
+                    custom_tooltip = {
+                        text = every_colonial_subject_following_requirements_tt
+                    }
+                    ordered_subject_or_below = {
+                        order_by = gdp
+						position = 0
+						check_range_bounds = no
+                        add_modifier = {
+                            name = modifier_integrated_colony
+                            days = normal_modifier_time
+                            multiplier = 0.5
+                        }
+                    }
+                }
+                hidden_effect = {
+                    every_subject_or_below = {
+                        limit = {
+                            country_is_colonial_or_company = yes
+                            liberty_desire < define:NDiplomacy|WAR_GOAL_INFAMY_LOW_LIBERTY_DESIRE_THRESHOLD
+                            country_has_building_group_levels = {
+                                type = bg_plantations
+                                value >= 20
+                            }
+                        }
+                        add_modifier = {
+                            name = modifier_integrated_colony
+                            days = normal_modifier_time
+                            multiplier = 0.5
+                        }
+                    }
+                }
+            }
+            je_spa_economic_regeneration_ultramar_cleanup = yes
+        }
+    }
+
+    outcome = {
+        header = je_standard_failure_header
+        effect_header = je_standard_on_failure_header
+        color = "blue_negative"
+        conclusion_desc = je_standard_failure_conclusion_desc
+        trigger = {
+            OR = {
+                NOT = {
+                    has_journal_entry = je_spa_economic_regeneration_master
+                }
+            }
+        }
+        effect = {
+            if = {
+                limit = {
+                    any_subject_or_below = {
+                        country_is_colonial_or_company = yes
+                    }
+                }
+                every_subject_or_below = {
+                    limit = {
+                        country_is_colonial_or_company = yes
+                    }
+                    add_modifier = {
+                        name = modifier_neglected_colony
+                        days = normal_modifier_time
+                    }
+                }
+            }
+            je_spa_economic_regeneration_ultramar_cleanup = yes
         }
     }
 
     weight = 100
 
-    	
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }

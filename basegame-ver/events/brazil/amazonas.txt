@@ -12,7 +12,7 @@ amazonas.1 = {
 	flavor = amazonas.1.f
 
 	event_image = {
-		video = "gfx/event_pictures/middleeast_jungle_expedition.bk2"
+		video = "middleeast_jungle_expedition"
 	}
 
 	icon = "gfx/interface/icons/event_icons/event_map.dds"
@@ -20,6 +20,7 @@ amazonas.1 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_monthly_pulse_country
 		is_at_war = no
 		in_default = no
 		any_scope_state = {
@@ -90,7 +91,7 @@ amazonas.2 = {
 	flavor = amazonas.2.f
 
 	event_image = {
-		video = "gfx/event_pictures/southamerica_aristocrats.bk2"
+		video = "southamerica_aristocrats"
 	}
 
 	icon = "gfx/interface/icons/event_icons/event_map.dds"
@@ -117,6 +118,18 @@ amazonas.2 = {
 				}
 			}
 			save_scope_as = bolivia_border_treaty_country_scope
+			random_scope_state = {
+				limit = {
+					state_region = s:STATE_AMAZONAS
+				}
+				save_scope_as = ceded_amazonas_scope
+			}
+			random_scope_state = {
+				limit = {
+					state_region = s:STATE_MATO_GROSSO
+				}
+				save_scope_as = ceded_mato_grosso_scope
+			}
 		}
 		ROOT = {
 			save_scope_as = brazil_scope
@@ -132,50 +145,80 @@ amazonas.2 = {
 	option = {
 		name = amazonas.2.a
 		default_option = yes
-		add_modifier = {
-			name = amazonic_indemnities_brazil_1
-			days = normal_modifier_time
-		}
-		random_country = {
+		if = {
 			limit = {
-				is_player = no
-				capital = { region = sr:region_andes }
-				any_scope_state = { state_region = s:STATE_AMAZONAS }
-				OR = {
-					relations:root >= relations_threshold:amicable
-					army_size < { # your army is four times as large
-    					value = root.army_size
-    					multiply = 0.25
-					}
-					is_subject_of = root
-					c:BRZ ?= root
-				}
+				exists = scope:ceded_mato_grosso_scope
 			}
-			random_scope_state = {
-				limit = {
-					state_region = s:STATE_AMAZONAS
-				}
-				set_state_owner = root
-			}
-			if = {
-				limit = {
-					any_scope_state = {
-						state_region = s:STATE_MATO_GROSSO
+			custom_tooltip = {
+				text = treaty_of_ayacucho_mato_grosso_tt
+				create_treaty = {
+					name = treaty_name_treaty_of_ayacucho
+					first_country = ROOT
+					second_country = scope:bolivia_border_treaty_country_scope
+					is_draft = no
+					binding_period = { years = 5 }
+
+					articles_to_create = {
+						{
+							article = state_transfer
+							source_country = scope:bolivia_border_treaty_country_scope
+							target_country = ROOT
+							inputs = {
+								{ state = scope:ceded_amazonas_scope }
+							}
+						}
+						{
+							article = state_transfer
+							source_country = scope:bolivia_border_treaty_country_scope
+							target_country = ROOT
+							inputs = {
+								{ state = scope:ceded_mato_grosso_scope }
+							}
+						}
+						{
+							article = money_transfer
+							source_country = ROOT
+							target_country = scope:bolivia_border_treaty_country_scope
+							inputs = {
+								{ quantity = 1000 }
+							}
+						}
 					}
 				}
-				random_scope_state = {
-					limit = {
-						state_region = s:STATE_MATO_GROSSO
-					}
-					set_state_owner = root
-				}
-			}
-			add_modifier = {
-				name = amazonic_indemnities_recipient_1
-				days = normal_modifier_time
 			}
 		}
+		else = {
+			custom_tooltip = {
+				text = treaty_of_ayacucho_tt
+				create_treaty = {
+					name = treaty_name_treaty_of_ayacucho
+					first_country = ROOT
+					second_country = scope:bolivia_border_treaty_country_scope
+					is_draft = no
+					binding_period = { years = 5 }
 
+					articles_to_create = {
+						{
+							article = state_transfer
+							source_country = scope:bolivia_border_treaty_country_scope
+							target_country = ROOT
+							inputs = {
+								{ state = scope:ceded_amazonas_scope }
+							}
+						}
+						{
+							article = money_transfer
+							source_country = ROOT
+							target_country = scope:bolivia_border_treaty_country_scope
+							inputs = {
+								{ quantity = 1000 }
+							}
+						}
+					}
+				}
+			}
+		}
+		custom_tooltip = treaty_of_ayacucho_indemnity_tt
 		every_country = {
 			limit = {
 				NOT = {
@@ -203,7 +246,7 @@ amazonas.3 = {
 	flavor = amazonas.3.f
 
 	event_image = {
-		video = "gfx/event_pictures/southamerica_aristocrats.bk2"
+		video = "southamerica_aristocrats"
 	}
 
 	icon = "gfx/interface/icons/event_icons/event_map.dds"
@@ -230,6 +273,12 @@ amazonas.3 = {
 				}
 			}
 			save_scope_as = colombia_border_treaty_country_scope
+			random_scope_state = {
+				limit = {
+					state_region = s:STATE_AMAZONAS
+				}
+				save_scope_as = ceded_amazonas_scope
+			}
 		}
 		ROOT = {
 			save_scope_as = brazil_scope
@@ -245,35 +294,36 @@ amazonas.3 = {
 	option = {
 		name = amazonas.3.a
 		default_option = yes
-		add_modifier = {
-			name = amazonic_indemnities_brazil_2
-			days = normal_modifier_time
-		}
-		random_country = {
-			limit = {
-				is_player = no
-				capital = { region = sr:region_gran_colombia }
-				any_scope_state = { state_region = s:STATE_AMAZONAS }
-				OR = {
-					relations:root >= relations_threshold:amicable
-					root.army_size < { # your army is four times as large
-    					value = army_size
-    					multiply = 0.25
+		custom_tooltip = {
+			text = treaty_of_bogota_tt
+			create_treaty = {
+				name = treaty_name_treaty_of_bogota
+				first_country = ROOT
+				second_country = scope:colombia_border_treaty_country_scope
+				is_draft = no
+				binding_period = { years = 5 }
+
+				articles_to_create = {
+					{
+						article = state_transfer
+						source_country = scope:colombia_border_treaty_country_scope
+						target_country = ROOT
+						inputs = {
+							{ state = scope:ceded_amazonas_scope }
+						}
 					}
-					is_subject_of = root
+					{
+						article = money_transfer
+						source_country = ROOT
+						target_country = scope:colombia_border_treaty_country_scope
+						inputs = {
+							{ quantity = 1000 }
+						}
+					}
 				}
-			}
-			random_scope_state = {
-				limit = {
-					state_region = s:STATE_AMAZONAS
-				}
-				set_state_owner = root
-			}
-			add_modifier = {
-				name = amazonic_indemnities_recipient_2
-				days = normal_modifier_time
 			}
 		}
+		custom_tooltip = treaty_of_bogota_indemnity_tt
 		every_country = {
 			limit = {
 				NOT = {
@@ -679,7 +729,7 @@ amazonas.8 = {
 	flavor = amazonas.8.f
 
 	event_image = {
-		video = "gfx/event_pictures/asia_poor_people_moving.bk2"
+		video = "asia_poor_people_moving"
 	}
 
 	icon = "gfx/interface/icons/event_icons/event_map.dds"
@@ -687,6 +737,7 @@ amazonas.8 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_amazonas [on_monthly_pulse]
 		any_scope_state = {
 			has_state_trait = state_trait_amazon_rainforest
 			any_scope_building = {

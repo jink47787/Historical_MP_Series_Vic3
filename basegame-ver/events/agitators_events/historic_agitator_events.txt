@@ -22,8 +22,21 @@ historical_agitators.1 = { #Vladimir Lenin
 	dlc = dlc004
 
 	trigger = {
-		has_dlc_feature = voice_of_the_people_content
-		empty_agitator_slots >= 1
+		# triggered by on_action - historical_agitators_yearly_events
+		OR = {
+			has_dlc_feature = voice_of_the_people_content
+			has_dlc_feature = ip5_content
+		}
+		OR = {
+			empty_agitator_slots >= 1
+			AND = {
+				empty_agitator_slots = 0
+				any_scope_character = {
+					has_role_of_type = agitator
+					is_historical = no
+				}
+			}
+		}
 		c:RUS ?= this
 		ig:ig_trade_unions ?= {
 			ig_counts_as_marginal = no
@@ -34,15 +47,37 @@ historical_agitators.1 = { #Vladimir Lenin
 		NOT = {
 			has_law_or_variant = law_type:law_council_republic
 		}
-		NOT = { has_global_variable = lenin_spawn }
+		NOT = { is_template_used = rus_lenin_character_template }
 	}
 
 	immediate = {
+		if = {
+			limit = {
+				empty_agitator_slots = 0
+				any_scope_character = {
+					has_role_of_type = agitator
+					is_historical = no
+				}
+			}
+			random_scope_character = {
+				limit = {
+					has_role_of_type = agitator
+					is_historical = no
+				}
+				save_scope_as = generic_forgettable_agitator
+			}
+		}
 		create_character = {
 			template = rus_lenin_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = lenin_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -84,6 +119,27 @@ historical_agitators.1 = { #Vladimir Lenin
 				days = normal_modifier_time
 			}
 		}
+		if = {
+			limit = {
+				exists = scope:generic_forgettable_agitator
+			}
+			scope:generic_forgettable_agitator = {
+				if = { # if the player has ip5 and the country has access to the Siberian Exile Pool, send the generic agitator to siberia
+					limit = {
+						has_dlc_feature = regional_exile_pools
+						ROOT = { has_regional_exile_pool_access = siberian_exile_pool }
+					}
+					exile_character = {
+						EXILE_POOL = siberian_exile_pool
+						YEARS = 10
+						value = yes
+					}
+				}
+				else = { # otherwise, generic agitator gets regular exile, no martyrdom
+					exile_character = yes
+				}
+			}
+		}
 		capital = {
 			add_radicals_in_state = {
 				value = small_radicals
@@ -103,6 +159,27 @@ historical_agitators.1 = { #Vladimir Lenin
 		}
 		scope:historic_agitator_scope = {
 			add_trait = special_character_lenin_popularity
+		}
+		if = {
+			limit = {
+				exists = scope:generic_forgettable_agitator
+			}
+			scope:generic_forgettable_agitator = {
+				if = { # if the player has ip5 and the country has access to the Siberian Exile Pool, send the generic agitator to siberia
+					limit = {
+						has_dlc_feature = regional_exile_pools
+						ROOT = { has_regional_exile_pool_access = siberian_exile_pool }
+					}
+					exile_character = {
+						EXILE_POOL = siberian_exile_pool
+						YEARS = 10
+						value = yes
+					}
+				}
+				else = { # otherwise, generic agitator gets regular exile, no martyrdom
+					exile_character = yes
+				}
+			}
 		}
 		capital = {
 			add_radicals_in_state = {
@@ -134,6 +211,7 @@ historical_agitators.2 = { #Louis Delescluze
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:FRA ?= this
@@ -142,13 +220,14 @@ historical_agitators.2 = { #Louis Delescluze
 		NOT = {
 			has_law_or_variant = law_type:law_council_republic
 		}
-		NOT = { has_global_variable = delescluze_spawn }
+		NOT = { is_template_used = fra_delescluze_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = fra_delescluze_character_template
 			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
 				if = {
 					limit = {
 						owner = {
@@ -162,7 +241,10 @@ historical_agitators.2 = { #Louis Delescluze
 			}
 			save_scope_as = historic_agitator_scope
 		}
-		set_global_variable = delescluze_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -222,6 +304,7 @@ historical_agitators.3 = { #Louis Blanqui
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:FRA ?= this
@@ -231,13 +314,14 @@ historical_agitators.3 = { #Louis Blanqui
 		NOT = {
 			has_law_or_variant = law_type:law_council_republic
 		}
-		NOT = { has_global_variable = blanqui_spawn }
+		NOT = { is_template_used = fra_blanqui_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = fra_blanqui_character_template
 			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
 				if = {
 					limit = {
 						owner = {
@@ -251,7 +335,10 @@ historical_agitators.3 = { #Louis Blanqui
 			}
 			save_scope_as = historic_agitator_scope
 		}
-		set_global_variable = blanqui_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -302,6 +389,7 @@ historical_agitators.4 = { #Emmeline Pankhurst
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		country_has_primary_culture = cu:british
@@ -312,15 +400,21 @@ historical_agitators.4 = { #Emmeline Pankhurst
 		NOT = {
 			has_law_or_variant = law_type:law_womens_suffrage
 		}
-		NOT = { has_global_variable = pankhurst_spawn }
+		NOT = { is_template_used = gbr_pankhurst_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = gbr_pankhurst_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = pankhurst_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -387,6 +481,7 @@ historical_agitators.5 = { #John Brown
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:USA ?= this
@@ -403,13 +498,16 @@ historical_agitators.5 = { #John Brown
 		NOT = {
 			has_law_or_variant = law_type:law_slavery_banned
 		}
-		NOT = { has_global_variable = jbrown_spawn }
+		NOT = { is_template_used = usa_john_brown_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = usa_john_brown_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
 		random_interest_group = {
 			limit = {
@@ -420,7 +518,10 @@ historical_agitators.5 = { #John Brown
 			}
 			save_scope_as = slaver_ig
 		}
-		set_global_variable = jbrown_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -509,6 +610,7 @@ historical_agitators.6 = { #Charles Maurras
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:FRA ?= this
@@ -520,13 +622,14 @@ historical_agitators.6 = { #Charles Maurras
 			has_variable = dreyfus_trial_exoneration
 			has_technology_researched = political_agitation
 		}
-		NOT = { has_global_variable = maurras_spawn }
+		NOT = { is_template_used = fra_maurras_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = fra_maurras_character_template
 			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
 				if = {
 					limit = {
 						owner = {
@@ -538,7 +641,6 @@ historical_agitators.6 = { #Charles Maurras
 			}
 			save_scope_as = historic_agitator_scope
 		}
-		set_global_variable = maurras_spawn
 		if = {
 			limit = {
 				any_character_in_void = {
@@ -550,13 +652,28 @@ historical_agitators.6 = { #Charles Maurras
 					has_variable = alfred_dreyfus_var
 				}
 				save_scope_as = alfred_dreyfus_scope
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:alfred_dreyfus_scope }
 	}
 
 	option = {
 		name = historical_agitators.6.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					divided_monarchists_ai_backs_legitimist = yes
+				}
+				add = 10
+			}
+		}
 		show_as_tooltip = {
 			create_character = {
 				template = fra_maurras_character_template
@@ -568,6 +685,9 @@ historical_agitators.6 = { #Charles Maurras
 	}
 	option = {
 		name = historical_agitators.6.b
+		ai_chance = {
+			base = 1
+		}
 		show_as_tooltip = {
 			create_character = {
 				template = fra_maurras_character_template
@@ -586,6 +706,18 @@ historical_agitators.6 = { #Charles Maurras
 	}
 	option = {
 		name = historical_agitators.6.c
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					OR = {
+						divided_monarchists_ai_backs_orleanist = yes
+						divided_monarchists_ai_backs_bonapartist = yes
+					}
+				}
+				add = 10
+			}
+		}
 		show_as_tooltip = {
 			create_character = {
 				template = fra_maurras_character_template
@@ -649,7 +781,12 @@ historical_agitators.7 = { #Giuseppe Mazzini
 				has_variable = mazzini_var
 			}
 			save_scope_as = historic_agitator_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -693,6 +830,7 @@ historical_agitators.8 = { #Napoleon III
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:FRA ?= this
@@ -715,12 +853,32 @@ historical_agitators.8 = { #Napoleon III
 		create_character = {
 			template = fra_napoleon_iii_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
 		name = historical_agitators.8.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					OR = {
+						divided_monarchists_ai_backs_orleanist = yes
+						divided_monarchists_ai_backs_legitimist = yes
+						divided_monarchists_ai_republican = yes
+					}
+				}
+				add = 10
+			}
+		}
 		show_as_tooltip = {
 			create_character = {
 				template = fra_napoleon_iii_character_template
@@ -742,6 +900,15 @@ historical_agitators.8 = { #Napoleon III
 	}
 	option = {
 		name = historical_agitators.8.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					divided_monarchists_ai_backs_bonapartist = yes
+				}
+				add = 10
+			}
+		}
 		show_as_tooltip = {
 			create_character = {
 				template = fra_napoleon_iii_character_template
@@ -774,6 +941,7 @@ historical_agitators.9 = { #Norton
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		OR = {
@@ -786,13 +954,16 @@ historical_agitators.9 = { #Norton
 		}
 		game_date > 1860.1.1
 		game_date < 1880.1.1
-		NOT = { has_global_variable = emperor_norton_spawn }
+		NOT = { is_template_used = usa_joshua_norton_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = usa_joshua_norton_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
 		random_scope_state = {
 			limit = {
@@ -801,13 +972,16 @@ historical_agitators.9 = { #Norton
 			}
 			save_scope_as = california_scope
 		}
-		set_global_variable = emperor_norton_spawn
 	}
 
 	cancellation_trigger = {
 		scope:historic_agitator_scope ?= {
 			is_character_alive = no
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -851,7 +1025,11 @@ historical_agitators.10 = { #Kropotkin
 	dlc = dlc004
 
 	trigger = {
-		has_dlc_feature = voice_of_the_people_content
+		# triggered by on_action - historical_agitators_yearly_events
+		OR = {
+			has_dlc_feature = voice_of_the_people_content
+			has_dlc_feature = ip5_content
+		}
 		empty_agitator_slots >= 1
 		c:RUS ?= this
 		ig:ig_trade_unions ?= {
@@ -861,7 +1039,7 @@ historical_agitators.10 = { #Kropotkin
 		game_date > 1872.1.1
 		game_date < 1917.1.1
 		has_technology_researched = anarchism
-		NOT = { has_global_variable = kropotkin_spawn }
+		NOT = { is_template_used = rus_pyotr_kropotkin_character_template }
 		NOT = { has_law_or_variant = law_type:law_council_republic }
 	}
 
@@ -869,14 +1047,20 @@ historical_agitators.10 = { #Kropotkin
 		create_character = {
 			template = rus_pyotr_kropotkin_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = kropotkin_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
 		name = historical_agitators.10.a
 		default_option = yes
-		scope:historic_agitator_scope = {
+		scope:historic_agitator_scope = { # modifier for Kropotkin's IG
 			interest_group ?= {
 				add_modifier = {
 					name = modifier_kropotkin_in_exile
@@ -884,7 +1068,26 @@ historical_agitators.10 = { #Kropotkin
 					is_decaying = yes
 				}
 			}
-			exile_character_with_martyrdom = yes
+		}
+		if = { # if the player has ip5 and the country has access to the Siberian Exile Pool, Kropotkin goes to Siberia
+			limit = {
+				has_dlc_feature = regional_exile_pools
+				ROOT = { has_regional_exile_pool_access = siberian_exile_pool }
+			}
+			scope:historic_agitator_scope = {
+				custom_tooltip = {
+					text = historic_agitator_to_siberia_10_tt
+					exile_character_with_martyrdom_to_pool = {
+							EXILE_POOL = siberian_exile_pool
+							YEARS = 10
+					}
+				}
+			}
+		}
+		else = { # otherwise, Kropotkin gets exiled
+			scope:historic_agitator_scope = {
+				exile_character_with_martyrdom = yes
+			}
 		}
 	}
 	option = {
@@ -959,7 +1162,11 @@ historical_agitators.11 = { #Bakunin
 	dlc = dlc004
 
 	trigger = {
-		has_dlc_feature = voice_of_the_people_content
+		# triggered by on_action - historical_agitators_yearly_events
+		OR = {
+			has_dlc_feature = voice_of_the_people_content
+			has_dlc_feature = ip5_content
+		}
 		empty_agitator_slots >= 1
 		c:RUS ?= this
 		ig:ig_trade_unions ?= {
@@ -969,7 +1176,7 @@ historical_agitators.11 = { #Bakunin
 		game_date > 1863.1.1
 		game_date < 1880.1.1
 		has_technology_researched = anarchism
-		NOT = { has_global_variable = bakunin_spawn }
+		NOT = { is_template_used = rus_mikhail_bakunin_character_template }
 		NOT = { has_law_or_variant = law_type:law_council_republic }
 	}
 
@@ -977,8 +1184,14 @@ historical_agitators.11 = { #Bakunin
 		create_character = {
 			template = rus_mikhail_bakunin_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = bakunin_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -1021,8 +1234,21 @@ historical_agitators.12 = { #Trotsky
 	dlc = dlc004
 
 	trigger = {
-		has_dlc_feature = voice_of_the_people_content
-		empty_agitator_slots >= 1
+		# triggered by on_action - historical_agitators_yearly_events
+		OR = {
+			has_dlc_feature = voice_of_the_people_content
+			has_dlc_feature = ip5_content
+		}
+		OR = {
+			empty_agitator_slots >= 1
+			AND = {
+				empty_agitator_slots = 0
+				any_scope_character = {
+					has_role_of_type = agitator
+					is_historical = no
+				}
+			}
+		}
 		c:RUS ?= this
 		any_scope_state = {
 			state_region = {
@@ -1033,16 +1259,45 @@ historical_agitators.12 = { #Trotsky
 		game_date > 1898.1.1
 		game_date < 1917.1.1
 		has_technology_researched = political_agitation
-		NOT = { has_global_variable = trotsky_spawn }
+		NOT = { is_template_used = rus_leon_trotsky_character_template }
 		NOT = { has_law_or_variant = law_type:law_council_republic }
 	}
 
 	immediate = {
+		if = {
+			limit = {
+				empty_agitator_slots = 0
+				any_scope_character = {
+					has_role_of_type = agitator
+					is_historical = no
+				}
+			}
+			random_scope_character = {
+				limit = {
+					has_role_of_type = agitator
+					is_historical = no
+				}
+				save_scope_as = generic_forgettable_agitator
+			}
+		}
 		create_character = {
 			template = rus_leon_trotsky_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+				if = {
+					limit = {
+						owner.ig:ig_armed_forces ?= {
+							has_ideology = ideology:ideology_militant
+						}
+					}
+					set_interest_group = owner.ig:ig_armed_forces
+				}
+				else = {
+					set_variable = red_army_candidate
+				}
+			}
 		}
-		set_global_variable = trotsky_spawn
 		random_scope_state = {
 			limit = {
 				state_region = {
@@ -1052,6 +1307,10 @@ historical_agitators.12 = { #Trotsky
 			}
 			save_scope_as = trotsky_state
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -1064,8 +1323,25 @@ historical_agitators.12 = { #Trotsky
 				is_decaying = yes
 			}
 		}
-		scope:historic_agitator_scope = {
-			exile_character_with_martyrdom = yes
+		if = { # if the player has ip5 and the country has access to the Siberian Exile Pool, Trotsky actually goes to Siberia
+			limit = {
+				has_dlc_feature = regional_exile_pools
+				ROOT = { has_regional_exile_pool_access = siberian_exile_pool }
+			}
+			scope:historic_agitator_scope = {
+				custom_tooltip = {
+					text = historic_agitator_to_siberia_10_tt
+					exile_character_with_martyrdom_to_pool = {
+						EXILE_POOL = siberian_exile_pool
+						YEARS = 10
+					}
+				}
+			}
+		}
+		else = { # otherwise, Trotsky gets regular exile
+			scope:historic_agitator_scope = {
+				exile_character_with_martyrdom = yes
+			}
 		}
 	}
 	option = {
@@ -1084,6 +1360,28 @@ historical_agitators.12 = { #Trotsky
 			add_radicals_in_state = {
 				value = medium_radicals
 				pop_type = laborers
+			}
+		}
+
+		if = {
+			limit = {
+				exists = scope:generic_forgettable_agitator
+			}
+			scope:generic_forgettable_agitator = {
+				if = { # if the player has ip5 and the country has access to the Siberian Exile Pool, send the generic agitator to siberia
+					limit = {
+						has_dlc_feature = regional_exile_pools
+						ROOT = { has_regional_exile_pool_access = siberian_exile_pool }
+					}
+					exile_character = {
+						EXILE_POOL = siberian_exile_pool
+						YEARS = 10
+						value = yes
+					}
+				}
+				else = { # otherwise, generic agitator gets regular exile, no martyrdom
+					exile_character = yes
+				}
 			}
 		}
 	}
@@ -1110,14 +1408,18 @@ historical_agitators.13 = { #Dabrowski
 	dlc = dlc004
 
 	trigger = {
-		has_dlc_feature = voice_of_the_people_content
+		# triggered by on_action - historical_agitators_yearly_events
+		OR = {
+			has_dlc_feature = voice_of_the_people_content
+			has_dlc_feature = ip5_content
+		}
 		empty_agitator_slots >= 1
 		any_scope_state = {
 			state_region = s:STATE_VOLHYNIA
 		}
 		game_date > 1862.1.1
 		game_date < 1896.1.1
-		NOT = { has_global_variable = dabrowski_spawn }
+		NOT = { is_template_used = rus_jaroslaw_dabrowski_character_template }
 		NOT = { has_law_or_variant = law_type:law_council_republic }
 	}
 
@@ -1125,20 +1427,36 @@ historical_agitators.13 = { #Dabrowski
 		create_character = {
 			template = rus_jaroslaw_dabrowski_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = dabrowski_spawn
 		random_scope_state = {
 			limit = {
 				state_region = s:STATE_VOLHYNIA
 			}
 			save_scope_as = dabrowski_state
 		}
+		if = {
+			limit = {
+				exists = c:POL
+				any_subject_or_below = {
+					c:POL ?= this
+				}
+			}
+			save_scope_as = poland_scope
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
 		name = historical_agitators.13.a
 		custom_tooltip = {
 			text = jaroslaw_in_prison_tt
+			revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 			scope:historic_agitator_scope = {
 				retire_character = yes
 			}
@@ -1148,15 +1466,39 @@ historical_agitators.13 = { #Dabrowski
 	option = {
 		name = historical_agitators.13.b
 		default_option = yes
-		scope:historic_agitator_scope = {
-			exile_character_with_martyrdom = yes
+		if = { # if the player has ip5 and the country has access to the Siberian Exile Pool, Dabrowski goes to Siberia
+			limit = {
+				has_dlc_feature = regional_exile_pools
+				ROOT = { has_regional_exile_pool_access = siberian_exile_pool }
+			}
+			scope:historic_agitator_scope = {
+				custom_tooltip = {
+					text = historic_agitator_to_siberia_10_tt
+					exile_character_with_martyrdom_to_pool = {
+							EXILE_POOL = siberian_exile_pool
+							YEARS = 10
+					}
+				}
+			}
+		}
+		else = { # otherwise, Dabrowski gets exiled
+			scope:historic_agitator_scope = {
+				exile_character_with_martyrdom = yes
+			}
 		}
 	}
 	option = {
 		name = historical_agitators.13.c
-		show_as_tooltip = {
-			create_character = {
-				template = rus_jaroslaw_dabrowski_character_template
+		trigger = {
+			exists = c:POL
+			any_subject_or_below = {
+				c:POL ?= this
+			}
+		}
+		scope:historic_agitator_scope = {
+			custom_tooltip = {
+				text = dabrowski_to_poland_tt
+				transfer_character = c:POL
 			}
 		}
 		every_scope_state = {
@@ -1194,20 +1536,23 @@ historical_agitators.14 = { #Dickens
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		country_has_primary_culture = cu:british
 		is_in_geographic_region = geographic_region_europe
 		game_date < 1870.1.1
-		NOT = { has_global_variable = dickens_spawn }
+		NOT = { is_template_used = gbr_charles_dickens_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = gbr_charles_dickens_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = dickens_spawn
 		random_country = {
 			limit = {
 				country_has_primary_culture = cu:french
@@ -1217,6 +1562,10 @@ historical_agitators.14 = { #Dickens
 		capital = {
 			save_scope_as = capital_scope
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -1277,6 +1626,7 @@ historical_agitators.15 = { #Luxemburg
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		any_scope_state = {
@@ -1284,7 +1634,7 @@ historical_agitators.15 = { #Luxemburg
 		}
 		game_date > 1889.1.1
 		has_technology_researched = socialism
-		NOT = { has_global_variable = luxemburg_spawn }
+		NOT = { is_template_used = pol_rosa_luxemburg_character_template }
 		NOT = { has_law_or_variant = law_type:law_council_republic }
 	}
 
@@ -1292,14 +1642,20 @@ historical_agitators.15 = { #Luxemburg
 		create_character = {
 			template = pol_rosa_luxemburg_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = luxemburg_spawn
 		random_scope_state = {
 			limit = {
 				state_region = s:STATE_LESSER_POLAND
 			}
 			save_scope_as = poland_scope
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -1347,21 +1703,28 @@ historical_agitators.16 = { #Sorel
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:FRA ?= this
 		game_date > 1905.1.1
 		game_date < 1922.1.1
 		has_technology_researched = socialism
-		NOT = { has_global_variable = sorel_spawn }
+		NOT = { is_template_used = fra_georges_sorel_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = fra_georges_sorel_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = sorel_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -1396,6 +1759,7 @@ historical_agitators.16 = { #Sorel
 			can_research = political_agitation
 		}
 		hidden_effect = {
+			revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 			scope:historic_agitator_scope = {
 				kill_character = {
 					hidden = yes
@@ -1427,6 +1791,7 @@ historical_agitators.17 = { #Boulanger
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:FRA ?= this
@@ -1436,15 +1801,17 @@ historical_agitators.17 = { #Boulanger
 			NOT = { owner = ROOT }
 		}
 		has_technology_researched = political_agitation
-		NOT = { has_global_variable = boulanger_spawn }
+		NOT = { is_template_used = fra_georges_boulanger_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = fra_georges_boulanger_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = boulanger_spawn
 		random_state_in_france = {
 			limit = {
 				NOT = {
@@ -1455,6 +1822,10 @@ historical_agitators.17 = { #Boulanger
 				save_scope_as = revenge_country
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -1546,13 +1917,14 @@ historical_agitators.18 = { #Lassalle
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		country_has_primary_culture = cu:north_german
 		game_date > 1848.1.1
 		game_date < 1885.1.1
 		has_technology_researched = dialectics
-		NOT = { has_global_variable = lassalle_spawn }
+		NOT = { is_template_used = pru_ferdinand_lassalle_character_template }
 		NOT = { has_law_or_variant = law_type:law_council_republic }
 	}
 
@@ -1560,14 +1932,20 @@ historical_agitators.18 = { #Lassalle
 		create_character = {
 			template = pru_ferdinand_lassalle_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = lassalle_spawn
 	}
 
 	cancellation_trigger = {
 		NOT = {
 			exists = scope:historic_agitator_scope
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -1594,7 +1972,7 @@ historical_agitators.18 = { #Lassalle
 			interest_group ?= {
 				add_modifier ={
 					name = modifier_agent_of_the_sovereign_ig
-					days = normal_modifier_time
+					days = very_long_modifier_time
 				}
 			}
 		}
@@ -1622,6 +2000,7 @@ historical_agitators.19 = { #Gama
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:BRZ ?= this
@@ -1630,15 +2009,21 @@ historical_agitators.19 = { #Gama
 		NOT = {
 			has_law_or_variant = law_type:law_slavery_banned
 		}
-		NOT = { has_global_variable = gama_spawn }
+		NOT = { is_template_used = brz_luis_gama_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = brz_luis_gama_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = gama_spawn
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {
@@ -1700,6 +2085,7 @@ historical_agitators.20 = { #Hugo
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		c:FRA ?= this
@@ -1730,18 +2116,26 @@ historical_agitators.20 = { #Hugo
 				}
 			}
 		}
-		NOT = { has_global_variable = victor_hugo_spawn }
+		NOT = { is_template_used = fra_victor_hugo_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = fra_victor_hugo_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
-		set_global_variable = victor_hugo_spawn
 		ruler = {
 			save_scope_as = ruler_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:ruler_scope }
 	}
 
 	option = {
@@ -1770,6 +2164,7 @@ historical_agitators.20 = { #Hugo
 	option = {
 		name = historical_agitators.20.c
 		hidden_effect = {
+			revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 			scope:historic_agitator_scope = {
 				retire_character = yes
 			}
@@ -1806,6 +2201,7 @@ historical_agitators.21 = { #Sun
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		empty_agitator_slots >= 1
 		OR = {
@@ -1823,18 +2219,21 @@ historical_agitators.21 = { #Sun
 				is_treaty_port = yes
 			}
 		}
-		NOT = { has_global_variable = sun_yat_sen_spawn }
+		NOT = { is_template_used = chi_sun_yat_sen_character_template }
 	}
 
 	immediate = {
 		create_character = {
 			template = chi_sun_yat_sen_character_template
 			save_scope_as = historic_agitator_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
 		ruler = {
 			save_scope_as = monarch_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
-		set_global_variable = sun_yat_sen_spawn
 		random_scope_state = {
 			limit = {
 				any_neighbouring_state = {
@@ -1843,6 +2242,11 @@ historical_agitators.21 = { #Sun
 			}
 			save_scope_as = sunyatsen_state
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:monarch_scope }
 	}
 
 	option = {
@@ -1883,6 +2287,7 @@ historical_agitators.22 = { #John Frost
 	dlc = dlc004
 
 	trigger = {
+		# triggered by on_action - historical_agitators_yearly_events
 		has_dlc_feature = voice_of_the_people_content
 		NOR = {
 			has_law_or_variant = law_type:law_universal_suffrage
@@ -1910,6 +2315,7 @@ historical_agitators.22 = { #John Frost
 				has_variable = john_frost_var
 			}
 			save_scope_as = historic_agitator_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		random_country = {
 			limit = {
@@ -1922,9 +2328,14 @@ historical_agitators.22 = { #John Frost
 		}
 	}
 
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
+	}
+
 	option = {
 		name = historical_agitators.22.a
 		default_option = yes
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 		scope:historic_agitator_scope = {
 			kill_character = yes
 		}
@@ -1978,10 +2389,15 @@ historical_agitators.23 = { #Florence Nightingale
 	immediate = {
 		random_scope_character = {
 			limit = {
-				has_variable = nightingale_var
+				has_template = GBR_florence_nightingale
 			}
 			save_scope_as = historic_agitator_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:historic_agitator_scope }
 	}
 
 	option = {

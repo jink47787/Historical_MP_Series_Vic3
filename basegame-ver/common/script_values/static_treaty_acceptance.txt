@@ -39,9 +39,46 @@ static_treaty_acceptance = {
 		}
 	}
 
+	subtract = {
+		desc = "DIPLOMATIC_ACCEPTANCE_ONE_TIME_ARTICLES"
+
+		if = {
+			limit = {
+				exists = scope:has_one_time_articles
+			}
+			value = 1000
+		}
+	}
+
 	add = {
-		value = "scope:other_country.modifier:country_diplomatic_reputation_add"
 		desc = "DIPLOMATIC_REPUTATION_REASON"
+		value = "scope:other_country.modifier:country_diplomatic_reputation_add"
+		if = {
+			limit = {
+				root = {
+					NOT = {
+						has_law_or_variant = law_type:law_council_republic
+					}
+				}
+				scope:other_country = {
+					has_law_or_variant = law_type:law_council_republic
+				}
+			}
+			subtract = {
+				value = "scope:other_country.modifier:country_other_country_socialist_government_hostility_impact_add"
+				multiply = {
+					value = 1
+					add = "scope:other_country.modifier:country_other_country_socialist_government_hostility_impact_mult"
+				}
+			}
+			subtract = {
+				value = "scope:other_country.modifier:country_other_country_socialist_government_hostility_impact_add"
+				multiply = {
+					value = 1
+					add = "scope:other_country.modifier:country_other_country_socialist_government_hostility_impact_mult"
+				}
+			}
+		}
 	}
 
 	subtract = {
@@ -138,13 +175,15 @@ static_treaty_acceptance = {
 		}
 		if = {
 			limit = {
-				has_attitude = {
-					who = scope:other_country
-					attitude = cooperative
-				}
-				has_attitude = {
-					who = scope:other_country
-					attitude = protective
+				OR = {
+					has_attitude = {
+						who = scope:other_country
+						attitude = cooperative
+					}
+					has_attitude = {
+						who = scope:other_country
+						attitude = protective
+					}
 				}
 			}
 			value = 10
@@ -180,6 +219,58 @@ static_treaty_acceptance = {
 				}
 			}
 			value = -50
+		}
+	}
+
+	add = {
+		desc = "DIPLOMATIC_ACCEPTANCE_OVERLORD_ATTITUDE"
+		if = {
+			limit = {
+				is_subject = yes
+				NOT = { scope:other_country = top_overlord }
+				NOR = {
+					has_attitude = {
+						who = top_overlord
+						attitude = rebellious
+					}
+					has_attitude = {
+						who = top_overlord
+						attitude = defiant
+					}
+					has_attitude = {
+						who = top_overlord
+						attitude = antagonistic
+					}
+					has_attitude = {
+						who = top_overlord
+						attitude = belligerent
+					}
+					has_attitude = {
+						who = top_overlord
+						attitude = domineering
+					}
+				}
+				top_overlord = {
+					OR = {
+						has_attitude = {
+							who = scope:other_country
+							attitude = antagonistic
+						}
+						has_attitude = {
+							who = scope:other_country
+							attitude = domineering
+						}
+						has_attitude = {
+							who = scope:other_country
+							attitude = belligerent
+						}
+						any_rival_country = {
+							this = scope:other_country
+						}
+					}
+				}
+			}
+			value = -25
 		}
 	}
 
@@ -412,7 +503,7 @@ static_treaty_acceptance = {
 	if = {
 		limit = {
 			NOT = { exists = scope:is_renegotiation }
-			scope:treaty_options ?= {			
+			scope:treaty_options ?= {
 				is_historical_treaty = yes
 				remaining_binding_period > 0
 			}
@@ -420,6 +511,20 @@ static_treaty_acceptance = {
 		add = {
 			desc = "TRIGGER_IS_HISTORICAL_TREATY_NONE"
 			value = 1000
+		}
+	}
+	else_if = {
+		limit = {
+			exists = scope:is_renegotiation
+			exists = scope:bad_faith_factor
+			scope:treaty_options.amended_treaty ?= {
+				is_historical_treaty = yes
+				remaining_binding_period > 0
+			}
+		}
+		add = {
+			desc = "TRIGGER_IS_HISTORICAL_TREATY_NONE"
+			value = -1000
 		}
 	}
 }
@@ -430,8 +535,8 @@ threaten_naval_hostilities_acceptance = {
 		value = "scope:other_country.ai_navy_comparison(root)"
 		multiply = 5
 		max = 25
-		min = 5 # You have to have higher navy power projection to use this at all
-		desc = "country_navy_power_projection"
+		min = 5 # You have to have a stronger navy to use this at all
+		desc = "DIPLOMATIC_ACCEPTANCE_NAVY_COMBAT_POWER"
 	}
 
 	# Vulnerability - how much do we rely on our coast & trade
@@ -543,7 +648,7 @@ ai_threaten_naval_hostilities_chance = {
 
 		if = { # Less likely unless we have a hostile attitude
 			limit = {
-				OR = {
+				NOR = {
 					has_attitude = {
 						who = scope:other_country
 						attitude = antagonistic
@@ -559,6 +664,13 @@ ai_threaten_naval_hostilities_chance = {
 				}
 			}
 			multiply = 0.33
+		}
+
+		multiply = { # More likely when demanding relief from a strait controller that is hurting us
+			value = scope:strait_grievance
+			multiply = 0.05
+			add = 1
+			max = 3
 		}
 	}
 }

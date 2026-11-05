@@ -1,7 +1,7 @@
 # Structure
 
 	lesson_name = {	# arbitrary name
-		chain = X				# The lesson belongs to this lesson chain, current chain lessons are preferred when picking which lesson to show.
+		chain = <tutorial_lesson_chain>				# The lesson belongs to this lesson chain, current chain lessons are preferred when picking which lesson to show.
 
 		start_automatically = yes/no	# Does the lesson start automatically if the trigger is fulfilled? Use the start_tutorial_lesson effect to manually start such lessons on user actions. Default: yes
 		trigger = { ... }		# The trigger has to be true for the lesson to start.

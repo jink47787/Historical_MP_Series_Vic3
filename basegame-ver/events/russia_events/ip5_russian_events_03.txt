@@ -1,0 +1,648 @@
+﻿namespace = russia_events
+
+# To Double or Not to Double
+russia_events.31 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = russia_events.31.t
+	desc = russia_events.31.d
+	flavor = russia_events.31.f
+
+	event_image = {
+		video = "europenorthamerica_capitalists_meeting"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = { # triggered by on_action - russia_yearly_events
+		has_dlc_feature = ip5_content
+		c:RUS ?= this
+		has_technology_researched = electric_telegraph
+		is_at_war = no
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				any_scope_character = {
+					has_template = rus_grand_duke_dmitri_pavlovich
+				}
+			}
+			save_scope_as = relevant_character
+		}
+	}
+
+	option = {
+		name = russia_events.31.a
+		default_option = yes
+		add_modifier = {
+			name = modifier_doubling_origin
+			days = normal_modifier_time
+		}
+	}
+
+	option = {
+		name = russia_events.31.b # option if Grand Duke Dmitri is actually around
+		trigger = {
+			exists = scope:relevant_character
+		}
+		scope:relevant_character = {
+			add_modifier = {
+				name = modifier_early_doubler
+				days = normal_modifier_time
+			}
+		}
+	}
+}
+
+# Realists Revolt, based on Revolt of the Fourteen
+russia_events.32 = {
+	type = country_event
+	placement = scope:relevant_state
+
+	duration = 3
+
+	title = russia_events.32.t
+	desc = russia_events.32.d
+	flavor = russia_events.32.f
+
+	event_image = {
+		video = "europenorthamerica_art_gallery"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = { # triggered by on_action - russia_yearly_events
+		has_dlc_feature = ip5_content
+		c:RUS ?= this
+		has_technology_researched = realism
+		OR = {
+			has_law_or_variant = law_type:law_outlawed_dissent
+			has_law_or_variant = law_type:law_censorship
+		}
+		any_scope_state = {
+			is_incorporated = yes
+			has_building = building_art_academy
+		}
+	}
+
+	immediate = {
+		set_variable = realists_revolt_happened_var
+		random_scope_state = {
+			limit = {
+				is_incorporated = yes
+				has_building = building_art_academy
+			}
+			save_scope_as = relevant_state
+		}
+	}
+
+	option = {
+		name = russia_events.32.a # Actually happened. Alexander II ordered police supervision of the Revolt of the Fourteen.
+		default_option = yes
+
+		set_variable = surveilled_artists_var
+
+		add_modifier = {
+			name = modifier_surveilled_artists
+			days = normal_modifier_time
+		}
+
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				OR = {
+					law_stance = {
+						law = law_type:law_censorship
+						value > neutral
+					}
+					law_stance = {
+						law = law_type:law_outlawed_dissent
+						value > neutral
+					}
+				}
+			}
+			add_modifier = {
+				name = modifier_ig_surveilled_artists_approval
+				days = normal_modifier_time
+			}
+		}
+	}
+
+	option = {
+		name = russia_events.32.b
+
+		scope:relevant_state = {
+			add_modifier = {
+				name = modifier_artel_of_artists
+				days = normal_modifier_time
+			}
+		}
+
+		scope:relevant_state = {
+			add_loyalists_in_state = {
+				pop_type = academics
+				value = medium_radicals
+			}
+		}
+	}
+}
+
+# Peredvizhniki, aka The Wanderers
+russia_events.33 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = russia_events.33.t
+	desc = russia_events.33.d
+	flavor = russia_events.33.f
+
+	event_image = {
+		video = "europenorthamerica_art_gallery"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = { # triggered by on_action - russia_yearly_events
+		has_dlc_feature = ip5_content
+		c:RUS ?= this
+		has_variable = realists_revolt_happened_var
+		any_scope_state = {
+			is_incorporated = yes
+			is_production_method_active = {
+					building_type = building_art_academy
+					production_method = pm_realist_art
+
+			}
+		}
+	}
+
+	immediate = {
+		remove_variable = realists_revolt_happened_var
+	}
+
+	option = {
+		name = russia_events.33.a
+		default_option = yes
+		if = {
+			limit = {
+				has_variable = surveilled_artists_var
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = yes
+					is_production_method_active = {
+							building_type = building_art_academy
+							production_method = pm_realist_art
+
+					}
+				}
+				add_modifier = {
+					name = modifier_peredvizhniki_art
+					days = long_modifier_time
+					multiplier = 0.5
+					is_decaying = yes
+				}
+			}
+		}
+		else = {
+			every_scope_state = {
+				limit = {
+					is_incorporated = yes
+					is_production_method_active = {
+							building_type = building_art_academy
+							production_method = pm_realist_art
+
+					}
+				}
+				add_modifier = {
+					name = modifier_peredvizhniki_art
+					days = long_modifier_time
+					is_decaying = yes
+				}
+			}
+		}
+		if = {
+			limit = {
+				AND = {
+					has_variable = surveilled_artists_var
+					any_political_movement = {
+						OR = {
+							is_political_movement_type = movement_nihilist
+							is_political_movement_type = movement_liberal
+							is_political_movement_type = movement_socialist
+						}
+					}
+				}
+			}
+			every_political_movement = {
+				limit = {
+					OR = {
+						is_political_movement_type = movement_nihilist
+						is_political_movement_type = movement_liberal
+						is_political_movement_type = movement_socialist
+					}
+				}
+				add_modifier = {
+					name = modifier_peredvizhniki_political_movement
+					days = normal_modifier_time
+					multiplier = 0.5
+					is_decaying = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = russia_events.33.b
+		trigger = {
+			has_law_or_variant = law_type:law_serfdom
+		}
+		every_interest_group = {
+			limit = {
+				is_marginal = no
+				law_stance = {
+					law = law_type:law_serfdom
+					value >= neutral
+				}
+			}
+			add_modifier = {
+				name = modifier_ig_approves_peredvizhniki_rejection
+				days = normal_modifier_time
+			}
+		}
+		if = {
+			limit = {
+				AND = {
+					has_variable = surveilled_artists_var
+				}
+			}
+			every_scope_state = {
+				limit = {
+					is_incorporated = yes
+					is_production_method_active = {
+							building_type = building_art_academy
+							production_method = pm_realist_art
+
+					}
+				}
+				add_loyalists_in_state = {
+					strata = upper
+					value = medium_radicals
+				}
+			}
+		}
+		else = {
+			every_scope_state = {
+				limit = {
+					is_incorporated = yes
+					is_production_method_active = {
+							building_type = building_art_academy
+							production_method = pm_realist_art
+
+					}
+				}
+				add_loyalists_in_state = {
+					strata = upper
+					value = small_radicals
+				}
+			}
+		}
+	}
+
+	after = {
+		if = {
+			limit = {
+				has_variable = surveilled_artists_var
+			}
+			remove_variable = surveilled_artists_var
+		}
+	}
+}
+
+# Grand Exhibition, an event for Russia to decide if they want to participate
+russia_events.34 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = russia_events.34.t
+	desc = russia_events.34.d
+	flavor = russia_events.34.f
+
+	event_image = {
+		video = "ip5_theater"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = { # triggered by on_action - on_yearly_events
+		has_dlc_feature = ip5_content
+		NAND = {
+			has_law_or_variant = law_type:law_isolationism
+			has_law_or_variant = law_type:law_closed_borders
+		}
+		c:RUS ?= this
+		is_at_war = no
+		any_country_in_europe = {
+			relations:root >= relations_threshold:neutral
+			is_at_war = no
+			has_journal_entry = je_grand_exhibition
+		}
+	}
+
+	immediate = {
+		ROOT = {
+			save_scope_as = russia_scope
+		}
+		random_country_in_europe = {
+			limit = {
+				relations:root >= relations_threshold:neutral
+				is_at_war = no
+				has_journal_entry = je_grand_exhibition
+			}
+			random_scope_state = {
+				limit = {
+					is_capital = yes
+				}
+				save_scope_as = relevant_state
+			}
+			save_scope_as = relevant_country
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			scope:relevant_country ?= {
+				NOT = {
+					has_journal_entry = je_grand_exhibition
+				}
+			}
+			ROOT = {
+				is_at_war = yes
+			}
+			scope:relevant_country ?= {
+				OR = {
+					relations:root < relations_threshold:neutral
+					is_at_war = yes
+				}
+			}
+		}
+	}
+
+	option = {
+		name = russia_events.34.a
+		default_option = yes
+		custom_tooltip = {
+			text = russia_did_attend_worlds_fair_tt
+		}
+		scope:relevant_country ?= {
+			post_notification = russia_world_fair_participant_message
+			create_diplomatic_catalyst = {
+				type = catalyst_event_positive
+				target = scope:russia_scope
+			}
+			change_relations = {
+				country = scope:russia_scope
+				value = 5
+			}
+			trigger_event = { id = russia_events.35 days = 7 popup = yes }
+		}
+		add_modifier = {
+			name = modifier_russia_participation_cost # costs money
+			multiplier = money_amount_multiplier_very_small
+			days = short_modifier_time
+		}
+		add_modifier = {
+			name = modifier_russia_agricultural_showcase
+			days = normal_modifier_time
+		}
+	}
+
+	option = {
+		name = russia_events.34.b # Izhevsk Arms Plant had an exhibit at the 1900 World Fair
+		trigger = {
+			any_company = {
+				is_company_type = company_izhevsk_arms_plant
+				company_is_prosperous = yes
+			}
+		}
+		custom_tooltip = {
+			text = russia_did_attend_worlds_fair_tt
+		}
+		scope:relevant_country ?= {
+			post_notification = russia_world_fair_participant_message
+			create_diplomatic_catalyst = {
+				type = catalyst_event_positive
+				target = scope:russia_scope
+			}
+			change_relations = {
+				country = scope:russia_scope
+				value = 5
+			}
+			trigger_event = { id = russia_events.35 days = 7 popup = yes }
+		}
+		add_modifier = {
+			name = modifier_russia_participation_cost # costs money
+			multiplier = money_amount_multiplier_very_small
+			days = short_modifier_time
+		}
+		add_modifier = {
+			name = modifier_russia_armaments_showcase
+			days = normal_modifier_time
+		}
+	}
+
+	option = {
+		name = russia_events.34.c
+		custom_tooltip = {
+			text = russia_did_not_attend_worlds_fair_tt
+		}
+	}
+}
+
+russia_events.35 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = russia_events.35.t
+	desc = russia_events.35.d
+	flavor = russia_events.35.f
+
+	event_image = {
+		video = "unspecific_world_fair"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = {  # triggered from russia_events.34.a or russia_events.34.b
+
+	}
+
+	immediate = {
+		set_variable = russia_attends_european_world_fair_var
+		ROOT = {
+			save_scope_as = relevant_country
+		}
+		c:RUS ?= {
+			save_scope_as = russia_scope
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			ROOT = {
+				NOT = {
+					has_journal_entry = je_grand_exhibition
+				}
+			}
+			ROOT = {
+				is_at_war = yes
+			}
+			c:RUS ?= {
+				OR = {
+					relations:root < relations_threshold:neutral
+					is_at_war = yes
+				}
+			}
+		}
+	}
+	option = {
+		name = russia_events.35.a
+		default_option = yes
+		add_modifier = {
+			name = modifier_russia_participation_prestige
+			days = normal_modifier_time
+		}
+		c:RUS ?= {
+			post_notification = russia_world_fair_showcase_message
+			create_diplomatic_catalyst = {
+				type = catalyst_event_positive
+				target = root
+			}
+			change_relations = {
+				country = root
+				value = 5
+			}
+			add_modifier = {
+				name = modifier_russia_expo_research_speed
+				days = moderately_long_modifier_time
+			}
+		}
+	}
+}
+
+namespace = chartering_the_stanitsas
+
+chartering_the_stanitsas.1 = { # The hosts petition for land on a newly gained frontier
+	type = country_event
+	placement = scope:cossack_frontier_state
+
+	duration = 3
+
+	title = chartering_the_stanitsas.1.t
+	desc = chartering_the_stanitsas.1.d
+	flavor = chartering_the_stanitsas.1.f
+
+	event_image = {
+		video = "ep1_cossacks"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	dlc = dlc019
+
+	trigger = {  # triggered from on_action - chartering_the_stanitsas_state_gained
+
+	}
+
+	immediate = {
+		set_variable = {
+			name = cossack_request_state_cooldown
+			days = normal_modifier_time
+		}
+		random_scope_state = {
+			limit = {
+				has_building = building_cossack_host
+				state_region = {
+					OR = {
+						this = s:STATE_ROSTOV
+						this = s:STATE_KUBAN
+						this = s:STATE_URALSK
+						this = s:STATE_ASTRAKHAN
+					}
+				}
+			}
+			save_scope_as = cossack_host_state
+		}
+	}
+
+	option = {
+		name = chartering_the_stanitsas.1.a
+		add_modifier = {
+			name = modifier_chartering_the_stanitsas_expense
+			days = short_modifier_time
+			multiplier = money_amount_multiplier_medium
+		}
+		add_modifier = {
+			name = modifier_chartering_the_stanitsas_host_approval
+			days = normal_modifier_time
+		}
+		scope:cossack_frontier_state ?= {
+			add_modifier = {
+				name = modifier_chartering_the_stanitsas_settlement
+				days = long_modifier_time
+			}
+			establish_cossack_host = yes
+		}
+	}
+
+	option = {
+		name = chartering_the_stanitsas.1.b
+		default_option = yes
+		add_modifier = {
+			name = modifier_chartering_the_stanitsas_native_approval
+			days = normal_modifier_time
+		}
+		scope:cossack_frontier_state ?= {
+			add_modifier = {
+				name = modifier_chartering_the_stanitsas_open_frontier
+				days = long_modifier_time
+			}
+		}
+	}
+}

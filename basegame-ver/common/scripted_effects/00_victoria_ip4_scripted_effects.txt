@@ -379,6 +379,12 @@ ip4_coup_victory_effect = {
 	ROOT = { # For notifications
 		save_scope_as = coup_country
 	}
+	if = {
+		limit = {
+			country_has_voting_franchise = yes
+		}
+		set_variable = { name = coup_ended_democracy_var years = 1 }
+	}
 	ip4_coup_victory_government_effects = yes
 	ip4_coup_victory_law_effects = yes
 	ip4_coup_victory_special_effects = yes
@@ -617,10 +623,7 @@ ip4_coup_victory_technical_effects = {
 		}
 		post_notification = successful_coup_in_country
 	}
-	every_diplomatically_relevant_country = {
-		limit = {
-			ROOT.var:coup_sponsor ?= this
-		}
+	ROOT.var:coup_sponsor ?= {
 		post_notification = successful_orchestrated_coup_in_country
 	}
 	if = {
@@ -1752,28 +1755,39 @@ iberia_calculate_shared_laws = {
 	}
 }
 
-upgrade_moderniser_movement_effect = {
+mutate_moderniser_movement_effect = {
+	random_political_movement = {
+		limit = {
+			is_political_movement_type = movement_modernizer
+		}
+		save_scope_as = modernizer_movement
+	}
 	if = {
 		limit = {
-			owner = {
-				any_political_movement = {
-					is_political_movement_type = movement_modernizer
-					has_core_ideology = ideology:ideology_modernizer_movement_1
-				}
-				NOR = {
-					has_law_or_variant = law_type:law_peasant_levies
-					has_law_or_variant = law_type:law_guild_system
-				}
+			scope:modernizer_movement ?= {
+				has_core_ideology = ideology:ideology_modernizer_movement_1
+			}
+			NOR = {
+				has_law_or_variant = law_type:law_peasant_levies
+				has_law_or_variant = law_type:law_guild_system
 			}
 		}
-		owner = {
-			random_political_movement = {
-				limit = {
-					is_political_movement_type = movement_modernizer
-					has_core_ideology = ideology:ideology_modernizer_movement_1
-				}
-				set_core_ideology = ideology_modernizer_movement_2
+		scope:modernizer_movement ?= {
+			set_core_ideology = ideology_modernizer_movement_2
+		}
+	}
+	else_if = {
+		limit = {
+			scope:modernizer_movement ?= {
+				has_core_ideology = ideology:ideology_modernizer_movement_2
 			}
+			OR = {
+				has_law_or_variant = law_type:law_peasant_levies
+				has_law_or_variant = law_type:law_guild_system
+			}
+		}
+		scope:modernizer_movement ?= {
+			set_core_ideology = ideology_modernizer_movement_1
 		}
 	}
 }
@@ -1987,7 +2001,7 @@ summon_napoleon_the_woat = { # Special case
 			ruler = yes
 			ideology = ideology_bonapartist
 			on_created = {
-				set_variable = house_bonaparte
+				set_variable = { name = dynasty_var value = flag:house_bonaparte }
 			}
 		}
 	}
@@ -2506,20 +2520,14 @@ evaluate_portuguese_pink_map_connection = {
 				is_in_same_market_area = scope:angola_scope
 			}
 		}
-		c:POR ?= {
-			set_variable = achievement_portugal_is_not_a_small_country_connection
-		}
+		set_variable = achievement_portugal_is_not_a_small_country_connection
 	}
 	else = {
 		if = {
 			limit = {
-				c:POR ?= {
-					has_variable = achievement_portugal_is_not_a_small_country_connection
-				}
+				has_variable = achievement_portugal_is_not_a_small_country_connection
 			}
-			c:POR ?= {
-				remove_variable = achievement_portugal_is_not_a_small_country_connection
-			}
+			remove_variable = achievement_portugal_is_not_a_small_country_connection
 		}
 	}
 }

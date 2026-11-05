@@ -66,13 +66,13 @@ law_is_valid_for_ig_petition = {
 
 ruler_is_bonapartist = {
 	ruler ?= {
-		has_variable = house_bonaparte
+		var:dynasty_var ?= flag:house_bonaparte
 	}
 }
 
 ruler_is_orleanist = {
 	ruler ?= {
-		has_variable = house_orleans
+		var:dynasty_var ?= flag:house_orleans
 	}
 }
 
@@ -642,6 +642,68 @@ state_is_homeland_of_indian_cultures = {
 	}
 }
 
+state_is_bengal_core = {
+	OR = {
+		AND = {
+			is_capital = yes
+			owner = ROOT
+		}
+		state_region = {
+			is_homeland = cu:bengali
+		}
+		state_region = {
+			is_homeland = cu:bihari
+		}
+		state_region = s:STATE_ARAKAN
+	}
+}
+
+state_is_java_core = {
+	OR = {
+		AND = {
+			is_capital = yes
+			owner = ROOT
+		}
+		state_region = {
+			is_homeland = cu:javan
+		}
+	}
+}
+
+country_can_take_dei_collapse_states = {
+	NOT = {
+		this = ROOT
+	}
+	OR = {
+		is_subject_of = ROOT
+		any_primary_culture = {
+			has_discrimination_trait = language_malay
+		}
+	}
+}
+
+state_is_in_india_collapse_regions = {
+	OR = {
+		region = sr:region_north_india
+		region = sr:region_south_india
+		region = sr:region_himalayas
+		state_region = s:STATE_PASHTUNISTAN
+		state_region = s:STATE_QUETTA
+	}
+}
+
+country_can_take_india_collapse_states = {
+	any_primary_culture = {
+		has_discrimination_trait_group = heritage_group_south_asian
+	}
+	OR = {
+		capital.region = sr:region_south_india
+		capital.region = sr:region_north_india
+		capital.state_region = s:STATE_PASHTUNISTAN
+		capital.state_region = s:STATE_QUETTA
+	}
+}
+
 state_is_homeland_of_german_cultures = {
 	state_region = {
 		OR = {
@@ -815,7 +877,7 @@ ideology_royalist_valid_trigger = {
 	}
 }
 
-ideology_social_democrat_valid_trigger = {
+ideology_state_socialist_valid_trigger = {
 	OR = {
 		is_interest_group_type = ig_devout
 		is_interest_group_type = ig_rural_folk
@@ -825,12 +887,15 @@ ideology_social_democrat_valid_trigger = {
 	}
 }
 
-ideology_communist_valid_trigger = {
+ideology_communist_leader_valid_trigger = {
 	OR = {
 		is_interest_group_type = ig_rural_folk
 		is_interest_group_type = ig_intelligentsia
 		is_interest_group_type = ig_trade_unions
-		is_interest_group_type = ig_armed_forces
+		AND = {
+			is_interest_group_type = ig_armed_forces
+			has_ideology = ideology:ideology_militant
+		}
 	}
 }
 
@@ -839,7 +904,10 @@ ideology_vanguardist_valid_trigger = {
 		is_interest_group_type = ig_rural_folk
 		is_interest_group_type = ig_intelligentsia
 		is_interest_group_type = ig_trade_unions
-		is_interest_group_type = ig_armed_forces
+		AND = {
+			is_interest_group_type = ig_armed_forces
+			has_ideology = ideology:ideology_militant
+		}
 	}
 }
 
@@ -893,19 +961,20 @@ ideology_luddite_valid_trigger = {
 	OR = {
 		is_interest_group_type = ig_rural_folk
 		is_interest_group_type = ig_devout
+		is_interest_group_type = ig_petty_bourgeoisie
 	}
 }
 
 ideology_authoritarian_valid_trigger = {
-	# trade unions should always go vanguardist instead if available
+	# Trade Unions should always go vanguardist instead if available
 	NAND = {
-		owner = { has_technology_researched = socialism }
+		owner ?= { has_technology_researched = socialism }
 		is_interest_group_type = ig_trade_unions
 	}
 	# PB should always go fascist instead if available
 	NAND = {
 		is_interest_group_type = ig_petty_bourgeoisie
-		owner = { has_technology_researched = mass_propaganda }
+		owner ?= { has_technology_researched = mass_propaganda }
 	}
 }
 
@@ -1014,18 +1083,12 @@ ideology_humanitarian_royalist_valid_trigger = {
 }
 
 ideology_despotic_utopian_valid_trigger = {
-	# trade unions should always go vanguardist instead if available
-	NAND = {
-		is_interest_group_type = ig_trade_unions
-		owner = { has_technology_researched = socialism }
-	}
 	# PB should always go fascist instead if available
 	NAND = {
 		is_interest_group_type = ig_petty_bourgeoisie
 		owner = { has_technology_researched = mass_propaganda }
 	}
 	OR = {
-		is_interest_group_type = ig_trade_unions
 		is_interest_group_type = ig_petty_bourgeoisie
 		is_interest_group_type = ig_intelligentsia
 	}
@@ -1111,5 +1174,18 @@ is_indian_interest_group = {
 		is_interest_group_type = ig_trade_unions
 		is_interest_group_type = ig_devout
 		is_interest_group_type = ig_rural_folk
+	}
+}
+
+qing_opium_wars_releasable_trigger = {
+	trigger_if = {
+		limit = {
+			c:CHI ?= this
+			NOT = { exists = scope:war_goal_holder }
+		}
+		custom_tooltip = {
+			text = opium_wars_releasable_tt
+			NOT = { has_variable = opium_wars_unresolved }
+		}
 	}
 }

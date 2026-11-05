@@ -66,7 +66,7 @@ arrange_accident = {
 				custom_tooltip = {
 					text = house_tokugawa_not_tt
 					NOT = {
-						has_variable = house_tokugawa
+						var:dynasty_var ?= flag:house_tokugawa
 					}
 				}
 			}
@@ -82,7 +82,7 @@ arrange_accident = {
 				custom_tooltip = {
 					text = house_yamato_not_tt
 					NOT = {
-						has_variable = house_yamato
+						var:dynasty_var ?= flag:house_yamato
 					}
 				}
 			}
@@ -97,6 +97,12 @@ arrange_accident = {
 			save_scope_as = assassinated_scope
 		}
 		if = {
+			limit = {
+				rlit_pushkin_needed_for_golden_age = yes
+			}
+			rlit_pushkin_force_duel_effect = yes
+		}
+		else_if = {
 			limit = {
 				exists = owner.institution:institution_home_affairs
 			}
@@ -301,11 +307,11 @@ arrange_accident = {
 
 	cooldown = { days = normal_modifier_time }
 	show_confirmation_box = yes
-	
+
 	should_ai_evaluate = {
 		country_rank >= rank_value:minor_power # Don't burn performance on tiny AI countries messing around with character interactions
 	}
-	
+
 	ai_will_do = {
 		is_heir_of_own_country = no # The AI won't kill its own heirs
 	}
@@ -406,6 +412,16 @@ arrange_accident = {
 			}
 			add = 10
 		}
+		if = {
+			limit = {
+				character_is_rival_french_house = yes
+				OR = {
+					is_interest_group_leader = yes
+					has_role_of_type = agitator
+				}
+			}
+			add = 40
+		}
 		if = { # Dangerous agitators have a greater chance of getting booted
 			limit = {
 				has_role_of_type = agitator
@@ -419,6 +435,19 @@ arrange_accident = {
 				}
 			}
 			multiply = 1.5
+		}
+		if = {
+			limit = {
+				has_template = RUS_grigoriy_rasputin
+				has_role = character_role_favorite
+			}
+			multiply = 0
+		}
+		if = {
+			limit = {
+				has_template = RUS_alexander_pushkin
+			}
+			multiply = 0
 		}
 	}
 }
@@ -594,6 +623,11 @@ send_to_jail = {
 		has_role_of_type = agitator
 		is_immortal = no
 		has_dlc_feature = ip2_content
+		scope:actor ?= {
+			NOT = {
+				has_regional_exile_pool_access = siberian_exile_pool
+			}
+		}
 	}
 
 	show_requirements = yes
@@ -632,7 +666,15 @@ send_to_jail = {
 		this = {
 			save_scope_as = prisoner_scope
 		}
-		trigger_event = { id = jail.1 popup = yes }
+		if = {
+			limit = {
+				rlit_pushkin_needed_for_golden_age = yes
+			}
+			rlit_pushkin_force_duel_effect = yes
+		}
+		else = {
+			trigger_event = { id = jail.1 popup = yes }
+		}
 	}
 
 	cooldown = { days = short_modifier_time }
@@ -737,6 +779,27 @@ send_to_jail = {
 			}
 			add = 10
 		}
+		if = {
+			limit = {
+				character_is_rival_french_house = yes
+			}
+			add = 50
+		}
+		if = {
+			limit = {
+				owner ?= {
+					ai_wants_radicals = yes
+				}
+				character_is_french_house = yes
+			}
+			add = 50
+		}
+		if = {
+			limit = {
+				has_template = RUS_alexander_pushkin
+			}
+			multiply = 0
+		}
 	}
 }
 
@@ -787,12 +850,6 @@ patronize = {
 						has_reactionary_ideology = yes
 					}
 					has_progressive_ideology = yes
-				}
-				AND = {
-					owner.ruler ?= {
-						has_liberal_ideology = yes
-					}
-					has_liberal_ideology = yes
 				}
 				AND = {
 					owner.ruler ?= {
@@ -896,7 +953,7 @@ patronize = {
 		country_rank >= rank_value:minor_power # Don't burn performance on tiny AI countries messing around with character interactions
 		relative_authority >= 0.5
 	}
-	
+
 	ai_chance = {
 		value = -25
 		if = {
@@ -972,6 +1029,66 @@ patronize = {
 					has_variable = ai_tenpo_reform_agenda
 				}
 				is_interest_group_type = ig_petty_bourgeoisie
+			}
+			add = 100
+		}
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_pool_decrease_landowner_influence
+					ruler ?= {
+						is_interest_group_type = ig_landowners
+					}
+				}
+				is_interest_group_type = ig_landowners
+				je_tsarpoints_landowner_ideology_close_enough = yes
+			}
+			add = 100
+		}
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_tsar_crown_of_perfection
+				}
+				OR = {
+					is_interest_group_type = ig_intelligentsia
+					is_interest_group_type = ig_petty_bourgeoisie
+					is_interest_group_type = ig_industrialists
+				}
+			}
+			add = 50
+			if = {
+				limit = {
+					is_interest_group_type = ig_intelligentsia
+				}
+				add = 50
+			}
+		}
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_tsar_heir_of_alexander
+					NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_4_complete }
+				}
+				is_interest_group_type = ig_rural_folk
+				is_interest_group_leader = yes
+				OR = {
+					has_conservative_ideology = yes
+					has_reactionary_ideology = yes
+				}
+			}
+			add = 100
+		}
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_divided_monarchists
+				}
+				character_matches_divided_monarchists_ai_path = yes
+				OR = {
+					is_interest_group_leader = yes
+					has_role_of_type = agitator
+				}
 			}
 			add = 100
 		}
@@ -1152,12 +1269,6 @@ ostracize = {
 					}
 					AND = {
 						owner.ruler ?= {
-							has_liberal_ideology = yes
-						}
-						has_liberal_ideology = yes
-					}
-					AND = {
-						owner.ruler ?= {
 							has_socialist_ideology = yes
 						}
 						has_conservative_ideology = yes
@@ -1238,6 +1349,47 @@ ostracize = {
 			}
 			add = 100
 		}
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_pool_decrease_landowner_influence
+				}
+				is_interest_group_type = ig_landowners
+			}
+			add = 100
+		}
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_tsar_heir_of_alexander
+					NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_4_complete }
+				}
+				is_interest_group_type = ig_rural_folk
+				is_interest_group_leader = no
+				has_role_of_type = politician
+				OR = {
+					has_liberal_ideology = yes
+					has_progressive_ideology = yes
+					has_socialist_ideology = yes
+				}
+			}
+			add = 100
+		}
+		if = {
+			limit = {
+				character_is_rival_french_house = yes
+			}
+			add = 50
+		}
+		if = {
+			limit = {
+				owner ?= {
+					ai_wants_radicals = yes
+				}
+				character_is_french_house = yes
+			}
+			add = 50
+		}
 		if = { # Dangerous agitators have a greater chance of getting booted
 			limit = {
 				has_role_of_type = agitator
@@ -1305,7 +1457,7 @@ retire_daimyo = {
 
 	cooldown = { days = normal_modifier_time }
 	show_confirmation_box = yes
-	
+
 	ai_will_do = {
 		is_heir_of_own_country = no # The AI won't kill its own heirs
 	}
@@ -1417,12 +1569,6 @@ grant_peerage = {
 						has_reactionary_ideology = yes
 					}
 					has_progressive_ideology = yes
-				}
-				AND = {
-					owner.ruler ?= {
-						has_liberal_ideology = yes
-					}
-					has_liberal_ideology = yes
 				}
 				AND = {
 					owner.ruler ?= {
@@ -1553,6 +1699,324 @@ grant_peerage = {
 				is_interest_group_type = ig_petty_bourgeoisie
 			}
 			add = 100
+		}
+	}
+}
+
+
+exile_to_siberia = {
+	clicksound = "event:/SFX/DLC/1.3_ip1/UI/exile_character"
+
+	should_ai_evaluate = {
+		OR = {
+			has_law_or_variant = law_type:law_autocracy
+			has_law_or_variant = law_type:law_oligarchy
+			has_law_or_variant = law_type:law_single_party_state
+			has_law_or_variant = law_type:law_secret_police
+			has_law_or_variant = law_type:law_outlawed_dissent
+			has_law_or_variant = law_type:law_censorship
+		}
+	}
+
+	potential = {
+		has_dlc_feature = regional_exile_pools
+		is_in_exile_pool = no
+		is_in_void = no
+		is_ruler_of_own_country = no
+		is_heir_of_own_country = no
+		OR = {
+			has_role_of_type = executive
+			has_role_of_type = magnate
+			has_role_of_type = politician
+			has_role_of_type = agitator
+			has_role_of_type = favorite
+		}
+		scope:actor ?= {
+			has_regional_exile_pool_access = siberian_exile_pool
+		}
+	}
+
+	show_requirements = yes
+
+	possible = {
+		owner ?= {
+			NOR = {
+				has_law_or_variant = law_type:law_protected_speech
+				has_law_or_variant = law_type:law_guaranteed_liberties
+			}
+		}
+		is_busy = no
+		trigger_if = {
+			limit = {
+				has_role_of_type = agitator
+			}
+			political_movement ?= { is_insurrectionary = no }
+		}
+		trigger_else = {
+			interest_group ?= {
+				is_in_government = no
+				is_insurrectionary = no
+				ig_counts_as_marginal = no
+			}
+		}
+	}
+
+	effect = {
+		this = {
+			save_scope_as = siberian_exile_scope
+		}
+		if = {
+			limit = {
+				rlit_pushkin_needed_for_golden_age = yes
+			}
+			rlit_pushkin_force_duel_effect = yes
+		}
+		else = {
+			scope:actor ?= {
+				trigger_event = { id = siberia.1 popup = yes }
+			}
+		}
+	}
+
+	cooldown = { days = siberian_exile_cooldown_time }
+	show_confirmation_box = yes
+
+	ai_chance = {
+		value = 0
+
+		if = {
+			limit = {
+				OR = {
+					interest_group ?= {
+						ig_approval < 0
+					}
+					political_movement ?= {
+						is_being_suppressed = yes
+					}
+				}
+			}
+
+			add = {
+				value = popularity
+				multiply = 0.25
+			}
+
+			if = { # Dangerous agitators have a greater chance of getting booted
+				limit = {
+					has_role_of_type = agitator
+					OR = {
+						has_trait = ambitious
+						has_trait = wrathful
+						has_trait = ruthless
+						has_trait = bandit
+						has_trait = social_bandit
+						has_trait = special_character_luxemburg_in_exile
+					}
+				}
+				multiply = 1.5
+			}
+
+			if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_outlawed_dissent
+					}
+				}
+				multiply = 1.5
+			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_censorship
+					}
+				}
+				multiply = 1.25
+			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_right_of_assembly
+					}
+				}
+				multiply = 0.75
+			}
+
+			if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_secret_police
+					}
+				}
+				multiply = 1.5
+			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_national_guard
+					}
+				}
+				multiply = 1.25
+			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_law_or_variant = law_type:law_no_home_affairs
+					}
+				}
+				multiply = 0.5
+			}
+
+			if = {
+				limit = {
+					interest_group ?= {
+						ig_approval <= -5
+					}
+				}
+				multiply = 1.25
+			}
+			else_if = {
+				limit = {
+					interest_group ?= {
+						ig_approval <= -10
+					}
+				}
+				multiply = 1.5
+			}
+
+			if = { # If we are Conservative dont immediately hang any Liberal politician and so on
+				limit = {
+					scope:actor ?= {
+						has_strategy = ai_strategy_conservative_agenda
+					}
+					has_liberal_ideology = yes
+				}
+				multiply = 0.5
+			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_strategy = ai_strategy_progressive_agenda
+					}
+					OR = {
+						has_liberal_ideology = yes
+						has_progressive_ideology = yes
+					}
+				}
+				multiply = 0.5
+			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_strategy = ai_strategy_egalitarian_agenda
+						NOT = { has_law_or_variant = law_type:law_council_republic }
+					}
+					OR = {
+						has_liberal_ideology = yes
+						has_progressive_ideology = yes
+						has_socialist_ideology = yes
+					}
+				}
+				multiply = 0.5
+			}
+			else_if = {
+				limit = {
+					scope:actor ?= {
+						has_strategy = ai_strategy_egalitarian_agenda
+					}
+					OR = {
+						has_progressive_ideology = yes
+						has_socialist_ideology = yes
+					}
+				}
+				multiply = 0.5
+			}
+
+			if = { # Be less inclined to toss out politicians
+				limit = {
+					NOT = { has_role_of_type = agitator }
+				}
+				multiply = 0.25
+			}
+		}
+
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_tsar_unshakable_autocracy
+					NOT = { has_variable = je_tp_tsar_unshakable_autocracy_button_1_complete }
+				}
+				has_role_of_type = agitator
+				OR = {
+					has_socialist_ideology = yes
+					has_progressive_ideology = yes
+					has_liberal_ideology = yes
+				}
+			}
+			add = 20
+		}
+		if = {
+			limit = {
+				save_temporary_scope_as = tp_exile_candidate_scope
+				owner ?= {
+					has_journal_entry = je_tp_fav_bootlicker
+					OR = {
+						var:tp_bootlicker_rival_1 ?= scope:tp_exile_candidate_scope
+						var:tp_bootlicker_rival_2 ?= scope:tp_exile_candidate_scope
+						var:tp_bootlicker_rival_3 ?= scope:tp_exile_candidate_scope
+					}
+				}
+			}
+			add = 30
+		}
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_pool_decrease_landowner_influence
+					ruler ?= {
+						is_interest_group_type = ig_landowners
+					}
+				}
+				is_interest_group_type = ig_landowners
+				is_interest_group_leader = yes
+				je_tsarpoints_landowner_ideology_close_enough = no
+				interest_group ?= {
+					any_scope_character = {
+						has_role_of_type = politician
+						is_interest_group_leader = no
+						je_tsarpoints_landowner_ideology_close_enough = yes
+					}
+				}
+			}
+			add = 40
+		}
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_tsar_heir_of_alexander
+					NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_4_complete }
+				}
+				is_interest_group_type = ig_rural_folk
+				is_interest_group_leader = yes
+				OR = {
+					has_liberal_ideology = yes
+					has_progressive_ideology = yes
+					has_socialist_ideology = yes
+				}
+			}
+			add = 40
+		}
+		if = {
+			limit = {
+				has_template = RUS_grigoriy_rasputin
+				has_role = character_role_favorite
+			}
+			multiply = 0
+		}
+		if = {
+			limit = {
+				has_template = RUS_alexander_pushkin
+			}
+			multiply = 0
 		}
 	}
 }

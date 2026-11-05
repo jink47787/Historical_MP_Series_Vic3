@@ -1,0 +1,277 @@
+﻿namespace = siberia
+
+siberia.1 = { # character interaction
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = siberia.1.t
+	desc = siberia.1.d
+	flavor = siberia.1.f
+
+	event_image = {
+		video = "votp_prison"
+	}
+
+	dlc = dlc019
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	trigger = {
+		# triggered by exile_to_siberia interaction
+	}
+
+	immediate = {
+
+	}
+
+	cancellation_trigger = {
+		OR = {
+			NOT = {
+				exists = scope:siberian_exile_scope
+			}
+			scope:siberian_exile_scope = {
+				is_character_alive = no
+			}
+		}
+	}
+
+	option = {
+		name = siberia.1.a
+		default_option = yes
+		ai_chance = {
+			base = 10
+		}
+		scope:siberian_exile_scope = {
+			custom_tooltip = {
+				text = to_siberia_5_tt
+				exile_character_with_martyrdom_to_pool = {
+					EXILE_POOL = siberian_exile_pool
+					YEARS = 5
+				}
+				set_variable = siberian_exile_var # makes this character eligible for having their ideology changed in siberia.2
+			}
+		}
+		# For achievement_trans_siberian_express
+		hidden_effect = {
+			if = {
+				limit = {
+					scope:siberian_exile_scope = { var:dynasty_var ?= flag:house_romanov }
+				}
+				set_variable = trans_siberian_express_var
+			}
+		}
+	}
+
+	option = {
+		name = siberia.1.b
+		ai_chance = {
+			base = 10
+		}
+		scope:siberian_exile_scope = {
+			custom_tooltip = {
+				text = to_siberia_10_tt
+				exile_character_with_martyrdom_to_pool = {
+					EXILE_POOL = siberian_exile_pool
+					YEARS = 10
+				}
+				set_variable = siberian_exile_var # makes this character eligible for having their ideology changed in siberia.2
+			}
+		}
+		# For achievement_trans_siberian_express
+		hidden_effect = {
+			if = {
+				limit = {
+					scope:siberian_exile_scope = { var:dynasty_var ?= flag:house_romanov }
+				}
+				set_variable = trans_siberian_express_var
+			}
+		}
+	}
+
+	option = {
+		name = siberia.1.c
+		ai_chance = {
+			base = 10
+		}
+		scope:siberian_exile_scope = {
+			custom_tooltip = {
+				text = to_siberia_20_tt
+				exile_character_with_martyrdom_to_pool = {
+					EXILE_POOL = siberian_exile_pool
+					YEARS = 20
+				}
+				set_variable = siberian_exile_var # makes this character eligible for having their ideology changed in siberia.2
+			}
+		}
+		# For achievement_trans_siberian_express
+		hidden_effect = {
+			if = {
+				limit = {
+					scope:siberian_exile_scope = { var:dynasty_var ?= flag:house_romanov }
+				}
+				set_variable = trans_siberian_express_var
+			}
+		}
+	}
+
+	option = {
+		name = siberia.1.e
+		ai_chance = {
+			base = 10
+		}
+		custom_tooltip = to_siberia_exonerated_tt
+	}
+}
+
+
+siberia.2 = {  # for characters while in exile
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = siberia.2.t
+	desc = siberia.2.d
+	flavor = siberia.2.f
+
+	event_image = {
+		video = "votp_conspiring"
+	}
+
+	cooldown = { days = very_long_modifier_time }
+
+	dlc = dlc019
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	trigger = { # triggered by russia_yearly_events in on_action
+		ROOT = {
+			has_regional_exile_pool_access = siberian_exile_pool
+		}
+		any_character_in_siberia = {
+			home_country ?= ROOT
+			has_variable = siberian_exile_var
+		}
+	}
+
+	immediate = {
+		random_character_in_siberia = {
+			limit = {
+				home_country ?= ROOT
+				has_variable = siberian_exile_var
+			}
+			set_temporary_event_immortality = { DURATION = 3 }
+			save_scope_as = siberian_exile_scope
+		}
+		scope:siberian_exile_scope = {
+			ideology = {
+				save_scope_as = siberian_exile_ideology_scope
+			}
+		}
+		if = {
+			limit = {
+				AND = {
+					any_character_in_siberia = {
+						count >= 2
+					}
+					any_character_in_siberia = {
+						NOT = {
+							this = scope:siberian_exile_scope
+						}
+						NOT = {
+							has_ideology = scope:siberian_exile_ideology_scope
+						}
+					}
+				}
+			}
+			random_character_in_siberia = {
+				limit = {
+					NOT = {
+						this = scope:siberian_exile_scope
+						}
+					NOT = {
+						has_ideology = scope:siberian_exile_ideology_scope
+					}
+				}
+				set_temporary_event_immortality = { DURATION = 3 }
+				save_scope_as = other_siberian_exile_scope
+			}
+			scope:other_siberian_exile_scope = {
+				ideology = {
+					save_scope_as = other_siberian_exile_ideology_scope
+				}
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		OR = {
+			NOT = {
+				exists = scope:siberian_exile_scope
+			}
+			scope:siberian_exile_scope = {
+				is_character_alive = no
+			}
+			AND = {
+				exists = scope:other_siberian_exile_scope
+				scope:other_siberian_exile_scope = {
+					is_character_alive = no
+				}
+			}
+		}
+	}
+
+	option = {
+		name = siberia.2.a
+		default_option = yes
+		ai_chance = {
+			base = 10
+		}
+		scope:siberian_exile_scope = {
+			randomize_character_ideology_effect = yes
+			randomize_character_trait_effect = yes
+		}
+	}
+
+	option = {
+		name = siberia.2.b
+		ai_chance = {
+			base = 10
+		}
+		trigger = {
+			exists = scope:other_siberian_exile_scope
+		}
+		random_list = {
+			1 = {
+				scope:siberian_exile_scope = {
+					set_ideology = scope:other_siberian_exile_ideology_scope
+				}
+			}
+			1 = {
+				scope:other_siberian_exile_scope = {
+					set_ideology = scope:siberian_exile_ideology_scope
+				}
+			}
+		}
+	}
+
+
+	after = {
+		scope:siberian_exile_scope = {
+			remove_variable = siberian_exile_var # this character is no longer eligible for having their ideology changed in siberia.2
+		}
+		revoke_temporary_event_immortality = { CHARACTER = scope:siberian_exile_scope }
+		if = {
+			limit = {
+				exists = scope:other_siberian_exile_scope
+			}
+			revoke_temporary_event_immortality = { CHARACTER = scope:other_siberian_exile_scope }
+		}
+	}
+}

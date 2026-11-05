@@ -24,6 +24,7 @@ labor_rights.1 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_law_checkpoint_advance
 		has_law = law_type:law_serfdom
 		OR = {
 			is_enacting_law = law_type:law_tenant_farmers
@@ -114,6 +115,7 @@ labor_rights.2 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_law_checkpoint_debate
 		has_law = law_type:law_serfdom
 		OR = {
 			is_enacting_law = law_type:law_tenant_farmers
@@ -146,6 +148,7 @@ labor_rights.2 = {
 			save_scope_as = anti_serfdom_ig
 			leader = {
 				save_scope_as = anti_serfdom_advocate
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 		currently_enacting_law = {
@@ -192,6 +195,10 @@ labor_rights.2 = {
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:anti_serfdom_advocate }
+	}
 }
 
 # Landowners demand compensation for lost serfs
@@ -218,6 +225,7 @@ labor_rights.3 = {
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_law_checkpoint_stall
 		has_law = law_type:law_serfdom
 		OR = {
 			is_enacting_law = law_type:law_tenant_farmers
@@ -257,6 +265,16 @@ labor_rights.3 = {
 
 	option = { # pay them off
 		name = labor_rights.3.a
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_variable = ai_poland_white
+					has_journal_entry = je_congress_poland
+				}
+				add = 100
+			}
+		}
 		currently_enacting_law = {
 			add_amendment = {
 				type = amendment_redemption_payments
@@ -268,11 +286,37 @@ labor_rights.3 = {
 		scope:serf_owners ?= {
 			improve_law_stance = yes
 		}
+		if = {
+			limit = {
+				c:POL ?= THIS
+				has_journal_entry = je_congress_poland
+			}
+			custom_tooltip = {
+				text = poland_white_advance_large
+				je:je_congress_poland = {
+					add_progress = {
+						value = congress_poland_white_shove_large
+						name = je_congress_poland_progress_bar
+					}
+				}
+			}
+		}
 	}
 
 	option = { # serfs should buy their emancipation
 		name = labor_rights.3.b
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_variable = ai_poland_red
+					has_journal_entry = je_congress_poland
+					enactment_phase >= 2
+				}
+				add = 100
+			}
+		}
 		currently_enacting_law = {
 			add_amendment = {
 				type = amendment_individual_redemption_payments
@@ -292,6 +336,16 @@ labor_rights.3 = {
 			enactment_phase < 2
 		}
 		highlighted_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_variable = ai_poland_red
+					has_journal_entry = je_congress_poland
+				}
+				add = 100
+			}
+		}
 		add_enactment_phase = 1
 		add_enactment_modifier = {
 			name = no_buying_serfs
@@ -299,6 +353,21 @@ labor_rights.3 = {
 		add_radicals = {
 			value = large_radicals
 			pop_type = aristocrats
+		}
+		if = {
+			limit = {
+				c:POL ?= THIS
+				has_journal_entry = je_congress_poland
+			}
+			custom_tooltip = {
+				text = poland_red_advance_large
+				je:je_congress_poland = {
+					add_progress = {
+						value = 40
+						name = je_congress_poland_progress_bar
+					}
+				}
+			}
 		}
 	}
 }
@@ -327,6 +396,7 @@ labor_rights.4 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_law_checkpoint_advance
 		OR = {
 			AND = {
 				is_enacting_law = law_type:law_regulatory_bodies
@@ -396,6 +466,7 @@ labor_rights.5 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_law_checkpoint_debate
 		OR = {
 			AND = {
 				is_enacting_law = law_type:law_regulatory_bodies
@@ -431,6 +502,22 @@ labor_rights.5 = {
 	option = { # support the unions
 		name = labor_rights.5.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_tsar_heir_of_alexander
+					NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_4_complete }
+				}
+				add = 100
+			}
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		# increase enactment speed and gain some loyalists but lose success chance
 		add_enactment_modifier = {
 			name = worker_protection_negotiations
@@ -480,6 +567,7 @@ labor_rights.6 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_law_checkpoint_stall
 		OR = {
 			AND = {
 				is_enacting_law = law_type:law_regulatory_bodies

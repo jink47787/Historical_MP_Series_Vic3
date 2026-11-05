@@ -33,6 +33,7 @@
 	}
 
 	possible = {
+		NOT = { has_law = law_type:law_canton_system }
 
 		scope:other_country = {
 			NOT = { is_subject_of = root }
@@ -185,6 +186,23 @@
             else_if = {
                 limit = {
                     scope:target_country ?= this
+                    scope:source_country.market ?= {
+                        market_trade = {
+                            target = root.market
+                            goods = scope:article.input_goods
+                            value > 0
+                        }
+                    }
+                }
+
+                add = {
+                    desc = "DIPLOMATIC_ACCEPTANCE_TRADE_PARTNER_FOR_GOODS"
+                    value = -300
+                }
+            }
+            else_if = {
+                limit = {
+                    scope:target_country ?= this
 					"scope:source_country.goods_production_rank(scope:article.input_goods)" <= 10
 					"goods_production_rank(scope:article.input_goods)" <= 10
                     "scope:article.input_market_goods(root)" ?= {
@@ -256,22 +274,15 @@
 			}
 		}
 
+		infamy_severity = 0.1
+		infamy_min = define:NDiplomacy|WAR_GOAL_INFAMY_MAJOR_DEMAND_MIN
+		infamy_max = define:NDiplomacy|WAR_GOAL_INFAMY_MAJOR_DEMAND_MAX
+
 		infamy = {
 			value = 0
 
-			add = {
-				desc = "INFAMY_BASE_VALUE"
-				value = 0.5
-			}
-
 			scope:target_country = {
-				multiply = {
-					desc = "INFAMY_TARGET_COUNTRY_POPULATION_FACTOR"
-					value = total_population
-					divide = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_FACTOR
-					multiply = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_MULTIPLIER
-                    max = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_MULTIPLIER_MAX_TOTAL
-				}
+				add = country_infamy_value
 			}
 		}
 	}

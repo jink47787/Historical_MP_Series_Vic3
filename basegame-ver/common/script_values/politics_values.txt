@@ -7,3 +7,134 @@ max_setbacks_minus_one = {
 }
 
 legitimacy_to_repeal_amendment = 50
+
+electoral_confidence_drift_floor = 0.25
+
+electoral_confidence_drift_limit = {
+	value = electoral_confidence_drift_floor
+	subtract = modifier:country_electoral_confidence_over_time
+}
+
+electoral_confidence_campaign_start_max_gain = 0.1
+
+electoral_confidence_campaign_start_uncapped_gain = {
+	value = eagle_burger_freedom_index_uncapped
+	multiply = electoral_confidence_campaign_start_max_gain
+}
+
+electoral_confidence_campaign_start_gain = {
+	value = 0
+	if = {
+		limit = {
+			active_law:lawgroup_distribution_of_power ?= {
+				has_amendment = amendment_type:amendment_tradition_of_free_elections
+			}
+		}
+		value = eagle_burger_freedom_index
+		multiply = electoral_confidence_campaign_start_max_gain
+	}
+}
+
+electoral_confidence_band = {
+	value = electoral_confidence
+	multiply = 10
+	floor = yes
+}
+
+retired_commander_politician_cooldown_years = {
+	value = define:NCharacters|RETIRED_COMMANDER_POLITICIAN_COOLDOWN_YEARS
+}
+
+favorite_appointment_controversy = {
+	value = 0
+	if = {
+		limit = {
+			exists = owner.ruler
+		}
+		value = average_progressiveness
+		subtract = owner.ruler.average_progressiveness
+		abs = yes
+		if = {
+			limit = {
+				exists = interest_group
+				exists = owner.ruler.interest_group
+			}
+			multiply = 0.5
+			add = {
+				value = interest_group.average_progressiveness
+				subtract = owner.ruler.interest_group.average_progressiveness
+				abs = yes
+				multiply = 0.5
+			}
+		}
+		subtract = 15
+		min = 0
+		divide = 10
+		multiply = {
+			value = 150
+			subtract = prominence
+			divide = 100
+		}
+		multiply = {
+			value = 100
+			subtract = owner.ruler.popularity
+			divide = 100
+		}
+		min = 0
+		max = 10
+	}
+}
+
+favorite_appointment_ig_penalty = {
+	value = 0
+	if = {
+		limit = {
+			is_in_government = yes
+			NOT = { root.interest_group ?= this }
+			root.favorite_appointment_controversy > 0
+		}
+		value = root.favorite_appointment_controversy
+		multiply = 0.5
+		min = 1
+	}
+	else_if = {
+		limit = {
+			NOT = { root.interest_group ?= this }
+			root.favorite_appointment_controversy > 0
+			exists = root.owner.ruler
+			0 < {
+				add = {
+					value = average_progressiveness
+					subtract = root.average_progressiveness
+					abs = yes
+				}
+				subtract = {
+					value = average_progressiveness
+					subtract = root.owner.ruler.average_progressiveness
+					abs = yes
+				}
+			}
+		}
+		value = root.favorite_appointment_controversy
+		multiply = 0.25
+		min = 1
+	}
+}
+
+favorite_appointment_radicals = {
+	value = root.favorite_appointment_controversy
+	subtract = 5
+	min = 0
+	divide = 5
+	multiply = medium_radicals
+}
+
+favorite_appointment_ig_radicals = {
+	value = root.favorite_appointment_radicals
+	if = {
+		limit = {
+			is_in_government = no
+		}
+		multiply = 0.5
+	}
+}

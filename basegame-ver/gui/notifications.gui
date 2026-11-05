@@ -1,7 +1,13 @@
 types notifications {
 	@message_feed_width = 425 #425 is max otherwise will overlap with lens in lowest res.
 	@message_feed_height = 140
+	@message_feed_height_grouped_small = 176 #fits the four rows a small group can have; rows are 32px tall with 4px spacing.
+	@message_feed_height_grouped = 280 #keep the expanded group short enough that a full feed still fits at the lowest supported resolution.
 	@message_feed_animation_duration = 0.2
+	@message_feed_group_member_width = 417 #message_feed_width minus the 8px scrollbar.
+	@message_feed_group_member_height = 32
+	@message_feed_group_member_spacing = 4
+	@message_feed_group_member_row = 36 #member height plus spacing; every grouped member row must be exactly this tall.
 
 	######################################################
 	################### MESSAGE FEED #####################
@@ -84,6 +90,49 @@ types notifications {
 		}
 	}
 
+	type message_feed_group_member_header = button {
+		name = "grouped_member_header"
+		layoutpolicy_horizontal = expanding
+		size = { @message_feed_group_member_width @message_feed_group_member_height }
+		datacontext = "[FeedMessageItem.GetPlayerMessageItem]"
+		onclick = "[FeedMessageItem.ToggleGroupMemberExpand]"
+		using = expand_button_bg
+		using = ui_pointer_over
+		tooltip = "MESSAGE_GROUP_MEMBER_CLICK_TOOLTIP"
+
+		hbox = {
+			spacing = 2
+			margin_right = 3
+			using = notification_icon_go_to
+
+			text_single = {
+				name = "member_title"
+				layoutpolicy_horizontal = expanding
+				max_width = 350
+				using = elide_fontsize_min
+				align = nobaseline
+				alwaystransparent = yes
+				text = "[PlayerMessageItem.GetName]"
+			}
+
+			expand = {}
+
+			button = {
+				visible = "[Not(FeedMessageItem.IsGroupMemberExpanded)]"
+				size = { 18 18 }
+				alwaystransparent = yes
+				using = expand_arrow
+			}
+
+			button = {
+				visible = "[FeedMessageItem.IsGroupMemberExpanded]"
+				size = { 18 18 }
+				alwaystransparent = yes
+				using = expand_arrow_expanded
+			}
+		}
+	}
+
 	type message_feed_widget_inner = widget {
 		size = { @message_feed_width 0 }
 		layoutpolicy_horizontal = growing
@@ -163,11 +212,11 @@ types notifications {
 							text_single = {
 								name = "title"
 								layoutpolicy_horizontal = expanding
-								text = "[PlayerMessageItem.GetName]"
-								align = nobaseline
 								max_width = 300
 								fontsize_min = 14
+								align = nobaseline
 								alwaystransparent = yes
+								text = "NOTIFICATION_FEED_TITLE"
 							}
 
 							expand = {}
@@ -329,7 +378,7 @@ types notifications {
 
 						state = {
 							name = "show_text_clicked"
-							trigger_when = "[FeedMessageItem.ClickedExpand]"
+							trigger_when = "[And(FeedMessageItem.ClickedExpand, Not(FeedMessageItem.IsGrouped))]"
 							on_start = "[FeedMessageItem.StartAnimation]"
 							on_finish = "[FeedMessageItem.EndAnimation]"
 							on_finish = "[FeedMessageItem.ClickedExpandFinished]"
@@ -339,15 +388,52 @@ types notifications {
 						}
 
 						state = {
+							name = "show_text_clicked_grouped_small"
+							trigger_when = "[And(FeedMessageItem.ClickedExpand, And(FeedMessageItem.IsGrouped, Not(GreaterThan_int32(FeedMessageItem.GetGroupCount, '(int32)4'))))]"
+							on_start = "[FeedMessageItem.StartAnimation]"
+							on_finish = "[FeedMessageItem.EndAnimation]"
+							on_finish = "[FeedMessageItem.ClickedExpandFinished]"
+							size = { @message_feed_width @message_feed_height_grouped_small }
+							alpha = 1
+							duration = @message_feed_animation_duration
+						}
+
+						state = {
+							name = "show_text_clicked_grouped"
+							trigger_when = "[And(FeedMessageItem.ClickedExpand, And(FeedMessageItem.IsGrouped, GreaterThan_int32(FeedMessageItem.GetGroupCount, '(int32)4')))]"
+							on_start = "[FeedMessageItem.StartAnimation]"
+							on_finish = "[FeedMessageItem.EndAnimation]"
+							on_finish = "[FeedMessageItem.ClickedExpandFinished]"
+							size = { @message_feed_width @message_feed_height_grouped }
+							alpha = 1
+							duration = @message_feed_animation_duration
+						}
+
+						state = {
 							name = "show_text_expanded"
-							trigger_when = "[FeedMessageItem.IsExpanded]"
-							duration = 0
+							trigger_when = "[And(FeedMessageItem.IsExpanded, Not(FeedMessageItem.IsGrouped))]"
 							size = { @message_feed_width @message_feed_height }
+							duration = 0
+						}
+
+						state = {
+							name = "show_text_expanded_grouped_small"
+							trigger_when = "[And(FeedMessageItem.IsExpanded, And(FeedMessageItem.IsGrouped, Not(GreaterThan_int32(FeedMessageItem.GetGroupCount, '(int32)4'))))]"
+							size = { @message_feed_width @message_feed_height_grouped_small }
+							duration = 0
+						}
+
+						state = {
+							name = "show_text_expanded_grouped"
+							trigger_when = "[And(FeedMessageItem.IsExpanded, And(FeedMessageItem.IsGrouped, GreaterThan_int32(FeedMessageItem.GetGroupCount, '(int32)4')))]"
+							size = { @message_feed_width @message_feed_height_grouped }
+							duration = 0
 						}
 
 						vbox = {
 							layoutpolicy_vertical = expanding
 							layoutpolicy_horizontal = expanding
+							visible = "[Not(FeedMessageItem.IsGrouped)]"
 
 							hbox = {
 								name = "text_and_icons"
@@ -355,6 +441,75 @@ types notifications {
 							}
 
 							expand = {}
+						}
+
+						scrollarea = {
+							name = "grouped_text_area"
+							visible = "[FeedMessageItem.IsGrouped]"
+							size = { 100% 100% }
+							scrollbarpolicy_horizontal = always_off
+
+							scrollbar_vertical = {
+								using = vertical_scrollbar
+							}
+
+							scrollwidget = {
+								vbox = {
+									layoutpolicy_horizontal = expanding
+
+									fixedgridbox = {
+										addcolumn = @message_feed_group_member_width
+										addrow = @message_feed_group_member_row
+										datamodel_reuse_widgets = yes
+										datamodel = "[FeedMessageItem.GetGroupMembersBeforeSelected]"
+
+										item = {
+											widget = {
+												size = { @message_feed_group_member_width @message_feed_group_member_height }
+
+												message_feed_group_member_header = {}
+											}
+										}
+									}
+
+									vbox = {
+										layoutpolicy_horizontal = expanding
+										datamodel = "[FeedMessageItem.GetSelectedGroupMembers]"
+
+										item = {
+											vbox = {
+												layoutpolicy_horizontal = expanding
+												spacing = @message_feed_group_member_spacing
+												margin_bottom = @message_feed_group_member_spacing
+
+												message_feed_group_member_header = {}
+
+												hbox = {
+													datacontext = "[FeedMessageItem.GetPlayerMessageItem]"
+													using = notification_icon_go_to_text_area
+												}
+											}
+										}
+									}
+
+									fixedgridbox = {
+										addcolumn = @message_feed_group_member_width
+										addrow = @message_feed_group_member_row
+										datamodel_reuse_widgets = yes
+										datamodel = "[FeedMessageItem.GetGroupMembersAfterSelected]"
+
+										item = {
+											widget = {
+												size = { @message_feed_group_member_width @message_feed_group_member_height }
+
+												message_feed_group_member_header = {}
+											}
+										}
+									}
+
+									expand = {}
+								}
+							}
 						}
 					}
 				}
@@ -902,6 +1057,13 @@ template notification_icon_go_to
 		onclick = "[InformationPanelBar.OpenPanelTab('politics', 'institutions')]"
 	}
 
+	# Electoral Confidence
+	message_feed_go_to_button = {
+		visible = "[TopScope.sCountry('electoral_confidence_country').IsValid]"
+		tooltip = "GO_TO_BUTTON_POLITICS"
+		onclick = "[InformationPanelBar.OpenPanelTab('politics', 'default')]"
+	}
+
 	# Interest
 	message_feed_go_to_button = {
 		visible = "[Scope.GetInterest.GetStrategicRegion.IsValid]"
@@ -913,7 +1075,7 @@ template notification_icon_go_to
 
 template notification_go_to_visibility
 {
-	visible = "[Not(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Scope.GetTreaty.IsValid, Scope.GetPoliticalMovement.IsValid), Scope.GetJournalEntry.IsValid), TopScope.sPoliticalLobby('political_lobby').IsValid), PlayerMessageItem.GetScopeTechnology.IsValid), PlayerMessageItem.GetScopeDiploPlay.IsValid), Scope.GetDiplomaticPlay.IsValid), Scope.GetWar.IsValid), Scope.GetInterestGroup.IsValid), Scope.GetCharacter.IsValid), TopScope.sCharacter('exile_scope').IsValid), Scope.GetState.IsValid), Scope.GetDiplomaticAction.GetFirstState.IsValid), TopScope.sHarvestConditionArea('area').IsValid), Scope.GetCulture.IsValid), TopScope.sCulture('culture').IsValid), Scope.GetLaw.IsValid), Scope.GetFront.IsValid), Scope.GetGoods.IsValid), Scope.GetMilitaryFormation.IsValid), Scope.GetPowerBloc.IsValid), Scope.GetBattle.IsValid), Scope.GetReligion.IsValid), TopScope.sReligion('religion').IsValid), Scope.GetPop.IsValid), Scope.GetCompany.IsValid), Scope.GetInstitution.IsValid), Scope.GetInterest.GetStrategicRegion.IsValid))]"
+	visible = "[Not(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Or(Scope.GetTreaty.IsValid, Scope.GetPoliticalMovement.IsValid), Scope.GetJournalEntry.IsValid), TopScope.sPoliticalLobby('political_lobby').IsValid), PlayerMessageItem.GetScopeTechnology.IsValid), PlayerMessageItem.GetScopeDiploPlay.IsValid), Scope.GetDiplomaticPlay.IsValid), Scope.GetWar.IsValid), Scope.GetInterestGroup.IsValid), Scope.GetCharacter.IsValid), TopScope.sCharacter('exile_scope').IsValid), Scope.GetState.IsValid), Scope.GetDiplomaticAction.GetFirstState.IsValid), TopScope.sHarvestConditionArea('area').IsValid), Scope.GetCulture.IsValid), TopScope.sCulture('culture').IsValid), Scope.GetLaw.IsValid), Scope.GetFront.IsValid), Scope.GetGoods.IsValid), Scope.GetMilitaryFormation.IsValid), Scope.GetPowerBloc.IsValid), Scope.GetBattle.IsValid), Scope.GetReligion.IsValid), TopScope.sReligion('religion').IsValid), Scope.GetPop.IsValid), Scope.GetCompany.IsValid), Scope.GetInstitution.IsValid), Scope.GetInterest.GetStrategicRegion.IsValid), TopScope.sCountry('electoral_confidence_country').IsValid))]"
 }
 
 template notification_icon_go_to_text_area
@@ -1151,6 +1313,13 @@ template notification_icon_go_to_text_area
 		visible = "[Scope.GetInstitution.IsValid]"
 		tooltip = "GO_TO_BUTTON_POLITICS_INSTITUTIONS"
 		onclick = "[InformationPanelBar.OpenPanelTab('politics', 'institutions')]"
+	}
+
+	# Electoral Confidence
+	message_feed_go_to_text_area_button = {
+		visible = "[TopScope.sCountry('electoral_confidence_country').IsValid]"
+		tooltip = "GO_TO_BUTTON_POLITICS"
+		onclick = "[InformationPanelBar.OpenPanelTab('politics', 'default')]"
 	}
 
 	# Interest

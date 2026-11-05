@@ -1,0 +1,560 @@
+﻿namespace = congress_poland
+
+# Appointment of the Viceroy
+congress_poland.1 = {
+	type = country_event
+	placement = scope:congress_poland_scope.capital
+
+	duration = 3
+
+	title = congress_poland.1.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = congress_poland.1.d
+				trigger = {
+					exists = scope:poland_viceroy_scope
+				}
+			}
+			triggered_desc = {
+				desc = congress_poland.1.d2
+				trigger = {
+					NOT = { exists = scope:poland_viceroy_scope }
+				}
+			}
+		}
+	}
+	flavor = congress_poland.1.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	dlc = dlc019
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	trigger = {
+		# triggered by journal entry
+		# also triggered by on_monthly_pulse_country_poland
+		scope:congress_poland_scope ?= {
+			NOT = { is_subject_type = subject_type_personal_union }
+		}
+	}
+
+	cancellation_trigger = {
+		has_global_variable = poland_je_complete
+	}
+
+	immediate = {
+		ruler = {
+			save_scope_as = tsar_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		if = {
+			limit = {
+				scope:congress_poland_scope ?= {
+					ruler ?= {
+						OR = {
+							has_variable = poland_autocratic
+							has_variable = poland_conciliatory
+						}
+					}
+				}
+			}
+			scope:congress_poland_scope = {
+				ruler = {
+					save_scope_as = poland_viceroy_scope
+					set_temporary_event_immortality = { DURATION = 3 }
+				}
+			}
+		}
+		scope:congress_poland_scope = {
+			ordered_scope_character = {
+				limit = {
+					has_role_of_type = politician
+				}
+				order_by = this.interest_group.ig_clout
+				position = 0
+				check_range_bounds = no
+				save_scope_as = poland_conciliatory_viceroy_candidate
+
+			}
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:tsar_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:poland_viceroy_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:poland_conciliatory_viceroy_candidate }
+	}
+
+	option = { # repressive
+		name = {
+			trigger = {
+				scope:poland_viceroy_scope ?= {
+					has_variable = poland_autocratic
+				}
+			}
+			text = congress_poland.1.a
+		}
+		name = {
+			trigger = {
+				OR = {
+					NOT = { exists = scope:poland_viceroy_scope }
+					scope:poland_viceroy_scope ?= {
+						NOT = { has_variable = poland_autocratic }
+					}
+				}
+			}
+			text = congress_poland.1.b
+		}
+		ai_chance = {
+			base = 0
+			modifier = {
+				trigger = {
+					ruler = {
+						tsar_reactionary_ideology_trigger = yes
+					}
+				}
+				add = 20
+			}
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_tsar_crown_of_perfection
+				}
+				add = 40
+			}
+			modifier = {
+				trigger = {
+					ai_russia_should_appease_poland = no
+					ai_russia_is_intransigent_on_poland = yes
+				}
+				add = 50
+			}
+		}
+		default_option = yes
+		custom_tooltip = poland_will_have_repressive_viceroy
+		if = {
+			limit = {
+				NOT = {
+					scope:poland_viceroy_scope ?= {
+						has_variable = poland_autocratic
+					}
+				}
+			}
+			scope:congress_poland_scope = {
+				create_character = {
+					culture = cu:russian
+					religion = rel:orthodox
+					ideology = ideology_authoritarian
+					interest_group = ig_landowners
+					noble = yes
+					on_created = {
+						set_character_as_ruler = yes
+						set_variable = poland_autocratic
+					}
+				}
+			}
+			custom_tooltip = {
+				text = poland_red_advance
+				je:je_congress_poland = {
+					add_progress = {
+						value = congress_poland_red_shove
+						name = je_congress_poland_progress_bar
+					}
+				}
+			}
+		}
+		change_relations = {
+			country = scope:congress_poland_scope
+			value = -30
+		}
+		scope:congress_poland_scope = {
+			post_notification = poland_repressive_viceroy_notification
+		}
+	}
+	option = { # conciliatory
+		name = {
+			trigger = {
+				scope:poland_viceroy_scope ?= {
+					has_variable = poland_conciliatory
+				}
+			}
+			text = congress_poland.1.a
+		}
+		name = {
+			trigger = {
+				OR = {
+					NOT = { exists = scope:poland_viceroy_scope }
+					scope:poland_viceroy_scope ?= {
+						NOT = { has_variable = poland_conciliatory }
+					}
+				}
+			}
+			text = congress_poland.1.b2
+		}
+		ai_chance = {
+			base = 0
+			modifier = {
+				trigger = {
+					ruler = {
+						NOT = {
+							tsar_reactionary_ideology_trigger = yes
+						}
+					}
+				}
+				add = 20
+			}
+			modifier = {
+				trigger = {
+					ai_russia_should_appease_poland = yes
+				}
+				add = 100
+			}
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_tsar_crown_of_perfection
+				}
+				factor = 0
+			}
+			modifier = {
+				trigger = {
+					ai_russia_holds_the_line_on_poland = yes
+				}
+				factor = 0
+			}
+		}
+		custom_tooltip = poland_will_have_conciliatory_viceroy
+		if = {
+			limit = {
+				NOT = {
+					scope:poland_viceroy_scope ?= {
+						has_variable = poland_conciliatory
+					}
+				}
+			}
+			scope:congress_poland_scope = {
+				scope:poland_conciliatory_viceroy_candidate = {
+					set_character_as_ruler = yes
+					set_variable = poland_conciliatory
+				}
+			}
+			custom_tooltip = {
+				text = poland_white_advance
+				je:je_congress_poland = {
+					add_progress = {
+						value = congress_poland_white_shove
+						name = je_congress_poland_progress_bar
+					}
+				}
+			}
+		}
+		change_relations = {
+			country = scope:congress_poland_scope
+			value = 30
+		}
+		scope:congress_poland_scope = {
+			post_notification = poland_conciliatory_viceroy_notification
+		}
+	}
+}
+
+# Expand Congress Poland
+congress_poland.2 = {
+	type = country_event
+	placement = scope:poland_expansion_state
+	duration = 3
+
+	title = congress_poland.2.t
+	desc = congress_poland.2.d
+	flavor = congress_poland.2.f
+
+    event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	dlc = dlc019
+
+	trigger = {
+		# triggered by journal entry button
+	}
+
+	cancellation_trigger = {
+		has_global_variable = poland_je_complete
+	}
+
+	immediate = {
+		ruler = {
+			save_scope_as = tsar_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		random_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:polish
+				}
+			}
+			save_scope_as = poland_expansion_state
+		}
+	}
+
+	option = { # give state/s
+		name = congress_poland.2.a
+		ai_chance = {
+			base = 0
+			modifier = {
+				trigger = {
+					ai_russia_is_reformist_and_threatened_by_europe = yes
+				}
+				add = 100
+			}
+			modifier = {
+				trigger = {
+					ai_russia_holds_the_line_on_poland = yes
+				}
+				factor = 0
+			}
+		}
+		default_option = yes
+		every_scope_state = {
+			limit = {
+				state_region = {
+					is_homeland = cu:polish
+				}
+			}
+			set_state_owner = scope:congress_poland_scope
+			# Poland can have a little Mazovia as a treat
+		}
+		add_modifier = {
+			name = appeased_poland_modifier
+			days = normal_modifier_time
+		}
+		scope:congress_poland_scope = {
+			post_notification = poland_expansion_accepted
+		}
+	}
+
+	option = { # refuse
+		name = congress_poland.2.b
+		ai_chance = {
+			base = 100
+		}
+		custom_tooltip = {
+			text = poland_red_advance_large
+			je:je_congress_poland = {
+				add_progress = {
+					value = congress_poland_red_shove_large
+					name = je_congress_poland_progress_bar
+				}
+			}
+		}
+		scope:congress_poland_scope = {
+			post_notification = poland_expansion_refused
+		}
+	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:tsar_scope }
+	}
+}
+
+# White victory outcome
+congress_poland.3 = {
+	type = country_event
+	placement = scope:congress_poland_scope.capital
+
+	duration = 3
+
+	title = congress_poland.3.t
+	desc = congress_poland.3.d
+	flavor = congress_poland.3.f
+
+    event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	dlc = dlc019
+
+	trigger = {
+		# triggered by journal entry
+	}
+
+	cancellation_trigger = {
+		NOT = { exists = scope:congress_poland_scope }
+	}
+
+	immediate = {
+
+	}
+
+	option = {
+		name = congress_poland.3.a
+		default_option = yes
+		show_as_tooltip = {
+			scope:congress_poland_scope = {
+				scope:congress_poland_scope = {
+					change_subject_type = subject_type_personal_union
+					remove_primary_culture = cu:russian
+				}
+				if = {
+					limit = {
+						has_variable = poland_got_democracy
+					}
+					activate_law = law_type:law_landed_voting
+				}
+			}
+		}
+	}
+}
+
+# Red victory outcome
+congress_poland.4 = {
+	type = country_event
+	placement = scope:congress_poland_scope.capital
+
+	duration = 3
+
+	title = congress_poland.4.t
+	desc = congress_poland.4.d
+	flavor = congress_poland.4.f
+
+    event_image = {
+		video = "ip5_harsh_winter"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	dlc = dlc019
+
+	trigger = {
+		# triggered by journal entry
+	}
+
+	cancellation_trigger = {
+	}
+
+	immediate = {
+
+	}
+
+	option = {
+		name = congress_poland.4.a
+		default_option = yes
+		show_as_tooltip = {
+			scope:russia_poland_scope ?= {
+				create_diplomatic_play = {
+					name = polish_uprising
+					type = dp_polish_uprising
+					target_state = scope:congress_poland_scope.capital
+					add_war_goal = {
+						holder = scope:congress_poland_scope
+						type = independence
+						target_country = scope:russia_poland_scope
+						primary_demand = yes
+					}
+				}
+			}
+			scope:congress_poland_scope = {
+				add_modifier = {
+					name = congress_poland_red_conscription
+					days = short_modifier_time
+				}
+				if = {
+					limit = {
+						has_variable = poland_got_democracy
+					}
+					activate_law = law_type:law_landed_voting
+				}
+				if = {
+					limit = {
+						has_variable = poland_got_republic
+					}
+					activate_law = law_type:law_parliamentary_republic
+				}
+			}
+		}
+	}
+}
+
+# Intro event
+congress_poland.5 = {
+	type = country_event
+	placement = scope:congress_poland_scope.capital
+
+	duration = 3
+
+	title = congress_poland.5.t
+	desc = congress_poland.5.d
+	flavor = congress_poland.5.f
+
+    event_image = {
+		video = "ip4_abdication"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	dlc = dlc019
+
+	trigger = {
+		# triggered by journal entry
+	}
+
+	cancellation_trigger = {
+		has_global_variable = poland_je_complete
+	}
+
+	immediate = {
+
+	}
+
+	option = {
+		name = congress_poland.5.a
+		default_option = yes
+		custom_tooltip = congress_poland.5.a.tt
+		show_as_tooltip = {
+			scope:congress_poland_scope ?= {
+				add_modifier = {
+					name = congress_poland_restrictions
+				}
+				add_modifier = {
+					name = congress_poland_laws
+				}
+				create_political_lobby = {
+					type = lobby_anti_overlord
+					target = top_overlord
+					add_interest_group = ig:ig_intelligentsia
+					add_interest_group = ig:ig_landowners
+					lobby_formation_reason = diplomacy
+				}
+			}
+		}
+	}
+}
+
+congress_poland.1000 = {
+	type = country_event
+	hidden = yes
+	dlc = dlc019
+	trigger = {
+		c:POL ?= {
+			is_subject_of = c:RUS
+		}
+	}
+	immediate = {
+		add_contextless_journal_entry = je_congress_poland
+	}
+}

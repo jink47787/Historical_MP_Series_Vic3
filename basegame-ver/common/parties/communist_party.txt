@@ -307,14 +307,15 @@
 	available_for_interest_group = {
 		owner = {
 			country_has_voting_franchise = yes
+			had_reformist_socialism_victory = yes
 			OR = {
 				py:communist_party ?= {
-					any_member = {}
+					party_has_members = yes
 				}		
 				any_interest_group = {
 					leader ?= {
 						OR = {
-							has_ideology = ideology:ideology_communist
+							has_ideology = ideology:ideology_communist_leader
 							has_ideology = ideology:ideology_vanguardist
 							has_ideology = ideology:ideology_anarchist
 						}
@@ -374,9 +375,22 @@
 		}
 		if = { # communists love communism
 			limit = {
+				OR = {
+					has_ideology = ideology:ideology_communist
+					has_ideology = ideology:ideology_internationalist
+					has_ideology = ideology:ideology_defensist
+				}
+			}
+			add = {
+				value = 50
+				desc = "from_communist_ig"
+			}
+		}
+		if = { # communists love communism
+			limit = {
 				leader ?= {
 					OR = {
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_vanguardist
 						has_ideology = ideology:ideology_anarchist
 					}
@@ -392,7 +406,7 @@
 				is_powerful = yes
 				leader ?= {
 					OR = {
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_vanguardist
 						has_ideology = ideology:ideology_anarchist
 					}
@@ -408,7 +422,7 @@
 				is_powerful = no
 				leader ?= {
 					OR = {
-						has_ideology = ideology:ideology_social_democrat
+						has_ideology = ideology:ideology_state_socialist
 						has_ideology = ideology:ideology_radical
 					}
 				}
@@ -417,7 +431,7 @@
 						is_powerful = yes
 						leader ?= {
 							OR = {
-								has_ideology = ideology:ideology_communist
+								has_ideology = ideology:ideology_communist_leader
 								has_ideology = ideology:ideology_vanguardist
 								has_ideology = ideology:ideology_anarchist
 							}
@@ -452,16 +466,16 @@
 				has_ideology = ideology:ideology_reactionary
 			}
 			add = {
-				value = -3
+				value = -5
 				desc = "from_reactionaries"
 			}
 		}
-		if = { # trade unions often enjoy communism
+		if = { # Trade Unions often enjoy communism
 			limit = {
 				is_interest_group_type = ig_trade_unions
 			}
 			add = {
-				value = 2
+				value = 3
 				desc = "from_trade_unions"
 			}
 		}
@@ -476,18 +490,26 @@
 				desc = "from_moderate"
 			}
 		}
+		if = { # anti-communism
+			limit = {
+				law_stance = {
+					law = law_type:law_council_republic
+					value < neutral
+				}
+			}
+			add = {
+				value = -20
+				desc = "from_anti_communism"
+			}
+		}
 		if = { # against land-based taxation
 			limit = {
-				OR = {
-					has_ideology = ideology:ideology_meritocratic
-					has_ideology = ideology:ideology_cartist
-					has_ideology = ideology:ideology_agrarian
-					leader ?= {
-						has_ideology = ideology:ideology_social_democrat
-					}
-				}
-				owner = {
+				owner ?= {
 					has_law_or_variant = law_type:law_land_based_taxation
+				}
+				law_stance = {
+					law = law_type:law_land_based_taxation
+					value < neutral
 				}
 			}
 			add = {
@@ -497,14 +519,9 @@
 		}
 		if = { # anticlerical
 			limit = {
-				OR = {
-					has_ideology = ideology:ideology_anti_clerical
-					leader ?= {
-						has_ideology = ideology:ideology_nihilist
-					}
-				}
-				owner = {
-					has_law_or_variant = law_type:law_state_religion
+				law_enactment_stance = {
+					law = law_type:law_state_atheism
+					value > neutral
 				}
 			}
 			add = {
@@ -514,17 +531,12 @@
 		}
 		if = { # against free trade - peasant/communist alliance
 			limit = {
-				OR = {
-					has_ideology = ideology:ideology_socialist
-					has_ideology = ideology:ideology_agrarian
-				}
-				owner = {
+				owner ?= {
 					has_law_or_variant = law_type:law_free_trade
 				}
-				NOT = {
-					leader ?= {
-						has_ideology = ideology:ideology_market_liberal
-					}
+				law_stance = {
+					law = law_type:law_free_trade
+					value < neutral
 				}
 			}
 			add = {
@@ -534,20 +546,12 @@
 		}
 		if = { # against laissez-faire - peasant/socialist alliance
 			limit = {
-				OR = {
-					has_ideology = ideology:ideology_socialist
-					has_ideology = ideology:ideology_agrarian
-					leader ?= {
-						has_ideology = ideology:ideology_protectionist
-					}
-				}
-				owner = {
+				owner ?= {
 					has_law_or_variant = law_type:law_laissez_faire
 				}
-				NOT = {
-					leader ?= {
-						has_ideology = ideology:ideology_market_liberal
-					}
+				law_stance = {
+					law = law_type:law_laissez_faire
+					value < neutral
 				}
 			}
 			add = {
@@ -557,25 +561,14 @@
 		}
 		if = { # loyalist-proletarian alliance for tax reform
 			limit = {
-				OR = {
-					has_ideology = ideology:ideology_proletarian
-					leader ?= {
-						has_ideology = ideology:ideology_social_democrat
-					}
-					AND = {
-						has_ideology = ideology:ideology_loyalist
-						owner = {
-							NOR = {
-								has_law_or_variant = law_type:law_proportional_taxation
-								has_law_or_variant = law_type:law_per_capita_based_taxation
-							}
-						}
-					}
-				}
-				owner = {
+				owner ?= {
 					NOT = {
 						has_law_or_variant = law_type:law_graduated_taxation
 					}
+				}
+				law_enactment_stance = {
+					law = law_type:law_graduated_taxation
+					value > neutral
 				}
 			}
 			add = {
@@ -585,49 +578,35 @@
 		}
 		if = { # anti-serfdom
 			limit = {
-				owner = {
+				owner ?= {
 					has_law_or_variant = law_type:law_serfdom
 				}
-				OR = {
-					has_ideology = ideology:ideology_egalitarian
-					has_ideology = ideology:ideology_egalitarian_modern
-					has_ideology = ideology:ideology_anti_slavery
-					has_ideology = ideology:ideology_laissez_faire
-					has_ideology = ideology:ideology_interventionist
-					has_ideology = ideology:ideology_particularist
-					leader ?= {
-						OR = {
-						has_ideology = ideology:ideology_abolitionist
-						has_ideology = ideology:ideology_social_democrat
-						has_ideology = ideology:ideology_communist
-								has_ideology = ideology:ideology_vanguardist
-						}
-					}
+				law_stance = {
+					law = law_type:law_serfdom
+					value < neutral
 				}
 			}
 			add = {
-				value = 5
+				value = 3
 				desc = "from_serfdom"
 			}
 		}
 		if = { # general anti-slavery
 			limit = {
-				owner = {
+				owner ?= {
 					OR = {
 						has_law_or_variant = law_type:law_legacy_slavery
 						has_law_or_variant = law_type:law_slave_trade
 						has_law_or_variant = law_type:law_colonial_slavery
 					}
 				}
-				OR = {
-					has_ideology = ideology:ideology_anti_slavery
-					leader ?= {
-						has_ideology = ideology:ideology_abolitionist
-					}
+				law_enactment_stance = {
+					law = law_type:law_slavery_banned
+					value > neutral
 				}
 			}
 			add = {
-				value = 5
+				value = 3
 				desc = "from_slavery"
 			}
 		}

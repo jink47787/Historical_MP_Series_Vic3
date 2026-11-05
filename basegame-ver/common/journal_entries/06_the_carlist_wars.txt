@@ -1,5 +1,10 @@
 ﻿je_the_first_carlist_war = {
 	group = je_group_global_international_situations
+
+	activation_description = {
+		always = yes
+	}
+
 	icon = "gfx/interface/icons/event_icons/event_carlist_beret.dds"
 
     is_shown_in_lobby = {
@@ -86,128 +91,136 @@
 		}
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = je_the_first_carlist_war_complete
-			NAND = {
-				exists = c:SPC
-				exists = c:SPA
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_the_first_carlist_war_complete
+				NAND = {
+					exists = c:SPC
+					exists = c:SPA
+				}
 			}
 		}
-	}
-
-	on_complete_all_involved = {
-		if = {
-			limit = {
-				c:SPC ?= this
+		effect = {
+			je_the_first_carlist_war_cleanup = yes
+		}
+		effect_all_involved = {
+			if = {
+				limit = {
+					c:SPC ?= this
+				}
+				change_tag = SPA
+				set_capital = STATE_NEW_CASTILE
+				set_market_capital = STATE_NEW_CASTILE
+				set_variable = spain_carlist_victory
+				add_modifier = {
+					name = carlist_war_spc_reward
+					years = 20
+					is_decaying = yes
+				}
+				hidden_effect = {
+					every_scope_state = {
+						limit = {
+							state_region = {
+								is_homeland = cu:spanish
+							}
+						}
+						set_state_type = incorporated
+					}
+				}
+				set_variable = is_carlist_spain
 			}
-			change_tag = SPA
-			set_capital = STATE_NEW_CASTILE
-			set_market_capital = STATE_NEW_CASTILE
-			set_variable = spain_carlist_victory
-			add_modifier = {
-				name = carlist_war_spc_reward
-				years = 20
-				is_decaying = yes
+			else_if = {
+				limit = {
+					c:SPA ?= this
+				}
+				add_modifier = {
+					name = carlist_war_spa_reward
+					years = 20
+					is_decaying = yes
+				}
 			}
+			trigger_event = carlist_war.2
 			hidden_effect = {
-				every_scope_state = {
+				remove_global_variable = spa_carlist_war_score
+				remove_global_variable = spc_carlist_war_score
+				remove_modifier = national_guard_preoccupied
+				remove_modifier = the_last_stand
+				remove_modifier = galvanized_forces
+				remove_modifier = spc_secure_port
+				remove_modifier = spa_carlist_terror_expenses
+				remove_modifier = captured_royal_arsenals
+				set_immune_to_revolutions = no
+				remove_variable = coup_immunity
+
+				if = {
 					limit = {
-						state_region = {
-							is_homeland = cu:spanish
+						any_scope_state = {
+							has_modifier = spa_carlist_terror
 						}
 					}
-					set_state_type = incorporated
-				}
-			}
-			set_variable = is_carlist_spain
-		}
-		else_if = {
-			limit = {
-				c:SPA ?= this
-			}
-			add_modifier = {
-				name = carlist_war_spa_reward
-				years = 20
-				is_decaying = yes
-			}
-		}
-		trigger_event = carlist_war.2
-		hidden_effect = {
-			remove_global_variable = spa_carlist_war_score
-			remove_global_variable = spc_carlist_war_score
-			remove_modifier = national_guard_preoccupied
-			remove_modifier = the_last_stand
-			remove_modifier = galvanized_forces
-			remove_modifier = spc_secure_port
-			remove_modifier = spa_carlist_terror_expenses
-			remove_modifier = captured_royal_arsenals
-			set_immune_to_revolutions = no
-			remove_variable = coup_immunity
-
-			if = {
-				limit = {
-					any_scope_state = {
-						has_modifier = spa_carlist_terror
+					every_scope_state = {
+						limit = {
+							has_modifier = spa_carlist_terror
+						}
+						remove_modifier = spa_carlist_terror
 					}
 				}
-				every_scope_state = {
+				if = {
 					limit = {
-						has_modifier = spa_carlist_terror
+						any_scope_State = {
+							has_modifier = ad_hoc_manufacturing
+						}
 					}
-					remove_modifier = spa_carlist_terror
-				}
-			}
-			if = {
-				limit = {
-					any_scope_State = {
-						has_modifier = ad_hoc_manufacturing
+					every_scope_state = {
+						limit = {
+							has_modifier = ad_hoc_manufacturing
+						}
+						remove_modifier = ad_hoc_manufacturing
 					}
 				}
-				every_scope_state = {
+				if = {
 					limit = {
-						has_modifier = ad_hoc_manufacturing
+						any_scope_state = {
+							has_modifier = spc_raided_grain_storages
+						}
 					}
-					remove_modifier = ad_hoc_manufacturing
-				}
-			}
-			if = {
-				limit = {
-					any_scope_state = {
-						has_modifier = spc_raided_grain_storages
+					every_scope_state = {
+						limit = {
+							has_modifier = spc_raided_grain_storages
+						}
+						remove_modifier = spc_raided_grain_storages
 					}
 				}
-				every_scope_state = {
+				if = {
 					limit = {
-						has_modifier = spc_raided_grain_storages
+						any_scope_state = {
+							has_modifier = pyrenean_smuggling
+						}
 					}
-					remove_modifier = spc_raided_grain_storages
-				}
-			}
-			if = {
-				limit = {
-					any_scope_state = {
-						has_modifier = pyrenean_smuggling
+					every_scope_state = {
+						limit = {
+							has_modifier = pyrenean_smuggling
+						}
+						remove_modifier = pyrenean_smuggling
 					}
 				}
-				every_scope_state = {
+				if = {
 					limit = {
-						has_modifier = pyrenean_smuggling
+						any_scope_state = {
+							has_modifier = ad_hoc_manufacturing_negative
+						}
 					}
-					remove_modifier = pyrenean_smuggling
-				}
-			}
-			if = {
-				limit = {
-					any_scope_state = {
-						has_modifier = ad_hoc_manufacturing_negative
+					every_scope_state = {
+						limit = {
+							has_modifier = ad_hoc_manufacturing_negative
+						}
+						remove_modifier = ad_hoc_manufacturing_negative
 					}
-				}
-				every_scope_state = {
-					limit = {
-						has_modifier = ad_hoc_manufacturing_negative
-					}
-					remove_modifier = ad_hoc_manufacturing_negative
 				}
 			}
 		}

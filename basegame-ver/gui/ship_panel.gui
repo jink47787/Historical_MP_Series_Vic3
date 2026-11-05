@@ -219,16 +219,17 @@ types ship_panel_types
 				flowcontainer = {
 					parentanchor = hcenter
 					spacing = 5
+					wrap_count = 2
 
 					### Flagship info
 					flowcontainer = {
 						direction = vertical
-						visible = "[HasDlcFeature('ship_designer')]"
+						visible = "[And(HasDlcFeature('ship_designer'), Ship.GetCountry.IsLocalPlayer)]"
 
 						button = {
 							visible = "[And(Not(Ship.IsFlagship), Ship.GetCountry.IsLocalPlayer)]"
 							using = default_button_action
-							size = { 180 40 }
+							size = { 272 40 }
 							onclick = "[PopupManager.AskConfirmation(Ship.AssignAsFlagship)]"
 							enabled = "[IsValid(Ship.AssignAsFlagship)]"
 
@@ -240,7 +241,7 @@ types ship_panel_types
 						button = {
 							visible = "[And(Ship.IsFlagship, Ship.GetCountry.IsLocalPlayer)]"
 							using = default_button_action
-							size = { 180 40 }
+							size = { 272 40 }
 							onclick = "[PopupManager.AskConfirmation(Ship.UnassignAsFlagship)]"
 							enabled = "[IsValid(Ship.UnassignAsFlagship)]"
 
@@ -254,6 +255,22 @@ types ship_panel_types
 						}
 					}
 
+					### REPAIR
+					flowcontainer = {
+						direction = vertical
+						visible = "[Ship.IsDamaged]"
+
+						button = {
+							using = default_button
+							size = { 272 40 }
+							enabled = "[IsValid(Ship.Repair)]"
+							onclick = "[Execute(Ship.Repair)]"
+							text = "REPAIR_SHIP_BUTTON"
+							tooltip = "REPAIR_SHIP_BUTTON_TOOLTIP"
+							using = tooltip_ne
+						}
+					}
+
 					### RETROFIT
 					flowcontainer = {
 						direction = vertical
@@ -262,7 +279,7 @@ types ship_panel_types
 						button = {
 							visible = "[Not(Ship.IsToRetrofit)]"
 							using = default_button
-							size = { 180 40 }
+							size = { 272 40 }
 							using = action_send_ship_to_retrofit
 							enabled = "[IsValid(Ship.Retrofit)]"
 							onclick = "[Execute(Ship.Retrofit)]"
@@ -276,7 +293,7 @@ types ship_panel_types
 						button = {
 							visible = "[Ship.IsToRetrofit]"
 							using = default_button_action
-							size = { 180 40 }
+							size = { 272 40 }
 							using = fleet_panel_construction_template_build_cancel
 							enabled = "[IsValid(Ship.CancelRetrofit)]"
 							onclick = "[Execute(Ship.CancelRetrofit)]"
@@ -293,7 +310,7 @@ types ship_panel_types
 						### Change Template
 						button = {
 							using = default_button
-							size = { 180 40 }
+							size = { 272 40 }
 							onclick = "[RightClickMenuManager.ToggleShipChangeTemplateActions(Ship.AccessSelf, PdxGuiWidget.AccessSelf)]"
 
 							text = "CHANGE_TEMPLATE"
@@ -582,7 +599,7 @@ types ship_panel_types
 							}
 
 							blockoverride "second_bar_text" {
-								raw_text = "@crew! #b [Ship.GetTotalCrew|D]#! / [Ship.GetCrewMax|D]"
+								text = "SHIP_CREW_BAR_VALUE"
 							}
 
 							blockoverride "entire_icon" {}
@@ -758,6 +775,9 @@ types ship_panel_types
 
 						### Blockade Strength
 						ship_stat_blockade_strength = {}
+
+						### Power Projection
+						ship_stat_power_projection = {}
 
 						ship_modifier_battle_against_torpedo_boat_destroyer_accuracy = {
 							visible = "[NotZero_CFixedPoint(Modifier.GetValueFor('ship_battle_against_ship_type_torpedo_boat_destroyer_accuracy_mult'))]"
@@ -984,25 +1004,30 @@ types ship_types
 			margin = { 10 5 }
 			spacing = 5
 
-			container = {
-				icon = {
-					size = { 24 24 }
-					block "stat_icon" {
-						texture = "gfx/interface/icons/harvest_condition_icons/placeholder.dds"
+			hbox = {
+				spacing = 5
+
+				block "stat_tooltip" {}
+
+				container = {
+					icon = {
+						size = { 24 24 }
+
+						block "stat_icon" {
+							texture = "gfx/interface/icons/harvest_condition_icons/placeholder.dds"
+						}
 					}
-				}
-				block "stat_icon_extra" {}
-			}
 
-			textbox = {
-				size = { 46 30 }
-				align = nobaseline
-				using = elide_fontsize_min
-
-				block "stat_tooltip" {
+					block "stat_icon_extra" {}
 				}
 
-				block "stat_value" {
+				textbox = {
+					size = { 46 30 }
+					align = nobaseline
+					using = elide_fontsize_min
+
+					block "stat_value" {
+					}
 				}
 			}
 
@@ -1197,29 +1222,7 @@ types ship_types
 	type ship_stat_base_veterancy = ship_stat {
 		blockoverride "stat_icon" {
 			texture = "[Ship.GetVeterancyLevel.GetTexture]"
-			tooltip = "SHIP_VETERANCY_TOOLTIP"
-			#parentanchor = vcenter|hcenter # todo PRCAL-45075 - comment back in once veteran rank number has been added by code
-        	#position = { 0 -9 } # todo PRCAL-45075 - comment back in once veteran rank number has been added by code
 		}
-
-		# blockoverride "stat_icon_extra" { # todo PRCAL-45075 - comment back in once veteran rank number has been added by code
-		# 	white_progressbar_vertical = {
-		# 		visible = "[Not(Ship.IsAtMaxVeterancy)]"
-		# 		size = { 20 6 }
-		# 		parentanchor = bottom|hcenter
-		# 		position = { 0 -3 }
-		# 		tooltip = "SHIP_VETERANCY_TOOLTIP"
-
-		# 		blockoverride "values" {
-		# 			min = "[Ship.GetVeterancyLevel.GetExperienceThreshold]"
-		# 			max = "[Ship.GetVeterancyLevel.GetNextLevel.GetExperienceThreshold]"
-		# 			value = "[Ship.GetVeterancyExperience]"
-		# 		}
-		# 		blockoverride "color" {
-		# 			color = { 0.6 0.4 0.6 1 }
-		# 		}
-		# 	}
-		# }
 
 		blockoverride "stat_label" {
 			text = "[concept_veterancy_level]"
@@ -1243,6 +1246,16 @@ types ship_types
 
 		blockoverride "stat_label" {
 			text = "[concept_readiness]"
+		}
+	}
+
+	type ship_stat_base_power_projection = ship_stat {
+		blockoverride "stat_icon" {
+			texture = "gfx/interface/icons/commander_order_icons/project_power.dds"
+		}
+
+		blockoverride "stat_label" {
+			text = "[concept_power_projection]"
 		}
 	}
 
@@ -1274,6 +1287,16 @@ types ship_types
 
 		blockoverride "stat_value" {
 			text = "[Modifier.GetShipArmor|v0]"
+		}
+	}
+
+	type ship_modifier_stat_power_projection = ship_stat_base_power_projection {
+		blockoverride "stat_tooltip" {
+			tooltip = "[Modifier.GetShipPowerProjectionTooltip]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Modifier.GetShipPowerProjection|v0]"
 		}
 	}
 
@@ -1334,6 +1357,16 @@ types ship_types
 
 		blockoverride "stat_value" {
 			text = "[Modifier.GetShipHitPointsMax|v0]"
+		}
+	}
+
+	type ship_modifier_stat_crew_max = ship_stat_base_crew_max {
+		blockoverride "stat_tooltip" {
+			tooltip = "[Modifier.GetShipCrewMaxTooltip]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Modifier.GetShipCrewMax|v0]"
 		}
 	}
 
@@ -1450,7 +1483,7 @@ types ship_types
 	## Template types
 	type ship_template_stat_armor = ship_stat_base_armor {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetArmorBreakdown]"
+			tooltip = "SHIP_TEMPLATE_ARMOR_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1460,7 +1493,7 @@ types ship_types
 
 	type ship_template_stat_carrying_capacity = ship_stat_base_carrying_capacity {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetCarryingCapacityBreakdown]"
+			tooltip = "SHIP_TEMPLATE_CARRYING_CAPACITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1470,7 +1503,7 @@ types ship_types
 
 	type ship_template_stat_crew_damage = ship_stat_base_crew_damage {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetCrewDamageBreakdown]"
+			tooltip = "SHIP_TEMPLATE_CREW_DAMAGE_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1480,7 +1513,7 @@ types ship_types
 
 	type ship_template_stat_critical_hit_chance = ship_stat_base_critical_hit_chance {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetCriticalHitChanceBreakdown]"
+			tooltip = "SHIP_TEMPLATE_CRITICAL_HIT_CHANCE_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1488,9 +1521,19 @@ types ship_types
 		}
 	}
 
+	type ship_template_stat_power_projection = ship_stat_base_power_projection {
+		blockoverride "stat_tooltip" {
+			tooltip = "SHIP_TEMPLATE_POWER_PROJECTION_TOOLTIP"
+		}
+
+		blockoverride "stat_value" {
+			text = "[ShipTemplate.GetPowerProjection|v0]"
+		}
+	}
+
 	type ship_template_stat_critical_hit_damage = ship_stat_base_critical_hit_multiplier {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetCriticalHitMultiplierBreakdown]"
+			tooltip = "SHIP_TEMPLATE_CRITICAL_HIT_MULTIPLIER_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1500,7 +1543,7 @@ types ship_types
 
 	type ship_template_stat_detection = ship_stat_base_detection {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetDetectionBreakdown]"
+			tooltip = "SHIP_TEMPLATE_DETECTION_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1510,7 +1553,7 @@ types ship_types
 
 	type ship_template_stat_hit_points = ship_stat_base_hit_points {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetHitPointsMaxBreakdown]"
+			tooltip = "SHIP_TEMPLATE_HIT_POINTS_MAX_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1518,9 +1561,19 @@ types ship_types
 		}
 	}
 
+	type ship_template_stat_crew_max = ship_stat_base_crew_max {
+		blockoverride "stat_tooltip" {
+			tooltip = "SHIP_TEMPLATE_CREW_MAX_TOOLTIP"
+		}
+
+		blockoverride "stat_value" {
+			text = "[ShipTemplate.GetCrewMax|v0]"
+		}
+	}
+
 	type ship_template_stat_hull_damage = ship_stat_base_hull_damage {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetHullDamageBreakdown]"
+			tooltip = "SHIP_TEMPLATE_HULL_DAMAGE_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1530,7 +1583,7 @@ types ship_types
 
 	type ship_template_stat_marine_capacity = ship_stat_base_marine_capacity {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetMarineCapacityBreakdown]"
+			tooltip = "SHIP_TEMPLATE_MARINE_CAPACITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1540,7 +1593,7 @@ types ship_types
 
 	type ship_template_stat_screening = ship_stat_base_screening {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetScreeningBreakdown]"
+			tooltip = "SHIP_TEMPLATE_SCREENING_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1550,7 +1603,7 @@ types ship_types
 
 	type ship_template_stat_movement_speed = ship_stat_base_movement_speed {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetMovementSpeedBreakdown]"
+			tooltip = "SHIP_TEMPLATE_MOVEMENT_SPEED_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1560,7 +1613,7 @@ types ship_types
 
 	type ship_template_stat_supply_capacity = ship_stat_base_supply_capacity {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetSupplyCapacityBreakdown]"
+			tooltip = "SHIP_TEMPLATE_SUPPLY_CAPACITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1570,7 +1623,7 @@ types ship_types
 
 	type ship_template_stat_supply_efficiency = ship_stat_base_supply_efficiency {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetSupplyEfficiencyBreakdown]"
+			tooltip = "SHIP_TEMPLATE_SUPPLY_EFFICIENCY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1580,7 +1633,7 @@ types ship_types
 
 	type ship_template_stat_visibility = ship_stat_base_visibility {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetVisibilityBreakdown]"
+			tooltip = "SHIP_TEMPLATE_VISIBILITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1590,7 +1643,7 @@ types ship_types
 
 	type ship_template_stat_vulnerability = ship_stat_base_vulnerability {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetVulnerabilityBreakdown]"
+			tooltip = "SHIP_TEMPLATE_VULNERABILITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1600,7 +1653,7 @@ types ship_types
 
 	type ship_template_stat_accuracy = ship_stat_base_accuracy {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetAccuracyBreakdown]"
+			tooltip = "SHIP_TEMPLATE_ACCURACY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1610,7 +1663,7 @@ types ship_types
 
 	type ship_template_stat_blockade_strength = ship_stat_base_blockade_strength {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetBlockadeStrength]"
+			tooltip = "SHIP_TEMPLATE_BLOCKADE_STRENGTH_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1620,7 +1673,7 @@ types ship_types
 
 	type ship_template_stat_readiness_gain = ship_stat_base_readiness_gain {
 		blockoverride "stat_tooltip" {
-			tooltip = "[ShipTemplate.GetReadinessGainBreakdown]"
+			tooltip = "SHIP_TEMPLATE_READINESS_GAIN_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1631,7 +1684,7 @@ types ship_types
 	## Ships
 	type ship_stat_accuracy = ship_stat_base_accuracy {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetAccuracyBreakdown]"
+			tooltip = "SHIP_ACCURACY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1645,22 +1698,7 @@ types ship_types
 		}
 
 		blockoverride "stat_value" {
-			#text = "[Ship.GetVeterancyLevel.GetNameNoIcon]" # todo PRCAL-45075 - comment back in once veteran rank number has been added by code.
-			white_progressbar_vertical = { # todo PRCAL-45075 - delete once veteran rank number has been added by code.
-				visible = "[Not(Ship.IsAtMaxVeterancy)]"
-				size = { 6 20 }
-				parentanchor = vcenter|left
-				tooltip = "SHIP_VETERANCY_TOOLTIP"
-
-				blockoverride "values" {
-					min = "[Ship.GetVeterancyLevel.GetExperienceThreshold]"
-					max = "[Ship.GetVeterancyLevel.GetNextLevel.GetExperienceThreshold]"
-					value = "[Ship.GetVeterancyExperience]"
-				}
-				blockoverride "color" {
-					color = { 0.6 0.4 0.6 1 }
-				}
-			}
+			text = "[Ship.GetVeterancyLevel.GetNameNoFormatting]"
 		}
 	}
 
@@ -1676,7 +1714,7 @@ types ship_types
 
 	type ship_stat_armor = ship_stat_base_armor {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetArmorBreakdown]"
+			tooltip = "SHIP_ARMOR_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1686,7 +1724,7 @@ types ship_types
 
 	type ship_stat_blockade_strength = ship_stat_base_blockade_strength {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetBlockadeStrengthBreakdown]"
+			tooltip = "SHIP_BLOCKADE_STRENGTH_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1694,9 +1732,19 @@ types ship_types
 		}
 	}
 
+	type ship_stat_power_projection = ship_stat_base_power_projection {
+		blockoverride "stat_tooltip" {
+			tooltip = "SHIP_POWER_PROJECTION_TOOLTIP"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Ship.GetPowerProjection|v0]"
+		}
+	}
+
 	type ship_stat_carrying_capacity = ship_stat_base_carrying_capacity {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetCarryingCapacityBreakdown]"
+			tooltip = "SHIP_CARRYING_CAPACITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1706,7 +1754,7 @@ types ship_types
 
 	type ship_stat_crew_damage = ship_stat_base_crew_damage {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetCrewDamageBreakdown]"
+			tooltip = "SHIP_CREW_DAMAGE_DESC"
 		}
 
 		blockoverride "stat_value" {
@@ -1716,7 +1764,7 @@ types ship_types
 
 	type ship_stat_crew_max = ship_stat_base_crew_max {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetCrewMaxBreakdown]"
+			tooltip = "SHIP_CREW_MAX_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1726,7 +1774,7 @@ types ship_types
 
 	type ship_stat_critical_hit_chance = ship_stat_base_critical_hit_chance {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetCriticalHitChanceBreakdown]"
+			tooltip = "SHIP_CRITICAL_HIT_CHANCE_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1736,7 +1784,7 @@ types ship_types
 
 	type ship_stat_critical_hit_multiplier = ship_stat_base_critical_hit_multiplier {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetCriticalHitMultiplierBreakdown]"
+			tooltip = "SHIP_CRITICAL_HIT_MULTIPLIER_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1746,7 +1794,7 @@ types ship_types
 
 	type ship_stat_detection = ship_stat_base_detection {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetDetectionBreakdown]"
+			tooltip = "SHIP_DETECTION_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1756,7 +1804,7 @@ types ship_types
 
 	type ship_stat_hit_points_max = ship_stat_base_hit_points_max {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetHitPointsMaxBreakdown]"
+			tooltip = "SHIP_HIT_POINTS_MAX_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1766,7 +1814,7 @@ types ship_types
 
 	type ship_stat_hull_damage = ship_stat_base_hull_damage {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetHullDamageBreakdown]"
+			tooltip = "SHIP_HULL_DAMAGE_DESC"
 		}
 
 		blockoverride "stat_value" {
@@ -1776,7 +1824,7 @@ types ship_types
 
 	type ship_stat_marine_capacity = ship_stat_base_marine_capacity {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetMarineCapacityBreakdown]"
+			tooltip = "SHIP_MARINE_CAPACITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1786,7 +1834,7 @@ types ship_types
 
 	type ship_stat_readiness_gain = ship_stat_base_readiness_gain {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetReadinessGainBreakdown]"
+			tooltip = "SHIP_READINESS_GAIN_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1796,7 +1844,7 @@ types ship_types
 
 	type ship_stat_screening = ship_stat_base_screening {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetScreeningBreakdown]"
+			tooltip = "SHIP_SCREENING_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1816,7 +1864,7 @@ types ship_types
 
 	type ship_stat_supply_capacity = ship_stat_base_supply_capacity {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetSupplyCapacityBreakdown]"
+			tooltip = "SHIP_SUPPLY_CAPACITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1826,7 +1874,7 @@ types ship_types
 
 	type ship_stat_supply_efficiency = ship_stat_base_supply_efficiency {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetSupplyEfficiencyBreakdown]"
+			tooltip = "SHIP_SUPPLY_EFFICIENCY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1836,7 +1884,7 @@ types ship_types
 
 	type ship_stat_visibility = ship_stat_base_visibility {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetVisibilityBreakdown]"
+			tooltip = "SHIP_VISIBILITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1846,7 +1894,7 @@ types ship_types
 
 	type ship_stat_vulnerability = ship_stat_base_vulnerability {
 		blockoverride "stat_tooltip" {
-			tooltip = "[Ship.GetVulnerabilityBreakdown]"
+			tooltip = "SHIP_VULNERABILITY_TOOLTIP"
 		}
 
 		blockoverride "stat_value" {
@@ -1951,6 +1999,126 @@ types ship_types
 
 		blockoverride "stat_label" {
 			text = "[concept_hull_attack_damage]"
+		}
+	}
+
+	type ship_modifier_crew_damage_mult = ship_stat {
+		size = { 350 36 }
+
+		blockoverride "stat_icon" {
+			texture = "gfx/interface/icons/military_icons/navy_icons/crew_damage_navy.dds"
+		}
+
+		blockoverride "stat_tooltip" {
+			tooltip = "[Modifier.GetDescFor('ship_crew_damage_mult')]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Modifier.GetValueFor('ship_crew_damage_mult')|+=v0%]"
+		}
+
+		blockoverride "stat_label" {
+			text = "[concept_crew_attack_damage]"
+		}
+	}
+
+	type ship_modifier_detection_mult = ship_stat {
+		size = { 350 36 }
+
+		blockoverride "stat_icon" {
+			texture = "gfx/interface/icons/military_icons/navy_icons/detection_navy.dds"
+		}
+
+		blockoverride "stat_tooltip" {
+			tooltip = "[Modifier.GetDescFor('ship_detection_mult')]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Modifier.GetValueFor('ship_detection_mult')|+=v0%]"
+		}
+
+		blockoverride "stat_label" {
+			text = "[concept_detection]"
+		}
+	}
+
+	type ship_modifier_readiness_gain_mult = ship_stat {
+		size = { 350 36 }
+
+		blockoverride "stat_icon" {
+			texture = "gfx/interface/icons/military_icons/navy_icons/readiness_gain.dds"
+		}
+
+		blockoverride "stat_tooltip" {
+			tooltip = "[Modifier.GetDescFor('ship_readiness_gain_mult')]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Modifier.GetValueFor('ship_readiness_gain_mult')|+=v0%]"
+		}
+
+		blockoverride "stat_label" {
+			text = "[concept_readiness]"
+		}
+	}
+
+	type ship_modifier_screening_mult = ship_stat {
+		size = { 350 36 }
+
+		blockoverride "stat_icon" {
+			texture = "gfx/interface/icons/military_icons/navy_icons/screening.dds"
+		}
+
+		blockoverride "stat_tooltip" {
+			tooltip = "[Modifier.GetDescFor('ship_screening_mult')]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Modifier.GetValueFor('ship_screening_mult')|+=v0%]"
+		}
+
+		blockoverride "stat_label" {
+			text = "[concept_screening]"
+		}
+	}
+
+	type ship_modifier_visibility_mult = ship_stat {
+		size = { 350 36 }
+
+		blockoverride "stat_icon" {
+			texture = "gfx/interface/icons/military_icons/navy_icons/visibility.dds"
+		}
+
+		blockoverride "stat_tooltip" {
+			tooltip = "[Modifier.GetDescFor('ship_visibility_mult')]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Modifier.GetValueFor('ship_visibility_mult')|-=v0%]"
+		}
+
+		blockoverride "stat_label" {
+			text = "[concept_visibility]"
+		}
+	}
+
+	type ship_modifier_vulnerability_mult = ship_stat {
+		size = { 350 36 }
+
+		blockoverride "stat_icon" {
+			texture = "gfx/interface/icons/military_icons/navy_icons/vulnerability.dds"
+		}
+
+		blockoverride "stat_tooltip" {
+			tooltip = "[Modifier.GetDescFor('ship_vulnerability_mult')]"
+		}
+
+		blockoverride "stat_value" {
+			text = "[Modifier.GetValueFor('ship_vulnerability_mult')|-=v0%]"
+		}
+
+		blockoverride "stat_label" {
+			text = "[concept_vulnerability]"
 		}
 	}
 

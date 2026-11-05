@@ -11,6 +11,7 @@
 	icon = "gfx/interface/icons/diplomatic_treaties_articles_icons/foreign_investment_agreement_treaties.dds"
 
 	flags = {
+		show_in_lens
 		is_investment_rights
 		can_be_enforced
 		can_be_renegotiated
@@ -139,6 +140,34 @@
 				value = country_rank
 				multiply = 0.05
 			}
+
+			if = {
+				limit = {
+					c:RUS ?= this
+					has_variable = ai_russia_client_bloc_pending
+				}
+				add = 0.15
+			}
+
+			if = {
+				limit = {
+					has_journal_entry = je_tp_tsar_heir_of_alexander
+					NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_2_complete }
+				}
+				add = 0.5
+			}
+		}
+
+		proposal_weight = {
+			value = 1
+
+			if = {
+				limit = {
+					c:RUS ?= this
+					ai_russia_article_partner_is_pending_client = yes
+				}
+				add = 5
+			}
 		}
 
 		article_ai_usage = {
@@ -186,6 +215,20 @@
 					add = {
 						desc = "catalyst_declared_bankruptcy"
 						add = 25
+					}
+				}
+
+				if = {
+					limit = {
+						c:CHI ?= this
+						scope:target_country ?= {
+							has_journal_entry = je_tp_tsar_heir_of_alexander
+							NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_2_complete }
+						}
+					}
+					add = {
+						desc = "DIPLOMATIC_ACCEPTANCE_BASE_ADDITIONAL"
+						value = 50
 					}
 				}
 
@@ -484,7 +527,7 @@
 							type = embargo
 						}
 					}
-					can_reach_target_country = yes
+					can_reach_target_country_to_coerce = { TARGET_COUNTRY = scope:target_country }
 				}
 				add = 1
 			}
@@ -528,42 +571,16 @@
 			}
 		}
 
+		infamy_severity = 0.05
+		infamy_min = define:NDiplomacy|WAR_GOAL_INFAMY_MODERATE_DEMAND_MIN
+		infamy_max = define:NDiplomacy|WAR_GOAL_INFAMY_MODERATE_DEMAND_MAX
+
 		infamy = {
 			value = 0
 
-			add = {
-				desc = "INFAMY_BASE_VALUE"
-				value = 0.25
-			}
-
 			scope:target_country = {
-				multiply = {
-					desc = "INFAMY_TARGET_COUNTRY_POPULATION_FACTOR"
-					add = {
-						every_scope_state = {
-							add = {
-								value = state_population
-								divide = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_FACTOR
-								multiply = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_MULTIPLIER
-
-								if = {
-									limit = {
-										is_incorporated = no
-									}
-									multiply = {
-										value = 1
-										add = define:NDiplomacy|WAR_GOAL_INFAMY_UNINCORPORATED_FACTOR
-									}
-								}
-								max = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_MULTIPLIER_MAX_PER_STATE
-							}
-						}
-					}
-					max = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SCALING_MULTIPLIER_MAX_TOTAL
-				}
+				add = country_infamy_value
 			}
-
-			min = 0.25
 		}
 	}
 }

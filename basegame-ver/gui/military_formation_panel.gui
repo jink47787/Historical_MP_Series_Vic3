@@ -1729,6 +1729,21 @@ types military_formation_panel_types
 		}
 
 		flowcontainer = {
+			visible = "[And(MilitaryFormation.IsFleet, Not(MilitaryFormation.CanReceiveNewShips))]"
+			direction = vertical
+			parentanchor = hcenter
+
+			textbox = {
+				max_width = @panel_width_minus_10
+				margin = { 1 10}
+				autoresize = yes
+				multiline = yes
+				align = nobaseline
+				text = "FLEET_SHIP_CONSTRUCTION_NOT_DELIVERED_WARNING"
+			}
+		}
+
+		flowcontainer = {
 			visible = "[MilitaryFormation.IsFleet]"
 			parentanchor = hcenter
 			direction = vertical
@@ -1770,10 +1785,7 @@ types military_formation_panel_types
 					using = default_button
 					onclick = "[InformationPanelBar.OpenGoodsPanel( MilitaryFormation.GetCountry.GetMarket.Self, Goods.Self )]"
 					onrightclick = "[RightClickMenuManager.ShowForGoods( Goods.AccessSelf )]"
-
-					tooltipwidget = {
-						FancyTooltip_Goods = {}
-					}
+					tooltip = "[MilitaryFormation.GetPilferedGoodsAmountDesc( Goods.Self )]"
 
 					icon = {
 						size = { 34 34 }
@@ -1807,64 +1819,396 @@ types military_formation_panel_types
 		}
 
 		### SUPPLY RAID
-		default_header = {
+		default_header_2texts = {
 			visible = "[MilitaryFormation.IsOnRaidSupplyMission]"
 			using = default_fade_in_out
 
-			blockoverride "text" {
+			blockoverride "text1" {
 				text = "FLEET_SUPPLY_RAID_HEADER"
 			}
-		}
 
-		textbox = {
-			visible = "[And( MilitaryFormation.IsOnRaidSupplyMission, MilitaryFormation.HasSupplyRaidTargets )]"
-			parentanchor = hcenter
-			align = hcenter|nobaseline
-			autoresize = yes
-			multiline = yes
-			max_width = @panel_width_minus_10
-			using = elide_fontsize_min
-			margin = { 0 5 }
-			text = "FLEET_SUPPLY_RAID_SUMMARY"
+			blockoverride "right" {
+				flowcontainer = {
+					parentanchor = right|vcenter
+					spacing = 2
+					position = { -12 0 }
+
+					icon = {
+						size = { 24 24 }
+						texture = "gfx/interface/icons/military_icons/navy_icons/detection_navy.dds"
+					}
+
+					textbox = {
+						parentanchor = vcenter
+						align = nobaseline
+						autoresize = yes
+						using = elide_fontsize_min
+						text = "FLEET_SUPPLY_RAID_CHANCE"
+						tooltip = "FLEET_SUPPLY_RAID_CHANCE_TOOLTIP"
+					}
+				}
+			}
 		}
 
 		empty_state = {
 			blockoverride "visible" {
-				visible = "[And( MilitaryFormation.IsOnRaidSupplyMission, Not( MilitaryFormation.HasSupplyRaidTargets ) )]"
+				visible = "[And( MilitaryFormation.IsOnRaidSupplyMission, Not( MilitaryFormation.HasRaidSupplyActivity ) )]"
 			}
 			blockoverride "text" {
 				text = "FLEET_NO_SUPPLY_RAID_TARGETS"
 			}
 		}
 
-		### PROTECT SUPPLY
-		default_header = {
-			visible = "[MilitaryFormation.IsOnProtectSupplyMission]"
-			using = default_fade_in_out
+		flowcontainer = {
+			visible = "[And( MilitaryFormation.IsOnRaidSupplyMission, MilitaryFormation.HasRaidSupplyActivity )]"
+			parentanchor = hcenter
+			direction = vertical
+			max_update_rate = 8
 
-			blockoverride "text" {
-				text = "FLEET_SUPPLY_PROTECT_HEADER"
+			flowcontainer = {
+				direction = vertical
+				spacing = 5
+				ignoreinvisible = yes
+				datamodel = "[MilitaryFormation.GetRaidSupplyRegions]"
+
+				item = {
+					flowcontainer = {
+						visible = "[Or( Not( IsDataModelEmpty( MilitaryFormation.GetRaidableFormationsInRegion( StateRegion.Self ) ) ), Not( IsDataModelEmpty( MilitaryFormation.GetSupplyProtectorsInRegion( StateRegion.Self ) ) ) )]"
+						direction = vertical
+						spacing = 2
+
+						flowcontainer = {
+							margin_left = 10
+
+							textbox = {
+								size = { 530 20 }
+								align = nobaseline
+								using = elide_fontsize_min
+								text = "NAVAL_MISSION_SEA_REGION_ENTRY"
+							}
+						}
+
+						textbox = {
+							visible = "[Not( IsDataModelEmpty( MilitaryFormation.GetRaidableFormationsInRegion( StateRegion.Self ) ) )]"
+							size = { 510 20 }
+							margin_left = 20
+							align = nobaseline
+							using = elide_fontsize_min
+							text = "FLEET_SUPPLY_RAID_FORMATIONS_HEADER"
+						}
+
+						flowcontainer = {
+							direction = vertical
+							spacing = 2
+							datamodel = "[MilitaryFormation.GetRaidableFormationsInRegion( StateRegion.Self )]"
+
+							item = {
+								button = {
+									size = { 540 40 }
+									onclick = "[InformationPanelBar.OpenMilitaryFormationPanel(MilitaryFormation.Self)]"
+									onmousehierarchyenter = "[AccessHighlightManager.HighlightMilitaryFormation( MilitaryFormation.Self )]"
+									onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+									using = default_button
+
+									tooltipwidget = {
+										FancyTooltip_MilitaryFormation = {}
+									}
+
+									background = {
+										using = entry_bg_simple
+									}
+
+									hbox = {
+										layoutpolicy_horizontal = expanding
+										layoutpolicy_vertical = expanding
+										margin = { 10 0 }
+										spacing = 5
+
+										tiny_flag = {
+											datacontext = "[MilitaryFormation.GetCountry]"
+										}
+
+										textbox = {
+											layoutpolicy_horizontal = expanding
+											size = { 0 20 }
+											align = nobaseline
+											using = elide_fontsize_min
+											text = "[MilitaryFormation.GetNameNoFormatting]"
+										}
+
+										expand = {}
+
+										textbox = {
+											autoresize = yes
+											align = right|nobaseline
+											using = elide_fontsize_min
+											text = "FLEET_SUPPLY_PROTECT_CONVOY_SHIPS"
+										}
+									}
+								}
+							}
+						}
+
+						textbox = {
+							visible = "[Not( IsDataModelEmpty( MilitaryFormation.GetSupplyProtectorsInRegion( StateRegion.Self ) ) )]"
+							size = { 510 20 }
+							margin_left = 20
+							align = nobaseline
+							using = elide_fontsize_min
+							text = "FLEET_SUPPLY_RAID_PROTECTORS_HEADER"
+						}
+
+						flowcontainer = {
+							direction = vertical
+							spacing = 2
+							datamodel = "[MilitaryFormation.GetSupplyProtectorsInRegion( StateRegion.Self )]"
+
+							item = {
+								button = {
+									size = { 540 40 }
+									onclick = "[InformationPanelBar.OpenMilitaryFormationPanel(MilitaryFormation.Self)]"
+									onmousehierarchyenter = "[AccessHighlightManager.HighlightMilitaryFormation( MilitaryFormation.Self )]"
+									onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+									using = default_button
+
+									tooltipwidget = {
+										FancyTooltip_MilitaryFormation = {}
+									}
+
+									background = {
+										using = entry_bg_simple
+									}
+
+									hbox = {
+										layoutpolicy_horizontal = expanding
+										layoutpolicy_vertical = expanding
+										margin = { 10 0 }
+										spacing = 5
+
+										tiny_flag = {
+											datacontext = "[MilitaryFormation.GetCountry]"
+										}
+
+										textbox = {
+											layoutpolicy_horizontal = expanding
+											size = { 0 20 }
+											align = nobaseline
+											using = elide_fontsize_min
+											text = "[MilitaryFormation.GetNameNoFormatting]"
+										}
+
+										expand = {}
+
+										textbox = {
+											autoresize = yes
+											align = right|nobaseline
+											using = elide_fontsize_min
+											text = "FLEET_SUPPLY_RAID_PROTECTOR_SHIPS"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 
-		textbox = {
-			visible = "[And( MilitaryFormation.IsOnProtectSupplyMission, MilitaryFormation.HasOwnSupplyShipsPassingThrough )]"
-			parentanchor = hcenter
-			align = hcenter|nobaseline
-			autoresize = yes
-			multiline = yes
-			max_width = @panel_width_minus_10
-			using = elide_fontsize_min
-			margin = { 0 5 }
-			text = "FLEET_SUPPLY_PROTECT_SUMMARY"
+		### PROTECT SUPPLY
+		default_header_2texts = {
+			visible = "[MilitaryFormation.IsOnProtectSupplyMission]"
+			using = default_fade_in_out
+
+			blockoverride "text1" {
+				text = "FLEET_SUPPLY_PROTECT_HEADER"
+			}
+
+			blockoverride "right" {
+				flowcontainer = {
+					parentanchor = right|vcenter
+					spacing = 2
+					position = { -12 0 }
+
+					icon = {
+						size = { 24 24 }
+						texture = "gfx/interface/icons/generic_icons/convoys.dds"
+					}
+
+					textbox = {
+						parentanchor = vcenter
+						align = nobaseline
+						autoresize = yes
+						max_width = @panel_width_minus_10
+						using = elide_fontsize_min
+						tooltip = "FLEET_SUPPLY_PROTECT_COUNT_TOOLTIP"
+						text = "FLEET_SUPPLY_PROTECT_COUNT"
+					}
+				}
+			}
 		}
 
 		empty_state = {
 			blockoverride "visible" {
-				visible = "[And( MilitaryFormation.IsOnProtectSupplyMission, Not( MilitaryFormation.HasOwnSupplyShipsPassingThrough ) )]"
+				visible = "[And( MilitaryFormation.IsOnProtectSupplyMission, Not( MilitaryFormation.HasProtectSupplyActivity ) )]"
 			}
 			blockoverride "text" {
 				text = "FLEET_NO_OWN_SUPPLY_SHIPS"
+			}
+		}
+
+		flowcontainer = {
+			visible = "[And( MilitaryFormation.IsOnProtectSupplyMission, MilitaryFormation.HasProtectSupplyActivity )]"
+			parentanchor = hcenter
+			direction = vertical
+			max_update_rate = 8
+
+			flowcontainer = {
+				direction = vertical
+				spacing = 5
+				ignoreinvisible = yes
+				datamodel = "[MilitaryFormation.GetProtectSupplyRegions]"
+
+				item = {
+					flowcontainer = {
+						visible = "[Or( Not( IsDataModelEmpty( MilitaryFormation.GetProtectedFormationsInRegion( StateRegion.Self ) ) ), Not( IsDataModelEmpty( MilitaryFormation.GetSupplyRaidersInRegion( StateRegion.Self ) ) ) )]"
+						direction = vertical
+						spacing = 2
+
+						flowcontainer = {
+							margin_left = 10
+
+							textbox = {
+								size = { 530 20 }
+								align = nobaseline
+								using = elide_fontsize_min
+								text = "NAVAL_MISSION_SEA_REGION_ENTRY"
+							}
+						}
+
+						textbox = {
+							visible = "[Not( IsDataModelEmpty( MilitaryFormation.GetProtectedFormationsInRegion( StateRegion.Self ) ) )]"
+							size = { 510 20 }
+							margin_left = 20
+							align = nobaseline
+							using = elide_fontsize_min
+							text = "FLEET_SUPPLY_PROTECT_FORMATIONS_HEADER"
+						}
+
+						flowcontainer = {
+							direction = vertical
+							spacing = 2
+							datamodel = "[MilitaryFormation.GetProtectedFormationsInRegion( StateRegion.Self )]"
+
+							item = {
+								button = {
+									size = { 540 40 }
+									onclick = "[InformationPanelBar.OpenMilitaryFormationPanel(MilitaryFormation.Self)]"
+									onmousehierarchyenter = "[AccessHighlightManager.HighlightMilitaryFormation( MilitaryFormation.Self )]"
+									onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+									using = default_button
+
+									tooltipwidget = {
+										FancyTooltip_MilitaryFormation = {}
+									}
+
+									background = {
+										using = entry_bg_simple
+									}
+
+									hbox = {
+										layoutpolicy_horizontal = expanding
+										layoutpolicy_vertical = expanding
+										margin = { 10 0 }
+										spacing = 5
+
+										tiny_flag = {
+											datacontext = "[MilitaryFormation.GetCountry]"
+										}
+
+										textbox = {
+											layoutpolicy_horizontal = expanding
+											size = { 0 20 }
+											align = nobaseline
+											using = elide_fontsize_min
+											text = "[MilitaryFormation.GetNameNoFormatting]"
+										}
+
+										expand = {}
+
+										textbox = {
+											autoresize = yes
+											align = right|nobaseline
+											using = elide_fontsize_min
+											text = "FLEET_SUPPLY_PROTECT_CONVOY_SHIPS"
+										}
+									}
+								}
+							}
+						}
+
+						textbox = {
+							visible = "[Not( IsDataModelEmpty( MilitaryFormation.GetSupplyRaidersInRegion( StateRegion.Self ) ) )]"
+							size = { 510 20 }
+							margin_left = 20
+							align = nobaseline
+							using = elide_fontsize_min
+							text = "FLEET_SUPPLY_PROTECT_RAIDERS_HEADER"
+						}
+
+						flowcontainer = {
+							direction = vertical
+							spacing = 2
+							datamodel = "[MilitaryFormation.GetSupplyRaidersInRegion( StateRegion.Self )]"
+
+							item = {
+								button = {
+									size = { 540 40 }
+									onclick = "[InformationPanelBar.OpenMilitaryFormationPanel(MilitaryFormation.Self)]"
+									onmousehierarchyenter = "[AccessHighlightManager.HighlightMilitaryFormation( MilitaryFormation.Self )]"
+									onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+									using = default_button
+
+									tooltipwidget = {
+										FancyTooltip_MilitaryFormation = {}
+									}
+
+									background = {
+										using = entry_bg_simple
+									}
+
+									hbox = {
+										layoutpolicy_horizontal = expanding
+										layoutpolicy_vertical = expanding
+										margin = { 10 0 }
+										spacing = 5
+
+										tiny_flag = {
+											datacontext = "[MilitaryFormation.GetCountry]"
+										}
+
+										textbox = {
+											layoutpolicy_horizontal = expanding
+											size = { 0 20 }
+											align = nobaseline
+											using = elide_fontsize_min
+											text = "[MilitaryFormation.GetNameNoFormatting]"
+										}
+
+										expand = {}
+
+										textbox = {
+											autoresize = yes
+											align = right|nobaseline
+											using = elide_fontsize_min
+											text = "FLEET_SUPPLY_PROTECT_RAIDER_POWER"
+										}
+									}
+								}
+							}
+						}
+
+					}
+				}
 			}
 		}
 
@@ -1920,11 +2264,11 @@ types military_formation_panel_types
 			item = {
 				button = {
 					size = { 540 40 }
-					using = default_button
 					onclick = "[InformationPanelBar.OpenStatePanel(State.AccessSelf)]"
 					onrightclick = "[RightClickMenuManager.ShowForState(State.AccessSelf)]"
 					onmousehierarchyenter = "[AccessHighlightManager.HighlightState(State.Self)]"
 					onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+					using = default_button
 					tooltip = "FLEET_PORT_BOMBARDMENT_STATE_TOOLTIP"
 
 					background = {
@@ -1989,6 +2333,99 @@ types military_formation_panel_types
 			}
 		}
 
+		### PROJECT POWER
+		default_header_2texts = {
+			visible = "[MilitaryFormation.IsOnProjectPowerMission]"
+			using = default_fade_in_out
+
+			blockoverride "text1" {
+				text = "FLEET_PROJECT_POWER_HEADER"
+			}
+
+			blockoverride "right" {
+				flowcontainer = {
+					parentanchor = right|vcenter
+					spacing = 2
+					position = { -12 0 }
+
+					icon = {
+						size = { 30 30 }
+						texture = "gfx/interface/icons/commander_order_icons/project_power.dds"
+					}
+
+					textbox = {
+						parentanchor = vcenter
+						align = nobaseline
+						autoresize = yes
+						max_width = @panel_width_minus_10
+						using = elide_fontsize_min
+						tooltip = "FLEET_PROJECT_POWER_INVOLVEMENT_TOOLTIP"
+						text = "FLEET_PROJECT_POWER_INVOLVEMENT"
+					}
+				}
+			}
+		}
+
+		flowcontainer = {
+			visible = "[And( MilitaryFormation.IsGeneratingInvolvement, Not( IsDataModelEmpty( MilitaryFormation.GetProjectPowerRegions ) ) )]"
+			parentanchor = hcenter
+			direction = vertical
+			spacing = 2
+			datamodel = "[MilitaryFormation.GetProjectPowerRegions]"
+
+			item = {
+				button = {
+					size = { 540 40 }
+					datacontext = "[MilitaryFormation.GetCountry]"
+					onclick = "[InformationPanelBar.OpenStrategicRegionPanel(StrategicRegion.Self)]"
+					onmousehierarchyenter = "[AccessHighlightManager.HighlightStrategicRegion(StrategicRegion.Self)]"
+					onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+					using = default_button
+					tooltip = "FLEET_PROJECT_POWER_REGION_TOOLTIP"
+
+					background = {
+						using = entry_bg_simple
+					}
+
+					hbox = {
+						margin = { 10 0 }
+						spacing = 5
+						layoutpolicy_horizontal = expanding
+						layoutpolicy_vertical = expanding
+
+						textbox = {
+							layoutpolicy_horizontal = expanding
+							size = { 0 20 }
+							align = nobaseline
+							using = elide_fontsize_min
+							text = "[StrategicRegion.GetNameNoFormatting]"
+						}
+
+						expand = {}
+
+						textbox = {
+							autoresize = yes
+							align = right|nobaseline
+							using = elide_fontsize_min
+							using = tooltip_se
+							datacontext = "[MilitaryFormation.GetTargetInterestTierTypeInRegion(StrategicRegion.Self)]"
+							tooltip = "COUNTRY_INTEREST_TOOLTIP"
+							text = "FLEET_PROJECT_POWER_REGION_TIER"
+						}
+					}
+				}
+			}
+		}
+
+		empty_state = {
+			blockoverride "visible" {
+				visible = "[And( MilitaryFormation.IsOnProjectPowerMission, Or( Not( MilitaryFormation.IsGeneratingInvolvement ), IsDataModelEmpty( MilitaryFormation.GetProjectPowerRegions ) ) )]"
+			}
+			blockoverride "text" {
+				text = "FLEET_PROJECT_POWER_NOT_ON_STATION"
+			}
+		}
+
 		### BLOCKADE
 		default_header_2texts = {
 			visible = "[MilitaryFormation.HasBlockadeMission]"
@@ -2006,7 +2443,7 @@ types military_formation_panel_types
 
 					icon = {
 						size = { 30 30 }
-						texture = "gfx/interface/icons/military_icons/navy_icons/blockade_strength_navy.dds"
+						texture = "gfx/interface/icons/generic_icons/state.dds"
 					}
 
 					textbox = {
@@ -2015,6 +2452,7 @@ types military_formation_panel_types
 						autoresize = yes
 						max_width = @panel_width_minus_10
 						using = elide_fontsize_min
+						tooltip = "FLEET_BLOCKADE_LEVEL_TOOLTIP"
 						text = "FLEET_BLOCKADE_LEVEL"
 					}
 				}
@@ -2031,9 +2469,11 @@ types military_formation_panel_types
 			item = {
 				button = {
 					size = { 540 40 }
-					using = default_button
 					onclick = "[InformationPanelBar.OpenStatePanel(State.AccessSelf)]"
 					onrightclick = "[RightClickMenuManager.ShowForState(State.AccessSelf)]"
+					onmousehierarchyenter = "[AccessHighlightManager.HighlightState(State.Self)]"
+					onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+					using = default_button
 					tooltip = "FLEET_BLOCKADE_STATE_TOOLTIP"
 
 					background = {
@@ -2069,7 +2509,7 @@ types military_formation_panel_types
 							autoresize = yes
 							align = right|nobaseline
 							using = elide_fontsize_min
-							raw_text = "#v [State.GetBlockadeLevel|%0]#!"
+							text = "CURRENT_BLOCKADE_EFFICIENCY_TO_MAX"
 						}
 					}
 				}
@@ -2163,10 +2603,10 @@ types military_formation_panel_types
 							item = {
 								button = {
 									size = { 540 40 }
-									using = default_button
 									onclick = "[InformationPanelBar.OpenMilitaryFormationPanel(MilitaryFormation.Self)]"
 									onmousehierarchyenter = "[AccessHighlightManager.HighlightMilitaryFormation( MilitaryFormation.Self )]"
 									onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+									using = default_button
 
 									tooltipwidget = {
 										FancyTooltip_MilitaryFormation = {}
@@ -2229,10 +2669,10 @@ types military_formation_panel_types
 							item = {
 								button = {
 									size = { 540 40 }
-									using = default_button
 									onclick = "[InformationPanelBar.OpenMilitaryFormationPanel(MilitaryFormation.Self)]"
 									onmousehierarchyenter = "[AccessHighlightManager.HighlightMilitaryFormation( MilitaryFormation.Self )]"
 									onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+									using = default_button
 
 									tooltipwidget = {
 										FancyTooltip_MilitaryFormation = {}
@@ -2483,14 +2923,6 @@ types military_formation_panel_types
 
 				expand = {}
 
-				### Admiral Repairing
-				icon = {
-					size = { 30 30 }
-					visible = "[And( Character.IsAdmiral, Character.IsDefeated )]"
-					texture = "[Character.GetRepairingTexture]"
-					tooltip = "ADMIRAL_REPAIRING_DATE_TOOLTIP"
-				}
-
 				### Travelling Commander
 				icon = {
 					size = { 30 30 }
@@ -2696,14 +3128,6 @@ types military_formation_panel_types
 					block "additional_info_to_the_right" {
 						vbox = {
 							layoutpolicy_vertical = expanding
-
-							### Admiral Repairing
-							icon = {
-								size = { 30 30 }
-								visible = "[And( Character.IsAdmiral, Character.IsDefeated )]"
-								texture = "[Character.GetRepairingTexture]"
-								tooltip = "ADMIRAL_REPAIRING_DATE_TOOLTIP"
-							}
 
 							### Travelling Commander
 							icon = {
@@ -3741,10 +4165,6 @@ types military_formation_panel_types
 					unit_group_default_unit_button = {
 						visible = "[MilitaryFormation.GetCountry.IsLocalPlayer]"
 
-						block "text_max_width" {
-							max_width = 250
-						}
-
 						blockoverride "size" {
 							size = { 250 40 }
 						}
@@ -3778,15 +4198,10 @@ types military_formation_panel_types
 		}
 
 		textbox = {
-			parentanchor = center
-			align = nobaseline
-			autoresize = yes
-			elide = right
-			fontsize_min = 14
-
-			block "text_max_width" {
-				max_width = 150
-			}
+			size = { 100% 100% }
+			margin = { 5 0 }
+			align = hcenter|nobaseline
+			using = elide_fontsize_min
 
 			block "default_unit_type_button_text" {
 				text = "[MilitaryFormation.GetSelectedUnitTypeForGroup(CombatUnitGroup.Self).GetNameNoFormatting]"
@@ -3984,7 +4399,7 @@ types military_formation_panel_types
 					raw_text = "[CombatUnitType.GetNameNoFormatting]"
 					using = fontsize_large
 					max_width = 150
-					fontsize_min = 14
+					using = elide_fontsize_min
 				}
 
 				offense_defense_info_text = {}
@@ -5886,6 +6301,26 @@ types military_formation_panel_types
 				}
 			}
 
+			### Formation Repairing
+			widget = {
+				visible = "[MilitaryFormation.IsDefeated]"
+				size = { 30 30 }
+
+				# Background
+				icon = {
+					size = { 100% 100% }
+					texture = "gfx/interface/backgrounds/round_button_bg.dds"
+				}
+
+				# Repair-icon
+				icon = {
+					size = { 100% 100% }
+					parentanchor = center
+					texture = "gfx/interface/icons/commander_order_icons/admiral_repairing.dds"
+					tooltip = "FORMATION_FULLY_DEFEATED"
+				}
+			}
+
 			### DELETE FORMATION
 			button_icon_round_action = {
 				blockoverride "icon_size" { size = { 65% 65% } }
@@ -6177,7 +6612,7 @@ types military_formation_panel_types
 					}
 
 					block "second_bar_text" {
-						raw_text = "@crew! #b [MilitaryFormation.GetShipList.GetCrew|D]#! / [ShipList.GetCrewMax|D]"
+						text = "MILITARY_FORMATION_CREW_BAR_VALUE"
 					}
 				}
 
@@ -6628,6 +7063,7 @@ types military_formation_panel_types
 				parentanchor = vcenter
 				tooltip = "MILITARY_FORMATION_TRANSFER_UNIT_TOOLTIP"
 				using = tooltip_ne
+				enabled = "[Not(MilitaryFormation.IsDefeated)]"
 				onclick = "[PopupManager.ShowTransferFormation( MilitaryFormation.AccessSelf )]"
 				
 				blockoverride "icon_size" {

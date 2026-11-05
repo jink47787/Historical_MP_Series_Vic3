@@ -1223,3 +1223,232 @@ re_add_disbanded_company_prestige_good_jes = {
 	re_add_prestige_good_je_if_lost = { UNLOCK_VAR = prestige_good_generic_paper_var JE = je_prestige_goods_paper }
 	re_add_prestige_good_je_if_lost = { UNLOCK_VAR = prestige_good_generic_explosives_var JE = je_prestige_goods_explosives }
 }
+
+# for Siberian Exile event
+randomize_character_ideology_effect = {
+	random_list = {
+		1 = {
+			set_ideology = ideology:ideology_modernizer_leader # currently the fallback
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_liberal_leader }
+				ideology_liberal_leader_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_liberal_leader
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_land_reformer }
+				ideology_land_reformer_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_land_reformer
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_traditionalist }
+				ideology_traditionalist_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_traditionalist
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_radical }
+				ideology_radical_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_radical
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_reformer }
+				ideology_reformer_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_reformer
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_anarchist }
+				ideology_anarchist_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_anarchist
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_vanguardist }
+				ideology_vanguardist_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_vanguardist
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_state_socialist }
+				ideology_state_socialist_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_state_socialist
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_market_liberal }
+				ideology_market_liberal_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_market_liberal
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_authoritarian }
+				ideology_authoritarian_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_authoritarian
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_nihilist }
+				ideology_nihilist_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_nihilist
+		}
+		1 = {
+			trigger = {
+				NOT = { has_ideology = ideology:ideology_utopian }
+				ideology_utopian_valid_trigger = yes
+			}
+			set_ideology = ideology:ideology_utopian
+		}
+	}
+}
+
+randomize_character_trait_effect = {
+	if = {
+		limit = { has_trait = ambitious }
+		add_random_trait = personality
+		remove_trait = ambitious
+	}
+	else_if = {
+		limit = { has_trait = arrogant }
+		add_random_trait = personality
+		remove_trait = arrogant
+	}
+	else_if = {
+		limit = { has_trait = ruthless }
+		add_random_trait = personality
+		remove_trait = ruthless
+	}
+	else_if = {
+		limit = { has_trait = honorable }
+		add_random_trait = personality
+		remove_trait = honorable
+	}
+	else_if = {
+		limit = { has_trait = cruel }
+		add_random_trait = personality
+		remove_trait = cruel
+	}
+	else_if = {
+		limit = { has_trait = wrathful }
+		add_random_trait = personality
+		remove_trait = wrathful
+	}
+	else_if = {
+		limit = { has_trait = cautious }
+		add_random_trait = personality
+		remove_trait = cautious
+	}
+	else_if = {
+		limit = { has_trait = reckless }
+		add_random_trait = personality
+		remove_trait = reckless
+	}
+	else_if = {
+		limit = { has_trait = romantic }
+		add_random_trait = personality
+		remove_trait = romantic
+	}
+	else_if = {
+		limit = { has_trait = meticulous }
+		add_random_trait = personality
+		remove_trait = meticulous
+	}
+	else = {
+		add_random_trait = personality
+	}
+}
+
+siberian_exile_var_cleanup = { # scope:character
+	if = {
+		limit = {
+			has_variable = siberian_exile_var
+			is_in_regional_exile_pool = {
+				exile_pool = siberian_exile_pool
+				value = no
+			}
+		}
+		remove_variable = siberian_exile_var
+	}
+}
+
+retired_commander_becomes_politician_roll_effect = {
+	if = {
+		limit = {
+			NOR = {
+				has_role_of_type = ruler
+				has_role_of_type = heir
+				has_role_of_type = politician
+				has_role_of_type = agitator
+				has_role_of_type = executive
+				has_role_of_type = magnate
+				is_interest_group_pool_full = character_role_politician
+			}
+			popularity >= define:NCharacters|RETIRED_COMMANDER_POLITICIAN_MIN_POPULARITY
+		}
+		random = {
+			chance = {
+				value = popularity
+				multiply = define:NCharacters|RETIRED_COMMANDER_POLITICIAN_POPULARITY_CHANCE_FACTOR
+				multiply = $CHANCE_MULT$
+			}
+			add_character_role = politician
+			owner ?= {
+				set_variable = {
+					name = retired_commander_politician_cooldown
+					years = retired_commander_politician_cooldown_years
+				}
+			}
+		}
+	}
+}
+
+retired_commander_career_end_becomes_politician_roll_effect = {
+	if = {
+		limit = {
+			owner ?= {
+				NOT = { has_variable = retired_commander_politician_cooldown }
+			}
+		}
+		retired_commander_becomes_politician_roll_effect = { CHANCE_MULT = 1 }
+	}
+}
+
+revoke_favorite_effect = {
+	remove_character_role = favorite
+	add_modifier = {
+		name = revoked_favorite
+		years = 10
+	}
+	if = { # No faith healing for Alexei without Rasputin
+		limit = {
+			has_template = RUS_grigoriy_rasputin
+			owner ?= { # has not completed je_tp_fav_rasputin
+				NOT = { has_variable = je_tp_fav_rasputin_complete_var }
+			}
+		}
+		owner ?= {
+			random_scope_character = {
+				limit = {
+					has_template = RUS_alexei_ii
+					has_modifier = modifier_faith_healing
+				}
+				remove_modifier = modifier_faith_healing
+			}
+		}
+	}
+}

@@ -3,6 +3,10 @@
 
 	group = je_group_crises
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_when_inactive = {
 		has_technology_researched = shift_work
 		has_technology_researched = camera
@@ -168,45 +172,60 @@
 		add = 120 #10 years timeout
 	}
 
-	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = {
+				is_goal_complete = yes
+			}
+		}
+		effect = {
+			je_belle_epoque_cleanup = yes
 		}
 	}
 
-	on_complete = {
-	}
-
-	fail = {
-		OR = {
-			trigger_if = {
-				limit = {
-					has_variable = belle_epoque_var
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				trigger_if = {
+					limit = {
+						has_variable = belle_epoque_var
+					}
+					custom_tooltip = {
+						text = belle_epoque_fail_tt
+						any_scope_war = {
+							any_scope_front = {
+								any_scope_state = {
+									this = scope:belle_epoque_state
+								}
+							}
+						}
+					}
 				}
-				custom_tooltip = {
-					text = belle_epoque_fail_tt
-					any_scope_war = {
-						any_scope_front = {
-							any_scope_state = {
-								this = scope:belle_epoque_state
+				trigger_if = {
+					limit = {
+						has_variable = belle_epoque_var
+					}
+					custom_tooltip = {
+						text = belle_epoque_invalid_tt
+						scope:belle_epoque_state = {
+							NOT = {
+								owner = root
 							}
 						}
 					}
 				}
 			}
-			trigger_if = {
-				limit = {
-					has_variable = belle_epoque_var
-				}
-				custom_tooltip = {
-					text = belle_epoque_invalid_tt
-					scope:belle_epoque_state = {
-						NOT = {
-							owner = root
-						}
-					}
-				}
-			}
+		}
+		effect = {
+			je_belle_epoque_cleanup = yes
 		}
 	}
 
@@ -280,12 +299,19 @@
 		}
 	}
 
-	invalid = {
-		trigger_if = {
-			limit = {
-				has_variable = belle_epoque_var
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			trigger_if = {
+				limit = {
+					has_variable = belle_epoque_var
+				}
+				NOT = { exists = scope:belle_epoque_state }
 			}
-			NOT = { exists = scope:belle_epoque_state }
+		}
+		effect = {
+			je_belle_epoque_cleanup = yes
 		}
 	}
 

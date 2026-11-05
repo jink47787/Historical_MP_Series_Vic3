@@ -3,6 +3,10 @@
 
 	group = je_group_technology
 
+	activation_description = {
+		always = yes
+	}
+
 	on_monthly_pulse = {
 		effect = {
 			change_variable = {
@@ -12,13 +16,40 @@
 		}
 	}
 
-	complete = {
-		scope:journal_entry = { is_goal_complete = yes }
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = { is_goal_complete = yes }
+		}
+		effect = {
+			remove_modifier = modifier_surveying_suez
+			trigger_event = { id = canal_events.100 }
+		}
 	}
 
-	on_complete = {
-		remove_modifier = modifier_surveying_suez
-		trigger_event = { id = canal_events.100 }
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = { has_variable = survey_suez_taken }
+				s:STATE_SINAI = {
+					any_scope_state = {
+						NOT = { owner = ROOT }
+						has_building = building_suez_canal
+						owner = { NOT = { has_war_with = root } }
+					}
+				}
+			}
+		}
+		effect = {
+			remove_variable = survey_suez_taken
+			remove_modifier = modifier_surveying_suez
+			je_suez_survey_cleanup = yes
+		}
 	}
 
 	current_value = {
@@ -27,23 +58,6 @@
 
 	goal_add_value = {
 		value = 18
-	}
-
-	invalid = {
-		OR = {
-			NOT = { has_variable = survey_suez_taken }
-			s:STATE_SINAI = {
-				any_scope_state = {
-					NOT = { owner = ROOT }
-					has_building = building_suez_canal
-				}
-			}
-		}
-	}
-
-	on_invalid = {
-		remove_variable = survey_suez_taken
-		remove_modifier = modifier_surveying_suez
 	}
 
 	progressbar = yes
@@ -58,39 +72,54 @@ je_suez_canal = {
 
 	group = je_group_technology
 
-	complete = {
-		s:STATE_SINAI = {
-			any_scope_state = {
-				owner = root
-				any_scope_building = {
-					is_building_type = building_suez_canal
-					occupancy >= 0.9
-				}
-			}
-		}
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		set_global_variable = suez_canal_complete
-	}
-
-	invalid = {
-		OR = {
-			NOT = { has_variable = survey_suez_taken }
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
 			s:STATE_SINAI = {
 				any_scope_state = {
-					NOT = { owner = ROOT }
-					has_building = building_suez_canal
+					owner = root
+					any_scope_building = {
+						is_building_type = building_suez_canal
+						occupancy >= 0.9
+					}
 				}
 			}
 		}
+		effect = {
+			set_global_variable = suez_canal_complete
+			je_suez_canal_cleanup = yes
+		}
 	}
 
-	on_invalid = {
-		remove_variable = survey_suez_taken
-		remove_modifier = modifier_surveying_suez
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = { has_variable = survey_suez_taken }
+				s:STATE_SINAI = {
+					any_scope_state = {
+						NOT = { owner = ROOT }
+						has_building = building_suez_canal
+						owner = { NOT = { has_war_with = root } }
+					}
+				}
+			}
+		}
+		effect = {
+			remove_variable = survey_suez_taken
+			remove_modifier = modifier_surveying_suez
+			je_suez_canal_cleanup = yes
+		}
 	}
-		
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -98,6 +127,10 @@ je_panama_survey = {
 	icon = "gfx/interface/icons/event_icons/event_map.dds"
 
 	group = je_group_technology
+
+	activation_description = {
+		always = yes
+	}
 
 	on_monthly_pulse = {
 		effect = {
@@ -108,13 +141,40 @@ je_panama_survey = {
 		}
 	}
 
-	complete = {
-		scope:journal_entry = { is_goal_complete = yes }
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = { is_goal_complete = yes }
+		}
+		effect = {
+			remove_modifier = modifier_surveying_panama
+			trigger_event = { id = canal_events.101 }
+		}
 	}
 
-	on_complete = {
-		remove_modifier = modifier_surveying_panama
-		trigger_event = { id = canal_events.101 }
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = { # If the Panama Canal is being built and you're not the one building it, you've blown it, chief.
+			OR = {
+				NOT = { has_variable = survey_panama_taken }
+				s:STATE_PANAMA = {
+					any_scope_state = {
+						NOT = { owner = ROOT }
+						has_building = building_panama_canal
+						owner = { NOT = { has_war_with = root } }
+					}
+				}
+			}
+		}
+		effect = {
+			remove_variable = survey_panama_taken
+			remove_modifier = modifier_surveying_panama
+			je_panama_survey_cleanup = yes
+		}
 	}
 
 	current_value = {
@@ -123,23 +183,6 @@ je_panama_survey = {
 
 	goal_add_value = {
 		value = 12
-	}
-
-	invalid = { # If the Panama Canal is being built and you're not the one building it, you've blown it, chief.
-		OR = {
-			NOT = { has_variable = survey_panama_taken }
-			s:STATE_PANAMA = {
-				any_scope_state = {
-					NOT = { owner = ROOT }
-					has_building = building_panama_canal
-				}
-			}
-		}
-	}
-
-	on_invalid = {
-		remove_variable = survey_panama_taken
-		remove_modifier = modifier_surveying_panama
 	}
 
 	progressbar = yes
@@ -154,38 +197,53 @@ je_panama_canal = {
 
 	group = je_group_technology
 
-	complete = {
-		s:STATE_PANAMA = {
-			any_scope_state = {
-				owner = root
-				any_scope_building = {
-					is_building_type = building_panama_canal
-					occupancy >= 0.9
-				}
-			}
-		}
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		set_global_variable = panama_canal_complete
-	}
-
-	invalid = { # If the Panama Canal is being built and you're not the one building it, you've blown it, chief.
-		OR = {
-			NOT = { has_variable = survey_panama_taken }
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
 			s:STATE_PANAMA = {
 				any_scope_state = {
-					NOT = { owner = ROOT }
-					has_building = building_panama_canal
+					owner = root
+					any_scope_building = {
+						is_building_type = building_panama_canal
+						occupancy >= 0.9
+					}
 				}
 			}
 		}
+		effect = {
+			set_global_variable = panama_canal_complete
+			je_panama_canal_cleanup = yes
+		}
 	}
 
-	on_invalid = {
-		remove_variable = survey_panama_taken
-		remove_modifier = modifier_surveying_panama
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = { # If the Panama Canal is being built and you're not the one building it, you've blown it, chief.
+			OR = {
+				NOT = { has_variable = survey_panama_taken }
+				s:STATE_PANAMA = {
+					any_scope_state = {
+						NOT = { owner = ROOT }
+						has_building = building_panama_canal
+						owner = { NOT = { has_war_with = root } }
+					}
+				}
+			}
+		}
+		effect = {
+			remove_variable = survey_panama_taken
+			remove_modifier = modifier_surveying_panama
+			je_panama_canal_cleanup = yes
+		}
 	}
-		
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }

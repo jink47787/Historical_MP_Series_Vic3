@@ -17,6 +17,16 @@
 	HEAT_MAP_COLOR_TO = 	{ 0.1  0.4  0.2  1.5 }
 	HEAT_MAP_MIN_ALPHA = 0.4                                    # Used in the Interest Group and Market Map Mode
 
+	### STATE VALUE MAP MODE ###
+	STATE_VALUE_COLOR_PERSPECTIVE = { 0 0.2 0.5 @opacity }		# Blue, held by the country being evaluated
+	STATE_VALUE_COLOR_PLAYER = { 0.5 0.04 0.02 @opacity }		# Red, held by the player
+	STATE_VALUE_COLOR_OTHER = { 0.11 0.46 0.05 @opacity }		# Green, held by anyone else
+	STATE_VALUE_COLOR_STRONGLY_DESIRED = { 0.9 0.75 0.1 @opacity }	# Gold stripes, valued enough by the country being evaluated to go to war over
+	STATE_INFAMY_COLOR_OWNED = { 0 0.2 0.5 @opacity }			# Blue, already held by the country being read
+	STATE_INFAMY_COLOR_LOW = { 0.85 0.72 0.25 @opacity }		# Yellow, below Infamous
+	STATE_INFAMY_COLOR_MID = { 0.80 0.40 0.05 @opacity }		# Orange, between Infamous and Notorious
+	STATE_INFAMY_COLOR_HIGH = { 0.60 0.08 0.05 @opacity }		# Red, Notorious and above
+
 	### HIGHLIGHT ###
 	HIGHLIGHT_COLOR = { 1 1 1 0.5 }								# White
 	HIGHLIGHT_INTERACTION_COLOR = { 1 0.57 0.15 0.5 }			# Golden
@@ -30,7 +40,6 @@
 	### IMPASSABLE TERRAIN ###
 	COLOR_IMPASSABLE_TERRAIN = { 0.0 0.0 0.0 0.5 }				# Alpha can control blend with terrain color
 	IMPASSABLE_TERRAIN_TILING = 100								# Tiling of texture
-	IMPASSABLE_TERRAIN_HEIGHT = 8								# Height of parallax effect
 
 	### CLOSE DISTANCE FADE ###
 	# Used for borders and impassable terrain
@@ -67,7 +76,6 @@
 	@slightly = 0.75
 	@very_slightly = 0.5
 
-	COLOR_DIPLOMACY_SELF = 	{ 0 0.2 0.5 @slightly}				# Blue
 	COLOR_BELLIGERENT = 	{ 0.5 0.04 0.02 @full }				# Red
 	COLOR_DOMINEERING = 	{ 0.5 0.04 0.02 @full }				# Red
 	COLOR_ANTAGONISTIC = 	{ 0.5 0.04 0.02 @slightly }			# Slightly Red
@@ -142,6 +150,18 @@
 	SEVERE_STARVATION_HEAT_MAX = { 0.69 0.08 0.06 1 }		#Max color for Severe Starvation
 	SEVERE_STARVATION_HEAT_WEIGHT = 3						#Weight used when blending Mild and Severe starvation colors
 	STARVATION_COLOR_CEILING_VALUE = 0.8					#At what % of state population starving do we reach the max color
+	# Market area map mode colors the catchment of each secondary world market hub by multiplying the primary hub's color with these, in order
+	MARKET_AREA_SECONDARY_HUB_SHADE_FIRST = 0.65
+	MARKET_AREA_SECONDARY_HUB_SHADE_SECOND = 1.35
+	MARKET_AREA_SECONDARY_HUB_SHADE_THIRD = 0.4
+
+	# For Journal Entry map mode
+	JOURNAL_ENTRY_MAP_MODE_DEFAULT_COLOR = { 0.9f 0.9f 0.9f 1.0 } # The color states will be painted in if no other color has been assigned in script
+	JOURNAL_ENTRY_MAP_MODE_EMPTY_COLOR = { 1 1 1 1 } # If a color equals this one, the province will be considered empty and painted with JOURNAL_ENTRY_MAP_MODE_DEFAULT_COLOR instead
+
+	# Colors for the cold effect map modes
+	COLD_EFFECT_MAP_COLOR_FROM = { 1 1 1 0.3 }				# White, the color of a state region with no cold effect
+	COLD_EFFECT_MAP_COLOR_TO = { 0.15 0.35 0.75 1.5 }		# Blue, the color of a state region with the maximum cold effect
 }
 
 # NOTE: Stolen from CK3, will need tweaking etc.
@@ -227,14 +247,35 @@ NGraphics = {
 	FLATMAP_EQUATOR_POSITION = 0.58 				# Position offset from top [ 0.0 - 1.0 ]
 	FLATMAP_EQUATOR_TILING = 24.0					# Tiling scale of equator texture (Effectively size)
 
+	# Seasons
+	SEASONS_STRENGTH = 1.0							# Master intensity of seasonal effects [ 0.0 disables ]
+	SEASONS_SETTINGS_FILE = "gfx/map/environment/season_settings.txt"		# Knob values, saved from the season debug panel
+	SEASONS_SNOW_CARVE_MASK_FILE = "gfx/map/masks/snow_carve_mask.png"		# Painted snow suppression, exported from the carve tool
+	SEASONS_CURVE_TEXTURE_WIDTH = 1024										# Texels of the baked climate curve strip across the map width; 24 control points per curve, so about 40 texels per segment
+	SEASONS_TREE_AUTUMN_RAMP_FILE = "gfx/map/environment/tree_autumn_ramp.dds"	# Autumn canopy colour over a tree's turn (RGB) and its blend weight (alpha), one row
+	SEASONS_COAST_DISTANCE_FILE = "gfx/map/masks/coast_distance.dds"		# Distance-from-coast field for the sea ice, baked by tools/bake_coast_distance.py
+	SEASONS_NOISE_FILE = "gfx/map/masks/season_noise.dds"			# Season noise fields for the sea ice (line wobble, lane wobble, snow patches, snow line noise), baked from the season debug panel
+	SEASONS_TERRAIN_NOISE_FILE = "gfx/map/masks/season_terrain_noise.dds"	# Season noise fields for the land (frost line noise, snow, autumn and spring patch masks), baked from the season debug panel
+	SEASONS_PLACEMENT_MASK_FILE = "gfx/map/masks/season_placement_mask.dds"	# Where the autumn and spring ground materials are allowed, hand-authored: red where foliage that turns grows, green where the ground is clear of trees. BC7, bright = allowed
+	SEASONS_IDLE_ENTITY_STATE = "idle"						# Entity state the seasonal vfx entities are put in for seasons they have no state for
+
 	# Bottom mesh tint gradient					(Applied globally to all meshes)
 	MESHTINT_HEIGHT_MIN = 0.0					# Tint begin (from bottom)
 	MESHTINT_HEIGHT_MAX = 0.07					# Tint end
 	MESHTINT_COLOR = { 0.20 0.14 0.06 1.0 }		# Tint Alpha and Color (effectitvely disabled with alpha 0.0)
 
+	# Building hover/click highlight				(Applied to hub buildings and monuments hovered on the map)
+	BUILDING_HIGHLIGHT_COLOR = { 1.0 0.85 0.4 1.0 }	# Highlight tint color
+	BUILDING_HIGHLIGHT_INTENSITY_HOVERED = 1.0		# Per-instance highlight encoding: hovered. Fixed contract with pdxmesh.shader (it hardcodes hovered = 1); keep 1.0
+	BUILDING_HIGHLIGHT_INTENSITY_PRESSED = 2.0		# Per-instance highlight encoding: pressed. Fixed contract with pdxmesh.shader ('raw - 1.0'); keep 2.0
+	BUILDING_HIGHLIGHT_RIM_POWER = 2.0				# Rim falloff exponent
+	BUILDING_HIGHLIGHT_BASE_STRENGTH = 0.1			# Flat tint strength when hovered
+	BUILDING_HIGHLIGHT_RIM_STRENGTH = 0.35			# Additional tint strength towards the silhouette
+	BUILDING_HIGHLIGHT_PRESSED_DARKEN = 0.8			# Diffuse multiplier while the mouse is pressed
+
 	# SSAO modifiers
-	SSAO_TREE_ALPHA = 0.2						# AO Alpha on trees
-	SSAO_TERRAIN_ALPHA = 0.85					# AO Alpha on the terrain under trees and buildings
+	SSAO_TREE_ALPHA = 0.75						# AO Alpha on trees
+	SSAO_TERRAIN_ALPHA = 0.5					# AO Alpha on the terrain under trees and buildings
 	SSAO_MESH_COLOR = { 0.20 0.14 0.06 0.0 }	# AO Alpha and color on buildings (alpha unused)
 
 	# Fog camera modifiers
@@ -248,13 +289,36 @@ NGraphics = {
 
 	# Map markers
 	MAP_MARKER_MERGE_DISTANCE_FOR_STACK = 10				# The max screen distance in pixels between map markers (center points) for them to form a stack
-	MAP_MARKER_MERGE_PROVINCES = 800.0
-	MAP_MARKER_MERGE_STATES = 1600.0
-	MAP_MARKER_MERGE_PROVINCES_STRATEGIC_REGION = 1600.0
 	MAP_MARKER_FULL_UPDATE_FREQUENCY = 1.0					#Do the heavy parts of the map markers only every X seconds
 
 	FRONT_MARKER_ADVANTAGE_HIGH = 60
 	FRONT_MARKER_ADVANTAGE_LOW = 25
+
+	# Map marker stack priority: within a stack, markers with a lower value sit closest to the stack point and higher values are placed further out
+	MAP_MARKER_STACK_PRIORITY_DEFAULT = 1
+	MAP_MARKER_STACK_PRIORITY_CONSTRUCTION_SUMMARY = 0
+	MAP_MARKER_STACK_PRIORITY_STATE = 2
+	MAP_MARKER_STACK_PRIORITY_CITY = 2
+	MAP_MARKER_STACK_PRIORITY_FRONT = 2
+	MAP_MARKER_STACK_PRIORITY_HQ = 2
+	MAP_MARKER_STACK_PRIORITY_PRODUCTION = 2
+	MAP_MARKER_STACK_PRIORITY_SEA_NODE_MOVEMENT = 2
+	MAP_MARKER_STACK_PRIORITY_FRONT_MOVEMENT = 2
+	MAP_MARKER_STACK_PRIORITY_HQ_MOVEMENT = 2
+	MAP_MARKER_STACK_PRIORITY_CONSTRUCTION = 2
+	MAP_MARKER_STACK_PRIORITY_FLEET_FORMATION = 3
+	MAP_MARKER_STACK_PRIORITY_LAND_FORMATION = 3
+	MAP_MARKER_STACK_PRIORITY_NAVAL_MISSION = 3
+	MAP_MARKER_STACK_PRIORITY_HARVEST_CONDITION = 3
+	MAP_MARKER_STACK_PRIORITY_NATIONAL_AWAKENING = 3
+	MAP_MARKER_STACK_PRIORITY_OBSTINANCE = 3
+	MAP_MARKER_STACK_PRIORITY_REVOLUTIONARY_MOVEMENT = 3
+	MAP_MARKER_STACK_PRIORITY_CONSTRUCTION_QUEUE = 4
+	MAP_MARKER_STACK_PRIORITY_STATE_INFRA = 4
+	MAP_MARKER_STACK_PRIORITY_SEA_REGION_INFRA = 4
+	MAP_MARKER_STACK_PRIORITY_INPUT_SHORTAGE = 5
+	MAP_MARKER_STACK_PRIORITY_EMPLOYMENT = 6
+	MAP_MARKER_STACK_PRIORITY_SUPPLY_ORIGIN = 7
 
 	# Error adjustment
 	MINIMUM_PROVINCE_SIZE_IN_PIXELS = 0			# Provinces that are smaller than that are just making the game unplayable. It doesn't affect the game, just informs in the error.log
@@ -382,13 +446,13 @@ NGraphics = {
 	COUNTRY_COLOR_BUFFER_TEXTURE_RESERVE_SIZE = 700			# How many countries buffer data is allocated for initially. If more countries are created, the buffer will be resized to accommodate them.
 
 	POWER_BLOC_BUFFER_TEXTURE_RESERVE_SIZE = 50				# How many power blocs buffer data is allocated for initially. If more power blocs are created, the buffer will be resized to accommodate them.
-	POWER_BLOC_COLOR_UPDATE_NUM_FRAMES_BETWEEN = 30			# Number of frames to wait between powerbloc mapcolor updates
 
 	# Harvest condition graphics
 	HARVEST_CONDITION_ENTITIES_CUTOFF = 600							# Zoom at which we hide all harvest condition entities
 	HARVEST_CONDITION_ENTITIES_INTERVAL = 50						# Interval between entities on areas affected by harvest conditions
 	HARVEST_CONDITION_ENTITY = "harvest_condition_sound_entity"		# Entity that spawns on areas affected by harvest conditions
 	HARVEST_CONDITION_INTENSITY_MAX = 10							# Max intensity to determine the correct intensity bucket for animation states
+	HARVEST_CONDITION_WEATHER_VFX_FADE_HEIGHT = 37					# Zoom range below HARVEST_CONDITION_ENTITIES_CUTOFF over which the sea condition weather VFX fades in, so it does not pop in at the cutoff
 
 	# Earthquake camera shake
 	EARTHQUAKE_SHAKE_AMPLITUDE = 0.25									# Amplitude multiplier
@@ -493,16 +557,6 @@ NFortifications = {
 }
 
 NCoasts = {
-	LOCATOR_GRID_CELL_SIZE = 1.0				# Size of each grid cell in map units used for sampling coastal points
-	LOCATOR_GRID_EXPAND = 5.0					# How far beyond province bounding box to expand the grid
-	LOCATOR_PROBE_NUM_SAMPLES = 7				# Number of radial samples around each grid point to detect land/water boundary
-	LOCATOR_PROBE_DISTANCE = 1.5 				# Distance from grid point to each radial sample
-	LOCATOR_PROBE_DISTANCE_BEHIND = 3.0 		# Distance behind the water point to check for rivers (skip if land is found)
-	LOCATOR_PROBE_SEARCH_ITERATIONS = 5			# Number of binary search iterations to refine the coastline position
-	LOCATOR_INTERVAL_MIN = 10.0						# Minimum distance between locator water positions
-	LOCATOR_INTERVAL_MAX = 25.0						# Maximum distance between locator water positions (randomized per locator)
-	LOCATOR_PORT_DISTANCE = 5.0					# Minimum distance from port hub to keep locators
-
 	LANDING_ENTITY_DEFAULT = "military_transport_naval_rowboat_generic_entity"				# Default entity spawned before the tech
 	LANDING_ENTITY_ADVANCED = "military_transport_naval_landingcraft_generic_entity"		# Entity spawned after the tech is researched
 	LANDING_TECH = "landing_craft"				# Tech that unlocks the advanced landing entity
@@ -557,6 +611,13 @@ NTravelNetwork = {
 
 	FORMATION_ARROW_SAMPLING_STEP = 7.0		 # Size of the sampling step (in "map pixels") of the spline network, used when creating arrows
 	FORMATION_ARROW_SAMPLING_STEP_FLATMAP = 30.0 # Size of the sampling step (in "map pixels") of the spline network, used when creating arrows, when zoomed out ("flatmap")
+
+	SUPPLY_ROUTE_BOUNDS_PADDING = 4.0		# How far the culling box of a supply route arrow is grown past its path, in "map pixels" - must stay wider than the widest ribbon ever drawn or arrows are culled while still on screen
+	SUPPLY_ROUTE_BOUNDS_HEIGHT = 100000.0	# Half height of that culling box - the control points carry no height of their own, so this is left tall enough to never cull on height
+
+	SUPPLY_ROUTE_COLOR_OWN = { 0.722 0.529 0.294 1.0 }		# #B8874B
+	SUPPLY_ROUTE_COLOR_ALLY = { 0.700 0.573 0.420 1.0 }		# #B3926B
+	SUPPLY_ROUTE_COLOR_ENEMY = { 0.741 0.251 0.224 1.0 }	# #BD4039
 }
 
 NPowerBlocCoa = {
@@ -601,12 +662,12 @@ NPowerBlocStatueCamera = {
 
 NNavy = {
 	FLEET_DIORAMA_INTERVAL = 20		# Interval between fleet dioramas in a sea node
+	FLEET_DIORAMA_BATTLE_CLEARANCE = 8	# Distance a fleet diorama keeps from the outer ring of a naval battle diorama in the same sea node, fleets closer than this fade out while the battle diorama is shown
 	FLEET_DIORAMA_CUTOFF = 600		# Zoom at which we hide all fleet entities
 	FLEET_DIORAMA_TERRAIN_OPACITY_BLEND_SPEED = 4.0	# Speed at which terrain opacity blends when showing/hiding fleet diorama entities
 	DIORAMA_SELECTION_DITHER_DURATION = 0.5					# How many seconds it takes for diorama entities to gradually appear or disappear from selection change. Applies to dioramas: fleet and naval battle dioramas
 	DIORAMA_LAND_HEIGHT_OFFSET = 0.5						# Height offset to consider a ship on land in the diorama
 
-	WATER_ENTITY_HEIGHT = 0.25						# Height above water
 
 	SHIP_ENTITY_STATE_IDLE = "idle"						# Ship is idling, e.g. stationed in a sea node or after battle victory/defeat
 	SHIP_ENTITY_STATE_MOVE = "move"						# Ship is moving in a battle
@@ -670,6 +731,16 @@ NNavy = {
 	SHIP_MOVE_HEAVE_AMPLITUDE = 0.06					# Vertical heave amplitude for move ship animation
 	SHIP_MOVE_HEAVE_SPEED = 1.5							# Speed of the move heave oscillation
 
+	SHIP_WIND_DIRECTION = 225.0							# Compass bearing the wind blows from, degrees clockwise from north (225 = SW)
+	SHIP_WIND_LEAN_SCALE = 1.5							# Global multiplier on each fleet entity's max_wind_lean
+	SHIP_WIND_LEAN_SMOOTHING = 2.0						# How fast ships settle into their target wind lean
+	SHIP_WIND_LEAN_VARIATION = 0.3						# Per-ship random spread of the lean, so a fleet does not heel in lockstep
+	SHIP_WIND_LEAN_IDLE_SCALE = 0.5						# Lean multiplier for ships lying idle, which are not pressing sail
+	SHIP_WIND_LEAN_CONDITIONS = { "naval_condition_strong_winds" "naval_condition_rough_waters" "naval_condition_tropical_storm" "naval_condition_cyclone" }	# Naval battle conditions whose wind makes ships in the battle heel harder
+	SHIP_WIND_LEAN_CONDITION_SCALE = 1.5				# Wind lean multiplier for ships in a naval battle with one of SHIP_WIND_LEAN_CONDITIONS
+	SHIP_WIND_LEAN_CALM_CONDITIONS = { "naval_condition_calm_waters" "naval_condition_fog" }	# Naval battle conditions with little wind, where ships in the battle heel less
+	SHIP_WIND_LEAN_CALM_CONDITION_SCALE = 0.5			# Wind lean multiplier for ships in a naval battle with one of SHIP_WIND_LEAN_CALM_CONDITIONS
+
 	BATTLE_DIORAMA_CIRCLING_TIME_RANGE = { 3.0 5.0 }	# Range of random time in seconds that ships spend circling around
 	BATTLE_DIORAMA_CRUISING_ANGLE = 45.0				# How long in angle degrees ships cruise in the diorama
 	BATTLE_DIORAMA_SINKING_ANGLE = 90.0					# Angle offset in degrees for calculating defeat target position (half circle for smooth approach)
@@ -683,7 +754,7 @@ NNavy = {
 
 	BATTLE_DIORAMA_CURVE_B1_MULT = 0.4					# Multiplier for the B1 curve parameter used for ship movement animation in naval battle dioramas, which defines the curvature of the movement path
 	BATTLE_DIORAMA_CURVE_B2_MULT = 0.3					# Multiplier for the B2 curve parameter used for ship movement animation in naval battle dioramas, which defines the curvature of the movement path
-	BATTLE_DIORAMA_SHIP_ANGULAR_SPEED = 0.1					# Speed multiplier for ship rotation during naval battle diorama animations
+	BATTLE_DIORAMA_SHIP_SPEED = 1.25						# Speed in world units per second at which ships travel around the naval battle diorama circle, regardless of its radius
 	BATTLE_DIORAMA_SHIP_SCALE = 1.0							# Scale for ship entities during naval battle diorama animations
 	BATTLE_DIORAMA_RADIUS_DEFAULT = 10.0					# Default radius of the circle on which ships are positioned, in other words distance from the center of the diorama
 	BATTLE_DIORAMA_RADIUS_RATIO_OUTER = 1.2					# Ratio for the outer radius of the circle on which ships are positioned
@@ -712,6 +783,9 @@ NNavy = {
 	PORT_BOMBARDMENT_VFX_ENTITY = "vfx_port_bombardment_impact"			# Entity that is spawned on ports that are being bombarded from the sea, used for both visual and sound effects
 	PORT_BOMBARDMENT_VFX_ENTITY_IMPACT_STATE = "impact"					# Animation state name for the port bombardment VFX entity when the bombardment hits the port
 	PORT_BOMBARDMENT_VFX_ENTITY_IMPACT_STATE_HEAVY = "impact_heavy"		# Animation state name for the port bombardment VFX entity when the bombardment hits the port with heavy impact
+
+	NAVAL_BATTLE_CONDITION_VFX_ENTITY = "naval_battle_condition_entity"	# Entity spawned at the center of a naval battle diorama, its animation state is picked from the battle condition key and its intensity
+	NAVAL_BATTLE_CONDITION_VFX_ENTITY_DIRECTION = { 0.0 0.0 -1.0 }		# Facing of the battle condition VFX entity { X, Y, Z }. The condition belongs to the sea rather than to the fleets, so this is a fixed world-space direction and does not follow the diorama
 }
 
 NShipViewer = {
@@ -738,4 +812,22 @@ NShipViewer = {
 	BATTLE_VIEWPORT_CAMERA_DISTANCE = 74.0								# The distance of the camera to the ships in both battle viewports
 	BATTLE_VIEWPORT_CAMERA_ATTACKER_TRANSLATION = { 2.0 0.0 -2.0 }		# The amount to translate the camera target by in the attacker viewport
 	BATTLE_VIEWPORT_CAMERA_DEFENDER_TRANSLATION = { -0.5 0.0 2.5 }		# The amount to translate the camera target by in the defender viewport
+}
+
+NCharacterPanelViewer = {
+	CAMERA_LOOK_AT = { 0.0 121.0 0.0 }			# Absolute look-at point, the portrait camera's node-relative framing is not available with a free camera
+	CAMERA_DISTANCE = 357.0						# Larger pulls the camera back, making the character smaller in frame
+	CAMERA_CHILD_LOOK_AT = { 0.0 46.0 0.0 }		# Look-at point at age 0, blended towards CAMERA_LOOK_AT as the character grows
+	CAMERA_CHILD_DISTANCE = 176.5				# Camera distance at age 0, blended towards CAMERA_DISTANCE as the character grows
+	CAMERA_CHILD_AGE_FULL = 14					# Age at which framing reaches the adult values
+	CAMERA_CHILD_AGE_EXPONENT = 1.78			# Shapes how the child framing fades out, 1.0 is linear in age, higher concentrates the effect on the youngest
+	CAMERA_BASE_YAW = 190.0						# In degrees, matches camera_leader
+	CAMERA_PITCH = -1.7							# In degrees
+	CAMERA_YAW_RANGE = 15.0						# In degrees, how far the character turns at full mouse deflection
+	YAW_BLEND_TIME = 0.5						# Seconds for the turn to catch up with the mouse
+	BACKGROUND_BASE_POSITION = { 0.0 1.0 }		# Where the panel background sits with no mouse deflection
+	BACKGROUND_PARALLAX_OFFSET = { -15.0 0.0 }	# Pixels the background slides at full mouse deflection, negative slides against the turn
+	BACKGROUND_CHILD_SCALE = 1.5				# Panel background scale at age 0, blended towards 1.0 as the character grows, anchored to the bottom edge
+	PARENT_BEHIND_MAX_AGE = 8					# Characters up to this age are shown with their country's ruler standing behind them
+	PARENT_BEHIND_OFFSET = { -25.0 0.0 20.0 }	# Offset of the ruler standing behind a child, X moves them sideways, Z moves them towards the camera
 }

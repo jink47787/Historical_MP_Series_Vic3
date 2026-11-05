@@ -1,0 +1,190 @@
+﻿je_forest_of_bayonets = {
+	icon = "gfx/interface/icons/event_icons/event_fire.dds"
+
+	group = je_group_global_international_situations
+
+	is_shown_when_inactive = {
+		always = yes
+	}
+
+	activation_description = {
+		always = yes
+	}
+
+	context = none
+
+	possible = {
+		always = yes
+	}
+
+	should_be_involved = {
+		is_in_geographic_region = geographic_region_europe
+		has_technology_researched = egalitarianism
+	}
+
+	should_show_when_not_involved = {
+		is_in_geographic_region = geographic_region_europe
+	}
+
+	should_be_pinned_by_default_involved = yes
+	should_be_pinned_by_default_uninvolved_or_context = no
+
+	can_revolution_inherit = yes
+
+	weight = 10000
+
+	scripted_progress_bar = forest_of_bayonets_progress_bar
+
+	immediate = {
+		scope:journal_entry ?= {
+			journal_entry_update_forest_of_bayonets_variables = yes
+		}
+	}
+
+	map_color = {
+		if = {
+			limit = {
+				owner = {
+					is_in_geographic_region = geographic_region_europe
+					is_involved_in_journal_entry = je_forest_of_bayonets
+				}
+			}
+			lerp = {
+				min_color = "forest_of_bayonets_ember_orange"
+				max_color = "forest_of_bayonets_fire_red"
+				factor = {
+					value = this.turmoil
+					multiply = 2
+				}
+			}
+		}
+	}
+
+	map_color_second = {
+		if = {
+			limit = {
+				is_in_revolt = yes
+				owner = {
+					is_in_geographic_region = geographic_region_europe
+					any_civil_war = {
+						political_movement ?= {
+							OR = {
+								movement_is_liberal = yes
+								movement_is_socialist = yes
+								is_political_movement_type = movement_cultural_minority
+							}
+						}
+					}
+				}
+			}
+			value = "forest_of_bayonets_fire_red"
+		}
+	}
+
+	map_tooltip = {
+		if = {
+			limit = {
+				turmoil > 0
+				owner ?= {
+					is_in_geographic_region = geographic_region_europe
+				}
+			}
+			custom_tooltip_no_bullet = "forest_of_bayonets_map_turmoil"
+		}
+		owner ?= {
+			save_scope_as = relevant_country
+			if = {
+				limit = {
+					is_involved_in_journal_entry = je_forest_of_bayonets
+				}
+				if = {
+					limit = {
+						je:je_forest_of_bayonets ?= {
+							has_variable = forest_of_bayonets_total_prestige_var
+							var:forest_of_bayonets_total_prestige_var > 0
+						}
+					}
+					custom_tooltip_no_bullet = "forest_of_bayonets_map_contribution"
+					custom_tooltip_no_bullet = "forest_of_bayonets_map_weight_tooltip"
+				}
+			}
+			else_if = {
+				limit = {
+					is_in_geographic_region = geographic_region_europe
+				}
+				custom_tooltip_no_bullet = "forest_of_bayonets_map_not_involved"
+			}
+		}
+		if = {
+			limit = {
+				is_in_revolt = yes
+				owner = {
+					is_in_geographic_region = geographic_region_europe
+					any_civil_war = {
+						political_movement ?= {
+							OR = {
+								movement_is_liberal = yes
+								movement_is_socialist = yes
+								is_political_movement_type = movement_cultural_minority
+							}
+						}
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "forest_of_bayonets_map_rev_state"
+		}
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			scope:journal_entry ?= {
+				journal_entry_update_forest_of_bayonets_variables = yes
+			}
+		}
+	}
+
+	outcome = {
+		header = je_forest_of_bayonets_fail_header
+		effect_header = je_forest_of_bayonets_on_fail_header
+		color = "red_outcome"
+		conclusion_desc = je_forest_of_bayonets_fail_conclusion_desc
+		flags = { historical }
+		trigger = {
+			custom_tooltip = {
+				text = je_forest_of_bayonets_fail_bar_tt
+				scope:journal_entry = {
+					"scripted_bar_progress(forest_of_bayonets_progress_bar)" >= forest_of_bayonets_upper_bound
+				}
+			}
+			scope:journal_entry ?= {
+				any_scope_je_involved = {
+					country_has_springtime_revolution = {
+						THRESHOLD = 0.25
+					}
+				}
+			}
+		}
+		effect = {
+			custom_tooltip = {
+				text = je_forest_of_bayonets_starts_springtime_tt
+				forest_of_bayonets_start_springtime_effect = yes
+			}
+		}
+		effect_all_involved = {
+			show_as_tooltip = {
+				trigger_event = 1848.4
+				add_modifier = { name = modifier_springtime_of_the_peoples days = 1095 }
+			}
+		}
+	}
+
+	timeout = 9125
+
+	outcome = {
+		header = je_forest_of_bayonets_complete_header
+		effect_header = je_forest_of_bayonets_on_complete_header
+		color = "gold_positive"
+		flags = { timeout }
+		conclusion_desc = je_forest_of_bayonets_complete_conclusion_desc
+	}
+}

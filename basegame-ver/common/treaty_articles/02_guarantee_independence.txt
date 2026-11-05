@@ -11,6 +11,7 @@
 	icon = "gfx/interface/icons/diplomatic_treaties_articles_icons/guarantee_independence_treaties.dds"
 
 	flags = {
+		show_in_lens
 		is_guarantee_independence
 		can_be_renegotiated
 		giftable
@@ -181,6 +182,45 @@
 					multiply = 0.1
 				}
 			}
+
+			if = {
+				limit = {
+					c:RUS ?= this
+					has_variable = ai_russia_client_bloc_pending
+				}
+				add = 0.15
+			}
+			if = {
+				limit = {
+					any_scope_regional_objective = {
+						type = aro:ai_regional_objective_protect_country
+						is_active = yes
+					}
+				}
+				add = 0.1
+			}
+		}
+
+		proposal_weight = {
+			value = 1
+
+			if = {
+				limit = {
+					c:RUS ?= this
+					ai_russia_article_partner_is_pending_client = yes
+					scope:other_country = {
+						is_subject = no
+					}
+				}
+				add = 5
+			}
+			if = {
+				limit = {
+					scope:source_country ?= this
+					ai_is_regional_objective_protect_target = { TARGET = scope:target_country }
+				}
+				add = 3
+			}
 		}
 
 		article_ai_usage = {
@@ -207,6 +247,16 @@
 				add = {
 					desc = "DIPLOMATIC_ACCEPTANCE_BASE_ADDITIONAL"
 					value = -10
+				}
+
+				if = {
+					limit = {
+						ai_is_regional_objective_protect_target = { TARGET = scope:target_country }
+					}
+					add = {
+						desc = "DIPLOMATIC_ACCEPTANCE_REGIONAL_OBJECTIVE_PROTECT"
+						value = 25
+					}
 				}
 
 				add = {
@@ -320,7 +370,7 @@
 					}
 				}
 			}
-			
+
 			# Special anti-Opium Wars cheese - block any alliance/defensive pact/guarantee deals before the JE fires
 			if = {
 				limit = {
@@ -330,24 +380,15 @@
 					desc = "DIPLOMATIC_ACCEPTANCE_OPIUM_DEALER"
 					add = -1000
 				}
-			}				
+			}
+		}
 
-			if = {
-				limit = {
-					NOT = { exists = scope:is_treaty_active }
-					exists = scope:treaty
-					scope:treaty.binding_period >= 1825
-				}
-				multiply = {
-					desc = "DIPLOMATIC_ACCEPTANCE_BINDING_PERIOD"
-					value = 1
-					add = {
-						value = scope:treaty.binding_period
-						min = 365
-						divide = 3650
-					}
-					max = 2
-				}
+		contextual_accept_score = {
+			value = 0
+
+			add = {
+				desc = "DIPLOMATIC_ACCEPTANCE_BINDING_PERIOD"
+				value = treaty_binding_period_commitment_acceptance
 			}
 		}
 	}

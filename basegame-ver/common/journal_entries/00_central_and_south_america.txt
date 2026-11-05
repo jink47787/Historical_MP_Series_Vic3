@@ -3,7 +3,10 @@
 
 	group = je_group_historical_content
 
-		
+	activation_description = {
+		always = yes
+	}
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 
 
@@ -18,48 +21,65 @@
 		}
 	}
 
-	complete = {
-		any_scope_state = {
-			state_region = s:STATE_GUATEMALA
-			turmoil < 0.2
-		}
-		any_scope_state = {
-			state_region = s:STATE_GUATEMALA
-			turmoil < 0.2
-		}
-		any_scope_state = {
-			state_region = s:STATE_COSTA_RICA
-			turmoil < 0.2
-		}
-		any_scope_state = {
-			state_region = s:STATE_SAN_SALVADOR
-			turmoil < 0.2
-		}
-		any_scope_state = {
-			state_region = s:STATE_NICARAGUA
-			turmoil < 0.2
-		}
-	}
-
-	fail = {
-		custom_tooltip = {
-			text = central_america_fail_tt
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
 			any_scope_state = {
-				OR = {
-					state_region = s:STATE_GUATEMALA
-					state_region = s:STATE_HONDURAS
-					state_region = s:STATE_COSTA_RICA
-					state_region = s:STATE_SAN_SALVADOR
-					state_region = s:STATE_NICARAGUA
-				}
-				count < 3
+				state_region = s:STATE_GUATEMALA
+				turmoil < 0.2
+			}
+			any_scope_state = {
+				state_region = s:STATE_HONDURAS
+				turmoil < 0.2
+			}
+			any_scope_state = {
+				state_region = s:STATE_COSTA_RICA
+				turmoil < 0.2
+			}
+			any_scope_state = {
+				state_region = s:STATE_SAN_SALVADOR
+				turmoil < 0.2
+			}
+			any_scope_state = {
+				state_region = s:STATE_NICARAGUA
+				turmoil < 0.2
+			}
+			hidden_trigger = {
+				 game_date > "1836.1.1"
 			}
 		}
+		effect = {
+			central_america_falls_apart_cleanup = yes
+		}
 	}
 
-	on_fail = {
-		trigger_event = { id = central_america.2 popup = yes }
-		custom_tooltip = central_america_capital_tt
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = central_america_fail_tt
+				any_scope_state = {
+					OR = {
+						state_region = s:STATE_GUATEMALA
+						state_region = s:STATE_HONDURAS
+						state_region = s:STATE_COSTA_RICA
+						state_region = s:STATE_SAN_SALVADOR
+						state_region = s:STATE_NICARAGUA
+					}
+					count < 3
+				}
+			}
+		}
+		effect = {
+			trigger_event = { id = central_america.2 popup = yes }
+			custom_tooltip = central_america_capital_tt
+		}
 	}
 
 	status_desc = {
@@ -78,47 +98,61 @@ ragamuffin_war = {
 
 	group = je_group_brazil
 
-
-	complete = {
-		is_at_war = no
-		OR = {
-			NOT = { exists = c:PNI }
-			c:PNI ?= {
-				is_country_alive = no
-			}
-		}
-		OR = {
-			NOT = { exists = c:PRA }
-			c:PRA ?= {
-				is_country_alive = no
-			}
-		}
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		hidden_effect = { set_variable = ragamuffin_war_completed }
-	}
-
-	fail = {
-		is_at_war = no
-		OR = {
-			c:PNI ?= {
-				is_country_alive = yes
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			is_at_war = no
+			OR = {
+				NOT = { exists = c:PNI }
+				c:PNI ?= {
+					is_country_alive = no
+				}
 			}
-			c:PRA ?= {
-				is_country_alive = yes
+			OR = {
+				NOT = { exists = c:PRA }
+				c:PRA ?= {
+					is_country_alive = no
+				}
 			}
+		}
+		effect = {
+			hidden_effect = { set_variable = ragamuffin_war_completed }
+			ragamuffin_war_cleanup = yes
 		}
 	}
 
-	on_fail = {
-		trigger_event = { id = south_america.5 }
-		hidden_effect = { set_variable = ragamuffin_war_completed }
-		if = {
-			limit = {
-				has_journal_entry = je_pedro_brazil
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			is_at_war = no
+			OR = {
+				c:PNI ?= {
+					is_country_alive = yes
+				}
+				c:PRA ?= {
+					is_country_alive = yes
+				}
 			}
-			remove_pedropoint_effect = yes
+		}
+		effect = {
+			trigger_event = { id = south_america.5 }
+			hidden_effect = { set_variable = ragamuffin_war_completed }
+			if = {
+				limit = {
+					has_journal_entry = je_pedro_brazil
+				}
+				remove_pedropoint_effect = yes
+			}
 		}
 	}
 
@@ -131,6 +165,10 @@ ragamuffin_war_minors = {
 	icon = "gfx/interface/icons/event_icons/bicorne_hat.dds"
 
 	group = je_group_historical_content
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_in_lobby = {
 		OR = {
@@ -146,30 +184,45 @@ ragamuffin_war_minors = {
 		}
 	}
 
-	complete = {
-		is_at_war = no
-		is_country_alive = yes
-	}
-
-	on_complete = {
-		if = {
-			limit = {
-				c:PNI ?= THIS
-			}
-			custom_tooltip = {
-				text = ragamuffin_war_minors_tt
-			}
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			is_at_war = no
+			is_country_alive = yes
 		}
-		else = {
-			trigger_event = { id = brazilian_minors.4 popup = yes }
+		effect = {
+			if = {
+				limit = {
+					c:PNI ?= THIS
+				}
+				custom_tooltip = {
+					text = ragamuffin_war_minors_tt
+				}
+			}
+			else = {
+				trigger_event = { id = brazilian_minors.4 popup = yes }
+			}
+			ragamuffin_war_minors_cleanup = yes
 		}
 	}
 
-	fail = {
-		is_country_alive = no
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			is_country_alive = no
+		}
+		effect = {
+			ragamuffin_war_minors_cleanup = yes
+		}
 	}
 
-		
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 
 }
@@ -180,38 +233,47 @@ je_reunify_central_america = {
 
 	group = je_group_foreign_affairs
 
-		
+	activation_description = {
+		always = yes
+	}
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 
 	is_shown_in_lobby = {
 		c:UCA ?= THIS
 	}
 
-	complete = {
-		any_scope_state = {
-			state_region = s:STATE_SAN_SALVADOR
-		}
-		any_scope_state = {
-			state_region = s:STATE_GUATEMALA
-		}
-		any_scope_state = {
-			state_region = s:STATE_HONDURAS
-		}
-		any_scope_state = {
-			state_region = s:STATE_NICARAGUA
-		}
-		any_scope_state = {
-			state_region = s:STATE_COSTA_RICA
-		}
-	}
-
-	on_complete = {
-		if = {
-			limit = {
-				NOT = { exists = c:UCA }
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			is_at_war = no
+			any_scope_state = {
+				state_region = s:STATE_SAN_SALVADOR
 			}
-			change_tag = UCA
+			any_scope_state = {
+				state_region = s:STATE_GUATEMALA
+			}
+			any_scope_state = {
+				state_region = s:STATE_HONDURAS
+			}
+			any_scope_state = {
+				state_region = s:STATE_NICARAGUA
+			}
+			any_scope_state = {
+				state_region = s:STATE_COSTA_RICA
+			}
 		}
-		trigger_event = { id = central_america.1 popup = yes }
+		effect = {
+			if = {
+				limit = {
+					NOT = { exists = c:UCA }
+				}
+				change_tag = UCA
+			}
+			trigger_event = { id = central_america.1 popup = yes }
+		}
 	}
 }

@@ -1,0 +1,286 @@
+﻿je_russification = {
+	should_be_pinned_by_default_uninvolved_or_context = yes
+	icon = "gfx/interface/icons/event_icons/event_map.dds"
+
+	group = je_group_historical_content
+	dlc = dlc019
+
+	activation_description = {
+		always = yes
+	}
+
+	is_shown_when_inactive = {
+		has_dlc_feature = ip5_content
+		c:RUS ?= this
+	}
+
+	possible = {
+		has_technology_researched = pan-nationalism
+		NOT = { has_law = law_type:law_no_colonial_affairs }
+		owner = {
+		 	AND = {
+				has_strategic_region_interest_tier = {
+		 			strategic_region = sr:region_northern_europe
+		 			value >= russification_interest_tier_min # set in event_values
+		 		}
+				has_strategic_region_interest_tier = {
+					strategic_region = sr:region_eastern_europe
+					value >= russification_interest_tier_min # set in event_values
+				}
+			}
+			AND = { # checks if Russia has at least one state in Finland, Baltic States, Poland
+				any_state_in_finland_old = {
+					count >= 1
+					OR = {
+						owner = ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				any_state_in_baltic_states_old = {
+					count >= 1
+					OR = {
+						owner = ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				any_state_in_poland_old = {
+					count >= 1
+					OR = {
+						owner = ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}
+		}
+	}
+
+	immediate = {
+		cu:russian = {
+			save_scope_as = russian_scope
+		}
+		trigger_event = {
+			id = russification.1
+			days = 1
+		}
+	}
+
+	on_yearly_pulse = {
+		random_events = {
+			30 = 0
+			20 = russification.4
+			20 = russification.5
+			10 = russification.6
+		}
+	}
+
+	# Map Mode
+	map_color = {
+		if = {
+			limit = {
+				je_russification_state_is_in_target_region = yes
+				je_russification_state_is_russified = yes
+			}
+			value = "russification_blue" # if completed
+		}
+		else_if = {
+			limit = {
+				je_russification_state_is_in_target_region = yes
+				je_russification_state_is_russified = no
+			}
+			value = "russification_amber" # if incomplete
+		}
+	}
+
+	map_tooltip = {
+		if = {
+			limit = {
+				je_russification_state_is_in_target_region = yes
+			}
+			custom_tooltip_no_bullet = je_russification_map_owned_tt
+			custom_tooltip_no_bullet = je_russification_map_incorporated_tt
+			custom_tooltip_no_bullet = je_russification_map_turmoil_tt
+			custom_tooltip_no_bullet = je_russification_map_culture_tt
+		}
+	}
+
+	outcome = { # JE completes - Russia owns FIN, UBD, POL directly
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			OR = {
+				institution_investment_level = {
+					institution = institution_colonial_affairs
+					value >= 2
+				}
+				institution_investment_level = {
+					institution = institution_schools
+					value >= 2
+				}
+			}
+			bureaucracy >= 0
+			approaching_bureaucracy_shortage = no
+			any_state_in_finland_old = {
+				is_incorporated = yes
+				any_scope_building = {
+					is_building_type = building_naval_fortification
+					level >= 5
+				}
+			}
+			any_state_in_baltic_states_old = {
+				is_incorporated = yes
+				any_scope_building = {
+					is_building_type = building_port
+					level >= 5
+				}
+			}
+			any_state_in_russia_western_borderlands = {
+				percent >= je_russification_region_goal_percent
+				owner ?= c:RUS
+				is_incorporated = yes
+				turmoil < je_russification_state_turmoil_max # set in event_values
+				culture_percent_state = {
+					target = cu:russian
+					value >= je_russification_state_russian_culture_min # set in event_values
+				}
+			}
+		}
+		effect = {
+			je_russification_cleanup = yes
+
+			trigger_event = {
+				id = russification.2
+				days = 1
+			}
+		}
+
+		event_outcome_effect_desc = {
+			header = russification.2.a
+	        effect = { # any changes to russification.2.a effects must be updated here
+			    if = {
+					limit = {
+						has_journal_entry = je_tsarpoints_master
+					}
+					je_tsarpoints_add_med = yes
+				}
+			    add_modifier = {
+		            name = modifier_je_russification_secured_ext
+		            days = very_long_modifier_time
+		        }
+				every_interest_group = {
+					limit ={
+						is_in_government = yes
+					}
+					add_modifier = {
+						name = modifier_je_russification_ig_str
+						days = moderately_long_modifier_time
+					}
+				}
+	        }
+		}
+
+		event_outcome_effect_desc = {
+			header = russification.2.b
+			effect = { # any changes to russification.2.b effects must be updated here
+				if = {
+					limit = {
+						has_journal_entry = je_tsarpoints_master
+					}
+					je_tsarpoints_add_med = yes
+				}
+			    add_modifier = {
+		            name = modifier_je_russification_secured_int
+		            days = moderately_long_modifier_time
+		        }
+		        custom_tooltip = russification_2b_character_modifier_tt
+			}
+		}
+	}
+
+	outcome = { # JE fails
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			AND = { # checks if all states in Finland, Baltic States, and Poland geographic regions are no longer under Russian control
+				any_state_in_finland_old = {
+					count = all
+					NOR = {
+						owner = ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				any_state_in_baltic_states_old = {
+					count = all
+					NOR = {
+						owner = ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+				any_state_in_poland_old = {
+					count = all
+					NOR = {
+						owner = ROOT
+						owner = {
+							is_subject_of = ROOT
+						}
+					}
+				}
+			}
+		}
+
+		effect = {
+			je_russification_cleanup = yes
+
+			trigger_event = {
+				id = russification.3
+				days = 1
+			}
+		}
+
+		event_outcome_effect_desc = {
+	        header = russification.3.a
+	        effect = { # any changes to russification.3.a effects must be updated here
+	        	custom_tooltip = russification_3a_character_modifier_tt
+		        add_radicals = {
+		            value = medium_radicals
+		            strata = upper
+		        }
+		        every_interest_group = {
+					limit ={
+						is_in_government = yes
+					}
+		            add_modifier = {
+		                name = modifier_je_russification_approval_loss
+		                days = normal_modifier_time
+		            }
+				}
+	        }
+	    }
+	}
+
+	outcome = { # invalid JE outcome
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+	    	has_law = law_type:law_no_colonial_affairs
+		}
+		effect = {
+			je_russification_cleanup = yes
+		}
+	}
+
+	weight = 1000
+}

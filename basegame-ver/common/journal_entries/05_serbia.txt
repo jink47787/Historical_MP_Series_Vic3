@@ -1,6 +1,12 @@
 ﻿je_serbian_throne = {
 
 	group = je_group_historical_content
+	dlc = dlc014
+
+	activation_description = {
+		always = yes
+	}
+
 	icon = "gfx/interface/icons/law_icons/monarchy.dds"
 
 	is_shown_in_lobby = {
@@ -25,7 +31,7 @@
 					OR = {
 						AND = {
 							ruler = {
-								has_variable = house_karadordevic
+								var:dynasty_var ?= flag:house_karadordevic
 							}
 							je:je_serbian_throne ?= {
 								"scripted_bar_progress(serbian_dethrone_bar)" >= 400
@@ -34,7 +40,7 @@
 						}
 						AND = {
 							ruler = {
-								has_variable = house_obrenovic
+								var:dynasty_var ?= flag:house_obrenovic
 							}
 							je:je_serbian_throne ?= {
 								"scripted_bar_progress(serbian_dethrone_bar)" >= 0
@@ -50,7 +56,7 @@
 					OR = {
 						AND = {
 							ruler = {
-								has_variable = house_karadordevic
+								var:dynasty_var ?= flag:house_karadordevic
 							}
 							je:je_serbian_throne ?= {
 								"scripted_bar_progress(serbian_dethrone_bar)" >= 300
@@ -59,7 +65,7 @@
 						}
 						AND = {
 							ruler = {
-								has_variable = house_obrenovic
+								var:dynasty_var ?= flag:house_obrenovic
 							}
 							je:je_serbian_throne ?= {
 								"scripted_bar_progress(serbian_dethrone_bar)" >= 100
@@ -84,7 +90,7 @@
 					OR = {
 						AND = {
 							ruler = {
-								has_variable = house_karadordevic
+								var:dynasty_var ?= flag:house_karadordevic
 							}
 							je:je_serbian_throne ?= {
 								"scripted_bar_progress(serbian_dethrone_bar)" >= 100
@@ -93,7 +99,7 @@
 						}
 						AND = {
 							ruler = {
-								has_variable = house_obrenovic
+								var:dynasty_var ?= flag:house_obrenovic
 							}
 							je:je_serbian_throne ?= {
 								"scripted_bar_progress(serbian_dethrone_bar)" >= 300
@@ -109,7 +115,7 @@
 					OR = {
 						AND = {
 							ruler = {
-								has_variable = house_karadordevic
+								var:dynasty_var ?= flag:house_karadordevic
 							}
 							je:je_serbian_throne ?= {
 								"scripted_bar_progress(serbian_dethrone_bar)" >= 0
@@ -118,7 +124,7 @@
 						}
 						AND = {
 							ruler = {
-								has_variable = house_obrenovic
+								var:dynasty_var ?= flag:house_obrenovic
 							}
 							je:je_serbian_throne ?= {
 								"scripted_bar_progress(serbian_dethrone_bar)" >= 400
@@ -156,77 +162,85 @@
 		}
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = je_serbian_throne_complete_timer_tt
-			je:je_serbian_throne ?= {
-				"scripted_bar_progress(serbian_dethrone_bar)" >= 500
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_serbian_throne_complete_timer_tt
+				je:je_serbian_throne ?= {
+					"scripted_bar_progress(serbian_dethrone_bar)" >= 500
+				}
+			}
+		}
+		effect = {
+			trigger_event = { id = serbian_throne.9 }
+			hidden_effect = {
+				serbian_throne_modifier_cleanser = yes
+				serbian_throne_variable_cleanser = yes
+			}
+		}
+		event_outcome_desc = {
+			first_valid = {
+				triggered_desc = {
+					desc = event_effects_serbian_throne.9_tt
+				}
 			}
 		}
 	}
 
-	on_complete = {
-		trigger_event = { id = serbian_throne.9 }
-		hidden_effect = {
-			serbian_throne_modifier_cleanser = yes
-			serbian_throne_variable_cleanser = yes
+	outcome = {
+		header = je_serbian_throne_fail_header
+		effect_header = je_serbian_throne_on_fail_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_serbian_throne_fail_timer_tt
+				je:je_serbian_throne ?= {
+					"scripted_bar_progress(serbian_dethrone_bar)" <= 0
+				}
+			}
+			hidden_trigger = {
+				always = no
+			}
 		}
-	}
-
-	event_outcome_completed_desc = {
-		first_valid = {
-			triggered_desc = {
-				desc = event_effects_serbian_throne.9_tt
+		effect = {
+			show_as_tooltip = {
+				trigger_event = { id = serbian_throne.10 }
+			}
+			je_serbian_throne_cleanup = yes
+		}
+		event_outcome_desc = {
+			first_valid = {
+				triggered_desc = {
+					desc = event_effects_serbian_throne.10_tt
+				}
 			}
 		}
 	}
 
-	custom_failure_header = je_serbian_throne_fail_header
-
-	fail = {
-		custom_tooltip = {
-			text = je_serbian_throne_fail_timer_tt
-			je:je_serbian_throne ?= {
-				"scripted_bar_progress(serbian_dethrone_bar)" <= 0
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = {
+					has_law = law_type:law_monarchy
+				}
+				c:SER ?= {
+					has_variable = ruler_selector_var
+				}
 			}
 		}
-		hidden_trigger = {
-			always = no
-		}
-	}
-
-	custom_on_failure_header = je_serbian_throne_on_fail_header
-
-	on_fail = {
-		show_as_tooltip = {
-			trigger_event = { id = serbian_throne.10 }
-		}
-	}
-
-	event_outcome_failed_desc = {
-		first_valid = {
-			triggered_desc = {
-				desc = event_effects_serbian_throne.10_tt
+		effect = {
+			trigger_event = { id = serbian_throne.11 }
+			hidden_effect = {
+				serbian_throne_modifier_cleanser = yes
+				serbian_throne_variable_cleanser = yes
 			}
-		}
-	}
-
-	invalid = {
-		OR = {
-			NOT = {
-				has_law = law_type:law_monarchy
-			}
-			c:SER ?= {
-				has_variable = ruler_selector_var
-			}
-		}
-	}
-
-	on_invalid = {
-		trigger_event = { id = serbian_throne.11 }
-		hidden_effect = {
-			serbian_throne_modifier_cleanser = yes
-			serbian_throne_variable_cleanser = yes
 		}
 	}
 }

@@ -1,5 +1,5 @@
 	sg_key = {
-		category = key 	# The subgoal category of this subgoal
+		category = <objective_subgoal_category> 	# The subgoal category of this subgoal
 	
 		# The four entries below check against already completed subgoals - they must all be passed for subgoal to have a chance to trigger (empty = automatic pass)
 		unlocking_subgoals_all = {} # all of these other subgoals must be completed (or failed/timed-out and non-repeatable) for subgoal to be able to trigger

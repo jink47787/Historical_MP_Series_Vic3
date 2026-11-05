@@ -11,6 +11,7 @@
 	icon = "gfx/interface/icons/diplomatic_treaties_articles_icons/defensive_pact_treaties.dds"
 
 	flags = {
+		show_in_lens
 		is_defensive_pact
 		can_be_renegotiated
 		friendly
@@ -113,13 +114,18 @@
 	}
 
 	on_entry_into_force = {
-		scope:article_options.first_country = {
-			add_lobby_appeasement_from_diplomacy_bidirectional = {
-				FIRST = scope:article_options.first_country
-				SECOND = scope:article_options.second_country
-				PRO_AMOUNT = 3
-				ANTI_AMOUNT = -3
-				FACTOR = appeasement_defensive_pact_formed
+		if = {
+			limit = {
+				NOT = { exists = scope:is_renegotiation }
+			}
+			scope:article_options.first_country = {
+				add_lobby_appeasement_from_diplomacy_bidirectional = {
+					FIRST = scope:article_options.first_country
+					SECOND = scope:article_options.second_country
+					PRO_AMOUNT = 3
+					ANTI_AMOUNT = -3
+					FACTOR = appeasement_defensive_pact_formed
+				}
 			}
 		}
 	}
@@ -174,6 +180,14 @@
 				multiply = 0.05
 			}
 
+			if = {
+				limit = {
+					c:RUS ?= this
+					has_variable = ai_russia_client_bloc_pending
+				}
+				add = 0.15
+			}
+
 			if =  {
 				limit = {
 					num_defensive_pacts < 1
@@ -191,6 +205,23 @@
 
 		proposal_weight = {
 			value = 1
+
+			if = {
+				limit = {
+					c:RUS ?= this
+					ai_russia_article_partner_is_pending_client = yes
+					scope:other_country = {
+						is_subject = no
+					}
+				}
+				add = 5
+			}
+			if = {
+				limit = {
+					ai_is_regional_objective_protect_target = { TARGET = scope:other_country }
+				}
+				add = 3
+			}
 
 			if =  {
 				limit = {
@@ -219,6 +250,16 @@
 			save_temporary_scope_as = target
 			scope:other_country = {
 				save_temporary_scope_as = actor
+			}
+
+			if = {
+				limit = {
+					ai_is_regional_objective_protect_target = { TARGET = scope:other_country }
+				}
+				add = {
+					desc = "DIPLOMATIC_ACCEPTANCE_REGIONAL_OBJECTIVE_PROTECT"
+					value = 25
+				}
 			}
 
 			add = {
@@ -434,21 +475,6 @@
 					add = -1000
 				}
 			}
-
-			if = {
-				limit = {
-					NOT = { exists = scope:is_treaty_active }
-					exists = scope:treaty
-					scope:treaty.binding_period >= 1825
-				}
-				subtract = {
-					desc = "DIPLOMATIC_ACCEPTANCE_BINDING_PERIOD"
-					value = scope:treaty.binding_period
-					divide = 3650
-					subtract = 25
-					max = 50
-				}
-			}			
 		}
 
 		contextual_accept_score = {
@@ -517,6 +543,21 @@
 						desc = "LOBBY_OPPORTUNITY_BONUS"
 						value = 5
 					}
+				}
+			}
+
+			if = {
+				limit = {
+					NOT = { exists = scope:is_treaty_active }
+					scope:treaty.binding_period >= 1825
+				}
+				subtract = {
+					desc = "DIPLOMATIC_ACCEPTANCE_BINDING_PERIOD"
+					value = scope:treaty.binding_period
+					divide = 365
+					multiply = 5
+					subtract = 25
+					max = 50
 				}
 			}
 		}

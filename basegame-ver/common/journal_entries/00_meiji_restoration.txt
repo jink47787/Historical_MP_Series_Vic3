@@ -3,6 +3,10 @@
 
 	group = je_group_meiji_restoration
 
+	activation_description = {
+		always = yes
+	}
+
 	scripted_button = je_meiji_restoration_proclaim_imperial_restoration
 	scripted_button = je_meiji_restoration_decide_shogunate_strategy
 	scripted_button = je_meiji_restoration_imperial_marriage
@@ -95,7 +99,7 @@
 					ig:ig_landowners ?= {
 						leader ?= {
 							NOT = {
-								has_variable = house_tokugawa
+								var:dynasty_var ?= flag:house_tokugawa
 							}
 						}
 					}
@@ -118,239 +122,254 @@
 		}
 	}
 
-	# Imperial Victory
-	custom_completion_header = je_meiji_restoration_imperial_victory_header
-	complete = {
-		custom_tooltip = {
-			text = at_least_six_months_tt
-			has_variable = restoration_timer_var
-			var:restoration_timer_var >= 6
-		}
-		custom_tooltip = {
-			text = ruler_is_japanese_emperor_tt
-			ruler ?= {
-				has_trait = special_character_japanese_emperor
-			}
-		}
-		NOT = {
-			any_civil_war = {
-				civil_war_progress > 0
-			}
-		}
-		NOT = {
-			has_law = law_type:law_bakufu
-		}
-		ig:ig_landowners ?= {
-			custom_tooltip = {
-				text = landowners_leader_is_not_tokugawa_tt
-				leader ?= {
-					NOT = {
-						has_variable = house_tokugawa
-					}
-				}
-			}
-		}
-	}
-
-	custom_on_completion_header = je_meiji_restoration_on_imperial_victory_header
-	on_complete = {
-		trigger_event = {
-			id = meiji.1
-		}
-		set_variable = japan_emperor_restored
-		set_variable = japan_restoration_complete
+	map_color = {
 		if = {
 			limit = {
-				is_player = no
-				c:EZO ?= {
-					is_player = no
-					is_subject_of = ROOT
-					NOT = {
-						has_social_hierarchy = edo_system
-					}
-				}
-			}
-			annex = c:EZO
-		}
-	}
-
-	event_outcome_completed_effect_desc = {
-		effect = {
-			if = {
-				limit = {
-					any_scope_state = {
-						state_region = s:STATE_KANTO
-					}
-				}
-				set_capital = STATE_KANTO
-
-				s:STATE_KANTO = {
-					random_scope_state = {
-						set_hub_name = {
-							type = city
-							name = HUB_NAME_STATE_KANTO_city_meiji
-						}
-					}
-				}
-			}
-			ig:ig_landowners ?= {
-				show_as_tooltip = {
-					remove_ideology = ideology_japan_hierarchic_2
-					add_ideology = ideology_hierarchic
-				}
-				set_interest_group_name = ig_kazoku
-			}
-			hidden_effect = { country_clear_daimyo = yes }
-			if = {
-				limit = {
-					NOT = {
-						any_political_movement = {
-							is_political_movement_type = movement_modernizer
-						}
-					}
-				}
-				create_political_movement = { type = movement_modernizer }
-			}
-			japan_display_add_meiji_reforms = yes
-		}
-	}
-
-	event_outcome_completed_effect_desc = {
-        header = meiji.1.a
-        effect = {
-			ig:ig_industrialists ?= {
-				add_modifier = {
-					name = meiji_favored_ig
-					days = very_long_modifier_time
-				}
-			}
-        }
-    }
-
-    event_outcome_completed_effect_desc = {
-        header = meiji.1.b
-        effect = {
-			ig:ig_intelligentsia ?= {
-				add_modifier = {
-					name = meiji_favored_ig
-					days = very_long_modifier_time
-				}
-			}
-        }
-    }
-
-	# Shogunate Victory
-	custom_failure_header = je_meiji_restoration_shogunate_victory_header
-	fail = {
-		trigger_if = {
-			limit = {
-				NOR = {
-					has_variable = kobu_gattai
-					has_variable = kogi_yoron
-				}
-			}
-			custom_tooltip = {
-				text = shogunate_has_a_vision_tt
-				always = no
-			}
-		}
-		trigger_else_if = {
-			limit = {
-				has_variable = kobu_gattai
-			}
-			custom_tooltip = {
-				text = kobu_gattai_trigger_conditions_tt
-				has_law = law_type:law_bakufu
-				has_variable = japan_renewed_bakufu
-				has_variable = japan_completed_imperial_marriage
-			}
-			custom_tooltip = {
-				text = ruler_is_japanese_shogun_tt
-				has_law = law_type:law_bakufu
-			}
-			custom_tooltip = {
-				text = shogun_imperial_marriage_tt
-				has_variable = japan_completed_imperial_marriage
-			}
-			custom_tooltip = {
-				text = shogun_renewed_bakufu_tt
-				has_variable = japan_renewed_bakufu
-			}
-		}
-		trigger_else_if = {
-			limit = {
-				has_variable = kogi_yoron
-			}
-			custom_tooltip = {
-				text = kogi_yoron_trigger_conditions_tt
-				ig:ig_landowners ?= {
-					is_in_government = yes
-					leader ?= {
-						has_variable = house_tokugawa
-					}
-				}
-				country_has_voting_franchise = yes
-				ruler = {
-					has_variable = house_yamato
-				}
-			}
-			country_has_voting_franchise = yes
-			ig:ig_landowners ?= {
-				is_in_government = yes
-				custom_tooltip = {
-					text = landowners_leader_is_tokugawa_tt
-					leader ?= {
-						has_variable = house_tokugawa
-					}
-				}
-			}
-			custom_tooltip = {
-				text = shogun_restored_emperor_tt
-				ruler = {
-					has_variable = house_yamato
-				}
-			}
-		}
-		legitimacy >= 75
-		NOT = {
-			any_civil_war = {
-				civil_war_progress > 0
-			}
-		}
-		trigger_if = {
-			limit = {
-				any_political_movement = {
-					is_political_movement_type = movement_meiji_restorationist
-				}
-			}
-			any_political_movement = {
-				is_political_movement_type = movement_meiji_restorationist
+				is_in_geographic_region = geographic_region_home_islands
 				OR = {
-					political_movement_support < 0.05
-					political_movement_radicalism < 0.5
+					AND = {
+						c:JAP ?= owner
+						state_daimyo_loyalty >= 0.8
+					}
+					AND = {
+						c:EZO ?= owner
+						s:STATE_HOKKAIDO.region_state:JAP ?= {
+							state_daimyo_loyalty >= 0.8
+						}
+					}
 				}
 			}
+			value = "restoration_shogunate_green_3"
 		}
-	}
-
-	custom_on_failure_header = je_meiji_restoration_on_shogunate_victory_header
-	on_fail = {
 		if = {
 			limit = {
-				has_variable = kobu_gattai
+				is_in_geographic_region = geographic_region_home_islands
+				OR = {
+					AND = {
+						c:JAP ?= owner
+						state_daimyo_loyalty >= 0.65
+					}
+					AND = {
+						c:EZO ?= owner
+						s:STATE_HOKKAIDO.region_state:JAP ?= {
+							state_daimyo_loyalty >= 0.65
+						}
+					}
+				}
 			}
-			trigger_event = {
-				id = ep2_meiji.8 popup = yes
-			}
+			value = "restoration_shogunate_green_2"
 		}
 		else_if = {
 			limit = {
-				has_variable = kogi_yoron
+				is_in_geographic_region = geographic_region_home_islands
+				OR = {
+					AND = {
+						c:JAP ?= owner
+						state_daimyo_loyalty >= 0.5
+					}
+					AND = {
+						c:EZO ?= owner
+						s:STATE_HOKKAIDO.region_state:JAP ?= {
+							state_daimyo_loyalty >= 0.5
+						}
+					}
+				}
 			}
+			value = "restoration_shogunate_green_1"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_home_islands
+				OR = {
+					AND = {
+						c:JAP ?= owner
+						state_daimyo_loyalty < 0.2
+					}
+					AND = {
+						c:EZO ?= owner
+						s:STATE_HOKKAIDO.region_state:JAP ?= {
+							state_daimyo_loyalty < 0.2
+						}
+					}
+				}
+			}
+			value = "restoration_imperial_red_3"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_home_islands
+				OR = {
+					AND = {
+						c:JAP ?= owner
+						state_daimyo_loyalty < 0.35
+					}
+					AND = {
+						c:EZO ?= owner
+						s:STATE_HOKKAIDO.region_state:JAP ?= {
+							state_daimyo_loyalty < 0.35
+						}
+					}
+				}
+			}
+			value = "restoration_imperial_red_2"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_home_islands
+				OR = {
+					AND = {
+						c:JAP ?= owner
+						state_daimyo_loyalty < 0.5
+					}
+					AND = {
+						c:EZO ?= owner
+						s:STATE_HOKKAIDO.region_state:JAP ?= {
+							state_daimyo_loyalty < 0.5
+						}
+					}
+				}
+			}
+			value = "restoration_imperial_red_1"
+		}
+	}
+
+	map_tooltip = {
+		state_region ?= {
+			save_scope_as = daimyo_map_state
+		}
+		owner ?= {
+			random_in_list = {
+				variable = daimyos_list
+				limit = {
+					var:daimyo_var ?= scope:daimyo_map_state
+				}
+				save_scope_as = daimyo_map_character
+			}
+		}
+		if = {
+			limit = {
+				is_in_geographic_region = geographic_region_home_islands
+				c:JAP ?= owner
+				exists = scope:daimyo_map_character
+				state_daimyo_loyalty >= 0.5
+			}
+			custom_tooltip_no_bullet = "restoration_map_shogunate_daimyo"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_home_islands
+				c:JAP ?= owner
+				exists = scope:daimyo_map_character
+				state_daimyo_loyalty < 0.5
+			}
+			custom_tooltip_no_bullet = "restoration_map_imperial_daimyo"
+		}
+		else_if = { # Special cases
+			limit = {
+				state_region = s:STATE_RYUKYU_ISLANDS
+				c:JAP ?= owner
+			}
+			custom_tooltip_no_bullet = "restoration_map_satsuma_ryukyu"
+		}
+		else_if = {
+			limit = {
+				state_region = s:STATE_RYUKYU_ISLANDS
+				c:RYU ?= owner
+			}
+			custom_tooltip_no_bullet = "restoration_map_ryukyu"
+		}
+		else_if = {
+			limit = {
+				state_region = s:STATE_HOKKAIDO
+				c:EZO ?= owner
+			}
+			custom_tooltip_no_bullet = "restoration_map_ezochi"
+		}
+		if = {
+			limit = {
+				is_in_geographic_region = geographic_region_home_islands
+				c:JAP ?= owner
+				scope:daimyo_map_character ?= {
+					OR = {
+						has_modifier = modifier_shinpan_daimyo
+						has_modifier = modifier_shinpan_daimyo_restoration
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "restoration_map_shinpan_daimyo"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_home_islands
+				c:JAP ?= owner
+				scope:daimyo_map_character ?= {
+					OR = {
+						has_modifier = modifier_fudai_daimyo
+						has_modifier = modifier_fudai_daimyo_restoration
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "restoration_map_fudai_daimyo"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_home_islands
+				c:JAP ?= owner
+				scope:daimyo_map_character ?= {
+					OR = {
+						has_modifier = modifier_tozama_daimyo
+						has_modifier = modifier_tozama_daimyo_restoration
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "restoration_map_tozama_daimyo"
+		}
+	}
+
+	# Imperial Victory
+	outcome = {
+		header = je_meiji_restoration_imperial_victory_header
+		effect_header = je_meiji_restoration_on_imperial_victory_header
+		color = "gold_positive"
+		conclusion_desc = je_meiji_restoration_imperial_victory_conclusion_desc
+		flags = { historical }
+		trigger = {
+			custom_tooltip = {
+				text = at_least_six_months_tt
+				has_variable = restoration_timer_var
+				var:restoration_timer_var >= 6
+			}
+			custom_tooltip = {
+				text = ruler_is_japanese_emperor_tt
+				ruler ?= {
+					has_trait = special_character_japanese_emperor
+				}
+			}
+			NOT = {
+				any_civil_war = {
+					civil_war_progress > 0
+				}
+			}
+			NOT = {
+				has_law = law_type:law_bakufu
+			}
+			ig:ig_landowners ?= {
+				custom_tooltip = {
+					text = landowners_leader_is_not_tokugawa_tt
+					leader ?= {
+						NOT = {
+							var:dynasty_var ?= flag:house_tokugawa
+						}
+					}
+				}
+			}
+		}
+		effect = {
 			trigger_event = {
-				id = ep2_meiji.9 popup = yes
+				id = meiji.1
 			}
 			set_variable = japan_emperor_restored
+			set_variable = japan_restoration_complete
 			if = {
 				limit = {
 					is_player = no
@@ -365,44 +384,33 @@
 				annex = c:EZO
 			}
 		}
-		else = {
-			custom_tooltip = je_meiji_shogunate_results_unknown_tt
-		}
-		set_variable = japan_restoration_complete
-	}
-
-	event_outcome_failed_effect_desc = {
-        effect = {
-			if = {
-				limit = {
-					has_variable = kobu_gattai
-				}
-				custom_tooltip_no_bullet = ep2_meiji.8.a
-				add_modifier = {
-					name = modifier_court_and_shogunate
-					days = very_long_modifier_time
-					is_decaying = yes
-				}
-				random_scope_character = {
+		event_outcome_effect_desc = {
+			effect = {
+				if = {
 					limit = {
-						has_role = character_role_emperor_of_japan
+						any_scope_state = {
+							state_region = s:STATE_KANTO
+						}
 					}
-					add_trait = literary
-					add_modifier = {
-						name = modifier_veiled_by_awe
-						days = stupidly_long_modifier_time
-					}
-				}
-			}
-        }
-    }
+					set_capital = STATE_KANTO
 
-    event_outcome_failed_effect_desc = {
-        effect = {
-			if = {
-				limit = {
-					has_variable = kogi_yoron
+					s:STATE_KANTO = {
+						random_scope_state = {
+							set_hub_name = {
+								type = city
+								name = HUB_NAME_STATE_KANTO_city_meiji
+							}
+						}
+					}
 				}
+				ig:ig_landowners ?= {
+					show_as_tooltip = {
+						remove_ideology = ideology_japan_hierarchic_2
+						add_ideology = ideology_hierarchic
+					}
+					set_interest_group_name = ig_kazoku
+				}
+				hidden_effect = { country_clear_daimyo = yes }
 				if = {
 					limit = {
 						NOT = {
@@ -415,76 +423,281 @@
 				}
 				japan_display_add_meiji_reforms = yes
 			}
-        }
-    }
-
-    event_outcome_failed_effect_desc = {
-        effect = {
-			if = {
-				limit = {
-					has_variable = kogi_yoron
-				}
-				custom_tooltip_no_bullet = ep2_meiji.9.a
-				add_modifier = {
-					name = modifier_continuity_and_enlightenment
-					days = very_long_modifier_time
-					is_decaying = yes
-				}
-			}
-        }
-    }
-
-    event_outcome_failed_effect_desc = {
-        effect = {
-			if = {
-				limit = {
-					has_variable = kogi_yoron
-				}
-				custom_tooltip_no_bullet = ep2_meiji.9.b
-				add_modifier = {
-					name = modifier_taikun_monarchy
-					days = very_long_modifier_time
-					is_decaying = yes
-				}
-				every_scope_character = {
-					limit = {
-						has_variable = house_tokugawa
-					}
-					add_modifier = {
-						name = modifier_taikun_monarchy_character
-						days = stupidly_long_modifier_time
-					}
-				}
-			}
-        }
-    }
-
-	invalid = {
-		NOT = {
-			country_has_monarchy_law = yes
 		}
+		event_outcome_effect_desc = {
+	        header = meiji.1.a
+	        effect = {
+				ig:ig_industrialists ?= {
+					add_modifier = {
+						name = meiji_favored_ig
+						days = very_long_modifier_time
+					}
+				}
+	        }
+	    }
+	    event_outcome_effect_desc = {
+	        header = meiji.1.b
+	        effect = {
+				ig:ig_intelligentsia ?= {
+					add_modifier = {
+						name = meiji_favored_ig
+						days = very_long_modifier_time
+					}
+				}
+	        }
+	    }
 	}
 
-	on_invalid = {
-		set_variable = japan_restoration_complete
-		if = {
-			limit = {
-				has_variable = emperor_var
+	# Shogunate Victory
+	outcome = {
+		header = je_meiji_restoration_shogunate_victory_header
+		effect_header = je_meiji_restoration_on_shogunate_victory_header
+		color = "blue_negative"
+		conclusion_desc = je_meiji_restoration_shogunate_victory_conclusion_desc
+		trigger = {
+			trigger_if = {
+				limit = {
+					NOR = {
+						has_variable = kobu_gattai
+						has_variable = kogi_yoron
+					}
+				}
+				custom_tooltip = {
+					text = shogunate_has_a_vision_tt
+					always = no
+				}
 			}
-			remove_variable = emperor_var
-		}
-		if = {
-			limit = {
-				is_player = no
-				c:EZO ?= {
-					is_player = no
-					is_subject_of = ROOT
-					NOT = {
-						has_social_hierarchy = edo_system
+			trigger_else_if = {
+				limit = {
+					has_variable = kobu_gattai
+				}
+				custom_tooltip = {
+					text = kobu_gattai_trigger_conditions_tt
+					has_law = law_type:law_bakufu
+					has_variable = japan_renewed_bakufu
+					has_variable = japan_completed_imperial_marriage
+				}
+				custom_tooltip = {
+					text = ruler_is_japanese_shogun_tt
+					has_law = law_type:law_bakufu
+				}
+				custom_tooltip = {
+					text = shogun_imperial_marriage_tt
+					has_variable = japan_completed_imperial_marriage
+				}
+				custom_tooltip = {
+					text = shogun_renewed_bakufu_tt
+					has_variable = japan_renewed_bakufu
+				}
+			}
+			trigger_else_if = {
+				limit = {
+					has_variable = kogi_yoron
+				}
+				custom_tooltip = {
+					text = kogi_yoron_trigger_conditions_tt
+					ig:ig_landowners ?= {
+						is_in_government = yes
+						leader ?= {
+							var:dynasty_var ?= flag:house_tokugawa
+						}
+					}
+					country_has_voting_franchise = yes
+					ruler = {
+						var:dynasty_var ?= flag:house_yamato
+					}
+				}
+				country_has_voting_franchise = yes
+				ig:ig_landowners ?= {
+					is_in_government = yes
+					custom_tooltip = {
+						text = landowners_leader_is_tokugawa_tt
+						leader ?= {
+							var:dynasty_var ?= flag:house_tokugawa
+						}
+					}
+				}
+				custom_tooltip = {
+					text = shogun_restored_emperor_tt
+					ruler = {
+						var:dynasty_var ?= flag:house_yamato
 					}
 				}
 			}
-			annex = c:EZO
+			legitimacy >= 75
+			NOT = {
+				any_civil_war = {
+					civil_war_progress > 0
+				}
+			}
+			trigger_if = {
+				limit = {
+					any_political_movement = {
+						is_political_movement_type = movement_meiji_restorationist
+					}
+				}
+				any_political_movement = {
+					is_political_movement_type = movement_meiji_restorationist
+					OR = {
+						political_movement_support < 0.05
+						political_movement_radicalism < 0.5
+					}
+				}
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					has_variable = kobu_gattai
+				}
+				trigger_event = {
+					id = ep2_meiji.8 popup = yes
+				}
+			}
+			else_if = {
+				limit = {
+					has_variable = kogi_yoron
+				}
+				trigger_event = {
+					id = ep2_meiji.9 popup = yes
+				}
+				set_variable = japan_emperor_restored
+				if = {
+					limit = {
+						is_player = no
+						c:EZO ?= {
+							is_player = no
+							is_subject_of = ROOT
+							NOT = {
+								has_social_hierarchy = edo_system
+							}
+						}
+					}
+					annex = c:EZO
+				}
+			}
+			else = {
+				custom_tooltip = je_meiji_shogunate_results_unknown_tt
+			}
+			set_variable = japan_restoration_complete
+			je_meiji_restoration_cleanup = yes
+		}
+		event_outcome_effect_desc = {
+	        effect = {
+				if = {
+					limit = {
+						has_variable = kobu_gattai
+					}
+					custom_tooltip_no_bullet = ep2_meiji.8.a
+					add_modifier = {
+						name = modifier_court_and_shogunate
+						days = very_long_modifier_time
+						is_decaying = yes
+					}
+					random_scope_character = {
+						limit = {
+							has_role = character_role_emperor_of_japan
+						}
+						add_trait = literary
+						add_modifier = {
+							name = modifier_veiled_by_awe
+							days = stupidly_long_modifier_time
+						}
+					}
+				}
+	        }
+	    }
+	    event_outcome_effect_desc = {
+	        effect = {
+				if = {
+					limit = {
+						has_variable = kogi_yoron
+					}
+					if = {
+						limit = {
+							NOT = {
+								any_political_movement = {
+									is_political_movement_type = movement_modernizer
+								}
+							}
+						}
+						create_political_movement = { type = movement_modernizer }
+					}
+					japan_display_add_meiji_reforms = yes
+				}
+	        }
+	    }
+	    event_outcome_effect_desc = {
+	        effect = {
+				if = {
+					limit = {
+						has_variable = kogi_yoron
+					}
+					custom_tooltip_no_bullet = ep2_meiji.9.a
+					add_modifier = {
+						name = modifier_continuity_and_enlightenment
+						days = very_long_modifier_time
+						is_decaying = yes
+					}
+				}
+	        }
+	    }
+	    event_outcome_effect_desc = {
+	        effect = {
+				if = {
+					limit = {
+						has_variable = kogi_yoron
+					}
+					custom_tooltip_no_bullet = ep2_meiji.9.b
+					add_modifier = {
+						name = modifier_taikun_monarchy
+						days = very_long_modifier_time
+						is_decaying = yes
+					}
+					every_scope_character = {
+						limit = {
+							var:dynasty_var ?= flag:house_tokugawa
+						}
+						add_modifier = {
+							name = modifier_taikun_monarchy_character
+							days = stupidly_long_modifier_time
+						}
+					}
+				}
+	        }
+	    }
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				country_has_monarchy_law = yes
+			}
+		}
+		effect = {
+			set_variable = japan_restoration_complete
+			if = {
+				limit = {
+					has_variable = emperor_var
+				}
+				remove_variable = emperor_var
+			}
+			if = {
+				limit = {
+					is_player = no
+					c:EZO ?= {
+						is_player = no
+						is_subject_of = ROOT
+						NOT = {
+							has_social_hierarchy = edo_system
+						}
+					}
+				}
+				annex = c:EZO
+			}
+			je_meiji_restoration_cleanup = yes
 		}
 	}
 
@@ -497,6 +710,10 @@ je_meiji_imperial_marriage = {
 	icon = "gfx/interface/icons/event_icons/event_scales.dds"
 
 	group = je_group_meiji_restoration
+
+	activation_description = {
+		always = yes
+	}
 
 	immediate = {
 		ruler = {
@@ -536,97 +753,123 @@ je_meiji_imperial_marriage = {
 		}
 	}
 
-	complete = {
-		trigger_if = {
-			limit = {
-				scope:journal_entry ?= {
-					has_variable = japan_break_treaty_var
-				}
-			}
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
 			trigger_if = {
 				limit = {
-					exists = scope:relevant_treaty_scope
+					scope:journal_entry ?= {
+						has_variable = japan_break_treaty_var
+					}
 				}
-				custom_tooltip = {
-					text = has_broken_relevant_treaty_tt
-					NOT = {
-						any_scope_treaty = {
-							scope:relevant_treaty_scope ?= this
+				trigger_if = {
+					limit = {
+						exists = scope:relevant_treaty_scope
+					}
+					custom_tooltip = {
+						text = has_broken_relevant_treaty_tt
+						NOT = {
+							any_scope_treaty = {
+								scope:relevant_treaty_scope ?= this
+							}
+						}
+					}
+				}
+				trigger_else = {
+					custom_tooltip = {
+						text = im_broken_applicable_treaty_tt
+						NOT = {
+							exists = scope:relevant_treaty_scope
 						}
 					}
 				}
 			}
-			trigger_else = {
+			has_law_or_variant = law_type:law_closed_borders
+			NOT = {
+				has_law_or_variant = law_type:law_free_trade
+			}
+			NOT = {
+				any_state_in_home_islands = {
+					is_treaty_port = yes
+				}
+			}
+		}
+		effect = {
+			custom_tooltip = {
+				text = kobu_gattai_progress_tt
+				set_variable = japan_completed_imperial_marriage
+			}
+			je_meiji_imperial_marriage_cleanup = yes
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
 				custom_tooltip = {
-					text = im_broken_applicable_treaty_tt
+					text = ruler_does_not_have_imperial_marriage_tt
+					ruler = {
+						NOT = {
+							has_variable = japan_imperial_marriage
+						}
+					}
+				}
+				custom_tooltip = {
+					text = je_has_timed_out_tt
 					NOT = {
-						exists = scope:relevant_treaty_scope
+						has_journal_entry = je_meiji_imperial_marriage
 					}
 				}
 			}
 		}
-		has_law_or_variant = law_type:law_closed_borders
-		NOT = {
-			has_law_or_variant = law_type:law_free_trade
-		}
-		NOT = {
-			any_state_in_home_islands = {
-				is_treaty_port = yes
-			}
-		}
-	}
-
-	on_complete = {
-		custom_tooltip = {
-			text = kobu_gattai_progress_tt
-			set_variable = japan_completed_imperial_marriage
-		}
-	}
-
-	fail = {
-		OR = {
-			custom_tooltip = {
-				text = ruler_does_not_have_imperial_marriage_tt
-				ruler = {
-					NOT = {
-						has_variable = japan_imperial_marriage
-					}
-				}
+		effect = {
+			ruler = {
+				remove_variable = japan_imperial_marriage
 			}
 			custom_tooltip = {
-				text = je_has_timed_out_tt
-				NOT = {
-					has_journal_entry = je_meiji_imperial_marriage
-				}
+				text = kobu_gattai_no_longer_viable_tt
+				remove_variable = kobu_gattai
+				set_variable = kogi_yoron
 			}
+			custom_tooltip = kogi_yoron_forced_tt
+			je_meiji_imperial_marriage_cleanup = yes
 		}
 	}
 
-	on_fail = {
-		ruler = {
-			remove_variable = japan_imperial_marriage
-		}
-		custom_tooltip = {
-			text = kobu_gattai_no_longer_viable_tt
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			custom_tooltip = je_will_fail_tt
+			ruler = {
+				remove_variable = japan_imperial_marriage
+			}
 			remove_variable = kobu_gattai
 			set_variable = kogi_yoron
+			je_meiji_imperial_marriage_cleanup = yes
 		}
-		custom_tooltip = kogi_yoron_forced_tt
 	}
 
-	on_timeout = {
-		custom_tooltip = je_will_fail_tt
-		ruler = {
-			remove_variable = japan_imperial_marriage
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOR = {
+				has_law_or_variant = law_type:law_monarchy
+				has_law = law_type:law_bakufu
+			}
 		}
-		remove_variable = kobu_gattai
-		set_variable = kogi_yoron
-	}
-
-	invalid = {
-		NOR = {
-			has_law_or_variant = law_type:law_monarchy
-			has_law = law_type:law_bakufu
+		effect = {
+			je_meiji_imperial_marriage_cleanup = yes
 		}
 	}
 
@@ -642,6 +885,10 @@ je_meiji_main = {
 
 	group = je_group_meiji_restoration
 
+	activation_description = {
+		always = yes
+	}
+
 	scripted_button = je_iwakura_mission_button
 	scripted_button = je_end_edo_system_button
 
@@ -649,69 +896,87 @@ je_meiji_main = {
 		set_variable = { name = meiji_var value = 0 }
 	}
 
-	complete = {
-		OR = {
-			AND = {
-				scope:journal_entry = {
-					is_goal_complete = yes
-				}
-				hidden_trigger = {
-					has_variable = completed_je_meiji_army
-					has_variable = completed_je_meiji_economy
-					OR = {
-						AND = {
-							has_dlc_feature = ep2_content
-							has_variable = iwakura_mission_finished
-						}
-						AND = {
-							NOT = { has_dlc_feature = ep2_content }
-							has_variable = completed_je_meiji_diplomacy
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			OR = {
+				AND = {
+					scope:journal_entry = {
+						is_goal_complete = yes
+					}
+					hidden_trigger = {
+						has_variable = completed_je_meiji_army
+						has_variable = completed_je_meiji_economy
+						OR = {
+							AND = {
+								has_dlc_feature = ep2_content
+								has_variable = iwakura_mission_finished
+							}
+							AND = {
+								NOT = { has_dlc_feature = ep2_content }
+								has_variable = completed_je_meiji_diplomacy
+							}
 						}
 					}
 				}
+				custom_tooltip = {
+					text = meiji_timeout_some_progress
+					always = no
+				}
 			}
+		}
+		effect = {
+			trigger_event = {
+				id = meiji.2
+			}
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
 			custom_tooltip = {
-				text = meiji_timeout_some_progress
+				text = meiji_timeout_no_progress
 				always = no
 			}
 		}
-	}
-
-	on_complete = {
-		trigger_event = {
-			id = meiji.2
-		}
-	}
-
-	on_timeout = {
-		hidden_effect = {
-			if = {
-				limit = {
-					OR = {
-						has_variable = completed_je_meiji_army
-						has_variable = completed_je_meiji_economy
-						has_variable = iwakura_mission_finished
-						has_variable = completed_je_meiji_diplomacy
-					}
-				}
-				trigger_event = { id = meiji.2 }
-			}
-			else = {
+		effect = {
+			show_as_tooltip = {
 				trigger_event = { id = meiji.14 }
 			}
+			je_meiji_main_cleanup = yes
 		}
 	}
 
-	fail = {
-		custom_tooltip = {
-			text = meiji_timeout_no_progress
-			always = no
-		}
-	}
-
-	on_fail = {
-		show_as_tooltip = {
-			trigger_event = { id = meiji.14 }
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			hidden_effect = {
+				if = {
+					limit = {
+						OR = {
+							has_variable = completed_je_meiji_army
+							has_variable = completed_je_meiji_economy
+							has_variable = iwakura_mission_finished
+							has_variable = completed_je_meiji_diplomacy
+						}
+					}
+					trigger_event = { id = meiji.2 }
+				}
+				else = {
+					trigger_event = { id = meiji.14 }
+				}
+			}
+			je_meiji_main_cleanup = yes
 		}
 	}
 
@@ -746,32 +1011,42 @@ je_meiji_economy = {
 
 	group = je_group_meiji_restoration
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_in_lobby = {
 		c:JAP = THIS
 	}
 
 
-	complete = {
-		in_default = no
-		any_scope_state = {
-			filter = {
-				is_incorporated = yes
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			in_default = no
+			any_scope_state = {
+				filter = {
+					is_incorporated = yes
+				}
+				any_scope_building = {
+					is_building_type = building_urban_center
+					level >= 5
+				}
+				has_building = building_railway
+				percent > 0.7
 			}
-			any_scope_building = {
-				is_building_type = building_urban_center
-				level >= 5
+		}
+		effect = {
+			change_variable = {
+				name = meiji_var
+				add = 1
 			}
-			has_building = building_railway
-			percent > 0.7
+			set_variable = completed_je_meiji_economy
+			je_meiji_economy_cleanup = yes
 		}
-	}
-
-	on_complete = {
-		change_variable = {
-			name = meiji_var
-			add = 1
-		}
-		set_variable = completed_je_meiji_economy
 	}
 
 	on_yearly_pulse = {
@@ -794,43 +1069,52 @@ je_meiji_army = {
 
 	group = je_group_meiji_restoration
 
-	complete = {
-		NOT = { has_law_or_variant = law_type:law_serfdom }
-		NOT = { has_law_or_variant = law_type:law_peasant_levies }
-		ig:ig_armed_forces ?= {
-			is_in_government = no
-		}
-		has_technology_researched = napoleonic_warfare
-		NOT = {
-			any_scope_barracks = {
-				OR = {
-					has_active_production_method = pm_no_organization
-					has_active_production_method = pm_samurai_training
-				}
-			}
-		}
-		NOT = {
-			any_military_formation = {
-				filter = {
-					is_army = yes
-				}
-				any_combat_unit = {
-					has_unit_type = unit_type:combat_unit_type_irregular_infantry
-				}
-				percent >= 0.25
-			}
-		}
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		change_variable = {
-			name = meiji_var
-			add = 1
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			NOT = { has_law_or_variant = law_type:law_serfdom }
+			NOT = { has_law_or_variant = law_type:law_peasant_levies }
+			ig:ig_armed_forces ?= {
+				is_in_government = no
+			}
+			has_technology_researched = napoleonic_warfare
+			NOT = {
+				any_scope_barracks = {
+					OR = {
+						has_active_production_method = pm_no_organization
+						has_active_production_method = pm_samurai_training
+					}
+				}
+			}
+			NOT = {
+				any_military_formation = {
+					filter = {
+						is_army = yes
+					}
+					any_combat_unit = {
+						has_unit_type = unit_type:combat_unit_type_irregular_infantry
+					}
+					percent >= 0.25
+				}
+			}
 		}
-		trigger_event = {
-			id = meiji.3
+		effect = {
+			change_variable = {
+				name = meiji_var
+				add = 1
+			}
+			trigger_event = {
+				id = meiji.3
+			}
+			set_variable = completed_je_meiji_army
 		}
-		set_variable = completed_je_meiji_army
 	}
 
 	on_yearly_pulse = {
@@ -853,18 +1137,28 @@ je_meiji_diplomacy = {
 
 	group = je_group_meiji_restoration
 
-	complete = {
-		NOT = { has_law_or_variant = law_type:law_traditionalism }
-		is_subject = no
-		is_country_type = recognized
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		change_variable = {
-			name = meiji_var
-			add = 1
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			NOT = { has_law_or_variant = law_type:law_traditionalism }
+			is_subject = no
+			is_country_type = recognized
 		}
-		set_variable = completed_je_meiji_diplomacy
+		effect = {
+			change_variable = {
+				name = meiji_var
+				add = 1
+			}
+			set_variable = completed_je_meiji_diplomacy
+			je_meiji_diplomacy_cleanup = yes
+		}
 	}
 
 	on_yearly_pulse = {

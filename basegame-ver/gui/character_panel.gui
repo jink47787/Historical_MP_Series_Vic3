@@ -1,4 +1,4 @@
-# COPY-PASTED FOR NOW
+﻿# COPY-PASTED FOR NOW
 @panel_width_minus_10 = 530			# used to be 450
 @panel_width = 540  				# used to be 460
 @panel_width_half = 270				# used to be 230
@@ -12,288 +12,70 @@
 types character_panel_types
 {
 	type character_with_background = widget {
+		name = "character_portrait_hover_area"
+		scissor = yes
+		alwaystransparent = no
 
 		# background
 		widget = {
-			size = { 100% 100% }
-			position = { 0 1 }
+			size = { 112% 100% }
+			parentanchor = bottom|hcenter
+			position = "[CharacterPanelViewer.GetBackgroundOffset]"
+			scale = "[CharacterPanelViewer.GetBackgroundScale]"
 			using = Animation_Character_Panel_Refresh
 
-			# Fallback
-			widget = {
-				visible = "[Not(Or8(Character.IsRulerOfOwnCountry, Character.IsHeirOfOwnCountry, Character.IsPolitician, Character.IsGeneral, Character.IsAdmiral, Character.IsMagnate, Character.IsExecutive, Character.IsAgitator) )]"
-				size = { 100% 100% }
+			background = {
+				texture = "[Character.GetBackgroundTexture]"
+				fittype = centercrop
+				mipmaplodbias = 1.8
+				shaderfile = "gfx/FX/gui_blur.shader"
+				effectname = "GuiBlur"
+			}
 
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_politician.dds"
-					fittype = centercrop
+			vfx = {
+				visible = "[GetScriptedGui('character_is_captain_nemo_sgui').IsValid( GuiScope.SetRoot( Character.MakeScope ).End )]"
+				name = "nautilus_school"
+
+				blockoverride "alpha" {
+					alpha = 1
 				}
 
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_politician_godrays
-					}
+				blockoverride "camera_fov_y_degrees" {
+					camera_fov_y_degrees = 3
 				}
 
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_politician_candles
-					}
+				blockoverride "camera_position" {
+					camera_position = { 0 0 -22.05 }
 				}
 
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler_smoke
-					}
+				blockoverride "camera_near_far" {
+					camera_near_far = { 1 1000 }
+				}
+
+				blockoverride "camera_look_at" {
+					camera_look_at = { 0 -0.2 0 }
+				}
+
+				blockoverride "entity_instance" {
+					entity_instance = vfx_entity_ui_bg_char_admiral_nautilus_fish
 				}
 			}
 
-			# Ruler General
 			widget = {
-				visible = "[And( Character.IsRulerOfOwnCountry, Character.IsGeneral )]"
+				visible = "[GetScriptedGui('character_is_captain_nemo_sgui').IsValid( GuiScope.SetRoot( Character.MakeScope ).End )]"
+				name = "nautilus_glass_frame"
 				size = { 100% 100% }
+				alwaystransparent = yes
 
 				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_rulergeneral.dds"
 					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler_general_glow
-					}
-				}
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler_smoke
-					}
-				}
-			}
-
-			# Agitator
-			widget = {
-				visible = "[Character.IsAgitator]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_agitator.dds"
-					fittype = centercrop
-				}
-			}
-
-			# Executive
-			widget = {
-				visible = "[Character.IsExecutive]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_executive.dds"
-					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "camera_fov_y_degrees" {
-						camera_fov_y_degrees = 25
-					}
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_executive_godrays
-					}
-				}
-			}
-
-			# Politician
-			widget = {
-				visible = "[And(And(And(Or(Or(Character.IsPolitician, Character.IsMagnate), Character.IsHeirOfOwnCountry), Not(Character.IsRulerOfOwnCountry)),Not(Character.IsAgitator)),Not(Character.IsExecutive))]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_politician.dds"
-					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_politician_godrays
-					}
-				}
-
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_politician_candles
-					}
-				}
-
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler_smoke
-					}
-				}
-			}
-
-			# Magnate
-			widget = {
-				visible = "[And8(Character.IsMagnate, Not(Character.IsPolitician), Not(Character.IsHeirOfOwnCountry), Not(Character.IsRulerOfOwnCountry), Not(Character.IsAgitator),Not(Character.IsExecutive), Not(Character.IsGeneral), Not(Character.IsAdmiral))]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_magnate.dds"
-					fittype = centercrop
-				}
-			}
-
-			# Ruler
-			widget = {
-				visible = "[And(Character.IsRulerOfOwnCountry, Not(Character.IsGeneral))]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_ruler.dds"
-					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler
-					}
-				}
-
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler_smoke
-					}
-				}
-			}
-
-			# Ruler Heir
-			widget = {
-				visible = "[And(Character.IsRulerOfOwnCountry, Character.IsHeirOfOwnCountry)]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_ruler.dds"
-					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler
-					}
-				}
-
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler_smoke
-					}
-				}
-			}
-
-			# General
-			widget = {
-				visible = "[And(And(And(Character.IsGeneral, And(Not(Character.IsRulerOfOwnCountry), Not(Character.IsHeirOfOwnCountry))), Not(Character.IsAgitator)), Not(Character.IsExecutive))]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_general.dds"
-					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_general_glow
-					}
-				}
-			}
-
-			# Admiral
-			widget = {
-				visible = "[And(And(Character.IsAdmiral,Not(Character.IsAgitator)), Not(Character.IsExecutive))]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_admiral.dds"
-					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_admiral_glow
-					}
-				}
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_admiral_waves
-					}
-				}
-
-				# VFX birds
-				vfx = {
-					blockoverride "camera_position" {
-						camera_position = { 0 0 15 }
-					}
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_admiral_seagulls
-					}
-				}
-			}
-
-			# Japanese Emperor - Pre-Meiji
-			widget = {
-				visible = "[GetScriptedGui('je_meiji_restoration_japanese_emperor_check_sgui').IsValid( GuiScope.SetRoot( Character.MakeScope ).AddScope( 'meiji_reform_state', MakeScopeBool( '(bool)no') ).End )]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_ruler_japan_pre_meiji.dds"
-					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler
-					}
-				}
-
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler_smoke
-					}
-				}
-			}
-
-			# Japanese Emperor - Post-Meiji
-			widget = {
-				visible = "[GetScriptedGui('je_meiji_restoration_japanese_emperor_check_sgui').IsValid( GuiScope.SetRoot( Character.MakeScope ).AddScope( 'meiji_reform_state', MakeScopeBool( '(bool)yes') ).End )]"
-				size = { 100% 100% }
-
-				background = {
-					texture = "gfx/interface/character_panel/backgrounds/char_role_ruler_japan_post_meiji.dds"
-					fittype = centercrop
-				}
-
-				# VFX
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler
-					}
-				}
-
-				vfx = {
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_char_ruler_smoke
-					}
+					texture = "gfx/interface/character_panel/backgrounds/char_role_admiral_nemo_frame_overlay.dds"
 				}
 			}
 		}
 
 		# Fallback
+
 		character_portrait_base_no_mask = {
 			visible = "[Not(Or8(Character.IsRulerOfOwnCountry, Character.IsHeirOfOwnCountry, Character.IsPolitician, Character.IsGeneral, Character.IsAdmiral, Character.IsMagnate, Character.IsExecutive, Character.IsAgitator) )]"
 			ignore_in_debug_draw = yes
@@ -311,7 +93,7 @@ types character_panel_types
 			}
 
 			blockoverride "portrait_texture" {
-				portrait_texture = "[Character.GetAnimatedPortrait('politician_environment', 'camera_leader', 'idle', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+				portrait_texture = "[CharacterPanelViewer.GetPortraitTexture( Character.Self, 'politician_environment', GetPortraitRenderSize(PdxGuiWidget.Self) )]"
 			}
 
 			blockoverride "portrait_icons" {}
@@ -321,7 +103,7 @@ types character_panel_types
 
 		# character
 		character_portrait_base_no_mask = {
-			visible = "[Character.IsAgitator]"
+			visible = "[And(Character.IsAgitator, Not(Or(Or6(Character.IsRulerOfOwnCountry, Character.IsGeneral, Character.IsAdmiral, Character.IsMagnate, Character.IsPolitician, Character.IsHeirOfOwnCountry), Character.IsExecutive)))]"
 			ignore_in_debug_draw = yes
 			parentanchor = bottom
 
@@ -337,7 +119,7 @@ types character_panel_types
 			}
 
 			blockoverride "portrait_texture" {
-				portrait_texture = "[Character.GetAnimatedPortrait('agitator_main_environment', 'camera_leader', 'idle', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+				portrait_texture = "[CharacterPanelViewer.GetPortraitTexture( Character.Self, 'agitator_main_environment', GetPortraitRenderSize(PdxGuiWidget.Self) )]"
 			}
 
 			blockoverride "portrait_icons" {}
@@ -347,7 +129,7 @@ types character_panel_types
 
 		# character
 		character_portrait_base_no_mask = {
-			visible = "[Character.IsExecutive]"
+			visible = "[And(Character.IsExecutive, Not(Or6(Character.IsRulerOfOwnCountry, Character.IsGeneral, Character.IsAdmiral, Character.IsMagnate, Character.IsPolitician, Character.IsHeirOfOwnCountry)))]"
 			ignore_in_debug_draw = yes
 			parentanchor = bottom
 
@@ -363,7 +145,7 @@ types character_panel_types
 			}
 
 			blockoverride "portrait_texture" {
-				portrait_texture = "[Character.GetAnimatedPortrait('agitator_main_environment_ceo', 'camera_leader', 'idle', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+				portrait_texture = "[CharacterPanelViewer.GetPortraitTexture( Character.Self, 'agitator_main_environment_ceo', GetPortraitRenderSize(PdxGuiWidget.Self) )]"
 			}
 
 			blockoverride "portrait_icons" {}
@@ -372,7 +154,7 @@ types character_panel_types
 		}
 
 		character_portrait_base_no_mask = {
-			visible = "[Or(Or(Character.IsMagnate, Character.IsPolitician), Character.IsHeirOfOwnCountry)]"
+			visible = "[And(Or(Or(Character.IsMagnate, Character.IsPolitician), Character.IsHeirOfOwnCountry), Not(Or(Or(Character.IsRulerOfOwnCountry, Character.IsGeneral), Character.IsAdmiral)))]"
 			ignore_in_debug_draw = yes
 			parentanchor = bottom
 
@@ -388,7 +170,37 @@ types character_panel_types
 			}
 
 			blockoverride "portrait_texture" {
-				portrait_texture = "[Character.GetAnimatedPortrait('politician_environment', 'camera_leader', 'idle', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+				portrait_texture = "[CharacterPanelViewer.GetParentBehindTexture( Character.Self, 'politician_environment', GetPortraitRenderSize(PdxGuiWidget.Self) )]"
+			}
+
+			blockoverride "portrait_onhover_highlight" {
+				shaderfile = "gfx/FX/jomini/gui_portrait.shader"
+				effectname = "NoHighlightBlur"
+			}
+
+			blockoverride "portrait_icons" {}
+			blockoverride "tooltip" {}
+			blockoverride "show_hat" {}
+		}
+
+		character_portrait_base_no_mask = {
+			visible = "[And(Or(Or(Character.IsMagnate, Character.IsPolitician), Character.IsHeirOfOwnCountry), Not(Or(Or(Character.IsRulerOfOwnCountry, Character.IsGeneral), Character.IsAdmiral)))]"
+			ignore_in_debug_draw = yes
+			parentanchor = bottom
+
+			block "character_layout" {
+				position = { 50 10 }
+				size = { 250 400 }
+			}
+
+			blockoverride "portrait_size" {
+				block "character_portrait_size" {
+					size = { 575 575 }
+				}
+			}
+
+			blockoverride "portrait_texture" {
+				portrait_texture = "[CharacterPanelViewer.GetPortraitTexture( Character.Self, 'politician_environment', GetPortraitRenderSize(PdxGuiWidget.Self) )]"
 			}
 
 			blockoverride "portrait_icons" {}
@@ -413,7 +225,7 @@ types character_panel_types
 			}
 
 			blockoverride "portrait_texture" {
-				portrait_texture = "[Character.GetAnimatedPortrait('ruler_environment', 'camera_leader', 'idle', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+				portrait_texture = "[CharacterPanelViewer.GetPortraitTexture( Character.Self, 'ruler_environment', GetPortraitRenderSize(PdxGuiWidget.Self) )]"
 			}
 
 			blockoverride "portrait_icons" {}
@@ -422,7 +234,7 @@ types character_panel_types
 		}
 
 		character_portrait_base_no_mask = {
-			visible = "[Character.IsAdmiral]"
+			visible = "[And(Character.IsAdmiral, Not(Or(Character.IsRulerOfOwnCountry, Character.IsGeneral)))]"
 			ignore_in_debug_draw = yes
 			parentanchor = bottom
 
@@ -438,7 +250,7 @@ types character_panel_types
 			}
 
 			blockoverride "portrait_texture" {
-				portrait_texture = "[Character.GetAnimatedPortrait('admiral_environment', 'camera_leader', 'idle', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+				portrait_texture = "[CharacterPanelViewer.GetPortraitTexture( Character.Self, 'admiral_environment', GetPortraitRenderSize(PdxGuiWidget.Self) )]"
 			}
 
 			blockoverride "portrait_icons" {}
@@ -447,7 +259,7 @@ types character_panel_types
 		}
 
 		character_portrait_base_no_mask = {
-			visible = "[And(Character.IsRulerOfOwnCountry, Character.IsGeneral)]"
+			visible = "[And(Character.IsGeneral, Not(Character.IsRulerOfOwnCountry))]"
 			ignore_in_debug_draw = yes
 			parentanchor = bottom
 
@@ -463,61 +275,19 @@ types character_panel_types
 			}
 
 			blockoverride "portrait_texture" {
-				portrait_texture = "[Character.GetAnimatedPortrait('general_environment', 'camera_leader', 'idle', GetPortraitRenderSize(PdxGuiWidget.Self))]"
+				portrait_texture = "[CharacterPanelViewer.GetPortraitTexture( Character.Self, 'general_environment', GetPortraitRenderSize(PdxGuiWidget.Self) )]"
 			}
 
 			blockoverride "portrait_icons" {}
 			blockoverride "tooltip" {}
 			blockoverride "show_hat" {}
 		}
-
-		character_portrait_base_no_mask = {
-			visible = "[And(Character.IsGeneral,And(Not(Character.IsRulerOfOwnCountry),Not(Character.IsHeirOfOwnCountry)))]"
-			ignore_in_debug_draw = yes
-			parentanchor = bottom
-
-			block "character_layout" {
-				position = { 50 10 }
-				size = { 250 400 }
-			}
-
-			blockoverride "portrait_size" {
-				block "character_portrait_size" {
-					size = { 575 575 }
-				}
-			}
-
-			blockoverride "portrait_texture" {
-				portrait_texture = "[Character.GetAnimatedPortrait('general_environment_02', 'camera_leader', 'idle', GetPortraitRenderSize(PdxGuiWidget.Self))]"
-			}
-
-			blockoverride "portrait_icons" {}
-			blockoverride "tooltip" {}
-			blockoverride "show_hat" {}
-		}
-
-		# Executive VFX
-			widget = {
-				size = { 100% 100% }
-				visible = "[Character.IsExecutive]"
-
-
-				# VFX
-				vfx = {
-					blockoverride "camera_fov_y_degrees" {
-						camera_fov_y_degrees = 25
-					}
-					blockoverride "entity_instance" {
-						entity_instance = vfx_entity_ui_bg_executive_dust
-					}
-				}
-			}
 
 		icon = {
 			using = dark_area
 			parentanchor = bottom|hcenter
 			size = { 100% 40% }
-			alpha = 0.65
+			alpha = 0.25
 			position = { 0 2 }
 
 			modify_texture = {
@@ -550,18 +320,33 @@ types character_panel_types
 		character_interactions_button = {
 			name = "tutorial_highlight_character_panel_interactions_button_1"
 		}
+	}
 
+	type heir_and_favorite_character_portraits = flowcontainer {
 		# Heir Portrait
 		widget = {
 			visible = "[And(Character.IsRulerOfOwnCountry, And(Not(Character.IsHeirOfOwnCountry), Country.AccessHeir.IsValid))]"
 			datacontext = "[Character.AccessInterestGroup.AccessCountry]"
-			parentanchor = bottom
 			size = { 110 110 }
-			position = { 10 -10 }
 
 			character_portrait_large = {
 				size = { 100% 100% }
 				datacontext = "[Country.AccessHeir]"
+
+				blockoverride "show_hat" {}
+				blockoverride "highlight" {}
+			}
+		}
+
+		# Favorite Portrait
+		widget = {
+			visible = "[And(Character.IsRulerOfOwnCountry, Character.GetCountry.HasFavorite)]"
+			datacontext = "[Character.AccessInterestGroup.AccessCountry]"
+			size = { 110 110 }
+
+			character_portrait_large = {
+				size = { 100% 100% }
+				datacontext = "[Country.GetHighestProminenceCharacterOfRole('character_role_favorite')]"
 
 				blockoverride "show_hat" {}
 				blockoverride "highlight" {}
@@ -738,6 +523,7 @@ types character_panel_types
 					### TODO: fix the backgrounds to fit the set container size (currently 540 x 600)
 
 					character_with_background = {
+						datacontext = "[CharacterPanel.GetPortraitViewer]"
 						size = { @panel_width_plus_14 540 }
 					}
 
@@ -1123,31 +909,40 @@ types character_panel_types
 						name = "tutorial_highlight_character_panel_interactions_button_2"
 					}
 
-					widget = {
-						size = { @panel_width_plus_14 50 }
-						parentanchor = hcenter|bottom
+					flowcontainer = {
+						direction = vertical
+						parentanchor = bottom
+						position = { 10 -10 }
 
 						### TIMED MODIFIERS
 						flowcontainer = {
-							parentanchor = right
+							visible = "[Not(IsDataModelEmpty(Character.GetTimedModifiers))]"
+							maximumsize = { 300 -1 }
+							spacing = 5
 							margin_top = 10
 							margin_right = 14
 							margin_left = 14
 							margin_bottom = 10
+							wrap_count = 7
 							datamodel = "[Character.GetTimedModifiers]"
-							spacing = 5
-							visible = "[Not(IsDataModelEmpty(Character.GetTimedModifiers))]"
-							maximumsize = { @panel_width_minus_10 45 }
-							datamodel_wrap = 2
+
+							background = {
+								using = fade_center_colored_black
+								alpha = 0.5
+								margin = { 5 5 }
+							}
 
 							item = {
 								icon = {
+									size = { 30 30 }
+									using = tooltip_se
 									tooltip = "[TimedModifier.GetTooltip]"
 									texture = "[TimedModifier.GetIcon]"
-									size = { 30 30 }
 								}
 							}
 						}
+
+						heir_and_favorite_character_portraits = {}
 					}
 				}
 

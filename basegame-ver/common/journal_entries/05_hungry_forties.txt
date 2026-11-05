@@ -1,18 +1,38 @@
 ﻿je_the_hungry_forties = {
+	group = je_group_global_international_situations
 
-	group = je_group_crises
+	activation_description = {
+		always = yes
+	}
+
 	icon = "gfx/interface/icons/event_icons/event_skull.dds"
-
 		
-	should_be_pinned_by_default_uninvolved_or_context = yes
+	should_be_pinned_by_default_uninvolved_or_context = no
+	should_be_pinned_by_default_involved = yes
 	weight = 10000
 
-	is_shown_when_inactive = {
+	should_be_involved = {
 		is_in_geographic_region = geographic_region_europe
+	}
+
+	should_show_when_not_involved = {
+		is_in_geographic_region = geographic_region_europe
+	}
+
+	modifiers_while_active = {
+		modifier_european_potato_famine
+	}
+
+	is_shown_when_inactive = {
+		NOT = { has_global_variable = hungry_forties_happened }
 		game_date <= 1860.1.1
 	}
 
-	immediate = {
+	immediate_all_involved = {
+		trigger_event = { id = hungry_forties.1 popup = yes }
+	}
+
+	on_become_involved_after_activation = {
 		trigger_event = { id = hungry_forties.1 popup = yes }
 	}
 
@@ -23,17 +43,139 @@
 		}
 	}
 
-	timeout = 1095
-
-	on_timeout = {
-		trigger_event = { id = hungry_forties.2 popup = yes }
-		remove_global_variable = hungry_forties_var
+	map_color = {
+		if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				has_potential_resource = building_rye_farm
+			}
+			value = "rye_color"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				has_potential_resource = building_wheat_farm
+			}
+			value = "wheat_color"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				has_potential_resource = building_maize_farm
+			}
+			value = "maize_color"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				has_potential_resource = building_rice_farm
+			}
+			value = "rice_color"
+		}
 	}
 
-	event_outcome_timeout_desc = {
-		first_valid = {
-			triggered_desc = {
-				desc = event_effects_hungry_forties.2_tt
+	map_color_second = {
+		if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				state_region = {
+					has_harvest_condition = disease_outbreak
+				}
+			}
+			lerp = {
+                min_color = "rye_color" # color
+                max_color = "disease_outbreak_brown" # color
+                factor = disease_outbreak_level # value between 0.0 and 1.0
+            }
+		}
+	}
+
+	map_tooltip = {
+		if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				has_potential_resource = building_rye_farm
+			}
+			custom_tooltip_no_bullet = "hungry_forties_rye_tt"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				has_potential_resource = building_wheat_farm
+			}
+			custom_tooltip_no_bullet = "hungry_forties_wheat_tt"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				has_potential_resource = building_maize_farm
+			}
+			custom_tooltip_no_bullet = "hungry_forties_maize_tt"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				has_potential_resource = building_rice_farm
+			}
+			custom_tooltip_no_bullet = "hungry_forties_rice_tt"
+		}
+		else_if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+			}
+			custom_tooltip_no_bullet = "hungry_forties_livestock_tt"
+		}
+		if = {
+			limit = {
+				is_in_geographic_region = geographic_region_europe
+				state_region = {
+					has_harvest_condition = disease_outbreak
+				}
+			}
+			custom_tooltip_no_bullet = "hungry_forties_disease_outbreak_tt"
+		}
+		if = {
+			limit = {
+				owner = {
+					is_in_geographic_region = geographic_region_europe
+					has_modifier = modifier_european_potato_famine_relief
+				}
+			}
+			save_scope_as = relevant_state
+			owner ?= {
+				custom_tooltip_no_bullet = "hungry_forties_relief_tt"
+			}
+		}
+	}
+
+	timeout = 1095
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			remove_global_variable = hungry_forties_var
+			set_global_variable = hungry_forties_happened
+			je_the_hungry_forties_cleanup = yes
+		}
+		effect_all_involved = {
+			show_as_tooltip = {
+				if = {
+					limit = {
+						has_modifier = modifier_european_potato_famine_relief
+					}
+					remove_modifier = modifier_european_potato_famine_relief
+				}
+			}
+			trigger_event = { id = hungry_forties.2 popup = yes }
+		}
+		event_outcome_desc = {
+			first_valid = {
+				triggered_desc = {
+					desc = event_effects_hungry_forties.2_tt
+				}
 			}
 		}
 	}

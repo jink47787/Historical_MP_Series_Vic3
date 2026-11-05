@@ -9,34 +9,36 @@
 		has_technology_researched = nationalism
 		NOR = {
 			owns_entire_state_region = STATE_OUTER_MANCHURIA
-			has_global_variable = rus_bought_outer_manchuria
+			has_variable = rus_bought_outer_manchuria
 		}
-		AND = {
-			any_scope_state = {
-				state_region = s:STATE_TRANS_BAIKAL
-			}
-			any_scope_state = {
-				state_region = s:STATE_OKHOTSK
+		any_neighbouring_state = {
+			OR = {
+				state_region = s:STATE_OUTER_MANCHURIA
+				state_region = s:STATE_AMUR
 			}
 		}
-		s:STATE_OUTER_MANCHURIA = {
+		any_country_in_qing_empire = {
+			OR = {
+				country_has_primary_culture = cu:manchu
+				country_has_primary_culture = cu:han
+			}
 			any_scope_state = {
-				is_split_state = no
+				state_region = s:STATE_OUTER_MANCHURIA
 				is_capital = no
-				owner = {
-					is_player = no
-					is_country_type = unrecognized
-					OR = {
-						country_has_primary_culture = cu:manchu
-						country_has_primary_culture = cu:han
-					}
-				}
 			}
+			is_country_type = unrecognized
+			is_player = no
 		}
 	}
 
 	ai_chance = {
 		value = 10
+		if = {
+			limit = {
+				has_journal_entry = je_tp_tsar_gendarme_of_europe
+			}
+			add = 90
+		}
 	}
 
 	possible = {
@@ -46,65 +48,23 @@
 		any_neighbouring_state = {
 			state_region = s:STATE_OUTER_MANCHURIA
 		}
-		any_country = {
-			OR = {
-				country_has_primary_culture = cu:manchu
-				country_has_primary_culture = cu:han
+		any_country_in_qing_empire = {
+			any_scope_state = {
+				state_region = s:STATE_OUTER_MANCHURIA
+				is_capital = no
 			}
-			OR = {
-				trigger_if = {
-					limit = {
-						has_journal_entry = je_warlord_china
-					}
-					custom_tooltip = {
-						text = china_explosion_point_2_tt
-						var:china_warlord_explosion <= 3
-					}
-				}
-				country_rank < rank_value:unrecognized_major_power
-			}
-			OR = {
-				is_subject = no
-				is_subject_of = ROOT
-			}
-			trigger_if = {
-				limit = {
-					country_rank >= rank_value:unrecognized_major_power
-				}
-				OR = {
-					custom_tooltip = {
-						text = war_with_china_not_russia_tt
-						any_enemy_in_war = {
-							NOT = {
-								c:RUS ?= this
-							}
-						}
-					}
-					custom_tooltip = {
-						text = owes_russia_obligation_tt
-						c:RUS ?= {
-							is_owed_obligation_by = PREV
-						}
-					}
-				}
-			}
+			country_is_valid_qing_treaty_partner = yes
 		}
 	}
 
 	effect = {
-		random_country = {
+		random_country_in_qing_empire = {
 			limit = {
-				OR = {
-					country_has_primary_culture = cu:manchu
-					country_has_primary_culture = cu:han
-				}
 				any_scope_state = {
 					state_region = s:STATE_OUTER_MANCHURIA
-					is_split_state = no
 					is_capital = no
 				}
-				is_country_type = unrecognized
-				is_player = no
+				country_is_valid_qing_treaty_partner = yes
 			}
 			save_scope_as = donor_scope
 		}
@@ -125,15 +85,20 @@
 			custom_tooltip = transfer_of_outer_manchuria_tt
 		}
 		else = {
-			c:RUS ?= {
-				create_incident = {
-					country = scope:donor_scope
-					value = 10
+			if = {
+				limit = {
+					exists = scope:donor_scope
+				}
+				c:RUS ?= {
+					create_incident = {
+						country = scope:donor_scope
+						value = 10
+					}
 				}
 			}
 			custom_tooltip = transfer_of_outer_manchuria_tt
 		}
-		set_global_variable = rus_bought_outer_manchuria
+		set_variable = rus_bought_outer_manchuria
 		trigger_event = { id = russo_chinese.1 popup = yes }
 	}
 }
@@ -143,118 +108,72 @@ je_the_eastern_border_russia_chuguchak_protocol = {
 	desc = "je_the_eastern_border_russia_chuguchak_protocol_desc"
 
 	visible = {
-		exists = c:RUS
-		c:RUS = ROOT
+		c:RUS ?= ROOT
 		is_subject = no
 		has_technology_researched = nationalism
 		NOT = {
-			owns_entire_state_region = STATE_ALTAI
-			owns_entire_state_region = STATE_JETISY
-			owns_entire_state_region = STATE_KIRGHIZIA
+			has_variable = rus_chuguchak_protocol
 		}
-		NOT = {
-			has_global_variable = rus_chuguchak_protocol
+		NAND = {
+			country_or_subject_owns_entire_state_region = STATE_ALTAI
+			country_or_subject_owns_entire_state_region = STATE_JETISY
+			country_or_subject_owns_entire_state_region = STATE_KIRGHIZIA
 		}
 		OR = {
-			AND = {
-				owns_entire_state_region = STATE_SEMIRECHE
-				owns_entire_state_region = STATE_AKMOLINSK
-			}
-			any_subject_or_below = {
-				owns_entire_state_region = STATE_SEMIRECHE
-				owns_entire_state_region = STATE_AKMOLINSK
-			}
+			country_or_subject_owns_entire_state_region = STATE_SEMIRECHE
+			country_or_subject_owns_entire_state_region = STATE_AKMOLINSK
 		}
+		any_country_in_qing_empire = {
 			OR = {
-			s:STATE_ALTAI = {
-				any_scope_state = {
-					is_capital = no
-					owner = {
-						is_player = no
-						is_country_type = unrecognized
-						OR = {
 				country_has_primary_culture = cu:manchu
 				country_has_primary_culture = cu:han
 			}
-				}
-				}
-			}
-			s:STATE_JETISY = {
+			OR = {
 				any_scope_state = {
+					state_region = s:STATE_ALTAI
 					is_capital = no
-					owner = {
-						is_player = no
-						is_country_type = unrecognized
-						OR = {
-							country_has_primary_culture = cu:manchu
-							country_has_primary_culture = cu:han
 				}
-					}
-				}
-			}
-			s:STATE_KIRGHIZIA = {
 				any_scope_state = {
+					state_region = s:STATE_JETISY
 					is_capital = no
-					owner = {
-						is_player = no
-						is_country_type = unrecognized
-						OR = {
-							country_has_primary_culture = cu:manchu
-							country_has_primary_culture = cu:han
+				}
+				any_scope_state = {
+					state_region = s:STATE_KIRGHIZIA
+					is_capital = no
 				}
 			}
-		}
-	}
+			is_country_type = unrecognized
+			is_player = no
 		}
 	}
 
 	ai_chance = {
 		value = 10
+		if = {
+			limit = {
+				has_journal_entry = je_tp_tsar_gendarme_of_europe
+			}
+			add = 90
+		}
 	}
 
 	possible = {
-		any_country = {
+		any_country_in_qing_empire = {
 			OR = {
-				country_has_primary_culture = cu:manchu
-				country_has_primary_culture = cu:han
-			}
-			OR = {
-				trigger_if = {
-					limit = {
-						has_journal_entry = je_warlord_china
-					}
-					custom_tooltip = {
-						text = china_explosion_point_2_tt
-						var:china_warlord_explosion <= 3
-					}
+				any_scope_state = {
+					state_region = s:STATE_ALTAI
+					is_capital = no
 				}
-				country_rank < rank_value:unrecognized_major_power
-			}
-			OR = {
-				is_subject = no
-				is_subject_of = ROOT
-			}
-			trigger_if = {
-				limit = {
-					country_rank >= rank_value:unrecognized_major_power
+				any_scope_state = {
+					state_region = s:STATE_JETISY
+					is_capital = no
 				}
-				OR = {
-					custom_tooltip = {
-						text = war_with_china_not_russia_tt
-						any_enemy_in_war = {
-							NOT = {
-								c:RUS ?= this
-							}
-						}
-					}
-					custom_tooltip = {
-						text = owes_russia_obligation_tt
-						c:RUS ?= {
-							is_owed_obligation_by = PREV
-						}
-					}
+				any_scope_state = {
+					state_region = s:STATE_KIRGHIZIA
+					is_capital = no
 				}
 			}
+			country_is_valid_qing_treaty_partner = yes
 		}
 		custom_tooltip = {
 			text = russia_chuguchak_protocol_req_tt
@@ -274,12 +193,8 @@ je_the_eastern_border_russia_chuguchak_protocol = {
 	}
 
 	effect = {
-		random_country = {
+		random_country_in_qing_empire = {
 			limit = {
-				OR = {
-					country_has_primary_culture = cu:manchu
-					country_has_primary_culture = cu:han
-				}
 				OR = {
 					any_scope_state = {
 						state_region = s:STATE_ALTAI
@@ -294,8 +209,7 @@ je_the_eastern_border_russia_chuguchak_protocol = {
 						is_capital = no
 					}
 				}
-				is_country_type = unrecognized
-				is_player = no
+				country_is_valid_qing_treaty_partner = yes
 			}
 			save_scope_as = donor_scope
 		}
@@ -316,15 +230,20 @@ je_the_eastern_border_russia_chuguchak_protocol = {
 			custom_tooltip = transfer_of_central_asia_tt
 		}
 		else = {
-			c:RUS ?= {
-				create_incident = {
-					country = scope:donor_scope
-					value = 15
+			if = {
+				limit = {
+					exists = scope:donor_scope
+				}
+				c:RUS ?= {
+					create_incident = {
+						country = scope:donor_scope
+						value = 15
+					}
 				}
 			}
 			custom_tooltip = transfer_of_central_asia_tt
 		}
-		set_global_variable = rus_chuguchak_protocol
+		set_variable = rus_chuguchak_protocol
 		trigger_event = { id = russo_chinese.2 popup = yes }
 	}
 }
@@ -337,71 +256,48 @@ je_the_eastern_border_treaty_of_aigun = {
 		has_technology_researched = nationalism
 		NOR = {
 			owns_entire_state_region = STATE_AMUR
-			has_global_variable = rus_bought_amur
+			has_variable = rus_bought_amur
 		}
-		AND = {
-			any_scope_state = {
-				state_region = s:STATE_TRANS_BAIKAL
-			}
-			any_scope_state = {
-				state_region = s:STATE_OKHOTSK
-			}
+		any_neighbouring_state = {
+			state_region = s:STATE_AMUR
 		}
-		s:STATE_AMUR = {
-			any_scope_state = {
-				is_split_state = no
-				is_capital = no
-				owner = {
-					is_player = no
-					is_country_type = unrecognized
+		any_country_in_qing_empire = {
 			OR = {
 				country_has_primary_culture = cu:manchu
 				country_has_primary_culture = cu:han
 			}
+			any_scope_state = {
+				state_region = s:STATE_AMUR
+				is_capital = no
 			}
+			is_country_type = unrecognized
+			is_player = no
 		}
-	}
 	}
 
 	ai_chance = {
 		value = 10
+		if = {
+			limit = {
+				has_journal_entry = je_tp_tsar_gendarme_of_europe
+			}
+			add = 90
+		}
 	}
 
 	possible = {
 		sr:region_siberia = {
 			save_temporary_scope_as = east_siberia_region
 		}
-		any_country = {
-			OR = {
-				is_subject = no
-				is_subject_of = ROOT
+		any_neighbouring_state = {
+			state_region = s:STATE_AMUR
+		}
+		any_country_in_qing_empire = {
+			any_scope_state = {
+				state_region = s:STATE_AMUR
+				is_capital = no
 			}
-			OR = {
-				custom_tooltip = {
-					text = war_with_china_not_russia_tt
-					any_enemy_in_war = {
-						NOT = {
-							c:RUS ?= this
-						}
-					}
-				}
-				custom_tooltip = {
-					text = owes_russia_obligation_tt
-					c:RUS ?= {
-						is_owed_obligation_by = PREV
-					}
-				}
-				trigger_if = {
-					limit = {
-						has_journal_entry = je_warlord_china
-					}
-					custom_tooltip = {
-						text = china_explosion_point_2_tt
-						var:china_warlord_explosion <= 3
-					}
-				}
-				country_rank < rank_value:unrecognized_major_power
-			}
+			country_is_valid_qing_treaty_partner = yes
 		}
 		c:RUS ?= {
 			country_rank >= rank_value:great_power
@@ -422,19 +318,13 @@ je_the_eastern_border_treaty_of_aigun = {
 	}
 
 	effect = {
-		random_country = {
+		random_country_in_qing_empire = {
 			limit = {
-				OR = {
-					country_has_primary_culture = cu:manchu
-					country_has_primary_culture = cu:han
-				}
 				any_scope_state = {
 					state_region = s:STATE_AMUR
-					is_split_state = no
 					is_capital = no
 				}
-				is_country_type = unrecognized
-				is_player = no
+				country_is_valid_qing_treaty_partner = yes
 			}
 			save_scope_as = donor_scope
 		}
@@ -455,15 +345,20 @@ je_the_eastern_border_treaty_of_aigun = {
 			custom_tooltip = transfer_of_amur_tt
 		}
 		else = {
-			c:RUS ?= {
-				create_incident = {
-					country = scope:donor_scope
-					value = 10
+			if = {
+				limit = {
+					exists = scope:donor_scope
+				}
+				c:RUS ?= {
+					create_incident = {
+						country = scope:donor_scope
+						value = 10
+					}
 				}
 			}
 			custom_tooltip = transfer_of_amur_tt
 		}
-		set_global_variable = rus_bought_amur
+		set_variable = rus_bought_amur
 		trigger_event = { id = russo_chinese.4 popup = yes }
 	}
 }
@@ -473,10 +368,11 @@ imamate_dispatch_muhammad_amin = {
 	name = "imamate_dispatch_muhammad_amin"
 	desc = "imamate_dispatch_muhammad_amin_desc"
 	visible = {
+		c:CHC ?= this
 		exists = c:CIR
 		is_subject = no
 		c:CIR ?= {
-			has_journal_entry = je_caucasian_war_circassia
+			is_involved_in_journal_entry = je_caucasian_war
 		}
 		NOT = {
 			has_variable = sent_muhammad_amin_var
@@ -486,7 +382,7 @@ imamate_dispatch_muhammad_amin = {
 	possible = {
 		is_subject = no
 		c:CIR ?= {
-			has_journal_entry = je_caucasian_war_circassia
+			is_involved_in_journal_entry = je_caucasian_war
 		}
 		custom_tooltip = {
 			text = muhammad_amin_possible
@@ -517,7 +413,9 @@ imamate_dispatch_muhammad_amin = {
 		value = 15
 		if = {
 			limit = {
-				c:CIR.relations:root < relations_threshold:neutral
+				scope:imamate_scope ?= {
+					c:CIR.relations:this < relations_threshold:neutral
+				}
 			}
 			add = -30
 		}
@@ -528,6 +426,7 @@ russia_escalate_caucasian_war = {
 	name = "russia_escalate_caucasian_war"
 	desc = "russia_escalate_caucasian_war_desc"
 	visible = {
+		c:RUS ?= this
 		is_subject = no
 		NOT = {
 			owns_entire_state_region = STATE_KUBAN
@@ -555,23 +454,23 @@ russia_escalate_caucasian_war = {
 				has_truce_with = c:CIR
 			}
 		}
-        NOT = {
-        	has_variable = escalated_caucasian_war
-        }
+		NOT = {
+			has_variable = escalated_caucasian_war
+		}
 	}
 
 	possible = {
 		c:RUS ?= {
 			country_rank >= rank_value:great_power
 		}
-			OR = {
+		OR = {
 			s:STATE_KUBAN = {
 				any_scope_state = {
 					OR = {
 						AND = {
 							exists = c:CIR
 							owner = c:CIR
-			}
+						}
 						AND = {
 							exists = c:CHC
 							owner = c:CHC
@@ -581,16 +480,16 @@ russia_escalate_caucasian_war = {
 			}
 			s:STATE_DAGESTAN = {
 				any_scope_state = {
-			OR = {
+					OR = {
 						AND = {
 							exists = c:CIR
-				owner = c:CIR
+							owner = c:CIR
 						}
 						AND = {
 							exists = c:CHC
-				owner = c:CHC
-			}
-		}
+							owner = c:CHC
+						}
+					}
 				}
 			}
 			s:STATE_NORTH_CAUCASUS = {

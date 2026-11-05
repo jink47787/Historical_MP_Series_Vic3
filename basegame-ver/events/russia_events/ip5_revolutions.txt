@@ -1,0 +1,306 @@
+﻿namespace = ip5_revolutions
+
+ip5_revolutions.1 = {
+	type = country_event
+	placement = root
+
+	title = ip5_revolutions.1.t
+	desc = ip5_revolutions.1.d
+	flavor = ip5_revolutions.1.f
+
+	event_image = {
+		video = "europenorthamerica_springtime_of_nations"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/invention_icons/anarchy.dds"
+
+	duration = 3
+
+	dlc = dlc019
+
+	immediate = {
+		ruler = {
+			save_scope_as = deposed_tsar
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		heir ?= {
+			save_scope_as = deposed_heir
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		if = {
+			limit = {
+				country_has_monarchy_law = yes
+			}
+			scope:deposed_tsar = {
+				set_variable = void_tsar
+			}
+		}
+		random_scope_character = {
+			limit = {
+				has_variable = true_russian_revolution_leader
+			}
+			save_scope_as = true_russian_revolutionary
+		}
+		cancel_enactment = yes
+		if = {
+			limit = {
+				OR = {
+					var:provisional_government_identity ?= flag:liberal
+					var:provisional_government_identity ?= flag:socialist
+				}
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_law = law_type:law_presidential_republic
+					}
+				}
+				enact_law = law_type:law_presidential_republic
+				update_party_support = yes
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_law = law_type:law_universal_suffrage
+					}
+				}
+				enact_law = law_type:law_universal_suffrage
+			}
+		}
+		else_if = {
+			limit = {
+				var:provisional_government_identity ?= flag:conservative
+				NOT = { has_variable = provisional_government_is_monarchist }
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_law = law_type:law_presidential_republic
+					}
+				}
+				enact_law = law_type:law_presidential_republic
+				update_party_support = yes
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_law = law_type:law_universal_suffrage
+					}
+				}
+				enact_law = law_type:law_oligarchy
+			}
+		}
+		else_if = {
+			limit = {
+				var:provisional_government_identity ?= flag:conservative
+				has_variable = provisional_government_is_monarchist
+			}
+			if = {
+				limit = {
+					NOT = {
+						has_law = law_type:law_monarchy
+					}
+				}
+				enact_law = law_type:law_monarchy
+				update_party_support = yes
+			}
+			scope:deposed_heir ?= {
+				set_character_as_ruler = yes
+			}
+		}
+		add_journal_entry = { type = je_russia_provisional_government }
+
+		# if heir isn't set as new monarch with monarchist restoration, set the revolutionary leader as the new ruler
+		if = {
+			limit = {
+				scope:deposed_heir ?= {
+					is_ruler_of_own_country = no
+				}
+			}
+			scope:true_russian_revolutionary ?= {
+				set_character_as_ruler = yes
+			}
+		}
+		add_modifier = {
+			name = modifier_russian_revolution_new_government
+			days = short_modifier_time
+			is_decaying = yes
+		}
+		scope:deposed_tsar ?= {
+			place_character_in_void = 240
+		}
+		# if monarchist restoration with heir hasn't happened, send the heir into The Void
+		if = {
+			limit = {
+				NOT = { has_variable = provisional_government_is_monarchist }
+			}
+			scope:deposed_heir ?= {
+				place_character_in_void = 240
+			}
+		}
+	}
+
+	option = {
+		name = ip5_revolutions.1.a
+		default_option = yes
+		custom_tooltip = provisional_government_name_tt
+		show_as_tooltip = {
+			if = {
+				limit = {
+					OR = {
+						var:provisional_government_identity ?= flag:liberal
+						var:provisional_government_identity ?= flag:socialist
+					}
+				}
+				enact_law = law_type:law_presidential_republic
+				enact_law = law_type:law_universal_suffrage
+			}
+			scope:true_russian_revolutionary ?= {
+				set_character_as_ruler = yes
+			}
+			add_modifier = {
+				name = modifier_russian_revolution_new_government
+				days = short_modifier_time
+				is_decaying = yes
+			}
+		}
+		if = {
+			limit = {
+				var:provisional_government_opposition_ideology ?= flag:socialist
+				any_political_movement = {
+					movement_is_socialist = yes
+					political_movement_support >= 0.05
+				}
+			}
+			trigger_event = {
+				id = factory_councils.11
+				days = 3
+			}
+		}
+		else_if = {
+			limit = {
+				var:provisional_government_identity ?= flag:socialist
+				NOT = {
+					has_factory_councils_law_or_amendment = yes
+				}
+			}
+			active_law:lawgroup_labour_associations ?= {
+				add_amendment = {
+					type = amendment_factory_councils
+					sponsor = PREV.ig:ig_trade_unions
+					cooldown = 6
+				}
+			}
+		}
+		show_as_tooltip = {
+			add_journal_entry = { type = je_russia_provisional_government }
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = {
+			CHARACTER = scope:deposed_tsar
+			CHARACTER = scope:deposed_heir
+		}
+	}
+}
+
+ip5_revolutions.2 = {
+	type = country_event
+	placement = root
+
+	title = ip5_revolutions.2.t
+	desc = ip5_revolutions.2.d
+	flavor = ip5_revolutions.2.f
+
+	event_image = {
+		video = "europenorthamerica_political_extremism"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/invention_icons/anarchy.dds"
+
+	duration = 3
+
+	dlc = dlc019
+
+	trigger = {
+	}
+
+	immediate = {
+	}
+
+	option = {
+		name = ip5_revolutions.2.a
+		default_option = yes
+
+		show_as_tooltip = {
+			add_journal_entry = {
+				type = je_russian_revolution
+			}
+			if = {
+				limit = {
+					country_opposition_is_liberal = yes
+					any_political_movement = {
+						movement_is_liberal = yes
+					}
+				}
+				ordered_political_movement = {
+					limit = {
+						movement_is_liberal = yes
+					}
+					order_by = political_movement_support
+					position = 0
+					add_modifier = {
+						name = russian_government_popular_opposition
+						multiplier = 0.01	# not the correct value, but shows that there's a numerical effect and applies a low number similar to what the early values for the modifier might be
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					country_opposition_is_conservative = yes
+					any_political_movement = {
+						movement_is_conservative = yes
+					}
+				}
+				ordered_political_movement = {
+					limit = {
+						movement_is_conservative = yes
+					}
+					order_by = political_movement_support
+					position = 0
+					add_modifier = {
+						name = russian_government_popular_opposition
+						multiplier = 0.01
+					}
+				}
+			}
+			else_if = {
+				limit = {
+					country_opposition_is_socialist = yes
+					any_political_movement = {
+						movement_is_socialist = yes
+					}
+				}
+				ordered_political_movement = {
+					limit = {
+						movement_is_socialist = yes
+					}
+					order_by = political_movement_support
+					position = 0
+					add_modifier = {
+						name = russian_government_popular_opposition
+						multiplier = 0.01
+					}
+				}
+			}
+		}
+		custom_tooltip = russian_revolution_radicalism_tt
+	}
+}

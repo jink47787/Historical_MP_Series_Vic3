@@ -1,149 +1,221 @@
-﻿je_canada_can = {
+﻿# Contextless/global JE shared by the Canadian colonies and their overlord, working toward Confederation.
+# Folded from the former per-country je_canada_can (colony perspective) and je_canada_gbr (overlord perspective).
+je_canada = {
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
-	group = je_group_historical_content
+	group = je_group_global_international_situations
 
-	is_shown_when_inactive = {
-		capital = {
-			is_in_geographic_region = geographic_region_greater_canada
+	activation_description = {
+		always = yes
+	}
+
+	should_be_involved = {
+		OR = {
+			# The Canadian colonies
+			AND = {
+				capital = {
+					is_in_geographic_region = geographic_region_greater_canada
+				}
+				is_subject = yes
+				country_is_colonial_or_company = yes
+			}
+			# Their overlord
+			AND = {
+				NOT = {
+					capital = {
+						is_in_geographic_region = geographic_region_greater_canada
+					}
+				}
+				any_subject_or_below = {
+					capital = {
+						is_in_geographic_region = geographic_region_greater_canada
+					}
+					country_is_colonial_or_company = yes
+					count >= 2
+				}
+			}
 		}
-		is_subject = yes
+	}
+
+	should_show_when_not_involved = {
+		OR = {
+			AND = {
+				capital = {
+					is_in_geographic_region = geographic_region_greater_canada
+				}
+				country_is_colonial_or_company = yes
+			}
+			any_subject_or_below = {
+				capital = {
+					is_in_geographic_region = geographic_region_greater_canada
+				}
+				country_is_colonial_or_company = yes
+			}
+		}
 	}
 
 	is_shown_in_lobby = {
 		OR = {
-			country_has_primary_culture = cu:anglo_canadian
-			country_has_primary_culture = cu:franco_canadian
-		}
-		is_in_geographic_region = geographic_region_greater_canada
-	}
-
-	possible = {
-		has_technology_researched = nationalism
-	}
-
-	scripted_button = je_canada_unite_can_button
-
-	complete = {
-		any_state_in_greater_canada = {
-			filter = {
-				NOR = {
-					this.state_region = s:STATE_WASHINGTON
-					this.state_region = s:STATE_IDAHO
-					this.state_region = s:STATE_OREGON
-					this.state_region = s:STATE_NEWFOUNDLAND
+			AND = {
+				OR = {
+					country_has_primary_culture = cu:anglo_canadian
+					country_has_primary_culture = cu:franco_canadian
 				}
+				is_in_geographic_region = geographic_region_greater_canada
 			}
-			owner = ROOT
-			percent = 1
-		}
-	}
-
-	on_complete = {
-		trigger_event = { id = can_aus.5 }
-		hidden_effect = {
-			if = {
-				limit = {
-					any_scope_state = {
-						state_region = s:STATE_ONTARIO
+			AND = {
+				NOT = {
+					capital = {
+						is_in_geographic_region = geographic_region_greater_canada
 					}
 				}
-			}
-			s:STATE_ONTARIO = {
-				random_scope_state = {
-			        set_hub_name = {
-			            type = city
-			            name = HUB_NAME_STATE_ONTARIO_city_ottawa
-			        }
+				any_subject_or_below = {
+					capital = {
+						is_in_geographic_region = geographic_region_greater_canada
+					}
+					count >= 2
 				}
-			}
-		}
-	}
-
-	invalid = {
-		is_subject = no
-	}
-
-	weight = 100
-
-
-	should_be_pinned_by_default_uninvolved_or_context = yes
-}
-
-je_canada_gbr = {
-	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
-
-	group = je_group_historical_content
-
-	is_shown_in_lobby = {
-		any_subject_or_below = {
-			capital = {
-				is_in_geographic_region = geographic_region_greater_canada
-			}
-			count >= 2
-		}
-		NOT = {
-			capital = {
-				is_in_geographic_region = geographic_region_greater_canada
 			}
 		}
 	}
 
 	is_shown_when_inactive = {
-		any_subject_or_below = {
-			capital = {
-				is_in_geographic_region = geographic_region_greater_canada
-			}
-			count >= 2
-		}
-		NOT = {
-			capital = {
-				is_in_geographic_region = geographic_region_greater_canada
+		any_country_in_greater_canada = {
+			is_subject = yes
+			country_is_colonial_or_company = yes
+			overlord = {
+				any_subject_or_below = {
+					capital = {
+						is_in_geographic_region = geographic_region_greater_canada
+					}
+					count >= 2
+				}
 			}
 		}
 	}
 
 	possible = {
-		has_technology_researched = nationalism
+		any_country_in_greater_canada = {
+			is_subject = yes
+			country_is_colonial_or_company = yes
+			OR = {
+				has_technology_researched = nationalism
+				overlord = {
+					has_technology_researched = nationalism
+				}
+			}
+		}
 	}
 
 	scripted_button = je_canada_unite_can_button
 
-	complete = {
-		any_country_in_greater_canada = {
-			is_subject_of = ROOT
-			owns_entire_state_region = STATE_ONTARIO
-			owns_entire_state_region = STATE_NEW_BRUNSWICK
-			owns_entire_state_region = STATE_QUEBEC
-			owns_entire_state_region = STATE_NEWFOUNDLAND
-			owns_entire_state_region = STATE_ALBERTA
-			owns_entire_state_region = STATE_BRITISH_COLUMBIA
-			owns_entire_state_region = STATE_SASKATCHEWAN
-			owns_entire_state_region = STATE_MANITOBA
-			owns_entire_state_region = STATE_YUKON_TERRITORY
-			owns_entire_state_region = STATE_NORTHWEST_TERRITORIES
-			owns_entire_state_region = STATE_NUNAVUT
-		}
-	}
-
-	on_complete = {
-		trigger_event = { id = can_aus.6 }
-		hidden_effect = {
-			if = {
-				limit = {
-					any_subject_or_below = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			any_country_in_greater_canada = {
+				save_temporary_scope_as = prospective_canadian_unifier
+				custom_tooltip = {
+					text = owns_all_confederate_canada_tt
+					any_state_region_in_canadian_confederation = {
 						any_scope_state = {
-							state_region = s:STATE_ONTARIO
+							is_largest_state_in_region = yes
+							scope:prospective_canadian_unifier ?= owner
+						}
+						count = all
+					}
+				}
+				custom_tooltip = {
+					text = only_one_remains_in_canada_tt
+					any_country_in_canadian_confederation = {
+						count = 1
+					}
+				}
+			}
+		}
+		effect = {
+			hidden_effect = {
+				s:STATE_ONTARIO ?= {
+					random_scope_state = {
+						set_hub_name = {
+							type = city
+							name = HUB_NAME_STATE_ONTARIO_city_ottawa
 						}
 					}
 				}
 			}
-			s:STATE_ONTARIO = {
-				random_scope_state = {
-			        set_hub_name = {
-			            type = city
-			            name = HUB_NAME_STATE_ONTARIO_city_ottawa
-			        }
+			je_canada_cleanup = yes
+		}
+		effect_all_involved = {
+			show_as_tooltip = {
+				trigger_event = { id = can_aus.5 }
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						capital = {
+							is_in_geographic_region = geographic_region_greater_canada
+						}
+						owns_entire_state_region = STATE_ONTARIO
+						owns_entire_state_region = STATE_NEW_BRUNSWICK
+						owns_entire_state_region = STATE_QUEBEC
+						owns_entire_state_region = STATE_NEWFOUNDLAND
+						owns_entire_state_region = STATE_ALBERTA
+						owns_entire_state_region = STATE_BRITISH_COLUMBIA
+						owns_entire_state_region = STATE_SASKATCHEWAN
+						owns_entire_state_region = STATE_MANITOBA
+						owns_entire_state_region = STATE_YUKON_TERRITORY
+						owns_entire_state_region = STATE_NORTHWEST_TERRITORIES
+						owns_entire_state_region = STATE_NUNAVUT
+					}
+					trigger_event = { id = can_aus.5 }
+				}
+				else_if = {
+					limit = {
+						NOT = {
+							capital = {
+								is_in_geographic_region = geographic_region_greater_canada
+							}
+						}
+					}
+					trigger_event = { id = can_aus.6 }
+				}
+			}
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_country_in_greater_canada = {
+					is_subject = yes
+					country_is_colonial_or_company = yes
+				}
+			}
+		}
+		effect = {
+			je_canada_cleanup = yes
+		}
+	}
+
+	on_weekly_pulse = {
+		effect = {
+			# Pull in any Canadian colony that qualifies after the situation has activated.
+			every_country_in_greater_canada = {
+				limit = {
+					has_journal_entry = je_canada
+					is_subject = yes
+					country_is_colonial_or_company = yes
+					NOT = {
+						is_involved_in_journal_entry = je_canada
+					}
+				}
+				je:je_canada ?= {
+					add_involved_country = prev
 				}
 			}
 		}
@@ -151,93 +223,200 @@ je_canada_gbr = {
 
 	weight = 100
 
+	should_be_pinned_by_default_uninvolved_or_context = no
+	should_be_pinned_by_default_involved = yes
 
-	should_be_pinned_by_default_uninvolved_or_context = yes
+	can_revolution_inherit = yes
 }
 
-je_australia_aus = {
+je_australia = {
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
-	group = je_group_historical_content
+	group = je_group_global_international_situations
 
-	is_shown_when_inactive = {
-		capital = {
-			is_in_geographic_region = geographic_region_australasia
-		}
-		is_subject = yes
+	activation_description = {
+		always = yes
 	}
 
-	possible = {
-		has_technology_researched = nationalism
-	}
-
-	scripted_button = je_australia_unite_aus_button
-
-	complete = {
-		any_state_in_australasia = {
-			owner = ROOT
-			percent = 1
-		}
-	}
-
-	on_complete = {
-		trigger_event = { id = can_aus.7 }
-	}
-
-	invalid = {
-		is_subject = no
-	}
-
-
-	should_be_pinned_by_default_uninvolved_or_context = yes
-}
-
-je_australia_gbr = {
-	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
-
-	group = je_group_historical_content
-
-	is_shown_when_inactive = {
-		any_subject_or_below = {
-			capital = {
-				is_in_geographic_region = geographic_region_australasia
+	should_be_involved = {
+		OR = {
+			# The Australasian colonies
+			AND = {
+				capital = {
+					is_in_geographic_region = geographic_region_australasia
+				}
+				is_subject = yes
+				country_is_colonial_or_company = yes
 			}
-			count >= 2
-		}
-		NOT = {
-			capital = {
-				is_in_geographic_region = geographic_region_australasia
+			# Their overlord
+			AND = {
+				NOT = {
+					capital = {
+						is_in_geographic_region = geographic_region_australasia
+					}
+				}
+				any_subject_or_below = {
+					capital = {
+						is_in_geographic_region = geographic_region_australasia
+					}
+					country_is_colonial_or_company = yes
+					count >= 2
+				}
 			}
 		}
 	}
 
-	possible = {
-		has_technology_researched = nationalism
+	should_show_when_not_involved = {
+		OR = {
+			AND = {
+				capital = {
+					is_in_geographic_region = geographic_region_australasia
+				}
+				country_is_colonial_or_company = yes
+			}
+			any_subject_or_below = {
+				capital = {
+					is_in_geographic_region = geographic_region_australasia
+				}
+				country_is_colonial_or_company = yes
+			}
+		}
 	}
 
-	scripted_button = je_australia_unite_aus_button
-
-	complete = {
+	is_shown_when_inactive = {
 		any_country_in_australasia = {
-			is_subject_of = ROOT
-			owns_entire_state_region = STATE_NEW_SOUTH_WALES
-			owns_entire_state_region = STATE_VICTORIA
-			owns_entire_state_region = STATE_TASMANIA
-			owns_entire_state_region = STATE_QUEENSLAND
-			owns_entire_state_region = STATE_SOUTH_AUSTRALIA
-			owns_entire_state_region = STATE_WESTERN_AUSTRALIA
-			owns_entire_state_region = STATE_NORTHERN_TERRITORY
-			owns_entire_state_region = STATE_NORTH_ISLAND
-			owns_entire_state_region = STATE_SOUTH_ISLAND
+			is_subject = yes
+			country_is_colonial_or_company = yes
+			overlord = {
+				any_subject_or_below = {
+					capital = {
+						is_in_geographic_region = geographic_region_australasia
+					}
+					count >= 2
+				}
+			}
 		}
 	}
 
-	on_complete = {
-		trigger_event = { id = can_aus.8 }
+	possible = {
+		any_country_in_australasia = {
+			is_subject = yes
+			country_is_colonial_or_company = yes
+			OR = {
+				has_technology_researched = nationalism
+				overlord = {
+					has_technology_researched = nationalism
+				}
+			}
+		}
+	}
+
+	scripted_button = je_australia_unite_aus_button
+
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			any_country_in_australasia = {
+				save_temporary_scope_as = prospective_australian_unifier
+				custom_tooltip = {
+					text = owns_all_australasia_tt
+					any_state_region_in_australasia = {
+						any_scope_state = {
+							is_largest_state_in_region = yes
+							scope:prospective_australian_unifier ?= owner
+						}
+						count = all
+					}
+				}
+				custom_tooltip = {
+					text = only_one_remains_in_australasia_tt
+					any_country_in_australasia = {
+						count = 1
+					}
+				}
+			}
+		}
+		effect = {
+			je_australia_cleanup = yes
+		}
+		effect_all_involved = {
+			show_as_tooltip = {
+				trigger_event = { id = can_aus.7 }
+			}
+			hidden_effect = {
+				if = {
+					limit = {
+						capital = {
+							is_in_geographic_region = geographic_region_australasia
+						}
+						owns_entire_state_region = STATE_NEW_SOUTH_WALES
+						owns_entire_state_region = STATE_VICTORIA
+						owns_entire_state_region = STATE_TASMANIA
+						owns_entire_state_region = STATE_QUEENSLAND
+						owns_entire_state_region = STATE_SOUTH_AUSTRALIA
+						owns_entire_state_region = STATE_WESTERN_AUSTRALIA
+						owns_entire_state_region = STATE_NORTHERN_TERRITORY
+						owns_entire_state_region = STATE_NORTH_ISLAND
+						owns_entire_state_region = STATE_SOUTH_ISLAND
+					}
+					trigger_event = { id = can_aus.7 }
+				}
+				else_if = {
+					limit = {
+						NOT = {
+							capital = {
+								is_in_geographic_region = geographic_region_australasia
+							}
+						}
+					}
+					trigger_event = { id = can_aus.8 }
+				}
+			}
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_country_in_australasia = {
+					is_subject = yes
+					country_is_colonial_or_company = yes
+				}
+			}
+		}
+		effect = {
+			je_australia_cleanup = yes
+		}
+	}
+
+	on_weekly_pulse = {
+		effect = {
+			# Pull in any Australasian colony that qualifies after the situation has activated.
+			every_country_in_australasia = {
+				limit = {
+					has_journal_entry = je_australia
+					is_subject = yes
+					country_is_colonial_or_company = yes
+					NOT = {
+						is_involved_in_journal_entry = je_australia
+					}
+				}
+				je:je_australia ?= {
+					add_involved_country = prev
+				}
+			}
+		}
 	}
 
 	weight = 100
 
+	should_be_pinned_by_default_uninvolved_or_context = no
+	should_be_pinned_by_default_involved = yes
 
-	should_be_pinned_by_default_uninvolved_or_context = yes
+	can_revolution_inherit = yes
 }

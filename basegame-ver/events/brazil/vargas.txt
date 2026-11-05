@@ -44,6 +44,7 @@ BRZ_populism.1 = {
 			create_character = {
 				template = BRZ_getulio_vargas_character_template
 				on_created = {
+					set_temporary_event_immortality = { DURATION = 3 }
 					set_variable = vargas_variable
 					set_career_length = {
 						years = 100
@@ -65,6 +66,7 @@ BRZ_populism.1 = {
 						ambitious
 					}
 					on_created = {
+						set_temporary_event_immortality = { DURATION = 3 }
 						set_variable = vargas_variable
 						set_career_length = {
 							years = 100
@@ -74,6 +76,10 @@ BRZ_populism.1 = {
 				}
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:vargas_scope }
 	}
 
 	option = {
@@ -128,6 +134,7 @@ BRZ_populism.2 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_populist_unrest [on_monthly_pulse]
 		empty_agitator_slots >= 1
 		any_scope_state = {
 			turmoil >= 0.15
@@ -157,14 +164,25 @@ BRZ_populism.2 = {
 						days = normal_modifier_time
 					}
 					set_variable = prestes_variable
+					if = {
+						limit = {
+							owner.ig:ig_armed_forces ?= {
+								has_ideology = ideology:ideology_militant
+							}
+						}
+						set_interest_group = owner.ig:ig_armed_forces
+					}
+					else = {
+						set_variable = red_army_candidate
+					}
 				}
 			}
 		}
 		else = {
 			create_character = {
 				is_agitator = yes
-				interest_group = ig_armed_forces
-				ideology = ideology_communist
+				interest_group = ig_trade_unions
+				ideology = ideology_communist_leader
 				traits = {
 					engineer
 					persistent
@@ -175,6 +193,17 @@ BRZ_populism.2 = {
 						days = normal_modifier_time
 					}
 					set_variable = prestes_variable
+					if = {
+						limit = {
+							owner.ig:ig_armed_forces ?= {
+								has_ideology = ideology:ideology_militant
+							}
+						}
+						set_interest_group = owner.ig:ig_armed_forces
+					}
+					else = {
+						set_variable = red_army_candidate
+					}
 				}
 			}
 		}
@@ -183,7 +212,9 @@ BRZ_populism.2 = {
 				has_variable = prestes_variable
 			}
 			save_scope_as = prestes_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 			save_scope_as = exile_scope #For the sake of not needing to make a new notification.
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		random_scope_state = {
 			limit = {
@@ -220,6 +251,8 @@ BRZ_populism.2 = {
 				}
 			}
 			50 = {
+				revoke_temporary_event_immortality = { CHARACTER = scope:prestes_scope }
+				revoke_temporary_event_immortality = { CHARACTER = scope:exile_scope }
 				scope:prestes_scope = {
 					kill_character = yes
 				}
@@ -304,6 +337,11 @@ BRZ_populism.2 = {
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:prestes_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:exile_scope }
+	}
 }
 
 #Populist defeat - continued landowner regime
@@ -355,6 +393,10 @@ BRZ_populism.3 = {
 			days = normal_modifier_time
 		}
 	}
+
+	after = {
+		je_populist_unrest_cleanup = yes
+	}
 }
 
 #An Ocean of Coffee
@@ -381,6 +423,7 @@ BRZ_populism.4 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_populist_unrest [on_monthly_pulse]
 		OR = {
 			has_law_or_variant = law_type:law_tenant_farmers
 			has_law_or_variant = law_type:law_commercialized_agriculture
@@ -471,6 +514,7 @@ BRZ_populism.5 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_populist_unrest [on_monthly_pulse]
 		any_scope_state = {
 			any_scope_building = {
 				is_building_type = building_urban_center
@@ -562,6 +606,7 @@ BRZ_populism.6 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_populist_unrest [on_monthly_pulse]
 		any_scope_state = {
 			turmoil >= 0.25
 			is_incorporated = yes
@@ -669,6 +714,7 @@ BRZ_populism.7 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_populist_unrest [on_monthly_pulse]
 		has_variable = brz_election_done
 		any_active_party = {
 			NOT = {
@@ -768,6 +814,7 @@ BRZ_populism.8 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_populist_unrest [on_monthly_pulse]
 		country_has_voting_franchise = yes
 		ig:ig_petty_bourgeoisie ?= {
 			has_party = yes
@@ -794,8 +841,13 @@ BRZ_populism.8 = {
 		ig:ig_petty_bourgeoisie ?= {
 			leader = {
 				save_scope_as = vargas_scope
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:vargas_scope }
 	}
 
 	option = {
@@ -860,6 +912,7 @@ BRZ_populism.9 = {
 	duration = 3
 
 	trigger = {
+		# triggered by journal entry - je_populist_unrest [on_monthly_pulse]
 		any_scope_state = {
 			state_region = s:STATE_AMAZONAS
 			turmoil >= 0.15
@@ -974,6 +1027,7 @@ BRZ_vargas.1 = {
 					}
 				}
 				save_scope_as = vargas_scope
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 			if = {
 				limit = {
@@ -1051,6 +1105,11 @@ BRZ_vargas.1 = {
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:vargas_scope }
+		je_populist_unrest_cleanup = yes
+	}
 }
 
 BRZ_vargas.2 = {
@@ -1106,6 +1165,10 @@ BRZ_vargas.2 = {
 				days = long_modifier_time
 			}
 		}
+	}
+
+	after = {
+		je_new_republic_cleanup = yes
 	}
 }
 
@@ -1163,6 +1226,10 @@ BRZ_vargas.3 = {
 			strata = middle
 		}
 	}
+
+	after = {
+		je_new_republic_cleanup = yes
+	}
 }
 
 BRZ_vargas.4 = {
@@ -1188,6 +1255,7 @@ BRZ_vargas.4 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_new_republic [on_monthly_pulse]
 		any_scope_state = {
 			turmoil >= 0.15
 			is_incorporated = yes
@@ -1270,6 +1338,7 @@ BRZ_vargas.5 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_new_republic [on_monthly_pulse]
 		OR = {
 			has_law_or_variant = law_type:law_autocracy
 			has_law_or_variant = law_type:law_oligarchy
@@ -1366,6 +1435,7 @@ BRZ_vargas.6 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_new_republic [on_monthly_pulse]
 		empty_agitator_slots >= 1
 		radical_fraction = {
 			value >= 0.15
@@ -1382,6 +1452,9 @@ BRZ_vargas.6 = {
 			create_character = {
 				template = BRZ_plinio_salgado
 				save_scope_as = integralist_agitator
+				on_created = {
+					set_temporary_event_immortality = { DURATION = 3 }
+				}
 			}
 		}
 		else = {
@@ -1394,6 +1467,9 @@ BRZ_vargas.6 = {
 					firebrand
 				}
 				save_scope_as = integralist_agitator
+				on_created = {
+					set_temporary_event_immortality = { DURATION = 3 }
+				}
 			}
 		}
 	}
@@ -1445,6 +1521,10 @@ BRZ_vargas.6 = {
 			strata = middle
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:integralist_agitator }
+	}
 }
 
 BRZ_vargas.7 = {
@@ -1470,6 +1550,7 @@ BRZ_vargas.7 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_new_republic [on_monthly_pulse]
 		any_scope_character = {
 			has_socialist_ideology = yes
 		}
@@ -1485,6 +1566,7 @@ BRZ_vargas.7 = {
 				has_socialist_ideology = yes
 			}
 			save_scope_as = anl_leader_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 	}
 
@@ -1500,7 +1582,7 @@ BRZ_vargas.7 = {
 		every_interest_group = {
 			limit = {
 				OR = {
-					has_ideology = ideology:ideology_socialist
+					#has_ideology = ideology:ideology_socialist
 					leader = {
 						has_socialist_ideology = yes
 					}
@@ -1534,7 +1616,7 @@ BRZ_vargas.7 = {
 		every_interest_group = {
 			limit = {
 				OR = {
-					has_ideology = ideology:ideology_socialist
+					#has_ideology = ideology:ideology_socialist
 					leader = {
 						has_socialist_ideology = yes
 					}
@@ -1551,6 +1633,10 @@ BRZ_vargas.7 = {
 			strata = lower
 		}
 		set_variable = anl_founded
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:anl_leader_scope }
 	}
 }
 
@@ -1577,6 +1663,7 @@ BRZ_vargas.8 = {
 	dlc = dlc008
 
 	trigger = {
+		# triggered by journal entry - je_new_republic [on_monthly_pulse]
 		has_variable = integralism_var
 		any_scope_state = {
 			turmoil >= 0.15
@@ -1602,6 +1689,7 @@ BRZ_vargas.8 = {
 				has_ideology = ideology:ideology_integralist
 			}
 			save_scope_as = integralist_leader_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 	}
 
@@ -1624,7 +1712,7 @@ BRZ_vargas.8 = {
 		random_interest_group = {
 			limit = {
 				OR = {
-					has_ideology = ideology:ideology_socialist
+					#has_ideology = ideology:ideology_socialist
 					leader = {
 						has_socialist_ideology = yes
 					}
@@ -1653,5 +1741,9 @@ BRZ_vargas.8 = {
 				is_decaying = yes
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:integralist_leader_scope }
 	}
 }

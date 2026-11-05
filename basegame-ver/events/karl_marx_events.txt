@@ -3,30 +3,192 @@
 # Marx Spawns
 marx_events.1 = {
 	type = country_event
+	placement = ROOT
 
 	title = marx_events.1.t
 	desc = marx_events.1.d
 	flavor = marx_events.1.f
 
-	event_image = {
-		video = "europenorthamerica_russian_serfs"
-	}
+	gui_window = event_window_1char_tabloid
+	left_icon = scope:marx_scope
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
 
-	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
 
 	duration = 3
 
+	fire_only_once = yes
+
 	trigger = {
-		has_technology_researched = socialism
 		NOT = { has_global_variable = marx_happened }
+		game_date >= 1847.12.8 # Marx commissioned to draw up the Manifesto
+		OR = {
+			has_technology_researched = socialism
+			can_research = socialism
+		}
+		ig:ig_trade_unions ?= {
+			is_marginal = no # not counts as
+		}
 		empty_agitator_slots >= 1
 	}
 
 	immediate = {
 		set_global_variable = {
 			name = marx_happened
+		}
+		random_list = {
+			95 = {
+				trigger = {
+					is_not_in_geographic_region = geographic_region_north_america
+					is_not_in_geographic_region = geographic_region_europe
+				}
+				create_character = {
+					is_agitator = yes
+					interest_group = ig_trade_unions
+					female = no
+					noble = no
+					ideology = ideology_communist_leader
+					traits = {
+						direct
+						persistent
+						literary
+					}
+					on_created = {
+						set_character_immortal = yes
+						set_career_length = {
+							years = 100
+							random_range = { 1.0 1.5 }
+						}
+						set_global_variable = { name = big_communism_builder value = this }
+					}
+				}
+			}
+			95 = {
+				trigger = {
+					OR = {
+						is_in_geographic_region = geographic_region_north_america
+						is_in_geographic_region = geographic_region_europe
+					}
+					NOT = {
+                		has_global_variable = ruler_selector_karl_marx
+            		}
+				}
+				create_character = {
+					template = agitator_karl_marx
+					on_created = {
+						set_character_immortal = yes
+						set_career_length = {
+							years = 100
+							random_range = { 1.0 1.5 }
+						}
+						set_global_variable = { name = big_communism_builder value = this }
+					}
+				}
+			}
+			5 = {
+				modifier = {
+					if = {
+						limit = {
+							OR = {
+								ruler = {
+									has_ideology = ideology:ideology_feminist
+								}
+								ig:ig_trade_unions ?= {
+									leader = {
+										OR = {
+											has_ideology = ideology:ideology_feminist
+											is_female = yes
+										}
+									}
+								}
+							}
+						}
+						add = 10
+					}
+					if = {
+						limit = {
+							OR = {
+								has_law_or_variant = law_type:law_womens_suffrage
+								has_law_or_variant = law_type:law_women_in_the_workplace
+							}
+						}
+						add = 5
+					}
+					else_if = {
+						limit = {
+							has_law_or_variant = law_type:law_women_own_property
+						}
+						add = -5
+					}
+					else_if = {
+						limit = {
+							has_law_or_variant = law_type:law_no_womens_rights
+						}
+						add = -10
+					}
+				}
+				create_character = { #Karla Marx
+					is_agitator = yes
+					interest_group = ig_trade_unions
+					female = yes
+					noble = no
+					ideology = ideology_communist_leader
+					traits = {
+						direct
+						persistent
+						literary
+					}
+					on_created = {
+						set_character_immortal = yes
+						set_career_length = {
+							years = 100
+							random_range = { 1.0 1.5 }
+						}
+						set_global_variable = { name = big_communism_builder value = this }
+					}
+				}
+			}
+			5 = {
+				trigger = {
+					any_scope_state = { state_region = s:STATE_TEXAS }
+					NOT = {
+                		has_global_variable = ruler_selector_karl_marx
+            		}
+				}
+				create_character = {
+					template = agitator_karl_marx
+					on_created = {
+						set_first_name = Charlie
+						set_character_immortal = yes
+						set_career_length = {
+							years = 100
+							random_range = { 1.0 1.5 }
+						}
+						set_global_variable = { name = big_communism_builder value = this }
+					}
+				}
+			}
+			1 = {
+				trigger = {
+					capital = { state_region = s:STATE_TALINN }
+				}
+				create_character = {
+					template = agitator_kras_masov
+					on_created = {
+						set_character_immortal = yes
+						set_career_length = {
+							years = 100
+							random_range = { 1.0 1.5 }
+						}
+						set_global_variable = { name = big_communism_builder value = this }
+					}
+				}
+			}
+		}
+		global_var:big_communism_builder ?= {
+			save_scope_as = marx_scope
 		}
 	}
 
@@ -39,100 +201,12 @@ marx_events.1 = {
 				days = normal_modifier_time
 			}
 		}
-		random_list = {
-			95 = {
-				trigger = {
-					is_not_in_geographic_region = geographic_region_north_america
-					is_not_in_geographic_region = geographic_region_europe
-				}
-				create_character = {
-					is_agitator = yes
-					interest_group = ig_trade_unions
-					female = no
-					ideology = ideology_communist
-					traits = {
-						direct
-						persistent
-					}
-				}
+		custom_tooltip = marx_spawn_tt
+		if = {
+			limit = {
+				can_research = socialism
 			}
-			95 = {
-				trigger = {
-					OR = {
-						is_in_geographic_region = geographic_region_north_america
-						is_in_geographic_region = geographic_region_europe
-					}
-					NOT = {
-                		has_global_variable = ruler_selector_karl_marx
-            		}
-				}
-				create_character = {
-					template = agitator_karl_marx
-				}
-			}
-			5 = {
-				modifier = {
-					if = {
-						limit = {
-							OR = {
-								ruler = {
-									has_ideology = ideology:ideology_feminist
-								}
-								ig:ig_trade_unions ?= {
-									leader = {
-										OR = {
-											has_ideology = ideology:ideology_feminist
-											is_female = yes
-										}
-									}
-								}
-							}
-						}
-						add = 10
-					}
-					if = {
-						limit = {
-							has_law_or_variant = law_type:law_women_in_the_workplace
-						}
-						add = 5
-					}
-					if = {
-						limit = {
-							has_law_or_variant = law_type:law_womens_suffrage
-						}
-						add = 5
-					}
-				}
-				create_character = { #Karla Marx
-					is_agitator = yes
-					interest_group = ig_trade_unions
-					female = yes
-					ideology = ideology_communist
-					traits = {
-						direct
-						persistent
-					}
-				}
-			}
-			5 = {
-				trigger = {
-					capital = { state_region = s:STATE_TEXAS }
-					NOT = {
-                		has_global_variable = ruler_selector_karl_marx
-            		}
-				}
-				create_character = {
-					template = agitator_charlie_marx
-				}
-			}
-			1 = {
-				trigger = {
-					capital = { state_region = s:STATE_TALINN }
-				}
-				create_character = {
-					template = agitator_kras_masov
-				}
-			}
+			add_technology_progress = { progress = 3125 technology = socialism }
 		}
 	}
 
@@ -144,115 +218,14 @@ marx_events.1 = {
 				days = normal_modifier_time
 			}
 		}
-		random_list = {
-			95 = {
-				trigger = {
-					is_not_in_geographic_region = geographic_region_north_america
-					is_not_in_geographic_region = geographic_region_europe
-				}
-				create_character = {
-					is_agitator = yes
-					interest_group = ig_trade_unions
-					female = no
-					ideology = ideology_communist
-					traits = {
-						direct
-						persistent
-					}
-					on_created = {
-						set_as_interest_group_leader = yes
-					}
-				}
+		scope:marx_scope ?= {
+			set_as_interest_group_leader = yes
+		}
+		if = {
+			limit = {
+				can_research = socialism
 			}
-			95 = {
-				trigger = {
-					OR = {
-						is_in_geographic_region = geographic_region_north_america
-						is_in_geographic_region = geographic_region_europe
-					}
-					NOT = {
-                		has_global_variable = ruler_selector_karl_marx
-            		}
-				}
-				create_character = {
-					template = agitator_karl_marx
-					on_created = {
-						set_as_interest_group_leader = yes
-					}
-				}
-			}
-			5 = {
-				modifier = {
-					if = {
-						limit = {
-							OR = {
-								ruler = {
-									has_ideology = ideology:ideology_feminist
-								}
-								ig:ig_trade_unions ?= {
-									leader = {
-										OR = {
-											has_ideology = ideology:ideology_feminist
-											is_female = yes
-										}
-									}
-								}
-							}
-						}
-						add = 10
-					}
-					if = {
-						limit = {
-							has_law_or_variant = law_type:law_women_in_the_workplace
-						}
-						add = 5
-					}
-					if = {
-						limit = {
-							has_law_or_variant = law_type:law_womens_suffrage
-						}
-						add = 5
-					}
-				}
-				create_character = { #Karla Marx
-					is_agitator = yes
-					interest_group = ig_trade_unions
-					female = yes
-					ideology = ideology_communist
-					traits = {
-						direct
-						persistent
-					}
-					on_created = {
-						set_as_interest_group_leader = yes
-					}
-				}
-			}
-			5 = {
-				trigger = {
-					capital = { state_region = s:STATE_TEXAS }
-					NOT = {
-                		has_global_variable = ruler_selector_karl_marx
-            		}
-				}
-				create_character = {
-					template = agitator_charlie_marx
-					on_created = {
-						set_as_interest_group_leader = yes
-					}
-				}
-			}
-			1 = {
-				trigger = {
-					capital = { state_region = s:STATE_TALINN }
-				}
-				create_character = {
-					template = agitator_kras_masov
-					on_created = {
-						set_as_interest_group_leader = yes
-					}
-				}
-			}
+			add_technology_progress = { progress = 4150 technology = socialism }
 		}
 	}
 
@@ -265,117 +238,488 @@ marx_events.1 = {
 			}
 		}
 		custom_tooltip = {
-			text = exile_communist_agitator_tt
-			random_list = {
-				95 = {
-					trigger = {
-						is_not_in_geographic_region = geographic_region_north_america
-						is_not_in_geographic_region = geographic_region_europe
-					}
-					create_character = {
-						is_agitator = yes
-						interest_group = ig_trade_unions
-						female = no
-						ideology = ideology_communist
-						traits = {
-							direct
-							persistent
+			text = marx_exile_tt
+			scope:marx_scope ?= {
+				exile_character_with_martyrdom = yes
+			}
+		}
+		if = {
+			limit = {
+				can_research = socialism
+			}
+			add_technology_progress = { progress = 2500 technology = socialism }
+		}
+	}
+}
+
+# The Death of Marx
+marx_events.2 = {
+	type = country_event
+	placement = ROOT
+
+	title = marx_events.2.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = marx_events.2.d
+				trigger = {
+					NAND = {
+						scope:marx_scope ?= {
+							has_template = agitator_karl_marx
 						}
-						on_created = {
-							exile_character_with_martyrdom = yes
-						}
+						p:xD080A0.state.owner ?= this
 					}
 				}
-				95 = {
-					trigger = {
-						OR = {
-							is_in_geographic_region = geographic_region_north_america
-							is_in_geographic_region = geographic_region_europe
-						}
+			}
+			triggered_desc = {
+				desc = marx_events.2.d_1
+				trigger = {
+					scope:marx_scope ?= {
+						has_template = agitator_karl_marx
+					}
+					p:xD080A0.state.owner ?= this
+				}
+			}
+		}
+	}
+	flavor = marx_events.2.f
+
+	gui_window = event_window_1char_tabloid
+	left_icon = scope:marx_scope
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	duration = 3
+
+	fire_only_once = yes
+
+	trigger = {
+		has_global_variable = marx_happened
+		game_date >= 1883.1.1
+		global_var:big_communism_builder ?= {
+			OR = {
+				owner ?= ROOT
+				AND = {
+					is_in_exile_pool = yes
+					global_var:big_communism_builder.home_country ?= ROOT
+				}
+			}
+		}
+	}
+
+	immediate = {
+		global_var:big_communism_builder ?= {
+			save_scope_as = marx_scope
+			set_variable = character_counts_as_dead
+		}
+		if = {
+			limit = {
+				scope:marx_scope ?= {
+					has_template = agitator_karl_marx
+				}
+				p:xD080A0.state.owner ?= this
+			}
+			p:xD080A0.state ?= {
+				save_scope_as = grave_scope
+			}
+		}
+		else = {
+			capital = {
+				save_scope_as = grave_scope
+			}
+		}
+		capital = {
+			save_scope_as = capital_scope
+		}
+	}
+
+	option = {
+		name = marx_events.2.a
+		default_option = yes
+		show_as_tooltip = {
+			scope:marx_scope ?= {
+				kill_character = yes
+			}
+		}
+	}
+
+	option = {
+		name = marx_events.2.b
+		show_as_tooltip = {
+			scope:marx_scope ?= {
+				kill_character = yes
+			}
+		}
+	}
+
+	option = {
+		name = marx_events.2.c
+		show_as_tooltip = {
+			scope:marx_scope ?= {
+				kill_character = yes
+			}
+		}
+	}
+
+	after = {
+		hidden_effect = {
+			global_var:big_communism_builder ?= {
+				if = {
+					limit = {
+						is_in_exile_pool = no
+					}
+					exile_character = yes
+				}
+				place_character_in_void = 10000 # Miserere nobis
+			}
+		}
+	}
+}
+
+# Capital
+marx_events.3 = {
+	type = country_event
+	placement = ROOT
+
+	title = marx_events.3.t
+	desc = marx_events.3.d
+	flavor = marx_events.3.f
+
+	gui_window = event_window_1char_tabloid
+	left_icon = scope:marx_scope
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	duration = 3
+
+	fire_only_once = yes
+
+	trigger = {
+		has_global_variable = marx_happened
+		has_global_variable = peoples_springtime_happened
+		global_var:big_communism_builder ?= {
+			OR = {
+				owner ?= ROOT
+				AND = {
+					is_in_exile_pool = yes
+					global_var:big_communism_builder.home_country ?= ROOT
+				}
+			}
+		}
+	}
+
+	immediate = {
+		global_var:big_communism_builder ?= {
+			save_scope_as = marx_scope
+		}
+	}
+
+	option = {
+		name = marx_events.3.a
+		default_option = yes
+		custom_tooltip_no_bullet = for_16_years_tt
+		scope:marx_scope ?= {
+			set_character_busy_and_immortal = yes
+		}
+		hidden_effect = {
+			trigger_event = { id = marx_events.4 years = 16 }
+		}
+	}
+
+	option = {
+		name = marx_events.3.b
+		trigger = {
+			scope:marx_scope ?= {
+				owner ?= ROOT
+				interest_group ?= {
+					is_in_government = yes
+				}
+			}
+		}
+		highlighted_option = yes
+		show_as_unavailable = {
+			scope:marx_scope ?= {
+				owner ?= ROOT
+			}
+		}
+		custom_tooltip_no_bullet = for_8_years_tt
+		scope:marx_scope ?= {
+			set_character_busy_and_immortal = yes
+		}
+		add_modifier = {
+			name = modifier_funding_capital
+			years = 8
+		}
+		hidden_effect = {
+			trigger_event = { id = marx_events.4 years = 8 }
+		}
+	}
+
+	option = {
+		name = marx_events.3.c
+		trigger = {
+			scope:marx_scope ?= {
+				owner ?= ROOT
+				custom_tooltip = {
+					text = marx_has_non_agitator_role_tt
+					any_character_role = {
 						NOT = {
-                			has_global_variable = ruler_selector_karl_marx
-            			}
-					}
-					create_character = {
-						template = agitator_karl_marx
-						on_created = {
-							exile_character_with_martyrdom = yes
+							is_character_role = character_role_agitator
 						}
 					}
 				}
-				5 = {
-					modifier = {
-						if = {
-							limit = {
-								OR = {
-									ruler = {
-										has_ideology = ideology:ideology_feminist
-									}
-									ig:ig_trade_unions ?= {
-										leader = {
-											OR = {
-												has_ideology = ideology:ideology_feminist
-												is_female = yes
-											}
-										}
-									}
-								}
-							}
-							add = 10
-						}
-						if = {
-							limit = {
-								has_law_or_variant = law_type:law_women_in_the_workplace
-							}
-							add = 5
-						}
-						if = {
-							limit = {
-								has_law_or_variant = law_type:law_womens_suffrage
-							}
-							add = 5
-						}
-					}
-					create_character = { #Karla Marx
-						is_agitator = yes
-						interest_group = ig_trade_unions
-						female = yes
-						ideology = ideology_communist
-						traits = {
-							direct
-							persistent
-						}
-						on_created = {
-							exile_character_with_martyrdom = yes
-						}
-					}
-				}
-				5 = {
-					trigger = {
-						capital = { state_region = s:STATE_TEXAS }
-						NOT = {
-                			has_global_variable = ruler_selector_karl_marx
-            			}
-					}
-					create_character = {
-						template = agitator_charlie_marx
-						on_created = {
-							exile_character_with_martyrdom = yes
-						}
-					}
-				}
-				1 = {
-					trigger = {
-						capital = { state_region = s:STATE_TALINN }
-					}
-					create_character = {
-						template = agitator_kras_masov
-						on_created = {
-							exile_character_with_martyrdom = yes
+				custom_tooltip = {
+					text = marx_has_official_duties_tt
+					OR = {
+						has_role_of_type = general
+						has_role_of_type = admiral
+						interest_group ?= {
+							is_in_government = yes
 						}
 					}
 				}
 			}
 		}
+		highlighted_option = yes
+		show_as_unavailable = {
+			scope:marx_scope ?= {
+				owner ?= ROOT
+			}
+		}
+		custom_tooltip = marx_focuses_on_other_things_tt
+	}
+}
+
+marx_events.4 = {
+	type = country_event
+	placement = ROOT
+
+	title = marx_events.4.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = marx_events.4.d_1
+				trigger = {
+					exists = scope:capital_author_scope
+				}
+			}
+			triggered_desc = {
+				desc = marx_events.4.d
+				trigger = {
+					NOT = {
+						exists = scope:capital_author_scope
+					}
+				}
+			}
+		}
+	}
+	flavor = marx_events.4.f
+
+	gui_window = event_window_1char_tabloid
+	left_icon = scope:capital_publisher_scope
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+
+	duration = 3
+
+	fire_only_once = yes
+
+	trigger = {
+		# Triggered by marx_events.3
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				global_var:big_communism_builder ?= {
+					has_variable = character_counts_as_dead
+				}
+			}
+			ordered_character = {
+				limit = {
+					has_template = GBR_friedrich_engels
+				}
+				alternative_limit = {
+					has_socialist_ideology = yes
+				}
+				alternative_limit = {
+					has_ideology = ideology:ideology_state_socialist
+				}
+				order_by = prominence
+				position = 0
+				save_scope_as = capital_publisher_scope
+			}
+			global_var:big_communism_builder ?= {
+				save_scope_as = capital_author_scope
+			}
+		}
+		else = {
+			global_var:big_communism_builder ?= {
+				save_scope_as = capital_publisher_scope
+			}
+		}
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_socialist
+			}
+			save_scope_as = socialist_movement_scope
+		}
+		generate_2_common_name = {
+			CULTURE_1 = primary_culture
+			CULTURE_2 = primary_culture
+		}
+	}
+
+	option = {
+		name = marx_events.4.a
+		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
+		if = {
+			limit = {
+				exists = scope:capital_author_scope
+			}
+			scope:capital_publisher_scope ?= {
+				add_trait = literary
+			}
+		}
+		else = {
+			scope:capital_publisher_scope ?= {
+				set_character_busy_and_immortal = no
+				add_trait = literary
+				hidden_effect = {
+					if = {
+						limit = {
+							is_immortal = no
+						}
+						set_character_immortal = yes
+					}
+				}
+			}
+		}
+		scope:socialist_movement_scope ?= {
+			add_modifier = {
+				name = modifier_das_kapital
+				days = long_modifier_time
+			}
+		}
+	}
+
+	option = {
+		name = marx_events.4.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
+		if = {
+			limit = {
+				exists = scope:capital_author_scope
+			}
+			scope:capital_publisher_scope ?= {
+				add_trait = literary
+			}
+		}
+		else = {
+			scope:capital_publisher_scope ?= {
+				set_character_busy_and_immortal = no
+				add_trait = literary
+				hidden_effect = {
+					if = {
+						limit = {
+							is_immortal = no
+						}
+						set_character_immortal = yes
+					}
+				}
+			}
+		}
+	}
+
+	option = {
+		name = marx_events.4.c
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
+		trigger = {
+			OR = {
+				has_law_or_variant = law_type:law_traditionalism
+				has_law_or_variant = law_type:law_agrarianism
+				has_law_or_variant = law_type:law_industry_banned
+			}
+		}
+		highlighted_option = yes
+		if = {
+			limit = {
+				exists = scope:capital_author_scope
+			}
+			scope:capital_publisher_scope ?= {
+				add_trait = literary
+			}
+		}
+		else = {
+			scope:capital_publisher_scope ?= {
+				set_character_busy_and_immortal = no
+				add_trait = literary
+				hidden_effect = {
+					if = {
+						limit = {
+							is_immortal = no
+						}
+						set_character_immortal = yes
+					}
+				}
+			}
+		}
+		add_radicals = {
+			pop_type = academics
+			value = 0.01
+		}
+		ordered_political_movement = {
+			limit = {
+				OR = {
+					is_political_movement_type = movement_land_reform
+					is_political_movement_type = movement_nihilist
+					is_political_movement_type = movement_radical
+					is_political_movement_type = movement_labor
+				}
+			}
+			order_by = political_movement_radicalism
+			position = 0
+			add_modifier = {
+				name = modifier_das_kapital
+				days = long_modifier_time
+			}
+		}
+	}
+
+	after = {
+		clear_generated_names = yes
 	}
 }

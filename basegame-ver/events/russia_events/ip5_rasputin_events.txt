@@ -1,0 +1,677 @@
+﻿namespace = rasputin
+
+# Spawn Rasputin's Character
+rasputin.1 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = rasputin.1.t
+	desc = rasputin.1.d
+	flavor = rasputin.1.f
+
+	gui_window = event_window_1char_tabloid
+	left_icon = scope:rasputin_scope
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = { # triggered by in on_action in russian_monarchy_yearly_events
+		has_dlc_feature = ip5_content
+		c:RUS ?= this
+		any_scope_character = {
+			has_template = RUS_alexei_ii
+		}
+	}
+
+	immediate = {
+		create_character = {
+			template = RUS_grigoriy_rasputin
+			save_scope_as = rasputin_scope
+		}
+		random_scope_character = {
+			limit = {
+				has_template = RUS_alexei_ii
+			}
+			save_scope_as = alexei_scope
+		}
+		random_scope_character = {
+			limit = {
+				has_role = character_role_favorite
+			}
+			save_scope_as = current_favorite_scope
+		}
+		scope:rasputin_scope ?= {
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		scope:alexei_scope ?= {
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		scope:current_favorite_scope ?= {
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		set_variable = rasputin1_active_var # to temporarily disable appoint_favorite and revoke_favorite while this event is active
+	}
+
+	option = {
+		name = rasputin.1.a
+		default_option = yes
+
+		ai_chance = {
+			base = 100
+		}
+		scope:current_favorite_scope ?= {
+			custom_tooltip = {
+				text = revoke_current_favorite_effect_tt
+				remove_character_role = favorite
+			}
+			add_modifier = {
+				name = revoked_favorite
+				years = 10
+			}
+		}
+		scope:rasputin_scope ?= {
+			custom_tooltip = {
+				text = appoint_rasputin_favorite_effect_tt
+				add_character_role = favorite
+			}
+		}
+		je_tsarpoints_determine_favourite_mission = yes # this scripted effect will set the tp_fav_chosen_rasputin variable
+		je_tsarpoints_assign_favourite_mission = yes # this scripted effect will add je_tp_fav_rasputin journal entry
+		scope:alexei_scope ?= {
+			add_modifier = {
+				name = modifier_faith_healing
+			}
+		}
+		custom_tooltip_no_bullet = alexei_health_improves_tt
+	}
+
+	option = {
+		name = rasputin.1.b
+
+		ai_chance = {
+			base = 10
+			modifier = {
+				trigger = {
+					OR = {
+						has_journal_entry = je_tp_fav_finance
+						has_journal_entry = je_tp_fav_parochial
+						has_journal_entry = je_tp_fav_industry
+						has_journal_entry = je_tp_fav_social_justice
+						has_journal_entry = je_tp_fav_bootlicker
+						has_journal_entry = je_tp_fav_worldwide
+						has_journal_entry = je_tp_fav_war
+					}
+				}
+				add = 10
+			}
+		}
+
+		scope:rasputin_scope ?= {
+			add_modifier = {
+				name = modifier_favorite_rebuffed
+				days = normal_modifier_time
+			}
+			add_character_role = character_role_agitator
+		}
+		custom_tooltip_no_bullet = alexei_health_deteriorates_tt # Alexei gets russian_character_is_marked_for_death_chance
+	}
+
+	after = {
+		remove_variable = rasputin1_active_var # to re-enable appoint_favorite and revoke_favorite after this event is no longer active
+		revoke_temporary_event_immortality = { CHARACTER = scope:rasputin_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:alexei_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:current_favorite_scope }
+	}
+}
+
+# The Holy Devil
+rasputin.2 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = rasputin.2.t
+	desc = rasputin.2.d
+	flavor = rasputin.2.f
+
+	gui_window = event_window_1char_tabloid
+	left_icon = scope:rasputin_scope
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = { # triggered by je_tp_fav_rasputin
+		any_scope_character = {
+			has_template = RUS_grigoriy_rasputin
+		}
+		any_scope_character = {
+			has_template = RUS_alexei_ii
+		}
+		any_interest_group = {
+			is_marginal = no
+			leader = {
+				NOT = { has_template = RUS_grigoriy_rasputin }
+			}
+		}
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				has_template = RUS_grigoriy_rasputin
+			}
+			save_scope_as = rasputin_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		random_scope_character = {
+			limit = {
+				has_template = RUS_alexei_ii
+			}
+			save_scope_as = alexei_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		random_interest_group = {
+			limit = {
+				is_marginal = no
+				leader = {
+					NOT = { has_template = RUS_grigoriy_rasputin } # so rasputin doesn't dismiss himself
+				}
+			}
+			save_scope_as = relevant_ig
+			leader = {
+				save_scope_as = relevant_leader_scope
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
+		}
+		set_variable = rasputin2_happened
+	}
+
+	cancellation_trigger = {
+		NOT = { has_journal_entry = je_tp_fav_rasputin }
+	}
+
+	option = {
+		name = rasputin.2.a
+		default_option = yes
+		ai_chance = {
+			base = 100
+		}
+		scope:relevant_ig ?= {
+			add_modifier = {
+				name = modifier_rasputin_not_dismissed
+				days = normal_modifier_time
+			}
+		}
+		custom_tooltip_no_bullet = alexei_health_improves_tt
+	}
+
+	option = {
+		name = rasputin.2.b
+
+		ai_chance = {
+			base = 10
+		}
+
+		custom_tooltip = {
+			text = alexei_health_deteriorates_tt # Alexei gets russian_character_is_marked_for_death_chance
+		}
+		scope:rasputin_scope ?= {
+			custom_tooltip = {
+				text = revoke_rasputin_favorite_effect_tt
+				remove_character_role = favorite
+			}
+			add_modifier = {
+				name = revoked_favorite
+				years = 10
+			}
+			add_character_role = character_role_agitator
+		}
+		custom_tooltip_no_bullet = alexei_health_deteriorates_tt # Alexei gets russian_character_is_marked_for_death_chance
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:rasputin_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:alexei_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:relevant_leader_scope }
+	}
+}
+
+# The Stabbing - based on Khioniya Guseva's attempt to kill Rasputin in 1914
+rasputin.3 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = rasputin.3.t
+	desc = rasputin.3.d
+	flavor = rasputin.3.f
+
+	event_image = {
+		video = "southamerica_public_figure_assassination"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = { # triggered by je_tp_fav_rasputin
+		has_variable = rasputin2_happened
+		NOT = { has_variable = rasputin3_happened }
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				has_template = RUS_grigoriy_rasputin
+			}
+			save_scope_as = rasputin_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		random_scope_character = {
+			limit = {
+				has_template = RUS_alexei_ii
+			}
+			save_scope_as = alexei_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		set_variable = rasputin3_happened
+	}
+
+	cancellation_trigger = {
+		NOT = { has_journal_entry = je_tp_fav_rasputin }
+	}
+
+	option = {
+		name = rasputin.3.a
+		default_option = yes
+
+		ai_chance = {
+			base = 80
+		}
+		custom_tooltip = {
+			text = rasputin_lives_tt
+		}
+		ruler = {
+			add_modifier = {
+				name = modifier_tsar_saved_rasputin
+				days = normal_modifier_time
+			}
+		}
+		add_modifier = {
+			name = modifier_rasputin_legit_instability
+			days = normal_modifier_time
+		}
+		scope:rasputin_scope = {
+			add_trait = wounded
+			add_modifier = {
+				name = modifier_survived_assassination
+				days = normal_modifier_time
+			}
+			custom_tooltip_no_bullet = alexei_health_improves_tt
+		}
+	}
+
+	option = {
+		name = rasputin.3.b
+
+		ai_chance = {
+			base = 20
+		}
+
+		random_list = {
+			50 = {
+				custom_tooltip = {
+					text = rasputin_dies_tt
+					revoke_temporary_event_immortality = { CHARACTER = scope:rasputin_scope }
+					scope:rasputin_scope = {
+						kill_character = yes
+					}
+				}
+			}
+			50 = {
+				custom_tooltip = {
+					text = rasputin_lives_tt
+				}
+				scope:rasputin_scope = {
+					add_trait = wounded
+					add_modifier = {
+						name = modifier_survived_assassination
+						days = normal_modifier_time
+					}
+				}
+			}
+		}
+		custom_tooltip_no_bullet = alexei_health_deteriorates_tt # Alexei gets russian_character_is_marked_for_death_chance
+	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:rasputin_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:alexei_scope }
+	}
+}
+
+# Subsequent Assassination Attempts
+rasputin.4 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = rasputin.4.t
+	desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = rasputin.4.d2
+				trigger = { has_variable = rasputin4_conspirators_active }
+			}
+			triggered_desc = {
+				desc = rasputin.4.d
+				trigger = { always = yes }
+			}
+		}
+	}
+	flavor = rasputin.4.f
+
+	event_image = {
+		video = "votp_agitators_sneaking"
+	}
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	cooldown = { days = normal_modifier_time }
+
+	dlc = dlc019
+
+	trigger = { # triggered by je_tp_fav_rasputin
+		AND = {
+			has_variable = rasputin2_happened
+			has_variable = rasputin3_happened
+		}
+	}
+
+	immediate = {
+		random_scope_character = {
+			limit = {
+				has_template = RUS_grigoriy_rasputin
+			}
+			save_scope_as = rasputin_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+			if = {
+				limit = { NOT = { has_variable = rasputin_times_survived_var } }
+				set_variable = { name = rasputin_times_survived_var value = 0 }
+			}
+		}
+		random_scope_character = {
+			limit = {
+				has_template = RUS_alexei_ii
+			}
+			save_scope_as = alexei_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		if = {
+			limit = {
+				NOT = { has_variable = rasputin4_conspirators_seen }
+				OR = {
+					any_scope_character = { has_template = RUS_felix_yusupov }
+					any_scope_character = { has_template = rus_grand_duke_dmitri_pavlovich }
+				}
+			}
+			set_variable = rasputin4_conspirators_active
+			random_scope_character = {
+				limit = {
+					OR = {
+						has_template = RUS_felix_yusupov
+						has_template = rus_grand_duke_dmitri_pavlovich
+					}
+				}
+				save_scope_as = conspirator_scope
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = { has_journal_entry = je_tp_fav_rasputin }
+	}
+
+	option = {
+		name = rasputin.4.a
+		default_option = yes
+		ai_chance = {
+			base = 80
+		}
+		custom_tooltip = {
+			text = rasputin_lives_tt
+		}
+		random_list = {
+			1 = {
+				trigger = {
+					any_interest_group = {
+						is_in_government = yes
+						NOT = { has_modifier = modifier_rasputin_ig_instability }
+					}
+				}
+				custom_tooltip = {
+					text = rasputin_ig_instability_tt
+					every_interest_group = {
+						limit = {
+							is_in_government = yes
+							NOT = { has_modifier = modifier_rasputin_ig_instability }
+						}
+						add_modifier = {
+							name = modifier_rasputin_ig_instability
+							days = normal_modifier_time
+						}
+					}
+				}
+			}
+			1 = {
+				trigger = {
+					ruler ?= {
+						NOT = {
+							has_modifier = modifier_tsar_saved_rasputin
+						}
+					}
+				}
+				ruler ?= {
+					add_modifier = {
+						name = modifier_tsar_saved_rasputin
+						days = normal_modifier_time
+					}
+				}
+			}
+			1 = {
+				add_radicals = {
+					value = large_radicals
+					strata = upper
+				}
+			}
+		}
+		scope:rasputin_scope = {
+			add_modifier = {
+				name = modifier_survived_assassination
+				days = normal_modifier_time
+			}
+			change_variable = { name = rasputin_times_survived_var add = 1 }
+			custom_tooltip_no_bullet = alexei_health_improves_tt
+		}
+	}
+
+	option = {
+		name = rasputin.4.b
+		ai_chance = {
+			base = 20
+		}
+		random_list = {
+			50 = {
+				modifier = { # more likely to die in this event option each time he survives
+					add = {
+						value = scope:rasputin_scope.var:rasputin_times_survived_var
+						multiply = 10
+						max = 90
+					}
+				}
+				custom_tooltip = {
+					text = rasputin_dies_tt
+					revoke_temporary_event_immortality = { CHARACTER = scope:rasputin_scope }
+					scope:rasputin_scope = {
+						kill_character = yes
+					}
+				}
+				if = {
+					limit = { exists = scope:conspirator_scope }
+					revoke_temporary_event_immortality = { CHARACTER = scope:conspirator_scope }
+					scope:conspirator_scope = {
+						exile_character_with_role_cleanup = yes
+					}
+				}
+			}
+			50 = {
+				custom_tooltip = {
+					text = rasputin_lives_tt
+				}
+				scope:rasputin_scope = {
+					add_modifier = {
+						name = modifier_survived_assassination
+						days = normal_modifier_time
+					}
+					change_variable = { name = rasputin_times_survived_var add = 1 }
+				}
+			}
+		}
+		custom_tooltip_no_bullet = alexei_health_deteriorates_tt # Alexei gets russian_character_is_marked_for_death_chance
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:rasputin_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:alexei_scope }
+		if = {
+			limit = { has_variable = rasputin4_conspirators_active }
+			revoke_temporary_event_immortality = { CHARACTER = scope:conspirator_scope }
+			set_variable = rasputin4_conspirators_seen
+			remove_variable = rasputin4_conspirators_active
+		}
+	}
+}
+
+# introducing Prince Felix Yusupov
+rasputin.5 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = rasputin.5.t
+	desc = rasputin.5.d
+	flavor = rasputin.5.f
+
+	gui_window = event_window_1char_tabloid
+	left_icon = scope:felix_scope
+
+	icon = "gfx/interface/icons/event_icons/event_default.dds"
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	fire_only_once = yes
+
+	dlc = dlc019
+
+	trigger = { # triggered by je_tp_fav_rasputin
+		game_date > 1913.1.1
+		any_interest_group = {
+			is_marginal = no
+			leader = {
+				NOR = {
+					is_ruler_of_own_country = yes
+					is_heir_of_own_country = yes
+					has_template = RUS_grigoriy_rasputin
+				}
+			}
+		}
+	}
+
+	immediate = {
+		create_character = {
+			template = RUS_felix_yusupov
+			save_scope_as = felix_scope
+		}
+		random_interest_group = {
+			limit = {
+				is_marginal = no
+				leader = {
+					NOR = {
+						is_ruler_of_own_country = yes
+						is_heir_of_own_country = yes
+						has_template = RUS_grigoriy_rasputin
+					}
+				}
+			}
+			save_scope_as = relevant_ig
+			leader = {
+				save_scope_as = relevant_character_scope
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
+		}
+		random_scope_character = {
+			limit = {
+				has_template = RUS_grigoriy_rasputin
+			}
+			save_scope_as = rasputin_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+		scope:felix_scope = {
+			set_temporary_event_immortality = { DURATION = 3 }
+			interest_group ?= {
+				save_scope_as = felix_ig_scope
+			}
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = { has_journal_entry = je_tp_fav_rasputin }
+	}
+
+	option = {
+		name = rasputin.5.a
+		default_option = yes
+		scope:felix_scope = {
+			add_trait = reckless
+		}
+		ai_chance = {
+			base = 50
+		}
+	}
+
+	option = {
+		name = rasputin.5.b
+		scope:felix_ig_scope ?= {
+			add_modifier = {
+				name = modifier_felix_ig_upset
+				days = normal_modifier_time
+			}
+		}
+		ai_chance = {
+			base = 50
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:felix_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:relevant_character_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:rasputin_scope }
+	}
+}

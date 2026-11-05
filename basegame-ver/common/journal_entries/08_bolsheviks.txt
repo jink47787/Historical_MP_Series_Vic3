@@ -1,0 +1,508 @@
+﻿# Communism in Russia
+# Bolsheviks, Mensheviks, SR's
+je_bolsheviks = {
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	group = je_group_socialism
+	dlc = dlc019
+
+	activation_description = {
+		always = yes
+	}
+
+	is_shown_when_inactive = {
+		c:RUS ?= this
+		has_dlc_feature = ip5_content
+		has_technology_researched = socialism
+		NOR = {
+			had_revolutionary_socialism_victory = yes
+			has_law_or_variant = law_type:law_council_republic
+		}
+		has_dlc_feature = ip5_content
+	}
+
+	possible = {
+		ig:ig_trade_unions ?= {
+			ig_counts_as_marginal = no
+		}
+		any_political_movement = {
+			OR = {
+				is_political_movement_type = movement_labor
+				is_political_movement_type = movement_communist
+				is_political_movement_type = movement_socialist
+				is_political_movement_type = movement_anarchist
+			}
+		}
+		custom_tooltip = {
+			text = je_bolsheviks_possible_tt
+			had_reformist_socialism_victory = yes
+		}
+	}
+
+	scripted_progress_bar = je_bolshevik_bar
+	scripted_progress_bar = je_menshevik_bar
+	scripted_progress_bar = je_left_sr_bar
+
+	immediate = {
+		save_scope_as = russia_scope
+		set_variable = {
+			name = bolshevik_labor
+			value = 50
+		}
+		set_variable = {
+			name = menshevik_labor
+			value = 50
+		}
+		ig:ig_trade_unions = {
+			save_scope_as = unions_scope
+		}
+		ig:ig_intelligentsia = {
+			save_scope_as = nerds_scope
+		}
+		ig:ig_rural_folk = {
+			save_scope_as = peasants_scope
+		}
+		set_bolshevik_je_leaders_effect = yes
+		set_variable = {
+			name = bolshevik_current_var
+			value = bolshevik_value
+		}
+		set_variable = {
+			name = menshevik_current_var
+			value = menshevik_value
+		}
+		set_variable = {
+			name = left_sr_current_var
+			value = left_sr_value
+		}
+		set_variable = {
+			name = bolshevik_pivot_var
+			value = bolshevik_value
+		}
+		set_variable = {
+			name = menshevik_pivot_var
+			value = menshevik_value
+		}
+		set_variable = {
+			name = left_sr_pivot_var
+			value = left_sr_value
+		}
+		trigger_event = {
+			id = bolsheviks.1
+			days = 0
+			popup = yes
+		}
+	}
+
+	on_weekly_pulse = {
+		effect = {
+			set_bolshevik_je_leaders_effect = yes
+		}
+	}
+
+	on_monthly_pulse = {
+		effect = {
+			set_variable = {
+				name = bolshevik_current_var
+				value = "scope:journal_entry.scripted_bar_progress(je_bolshevik_bar)"
+			}
+			set_variable = {
+				name = menshevik_current_var
+				value = "scope:journal_entry.scripted_bar_progress(je_menshevik_bar)"
+			}
+			set_variable = {
+				name = left_sr_current_var
+				value = "scope:journal_entry.scripted_bar_progress(je_left_sr_bar)"
+			}
+			set_variable = {
+				name = bolshevik_pivot_var
+				value = bolshevik_value
+			}
+			set_variable = {
+				name = menshevik_pivot_var
+				value = menshevik_value
+			}
+			set_variable = {
+				name = left_sr_pivot_var
+				value = left_sr_value
+			}
+		}
+		# Really make sure that Lenin and Trotsky are around for this
+		random_events = {
+			10 = 0
+			1 = historical_agitators.1 # Lenin
+			1 = historical_agitators.12 # Trotsky
+			1 = bolsheviks.4 # bolsheviks and mensheviks fight over labor movement
+			1 = bolsheviks.5 # most popular leftist makes a speech
+		}
+	}
+
+	# This displays the leader of each faction
+	status_desc = {
+		first_valid = {
+			triggered_desc = {
+				desc = bolshevik_leader_status
+				trigger = {
+					exists = var:bolshevik_leader
+					var:bolshevik_leader ?= { is_character_alive = yes }
+				}
+			}
+			triggered_desc = {
+				desc = bolshevik_leader_status_empty
+				trigger = {
+					NOT = {
+						exists = var:bolshevik_leader
+						var:bolshevik_leader ?= { is_character_alive = yes }
+					}
+				}
+			}
+		}
+		first_valid = {
+			triggered_desc = {
+				desc = menshevik_leader_status
+				trigger = {
+					has_variable = menshevik_leader
+					var:menshevik_leader ?= { is_character_alive = yes }
+				}
+			}
+			triggered_desc = {
+				desc = menshevik_leader_status_empty
+				trigger = {
+					NOT = {
+						exists = var:menshevik_leader
+						var:menshevik_leader ?= { is_character_alive = yes }
+					}
+				}
+			}
+		}
+		first_valid = {
+			triggered_desc = {
+				desc = sr_leader_status
+				trigger = {
+					exists = var:left_sr_leader
+					var:left_sr_leader ?= { is_character_alive = yes }
+				}
+			}
+			triggered_desc = {
+				desc = sr_leader_status_empty
+				trigger = {
+					NOT = {
+						exists = var:left_sr_leader
+						var:left_sr_leader ?= { is_character_alive = yes }
+					}
+				}
+			}
+		}
+	}
+
+	outcome = {
+		header = je_bolsheviks_coup_header
+		effect_header = je_bolsheviks_coup_effect_header
+		color = "red_outcome"
+
+		conclusion_desc = je_bolsheviks_bolsheviks_conclusion_desc
+
+		flags = { historical }
+
+		trigger = {
+			OR = {
+				legitimacy <= 50
+				has_journal_entry = je_russia_provisional_government
+				AND = {
+					custom_tooltip = {
+						text = has_communist_revolution_tt
+						any_civil_war = {
+							is_civil_war_type = revolution
+							civil_war_progress >= 0.5
+							political_movement ?= {
+								OR = {
+									is_political_movement_type = movement_communist
+									is_political_movement_type = movement_labor
+								}
+							}
+						}
+					}
+					custom_tooltip = {
+						text = capital_in_revolt_tt
+						capital = {
+							is_in_revolt = yes
+						}
+					}
+				}
+			}
+			has_factory_councils_law_or_amendment = yes
+			custom_tooltip = {
+				text = bolshevik_bar_strong
+				scope:journal_entry = {
+					scripted_bar_progress = {
+						name = je_bolshevik_bar
+						value >= socialist_faction_bar_victory_threshold
+					}
+				}
+			}
+		}
+
+		effect = {
+			set_variable = bolshevik_coup_var
+			trigger_event = {
+				id = bolsheviks.2
+				popup = yes
+			}
+		}
+		event_outcome_effect_desc = {
+			header = bolsheviks.2.a
+			effect = {
+				activate_law = law_type:law_council_republic
+				var:bolshevik_leader ?= {
+					set_character_as_ruler = yes
+				}
+				ig:ig_trade_unions ?= {
+					add_ruling_interest_group = yes
+				}
+				every_interest_group ?= {
+					limit = {
+						leader = {
+							NOR = {
+								character_counts_as_bolshevik = yes
+								character_counts_as_menshevik = yes
+								character_counts_as_left_sr = yes
+							}
+						}
+					}
+					remove_ruling_interest_group = yes
+				}
+			}
+		}
+	}
+
+	# Menshevik outcome
+	outcome = {
+		header = je_bolsheviks_mensheviks_header
+		effect_header = je_bolsheviks_mensheviks_effect_header
+		color = "gold_positive"
+
+		conclusion_desc = je_bolsheviks_mensheviks_conclusion_desc
+
+		trigger = {
+			# faction is in government
+			any_scope_character = {
+				character_counts_as_menshevik = yes
+				is_interest_group_leader = yes
+				interest_group ?= {
+					is_in_government = yes
+				}
+			}
+			# faction is strong
+			custom_tooltip = {
+				text = menshevik_bar_strong
+				scope:journal_entry = {
+					scripted_bar_progress = {
+						name = je_menshevik_bar
+						value >= socialist_faction_bar_victory_threshold
+					}
+				}
+			}
+			# faction has achieved primary ideological goals
+			has_law = law_type:law_universal_suffrage
+			OR = {
+				has_law = law_type:law_worker_protections
+				has_law = law_type:law_old_age_pension
+			}
+		}
+
+		effect = {
+			set_variable = menshevik_gov_var
+			trigger_event = {
+				id = bolsheviks.3
+				popup = yes
+			}
+		}
+		event_outcome_effect_desc = {
+			header = bolsheviks.3.a
+			effect = {
+				add_loyalists = {
+					value = large_radicals
+					strata = lower
+				}
+				add_modifier = {
+					name = menshevik_government_modifier
+					days = very_long_modifier_time
+				}
+			}
+		}
+	}
+
+	# SR outcome
+	outcome = {
+		header = je_bolsheviks_sr_header
+		effect_header = je_bolsheviks_sr_effect_header
+		color = "green_outcome"
+
+		conclusion_desc = je_bolsheviks_sr_conclusion_desc
+
+		trigger = {
+			OR = {
+				legitimacy <= 50
+				has_journal_entry = je_russia_provisional_government
+				AND = {
+					custom_tooltip = {
+						text = has_peasant_anarchist_revolution_tt
+						any_civil_war = {
+							is_civil_war_type = revolution
+							civil_war_progress >= 0.5
+							political_movement ?= {
+								OR = {
+									is_political_movement_type = movement_anarchist
+									is_political_movement_type = movement_land_reform
+								}
+							}
+						}
+					}
+					custom_tooltip = {
+						text = capital_in_revolt_tt
+						capital = {
+							is_in_revolt = yes
+						}
+					}
+				}
+			}
+			has_factory_councils_law_or_amendment = yes
+			custom_tooltip = {
+				text = sr_bar_strong
+				scope:journal_entry = {
+					scripted_bar_progress = {
+						name = je_left_sr_bar
+						value >= socialist_faction_bar_victory_threshold
+					}
+				}
+			}
+		}
+
+		effect = {
+			set_variable = sr_coup_var
+			trigger_event = {
+				id = bolsheviks.2
+				popup = yes
+			}
+		}
+		event_outcome_effect_desc = {
+			header = bolsheviks.2.a
+			effect = {
+				activate_law = law_type:law_council_republic
+				var:left_sr_leader ?= {
+					set_character_as_ruler = yes
+				}
+				ig:ig_rural_folk ?= {
+					add_ruling_interest_group = yes
+				}
+				every_interest_group ?= {
+					limit = {
+						leader = {
+							NOR = {
+								character_counts_as_bolshevik = yes
+								character_counts_as_menshevik = yes
+								character_counts_as_left_sr = yes
+							}
+						}
+					}
+					remove_ruling_interest_group = yes
+				}
+			}
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+
+		trigger = {
+			custom_tooltip = {
+				text = je_bolsheviks_grace_over_tt
+				scope:journal_entry.journal_entry_age > 365
+			}
+			NOT = {
+				has_journal_entry = je_russia_provisional_government
+			}
+			custom_tooltip = {
+				text = socialist_factions_all_weak_tt
+				scope:journal_entry = {
+					scripted_bar_progress = {
+						name = je_bolshevik_bar
+						value < socialist_faction_bar_failure_threshold
+					}
+					scripted_bar_progress = {
+						name = je_menshevik_bar
+						value < socialist_faction_bar_failure_threshold
+					}
+					scripted_bar_progress = {
+						name = je_left_sr_bar
+						value < socialist_faction_bar_failure_threshold
+					}
+				}
+			}
+		}
+
+		effect = {
+			je_bolsheviks_cleanup_effect = yes
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_bolsheviks_invalid_conclusion_desc
+		trigger = {
+			has_journal_entry = je_state_and_revolution
+		}
+		effect = {
+			if = {
+				limit = {
+					scope:journal_entry = {
+						"scripted_bar_progress(je_left_sr_bar)" > "scripted_bar_progress(je_bolshevik_bar)"
+					}
+				}
+				if = {
+					limit = {
+						any_scope_character = {
+							character_counts_as_left_sr = yes
+							is_interest_group_leader = yes
+							interest_group ?= {
+								is_in_government = yes
+							}
+						}
+					}
+					set_variable = sr_coup_var
+					trigger_event = {
+						id = bolsheviks.3
+						popup = yes
+					}
+				}
+			}
+			else = {
+				if = {
+					limit = {
+						any_scope_character = {
+							character_counts_as_bolshevik = yes
+							is_interest_group_leader = yes
+							interest_group ?= {
+								is_in_government = yes
+							}
+						}
+					}
+					set_variable = bolshevik_coup_var
+					trigger_event = {
+						id = bolsheviks.3
+						popup = yes
+					}
+				}
+			}
+			je_bolsheviks_cleanup_effect = yes
+		}
+	}
+
+	weight = 5000
+
+	should_be_pinned_by_default_uninvolved_or_context = yes
+	should_be_pinned_by_default_involved = yes
+}

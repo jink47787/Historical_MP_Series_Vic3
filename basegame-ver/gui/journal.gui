@@ -1,5 +1,6 @@
-# COPY-PASTED FOR NOW
+﻿# COPY-PASTED FOR NOW
 @panel_width_minus_10 = 530			# used to be 450
+@panel_width_minus_20 = 520
 @panel_width_minus_30 = 510
 @panel_width = 540  				# used to be 460
 @panel_width_half = 270				# used to be 230
@@ -14,7 +15,7 @@ types journal
 {
 	type journal_panel = default_block_window {
 		name = "journal_panel"
-		
+
 		blockoverride "animation_state_block" {
 			state = {
 				name = _show
@@ -30,7 +31,7 @@ types journal
 				}
 			}
 		}
-		
+
 		blockoverride "window_header_name"
 		{
 			text = "JOURNAL_WINDOW_HEADER"
@@ -61,10 +62,10 @@ types journal
 				}
 
 				blockoverride "second_button" {
-					text = "POTENTIAL"
+					text = "DECISIONS"
 				}
 				blockoverride "second_button_tooltip" {
-					tooltip = "POTENTIAL"
+					tooltip = "DECISIONS"
 				}
 				blockoverride "second_button_click" {
 					onclick = "[InformationPanel.SelectTab('inactive_journal_entries')]"
@@ -76,7 +77,7 @@ types journal
 					visible = "[Not( InformationPanel.IsTabSelected('inactive_journal_entries') )]"
 				}
 				blockoverride "second_button_selected" {
-					text = "POTENTIAL"
+					text = "DECISIONS"
 				}
 
 				blockoverride "third_button" {
@@ -99,104 +100,335 @@ types journal
 				}
 			}
 		}
-		
+
 		blockoverride "scrollarea_content" {
-			
+
 			flowcontainer = {
 				direction = vertical
 				using = default_list_position
-				margin_top = 10
-				
+				margin_top = 5
+				spacing = 5
+
 				### JOURNAL
 				flowcontainer = {
 					visible = "[InformationPanel.IsTabSelected('default')]"
-					using = default_list_position
+					parentanchor = hcenter
 					direction = vertical
 					using = default_content_fade
-					
-					### GAME OBJECTIVES
-					default_header = {
+
+					### Player Objective
+					flowcontainer = {
 						visible = "[GetPlayer.HasObjective]"
-						blockoverride "text" {
-							text = "[AccessPlayer.GetObjective.GetName]"
-						}
-					}
-
-					empty_state = {
-						blockoverride "visible" {
-							 visible = "[And(IsDataModelEmpty(AccessPlayer.AccessActivePlayerObjectiveJournalEntries), GetPlayer.HasObjective)]"
-						}
-
-						blockoverride "text" {
-							text = "[AccessPlayer.GetObjective.GetObjectiveType.GetIdleHeader]"
-						}
-
-						blockoverride "hint_visibility" {
-							visible = yes
-						}
-
-						blockoverride "hint" {
-							text = "[AccessPlayer.GetObjective.GetObjectiveType.GetIdleHint]"
-						}
-					}
-
-					flowcontainer = {
-						visible = "[Not(IsDataModelEmpty(AccessPlayer.AccessActivePlayerObjectiveJournalEntries))]"
-						direction = vertical
-						spacing = 2
 						parentanchor = hcenter
-						datamodel = "[AccessPlayer.AccessActivePlayerObjectiveJournalEntries]"
-						
-						item = {
-							journal_entry = {}
-						}
-					}
-
-					empty_state = {
-						blockoverride "visible" {
-							 visible = "[IsDataModelEmpty(AccessPlayer.AccessActiveNonPlayerObjectiveJournalEntries)]"
-						}
-						blockoverride "text" {
-							text = "NO_JOURNAL_ENTRIES"
-						}
-					}
-
-					flowcontainer = {
 						direction = vertical
-						parentanchor = hcenter
-						datamodel = "[AccessPlayer.GetGroupsForActiveJournalEntries]"
-						spacing = 10
-						margin_bottom = 10
 
-						item = {
-							flowcontainer = {
-								direction = vertical
-								textbox = {
-									text = "[JournalEntryGroup.GetName]"
-									autoresize = yes
-									align = nobaseline
-									default_format = "#title"
-									margin_left = 3
-								}							
+						default_header = {
+							blockoverride "text" {
+								text = "concept_strategic_objective_short"
+							}
+						}
+
+						flowcontainer = {
+							direction = vertical
+							minimumsize = { @panel_width_plus_20 150 }
+							maximumsize = { @panel_width_plus_20 150 }
+
+							background = {
+								using = simple_frame
+								alpha = 0.85
+								texture = "[AccessPlayer.GetObjective.GetIllustration]"
+
+								modify_texture = {
+									using = simple_frame_mask
+								}
+							}
+
+							### GAME OBJECTIVES
+							container = {
+								minimumsize = { @panel_width_plus_20 35 }
+
+								background = {
+									margin = { -2 -2 }
+									using = dark_area
+									alpha = 0.65
+
+									modify_texture = {
+										texture = "gfx/interface/masks/fade_vertical_bottom.dds"
+										blend_mode = alphamultiply
+										alpha = 0.6
+									}
+								}
+
 								flowcontainer = {
-									direction = vertical
-									datamodel = "[JournalEntryGroup.GetActiveJournalEntryTypes(GetPlayer.Self)]"
-									spacing = 2
-									item = {
-										journal_entry = {
-											datacontext = "[AccessPlayer.GetJournalEntry(JournalEntryType.Self)]"
+									margin_top = 3
+									parentanchor = hcenter
+
+									icon = {
+										texture = "[AccessPlayer.GetObjective.GetIcon]"
+										size = { 27 27 }
+									}
+
+									textbox = {
+										text = "[AccessPlayer.GetObjective.GetName]"
+										default_format = "#header"
+										autoresize = yes
+										max_width = 200
+										margin_top = 4
+										using = elide_fontsize_min
+									}
+								}
+							}
+
+							empty_state = {
+								minimumsize = { @panel_width 150 }
+								margin_top = 50
+
+								blockoverride "visible" {
+									visible = "[And(IsDataModelEmpty(AccessPlayer.AccessActivePlayerObjectiveJournalEntries), GetPlayer.HasObjective)]"
+								}
+
+								blockoverride "text" {
+									text = "[AccessPlayer.GetObjective.GetObjectiveType.GetIdleHeader]"
+									margin_bottom = 2
+
+									background = {
+										using = dark_area
+										alpha = 0.35
+
+										modify_texture = {
+											texture = "gfx/interface/masks/fade_horizontal_center.dds"
+											blend_mode = alphamultiply
+											alpha = 1
+										}
+									}
+								}
+
+								blockoverride "hint_visibility" {
+									visible = yes
+								}
+
+								blockoverride "hint" {
+									text = "[AccessPlayer.GetObjective.GetObjectiveType.GetIdleHint]"
+								}
+							}
+
+							empty_state = {
+								blockoverride "visible" {
+									visible = "[And(IsDataModelEmpty(AccessPlayer.AccessActiveNonPlayerObjectiveJournalEntries), Not(GetPlayer.HasObjective))]"
+								}
+
+								blockoverride "text" {
+									text = "NO_JOURNAL_ENTRIES"
+								}
+							}
+						}
+
+						flowcontainer = {
+							direction = vertical
+							parentanchor = hcenter
+
+							flowcontainer = {
+								visible = "[Not(IsDataModelEmpty(AccessPlayer.AccessActivePlayerObjectiveJournalEntries))]"
+								direction = vertical
+								spacing = 2
+								parentanchor = hcenter
+								datamodel = "[AccessPlayer.AccessActivePlayerObjectiveJournalEntries]"
+
+								item = {
+									journal_entry = {}
+								}
+							}
+
+							player_objective_additional_entries = {}
+						}
+					}
+
+					flowcontainer = {
+						parentanchor = hcenter
+						direction = vertical
+						#spacing = 10
+
+						default_header = {
+							blockoverride "text" {
+								text = "JOURNAL_ENTRIES_CONCEPT"
+							}
+						}
+
+						flowcontainer = {
+							direction = vertical
+
+							background = {
+								using = dropdown_background
+								margin = { 0 -2 }
+							}
+
+							section_header_button = {
+								blockoverride "left_text" {
+									text = "FILTERS"
+									fontsize_min = 12
+									elide = right
+								}
+
+								blockoverride "right_text" {
+									section_header_right_text = {
+										text = "[JournalPanel.GetFilterDesc]"
+									}
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle( 'characters_filters' )]"
+								}
+
+								blockoverride "onclick_showmore" {
+									visible = "[Not(GetVariableSystem.Exists( 'characters_filters' ))]"
+								}
+
+								blockoverride "onclick_showless" {
+									visible = "[GetVariableSystem.Exists( 'characters_filters' )]"
+								}
+							}
+
+							flowcontainer = {
+								visible = "[GetVariableSystem.Exists( 'characters_filters' )]"
+								minimumsize = { @panel_width_plus_14 -1 }
+								parentanchor = hcenter
+								margin_top = 5
+								margin_bottom = 10
+								direction = vertical
+
+								editbox = {
+									name = "journal_entries_search_bar"
+									parentanchor = hcenter
+									size = { @panel_width 40 }
+									margin_left = 10
+									alwaystransparent = no
+									focuspolicy = all
+									focus_on_visible = yes
+									align = nobaseline
+									maxcharacters = 120
+
+									background = {
+										using = text_edit_bg
+									}
+
+									textbox = {
+										visible = "[JournalPanel.GetSearchBar.IsQueryEmpty]"
+										parentanchor = vcenter
+										align = nobaseline
+										position = { 10 0 }
+										autoresize = yes
+										using = elide_fontsize_min
+										max_width = @panel_width
+										default_format = "#white"
+										alpha = 0.5
+										text = "JOURNAL_PANEL_SEARCH_BAR_EMPTY_TEXT"
+									}
+								}
+
+								### Availability Filter
+								building_browser_filter_line = {
+									parentanchor = hcenter
+									blockoverride "line_background" {}
+
+									blockoverride "line_size" {
+										size = { @panel_width 38 }
+									}
+
+									blockoverride "filter_line_label"
+									{
+										text = "AVAILABILITY"
+									}
+
+									blockoverride "filter_line_buttons"
+									{
+										building_browser_filter_line_button = {
+											text = "ACTIVE"
+											align = hcenter|nobaseline
+
+											blockoverride "line_button_tooltip"{
+												tooltip = "ACTIVE_JOURNAL_ENTRIES_FILTER_TOOLTIP"
+											}
+
+											blockoverride "line_button_onclick" {
+												onclick = "[JournalPanel.SetAvailabilityFilter('active')]"
+											}
+
+											blockoverride "line_button_icon_texture" {
+												visible = no
+											}
+
+											blockoverride "line_button_selected" {
+												visible = "[JournalPanel.IsAvailabilityFilterSelected('active')]"
+											}
+										}
+
+										building_browser_filter_line_button = {
+											text = "POTENTIAL"
+											align = hcenter|nobaseline
+
+											blockoverride "line_button_tooltip"{
+												tooltip = "POTENTIAL_JOURNAL_ENTRIES_FILTER_TOOLTIP"
+											}
+
+											blockoverride "line_button_onclick" {
+												onclick = "[JournalPanel.SetAvailabilityFilter('potential')]"
+											}
+
+											blockoverride "line_button_icon_texture" {
+												visible = no
+											}
+
+											blockoverride "line_button_selected" {
+												visible = "[JournalPanel.IsAvailabilityFilterSelected('potential')]"
+											}
+										}
+
+										building_browser_filter_line_button = {
+											text = "CONCLUDED"
+											align = hcenter|nobaseline
+
+											blockoverride "line_button_tooltip"{
+												tooltip = "CONCLUDED_JOURNAL_ENTRIES_FILTER_TOOLTIP"
+											}
+
+											blockoverride "line_button_onclick" {
+												onclick = "[JournalPanel.SetAvailabilityFilter('concluded')]"
+											}
+
+											blockoverride "line_button_icon_texture" {
+												visible = no
+											}
+
+											blockoverride "line_button_selected" {
+												visible = "[JournalPanel.IsAvailabilityFilterSelected('concluded')]"
+											}
 										}
 									}
 								}
 							}
 						}
+
+						### Journal Entry Groups
+						journal_entry_groups_list = {}
 					}
-						
+				}
+
+				### DECISIONS
+				flowcontainer = {
+					visible = "[InformationPanel.IsTabSelected('inactive_journal_entries')]"
+					using = default_list_position
+					using = default_content_fade
+					direction = vertical
+					spacing = 10
+					parentanchor = hcenter
+
 					### DECISIONS
 					default_header = {
+
 						blockoverride "text" {
 							text = "DECISIONS"
 						}
+
 					}
 
 					flowcontainer = {
@@ -205,7 +437,6 @@ types journal
 						margin_bottom = 10
 						using = default_content_fade
 
-						
 						textbox = {
 							visible = "[IsDataModelEmpty(GetPlayer.GetDecisions)]"
 							text = NO_DECISIONS
@@ -221,73 +452,14 @@ types journal
 						dynamicgridbox = {
 							parentanchor = hcenter
 							datamodel = "[GetPlayer.GetDecisions]"
+
 							item = {
 								flowcontainer = {
 									margin = { 0 2 }
 									direction = vertical
-									
+
 									decision = {
 										minimumsize = { @panel_width_minus_30 -1 }
-									}
-								}
-							}
-						}
-					}
-				}
-
-				### INACTIVE JOURNAL ENTRIES
-				flowcontainer = {
-					visible = "[InformationPanel.IsTabSelected('inactive_journal_entries')]"
-					using = default_list_position
-					using = default_content_fade
-					direction = vertical
-					spacing = 10
-					parentanchor = hcenter
-					datamodel = "[AccessPlayer.GetGroupsForInActiveJournalEntries]"
-
-					empty_state = {
-						parentanchor = vcenter
-
-						blockoverride "visible" {
-							visible = "[IsDataModelEmpty(AccessPlayer.GetGroupsForInActiveJournalEntries)]"
-						}
-
-						blockoverride "text" {
-							text = "NO_INACTIVE_JOURNAL_ENTRIES"
-						}
-					}
-
-					item = {
-						flowcontainer = {
-							direction = vertical
-
-							textbox = {
-								text = "[JournalEntryGroup.GetName]"
-								autoresize = yes
-								align = nobaseline
-								default_format = "#title"
-								margin_left = 3
-							}
-
-							flowcontainer = {
-								direction = vertical
-								datamodel = "[JournalEntryGroup.GetInactiveJournalEntryTypes(GetPlayer.Self)]"
-								spacing = 2
-
-								item = {
-									journal_entry = {
-										datacontext = "[AccessPlayer.GetJournalEntry(JournalEntryType.Self)]"
-										alpha = 0.75
-
-										blockoverride "fontsize" {}
-
-										blockoverride "iconsize" {
-											size = { 35 35 }
-										}
-
-										blockoverride "scripted_progress_bars_visibility" {
-											visible = no
-										}
 									}
 								}
 							}
@@ -316,7 +488,7 @@ types journal
 							blockoverride "text" {
 								text = "NO_FORMABLE_COUNTRIES"
 							}
-						}	
+						}
 
 						flowcontainer = {
 							parentanchor = hcenter
@@ -335,9 +507,440 @@ types journal
 		}
 	}
 
-	### JOURNAL ENTRY
+	### Journal Entry Groups List
+	type journal_entry_groups_list = flowcontainer {
+		parentanchor = hcenter
+		direction = vertical
+		margin_top = 10
+		spacing = 10
+
+		### Themed groups with active entries
+		journal_entry_themed_group_list = {
+			blockoverride "themed_group_datamodel" {
+				visible = "[Not(IsDataModelEmpty(JournalPanel.GetActiveJournalEntryGroups))]"
+				datamodel = "[JournalPanel.GetActiveJournalEntryGroups]"
+			}
+		}
+
+		### Themed groups whose shown entries are only potential
+		journal_entry_themed_group_list = {
+			blockoverride "themed_group_datamodel" {
+				visible = "[Not(IsDataModelEmpty(JournalPanel.GetPotentialJournalEntryGroups))]"
+				datamodel = "[JournalPanel.GetPotentialJournalEntryGroups]"
+			}
+		}
+
+		### Active entries outside a themed group
+		journal_entry_ungrouped_list = {
+			blockoverride "ungrouped_datamodel" {
+				visible = "[Not(IsDataModelEmpty(JournalPanel.GetUngroupedActiveJournalEntryTypes))]"
+				datamodel = "[JournalPanel.GetUngroupedActiveJournalEntryTypes]"
+			}
+		}
+
+		### Potential entries outside a themed group
+		journal_entry_ungrouped_potential = {}
+
+		### Themed groups whose shown entries are only concluded
+		journal_entry_themed_group_list = {
+			blockoverride "themed_group_datamodel" {
+				visible = "[Not(IsDataModelEmpty(JournalPanel.GetConcludedJournalEntryGroups))]"
+				datamodel = "[JournalPanel.GetConcludedJournalEntryGroups]"
+			}
+		}
+
+		### Concluded entries outside a themed group
+		journal_entry_ungrouped_concluded = {}
+	}
+
+	type journal_entry_themed_group_list = flowcontainer {
+		parentanchor = hcenter
+		direction = vertical
+		spacing = 10
+
+		block "themed_group_datamodel" {}
+
+		item = {
+			journal_entry_group_with_illustration = {}
+		}
+	}
+
+	type journal_entry_ungrouped_list = flowcontainer {
+		visible = "[Not(IsDataModelEmpty(JournalPanel.GetUngroupedActiveJournalEntryTypes))]"
+		parentanchor = hcenter
+		direction = vertical
+		spacing = 2
+		margin = { 12 6 }
+		margin_bottom = 10
+
+		background = {
+			using = entry_bg_fancy_dark
+		}
+
+		textbox = {
+			minimumsize = { @panel_width_minus_20 24 }
+			align = nobaseline
+			margin_left = 5
+			using = elide_fontsize_min
+			text = "ADDITIONAL_JOURNAL_ENTRIES"
+		}
+
+		flowcontainer = {
+			direction = vertical
+			spacing = 2
+
+			block "ungrouped_datamodel" {}
+
+			item = {
+				journal_entry = {
+					datacontext = "[AccessPlayer.GetJournalEntry(JournalEntryType.Self)]"
+
+					blockoverride "minimumsize" {
+						minimumsize = { @panel_width_minus_20 -1 }
+					}
+				}
+			}
+		}
+	}
+
+	type journal_entry_group_with_illustration = flowcontainer {
+		parentanchor = hcenter
+		direction = vertical
+		margin_bottom = 5
+
+		background = {
+			using = entry_bg_fancy_dark
+			using = frame_small_mask
+			alpha = 0.85
+		}
+
+		background = {
+			using = frame_small
+		}
+
+		flowcontainer = {
+			direction = vertical
+			minimumsize = { @panel_width 100 }
+			maximumsize = { @panel_width 100 }
+
+			background = {
+				margin = { -1 -1 }
+				margin_top = -1
+				texture = "[JournalEntryGroup.GetIllustration]"
+				using = frame_small_mask_top
+			}
+
+			textbox = {
+				minimumsize = { @panel_width_half 40 }
+				margin_left = 13
+				default_format = "#bold"
+				align = nobaseline
+				using = elide_fontsize_min
+				text = "[JournalEntryGroup.GetName]"
+
+				background = {
+					margin_bottom = 30
+					using = dark_area
+					alpha = 1
+					using = frame_small_mask_top
+					using = fade_right_simple
+					using = fade_down_simple
+				}
+			}
+		}
+
+		flowcontainer = {
+			direction = vertical
+			parentanchor = hcenter
+			spacing = 2
+			margin = { 0 2 }
+			margin_top = -5
+
+			### ACTIVE
+			flowcontainer = {
+				direction = vertical
+				spacing = 2
+				datamodel = "[JournalPanel.GetFilteredActiveJournalEntryTypes(JournalEntryGroup.AccessSelf)]"
+
+				item = {
+					flowcontainer = {
+						datacontext = "[AccessPlayer.GetJournalEntry(JournalEntryType.Self)]"
+						direction = vertical
+
+						journal_entry = {
+							visible = "[JournalEntry.IsHighlighted]"
+
+							blockoverride "minimumsize" {
+								minimumsize = { @panel_width_minus_20 56 }
+							}
+
+							blockoverride "button_style" {
+								using = default_button_primary
+							}
+						}
+
+						journal_entry = {
+							visible = "[Not(JournalEntry.IsHighlighted)]"
+
+							blockoverride "minimumsize" {
+								minimumsize = { @panel_width_minus_20 -1 }
+							}
+						}
+					}
+				}
+			}
+
+			### POTENTIAL
+			flowcontainer = {
+				direction = vertical
+				spacing = 2
+				datamodel = "[JournalPanel.GetFilteredInactiveJournalEntryTypes(JournalEntryGroup.AccessSelf)]"
+
+				item = {
+					potential_journal_entry = {
+						blockoverride "minimumsize" {
+							minimumsize = { @panel_width_minus_20 -1 }
+						}
+					}
+				}
+			}
+
+			### CONCLUDED
+			flowcontainer = {
+				direction = vertical
+				spacing = 2
+				datamodel = "[JournalPanel.GetFilteredConcludedJournalEntries(JournalEntryGroup.AccessSelf)]"
+
+				item = {
+					concluded_journal_entry = {
+						blockoverride "minimumsize" {
+							minimumsize = { @panel_width_minus_20 -1 }
+						}
+					}
+				}
+			}
+		}
+	}
+
+	type journal_entry_ungrouped_potential = flowcontainer {
+		parentanchor = hcenter
+		direction = vertical
+		visible = "[Not(IsDataModelEmpty(JournalPanel.GetUngroupedPotentialJournalEntryTypes))]"
+
+		section_header_button = {
+			blockoverride "layout" {
+				size = { @panel_width 38 }
+			}
+
+			blockoverride "left_text" {
+				text = "POTENTIAL"
+			}
+
+			blockoverride "right_text" {
+				section_header_right_text = {
+					text = "[GetDataModelSize(JournalPanel.GetUngroupedPotentialJournalEntryTypes)]"
+				}
+			}
+
+			blockoverride "onclick" {
+				onclick = "[GetVariableSystem.Toggle('journal_entry_ungrouped_collapsed')]"
+			}
+
+			blockoverride "onclick_showmore" {
+				visible = "[Not(Or(Not(GetVariableSystem.Exists('journal_entry_ungrouped_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty)))]"
+			}
+
+			blockoverride "onclick_showless" {
+				visible = "[Or(Not(GetVariableSystem.Exists('journal_entry_ungrouped_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty))]"
+			}
+		}
+
+		flowcontainer = {
+			using = default_list_position
+			direction = vertical
+			visible = "[And(Or(Not(GetVariableSystem.Exists('journal_entry_ungrouped_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty)), InformationPanel.IsTabSelected('default'))]"
+
+			flowcontainer = {
+				direction = vertical
+				spacing = 2
+				datamodel = "[JournalPanel.GetUngroupedPotentialJournalEntryTypes]"
+
+				item = {
+					potential_journal_entry = {}
+				}
+			}
+		}
+	}
+
+	type journal_entry_ungrouped_concluded = flowcontainer {
+		parentanchor = hcenter
+		direction = vertical
+		visible = "[Not(IsDataModelEmpty(JournalPanel.GetUngroupedConcludedJournalEntries))]"
+
+		section_header_button = {
+			blockoverride "layout" {
+				size = { @panel_width 38 }
+			}
+
+			blockoverride "fade" {
+				alpha = 0.75
+			}
+
+			blockoverride "left_text" {
+				text = "CONCLUDED"
+			}
+
+			blockoverride "right_text" {
+				section_header_right_text = {
+					text = "[GetDataModelSize(JournalPanel.GetUngroupedConcludedJournalEntries)]"
+				}
+			}
+
+			blockoverride "onclick" {
+				onclick = "[GetVariableSystem.Toggle('completed_journal_entry_ungrouped_collapsed')]"
+			}
+
+			blockoverride "onclick_showmore" {
+				visible = "[Not(Or(Not(GetVariableSystem.Exists('completed_journal_entry_ungrouped_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty)))]"
+			}
+
+			blockoverride "onclick_showless" {
+				visible = "[Or(Not(GetVariableSystem.Exists('completed_journal_entry_ungrouped_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty))]"
+			}
+		}
+
+		flowcontainer = {
+			using = default_list_position
+			direction = vertical
+			visible = "[And(Or(Not(GetVariableSystem.Exists('completed_journal_entry_ungrouped_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty)), InformationPanel.IsTabSelected('default'))]"
+
+			flowcontainer = {
+				direction = vertical
+				spacing = 2
+				datamodel = "[JournalPanel.GetUngroupedConcludedJournalEntries]"
+
+				item = {
+					concluded_journal_entry = {}
+				}
+			}
+		}
+	}
+
+	### Player Objective Potential & Completed JEs
+	type player_objective_additional_entries = flowcontainer {
+		parentanchor = hcenter
+		direction = vertical
+
+		### POTENTIAL JOURNAL ENTRIES - OBJECTIVE
+		section_header_button = {
+			datamodel = "[AccessPlayer.AccessActivePlayerObjectiveInactiveJournalEntryTypes]"
+
+			blockoverride "layout" {
+				size = { @panel_width 38 }
+			}
+
+			blockoverride "left_text" {
+				text = "POTENTIAL"
+			}
+
+			blockoverride "right_text" {
+				section_header_right_text = {
+					text = "[GetDataModelSize(AccessPlayer.AccessActivePlayerObjectiveInactiveJournalEntryTypes)]"
+				}
+			}
+
+			blockoverride "onclick" {
+				enabled = "[Not(IsDataModelEmpty(AccessPlayer.AccessActivePlayerObjectiveInactiveJournalEntryTypes))]"
+				onclick = "[GetVariableSystem.Toggle('journal_objective_potential_collapsed')]"
+			}
+
+			blockoverride "onclick_showmore" {
+				visible = "[Not(Or(Not(GetVariableSystem.Exists('journal_objective_potential_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty)))]"
+			}
+
+			blockoverride "onclick_showless" {
+				visible = "[Or(Not(GetVariableSystem.Exists('journal_objective_potential_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty))]"
+			}
+		}
+
+		flowcontainer = {
+			visible = "[And(Or(Not(GetVariableSystem.Exists('journal_objective_potential_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty)), InformationPanel.IsTabSelected('default'))]"
+			using = default_list_position
+			direction = vertical
+			spacing = 10
+
+			flowcontainer = {
+				direction = vertical
+				spacing = 2
+				datamodel = "[AccessPlayer.AccessActivePlayerObjectiveInactiveJournalEntryTypes]"
+
+				item = {
+					journal_entry_type = {
+						alpha = 0.75
+					}
+				}
+			}
+		}
+
+		## CONCLUDED JOURNAL ENTRIES - OBJECTIVE
+		section_header_button = {
+			blockoverride "layout" {
+				size = { @panel_width 38 }
+			}
+
+			blockoverride "fade" {
+				alpha = 0.75
+			}
+
+			blockoverride "left_text" {
+				text = "CONCLUDED"
+			}
+
+			blockoverride "right_text" {
+				section_header_right_text = {
+					text = "[GetDataModelSize(AccessPlayer.AccessActivePlayerObjectiveConcludedJournalEntries)]"
+				}
+			}
+
+			blockoverride "onclick" {
+				enabled = "[Not(IsDataModelEmpty(AccessPlayer.AccessActivePlayerObjectiveConcludedJournalEntries))]"
+				onclick = "[GetVariableSystem.Toggle('journal_objective_completed_collapsed')]"
+			}
+
+			blockoverride "onclick_showmore" {
+				visible = "[Not(Or(Not(GetVariableSystem.Exists('journal_objective_completed_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty)))]"
+			}
+
+			blockoverride "onclick_showless" {
+				visible = "[Or(Not(GetVariableSystem.Exists('journal_objective_completed_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty))]"
+			}
+
+		}
+
+		flowcontainer = {
+			visible = "[And(Or(Not(GetVariableSystem.Exists('journal_objective_completed_collapsed')), Not(JournalPanel.GetSearchBar.IsQueryEmpty)), InformationPanel.IsTabSelected('default'))]"
+			using = default_list_position
+			direction = vertical
+
+			flowcontainer = {
+				direction = vertical
+				spacing = 2
+				datamodel = "[AccessPlayer.AccessActivePlayerObjectiveConcludedJournalEntries]"
+
+				item = {
+					concluded_journal_entry = {}
+				}
+			}
+		}
+	}
+
+	### Journal Entry Group Potential & Completed JEs
 	type journal_entry = button {
-		
+		onmousehierarchyenter = "[PdxGuiWidget.FindChild('journal_pin_button').InterruptThenTriggerAnimation('hide_journal_pin_button','show_journal_pin_button')]"
+		onmousehierarchyleave = "[PdxGuiWidget.FindChild('journal_pin_button').InterruptThenTriggerAnimation('show_journal_pin_button','hide_journal_pin_button')]"
+		onclick = "[InformationPanelBar.OpenJournalEntryPanel(JournalEntry.AccessSelf)]"
+		enabled = "[JournalEntry.IsActive]"
+
 		highlight_tutorial_ui = {
 			visible = "[JournalEntry.IsBeingTutorialHighlighted]"
 		}
@@ -345,133 +948,183 @@ types journal
 		block "button_style" {
 			using = default_button
 		}
-		onclick = "[InformationPanelBar.OpenJournalEntryPanel(JournalEntry.AccessSelf)]"
-		enabled = "[JournalEntry.IsActive]"
 
 		tooltipwidget = {
 			FancyTooltip_JournalEntry = {}
 		}
 
-		onmousehierarchyenter = "[PdxGuiWidget.FindChild('journal_pin_button').InterruptThenTriggerAnimation('hide_journal_pin_button','show_journal_pin_button')]"
-		onmousehierarchyleave = "[PdxGuiWidget.FindChild('journal_pin_button').InterruptThenTriggerAnimation('show_journal_pin_button','hide_journal_pin_button')]"
-	
 		block "background" {}
-	
+
 		flowcontainer = {
 			resizeparent = yes
+
 			block "minimumsize" {
 				minimumsize = { @panel_width -1 }
 			}
-			block "flowcontainer_properties" {
-				margin = { 10 8 }
-				spacing = 10
-			}
 
-			flowcontainer = {
-				direction = vertical
-				
-				# journal entry icon
-				icon = {
-					texture = "[JournalEntry.GetIcon]"
-					block "iconsize" {
-						size = { 40 40 }
-					}
-				}
-				
-				# completion in progress
-				icon = {
-					visible = "[JournalEntry.IsProgressing]"
-					parentanchor = hcenter
-					block "completing_iconsize" {
-						size = { 20 20 }
-					}
-					texture = "gfx/interface/icons/generic_icons/green_checkmark.dds"
-					tooltip = "JOURNAL_ENTRY_IN_PROGRESS"
-					using = shimmer
-					
-					icon = {
-						parentanchor = center
-						using = rotate_glow_animation_02
-						size = { 300% 300% }
-						alpha = 0.5
-					}
-				}
+			block "flowcontainer_properties" {
+				margin = { 10 4 }
+				spacing = 7
 			}
 
 			flowcontainer = {
 				direction = vertical
 				parentanchor = vcenter
+				margin = { 2 2 }
 
-				# title
-				textbox = {
-					text = "[JournalEntry.GetName]"
-					autoresize = yes
-					align = left|nobaseline
-					multiline = yes
-					default_format = "#header"
+				flowcontainer = {
+					spacing = 2
 
-					block "fontsize" {
-						using = fontsize_large
+					# completion in progress
+					icon = {
+						visible = "[JournalEntry.IsProgressing]"
+						texture = "gfx/interface/icons/generic_icons/green_checkmark.dds"
+						tooltip = "JOURNAL_ENTRY_IN_PROGRESS"
+						parentanchor = vcenter
+						using = tooltip_ne
+						using = shimmer
+
+						block "completing_iconsize" {
+							size = { 20 20 }
+						}
+
+						icon = {
+							parentanchor = center
+							using = rotate_glow_animation_02
+							size = { 300% 300% }
+							alpha = 0.5
+						}
 					}
-					
-					block "textsize" {
-						maximumsize = { 420 -1 }
-						minimumsize = { 420 -1 }
+
+					# will be activated
+					icon = {
+						visible = "[JournalEntry.WillBeActivated]"
+						size = { 20 20 }
+						parentanchor = left|vcenter
+						using = shimmer
+						tooltip = "JOURNAL_ENTRY_WILL_BE_ACTIVATED"
+						texture = "gfx/interface/icons/generic_icons/clock.dds"
+					}
+
+					# journal entry icon
+					icon = {
+						texture = "[JournalEntry.GetIcon]"
+
+						block "iconsize" {
+							size = { 30 30 }
+						}
+					}
+
+					# title
+					textbox = {
+						parentanchor = vcenter
+						autoresize = yes
+						align = nobaseline
+						default_format = "#header"
+						using = elide_fontsize_min
+						text = "[JournalEntry.GetName]"
+
+						block "fontsize" {
+							using = fontsize_large
+						}
+
+						block "textsize" {
+							maximumsize = { 240 -1 }
+							minimumsize = { 240 -1 }
+						}
 					}
 				}
-				
-				# status description
+
+				# status description - hidden here so journal panel buttons keep an even height, shown in the outliner
 				textbox = {
 					text = "[JournalEntry.GetStatusDesc]"
-					visible = "[Not(StringIsEmpty(JournalEntry.GetStatusDesc))]"
-					autoresize = yes					
-					align = left|nobaseline
+					autoresize = yes
+					align = nobaseline
+					fontsize = 14
 					multiline = yes
-					block "textsize" {
-						maximumsize = { 420 -1 }
-						minimumsize = { 420 -1 }
+					elide = right
+
+					block "status_desc_visibility" {
+						visible = no
+					}
+
+					block "status_desc_textsize" {
+						maximumsize = { 240 -1 }
+						minimumsize = { 240 -1 }
 					}
 				}
 
 				# number of possible actions
 				textbox = {
-					text = "JOURNAL_ENTRY_POSSIBLE_ACTIONS"
-					visible = "[GreaterThan_int32(JournalEntry.GetNumPossibleScriptedButtons, '(int32)0')]"
-					autoresize = yes					
-					align = left|nobaseline
+					autoresize = yes
+					align = nobaseline
+					fontsize = 14
 					multiline = yes
-					block "textsize" {
-						maximumsize = { 420 -1 }
-						minimumsize = { 420 -1 }
+					text = "JOURNAL_ENTRY_POSSIBLE_ACTIONS"
+
+					block "possible_actions_visibility" {
+						visible = no
+					}
+
+					block "possible_actions_textsize" {
+						maximumsize = { 240 -1 }
+						minimumsize = { 240 -1 }
 					}
 				}
 
-				textbox = {
-					
-					autoresize = yes
-				}
-				
 				# progress description
 				textbox = {
+					autoresize = yes
+					align = nobaseline
+					multiline = yes
+					using = elide_fontsize_min
 					text = "[JournalEntry.GetProgressDesc]"
 					tooltip = "[JournalEntry.GetGoalDesc]"
-					autoresize = yes					
-					align = left|nobaseline
-					multiline = yes
+
 					block "textsize" {
-						maximumsize = { 420 -1 }
-						minimumsize = { 420 -1 }
+						maximumsize = { 240 -1 }
+						minimumsize = { 240 -1 }
 					}
 				}
 
-				# progress bar
 				flowcontainer = {
-					visible = "[And(JournalEntry.HasProgressBar, JournalEntry.IsActive)]"
-					margin = { 0 10 }
+					name = "custom_widgets_container"
+				}
+
+				# time out info
+				flowcontainer = {
+					visible = "[And(JournalEntry.CanTimeOut, JournalEntry.IsActive)]"
+					spacing = 2
+
+					icon = {
+						size = { 18 18 }
+						parentanchor = vcenter
+						texture = "gfx/interface/icons/generic_icons/clock.dds"
+					}
+
+					textbox = {
+						autoresize = yes
+						fontsize = 14
+						align = nobaseline
+						parentanchor = vcenter
+						elide = right
+						max_width = 245
+						text = "[JournalEntry.GetTimeoutTooltip]"
+					}
+				}
+
+				flowcontainer = {
+					block "goal_progress_bar_visibility_below_title" {
+						visible = no
+					}
+
+					block "goal_progress_bar_margins" {}
+
 					default_progressbar_horizontal = {
-						block "progressbar_size" {
-							size = { 420 6 }
+						block "goal_progressbar_size" {
+							size = { 190 3 }
 						}
+
 						blockoverride "values" {
 							value = "[FixedPointToFloat(JournalEntry.GetGoalProgressPercent)]"
 							min = 0
@@ -479,309 +1132,58 @@ types journal
 						}
 					}
 				}
-				
-				flowcontainer = {
-					name = "custom_widgets_container"
-				}
 
 				# scripted progress bars
 				flowcontainer = {
-					datamodel = "[JournalEntry.GetScriptedProgressBars]"
-					margin = { 0 10 }
-					direction = vertical
-					spacing = 10
-					
-					block "scripted_progress_bars_visibility" {
-						visible = "[Not( IsDataModelEmpty( JournalEntry.GetScriptedProgressBars ) )]"
+					block "scripted_progress_bars_visibility_below_title" {
+						visible = no
 					}
 
-					item = {
-						container = {
+					journal_entry_scripted_progress_bars = {}
+				}
+			}
 
-							# Default
-							default_progressbar_horizontal = {
-								visible = "[ScriptedProgressBar.IsDefault]"
-								block "progressbar_size" {
-									size = { 420 10 }
-								}
-								tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
-								blockoverride "values" {
-									value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
-									min = 0
-									max = 1
-								}
-							}
+			# progress bar
+			flowcontainer = {
+				margin = { 0 10 }
+				parentanchor = vcenter
 
-							# Default Bad
-							bad_progressbar_horizontal = {
-								visible = "[ScriptedProgressBar.IsDefaultBad]"
-								block "progressbar_size" {
-									size = { 420 10 }
-								}
-								tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
-								blockoverride "values" {
-									value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
-									min = 0
-									max = 1
-								}
-							}
-
-							#Default Green
-							green_progressbar_horizontal = {
-								visible = "[ScriptedProgressBar.IsDefaultGreen]"
-								block "progressbar_size" {
-									size = { 420 10 }
-								}
-
-								tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
-								blockoverride "values" {
-									value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
-									min = 0
-									max = 1
-								}
-							}
-
-							# double sided bad
-							bad_progressbar_horizontal = {
-								visible = "[ScriptedProgressBar.IsDoubleSidedBad]"
-								block "progressbar_size" {
-									size = { 420 10 }
-								}
-								tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
-
-								blockoverride "noprogresstexture" {
-									noprogresstexture = "gfx/interface/progressbar/progressbar_gold.dds"
-								}
-
-								blockoverride "values" {
-									value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
-									min = 0
-									max = 1
-								}
-
-								#this is hack to get an extra marker on top of the frame (progressbar properties are copied)
-								blockoverride "on_top_of_the_progressbar" {
-									progressbar = {
-										noprogresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
-										progresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
-										size = { 100% 100% }
-										spriteType = Corneredtiled
-										spriteborder = { 4 4 }
-										texture_density = 2
-										skip_initial_animation = yes
-
-										block "values" {}
-										block "direction" {
-											direction = horizontal
-										}
-										block "progress_changed_animation" {
-											using = progressbar_changed_animation
-										}
-										block "animate_negative_change" {
-											animate_negative_changes = yes
-										}
-										marker = {
-
-											icon = {
-												size = { 40 20 }
-												parentanchor = vcenter
-												widgetanchor = center
-												texture = "gfx/interface/progressbar/progressbar_marker.dds"
-												using = shimmer
-											}
-										}
-									}
-								}
-							}
-
-							# double sided spain
-							gold_progressbar_horizontal = {
-								visible = "[ScriptedProgressBar.IsDoubleSidedSpain]"
-								block "progressbar_size" {
-									size = { 420 10 }
-								}
-								tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
-
-								blockoverride "noprogresstexture" {
-									noprogresstexture = "gfx/interface/progressbar/progressbar_default.dds"
-								}
-
-								blockoverride "values" {
-									value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
-									min = 0
-									max = 1
-								}
-
-								#this is hack to get an extra marker on top of the frame (progressbar properties are copied)
-								blockoverride "on_top_of_the_progressbar" {
-									progressbar = {
-										noprogresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
-										progresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
-										size = { 100% 100% }
-										spriteType = Corneredtiled
-										spriteborder = { 4 4 }
-										texture_density = 2
-										skip_initial_animation = yes
-
-										block "values" {}
-										block "direction" {
-											direction = horizontal
-										}
-										block "progress_changed_animation" {
-											using = progressbar_changed_animation
-										}
-										block "animate_negative_change" {
-											animate_negative_changes = yes
-										}
-										marker = {
-
-											icon = {
-												size = { 40 20 }
-												parentanchor = vcenter
-												widgetanchor = center
-												texture = "gfx/interface/progressbar/progressbar_marker.dds"
-												using = shimmer
-											}
-										}
-									}
-								}
-							}
-
-							# double sided ryukyu
-							bad_progressbar_horizontal = {
-								visible = "[ScriptedProgressBar.IsDoubleSidedRyukyu]"
-								block "progressbar_size" {
-									size = { 420 10 }
-								}
-								tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
-
-								blockoverride "noprogresstexture" {
-									noprogresstexture = "gfx/interface/progressbar/progressbar_gold.dds"
-								}
-
-								blockoverride "values" {
-									value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
-									min = 0
-									max = 1
-								}
-
-								#this is hack to get an extra marker on top of the frame (progressbar properties are copied)
-								blockoverride "on_top_of_the_progressbar" {
-									progressbar = {
-										noprogresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
-										progresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
-										size = { 100% 100% }
-										spriteType = Corneredtiled
-										spriteborder = { 4 4 }
-										texture_density = 2
-										skip_initial_animation = yes
-
-										block "values" {}
-										block "direction" {
-											direction = horizontal
-										}
-										block "progress_changed_animation" {
-											using = progressbar_changed_animation
-										}
-										block "animate_negative_change" {
-											animate_negative_changes = yes
-										}
-										marker = {
-
-											icon = {
-												size = { 40 20 }
-												parentanchor = vcenter
-												widgetanchor = center
-												texture = "gfx/interface/progressbar/progressbar_marker.dds"
-												using = shimmer
-											}
-										}
-									}
-								}
-							}
-
-							# Double sided gold
-							default_progressbar_horizontal  = {
-								visible = "[ScriptedProgressBar.IsDoubleSidedGold]"
-								block "progressbar_size" {
-									size = { 420 6 }
-								}
-
-								blockoverride "noprogresstexture" {
-									noprogresstexture = "gfx/interface/progressbar/progressbar_gold.dds"
-								}
-
-								tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
-								blockoverride "values" {
-									value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
-									min = 0
-									max = 1
-								}
-
-								#this is hack to get an extra marker on top of the frame (progressbar properties are copied)
-								blockoverride "on_top_of_the_progressbar" {
-									progressbar = {
-										noprogresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
-										progresstexture = "gfx/interface/icons/generic_icons/transparent.dds"
-										size = { 100% 100% }
-										spriteType = Corneredtiled
-										spriteborder = { 4 4 }
-										texture_density = 2
-										skip_initial_animation = yes
-
-										block "values" {}
-										block "direction" {
-											direction = horizontal
-										}
-										block "progress_changed_animation" {
-											using = progressbar_changed_animation
-										}
-										block "animate_negative_change" {
-											animate_negative_changes = yes
-										}
-										marker = {
-
-											icon = {
-												size = { 40 20 }
-												parentanchor = vcenter
-												widgetanchor = center
-												texture = "gfx/interface/progressbar/progressbar_marker.dds"
-												using = shimmer
-											}
-										}
-									}
-								}
-							}
-						}
-					}
+				block "goal_progress_bar_visibility_to_the_right" {
+					visible = "[And(JournalEntry.HasProgressBar, JournalEntry.IsActive)]"
 				}
 
-				# time out info
-				flowcontainer = {
-					visible = "[And(JournalEntry.CanTimeOut, JournalEntry.IsActive)]"
-					spacing = 5
-					
-					icon = {
-						size = { 18 18 }
-						texture = "gfx/interface/icons/generic_icons/clock.dds"
-						parentanchor = vcenter
+				default_progressbar_horizontal = {
+					block "progressbar_size" {
+						size = { 190 3 }
 					}
-					textbox = {
-						text = "[JournalEntry.GetTimeoutTooltip]"
-						autoresize = yes
-						align = left|nobaseline
-						parentanchor = vcenter
+					blockoverride "values" {
+						value = "[FixedPointToFloat(JournalEntry.GetGoalProgressPercent)]"
+						min = 0
+						max = 1
 					}
 				}
+			}
+
+			flowcontainer = {
+				parentanchor = vcenter
+
+				block "scripted_progress_bars_visibility_to_the_right" {
+					visible = "[Not( IsDataModelEmpty( JournalEntry.GetScriptedProgressBars ) )]"
+				}
+
+				journal_entry_scripted_progress_bars = {}
 			}
 		}
 
 		# pin button
 		widget = {
-			size = { 23 23 }
+			size = { 24 24 }
 			parentanchor = vcenter|right
-			position = { -5 0 }
-			visible = "[JournalEntry.IsActive]"
+			position = { -4 0 }
+
+			block "pin_button_visibility" {
+				visible = "[JournalEntry.IsActive]"
+			}
 
 			button = {
 				name = "journal_pin_button"
@@ -808,6 +1210,7 @@ types journal
 					scale = 1
 				}
 			}
+
 			button = {
 				using = check_button_sound
 				texture = "gfx/interface/outliner/pinned_icon.dds"
@@ -819,12 +1222,263 @@ types journal
 			}
 		}
 	}
-	
+
+	### JOURNAL ENTRY TYPE
+	type potential_journal_entry = journal_entry {
+		datacontext = "[AccessPlayer.GetJournalEntry(JournalEntryType.Self)]"
+		alpha = 0.75
+
+		blockoverride "fontsize" {
+			fontsize = 16
+		}
+
+		blockoverride "iconsize" {
+			size = { 26 26 }
+		}
+
+		blockoverride "flowcontainer_properties" {
+			margin = { 10 2 }
+			spacing = 5
+		}
+
+		blockoverride "scripted_progress_bars_visibility_to_the_right" {
+			visible = no
+		}
+	}
+
+	type journal_entry_type = button {
+		enabled = no
+
+		block "button_style" {
+			using = default_button
+		}
+
+		tooltipwidget = {
+			FancyTooltip_JournalEntryType = {}
+		}
+
+		block "background" {}
+
+		flowcontainer = {
+			resizeparent = yes
+
+			block "minimumsize" {
+				minimumsize = { @panel_width -1 }
+			}
+
+			block "flowcontainer_properties" {
+				margin = { 10 1 }
+				spacing = 5
+			}
+
+			flowcontainer = {
+				direction = vertical
+				parentanchor = vcenter
+				margin = { 2 2 }
+
+				flowcontainer = {
+					spacing = 2
+
+					# journal entry icon
+					icon = {
+						texture = "[JournalEntryType.GetIcon]"
+
+						block "iconsize" {
+							size = { 24 24 }
+						}
+					}
+
+					# title
+					textbox = {
+						parentanchor = vcenter
+						autoresize = yes
+						align = nobaseline
+						default_format = "#header"
+						using = elide_fontsize_min
+						text = "[JournalEntryType.GetName]"
+
+						block "fontsize" {
+							fontsize = 16
+						}
+
+						block "textsize" {
+							maximumsize = { 240 -1 }
+							minimumsize = { 240 -1 }
+						}
+					}
+				}
+			}
+		}
+	}
+
+	### CONCLUDED JOURNAL ENTRY
+	type concluded_journal_entry = flowcontainer {
+		tooltipwidget = {
+			FancyTooltip_ConcludedJournalEntry = {}
+		}
+
+		block "background" {
+			background = {
+				using = entry_bg_simple
+				alpha = 0.7
+			}
+		}
+
+		block "minimumsize" {
+			minimumsize = { @panel_width -1 }
+		}
+
+		block "flowcontainer_properties" {
+			margin = { 0 2 }
+			margin_left = 10
+			spacing = 5
+		}
+
+		# journal entry icon
+		icon = {
+			parentanchor = vcenter
+			alpha = 0.4
+			texture = "[ConcludedJournalEntry.GetType.GetIcon]"
+
+			block "iconsize" {
+				size = { 26 26 }
+			}
+		}
+
+		# title
+		textbox = {
+			parentanchor = vcenter
+			autoresize = yes
+			align = nobaseline
+			default_format = "#header"
+			alpha = 0.4
+			using = elide_fontsize_min
+			text = "[ConcludedJournalEntry.GetName]"
+
+			block "fontsize" {
+				fontsize = 16
+			}
+
+			block "textsize" {
+				maximumsize = { 240 -1 }
+				minimumsize = { 240 -1 }
+			}
+		}
+
+		# concluded text
+		textbox = {
+			parentanchor = vcenter
+			autoresize = yes
+			align = nobaseline
+			default_format = "#lore"
+			alpha = 0.7
+			using = elide_fontsize_min
+			text = "CONCLUDED"
+
+			block "fontsize" {
+				fontsize = 16
+			}
+
+			block "textsize" {
+				maximumsize = { 120 -1 }
+				minimumsize = { 120 -1 }
+			}
+		}
+
+		expand = {}
+
+		widget = {
+			size = { 82 -1 }
+		}
+
+		button_icon_goto = {
+			parentanchor = left|vcenter
+			size = { 22 22 }
+			onclick = "[InformationPanelBar.OpenJournalEntryPanelByType(ConcludedJournalEntry.GetType.AccessSelf)]"
+			input_action = "go_to_details"
+		}
+	}
+
+	type journal_entry_scripted_progress_bars = flowcontainer {
+		direction = vertical
+		datamodel = "[JournalEntry.GetScriptedProgressBars]"
+
+		block "progressbars_spacing" {
+			spacing = 4
+		}
+
+		block "scripted_progress_bars_margins" {}
+
+		item = {
+			widget = {
+				tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
+
+				block "progressbar_size" {
+					size = { 190 7 }
+				}
+
+				# Default
+				default_progressbar_horizontal = {
+					visible = "[ScriptedProgressBar.IsDefault]"
+					size = { 100% 70% }
+					parentanchor = vcenter
+
+					blockoverride "values" {
+						value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
+						min = 0
+						max = 1
+					}
+				}
+
+				# Default Bad
+				bad_progressbar_horizontal = {
+					visible = "[ScriptedProgressBar.IsDefaultBad]"
+					tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
+					size = { 100% 70% }
+					parentanchor = vcenter
+
+					blockoverride "values" {
+						value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
+						min = 0
+						max = 1
+					}
+				}
+
+				#Default Green
+				green_progressbar_horizontal = {
+					visible = "[ScriptedProgressBar.IsDefaultGreen]"
+					tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
+					size = { 100% 70% }
+					parentanchor = vcenter
+
+					blockoverride "values" {
+						value = "[JournalEntry.GetCurrentBarProgress(ScriptedProgressBar.Self)]"
+						min = 0
+						max = 1
+					}
+
+				}
+
+				# Look defined in script
+				scripted_progressbar_dynamic = {
+					visible = "[ScriptedProgressBar.IsDynamic]"
+					tooltip = "[ScriptedProgressBar.GetPeriodicProgressBreakdown]"
+					size = { 100% 70% }
+					parentanchor = vcenter
+
+					blockoverride "marker_size" {
+						size = { 40 20 }
+					}
+				}
+			}
+		}
+	}
+
 	### DECISION
 	type decision = container {
 		maximumsize = { @panel_width_minus_30 -1 }
 		minimumsize = { @panel_width_minus_30 -1 }
-		
+
 		button_checkbox_label = {
 			position = { -10 9 }
 			tooltip = "[SelectLocalization(GetPlayer.IsIgnoringDecision(Decision.Self),'TOGGLE_DECISION_NOTIFICATION_DISABLED_TOOLTIP','TOGGLE_DECISION_NOTIFICATION_ENABLED_TOOLTIP')]"
@@ -843,7 +1497,7 @@ types journal
 
 		flowcontainer = {
 			margin = { 30 10 }
-			direction = vertical 
+			direction = vertical
 
 			textbox = {
 				text = "[Decision.GetName]"
@@ -865,15 +1519,19 @@ types journal
 				minimumsize = { 420 -1 }
 			}
 		}
-		
+
 		button_icon_check = {
 			parentanchor = right|vcenter
 			size = { 50 50 }
 			tooltip = "[Decision.GetTooltip( GetPlayer )]"
 			enabled = "[IsValid( Decision.TakeDecision( GetPlayer ) )]"
 			onclick = "[Execute( Decision.TakeDecision( GetPlayer ) )]"
+
+			blockoverride "sound" {
+				using = icon_toggle_single_onoff_sound
+			}
 		}
-		
+
 		divider_clean = {
 			parentanchor = bottom
 		}

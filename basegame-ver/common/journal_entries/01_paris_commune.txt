@@ -2,6 +2,11 @@
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
 	group = je_group_historical_content
+	dlc = dlc004
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_when_inactive = {
 		has_dlc_feature = voice_of_the_people_content
@@ -51,15 +56,30 @@
 		trigger_event = { id = paris_commune.1 popup = yes }
 	}
 
-	fail = {
-		custom_tooltip = {
-			text = je_the_paris_commune_france_spawned
-			has_variable = paris_commune_spawn
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_the_paris_commune_france_spawned
+				has_variable = paris_commune_spawn
+			}
+		}
+		effect = {
+			je_paris_commune_cleanup = yes
 		}
 	}
 
-	on_timeout = {
-
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_paris_commune_cleanup = yes
+		}
 	}
 
 	on_monthly_pulse = {
@@ -72,93 +92,180 @@
 	weight = 8000
 }
 
-je_the_paris_commune_france = {
+je_paris_commune = {
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
-	group = je_group_historical_content
+	group = je_group_global_international_situations
+	dlc = dlc004
+	scripted_progress_bar = je_paris_commune_progress_bar
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_in_lobby = {
 		has_dlc_feature = voice_of_the_people_content #France DLC
 		c:FRA = THIS
 	}
 
-	can_revolution_inherit = no
+	should_be_pinned_by_default_uninvolved_or_context = no
+	should_be_pinned_by_default_involved = yes
+
+	can_revolution_inherit = yes
+
+	should_be_involved = {
+		OR = {
+			c:FRA ?= this
+			c:PRC ?= this
+			civil_war_origin_country ?= c:FRA
+		}
+	}
+
+	should_show_when_not_involved = {
+		OR = {
+			has_strategic_region_interest_tier = {
+				strategic_region = sr:region_western_europe
+				value >= 3
+			}
+			capital ?= {
+				is_in_geographic_region = geographic_region_western_europe
+			}
+		}
+	}
 
 	scripted_button = je_the_paris_commune_france_button_a
 	scripted_button = je_the_paris_commune_france_button_b
 
 	immediate = {
-		add_modifier = {
-			name = fra_paris_commune_drain
-			multiplier = money_amount_multiplier_more_large
-		}
-
 		c:FRA ?= {
 			save_scope_as = france_scope
+			set_variable = { name = PRC_money_transfer value = money_amount_multiplier_very_large }
+			add_modifier = {
+				name = fra_paris_commune_drain
+				multiplier = money_amount_multiplier_more_large
+			}
 		}
 		c:PRC ?= {
 			save_scope_as = commune_scope
+			add_modifier = {
+				name = fra_paris_commune_drain_proceeds
+				multiplier = c:FRA.var:PRC_money_transfer
+			}
 		}
-		set_global_variable = {
-			name = paris_commune_drift_final_var
-			value = 0
-		}
-		set_variable = { name = PRC_money_transfer value = money_amount_multiplier_very_large }
-	}
-
-	complete = {
-		custom_tooltip = {
-			text = je_the_paris_commune_france_complete
-			global_var:paris_commune_progress_var <= 0
-		}
-	}
-
-	on_complete = {
-		trigger_event = { id = paris_commune.2 popup = yes }
-		hidden_effect = {
-			remove_modifier = fra_paris_commune_drain
-		}
-	}
-
-	fail = {
-		custom_tooltip = {
-			text = je_the_paris_commune_communard_complete
-			global_var:paris_commune_progress_var >= 100
+		if = {
+			limit = {
+				NOT = { has_global_variable_map = first_proletarian_revolution }
+			}
+			add_to_global_variable_map = { name = first_proletarian_revolution key = scope:commune_scope.capital.state_region value = year }
+			every_country = {
+				limit = {
+					OR = {
+						has_technology_researched = socialism
+						can_research = socialism
+					}
+				}
+				trigger_event = { id = factory_councils.2 months = 3 }
+			}
 		}
 	}
 
-	on_fail = {
-		trigger_event = { id = paris_commune.3 popup = yes }
-		hidden_effect = {
-			remove_modifier = fra_paris_commune_drain
-		}
-	}
-
-	invalid = {
-		OR = {
-			NOT = {
-				any_scope_state = {
-					state_region = s:STATE_ILE_DE_FRANCE
+	outcome = {
+		header = je_paris_commune_government_victory
+		effect_header = je_paris_commune_on_government_victory
+		color = "gold_positive"
+		conclusion_desc = je_paris_commune_government_victory_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_the_paris_commune_france_complete
+				scope:journal_entry = {
+					"scripted_bar_progress(je_paris_commune_progress_bar)" <= 0
 				}
 			}
-			has_war_with = c:PRC
-			NOT = {
-				exists = c:PRC
+		}
+		effect = {
+			scope:france_scope ?= {
+				trigger_event = { id = paris_commune.2 popup = yes }
 			}
-			has_global_variable = paris_commune_invalid
+			scope:france_scope ?= {
+				je_paris_commune_cleanup = yes
+			}
+			scope:commune_scope ?= {
+				je_paris_commune_cleanup = yes
+			}
 		}
 	}
 
-	on_invalid = {
-		hidden_effect = {
-			remove_modifier = fra_paris_commune_drain
+	outcome = {
+		header = je_paris_commune_commune_victory
+		effect_header = je_paris_commune_on_commune_victory
+		color = "blue_negative"
+		conclusion_desc = je_paris_commune_commune_victory_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_the_paris_commune_communard_complete
+				scope:journal_entry = {
+					"scripted_bar_progress(je_paris_commune_progress_bar)" >= 100
+				}
+			}
+		}
+		effect = {
+			scope:france_scope ?= {
+				trigger_event = { id = paris_commune.3 popup = yes }
+			}
+			scope:france_scope ?= {
+				je_paris_commune_cleanup = yes
+			}
+			scope:commune_scope ?= {
+				je_paris_commune_cleanup = yes
+			}
 		}
 	}
 
-	on_timeout = {
-		trigger_event = { id = paris_commune.2 popup = yes }
-		hidden_effect = {
-			remove_modifier = fra_paris_commune_drain
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				scope:france_scope ?= {
+					NOT = {
+						any_scope_state = {
+							state_region = s:STATE_ILE_DE_FRANCE
+						}
+					}
+				}
+				scope:france_scope ?= { has_war_with = c:PRC }
+				NOT = { exists = c:PRC }
+				NOT = { exists = c:FRA }
+				has_global_variable = paris_commune_invalid
+			}
+		}
+		effect = {
+			hidden_effect = {
+				scope:france_scope ?= {
+					je_paris_commune_cleanup = yes
+				}
+				scope:commune_scope ?= {
+					je_paris_commune_cleanup = yes
+				}
+			}
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			scope:france_scope ?= {
+				trigger_event = { id = paris_commune.2 popup = yes }
+			}
+			scope:france_scope ?= {
+				je_paris_commune_cleanup = yes
+			}
+			scope:commune_scope ?= {
+				je_paris_commune_cleanup = yes
+			}
 		}
 	}
 
@@ -168,175 +275,60 @@ je_the_paris_commune_france = {
 
 	on_weekly_pulse = {
 		effect = {
-			paris_commune_update_tick = yes
+			scope:france_scope ?= {
+				if = { #Adversarial system - if you side with France, the automated adversary fires Commune events, if not, it fires Versailles events.
+					limit = {
+						has_variable = paris_commune_fra_perspective
+					}
+					random_list = {
+						50 = {
+							paris_commune_automated_opposition_paris = yes
+						}
+						50 = {
+
+						}
+					}
+				}
+				else_if = {
+					limit = {
+						has_variable = paris_commune_prc_perspective
+					}
+					random_list = {
+						50 = {
+							paris_commune_automated_opposition_versailles = yes
+						}
+						50 = {
+
+						}
+					}
+				}
+				random_list = {
+					10 = { trigger_event = { id = paris_commune_pulse_events.1 } } # Seizing Church and State
+					10 = { trigger_event = { id = paris_commune_pulse_events.2 } } # Forty Warning Shots
+					10 = { trigger_event = { id = paris_commune_pulse_events.3 } } # For Want of a Nail
+					10 = { trigger_event = { id = paris_commune_pulse_events.4 } } # Petrol Maidens
+					10 = { trigger_event = { id = paris_commune_pulse_events.5 } } # Enemy Combatants
+					10 = { trigger_event = { id = paris_commune_pulse_events.6 } } # A Priest for Your Captain
+					10 = { trigger_event = { id = paris_commune_pulse_events.7 } } # Clapped With Irons
+					10 = { trigger_event = { id = paris_commune_pulse_events.8 } } # Four-Hundred Gun Salute
+					10 = { trigger_event = { id = paris_commune_pulse_events.9 } } # Our Bodies, Our Rules
+					10 = { trigger_event = { id = paris_commune_pulse_events.10 } } # A Fortress Falls
+					10 = { trigger_event = { id = paris_commune_pulse_events.11 } } # Working Co-op
+					10 = { trigger_event = { id = paris_commune_pulse_events.12 } } # Off to School
+					10 = { trigger_event = { id = paris_commune_pulse_events.13 } } # Capital Punishments
+					10 = { trigger_event = { id = paris_commune_pulse_events.14 } } # First In, Best Dressed
+					10 = { trigger_event = { id = paris_commune_pulse_events.15 } } # Recusing the Republicans
+					10 = { trigger_event = { id = paris_commune_pulse_events.16 } } # Go and Fight!
+				}
+			}
+			scope:journal_entry ?= {
+				journal_entry_update_paris_commune_variables = yes
+			}
 		}
 	}
 
-	on_monthly_pulse = {
-		effect = {
-			paris_commune_update_tick = yes
-			change_global_variable = {
-				name = paris_commune_progress_var
-				add = global_var:paris_commune_drift_final_var
-			}
-			if = { #Adversarial system - if you side with France, the automated adversary fires Commune events, if not, it fires Versailles events.
-				limit = {
-					has_variable = paris_commune_fra_perspective
-				}
-				random_list = {
-					50 = {
-						paris_commune_automated_opposition_paris = yes
-					}
-					50 = {
-
-					}
-				}
-			}
-			else_if = {
-				limit = {
-					has_variable = paris_commune_prc_perspective
-				}
-				random_list = {
-					50 = {
-						paris_commune_automated_opposition_versailles = yes
-					}
-					50 = {
-
-					}
-				}
-			}
-		}
-		random_events = {
-			10 = paris_commune_pulse_events.1 # Seizing Church and State
-			10 = paris_commune_pulse_events.2 # Forty Warning Shots
-			10 = paris_commune_pulse_events.3 # For Want of a Nail
-			10 = paris_commune_pulse_events.4 # Petrol Maidens
-			10 = paris_commune_pulse_events.5 # Enemy Combatants
-			10 = paris_commune_pulse_events.6 # A Priest for Your Captain
-			10 = paris_commune_pulse_events.7 # Clapped With Irons
-			10 = paris_commune_pulse_events.8 # Four-Hundred Gun Salute
-			10 = paris_commune_pulse_events.9 # Our Bodies, Our Rules
-			10 = paris_commune_pulse_events.10 # A Fortress Falls
-			10 = paris_commune_pulse_events.11 # Working Co-op
-			10 = paris_commune_pulse_events.12 # Off to School
-			10 = paris_commune_pulse_events.13 # Capital Punishments
-			10 = paris_commune_pulse_events.14 # First In, Best Dressed
-			10 = paris_commune_pulse_events.15 # Recusing the Republicans
-			10 = paris_commune_pulse_events.16 # Go and Fight!
-		}
-	}
-
-		
-	should_be_pinned_by_default_uninvolved_or_context = yes
 
 	weight = 8000
 
-	current_value = {
-		value = global_var:paris_commune_progress_var
-	}
-
-	goal_add_value = {
-		add = 100
-	}
-
 	timeout = 730
-
-	progressbar = yes
-}
-
-je_the_paris_commune_communards = {
-	icon = "gfx/interface/icons/event_icons/event_protest.dds"
-
-	group = je_group_historical_content
-
-	can_revolution_inherit = no
-
-	immediate = {
-		c:FRA ?= {
-			save_scope_as = france_scope
-		}
-		c:PRC ?= {
-			save_scope_as = commune_scope
-		}
-		add_modifier = {
-			name = fra_paris_commune_drain_proceeds
-			multiplier = c:FRA.var:PRC_money_transfer
-		}
-	}
-
-	complete = {
-		custom_tooltip = {
-			text = je_the_paris_commune_communard_complete
-			global_var:paris_commune_progress_var >= 100
-		}
-	}
-
-	on_complete = {
-		hidden_effect = {
-			c:FRA ?= {
-				trigger_event = { id = paris_commune.3 popup = yes }
-			}
-		}
-		show_as_tooltip = {
-			trigger_event = { id = paris_commune.3 popup = yes }
-		}
-		remove_modifier = fra_paris_commune_drain_proceeds
-	}
-
-	fail = {
-		custom_tooltip = {
-			text = je_the_paris_commune_france_complete
-			global_var:paris_commune_progress_var <= 0
-		}
-	}
-
-	on_fail = {
-		show_as_tooltip = {
-			trigger_event = { id = paris_commune.2 popup = yes }
-		}
-		remove_modifier = fra_paris_commune_drain_proceeds
-	}
-
-	invalid = {
-		OR = {
-			NOT = {
-				any_scope_state = {
-					state_region = s:STATE_ILE_DE_FRANCE
-				}
-			}
-			has_war_with = c:FRA
-			NOT = {
-				exists = c:FRA
-			}
-			has_global_variable = paris_commune_invalid
-		}
-	}
-
-	on_timeout = {
-		show_as_tooltip = {
-			trigger_event = { id = paris_commune.2 popup = yes }
-		}
-		remove_modifier = fra_paris_commune_drain_proceeds
-	}
-
-	on_invalid = {
-		remove_modifier = fra_paris_commune_drain_proceeds
-	}
-
-		
-	should_be_pinned_by_default_uninvolved_or_context = yes
-
-	weight = 8000
-
-	current_value = {
-		value = global_var:paris_commune_progress_var
-	}
-
-	goal_add_value = {
-		add = 100
-	}
-
-	timeout = 730
-
-	progressbar = yes
 }

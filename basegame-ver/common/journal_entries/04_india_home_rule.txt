@@ -4,6 +4,11 @@
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
 	group = je_group_british_india
+	dlc = dlc011
+
+	activation_description = {
+		always = yes
+	}
 
 	scripted_progress_bar = je_india_home_rule_progressbar
 
@@ -62,88 +67,109 @@
 		trigger_event = { id = india_home_rule_events.7 popup = yes }
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = is_dominion_or_protectorate_tt
-			OR = {
-				has_diplomatic_pact = {
-					who = overlord
-					type = dominion
-					is_initiator = no
-				}
-				has_diplomatic_pact = {
-					who = overlord
-					type = protectorate
-					is_initiator = no
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = is_dominion_or_protectorate_tt
+				OR = {
+					has_diplomatic_pact = {
+						who = overlord
+						type = dominion
+						is_initiator = no
+					}
+					has_diplomatic_pact = {
+						who = overlord
+						type = protectorate
+						is_initiator = no
+					}
 				}
 			}
-		}
-		country_has_voting_franchise = yes
-		has_law_or_variant = law_type:law_elected_bureaucrats
-		custom_tooltip = {
-			text = accepts_south_asian_culture_tt
-			any_scope_culture = {
-				has_discrimination_trait_group = heritage_group_south_asian
-				root = {
-					country_average_culture_pop_acceptance = {
-						culture = prev
-						value >= 60
+			country_has_voting_franchise = yes
+			has_law_or_variant = law_type:law_elected_bureaucrats
+			custom_tooltip = {
+				text = accepts_south_asian_culture_tt
+				any_scope_culture = {
+					has_discrimination_trait_group = heritage_group_south_asian
+					root = {
+						country_average_culture_pop_acceptance = {
+							culture = prev
+							value >= 60
+						}
 					}
 				}
 			}
 		}
-	}
-
-	fail = {
-		OR = {
-			has_any_secessionists_broken_out = yes
-			any_political_movement = {
-				is_political_movement_type = movement_india_pan_national
-				political_movement_radicalism >= india_independence_radicalism_threshold
-			}
-			any_civil_war = {
-				civil_war_progress >= 0.75
-				is_civil_war_type = revolution
-			}
+		effect = {
+			trigger_event = { id = india_home_rule_events.1 popup = yes }
+			set_global_variable = india_home_rule
 		}
+	    event_outcome_desc = {
+	        first_valid = {
+	            triggered_desc = {
+	                desc = event_effects_india_home_rule_events.1_tt
+	            }
+	        }
+	    }
 	}
 
-	on_fail = {
-		trigger_event = { id = india_home_rule_events.3 popup = yes}
-		set_global_variable = india_home_rule_failed
-	}
-
-    event_outcome_failed_desc = {
-        first_valid = {
-            triggered_desc = {
-                desc = event_effects_india_home_rule_events.3_tt
-            }
-        }
-    }
-
-	on_complete = {
-		trigger_event = { id = india_home_rule_events.1 popup = yes }
-		set_global_variable = india_home_rule
-	}
-
-    event_outcome_completed_desc = {
-        first_valid = {
-            triggered_desc = {
-                desc = event_effects_india_home_rule_events.1_tt
-            }
-        }
-    }
-
-	invalid = {
-		OR = {
-			NOT = {
-				exists = scope:overlord_scope
-			}
-			scope:india_scope ?= {
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				has_any_secessionists_broken_out = yes
+				any_political_movement = {
+					is_political_movement_type = movement_india_pan_national
+					political_movement_radicalism >= india_independence_radicalism_threshold
+				}
+				any_civil_war = {
+					civil_war_progress >= 0.75
+					is_civil_war_type = revolution
+				}
 				NOT = {
-					is_subject_of = scope:overlord_scope
+					OR = {
+						has_war_with = scope:overlord_scope
+						is_at_war_with_overlord = yes
+					}
 				}
 			}
+		}
+		effect = {
+			trigger_event = { id = india_home_rule_events.3 popup = yes}
+			set_global_variable = india_home_rule_failed
+		}
+	    event_outcome_desc = {
+	        first_valid = {
+	            triggered_desc = {
+	                desc = event_effects_india_home_rule_events.3_tt
+	            }
+	        }
+	    }
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = {
+					exists = scope:overlord_scope
+				}
+				scope:india_scope ?= {
+					NOT = {
+						is_subject_of = scope:overlord_scope
+					}
+				}
+			}
+		}
+		effect = {
+			je_india_home_rule_cleanup = yes
 		}
 	}
 
@@ -156,6 +182,11 @@ je_india_nationalism_britain = {
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
 	group = je_group_british_india
+	dlc = dlc011
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_in_lobby = {
 		has_dlc_feature = ip2_content #Pivot of Empire
@@ -177,29 +208,47 @@ je_india_nationalism_britain = {
 		trigger_event = { id = india_home_rule_events.8 popup = yes }
 	}
 
-	complete = {
-		trigger_if = {
-			limit = {
-				c:BIC ?= {
-					has_journal_entry = je_india_home_rule
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			trigger_if = {
+				limit = {
+					c:BIC ?= {
+						has_journal_entry = je_india_home_rule
+					}
+				}
+				custom_tooltip = {
+					text = granted_india_home_rule_tt
+					has_global_variable = india_home_rule
 				}
 			}
-			custom_tooltip = {
-				text = granted_india_home_rule_tt
-				has_global_variable = india_home_rule
+			trigger_else = {
+				custom_tooltip = {
+					text = preserve_british_rule_forever_tt
+					always = no
+				}
 			}
 		}
-		trigger_else = {
-			custom_tooltip = {
-				text = preserve_british_rule_forever_tt
-				always = no
-			}
+		effect = {
+			je_india_nationalism_britain_cleanup = yes
 		}
 	}
 
-	fail = {
-		c:BIC ?= {
-			has_revolution = yes
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			c:BIC ?= {
+				has_revolution = yes
+			}
+		}
+		effect = {
+			je_india_nationalism_britain_cleanup = yes
 		}
 	}
 
@@ -226,24 +275,30 @@ je_india_nationalism_britain = {
 		}
 	}
 
-	on_fail = {
-
-	}
-
-	on_complete = {
-
-	}
-
-	invalid = {
-		OR = {
-			NOT = {
-				exists = scope:india_scope
-			}
-			scope:india_scope ?= {
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				AND = {
+					NOT = { exists = scope:india_scope }
+					NOT = { war_may_restore_country = BIC }
+				}
+				scope:india_scope ?= {
+					NOT = {
+						is_subject_of = ROOT
+					}
+				}
 				NOT = {
-					is_subject_of = ROOT
+					OR = {
+						has_war_with = ROOT
+						is_at_war_with_overlord = yes
+					}
 				}
 			}
+		}
+		effect = {
+			je_india_nationalism_britain_cleanup = yes
 		}
 	}
 

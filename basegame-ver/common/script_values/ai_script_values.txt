@@ -1,4 +1,52 @@
-﻿base_impose_law_weight= {
+﻿# How much the AI weighs the countries it would hurt with a strait setting (fallout_for links, summed dependence 0-100 per country) against the setting's own benefits in strait_scores
+ai_strait_fallout_weight = 0.25
+
+# How much the AI values strait toll income in strait_scores, per percent of its GDP earned a year
+ai_strait_toll_income_weight = 3
+
+# Minimum military_reach (0-1, see the military_reach link and the MILITARY_REACH defines) for the can_reach_target_*_to_* scripted triggers
+# A land route is always 1, a sea route is at most MILITARY_REACH_SEA_MAX and halves at MILITARY_REACH_SUPPLY_DISTANCE_HALF supply distance
+ai_military_reach_conquer = 0.35
+ai_military_reach_subjugate = 0.3
+ai_military_reach_coerce = 0.25
+ai_military_reach_protect = 0.2
+
+# Minimum shippable_army_strength_against the target (army strength that can be shipped at once relative to the target's army strength)
+# for the can_reach_target_*_to_* scripted triggers when the target cannot be reached by land
+ai_military_reach_conquer_min_shippable_strength = 0.5
+ai_military_reach_subjugate_min_shippable_strength = 0.35
+ai_military_reach_coerce_min_shippable_strength = 0.2
+ai_military_reach_protect_min_shippable_strength = 0.1
+
+# Ambition weights for state_value in game/common/ai_strategies/00_default_strategy.txt
+ai_state_ambition_floor = 0
+ai_state_ambition_max = 1.5
+ai_state_ambition_claim_weight = 1.0
+ai_state_ambition_regional_objective_weight = 1.0
+ai_state_ambition_homeland_weight = 0.8
+ai_state_ambition_capital_region_weight = 0.6
+ai_state_ambition_split_state_weight = 0.5
+ai_state_ambition_overlord_gift_weight = 0.4
+ai_state_ambition_colonial_weight = 0.4
+ai_state_ambition_border_weight = 0.25
+ai_state_ambition_sphere_weight = 0.15
+
+# Base scores for hostile attitudes
+ai_systemic_conquest_score = 200
+ai_systemic_subjugation_score = 150
+ai_systemic_befriend_score = 100
+ai_systemic_protect_score = 100
+
+ai_regional_objective_conquest_score = 400
+ai_regional_objective_subjugation_score = 300
+ai_regional_objective_reconcile_score = 200
+ai_regional_objective_protect_score = 200
+ai_regional_objective_subject_value = 50
+
+# Multiplier to default aggression of recognized nations set in the default strategy only
+ai_unjustified_war_restraint = 0.15
+
+base_impose_law_weight= {
 	value = 0.01
 
 	# Impose law is a fairly hostile act, AIs should use it mostly when angry at a subject
@@ -182,7 +230,7 @@ wanted_army_size_script_value = {
 		limit = { has_technology_researched = mobile_armor }
 		multiply = 0.8
 	}
-	
+
 	# General multiplier for easy adjustment
 	multiply = 1.0
 
@@ -240,7 +288,7 @@ wanted_army_size_script_value = {
 		}
 		multiply = 1.5 # More eager to enlarge army in general during the makhzen je
 	}
-	
+
 	# Multiply final value by diplomatic pact expenses ratio - countries paying a lot to pacts have lower spending ambitions
 	multiply = {
 		value = 1
@@ -284,6 +332,20 @@ wanted_army_size_script_value = {
 				multiply = 1.10 #safety margin
 			}
 		}
+	}
+
+	if = { #Grow the army until the Build Army agenda concludes
+		limit = {
+			has_journal_entry = je_tp_pool_build_army
+		}
+		multiply = 1.25
+	}
+
+	if = {
+		limit = {
+			divided_monarchists_ai_backs_bonapartist = yes
+		}
+		multiply = 1.25
 	}
 }
 
@@ -340,15 +402,15 @@ wanted_marines_size_script_value = {
 		limit = { country_rank = rank_value:major_power }
 		add = 2
 	}
-	
+
 	# General multiplier for easy adjustment
 	multiply = 0.5
-	
+
 	# Less marines before we have steel ships
 	if = {
 		limit = { NOT = { has_technology_researched = ironclad_tech } }
 		multiply = 0.5
-	}	
+	}
 
 	# Factor in strategies
 	if = {
@@ -365,7 +427,7 @@ wanted_marines_size_script_value = {
 		multiply = 0.5
 	}
 	if = {
-		limit = { 
+		limit = {
 			OR = {
 				country_rank < rank_value:minor_power
 				is_country_type = unrecognized
@@ -374,13 +436,13 @@ wanted_marines_size_script_value = {
 		}
 		multiply = 0
 	}
-	
+
 	# Multiply final value by diplomatic pact expenses ratio - countries paying a lot to pacts have lower spending ambitions
 	multiply = {
 		value = 1
 		subtract = diplomatic_pact_expense_ratio
 	}
-	
+
 	max = total_marine_capacity
 }
 
@@ -437,14 +499,18 @@ wanted_navy_size_script_value = {
 		limit = { country_rank = rank_value:major_power }
 		add = 10
 	}
-	
+
 	# General multiplier for easy adjustment
 	multiply = 0.75
-	
+
 	# More advanced ships require more crew
 	if = {
 		limit = { has_technology_researched = ironclad_tech }
 		multiply = 1.15
+	}
+	if = {
+		limit = { has_technology_researched = pre_dreadnought_tech }
+		multiply = 1.25
 	}
 	if = {
 		limit = { has_technology_researched = dreadnought_tech }
@@ -452,7 +518,7 @@ wanted_navy_size_script_value = {
 	}
 	if = {
 		limit = { has_technology_researched = battleship_tech }
-		multiply = 1.25
+		multiply = 1.15
 	}
 
 	# Journal related AI behaviours, choose this if you DONT care about the exact number of ships
@@ -489,12 +555,12 @@ wanted_navy_size_script_value = {
 		limit = { has_strategy = ai_strategy_maintain_mandate_of_heaven }
 		multiply = 0.25
 	}
-	
+
 	# Multiply final value by diplomatic pact expenses ratio - countries paying a lot to pacts have lower spending ambitions
 	multiply = {
 		value = 1
 		subtract = diplomatic_pact_expense_ratio
-	}	
+	}
 
 	# Journal related AI behaviours, choose this if you DO care about the exact number of ships
 	if = {
@@ -502,6 +568,52 @@ wanted_navy_size_script_value = {
 			has_journal_entry = je_hawaii
 		}
 		min = 25
+	}
+
+	if = { #Grow the navy until the Build Navy agenda concludes
+		limit = {
+			has_journal_entry = je_tp_pool_build_navy
+		}
+		multiply = 1.3
+	}
+
+	if = {
+		limit = {
+			divided_monarchists_ai_backs_bonapartist = yes
+		}
+		multiply = 1.25
+	}
+}
+
+ai_num_submarines = {
+	value = 0
+	every_scope_ship = {
+		limit = {
+			is_ai_ship_category = ai_ship_category_submarines
+		}
+		add = 1
+	}
+}
+
+# The country's ship count, era-adjusted since navies get more expensive with better tech
+navy_size_adjusted_by_tech = {
+	value = navy_size
+
+	if = {
+		limit = { has_technology_researched = ironclad_tech }
+		divide = 1.15
+	}
+	if = {
+		limit = { has_technology_researched = pre_dreadnought_tech }
+		divide = 1.25
+	}
+	if = {
+		limit = { has_technology_researched = dreadnought_tech }
+		divide = 1.25
+	}
+	if = {
+		limit = { has_technology_researched = battleship_tech }
+		divide = 1.15
 	}
 }
 
@@ -668,5 +780,28 @@ ship_mod_merchant_navy_doctrine = {
 	if = {
 		limit = { has_law = law_type:law_merchant_navy }
 		multiply = ship_mod_doctrine_boost
+	}
+}
+
+#root = country deciding whether to accept the demand
+#scope:initiator = country making the demand
+#scope:target_country = country deciding whether to accept the demand
+#scope:diplomatic_play_type = type of diplomatic play the demand is for
+diplomatic_play_acceptance = {
+	value = 0
+}
+
+#root = state; agricultural building levels for AI decree targeting, with subsistence counted at half weight
+ai_decree_agricultural_levels_script_value = {
+	value = "state_has_building_group_levels(bg_agriculture)"
+	add = "state_has_building_group_levels(bg_ranching)"
+	add = "state_has_building_group_levels(bg_plantations)"
+	subtract = {
+		value = "state_has_building_group_levels(bg_subsistence_agriculture)"
+		multiply = 0.5
+	}
+	subtract = {
+		value = "state_has_building_group_levels(bg_subsistence_ranching)"
+		multiply = 0.5
 	}
 }

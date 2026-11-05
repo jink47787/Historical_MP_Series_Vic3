@@ -29,6 +29,24 @@ building_government_administration = {
 
 	required_construction = construction_cost_very_low
 
+	ai_value = {
+		value = 1000
+
+		if = { # Bureaucratic Reform agenda - only the agenda's target states, while they still lack tax capacity
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_pool_bureaucratic_reform
+					is_target_in_variable_list = {
+						name = tp_bureaucratic_reform_states
+						target = prev
+					}
+				}
+				tax_capacity < tax_capacity_usage
+			}
+			add = 1000
+		}
+	}
+
 	background = "gfx/interface/icons/building_icons/backgrounds/building_panel_bg_monuments.dds"
 }
 
@@ -55,6 +73,15 @@ building_university = {
 	required_construction = construction_cost_medium
 
 	background = "gfx/interface/icons/building_icons/backgrounds/building_panel_bg_monuments.dds"
+
+	can_build_government = {
+		custom_tooltip = {
+			text = pol_cannot_build_unis
+			owner = {
+				NOT = { has_variable = poland_universities_closed_var }
+			}
+		}
+	}
 
 	ai_value = {
 		value = 2000 # Higher base value
@@ -90,7 +117,45 @@ building_university = {
 					has_building = building_university
 				}
 			}
-			add = 500
+			add = 10000
+		}
+
+		if = { # Educational Reform agenda - only while innovation is below cap
+			limit = {
+				owner = {
+					has_journal_entry = je_tp_pool_educational_reform
+					country_innovation < max_innovation
+				}
+			}
+			add = 2000
+		}
+
+		if = {
+			limit = {
+				OR = {
+					AND = {
+						owner ?= { has_variable = ai_ukraine_renaissance_accelerate }
+						state_region = { is_homeland = cu:ukrainian }
+					}
+					AND = {
+						owner ?= { has_variable = ai_belarus_renaissance_accelerate }
+						state_region = { is_homeland = cu:byelorussian }
+					}
+				}
+			}
+			add = 1000
+		}
+
+		if = {
+			limit = {
+				has_building = building_university
+				owner ?= {
+					has_variable = ai_poland_white
+					has_journal_entry = je_congress_poland
+					NOT = { has_variable = poland_university_requirement_met_var }
+				}
+			}
+			add = 1000
 		}
 	}
 }

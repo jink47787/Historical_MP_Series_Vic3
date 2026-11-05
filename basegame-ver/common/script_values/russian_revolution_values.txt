@@ -1,0 +1,520 @@
+﻿russian_liberal_laws_value = {
+	value = 0
+	if = {
+		limit = {
+			has_journal_entry = je_russian_revolution
+		}
+		add = {
+			add = active_law:lawgroup_governance_principles.type.progressiveness
+			if = {
+				limit = {
+					has_law = law_type:law_council_republic
+				}
+				divide = 2
+			}
+		}
+		add = active_law:lawgroup_distribution_of_power.type.progressiveness
+		add = {
+			add = active_law:lawgroup_citizenship.type.progressiveness
+			divide = 2
+		}
+		add = active_law:lawgroup_church_and_state.type.progressiveness
+		add = active_law:lawgroup_free_speech.type.progressiveness
+		add = {
+			add = active_law:lawgroup_rights_of_women.type.progressiveness
+			divide = 2
+		}
+		add = {
+			add = active_law:lawgroup_land_reform.type.progressiveness
+			divide = 2
+		}
+	}
+}
+
+russian_socialist_laws_value = {
+	value = 0
+	if = {
+		limit = {
+			has_journal_entry = je_russian_revolution
+		}
+		add = {
+			add = active_law:lawgroup_governance_principles.type.progressiveness
+			if = {
+				limit = {
+					has_law = law_type:law_council_republic
+				}
+				multiply = 2
+			}
+		}
+		add = {
+			add = active_law:lawgroup_distribution_of_power.type.progressiveness
+			divide = 2
+		}
+		add = active_law:lawgroup_economic_system.type.progressiveness
+		add = {
+			add = active_law:lawgroup_land_reform.type.progressiveness
+			divide = 2
+		}
+		add = active_law:lawgroup_labor_rights.type.progressiveness
+		add = active_law:lawgroup_labour_associations.type.progressiveness
+		add = {
+			add = active_law:lawgroup_health_system.type.progressiveness
+			divide = 2
+		}
+	}
+}
+
+russian_total_con_calc = {
+	value = root.var:rus_gov_con
+}
+
+russian_total_lib_calc = {
+	value = root.var:rus_gov_lib
+}
+
+russian_total_soc_calc = {
+	value = root.var:rus_gov_soc
+}
+
+russian_total_alignment_calc = {
+	value = russian_conservative_monthly_change
+	add = russian_liberal_monthly_change
+	add = russian_socialist_monthly_change
+}
+
+russian_conservative_share = {
+	value = 0
+	if = {
+		limit = {
+			russian_total_alignment_calc > 0
+		}
+		add = russian_conservative_monthly_change
+		divide = russian_total_alignment_calc
+	}
+}
+
+russian_liberal_share = {
+	value = 0
+	if = {
+		limit = {
+			russian_total_alignment_calc > 0
+		}
+		add = russian_liberal_monthly_change
+		divide = russian_total_alignment_calc
+	}
+}
+
+russian_socialist_share = {
+	value = 0
+	if = {
+		limit = {
+			russian_total_alignment_calc > 0
+		}
+		add = russian_socialist_monthly_change
+		divide = russian_total_alignment_calc
+	}
+}
+
+russian_conservative_monthly_change = {
+	value = 0
+	if = {
+		limit = {
+			ruler ?= {
+				OR = {
+					has_reactionary_ideology = yes
+					has_conservative_ideology = yes
+					has_monarchist_ideology = yes
+				}
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_ruler"
+			add = 1
+		}
+	}
+	if = {
+		limit = {
+			any_political_movement = {
+				OR = {
+					movement_is_nationalist = yes
+					movement_is_conservative = yes
+				}
+				political_movement_support >= 0.05
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_movements"
+			every_political_movement = {
+				limit = {
+				OR = {
+					movement_is_nationalist = yes
+					movement_is_conservative = yes
+				}
+					political_movement_support >= 0.05
+				}
+				add = this.political_movement_support
+			}
+		}
+	}
+	if = {
+		limit = {
+			any_interest_group = {
+				OR = {
+					ig_is_reactionary = yes
+					interest_group_has_reactionary_ideology = yes
+					interest_group_has_conservative_ideology = yes
+				}
+				is_marginal = no
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_interest_groups"
+			every_interest_group = {
+				limit = {
+				OR = {
+					ig_is_reactionary = yes
+					interest_group_has_reactionary_ideology = yes
+					interest_group_has_conservative_ideology = yes
+				}
+					is_marginal = no
+				}
+				add = this.ig_clout
+			}
+		}
+	}
+	if = {
+		limit = {
+			russian_liberal_laws_value <= 0
+			russian_socialist_laws_value <= 0
+		}
+		add = {
+			desc = "russian_alignment_change_laws"
+			add = 1
+		}
+	}
+	if = {
+		limit = {
+			NOT = { has_technology_researched = socialism }
+		}
+		divide = 2
+	}
+	if = {
+		limit = {
+			NOT = { has_technology_researched = egalitarianism }
+		}
+		divide = 2
+	}
+}
+
+russian_liberal_monthly_change = {
+	value = 0
+	if = {
+		limit = {
+			ruler ?= {
+				OR = {
+					has_ideology = ideology:ideology_modernizer_leader
+					has_liberal_ideology = yes
+					has_progressive_ideology = yes
+				}
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_ruler"
+			add = 1
+		}
+	}
+	if = {
+		limit = {
+			any_political_movement = {
+				movement_is_liberal = yes
+				political_movement_support >= 0.05
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_movements"
+			every_political_movement = {
+				limit = {
+				movement_is_liberal = yes
+					political_movement_support >= 0.05
+				}
+				add = this.political_movement_support
+			}
+		}
+	}
+	if = {
+		limit = {
+			any_interest_group = {
+				OR = {
+					ig_is_liberal = yes
+					interest_group_has_liberal_ideology = yes
+					interest_group_has_progressive_ideology = yes
+				}
+				is_marginal = no
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_interest_groups"
+			every_interest_group = {
+				limit = {
+				OR = {
+					ig_is_liberal = yes
+					interest_group_has_liberal_ideology = yes
+					interest_group_has_progressive_ideology = yes
+				}
+					is_marginal = no
+				}
+				add = this.ig_clout
+			}
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				AND = {
+					russian_liberal_laws_value <= 0
+					russian_socialist_laws_value <= 0
+				}
+			}
+			russian_liberal_laws_value > russian_socialist_laws_value
+		}
+		add = {
+			desc = "russian_alignment_change_laws"
+			add = 1
+		}
+	}
+	if = {
+		limit = {
+			NOT = { has_technology_researched = socialism }
+		}
+		divide = 2
+	}
+}
+
+russian_socialist_monthly_change = {
+	value = 0
+	if = {
+		limit = {
+			ruler ?= {
+				has_socialist_ideology = yes
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_ruler"
+			add = 1
+		}
+	}
+	if = {
+		limit = {
+			any_political_movement = {
+				movement_is_socialist = yes
+				political_movement_support >= 0.05
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_movements"
+			every_political_movement = {
+				limit = {
+				movement_is_socialist = yes
+					political_movement_support >= 0.05
+				}
+				add = this.political_movement_support
+			}
+		}
+	}
+	if = {
+		limit = {
+			any_interest_group = {
+				OR = {
+					ig_is_socialist = yes
+					interest_group_has_socialist_ideology = yes
+				}
+				is_marginal = no
+			}
+		}
+		add = {
+			desc = "russian_alignment_change_interest_groups"
+			every_interest_group = {
+				limit = {
+				OR = {
+					ig_is_socialist = yes
+					interest_group_has_socialist_ideology = yes
+				}
+					is_marginal = no
+				}
+				add = this.ig_clout
+			}
+		}
+	}
+	if = {
+		limit = {
+			NOT = {
+				AND = {
+					russian_liberal_laws_value <= 0
+					russian_socialist_laws_value <= 0
+				}
+			}
+			russian_liberal_laws_value < russian_socialist_laws_value
+		}
+		add = {
+			desc = "russian_alignment_change_laws"
+			add = 1
+		}
+	}
+}
+
+socialist_faction_bar_drift_factor = 0.05
+socialist_faction_bar_failure_threshold = 20
+socialist_faction_bar_victory_threshold = 100
+
+bolshevik_value = {
+	value = 0
+	every_political_movement = {
+		limit = {
+			is_political_movement_type = movement_communist
+		}
+		add = {
+			desc = "socialist_faction_movement_desc"
+			value = this.political_movement_support
+			multiply = 200
+			max = 50
+		}
+	}
+	every_political_movement = {
+		limit = {
+			is_political_movement_type = movement_labor
+		}
+		add = {
+			desc = "socialist_faction_labor_desc"
+			value = this.political_movement_support
+			multiply = ROOT.var:bolshevik_labor
+			max = 50
+		}
+	}
+	if = {
+		limit = {
+			exists = var:bolshevik_leader
+		}
+		add = {
+			desc = "socialist_faction_leader_prominence_desc"
+			value = var:bolshevik_leader.prominence
+			multiply = 0.5
+			max = 25
+		}
+		add = {
+			desc = "socialist_faction_leader_popularity_desc"
+			value = var:bolshevik_leader.popularity
+			multiply = 0.5
+			max = 25
+		}
+	}
+	ig:ig_trade_unions = {
+		add = {
+			desc = "socialist_faction_ig_clout_desc"
+			value = this.ig_clout
+			multiply = 200
+			max = 50
+		}
+	}
+}
+
+menshevik_value = {
+	value = 0
+	every_political_movement = {
+		limit = {
+			is_political_movement_type = movement_socialist
+		}
+		add = {
+			desc = "socialist_faction_movement_desc"
+			value = this.political_movement_support
+			multiply = 200
+			max = 50
+		}
+	}
+	every_political_movement = {
+		limit = {
+			is_political_movement_type = movement_labor
+		}
+		add = {
+			desc = "socialist_faction_labor_desc"
+			value = this.political_movement_support
+			multiply = ROOT.var:menshevik_labor
+			max = 50
+		}
+	}
+	if = {
+		limit = {
+			exists = var:menshevik_leader
+		}
+		add = {
+			desc = "socialist_faction_leader_prominence_desc"
+			value = var:menshevik_leader.prominence
+			multiply = 0.5
+			max = 25
+		}
+		add = {
+			desc = "socialist_faction_leader_popularity_desc"
+			value = var:menshevik_leader.popularity
+			multiply = 0.5
+			max = 25
+		}
+	}
+	ig:ig_intelligentsia = {
+		add = {
+			desc = "socialist_faction_ig_clout_desc"
+			value = this.ig_clout
+			multiply = 200
+			max = 50
+		}
+	}
+}
+
+left_sr_value = {
+	value = 0
+	every_political_movement = {
+		limit = {
+			is_political_movement_type = movement_anarchist
+		}
+		add = {
+			desc = "socialist_faction_movement_desc"
+			value = this.political_movement_support
+			multiply = 200
+			max = 50
+		}
+	}
+	every_political_movement = {
+		limit = {
+			is_political_movement_type = movement_land_reform
+		}
+		add = {
+			desc = "socialist_faction_movement_desc"
+			value = this.political_movement_support
+			multiply = 200
+			max = 50
+		}
+	}
+	if = {
+		limit = {
+			exists = var:left_sr_leader
+		}
+		add = {
+			desc = "socialist_faction_leader_prominence_desc"
+			value = var:left_sr_leader.prominence
+			multiply = 0.5
+			max = 25
+		}
+		add = {
+			desc = "socialist_faction_leader_popularity_desc"
+			value = var:left_sr_leader.popularity
+			multiply = 0.5
+			max = 25
+		}
+	}
+	ig:ig_rural_folk = {
+		add = {
+			desc = "socialist_faction_ig_clout_desc"
+			value = this.ig_clout
+			multiply = 200
+			max = 50
+		}
+	}
+}

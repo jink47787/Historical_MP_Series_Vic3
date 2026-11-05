@@ -1,5 +1,11 @@
 ﻿je_la_trinitaria = {
 	group = je_group_historical_content
+	dlc = dlc016
+
+	activation_description = {
+		always = yes
+	}
+
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
     is_shown_in_lobby = {
@@ -50,69 +56,86 @@
 		}
 	}
 
-	fail = {
-		custom_tooltip = {
-			text = dominican_secession_tt
-			c:DOM ?= {
-				is_diplomatic_play_enemy_of = root
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = dominican_movement_suppressed_tt
+				NOT = {
+					any_political_movement = {
+						is_political_movement_type = movement_dominican_national
+						political_movement_radicalism >= define:NPolitics|RADICALISM_AGITATING_THRESHOLD
+					}
+				}
+			}
+			any_scope_state = {
+				state_region = s:STATE_SANTO_DOMINGO
+				is_incorporated = yes
+				turmoil < 0.1
 			}
 		}
-	}
-
-	complete = {
-		custom_tooltip = {
-			text = dominican_movement_suppressed_tt
-			NOT = {
-				any_political_movement = {
-					is_political_movement_type = movement_dominican_national
-					political_movement_radicalism >= define:NPolitics|RADICALISM_AGITATING_THRESHOLD
+		effect = {
+			trigger_event = {
+				id = dominican_events.3
+				popup = yes
+			}
+			show_as_tooltip = {
+				add_primary_culture = cu:afro_caribeno
+				s:STATE_SANTO_DOMINGO = {
+					add_homeland = cu:afro_antillean
 				}
 			}
 		}
-		any_scope_state = {
-			state_region = s:STATE_SANTO_DOMINGO
-			is_incorporated = yes
-			turmoil < 0.1
-		}
 	}
 
-	on_complete = {
-		trigger_event = { 
-			id = dominican_events.3
-			popup = yes 
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = dominican_secession_tt
+				c:DOM ?= {
+					is_diplomatic_play_enemy_of = root
+				}
+			}
 		}
-		show_as_tooltip = {
-			add_primary_culture = cu:afro_caribeno
-			s:STATE_SANTO_DOMINGO = {
-				add_homeland = cu:afro_antillean
+		effect = {
+			trigger_event = {
+				id = dominican_events.2
+				popup = yes
+			}
+			show_as_tooltip = {
+				add_modifier = {
+					name = modifier_dominican_mutinies
+					days = short_modifier_time
+				}
 			}
 		}
 	}
 
-	on_fail = {
-		trigger_event = { 
-			id = dominican_events.2
-			popup = yes 
-		}
-		show_as_tooltip = {
-			add_modifier = {
-				name = modifier_dominican_mutinies
-				days = short_modifier_time
-			}
-		}
-	}
-
-	invalid = {
-		NOT = {
-			any_scope_state = {
-				state_region = s:STATE_SANTO_DOMINGO
-			}
-		}
-		AND = {
-			exists = c:DOM
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
 			NOT = {
-				is_diplomatic_play_enemy_of = c:DOM
+				any_scope_state = {
+					state_region = s:STATE_SANTO_DOMINGO
+				}
 			}
+			AND = {
+				exists = c:DOM
+				NOT = {
+					is_diplomatic_play_enemy_of = c:DOM
+				}
+			}
+		}
+		effect = {
+			je_la_trinitaria_cleanup = yes
 		}
 	}
 

@@ -2,6 +2,11 @@
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
 	group = je_group_historical_content
+	dlc = dlc014
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_when_inactive = {
 		has_dlc_feature = ip3_content
@@ -69,74 +74,92 @@
 		}
 	}
 
-	complete = {
-		custom_tooltip = { # happens via major formables
-			text = is_yugoslavia_tt
-			c:YUG ?= this
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = { # happens via major formables
+				text = is_yugoslavia_tt
+				c:YUG ?= this
+			}
+			government_legitimacy >= 50
+			is_at_war = no
+			custom_tooltip = {
+	            text = no_insurrectionary_movement_tt
+	            NOT = {
+	                any_political_movement = {
+	                    is_insurrectionary = yes
+	                }
+	            }
+	        }
 		}
-		government_legitimacy >= 50
-		is_at_war = no
-		custom_tooltip = {
-            text = no_insurrectionary_movement_tt
-            NOT = {
-                any_political_movement = {
-                    is_insurrectionary = yes
-                }
-            }
-        }
+		effect = {
+			hidden_effect = {
+				set_variable = je_yugoslavia_happened
+			}
+			trigger_event = {
+				id = yugoslavia.2
+				days = 1
+				popup = yes
+			}
+		}
+		event_outcome_desc = {
+		     first_valid = {
+		         triggered_desc = {
+		             desc = event_effects_yugoslavia.2_tt
+		         }
+		     }
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			is_subject = yes
+			NOT = { is_at_war_with_overlord = yes }
+		}
+		effect = {
+			hidden_effect = {
+				set_variable = {
+					name = je_yugoslavia_happened
+					days = long_modifier_time
+				}
+			}
+			post_notification = yugoslavia_failed_message
+			je_yugoslavia_cleanup = yes
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			ROOT = {
+				OR  = {
+					NOR = {
+						country_has_primary_culture = cu:croat
+						country_has_primary_culture = cu:serb
+						country_has_primary_culture = cu:slovene
+						country_has_primary_culture = cu:bosniak
+						country_has_primary_culture = cu:bulgarian
+					}
+					c:KUK ?= this
+					has_journal_entry = je_danubian_federation
+				}
+			}
+		}
+		effect = {
+			je_yugoslavia_cleanup = yes
+		}
 	}
 
 	on_monthly_pulse = {
 
-	}
-
-	on_complete = {
-		hidden_effect = {
-			set_variable = je_yugoslavia_happened
-		}
-		trigger_event = {
-			id = yugoslavia.2
-			days = 1
-			popup = yes
-		}
-	}
-
-	event_outcome_completed_desc = {
-	     first_valid = {
-	         triggered_desc = {
-	             desc = event_effects_yugoslavia.2_tt
-	         }
-	     }
-	}
-
-	fail = {
-		is_subject = yes
-	}
-
-	on_fail = {
-		hidden_effect = {
-			set_variable = {
-				name = je_yugoslavia_happened
-				days = long_modifier_time
-			}
-		}
-		post_notification = yugoslavia_failed_message
-	}
-
-	invalid = {
-		ROOT = {
-			OR  = {
-				NOR = {
-					country_has_primary_culture = cu:croat
-					country_has_primary_culture = cu:serb
-					country_has_primary_culture = cu:slovene
-					country_has_primary_culture = cu:bosniak
-					country_has_primary_culture = cu:bulgarian
-				}
-				c:KUK ?= this
-				has_journal_entry = je_danubian_federation
-			}
-		}
 	}
 
 	weight = 100

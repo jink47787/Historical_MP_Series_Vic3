@@ -171,6 +171,10 @@ german_unification.1 = {
 			change_tag = SGF
 		}
 	}
+	after = {
+		je_north_german_unification_cleanup = yes
+		je_south_german_unification_cleanup = yes
+	}
 }
 
 # Annex a German country after forming NGF/SGF
@@ -270,7 +274,7 @@ german_unification.3 = {
 
 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	duration = 3
 
@@ -283,6 +287,7 @@ german_unification.3 = {
 			save_scope_as = junkers
 			leader = {
 				save_scope_as = bismarck_scope
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -334,6 +339,10 @@ german_unification.3 = {
 			base = 5
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:bismarck_scope }
+	}
 }
 
 # German Unification
@@ -355,6 +364,11 @@ german_unification.4 = {
 
 	duration = 3
 
+	trigger = {
+		# triggered by on_action - on_country_formed
+		c:GER ?= this
+	}
+
 immediate = {
 	if = {
 		limit = {
@@ -370,9 +384,6 @@ immediate = {
 		}
 	}
 }
-
-	trigger = {
-	}
 
 	option = {
 		name = german_unification.4.a
@@ -458,6 +469,218 @@ german_unification.5 = {
 			add_journal_entry = {
 				type = je_south_german_unification
 			}
+		}
+	}
+	after = {
+		je_german_unification_idea_cleanup = yes
+	}
+}
+
+# Taken Over by Pan-Nationalist Radicals
+german_unification.6 = {
+	type = country_event
+	placement = ROOT
+
+	title = german_unification.6.t
+	desc = german_unification.6.d
+	flavor = german_unification.6.f
+
+	event_image = {
+		video = "unspecific_signed_contract"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	duration = 3
+
+	cooldown = { days = never_fire_again_modifier_time }
+
+	trigger = {
+		has_variable = victorious_pan_nationalists
+		has_technology_researched = pan-nationalism
+		is_diplomatic_play_committed_participant = no
+		is_at_war = no
+		any_neighbouring_state = {
+			owner ?= {
+				is_unification_candidate = GER
+				save_temporary_scope_as = unification_candidate
+				has_technology_researched = pan-nationalism
+				prestige > ROOT.prestige
+				ROOT = {
+					any_primary_culture = { # Every one of our primary cultures is a primary culture of the relevant unifier
+						is_primary_culture_of = scope:unification_candidate
+						count = all
+					}
+					OR = {
+						is_subject = no
+						AND = {
+							is_subject = yes
+							scope:unification_candidate ?= overlord
+						}
+					}
+				}
+				relations:root > 0
+				is_diplomatic_play_committed_participant = no
+				is_at_war = no
+			}
+		}
+	}
+
+	immediate = {
+		save_scope_as = smaller_country_scope
+		ordered_country = {
+			limit = {
+				save_temporary_scope_as = unification_candidate
+				has_technology_researched = pan-nationalism
+				prestige > ROOT.prestige
+				ROOT = {
+					any_primary_culture = { # Every one of our primary cultures is a primary culture of the relevant unifier
+						is_primary_culture_of = scope:unification_candidate
+						count = all
+					}
+				}
+				relations:root > 0
+				is_diplomatic_play_committed_participant = no
+				is_at_war = no
+				any_neighbouring_state = {
+					owner ?= ROOT
+				}
+			}
+			order_by = prestige
+			position = 0
+			save_scope_as = mother_country_scope
+		}
+		random_political_movement = {
+			limit = {
+				is_political_movement_type = movement_german_national
+			}
+			save_scope_as = german_national_movement_scope
+		}
+	}
+
+	option = {
+		name = german_unification.6.a
+		default_option = yes
+		ai_chance = {
+			base = 100
+		}
+		if = {
+			limit = {
+				country_has_primary_culture = cu:north_german
+			}
+			add_loyalists = {
+				value = very_large_radicals
+				culture = cu:north_german
+			}
+		}
+		if = {
+			limit = {
+				country_has_primary_culture = cu:south_german
+			}
+			add_loyalists = {
+				value = very_large_radicals
+				culture = cu:south_german
+			}
+		}
+		scope:mother_country_scope ?= {
+			trigger_event = { id = german_unification.7 popup = yes }
+		}
+	}
+
+	option = {
+		name = german_unification.6.b
+		ai_chance = {
+			base = 0
+		}
+		if = {
+			limit = {
+				country_has_primary_culture = cu:north_german
+			}
+			add_radicals = {
+				value = large_radicals
+				culture = cu:north_german
+			}
+		}
+		if = {
+			limit = {
+				country_has_primary_culture = cu:south_german
+			}
+			add_radicals = {
+				value = large_radicals
+				culture = cu:south_german
+			}
+		}
+		remove_variable = victorious_pan_nationalists
+	}
+}
+
+# Country gets taken over by pan-nationalists and wants to join us
+german_unification.7 = {
+	type = country_event
+	placement = ROOT
+
+	title = german_unification.7.t
+	desc = german_unification.7.d
+	flavor = german_unification.7.f
+
+	event_image = {
+		video = "votp_monarch_holding_court"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
+
+	duration = 1
+
+	trigger = {
+		#Part of event chain
+	}
+
+	immediate = {
+
+	}
+
+	option = {
+		name = german_unification.7.a
+		ai_chance = {
+			base = 100
+		}
+		default_option = yes
+		if = {
+			limit = {
+				scope:smaller_country_scope = {
+					is_player = yes
+				}
+			}
+			scope:smaller_country_scope = {
+				play_as = root
+			}
+		}
+		hidden_effect = { # remove all German radicals in country that's being annexed pre-annexation
+			scope:smaller_country_scope = {
+				add_radicals = {
+					value = -1
+					culture = cu:north_german
+				}
+				add_radicals = {
+					value = -1
+					culture = cu:south_german
+				}
+			}
+		}
+		annex_with_incorporation = scope:smaller_country_scope
+	}
+	option = {
+		name = german_unification.7.b
+		ai_chance = {
+			base = 0
+		}
+		create_diplomatic_pact = {
+			country = scope:smaller_country_scope
+			type = puppet
 		}
 	}
 }

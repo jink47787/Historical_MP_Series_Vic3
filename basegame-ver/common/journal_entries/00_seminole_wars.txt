@@ -3,40 +3,72 @@
 
 	group = je_group_usa_manifest_destiny
 
-	complete = {
-		owns_entire_state_region = STATE_FLORIDA
-		NOT = { exists = c:SML }
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		show_as_tooltip = {
-			if = {
-				limit = {
-					c:SEQ ?= { is_subject_of = c:USA }
-					exists = s:STATE_OKLAHOMA.region_state:SEQ
-				}
-				custom_tooltip = {
-					text = je_seminole_wars_removal
-					s:STATE_FLORIDA.region_state:USA ?= {
-						every_scope_pop = {
-							limit = {
-								culture = cu:muskogean
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			owns_entire_state_region = STATE_FLORIDA
+			NOT = { exists = c:SML }
+		}
+		effect = {
+			show_as_tooltip = {
+				if = {
+					limit = {
+						c:SEQ ?= { is_subject_of = c:USA }
+						exists = s:STATE_OKLAHOMA.region_state:SEQ
+					}
+					custom_tooltip = {
+						text = je_seminole_wars_removal
+						s:STATE_FLORIDA.region_state:USA ?= {
+							every_scope_pop = {
+								limit = {
+									culture = cu:muskogean
+								}
+								move_pop = s:STATE_OKLAHOMA.region_state:SEQ
 							}
-							move_pop = s:STATE_OKLAHOMA.region_state:SEQ
+						}
+					}
+				}
+				else = {
+					s:STATE_FLORIDA.region_state:USA ?= {
+						add_modifier = {
+							name = florida_resettlement
+							days = long_modifier_time
 						}
 					}
 				}
 			}
-			else = {
-				s:STATE_FLORIDA.region_state:USA ?= {
-					add_modifier = {
-						name = florida_resettlement
-						days = long_modifier_time
-					}
+			trigger_event = { id = native_resettlement.7 }
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				c:SML ?= {
+					owns_entire_state_region_uncontested = STATE_FLORIDA
+				}
+				c:MSC ?= {
+					owns_entire_state_region_uncontested = STATE_FLORIDA
 				}
 			}
 		}
-		trigger_event = { id = native_resettlement.7 }
+		effect = {
+			s:STATE_FLORIDA = {
+				remove_claim = c:USA
+			}
+			je_seminole_wars_cleanup = yes
+		}
 	}
 
 	immediate = {
@@ -54,23 +86,6 @@
 		}
 		s:STATE_FLORIDA.region_state:USA = {
 			save_scope_as = flarda
-		}
-	}
-
-	fail = {
-		OR = {
-			c:SML ?= {
-				owns_entire_state_region = STATE_FLORIDA
-			}
-			c:MSC ?= {
-				owns_entire_state_region = STATE_FLORIDA
-			}
-		}
-	}
-
-	on_fail = {
-		s:STATE_FLORIDA = {
-			remove_claim = c:USA
 		}
 	}
 

@@ -1,6 +1,6 @@
-link to a graphical representation of the mobilization option group
+﻿link to the background illustration of the mobilization option group
 
-	icon = "gfx/interface/icons/some/icons/path/icon.dds"
+	background = "gfx/interface/illustrations/some/path/background.dds"
 
 Mobilization Option Groups get sorted from highest to lowest weight on the UI
 

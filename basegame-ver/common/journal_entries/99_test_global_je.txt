@@ -5,6 +5,10 @@ je_global_test = {
 
 	group = je_group_global_test
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_when_inactive = {
 		always = no
 		#always = yes
@@ -44,26 +48,63 @@ je_global_test = {
 		#}
 	}
 
-	complete = {
-		any_country = {
-			count < 1
-			OR = {
-				country_definition = cd:LIP
-				country_definition = cd:SCM
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			any_country = {
+				count < 1
+				OR = {
+					country_definition = cd:LIP
+					country_definition = cd:SCM
+				}
 			}
+		}
+		effect = {
+			je_global_test_cleanup = yes
+		}
+		effect_all_involved = {
+			add_modifier = { name = lippe_crisis_averted years = 10 }
 		}
 	}
 
-	fail = {
-		any_country = {
-			count > 2
-			OR = {
-				country_definition = cd:LIP
-				country_definition = cd:SCM
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			any_country = {
+				count > 2
+				OR = {
+					country_definition = cd:LIP
+					country_definition = cd:SCM
+				}
 			}
 		}
+		effect = {
+			je_global_test_cleanup = yes
+		}
+		effect_all_involved = {
+			add_modifier = { name = lippe_crisis years = 10 }
+		}
 	}
-	
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_global_test_cleanup = yes
+		}
+		effect_all_involved = {
+			add_modifier = { name = lippe_crisis years = 10 }
+		}
+	}
+
 	immediate_all_involved = {
 		if = {
 			limit = { exists = c:LIP }
@@ -97,18 +138,6 @@ je_global_test = {
 		}
 	}
 
-	on_complete_all_involved = {
-		add_modifier = { name = lippe_crisis_averted years = 10 }
-	}
-	
-	on_fail_all_involved = {
-		add_modifier = { name = lippe_crisis years = 10 }
-	}
-	
-	on_timeout_all_involved = {
-		add_modifier = { name = lippe_crisis years = 10 }
-	}
-	
 	on_weekly_pulse = {
 		effect = {
 			scope:journal_entry = {
@@ -131,9 +160,8 @@ je_global_test = {
 	}
 
 	weight = 1000
-	
+
 	timeout = 1825
 
-		
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }

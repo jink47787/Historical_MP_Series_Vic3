@@ -1,0 +1,689 @@
+﻿# root = country
+# scope:war = the war we're evaluating war support change for
+# No randomness is allowed in this script value
+
+military_size = {
+	add = army_size_including_conscripts
+	add = navy_size
+}
+
+war_support_from_casualties = {
+	add = "scope:war.num_country_casualties(root)"
+	if = {
+		limit = { military_size > 0 }
+		divide = military_size
+	}
+	divide = 1000
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_KIA_FACTOR
+}
+
+war_support_from_battles = {
+	add = "size_weighted_won_battles_fraction(scope:war)"
+	subtract = "size_weighted_lost_battles_fraction(scope:war)"
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_BATTLES_FACTOR
+	multiply = {
+		value = "scope:war.num_significant_battles"
+		divide = define:NWar|WAR_SUPPORT_BATTLES_RAMP_THRESHOLD
+		max = 1
+	}
+}
+
+# The mirror of the duration drain: a new war carries its own enthusiasm, decaying to nothing as the war stops being new
+war_support_from_short_war = {
+	value = define:NWar|WAR_SUPPORT_CHANGE_SHORT_WAR_MONTHS
+	subtract = "scope:war.war_duration_months"
+	min = 0
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_SHORT_WAR_PER_MONTH
+}
+
+# Symmetric drain that grows with war length, guaranteeing any war eventually sinks both sides to the floor
+# No drain until the war has lasted past the grace period
+war_support_from_duration = {
+	value = "scope:war.war_duration_months"
+	subtract = define:NWar|WAR_SUPPORT_CHANGE_DURATION_DRAIN_GRACE_MONTHS
+	min = 0
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_DURATION_DRAIN_PER_MONTH
+}
+
+# A war the country did not pick weighs on the lobbies differently: objecting to it carries less, backing it carries more
+war_support_from_anti_war_lobby_clout = {
+	add = "lobby_war_opposition(scope:war)"
+	divide = define:NWar|WAR_SUPPORT_CHANGE_LOBBY_CLOUT_MAX_AT
+	max = 1
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_ANTI_WAR_LOBBY_CLOUT_FACTOR
+	if = {
+		limit = { scope:war = { is_on_defending_side = root } }
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_DEFENSIVE_WAR_ANTI_WAR_LOBBY_MULT
+	}
+}
+
+war_support_from_lobby_clout = {
+	add = "lobby_war_support(scope:war)"
+	divide = define:NWar|WAR_SUPPORT_CHANGE_LOBBY_CLOUT_MAX_AT
+	max = 1
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_PRO_WAR_LOBBY_CLOUT_FACTOR
+	if = {
+		limit = { scope:war = { is_on_defending_side = root } }
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_DEFENSIVE_WAR_PRO_WAR_LOBBY_MULT
+	}
+}
+
+war_support_from_country_turmoil = {
+	add = country_turmoil
+	divide = define:NWar|WAR_SUPPORT_CHANGE_TURMOIL_MAX_AT
+	max = 1
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_TURMOIL_FACTOR
+}
+war_support_from_devastation = {
+	add = average_devastation
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_DEVASTATION_FACTOR
+}
+war_support_from_fervor = {
+	if = {
+		limit = {
+			scope:war = {
+				OR = {
+					is_target_of_wargoal_in_war = root
+					is_holder_of_wargoal_in_war = root
+				}
+			}
+		}
+		add = country_fervor_primary_culture
+		multiply = define:NPops|CULTURAL_FERVOR_WAR_SUPPORT_EFFECT
+	}
+}
+
+war_support_from_gdp = {
+	value = "scope:war.gdp_change_since_war_start(root)"
+	save_temporary_value_as = temp_gdp_change
+
+	value = 0
+	if = {
+		limit = { scope:temp_gdp_change > 0 }
+		add = {
+			value = scope:temp_gdp_change
+			max = define:NWar|WAR_SUPPORT_CHANGE_GDP_GROWTH_MAX_AT
+			subtract = define:NWar|WAR_SUPPORT_CHANGE_GDP_TOLERANCE
+			min = 0
+			divide = {
+				value = define:NWar|WAR_SUPPORT_CHANGE_GDP_GROWTH_MAX_AT
+				subtract = define:NWar|WAR_SUPPORT_CHANGE_GDP_TOLERANCE
+			}
+			multiply = define:NWar|WAR_SUPPORT_CHANGE_GDP_GROWTH_FACTOR
+		}
+	}
+	else = {
+		add = {
+			# The collapse side needs no cap of its own: GDP cannot fall by more than everything the country had
+			value = scope:temp_gdp_change
+			multiply = -1
+			subtract = define:NWar|WAR_SUPPORT_CHANGE_GDP_TOLERANCE
+			min = 0
+			divide = {
+				value = 1
+				subtract = define:NWar|WAR_SUPPORT_CHANGE_GDP_TOLERANCE
+			}
+			multiply = define:NWar|WAR_SUPPORT_CHANGE_GDP_DECLINE_FACTOR
+		}
+	}
+}
+
+war_support_from_blockade = {
+	value = "scope:war.blockaded_gdp_share(root)"
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_BLOCKADE_FACTOR
+}
+
+# Tuned to outweigh the economic damage of losing the land, so being carved up hardens a country rather than breaking it
+war_support_from_lost_land = {
+	value = "scope:war.land_lost_since_war_start(root)"
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_LOST_LAND_FACTOR
+}
+
+war_support_from_gold_reserves = {
+	if = {
+		limit = { gold_reserves_limit > 0 }
+		add = gold_reserves
+		divide = gold_reserves_limit
+		max = 1
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_GOLD_RESERVES_FACTOR
+	}
+}
+
+war_support_from_taking_loans = {
+	if = {
+		limit = {
+			taking_loans = yes
+			credit > 0
+		}
+		add = principal
+		divide = credit
+		max = 1
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_TAKING_LOANS_EFFECT
+	}
+}
+
+war_support_from_servicing_debt = {
+	if = {
+		limit = {
+			taking_loans = no
+			principal > 0
+			credit > 0
+		}
+		add = principal
+		divide = credit
+		max = 1
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_TAKING_LOANS_EFFECT
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_SERVICING_DEBT_MULT
+	}
+}
+
+war_support_from_looming_bankruptcy = {
+	if = {
+		limit = {
+			taking_loans = yes
+			in_default = no
+			weeks_until_bankruptcy < define:NWar|WAR_SUPPORT_CHANGE_BANKRUPTCY_LOOMING_WEEKS
+		}
+		value = define:NWar|WAR_SUPPORT_CHANGE_BANKRUPTCY_LOOMING_WEEKS
+		subtract = weeks_until_bankruptcy
+		divide = define:NWar|WAR_SUPPORT_CHANGE_BANKRUPTCY_LOOMING_WEEKS
+		min = 0
+		max = 1
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_BANKRUPTCY_IMMINENT_EFFECT
+	}
+}
+
+war_support_from_bankruptcy = {
+	if = {
+		limit = {
+			in_default = yes
+		}
+		value = define:NWar|WAR_SUPPORT_CHANGE_BANKRUPTCY_IMMINENT_EFFECT
+	}
+}
+
+# Only says anything when the subject is actually fighting this war alongside its overlord: not when the overlord stayed out of it, and not when the subject is fighting the overlord itself
+war_support_from_subject_attitude = {
+	if = {
+		limit = {
+			is_ai = yes
+			is_subject = yes
+			scope:war = {
+				is_war_participant = root
+				is_war_participant = root.overlord
+				NOT = { is_fighting_overlord_in_war = root }
+			}
+		}
+		if = {
+			limit = { attitude_towards_overlord = rebellious }
+			add = define:NWar|WAR_SUPPORT_CHANGE_REBELLIOUS_SUBJECT_EFFECT
+		}
+		else_if = {
+			limit = { attitude_towards_overlord = defiant }
+			add = define:NWar|WAR_SUPPORT_CHANGE_DEFIANT_SUBJECT_EFFECT
+		}
+		else_if = {
+			limit = { attitude_towards_overlord = aloof }
+			add = define:NWar|WAR_SUPPORT_CHANGE_ALOOF_SUBJECT_EFFECT
+		}
+		else_if = {
+			limit = { attitude_towards_overlord = loyal }
+			add = define:NWar|WAR_SUPPORT_CHANGE_LOYAL_SUBJECT_EFFECT
+		}
+	}
+}
+
+war_support_from_loyalists = {
+	add = loyalist_fraction
+	divide = define:NWar|WAR_SUPPORT_CHANGE_LOYALISTS_MAX_AT
+	max = 1
+	multiply = define:NWar|WAR_SUPPORT_CHANGE_LOYALISTS_FACTOR
+}
+
+# Wars where a goal cannot actually be taken have nothing pulling the two sides together, so a stalled demand converges war support on the neutral point.
+# Split in two so the breakdown can say which half is acting; they are mutually exclusive, one applying only below the neutral point and the other only above it.
+# Both are time-gated exactly like war goal progress.
+war_support_from_stalled_goal_against_us = {
+	if = {
+		limit = {
+			scope:war_support < define:NDiplomacy|WAR_SUPPORT_DRIFT_TARGET
+			scope:war = { has_stalled_wargoal_against = root }
+		}
+		value = define:NDiplomacy|WAR_SUPPORT_DRIFT_TARGET
+		subtract = scope:war_support
+		divide = define:NDiplomacy|WAR_SUPPORT_DRIFT_TARGET
+		min = 0
+		max = 1
+		if = {
+			limit = { scope:war = { has_stalled_state_wargoal_against = root } }
+			multiply = define:NWar|WAR_SUPPORT_CHANGE_STALLED_STATE_GOAL_CONVERGENCE
+		}
+		else = {
+			multiply = define:NWar|WAR_SUPPORT_CHANGE_STALLED_GOAL_CONVERGENCE
+		}
+		multiply = "scope:war.war_goal_time_ramp"
+	}
+}
+
+war_support_from_stalled_goal_held_by_us = {
+	if = {
+		limit = {
+			scope:war_support > define:NDiplomacy|WAR_SUPPORT_DRIFT_TARGET
+			scope:war = { has_stalled_wargoal_held_by = root }
+		}
+		value = scope:war_support
+		subtract = define:NDiplomacy|WAR_SUPPORT_DRIFT_TARGET
+		divide = define:NDiplomacy|WAR_SUPPORT_DRIFT_TARGET
+		min = 0
+		max = 1
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_STALLED_GOAL_CONVERGENCE
+		multiply = "scope:war.war_goal_time_ramp"
+		multiply = -1
+	}
+}
+
+war_support_from_rivalry = {
+	if = {
+		limit = { scope:war = { is_at_war_with_rival = root } }
+		add = define:NWar|WAR_SUPPORT_CHANGE_RIVAL_BOOST
+	}
+}
+
+war_support_from_journal_entries = {
+	if = {
+		limit = { has_journal_entry = je_the_first_carlist_war }
+		add = {
+			value = 10.0
+			desc = "je_the_first_carlist_war"
+		}
+	}
+	if = {
+		limit = {
+			has_variable = rcw_russian_faction
+			has_global_variable = rcw_exhaustion_level
+			global_var:rcw_exhaustion_level >= 1
+			scope:war.diplomatic_play = {
+				OR = {
+					is_diplomatic_play_type = dp_unify_russia
+					is_diplomatic_play_type = dp_revolution
+				}
+			}
+		}
+		add = {
+			value = enemy_occupation
+			if = {
+				limit = { global_var:rcw_exhaustion_level >= 4 }
+				multiply = -2.0
+			}
+			else_if = {
+				limit = { global_var:rcw_exhaustion_level >= 3 }
+				multiply = -1.0
+			}
+			else_if = {
+				limit = { global_var:rcw_exhaustion_level >= 2 }
+				multiply = -0.5
+			}
+			else = {
+				multiply = -0.25
+			}
+			desc = "WAR_SUPPORT_CHANGE_FROM_RCW_EXHAUSTION"
+		}
+	}
+}
+
+war_support_change = {
+	# save all values that make up the war support change calculation since we frequently refer to them numerous times below
+	value = enemy_occupation
+	save_temporary_value_as = temp_enemy_occupation
+	value = war_support_from_casualties
+	save_temporary_value_as = temp_war_support_from_casualties
+	value = war_support_from_battles
+	save_temporary_value_as = temp_war_support_from_battles
+	value = war_support_from_duration
+	save_temporary_value_as = temp_war_support_from_duration
+	value = war_support_from_short_war
+	save_temporary_value_as = temp_war_support_from_short_war
+	value = "scope:war.war_support_from_acceptance_of_dead(root)"
+	save_temporary_value_as = temp_war_support_from_acceptance_of_dead
+	value = war_support_from_country_turmoil
+	save_temporary_value_as = temp_war_support_from_country_turmoil
+	value = war_support_from_devastation
+	save_temporary_value_as = temp_war_support_from_devastation
+	value = war_support_from_fervor
+	save_temporary_value_as = temp_war_support_from_fervor
+	value = war_support_from_anti_war_lobby_clout
+	save_temporary_value_as = temp_war_support_from_anti_war_lobby_clout
+	value = war_support_from_lobby_clout
+	save_temporary_value_as = temp_war_support_from_lobby_clout
+	value = war_support_from_gold_reserves
+	save_temporary_value_as = temp_war_support_from_gold_reserves
+	value = war_support_from_gdp
+	save_temporary_value_as = temp_war_support_from_gdp
+	value = war_support_from_blockade
+	save_temporary_value_as = temp_war_support_from_blockade
+	value = "scope:war.enemy_pressure(root)"
+	save_temporary_value_as = temp_enemy_pressure
+	value = war_support_from_lost_land
+	save_temporary_value_as = temp_war_support_from_lost_land
+	value = war_support_from_taking_loans
+	save_temporary_value_as = temp_war_support_from_taking_loans
+	value = war_support_from_servicing_debt
+	save_temporary_value_as = temp_war_support_from_servicing_debt
+	value = war_support_from_looming_bankruptcy
+	save_temporary_value_as = temp_war_support_from_looming_bankruptcy
+	value = war_support_from_bankruptcy
+	save_temporary_value_as = temp_war_support_from_bankruptcy
+	value = war_support_from_subject_attitude
+	save_temporary_value_as = temp_war_support_from_subject_attitude
+	value = war_support_from_loyalists
+	save_temporary_value_as = temp_war_support_from_loyalists
+	value = war_support_from_rivalry
+	save_temporary_value_as = temp_war_support_from_rivalry
+	value = war_support_from_stalled_goal_against_us
+	save_temporary_value_as = temp_war_support_from_stalled_goal_against_us
+	value = war_support_from_stalled_goal_held_by_us
+	save_temporary_value_as = temp_war_support_from_stalled_goal_held_by_us
+	# end save temp values
+
+	# Sum of signed contributions: positive raises war support, negative lowers it.
+	value = 0
+
+	if = {
+		limit = { scope:temp_war_support_from_duration <= -0.01 }
+		add = {
+			add = scope:temp_war_support_from_duration
+			desc = "WAR_SUPPORT_CHANGE_FROM_DURATION"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_short_war >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_short_war
+			desc = "WAR_SUPPORT_CHANGE_FROM_SHORT_WAR"
+		}
+	}
+
+	add = {
+		add = scope:temp_enemy_occupation
+		multiply = define:NWar|WAR_SUPPORT_CHANGE_ENEMY_OCCUPATION_FACTOR
+		desc = "WAR_SUPPORT_CHANGE_FROM_ENEMY_OCCUPATION"
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_casualties <= -0.01 }
+		add = {
+			add = scope:temp_war_support_from_casualties
+			desc = "WAR_SUPPORT_CHANGE_FROM_CASUALTIES"
+			multiply = {
+				add = 1
+				add = modifier:country_war_support_casualties_mult
+				min = 0
+				desc = "WAR_SUPPORT_CHANGE_FROM_country_war_support_casualties_mult"
+			}
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_battles >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_battles
+			desc = "WAR_SUPPORT_CHANGE_FROM_BATTLES"
+			multiply = {
+				add = 1
+				add = modifier:country_war_support_battles_increase_mult
+				min = 0
+				desc = "WAR_SUPPORT_CHANGE_FROM_country_war_support_battles_increase_mult"
+			}
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_battles <= -0.01 }
+		add = {
+			add = scope:temp_war_support_from_battles
+			desc = "WAR_SUPPORT_CHANGE_FROM_BATTLES"
+			multiply = {
+				add = 1
+				add = modifier:country_war_support_battles_decrease_mult
+				min = 0
+				desc = "WAR_SUPPORT_CHANGE_FROM_country_war_support_battles_decrease_mult"
+			}
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_acceptance_of_dead <= -0.01 }
+		add = {
+			add = scope:temp_war_support_from_acceptance_of_dead
+			desc = "WAR_SUPPORT_CHANGE_FROM_ACCEPTANCE_OF_DEAD"
+		}
+	}
+
+	if = {
+		limit = {
+			scope:temp_war_support_from_country_turmoil <= -0.01
+			scope:temp_enemy_pressure > 0
+		}
+		add = {
+			add = scope:temp_war_support_from_country_turmoil
+			desc = "WAR_SUPPORT_CHANGE_FROM_TURMOIL"
+			multiply = {
+				value = scope:temp_enemy_pressure
+				desc = "WAR_SUPPORT_CHANGE_ENEMY_PRESSURE"
+			}
+		}
+	}
+
+	if = {
+		limit = {
+			scope:temp_war_support_from_devastation <= -0.01
+			scope:temp_enemy_pressure > 0
+		}
+		add = {
+			add = scope:temp_war_support_from_devastation
+			desc = "WAR_SUPPORT_CHANGE_FROM_DEVASTATION"
+			multiply = {
+				value = scope:temp_enemy_pressure
+				desc = "WAR_SUPPORT_CHANGE_ENEMY_PRESSURE"
+			}
+		}
+	}
+
+	if = {
+		limit = {
+			scope:temp_war_support_from_anti_war_lobby_clout <= -0.01
+			scope:temp_enemy_pressure > 0
+		}
+		add = {
+			add = scope:temp_war_support_from_anti_war_lobby_clout
+			desc = "WAR_OPPOSITION_FROM_LOBBIES"
+			multiply = {
+				value = scope:temp_enemy_pressure
+				desc = "WAR_SUPPORT_CHANGE_ENEMY_PRESSURE"
+			}
+		}
+	}
+
+	add = {
+		add = "additional_war_support_change(scope:war.diplomatic_play)"
+		desc = "WAR_SUPPORT_CHANGE_FROM_EVENTS"
+	}
+
+	add = {
+		add = "war_support_from_war_goals(scope:war)"
+		desc = "WAR_SUPPORT_CHANGE_FROM_WAR_GOALS"
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_lobby_clout >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_lobby_clout
+			desc = "WAR_SUPPORT_FROM_LOBBIES"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_fervor >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_fervor
+			desc = "WAR_SUPPORT_FROM_FERVOR"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_gold_reserves >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_gold_reserves
+			desc = "WAR_SUPPORT_CHANGE_FROM_GOLD_RESERVES"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_gdp >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_gdp
+			desc = "WAR_SUPPORT_CHANGE_FROM_GDP"
+		}
+	}
+
+	if = {
+		limit = {
+			scope:temp_war_support_from_gdp <= -0.01
+			scope:temp_enemy_pressure > 0
+		}
+		add = {
+			add = scope:temp_war_support_from_gdp
+			desc = "WAR_SUPPORT_CHANGE_FROM_GDP"
+			multiply = {
+				value = scope:temp_enemy_pressure
+				desc = "WAR_SUPPORT_CHANGE_ENEMY_PRESSURE"
+			}
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_blockade <= -0.01 }
+		add = {
+			add = scope:temp_war_support_from_blockade
+			desc = "WAR_SUPPORT_CHANGE_FROM_BLOCKADE"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_lost_land >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_lost_land
+			desc = "WAR_SUPPORT_CHANGE_FROM_LOST_LAND"
+		}
+	}
+
+	if = {
+		limit = {
+			scope:temp_war_support_from_taking_loans <= -0.01
+			scope:temp_enemy_pressure > 0
+		}
+		add = {
+			add = scope:temp_war_support_from_taking_loans
+			desc = "WAR_SUPPORT_CHANGE_FROM_TAKING_LOANS"
+			multiply = {
+				value = scope:temp_enemy_pressure
+				desc = "WAR_SUPPORT_CHANGE_ENEMY_PRESSURE"
+			}
+		}
+	}
+
+	if = {
+		limit = {
+			scope:temp_war_support_from_servicing_debt <= -0.01
+			scope:temp_enemy_pressure > 0
+		}
+		add = {
+			add = scope:temp_war_support_from_servicing_debt
+			desc = "WAR_SUPPORT_CHANGE_FROM_SERVICING_DEBT"
+			multiply = {
+				value = scope:temp_enemy_pressure
+				desc = "WAR_SUPPORT_CHANGE_ENEMY_PRESSURE"
+			}
+		}
+	}
+
+	if = {
+		limit = {
+			scope:temp_war_support_from_looming_bankruptcy <= -0.01
+			scope:temp_enemy_pressure > 0
+		}
+		add = {
+			add = scope:temp_war_support_from_looming_bankruptcy
+			desc = "WAR_SUPPORT_CHANGE_FROM_LOOMING_BANKRUPTCY"
+			multiply = {
+				value = scope:temp_enemy_pressure
+				desc = "WAR_SUPPORT_CHANGE_ENEMY_PRESSURE"
+			}
+		}
+	}
+
+	if = {
+		limit = {
+			scope:temp_war_support_from_bankruptcy <= -0.01
+			scope:temp_enemy_pressure > 0
+		}
+		add = {
+			add = scope:temp_war_support_from_bankruptcy
+			desc = "WAR_SUPPORT_CHANGE_FROM_BANKRUPTCY"
+			multiply = {
+				value = scope:temp_enemy_pressure
+				desc = "WAR_SUPPORT_CHANGE_ENEMY_PRESSURE"
+			}
+		}
+	}
+
+	if = {
+		limit = {
+			OR = {
+				scope:temp_war_support_from_subject_attitude <= -0.01
+				scope:temp_war_support_from_subject_attitude >= 0.01
+			}
+		}
+		add = {
+			add = scope:temp_war_support_from_subject_attitude
+			desc = "WAR_SUPPORT_CHANGE_FROM_SUBJECT_ATTITUDE"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_loyalists >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_loyalists
+			desc = "WAR_SUPPORT_CHANGE_FROM_LOYALISTS"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_rivalry >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_rivalry
+			desc = "WAR_SUPPORT_CHANGE_FROM_RIVALRY"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_stalled_goal_against_us >= 0.01 }
+		add = {
+			add = scope:temp_war_support_from_stalled_goal_against_us
+			desc = "WAR_SUPPORT_CHANGE_FROM_STALLED_GOALS_AGAINST_US"
+		}
+	}
+
+	if = {
+		limit = { scope:temp_war_support_from_stalled_goal_held_by_us <= -0.01 }
+		add = {
+			add = scope:temp_war_support_from_stalled_goal_held_by_us
+			desc = "WAR_SUPPORT_CHANGE_FROM_STALLED_GOALS_HELD_BY_US"
+		}
+	}
+
+	# Special, needs to support different loc keys so doesn't use the temp method
+	add = war_support_from_journal_entries
+}
+

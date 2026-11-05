@@ -80,8 +80,18 @@ types strategic_region_panel_types
 					}
 				}
 
+				empty_state = {
+					blockoverride "visible" {
+						visible = "[Not(Country.Exists)]"
+					}
+
+					blockoverride "text" {
+						text = "NO_COUNTRY_SELECTED"
+					}
+				}
+
 				textbox = {
-					visible = "[Not(GreaterThan_CFixedPoint(Country.GetCurrentInvolvementIn(StrategicRegion.Self), '(CFixedPoint)0'))]"
+					visible = "[And(Country.Exists, Not(GreaterThan_CFixedPoint(Country.GetCurrentInvolvementIn(StrategicRegion.Self), '(CFixedPoint)0')))]"
 					align = nobaseline
 					parentanchor = center
 					autoresize = yes
@@ -283,6 +293,56 @@ types strategic_region_panel_types
 							parentanchor = hcenter
 							direction = vertical
 							spacing = 5
+
+							## ACTIVE STANCES
+							section_header_button = {
+								blockoverride "left_text" {
+									text = "STRATEGIC_REGION_ACTIVE_STANCES"
+								}
+
+								blockoverride "right_text" {
+									section_header_right_text = {
+										text = "[GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithActiveStance)]"
+									}
+								}
+
+								blockoverride "onclick" {
+									onclick = "[GetVariableSystem.Toggle('active_stances_strategic_regions')]"
+								}
+
+								blockoverride "onclick_showmore" {
+									visible = "[Not(GetVariableSystem.Exists('active_stances_strategic_regions'))]"
+								}
+
+								blockoverride "onclick_showless" {
+									visible = "[GetVariableSystem.Exists('active_stances_strategic_regions')]"
+								}
+							}
+
+							flowcontainer = {
+								visible = "[And(Not(GetVariableSystem.Exists('country_interest_list')), GetVariableSystem.Exists('active_stances_strategic_regions'))]"
+								parentanchor = hcenter
+								spacing = 5
+								wrap_count = 2
+								datamodel = "[StrategicRegion.GetNonPlayerCountriesWithActiveStance]"
+
+								item = {
+									container = {
+										country_interest_item = {
+											visible = "[EqualTo_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithActiveStance), '(int32)1')]"
+											minimumsize = { @panel_width_minus_10 120 }
+
+											blockoverride "country_name_max_width" {
+												max_width = 400
+											}
+										}
+
+										country_interest_item = {
+											visible = "[GreaterThan_int32(GetDataModelSize(StrategicRegion.GetNonPlayerCountriesWithActiveStance), '(int32)1')]"
+										}
+									}
+								}
+							}
 
 							## TIER 1
 							section_header_button = {

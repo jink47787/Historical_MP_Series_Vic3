@@ -20,6 +20,7 @@ ig_suppression_events.1 = { #pst kid do you want to scheme?
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
+		# triggered by on_action - on_yearly_events
 		# triggered by on_yearly_pulse_country
 		NOT = { has_journal_entry = je_ig_suppression_1 }
 		NOT = { has_variable = dismissed_ig_suppresion_var }
@@ -55,6 +56,19 @@ ig_suppression_events.1 = { #pst kid do you want to scheme?
 			type = je_ig_suppression_1
 			target = scope:suppressed_ig
 		}
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_pool_decrease_landowner_influence
+					scope:suppressed_ig ?= {
+						is_interest_group_type = ig_landowners
+					}
+				}
+				add = 100
+			}
+		}
 	}
 
 	option = { #nah I'm fine
@@ -88,6 +102,7 @@ ig_suppression_events.2 = { #scandal / es can da lo es un escandalo
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_ig_suppression_1 [on_monthly_pulse]
 		#triggered by JE
 		scope:target ?= {
 			leader = {
@@ -101,6 +116,7 @@ ig_suppression_events.2 = { #scandal / es can da lo es un escandalo
 		scope:target = {
 			leader = {
 				save_scope_as = suppressed_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 		set_variable = {
@@ -233,6 +249,10 @@ ig_suppression_events.2 = { #scandal / es can da lo es un escandalo
 		}
 		trigger_event = { id = ig_suppression_events.3 days = 60 }
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:suppressed_leader }
+	}
 }
 
 ig_suppression_events.3 = { #make them step down
@@ -262,6 +282,7 @@ ig_suppression_events.3 = { #make them step down
 		scope:target = {
 			leader = {
 				save_scope_as = suppressed_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -279,6 +300,7 @@ ig_suppression_events.3 = { #make them step down
 			set_variable = {
 				name = ig_leader_steps_down_var
 			}
+			revoke_temporary_event_immortality = { CHARACTER = scope:suppressed_leader }
 			scope:suppressed_leader = {
 				retire_character = yes
 			}
@@ -304,6 +326,10 @@ ig_suppression_events.3 = { #make them step down
 			add_modifier = {
 				name = suppression_leader_modifier
 				days = normal_modifier_time
+			}
+			if = {
+				limit = { NOT = { has_trait = scandalous } }
+				add_trait = scandalous
 			}
 		}
 	}
@@ -336,6 +362,10 @@ ig_suppression_events.3 = { #make them step down
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:suppressed_leader }
+	}
 }
 
 ig_suppression_events.4 = { #send them to jail
@@ -365,6 +395,7 @@ ig_suppression_events.4 = { #send them to jail
 		scope:target = {
 			leader = {
 				save_scope_as = suppressed_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -382,6 +413,7 @@ ig_suppression_events.4 = { #send them to jail
 			set_variable = {
 				name = ig_leader_in_jail_var
 			}
+			revoke_temporary_event_immortality = { CHARACTER = scope:suppressed_leader }
 			scope:suppressed_leader = {
 				retire_character = yes
 			}
@@ -416,6 +448,7 @@ ig_suppression_events.4 = { #send them to jail
 			set_variable = {
 				name = ig_leader_steps_down_var
 			}
+			revoke_temporary_event_immortality = { CHARACTER = scope:suppressed_leader }
 			scope:suppressed_leader = {
 				retire_character = yes
 			}
@@ -450,6 +483,10 @@ ig_suppression_events.4 = { #send them to jail
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:suppressed_leader }
+	}
 }
 
 ig_suppression_events.5 = { #break into an IG's meeting
@@ -472,6 +509,7 @@ ig_suppression_events.5 = { #break into an IG's meeting
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_ig_suppression_1 [on_monthly_pulse]
 		#triggered by JE
 		OR = {
 			has_law_or_variant = law_type:law_militarized_police
@@ -498,6 +536,15 @@ ig_suppression_events.5 = { #break into an IG's meeting
 
 	option = { #sneak in
 		name = ig_suppression_events.5.a
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		trigger = {
 			has_law_or_variant = law_type:law_secret_police
 		}
@@ -511,6 +558,15 @@ ig_suppression_events.5 = { #break into an IG's meeting
 
 	option = { #break by force
 		name = ig_suppression_events.5.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 15
+			}
+		}
 		trigger = {
 			has_law_or_variant = law_type:law_militarized_police
 		}
@@ -538,11 +594,39 @@ ig_suppression_events.5 = { #break into an IG's meeting
 				days = normal_modifier_time
 			}
 		}
+
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_pool_decrease_landowner_influence
+					scope:target ?= {
+						is_interest_group_type = ig_landowners
+					}
+				}
+				add = 100
+			}
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 	}
 
 	option = { #just walk in there
 		name = ig_suppression_events.5.e
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:target = {
 			add_modifier = {
 				name = suppressed_meeting_modifier
@@ -572,6 +656,7 @@ ig_suppression_events.6 = { #bribe an IG leader
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_ig_suppression_1 [on_monthly_pulse]
 		#triggered by JE
 		OR = {
 			has_law_or_variant = law_type:law_militarized_police
@@ -587,6 +672,7 @@ ig_suppression_events.6 = { #bribe an IG leader
 		scope:target = {
 			leader = {
 				save_scope_as = suppressed_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -594,6 +680,15 @@ ig_suppression_events.6 = { #bribe an IG leader
 	option = { #bribe
 		name = ig_suppression_events.6.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		add_modifier = {
 			name = bribing_scandal_modifier
 			days = normal_modifier_time
@@ -615,6 +710,15 @@ ig_suppression_events.6 = { #bribe an IG leader
 
 	option = { #intimidate
 		name = ig_suppression_events.6.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 15
+			}
+		}
 		scope:target = {
 			add_modifier = {
 				name = ig_autosabotage_modifier
@@ -632,6 +736,10 @@ ig_suppression_events.6 = { #bribe an IG leader
 				value = medium_radicals
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:suppressed_leader }
 	}
 }
 
@@ -703,6 +811,10 @@ ig_suppression_events.7 = { #ending event so it's not completely anti climatic
 			}
 		}
 	}
+
+	after = {
+		je_ig_suppression_1_cleanup = yes
+	}
 }
 
 ig_suppression_events.1000 = { #Write negative article about IG
@@ -726,6 +838,7 @@ ig_suppression_events.1000 = { #Write negative article about IG
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_ig_suppression_1 [on_monthly_pulse]
 		#triggered by the JE pulse
 		NOT = { has_variable = bad_article_cooldown_modifier }
 	}
@@ -910,6 +1023,7 @@ ig_suppression_events.1001 = {
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_ig_suppression_1 [on_monthly_pulse]
 		any_interest_group = {
 			is_powerful = yes
 			is_in_government = no
@@ -1012,6 +1126,7 @@ ig_suppression_events.1003 = { #Assassinate an Ig leader
 	cooldown = { days = stupidly_long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_ig_suppression_1 [on_monthly_pulse]
 		has_law_or_variant = law_type:law_secret_police
 		scope:target = {
 			leader = {
@@ -1024,6 +1139,7 @@ ig_suppression_events.1003 = { #Assassinate an Ig leader
 		scope:target = {
 			leader = {
 				save_scope_as = suppressed_ig_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -1031,6 +1147,15 @@ ig_suppression_events.1003 = { #Assassinate an Ig leader
 
 	option = {
 		name = ig_suppression_events.1003.a
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 15
+			}
+		}
 			capital = {
 				add_radicals_in_state = {
   					value = medium_radicals
@@ -1062,6 +1187,15 @@ ig_suppression_events.1003 = { #Assassinate an Ig leader
 	option = { #Nothing happens
 		name = ig_suppression_events.1003.b
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		if = {
 			limit = {
 				scope:target = {
@@ -1086,6 +1220,10 @@ ig_suppression_events.1003 = { #Assassinate an Ig leader
 				}
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:suppressed_ig_leader }
 	}
 
 }

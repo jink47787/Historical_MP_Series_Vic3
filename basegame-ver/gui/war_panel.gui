@@ -14,7 +14,7 @@
 
 types war_panel
 {
-	type war_panel = default_block_window {
+	type war_panel = default_block_window_two_lines {
 		name = "war_panel"
 		
 		blockoverride "window_header_name"
@@ -22,6 +22,11 @@ types war_panel
 			raw_text = "#BOLD [WarPanel.GetWar.GetName]#!"
 		}
 		
+		blockoverride "window_header_name_line_two"
+		{
+			text = "WAR_PANEL_START_DATE_HEADER"
+		}
+
 		blockoverride "fixed_top" {
 			#TABS
 			tab_buttons = {
@@ -645,13 +650,16 @@ types war_panel
 										}
 
 										button = {
-											tooltip = "PANEL_MILITARY_NAVY_CURRENT_SHIPS_TOOLTIP"
 											using = default_button
 											parentanchor = left
 											visible = "[WarPanel.GetLeftLeader.IsLocalPlayer]"
 											size = { 140 25 }
 											onclick = "[InformationPanelBar.OpenMilitaryPanelTab('navy')]"
 											using = fontsize_large
+
+											tooltipwidget = {
+												RegularTooltip_CountryShips = {}
+											}
 
 											textbox = {
 												margin_left = 10
@@ -676,13 +684,16 @@ types war_panel
 
 										textbox = {
 											visible = "[Not(WarPanel.GetLeftLeader.IsLocalPlayer)]"
-											tooltip = "PANEL_MILITARY_NAVY_CURRENT_SHIPS_TOOLTIP"
 											datacontext = "[WarPanel.GetWar]"
 											margin_left = 10
 											parentanchor = left
 											text = "WAR_LEADER_LEFT_NUM_SHIPS"
 											align = center|nobaseline
 											autoresize = yes
+
+											tooltipwidget = {
+												RegularTooltip_CountryShips = {}
+											}
 										}
 									}
 								}
@@ -776,11 +787,14 @@ types war_panel
 										}
 
 										textbox = {
-											tooltip = "PANEL_MILITARY_NAVY_CURRENT_SHIPS_TOOLTIP"
 											margin_left = 10
 											text = "WAR_LEADER_RIGHT_NUM_SHIPS"
 											align = center|nobaseline
 											autoresize = yes
+
+											tooltipwidget = {
+												RegularTooltip_CountryShips = {}
+											}
 										}
 									}
 								}
@@ -852,6 +866,19 @@ types war_panel
 							}
 						}
 					}
+				}
+
+				### STALEMATE COUNTDOWN
+				textbox = {
+					visible = "[WarPanel.GetWar.IsInStalemate]"
+					text = "WAR_PANEL_STALEMATE_COUNTDOWN"
+					tooltip = "WAR_PANEL_STALEMATE_COUNTDOWN_TOOLTIP"
+					autoresize = yes
+					multiline = yes
+					maximumsize = { @panel_width_minus_20 -1 }
+					align = center|nobaseline
+					parentanchor = hcenter
+					margin = { 0 10 }
 				}
 
 				### INVASIONS
@@ -1947,7 +1974,10 @@ types war_panel
 				raw_text = "#variable @ships![Country.GetNumShips|0]#!"
 				align = center|nobaseline
 				alpha = "[TransparentIfZero_int32(Country.GetNumShips)]"
-				tooltip = "PANEL_MILITARY_NAVY_CURRENT_SHIPS_TOOLTIP"
+
+				tooltipwidget = {
+					RegularTooltip_CountryShips = {}
+				}
 			}
 		}
 
@@ -2064,7 +2094,7 @@ types war_panel
 
 			### war support
 			textbox = {
-				raw_text = "[concept_war_support]: #variable [War.GetWarSupport(Country.Self)|+=0]#!"
+				raw_text = "[concept_war_support]: #[War.GetWarSupportColored(Country.Self)] [War.GetWarSupport(Country.Self)|0]%#!"
 				autoresize = yes
 				align = right|nobaseline
 				tooltip = "WAR_PANEL_PARTICIPANT_TOOLTIP"

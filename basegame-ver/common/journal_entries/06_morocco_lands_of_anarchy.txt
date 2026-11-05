@@ -1,10 +1,14 @@
 ﻿je_lands_of_anarchy = {
 	group = je_group_historical_content
+
+	activation_description = {
+		always = yes
+	}
+
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
     is_shown_in_lobby = {
         c:MOR ?= this
-        has_dlc_feature = ip4_content
     }
 
 	scripted_progress_bar = lands_of_anarchy_tribes_of_marrakech_bar
@@ -35,7 +39,7 @@
 				add_modifier = {
 					name = state_of_anarchy_scaled_mod
 					multiplier = {
-						value = var:al_rif_progress_bar_current_var
+						value = root.var:al_rif_progress_bar_current_var
 						divide = -100
 						add = 5.15
 					}
@@ -52,7 +56,7 @@
 				add_modifier = {
 					name = state_of_anarchy_scaled_mod
 					multiplier = {
-						value = var:marrakech_progress_bar_current_var
+						value = root.var:marrakech_progress_bar_current_var
 						divide = -100
 						add = 5.15
 					}
@@ -69,7 +73,7 @@
 				add_modifier = {
 					name = state_of_anarchy_scaled_mod
 					multiplier = {
-						value = var:inner_morocco_progress_bar_current_var
+						value = root.var:inner_morocco_progress_bar_current_var
 						divide = -100
 						add = 5.15
 					}
@@ -97,7 +101,7 @@
             		add_modifier = {
             			name = state_of_anarchy_scaled_mod
             			multiplier = {
-            				value = var:al_rif_progress_bar_current_var
+            				value = root.var:al_rif_progress_bar_current_var
             				divide = -100
             				add = 5.15
             			}
@@ -115,7 +119,7 @@
             		add_modifier = {
             			name = state_of_anarchy_scaled_mod
             			multiplier = {
-            				value = var:marrakech_progress_bar_current_var
+            				value = root.var:marrakech_progress_bar_current_var
             				divide = -100
             				add = 5.15
             			}
@@ -134,7 +138,7 @@
             		add_modifier = {
             			name = state_of_anarchy_scaled_mod
             			multiplier = {
-            				value = var:inner_morocco_progress_bar_current_var
+            				value = root.var:inner_morocco_progress_bar_current_var
             				divide = -100
             				add = 5.15
             			}
@@ -147,147 +151,119 @@
 		}
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = je_lands_of_anarchy_complete_tt
-			AND = {
-				je:je_lands_of_anarchy = {
-					"scripted_bar_progress(lands_of_anarchy_tribes_of_marrakech_bar)" >= 400
-				}
-				je:je_lands_of_anarchy = {
-					"scripted_bar_progress(lands_of_anarchy_tribes_of_al_rif_bar)" >= 400
-				}
-				je:je_lands_of_anarchy = {
-					"scripted_bar_progress(lands_of_anarchy_tribes_of_inner_morocco_bar)" >= 400
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_lands_of_anarchy_complete_tt
+				AND = {
+					je:je_lands_of_anarchy = {
+						"scripted_bar_progress(lands_of_anarchy_tribes_of_marrakech_bar)" >= 400
+					}
+					je:je_lands_of_anarchy = {
+						"scripted_bar_progress(lands_of_anarchy_tribes_of_al_rif_bar)" >= 400
+					}
+					je:je_lands_of_anarchy = {
+						"scripted_bar_progress(lands_of_anarchy_tribes_of_inner_morocco_bar)" >= 400
+					}
 				}
 			}
 		}
-	}
-
-	on_complete = {
-		s:STATE_AL_RIF = {
-			if = {
-				limit = {
-					any_scope_state = {
-						NOT = {
-							owner = ROOT
+		effect = {
+			s:STATE_AL_RIF = {
+				if = {
+					limit = {
+						any_scope_state = {
+							NOT = {
+								owner = ROOT
+							}
 						}
 					}
+					add_claim = ROOT
 				}
-				add_claim = ROOT
-			}
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					has_modifier = lands_of_anarchy_harka_mod
-				}
-				remove_modifier = lands_of_anarchy_harka_mod
-			}
-			if = {
-				limit = {
-					ruler ?= {
-						has_modifier = lands_of_anarchy_harka_popularity_mod
-					}
-				}
-				ruler ?= {
-					remove_modifier = lands_of_anarchy_harka_popularity_mod
-				}
-			}
-		}
-		trigger_event = lands_of_anarchy.2
-	}
-
-	fail = {
-		custom_tooltip = {
-			text = je_lands_of_anarchy_fail_tt
-			AND = {
-				je:je_lands_of_anarchy = {
-					"scripted_bar_progress(lands_of_anarchy_tribes_of_marrakech_bar)" <= 100
-				}
-				je:je_lands_of_anarchy = {
-					"scripted_bar_progress(lands_of_anarchy_tribes_of_al_rif_bar)" <= 100
-				}
-				je:je_lands_of_anarchy = {
-					"scripted_bar_progress(lands_of_anarchy_tribes_of_inner_morocco_bar)"<= 100
-				}
-			}
-		}
-	}
-
-	on_fail = {
-		trigger_event = lands_of_anarchy.3
-		hidden_effect = {
-			if = {
-				limit = {
-					has_modifier = lands_of_anarchy_harka_mod
-				}
-				remove_modifier = lands_of_anarchy_harka_mod
-			}
-			if = {
-				limit = {
-					ruler ?= {
-						has_modifier = lands_of_anarchy_harka_popularity_mod
-					}
-				}
-				ruler ?= {
-					remove_modifier = lands_of_anarchy_harka_popularity_mod
-				}
-			}
-		}
-	}
-
-	invalid = {
-		any_scope_state = {
-			has_modifier = state_of_anarchy_scaled_mod
-			count < 2
-		}
-		hidden_trigger = {
-			has_variable = anarchy_modifiers_given_var
-		}
-	}
-
-	on_invalid = {
-		every_scope_state = {
-			limit = {
-				has_modifier = state_of_anarchy_scaled_mod
 			}
 			hidden_effect = {
-				remove_modifier = state_of_anarchy_scaled_mod
-			}
-		}
-		add_modifier = {
-			name = lands_of_anarchy_failed_nation_mod
-			days = long_modifier_time
-		}
-		hidden_effect = {
-			if = {
-				limit = {
-					has_modifier = lands_of_anarchy_harka_mod
+				if = {
+					limit = {
+						has_modifier = lands_of_anarchy_harka_mod
+					}
+					remove_modifier = lands_of_anarchy_harka_mod
 				}
-				remove_modifier = lands_of_anarchy_harka_mod
-			}
-			if = {
-				limit = {
+				if = {
+					limit = {
+						ruler ?= {
+							has_modifier = lands_of_anarchy_harka_popularity_mod
+						}
+					}
 					ruler ?= {
-						has_modifier = lands_of_anarchy_harka_popularity_mod
+						remove_modifier = lands_of_anarchy_harka_popularity_mod
 					}
 				}
-				ruler ?= {
-					remove_modifier = lands_of_anarchy_harka_popularity_mod
+			}
+			trigger_event = lands_of_anarchy.2
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_lands_of_anarchy_fail_tt
+				AND = {
+					je:je_lands_of_anarchy = {
+						"scripted_bar_progress(lands_of_anarchy_tribes_of_marrakech_bar)" <= 100
+					}
+					je:je_lands_of_anarchy = {
+						"scripted_bar_progress(lands_of_anarchy_tribes_of_al_rif_bar)" <= 100
+					}
+					je:je_lands_of_anarchy = {
+						"scripted_bar_progress(lands_of_anarchy_tribes_of_inner_morocco_bar)"<= 100
+					}
+				}
+			}
+		}
+		effect = {
+			trigger_event = lands_of_anarchy.3
+			hidden_effect = {
+				if = {
+					limit = {
+						has_modifier = lands_of_anarchy_harka_mod
+					}
+					remove_modifier = lands_of_anarchy_harka_mod
+				}
+				if = {
+					limit = {
+						ruler ?= {
+							has_modifier = lands_of_anarchy_harka_popularity_mod
+						}
+					}
+					ruler ?= {
+						remove_modifier = lands_of_anarchy_harka_popularity_mod
+					}
 				}
 			}
 		}
 	}
 
-	timeout = 9125
-
-	on_timeout = {
-		add_modifier = {
-			name = lands_of_anarchy_failed_nation_mod
-			days = long_modifier_time
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			any_scope_state = {
+				has_modifier = state_of_anarchy_scaled_mod
+				count < 2
+			}
+			hidden_trigger = {
+				has_variable = anarchy_modifiers_given_var
+			}
 		}
-		hidden_effect = {
+		effect = {
 			every_scope_state = {
 				limit = {
 					has_modifier = state_of_anarchy_scaled_mod
@@ -296,22 +272,71 @@
 					remove_modifier = state_of_anarchy_scaled_mod
 				}
 			}
-			if = {
-				limit = {
-					has_modifier = lands_of_anarchy_harka_mod
-				}
-				remove_modifier = lands_of_anarchy_harka_mod
+			add_modifier = {
+				name = lands_of_anarchy_failed_nation_mod
+				days = long_modifier_time
 			}
-			if = {
-				limit = {
+			hidden_effect = {
+				if = {
+					limit = {
+						has_modifier = lands_of_anarchy_harka_mod
+					}
+					remove_modifier = lands_of_anarchy_harka_mod
+				}
+				if = {
+					limit = {
+						ruler ?= {
+							has_modifier = lands_of_anarchy_harka_popularity_mod
+						}
+					}
 					ruler ?= {
-						has_modifier = lands_of_anarchy_harka_popularity_mod
+						remove_modifier = lands_of_anarchy_harka_popularity_mod
 					}
 				}
-				ruler ?= {
-					remove_modifier = lands_of_anarchy_harka_popularity_mod
+			}
+			je_lands_of_anarchy_cleanup = yes
+		}
+	}
+
+	timeout = 9125
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			add_modifier = {
+				name = lands_of_anarchy_failed_nation_mod
+				days = long_modifier_time
+			}
+			hidden_effect = {
+				every_scope_state = {
+					limit = {
+						has_modifier = state_of_anarchy_scaled_mod
+					}
+					hidden_effect = {
+						remove_modifier = state_of_anarchy_scaled_mod
+					}
+				}
+				if = {
+					limit = {
+						has_modifier = lands_of_anarchy_harka_mod
+					}
+					remove_modifier = lands_of_anarchy_harka_mod
+				}
+				if = {
+					limit = {
+						ruler ?= {
+							has_modifier = lands_of_anarchy_harka_popularity_mod
+						}
+					}
+					ruler ?= {
+						remove_modifier = lands_of_anarchy_harka_popularity_mod
+					}
 				}
 			}
+			je_lands_of_anarchy_cleanup = yes
 		}
 	}
 }

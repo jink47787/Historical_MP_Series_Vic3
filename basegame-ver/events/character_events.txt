@@ -22,6 +22,8 @@ character_events.2 = { #Rich industrialist wants to build a university
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
 	trigger = {
+		# triggered by on_action - on_yearly_events
+		NOT = { has_variable = poland_universities_closed_var }
 		has_technology_researched = academia
 		trigger_if = {
 			limit = {
@@ -53,6 +55,7 @@ character_events.2 = { #Rich industrialist wants to build a university
 			ig:ig_petty_bourgeoisie ?= {
 				leader = {
 					save_scope_as = university_benefactor
+					set_temporary_event_immortality = { DURATION = 3 }
 				}
 			}
 		}
@@ -60,6 +63,7 @@ character_events.2 = { #Rich industrialist wants to build a university
 			ig:ig_industrialists ?= {
 				leader = {
 					save_scope_as = university_benefactor
+					set_temporary_event_immortality = { DURATION = 3 }
 				}
 			}
 		}
@@ -102,6 +106,10 @@ character_events.2 = { #Rich industrialist wants to build a university
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:university_benefactor }
+	}
 }
 
 character_events.3 = { #The duel
@@ -127,6 +135,7 @@ character_events.3 = { #The duel
 	icon = "gfx/interface/icons/event_icons/event_skull.dds"
 
 	trigger = {
+		# triggered by on_action - on_yearly_events
 		NOT = { has_variable = duels_banned }
 		any_scope_character = {
 			is_busy = yes
@@ -151,6 +160,7 @@ character_events.3 = { #The duel
 				is_immortal = no
 			}
 			save_scope_as = duel_participant_1
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 
 		random_scope_character = {
@@ -165,6 +175,7 @@ character_events.3 = { #The duel
 				is_immortal = no
 			}
 			save_scope_as = duel_participant_2
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 	}
 
@@ -252,6 +263,7 @@ character_events.3 = { #The duel
 						add = -5
 					}
 				}
+				revoke_temporary_event_immortality = { CHARACTER = scope:duel_participant_1 }
 				scope:duel_participant_1 = {
 					kill_character = yes
 				}
@@ -343,6 +355,7 @@ character_events.3 = { #The duel
 						add = 10
 					}
 				}
+				revoke_temporary_event_immortality = { CHARACTER = scope:duel_participant_2 }
 				scope:duel_participant_2 = {
 					kill_character = yes
 				}
@@ -401,6 +414,11 @@ character_events.3 = { #The duel
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:duel_participant_1 }
+		revoke_temporary_event_immortality = { CHARACTER = scope:duel_participant_2 }
+	}
 }
 
 
@@ -426,6 +444,7 @@ character_events.4 = { #Devout leader sleeping with a nun
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
 	trigger = {
+		# triggered by on_action - on_yearly_events
 		any_scope_character = {
 			has_role_of_type = politician
 			is_ruler_of_own_country = no
@@ -453,6 +472,7 @@ character_events.4 = { #Devout leader sleeping with a nun
 				}
 			}
 			save_scope_as = devout_scandal
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 	}
 
@@ -465,6 +485,7 @@ character_events.4 = { #Devout leader sleeping with a nun
 		name = character_events.4.a
 		custom_tooltip = character_events.4.a.tt
 		hidden_effect = {
+			revoke_temporary_event_immortality = { CHARACTER = scope:devout_scandal }
 			scope:devout_scandal = {
                 retire_character = {
                     hidden = yes
@@ -481,7 +502,15 @@ character_events.4 = { #Devout leader sleeping with a nun
 				name = modifier_devout_in_scandal
 				days = stupidly_long_modifier_time
 			}
+			if = {
+				limit = { NOT = { has_trait = scandalous } }
+				add_trait = scandalous
+			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:devout_scandal }
 	}
 }
 
@@ -507,6 +536,7 @@ character_events.5 = { #A statue made of the king
 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
 
 	trigger = {
+		# triggered by on_action - on_yearly_events
 		has_law = law_type:law_monarchy
 		any_scope_state = {
 			is_incorporated = yes
@@ -529,11 +559,13 @@ character_events.5 = { #A statue made of the king
 			}
 			var:emperor_var ?= {
 				save_scope_as = statue_ruler
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 		else = {
 			ruler = {
 				save_scope_as = statue_ruler
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 		random_scope_state = {
@@ -563,6 +595,16 @@ character_events.5 = { #A statue made of the king
 
 	option = { #Do it
 		name = character_events.5.a
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					divided_monarchists_ai_house_hooks_active = yes
+					divided_monarchists_ai_path_is_ruler = yes
+				}
+				add = 10
+			}
+		}
 		add_modifier = {
 			name = modifier_statue_of_ruler #prestige
 			days = normal_modifier_time
@@ -593,6 +635,17 @@ character_events.5 = { #A statue made of the king
 	option = { #No
 		default_option = yes
 		name = character_events.5.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					divided_monarchists_ai_active = yes
+					divided_monarchists_ai_house_hooks_active = yes
+					NOT = { divided_monarchists_ai_path_is_ruler = yes }
+				}
+				add = 10
+			}
+		}
 		random_interest_group = {
 			limit = {
 				law_stance = {
@@ -612,6 +665,10 @@ character_events.5 = { #A statue made of the king
 			}
 			fra_disfavor_ruler_dynasty = yes
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:statue_ruler }
 	}
 }
 
@@ -637,6 +694,7 @@ character_events.6 = { #Statue torn down
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
 	trigger = {
+		# triggered by on_action - on_yearly_events
 		NOT = {
 			has_law = law_type:law_monarchy
 		}

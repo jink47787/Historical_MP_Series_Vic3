@@ -1,4 +1,4 @@
-types notifications {
+﻿types notifications {
 	type notification_popup = default_popup {
 		blockoverride "sound" {
 			state = {
@@ -200,6 +200,28 @@ types notifications {
 			}
 
 			flowcontainer = {
+				visible = "[ConfirmationWindow.HasRequiredCheckbox]"
+				spacing = 5
+
+				button_checkbox = {
+					size = { 30 30 }
+					parentanchor = vcenter
+					onclick = "[ConfirmationWindow.ToggleRequiredCheckbox]"
+					checked = "[ConfirmationWindow.IsRequiredCheckboxChecked]"
+					using = check_button_sound
+				}
+
+				textbox = {
+					maximumsize = { 265 -1 }
+					margin_left = 10
+					parentanchor = vcenter
+					multiline = yes
+					autoresize = yes
+					text = "[ConfirmationWindow.GetRequiredCheckboxText]"
+				}
+			}
+
+			flowcontainer = {
 				direction = horizontal
 				using = default_list_position
 				spacing = 20
@@ -220,9 +242,10 @@ types notifications {
 					using = default_button_primary_action
 					using = confirm_button_sound
 					size = { 140 40 }
+					enabled = "[ConfirmationWindow.CanConfirm]"
 					text = "CONFIRM_YES"
-					
-					tooltip = "CONFIRM"
+
+					tooltip = "[SelectLocalization(ConfirmationWindow.CanConfirm,'CONFIRM','LOAD_GAME_ACKNOWLEDGE_REQUIRED_TT')]"
 					input_action = "confirm"
 
 					block "answer_yes_handler" {
@@ -2512,7 +2535,64 @@ default_popup = {
 				text = "[Proposal.GetDiplomaticDemand.GetProposalDesc]"
 				using = fontsize_large
 				align = left|nobaseline
-			}			
+			}
+
+			flowcontainer = {
+				visible = "[Not(StringIsEmpty(Proposal.GetDiplomaticDemand.GetAcceptedEffectsDesc))]"
+				direction = vertical
+				margin_top = 10
+
+				textbox = {
+					autoresize = yes
+					align = nobaseline
+					using = fontsize_large
+					text = "DIPLOMATIC_DEMAND_ACCEPTED_EFFECTS_DESC"
+				}
+
+				textbox = {
+					maximumsize = { 530 -1 }
+					minimumsize = { 530 0 }
+					autoresize = yes
+					multiline = yes
+					align = nobaseline
+					using = fontsize_large
+					text = "[Proposal.GetDiplomaticDemand.GetAcceptedEffectsDesc]"
+				}
+			}
+
+			textbox = {
+				visible = "[Proposal.GetDiplomaticDemand.IsCallingInObligation]"
+				maximumsize = { 530 -1 }
+				minimumsize = { 530 0 }
+				autoresize = yes
+				multiline = yes
+				align = nobaseline
+				using = fontsize_large
+				text = "DIPLOMATIC_DEMAND_PROPOSAL_OBLIGATION_DESC"
+			}
+
+			flowcontainer = {
+				visible = "[Not(StringIsEmpty(Proposal.GetDiplomaticDemand.GetRejectedEffectsDesc))]"
+				direction = vertical
+				margin_top = 10
+
+				textbox = {
+					autoresize = yes
+					align = nobaseline
+					using = fontsize_large
+					text = "DIPLOMATIC_DEMAND_REJECTED_EFFECTS_DESC"
+				}
+
+				textbox = {
+					maximumsize = { 530 -1 }
+					minimumsize = { 530 0 }
+					autoresize = yes
+					multiline = yes
+					align = nobaseline
+					using = fontsize_large
+					text = "[Proposal.GetDiplomaticDemand.GetRejectedEffectsDesc]"
+				}
+			}
 		}
 	}
 
@@ -2524,14 +2604,30 @@ default_popup = {
 			spacing = 20
 
 			button = {
+				visible = "[Not(Proposal.GetDiplomaticDemand.WouldRepudiateObligationIfRejected)]"
 				using = default_button
 				using = close_button_sound
 				size = { 220 42 }
 				text = "DECLINE"
-				onclick = "[Execute(Proposal.GetDiplomaticDemand.RejectDiplomaticDemand)]"
+				onclick = "[PopupManager.ExecuteOrAskConfirmationIfNeeded(Proposal.GetDiplomaticDemand.RejectDiplomaticDemand)]"
 				onclick = "[PopupManager.CloseProposal(Proposal.AccessSelf)]"
 				enabled = "[IsValid(Proposal.GetDiplomaticDemand.RejectDiplomaticDemand)]"
 				tooltip = "[GetDesc(Proposal.GetDiplomaticDemand.RejectDiplomaticDemand)]"
+				using = tooltip_se
+				shortcut = "close_window"
+			}
+
+			button = {
+				visible = "[Proposal.GetDiplomaticDemand.WouldRepudiateObligationIfRejected]"
+				using = default_button
+				using = close_button_sound
+				size = { 220 42 }
+				text = "DECLINE_WARNING"
+				onclick = "[PopupManager.ExecuteOrAskConfirmationIfNeeded(Proposal.GetDiplomaticDemand.RejectDiplomaticDemand)]"
+				onclick = "[PopupManager.CloseProposal(Proposal.AccessSelf)]"
+				enabled = "[IsValid(Proposal.GetDiplomaticDemand.RejectDiplomaticDemand)]"
+				tooltip = "THEY_CALL_IN_OBLIGATION_TOOLTIP"
+				using = tooltip_se
 				shortcut = "close_window"
 			}
 
@@ -2544,6 +2640,7 @@ default_popup = {
 				onclick = "[PopupManager.CloseProposal(Proposal.AccessSelf)]"
 				enabled = "[IsValid(Proposal.GetDiplomaticDemand.AcceptDiplomaticDemand)]"
 				tooltip = "[GetDesc(Proposal.GetDiplomaticDemand.AcceptDiplomaticDemand)]"
+				using = tooltip_se
 				
 				input_action = "confirm"
 			}
@@ -2646,6 +2743,7 @@ default_popup = {
 				onclick = "[Execute(Proposal.GetDiplomaticAction.DeclineActionProposal)]"
 				enabled = "[IsValid(Proposal.GetDiplomaticAction.DeclineActionProposal)]"
 				tooltip = "[GetDesc(Proposal.GetDiplomaticAction.DeclineActionProposal)]"
+				using = tooltip_se
 				visible = "[Not(Proposal.GetDiplomaticAction.IsCallingInObligation)]"
 			}
 			
@@ -2657,7 +2755,8 @@ default_popup = {
 				shortcut = "close_window"
 				onclick = "[Execute(Proposal.GetDiplomaticAction.DeclineActionProposal)]"
 				enabled = "[IsValid(Proposal.GetDiplomaticAction.DeclineActionProposal)]"
-				tooltip = "THEY_CALL_IN_OBLIGATION"
+				tooltip = "THEY_CALL_IN_OBLIGATION_TOOLTIP"
+				using = tooltip_se
 				visible = "[Proposal.GetDiplomaticAction.IsCallingInObligation]"
 			}			
 
@@ -2669,6 +2768,7 @@ default_popup = {
 				onclick = "[Execute(Proposal.GetDiplomaticAction.AcceptActionProposal)]"
 				enabled = "[IsValid(Proposal.GetDiplomaticAction.AcceptActionProposal)]"
 				tooltip = "[GetDesc(Proposal.GetDiplomaticAction.AcceptActionProposal)]"
+				using = tooltip_se
 
 				input_action = "confirm"
 			}
@@ -2860,6 +2960,44 @@ default_popup =  {
 					autoresize = yes
 					align = nobaseline
 					text = "[DiplomaticPlayConfirmation.GetDescription]"
+				}
+
+				flowcontainer = {
+					visible = "[And(Not(DiplomaticPlayConfirmation.WillForceDiplomaticPlay), Not(StringIsEmpty(DiplomaticPlayConfirmation.GetDemandAcceptedEffectsDesc)))]"
+					direction = vertical
+
+					textbox = {
+						autoresize = yes
+						align = nobaseline
+						text = "DIPLOMATIC_DEMAND_ACCEPTED_EFFECTS_DESC"
+					}
+
+					textbox = {
+						maximumsize = { 575 -1 }
+						multiline = yes
+						autoresize = yes
+						align = nobaseline
+						text = "[DiplomaticPlayConfirmation.GetDemandAcceptedEffectsDesc]"
+					}
+				}
+
+				flowcontainer = {
+					visible = "[And(Not(DiplomaticPlayConfirmation.WillForceDiplomaticPlay), Not(StringIsEmpty(DiplomaticPlayConfirmation.GetDemandRejectedEffectsDesc)))]"
+					direction = vertical
+
+					textbox = {
+						autoresize = yes
+						align = nobaseline
+						text = "DIPLOMATIC_DEMAND_REJECTED_EFFECTS_DESC"
+					}
+
+					textbox = {
+						maximumsize = { 575 -1 }
+						multiline = yes
+						autoresize = yes
+						align = nobaseline
+						text = "[DiplomaticPlayConfirmation.GetDemandRejectedEffectsDesc]"
+					}
 				}
 				
 				flowcontainer = {
@@ -3058,6 +3196,30 @@ default_popup =  {
 					parentanchor = left|vcenter
 				}				
 			}
+
+			flowcontainer = {
+				visible = "[And(Not(DiplomaticPlayConfirmation.WillForceDiplomaticPlay), DiplomaticPlayConfirmation.CanCallInObligation)]"
+				spacing = 5
+				margin_top = 10
+				margin_bottom = 10
+
+				checkbutton = {
+					size = { 25 25 }
+					parentanchor = vcenter
+					using = check_button
+					onclick = "[DiplomaticPlayConfirmation.ToggleCallInObligation]"
+					checked = "[DiplomaticPlayConfirmation.WillCallInObligation]"
+					tooltip = "DIPLOMATIC_DEMAND_USE_OBLIGATION_TOOLTIP"
+					using = tooltip_se
+				}
+
+				textbox = {
+					parentanchor = vcenter
+					autoresize = yes
+					align = nobaseline
+					text = "USE_OBLIGATION"
+				}
+			}
 			
 			container = {
 				minimumsize = { 525 40 }
@@ -3227,7 +3389,7 @@ default_popup_vbox = {
 						visible = "[NotZero(Treaty.GetBindingDays)]"
 						align = nobaseline
 						autoresize = yes
-						max_width = 230
+						max_width = 200
 						using = elide_fontsize_min
 						text = "TREATY_BINDING_PERIOD"
 					}
@@ -3237,10 +3399,14 @@ default_popup_vbox = {
 						visible = "[IsZero(Treaty.GetBindingDays)]"
 						align = nobaseline
 						autoresize = yes
-						max_width = 230
+						max_width = 200
 						using = elide_fontsize_min
 						text = "TREATY_NO_BINDING_PERIOD_NO_CONCEPT"
 					}
+				}
+
+				blockoverride "treaty_automatic_withdrawal_tooltip" {
+					tooltip = "TREATY_PROPOSAL_AUTOMATIC_WITHDRAWAL_TOOLTIP"
 				}
 			}
 
@@ -3315,7 +3481,8 @@ default_popup_vbox = {
 					size = { 26 26 }
 					position = { 145 0 }
 					texture = "gfx/interface/icons/generic_icons/warning.dds"
-					tooltip = "THEY_CALL_IN_OBLIGATION"
+					tooltip = "THEY_CALL_IN_OBLIGATION_TOOLTIP"
+					using = tooltip_se
 				}
 			}
 
@@ -3444,6 +3611,28 @@ container =  {
 		}
 
 		flowcontainer = {
+			visible = "[FrontEndLoadConfirmationWindow.HasRequiredCheckbox]"
+			spacing = 5
+
+			button_checkbox = {
+				size = { 30 30 }
+				parentanchor = vcenter
+				onclick = "[FrontEndLoadConfirmationWindow.ToggleRequiredCheckbox]"
+				checked = "[FrontEndLoadConfirmationWindow.IsRequiredCheckboxChecked]"
+				using = check_button_sound
+			}
+
+			textbox = {
+				margin_left = 10
+				maximumsize = { 265 -1 }
+				parentanchor = vcenter
+				multiline = yes
+				text = "[FrontEndLoadConfirmationWindow.GetRequiredCheckboxText]"
+				autoresize = yes
+			}
+		}
+
+		flowcontainer = {
 			direction = horizontal
 			using = default_list_position
 			spacing = 20
@@ -3460,10 +3649,11 @@ container =  {
 				using = default_button_primary_action
 				using = confirm_button_sound
 				size = { 140 40 }
+				enabled = "[FrontEndLoadConfirmationWindow.CanConfirm]"
 				text = "CONFIRM_YES"
 				onclick = "[FrontEndLoadConfirmationWindow.AnswerYes]"
-				
-				tooltip = "CONFIRM"
+
+				tooltip = "[SelectLocalization(FrontEndLoadConfirmationWindow.CanConfirm,'CONFIRM','LOAD_GAME_ACKNOWLEDGE_REQUIRED_TT')]"
 				input_action = "confirm"
 			}
 		}
@@ -4424,6 +4614,26 @@ notification_popup = {
 				using = fontsize_large
 			}
 
+			### STALEMATE
+			textbox = {
+				visible = "[DiplomaticPlay.HasEndedInStalemate]"
+				text = "PEACE_POPUP_STALEMATE"
+				autoresize = yes
+				multiline = yes
+				maximumsize = { 700 -1 }
+				align = center|nobaseline
+				parentanchor = hcenter
+			}
+
+			### WAR GOAL IMPACT
+			textbox = {
+				visible = "[DiplomaticPlay.HasAnyWarGoalImpact]"
+				text = "PEACE_POPUP_OUTCOME_IMPACT"
+				autoresize = yes
+				align = center|nobaseline
+				parentanchor = hcenter
+			}
+
 			### SIGNED DATE AND DURATION
 			textbox = {
 				text = "PEACE_SIGNED_DATE"
@@ -4659,6 +4869,79 @@ notification_popup = {
 								tiny_flag = {
 									blockoverride "mobilized_visibility" {
 										visible = no
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			### OCCUPATION TIMER SECTION
+			flowcontainer = {
+				visible = "[DiplomaticPlay.HasExecutedWarGoalsByOccupationTimer]"
+				direction = vertical
+				parentanchor = hcenter
+
+				textbox = {
+					text = "PEACE_POPUP_OCCUPATION_TIMER_HEADER"
+					autoresize = yes
+					align = center|nobaseline
+					parentanchor = hcenter
+					using = fontsize_large
+				}
+
+				widget = {
+					size = { 15 10 }
+				}
+
+				container = {
+					parentanchor = hcenter
+					minimumsize = { 600 -1 }
+
+					### CENTER DIVIDER
+					vertical_divider = {
+						parentanchor = hcenter
+					}
+
+					container = {
+						minimumsize = { 575 -1 }
+
+						### ATTACKERS
+						flowcontainer = {
+							position = { 0 5 }
+							parentanchor = left
+							direction = vertical
+							minimumsize = { 285 -1 }
+
+							dynamicgridbox = {
+								using = default_list_position
+								datamodel = "[DiplomaticPlay.GetAllWarGoalsOfInitiatorSide]"
+
+								item = {
+									container = {
+										visible = "[WarGoal.IsExecutedByOccupationTimer]"
+										small_wargoal_item_with_executed_checkmark = {}
+									}
+								}
+							}
+						}
+
+						### DEFENDERS
+						flowcontainer = {
+							position = { 0 5 }
+							parentanchor = right
+							direction = vertical
+							minimumsize = { 285 -1 }
+
+							dynamicgridbox = {
+								using = default_list_position
+								datamodel = "[DiplomaticPlay.GetAllWarGoalsOfTargetSide]"
+
+								item = {
+									container = {
+										visible = "[WarGoal.IsExecutedByOccupationTimer]"
+										small_wargoal_item_with_executed_checkmark = {}
 									}
 								}
 							}
@@ -5098,12 +5381,15 @@ types start_diplo_play {
 
 					textbox = {
 						raw_text = "@ships! [Country.GetNumShips|0v]"
-						tooltip = "PANEL_MILITARY_NAVY_CURRENT_SHIPS_TOOLTIP"
 						alpha = "[TransparentIfZero_int32(Country.GetNumShips)]"
 						size = { 100 30 }
 						elide = right
 						align = left|nobaseline
 						fontsize_min = 12
+
+						tooltipwidget = {
+							RegularTooltip_CountryShips = {}
+						}
 					}
 
 					block "vertical_dividers" {

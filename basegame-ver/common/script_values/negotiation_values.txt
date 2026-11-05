@@ -147,6 +147,7 @@ active_clout = { #accommodates for the fact that opposes IGs have their clout mu
 
 movement_balance_factor = 60
 movement_max_factor = 35
+negotiation_min_enactment_chance = 0
 
 ##Simplest way to balance negotiation difficulty is to search BEST LEVER HERE below and alter the amenability penalty.
 amenability = { #runs in IG scope. owner is the county.
@@ -414,8 +415,38 @@ amenability = { #runs in IG scope. owner is the county.
 				}
 			}
 			add = {
-				add = -5
+				value = -5
+				if = {
+					limit = {
+						law_enactment_stance = {
+							law = owner.currently_enacting_law.type
+							value < disapprove
+						}
+					}
+					multiply = 2
+				}
 				desc = "amenability_law_worried_to_be_tie_breaker"
+			}
+		}
+
+		if = {
+			limit = {
+				opposes_law = yes
+				ig_could_coup_government = yes
+			}
+			add = {
+				value = -100
+				desc = "amenability_could_coup_instead"
+			}
+		}
+		else_if = {
+			limit = {
+				ig_could_coup_government = yes
+				has_variable = golpista_ig_var
+			}
+			add = {
+				value = -100
+				desc = "amenability_is_staging_coup"
 			}
 		}
 
@@ -458,6 +489,33 @@ amenability = { #runs in IG scope. owner is the county.
 			add = {
 				value = -500
 				desc = "amenability_too_large_gap"
+			}
+		}
+
+		if = {
+			limit = {
+				opposes_law = yes
+				owner.enactment_chance <= {
+					value = owner.stall_chance
+					multiply = 2
+				}
+			}
+			add = {
+				value = -500
+				desc = "amenability_law_needs_their_support"
+			}
+		}
+
+		if = {
+			limit = {
+				opposes_law = yes
+				owner.enactment_chance <= {
+					value = negotiation_min_enactment_chance
+				}
+			}
+			add = {
+				value = -500
+				desc = "amenability_law_enactment_chance_too_low"
 			}
 		}
 

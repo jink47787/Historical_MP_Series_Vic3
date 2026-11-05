@@ -11,6 +11,7 @@
 	icon = "gfx/interface/icons/diplomatic_treaties_articles_icons/support_independence_treaties.dds"
 
 	flags = {
+		show_in_lens
 		is_support_independence
 		can_be_renegotiated
 		giftable
@@ -79,6 +80,15 @@
 
 	requirement_to_maintain = {
 		trigger = {
+			OR = {
+				scope:source_country = { aggressive_diplomatic_plays_permitted = yes }
+				scope:source_country = { overlord = scope:target_country.overlord }
+			}
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
 			custom_tooltip = {
 				text = "DIPLOMATIC_PACT_REQUIREMENT_HIGHER_RANK_OR_SAME_OVERLORD"
 				trigger_if = {
@@ -92,6 +102,48 @@
 				}
 				trigger_else = { #otherwise must be of same or higher rank
 					scope:source_country.country_rank >= scope:target_country.country_rank
+				}
+			}
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
+			custom_tooltip = {
+				text = "DIPLOMATIC_PACT_REQUIREMENT_NOT_HUMILIATED_BY_OVERLORD"
+				trigger_if = {
+					limit = {
+						scope:target_country = { is_subject = yes }
+					}
+					scope:target_country.overlord = {
+						NOT = { has_diplomatic_pact = { who = scope:source_country type = humiliation is_initiator = yes } }
+					}
+					scope:target_country.top_overlord = {
+						NOT = { has_diplomatic_pact = { who = scope:source_country type = humiliation is_initiator = yes } }
+					}
+				}
+			}
+		}
+	}
+
+	requirement_to_maintain = {
+		trigger = {
+			trigger_if = {
+				limit = {
+					scope:target_country = { is_subject = yes }
+				}
+				scope:source_country = {
+					NOT = { has_truce_with = scope:target_country.overlord }
+				}
+				trigger_if = {
+					limit = {
+						scope:target_country = {
+							NOT = { overlord = top_overlord }
+						}
+					}
+					scope:source_country = {
+						NOT = { has_truce_with = scope:target_country.top_overlord }
+					}
 				}
 			}
 		}
@@ -197,6 +249,14 @@
 				multiply = 0.05
 			}
 
+			if = {
+				limit = {
+					c:RUS ?= this
+					has_variable = ai_russia_client_bloc_pending
+				}
+				add = 0.15
+			}
+
 			# Rebellious subjects should very actively seek fellow subjects to rebel together with
 			if = {
 				limit = {
@@ -207,6 +267,21 @@
 					}
 				}
 				add = 1.0
+			}
+		}
+
+		proposal_weight = {
+			value = 1
+
+			if = {
+				limit = {
+					c:RUS ?= this
+					ai_russia_article_partner_is_pending_client = yes
+					scope:other_country = {
+						is_subject = yes
+					}
+				}
+				add = 5
 			}
 		}
 
@@ -466,23 +541,14 @@
 					}
 				}
 			}
+		}
 
-			if = {
-				limit = {
-					NOT = { exists = scope:is_treaty_active }
-					exists = scope:treaty
-					scope:treaty.binding_period >= 1825
-				}
-				multiply = {
-					desc = "DIPLOMATIC_ACCEPTANCE_BINDING_PERIOD"
-					value = 1
-					add = {
-						value = scope:treaty.binding_period
-						min = 365
-						divide = 3650
-					}
-					max = 2
-				}
+		contextual_accept_score = {
+			value = 0
+
+			add = {
+				desc = "DIPLOMATIC_ACCEPTANCE_BINDING_PERIOD"
+				value = treaty_binding_period_commitment_acceptance
 			}
 		}
 	}

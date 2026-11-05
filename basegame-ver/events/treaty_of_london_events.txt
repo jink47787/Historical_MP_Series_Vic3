@@ -21,6 +21,7 @@ treaty_of_london_events.1 = {
 	duration = 3
 
 	trigger = {
+		# triggered by on_action - on_monthly_pulse_country
 		c:NET ?= this
 		NOT = {
 			has_variable = treaty_of_london_initiation_var
@@ -47,14 +48,7 @@ treaty_of_london_events.1 = {
 		custom_tooltip = if_they_accept_tt
 		custom_tooltip = treaty_of_london_explanation_tt
 		show_as_tooltip = {
-			add_journal_entry = {
-				type = je_conference_of_london
-			}
-			c:BEL ?= {
-				add_journal_entry = {
-					type = je_conference_of_london
-				}
-			}
+			add_contextless_journal_entry = je_conference_of_london
 			every_country_in_europe = {
 				limit = {
 					country_rank >= rank_value:great_power
@@ -139,14 +133,7 @@ treaty_of_london_events.2 = {
 		ai_chance = {
 			base = 95
 		}
-		c:NET ?= {
-			add_journal_entry = {
-				type = je_conference_of_london
-			}
-		}
-		add_journal_entry = {
-			type = je_conference_of_london
-		}
+		add_contextless_journal_entry = je_conference_of_london
 		custom_tooltip = treaty_of_london_explanation_tt
 		every_country_in_europe = {
 			limit = {
@@ -231,25 +218,27 @@ treaty_of_london_events.3 = {
 		ai_chance = {
 			base = 95
 		}
-		add_journal_entry = {
-			type = je_conference_of_london
+		je:je_conference_of_london ?= {
+			add_involved_country = ROOT
 		}
 		custom_tooltip = treaty_of_london_explanation_tt
-		if = {
-			limit = {
-				NOT = {
-					exists = global_var:je_conference_of_london_participants_var
+		je:je_conference_of_london ?= {
+			if = {
+				limit = {
+					NOT = {
+						exists = var:je_conference_of_london_participants_var
+					}
+				}
+				set_variable = {
+					name = je_conference_of_london_participants_var
+					value = 1
 				}
 			}
-			set_global_variable = {
-				name = je_conference_of_london_participants_var
-				value = 1
-			}
-		}
-		else = {
-			change_global_variable = {
-				name = je_conference_of_london_participants_var
-				add = 1
+			else = {
+				change_variable = {
+					name = je_conference_of_london_participants_var
+					add = 1
+				}
 			}
 		}
 	}
@@ -340,6 +329,7 @@ treaty_of_london_events.4 = {
 				}
 			}
 			create_treaty = {
+				name = treaty_name_treaty_of_london
 				first_country = root
 				second_country = c:BEL
 
@@ -392,6 +382,14 @@ treaty_of_london_events.4 = {
 			}
 		}
 	}
+	after = {
+		if = {
+			limit = {
+				c:NET ?= this
+			}
+			je_conference_of_london_cleanup = yes
+		}
+	}
 }
 
 treaty_of_london_events.5 = {
@@ -431,6 +429,14 @@ treaty_of_london_events.5 = {
 		default_option = yes
 		add_radicals = {
 			value = small_radicals
+		}
+	}
+	after = {
+		if = {
+			limit = {
+				c:NET ?= this
+			}
+			je_conference_of_london_cleanup = yes
 		}
 	}
 }

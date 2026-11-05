@@ -2,6 +2,11 @@
 	icon = "gfx/interface/icons/law_icons/monarchy.dds"
 
 	group = je_group_brazil_pedro
+	dlc = dlc008
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_in_lobby = {
 		has_dlc_feature = rp1_content #Colossus of the South
@@ -73,71 +78,17 @@
 		}
 	}
 
-	complete = {
-		country_has_monarchy_law = yes
-		AND = {
-			custom_tooltip = {
-				text = je_pedro_success
-				var:pedropoints > 5
-			}
-			custom_tooltip = {
-				text = pedro_dead
-				ruler = {
-					NOT = {
-						has_variable = is_pedro
-					}
-				}
-			}
-		}
-		hidden_trigger = {
-			NOT = {
-				has_variable = kingdom_var
-			}
-		}
-	}
-
-	on_complete = {
-		hidden_effect = {
-			ruler ?= { set_character_immortal = no }
-			if = {
-				limit = {
-					exists = heir
-				}
-				heir ?= { set_character_immortal = no }
-			}
-		}
-		custom_tooltip = {
-			text = pedro_heir_empowered_tt
-		}
-		custom_tooltip = {
-			text = pedro_je_royalists_more_common_tt
-			set_variable = brz_enduring_empire
-		}
-		# Monarchy survives
-		trigger_event = {
-			id = pedro.7
-			popup = yes
-		}
-	}
-
-	fail = {
-		OR = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		conclusion_desc = je_pedro_success
+		color = "gold_positive"
+		trigger = {
+			country_has_monarchy_law = yes
 			AND = {
 				custom_tooltip = {
-					text = je_pedro_fail
-					var:pedropoints <= 0
-				}
-				ig:ig_landowners ?= {
-					ig_counts_as_marginal = no
-				}
-				ig:ig_armed_forces ?= {
-					ig_counts_as_marginal = no
-				}
-			}
-			AND = {
-				custom_tooltip = {
-					text = je_pedro_fail_2
-					var:pedropoints <= 5
+					text = je_pedro_success
+					var:pedropoints > 5
 				}
 				custom_tooltip = {
 					text = pedro_dead
@@ -148,95 +99,163 @@
 					}
 				}
 			}
+			hidden_trigger = {
+				NOT = {
+					has_variable = kingdom_var
+				}
+			}
 		}
-		hidden_trigger = {
-			NOT = {
+		effect = {
+			hidden_effect = {
+				ruler ?= { set_character_immortal = no }
+				if = {
+					limit = {
+						exists = heir
+					}
+					heir ?= { set_character_immortal = no }
+				}
+			}
+			custom_tooltip = {
+				text = pedro_heir_empowered_tt
+			}
+			custom_tooltip = {
+				text = pedro_je_royalists_more_common_tt
+				set_variable = brz_enduring_empire
+			}
+			# Monarchy survives
+			trigger_event = {
+				id = pedro.7
+				popup = yes
+			}
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				AND = {
+					custom_tooltip = {
+						text = je_pedro_fail
+						var:pedropoints <= 0
+					}
+					ig:ig_landowners ?= {
+						ig_counts_as_marginal = no
+					}
+					ig:ig_armed_forces ?= {
+						ig_counts_as_marginal = no
+					}
+				}
+				AND = {
+					custom_tooltip = {
+						text = je_pedro_fail_2
+						var:pedropoints <= 5
+					}
+					custom_tooltip = {
+						text = pedro_dead
+						ruler = {
+							NOT = {
+								has_variable = is_pedro
+							}
+						}
+					}
+				}
+			}
+			hidden_trigger = {
+				NOT = {
+					has_variable = kingdom_var
+				}
+			}
+		}
+		effect = {
+			hidden_effect = {
+				ruler ?= { set_character_immortal = no }
+				if = {
+					limit = {
+						exists = heir
+					}
+					heir ?= { set_character_immortal = no }
+				}
+				if = {
+					limit = {
+						any_scope_state = {
+							state_region = s:STATE_SANTA_CATARINA
+						}
+					}
+					random_scope_state = {
+						limit = { state_region = s:STATE_SANTA_CATARINA }
+				        set_hub_name = {
+				            type = port
+				            name = HUB_NAME_STATE_SANTA_CATARINA_port_bra_republic
+				        }
+			        }
+				}
+			}
+			# Monarchy ended by coup
+			trigger_event = {
+				id = pedro.8
+				popup = yes
+			}
+			show_as_tooltip = {
+				if = {
+					limit = {
+						NOT = { has_law = law_type:law_landed_voting }
+					}
+					activate_law = law_type:law_landed_voting
+				}
+				activate_law = law_type:law_presidential_republic
+				if = {
+					limit = {
+						ig:ig_landowners ?= {
+							is_in_government = no
+							ig_counts_as_marginal = no
+						}
+					}
+					ig:ig_landowners ?= {
+						add_ruling_interest_group = yes
+					}
+				}
+				if = {
+					limit = {
+						ig:ig_armed_forces ?= {
+							is_in_government = no
+							ig_counts_as_marginal = no
+						}
+					}
+					ig:ig_armed_forces ?= {
+						add_ruling_interest_group = yes
+					}
+				}
+			}
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOR = {
+					country_has_monarchy_law = yes
+					has_variable = ruler_selector_var
+				}
 				has_variable = kingdom_var
 			}
 		}
-	}
-
-	on_fail = {
-		hidden_effect = {
-			ruler ?= { set_character_immortal = no }
-			if = {
-				limit = {
-					exists = heir
-				}
-				heir ?= { set_character_immortal = no }
-			}
-			if = {
-				limit = {
-					any_scope_state = {
-						state_region = s:STATE_SANTA_CATARINA
+		effect = {
+			hidden_effect = {
+				ruler ?= { set_character_immortal = no }
+				if = {
+					limit = {
+						exists = heir
 					}
-				}
-				random_scope_state = {
-					limit = { state_region = s:STATE_SANTA_CATARINA }
-			        set_hub_name = {
-			            type = port
-			            name = HUB_NAME_STATE_SANTA_CATARINA_port_bra_republic
-			        }
-		        }
-			}
-		}
-		# Monarchy ended by coup
-		trigger_event = {
-			id = pedro.8
-			popup = yes
-		}
-		show_as_tooltip = {
-			if = {
-				limit = {
-					NOT = { has_law = law_type:law_landed_voting }
-				}
-				activate_law = law_type:law_landed_voting
-			}
-			activate_law = law_type:law_presidential_republic
-			if = {
-				limit = {
-					ig:ig_landowners ?= {
-						is_in_government = no
-						ig_counts_as_marginal = no
-					}
-				}
-				ig:ig_landowners ?= {
-					add_ruling_interest_group = yes
+					heir ?= { set_character_immortal = no }
 				}
 			}
-			if = {
-				limit = {
-					ig:ig_armed_forces ?= {
-						is_in_government = no
-						ig_counts_as_marginal = no
-					}
-				}
-				ig:ig_armed_forces ?= {
-					add_ruling_interest_group = yes
-				}
-			}
-		}
-	}
-
-	invalid = {
-		OR = {
-			NOR = {
-				country_has_monarchy_law = yes
-				has_variable = ruler_selector_var
-			}
-			has_variable = kingdom_var
-		}
-	}
-
-	on_invalid = {
-		hidden_effect = {
-			ruler ?= { set_character_immortal = no }
-			if = {
-				limit = {
-					exists = heir
-				}
-				heir ?= { set_character_immortal = no }
-			}
+			je_pedro_brazil_cleanup = yes
 		}
 	}
 
@@ -263,52 +282,86 @@ je_pedro_republic = {
 	icon = "gfx/interface/icons/law_icons/presidential_republic.dds"
 
 	group = je_group_brazil_pedro
+	dlc = dlc008
 
-	complete = {
-		has_law_or_variant = law_type:law_presidential_republic
+	activation_description = {
+		always = yes
 	}
 
-	timeout = 3600
-
-	on_complete = {
-		# the actual ending event needs to be triggered from on_law_enactment_pass
-		show_as_tooltip = {
-			ruler = {
-				set_character_as_ruler = yes
-				set_as_interest_group_leader = yes
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			has_law_or_variant = law_type:law_presidential_republic
+		}
+		effect = {
+			# the actual ending event needs to be triggered from on_law_enactment_pass
+			show_as_tooltip = {
+				ruler = {
+					set_character_as_ruler = yes
+					set_as_interest_group_leader = yes
+				}
 			}
+			je_pedro_republic_cleanup = yes
 		}
 	}
 
-	fail = {
-		OR = {
-			NOT = { has_journal_entry = je_pedro_brazil }
-			custom_tooltip = {
-				text = pedro_dead
-				ruler = {
-					NOT = {
-						has_variable = is_pedro
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = { has_journal_entry = je_pedro_brazil }
+				custom_tooltip = {
+					text = pedro_dead
+					ruler = {
+						NOT = {
+							has_variable = is_pedro
+						}
 					}
 				}
 			}
 		}
-	}
-
-	on_timeout = {
-		remove_pedropoint_effect = yes
-	}
-
-	invalid = {
-		NOR = {
-			country_has_monarchy_law = yes
-			has_law_or_variant = law_type:law_presidential_republic
+		effect = {
+			je_pedro_republic_cleanup = yes
 		}
 	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOR = {
+				country_has_monarchy_law = yes
+				has_law_or_variant = law_type:law_presidential_republic
+			}
+		}
+		effect = {
+			je_pedro_republic_cleanup = yes
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			remove_pedropoint_effect = yes
+			je_pedro_republic_cleanup = yes
+		}
+	}
+
+	timeout = 3600
 
 	weight = 100
 	can_revolution_inherit = no
 	transferable = no
-		
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -317,6 +370,11 @@ je_isabel = {
 	icon = "gfx/interface/icons/law_icons/monarchy.dds"
 
 	group = je_group_brazil_pedro
+	dlc = dlc008
+
+	activation_description = {
+		always = yes
+	}
 
 	immediate = {
 		heir ?= {
@@ -324,41 +382,55 @@ je_isabel = {
 		}
 	}
 
-	complete = {
-		NOT = {
-			has_law_or_variant = law_type:law_no_womens_rights
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			NOT = {
+				has_law_or_variant = law_type:law_no_womens_rights
+			}
+			scope:journal_entry = { is_goal_complete = yes }
 		}
-		scope:journal_entry = { is_goal_complete = yes }
+		effect = {
+			trigger_event = {
+				id = pedro.13
+				popup = yes
+			}
+			custom_tooltip = {
+				text = isabel_je_tt
+			}
+			show_as_tooltip = {
+				ruler ?= { remove_modifier = isabel_heir_popularity }
+				heir ?= { remove_modifier = isabel_heir_popularity }
+			}
+		}
 	}
 
-	on_complete = {
-		trigger_event = {
-			id = pedro.13
-			popup = yes
-		}
-		custom_tooltip = {
-			text = isabel_je_tt
-		}
-		show_as_tooltip = {
-			ruler ?= { remove_modifier = isabel_heir_popularity }
-			heir ?= { remove_modifier = isabel_heir_popularity }
-		}
-	}
-
-	fail = {
-		OR = {
-			NOT = { has_journal_entry = je_pedro_brazil }
-			heir ?= {
-				custom_tooltip = {
-					text = is_isabella_tt
-					NOT = {
-						has_variable = isabel_var
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = { has_journal_entry = je_pedro_brazil }
+				heir ?= {
+					custom_tooltip = {
+						text = is_isabella_tt
+						NOT = {
+							has_variable = isabel_var
+						}
 					}
 				}
+				NOT = {
+					exists = heir
+				}
 			}
-			NOT = {
-				exists = heir
-			}
+		}
+		effect = {
+			je_isabel_cleanup = yes
 		}
 	}
 

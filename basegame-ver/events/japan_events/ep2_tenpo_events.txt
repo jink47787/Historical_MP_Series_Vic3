@@ -21,7 +21,7 @@ tenpo_events.1 = {
 
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	trigger = {
 		# Triggered in history
@@ -91,12 +91,13 @@ tenpo_events.2 = {
 
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	immediate = {
 		create_character = {
 			template = JAP_oshio_heihachiro
 			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
 				place_character_in_void = 24
 			}
 			save_scope_as = oshio_scope
@@ -111,6 +112,7 @@ tenpo_events.2 = {
 	}
 
 	trigger = {
+		# triggered by journal entry - je_tenpo_crisis [on_monthly_pulse]
 		any_scope_state = {
 			state_region = s:STATE_KANSAI
 			any_scope_pop = {
@@ -160,6 +162,7 @@ tenpo_events.2 = {
 					}
 					custom_tooltip = {
 						text = tenpo_events.2.tt_1
+						revoke_temporary_event_immortality = { CHARACTER = scope:oshio_scope }
 						scope:oshio_scope = {
 							kill_character = yes
 						}
@@ -173,6 +176,7 @@ tenpo_events.2 = {
 					}
 					custom_tooltip = {
 						text = tenpo_events.2.tt_2
+						revoke_temporary_event_immortality = { CHARACTER = scope:oshio_scope }
 						scope:oshio_scope = {
 							kill_character = yes
 						}
@@ -226,8 +230,8 @@ tenpo_events.2 = {
 	option = {
 		name = tenpo_events.2.c
 		highlighted_option = yes
-		show_as_unavailable = { 
-			always = yes 
+		show_as_unavailable = {
+			always = yes
 		}
 		trigger = {
 			s:STATE_KANSAI = {
@@ -240,6 +244,10 @@ tenpo_events.2 = {
 			free_character_from_void = yes
 			replace_character_roles = { add = { agitator } remove_all = yes }
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:oshio_scope }
 	}
 }
 
@@ -264,7 +272,7 @@ tenpo_events.3 = {
 
 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	trigger = {
 		# Triggered in history
@@ -363,6 +371,10 @@ tenpo_events.3 = {
 			strata = middle
 		}
 	}
+
+	after = {
+		je_tenpo_crisis_cleanup = yes
+	}
 }
 
 
@@ -388,7 +400,7 @@ tenpo_events.4 = {
 
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	trigger = {
 		# Triggered in history
@@ -408,6 +420,7 @@ tenpo_events.4 = {
 			save_scope_as = government_ig
 			leader = {
 				save_scope_as = roju_scope
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -417,6 +430,7 @@ tenpo_events.4 = {
 		default_option = yes
 		custom_tooltip = {
 			text = tenpo_events.4.tt_1
+			revoke_temporary_event_immortality = { CHARACTER = scope:roju_scope }
 			scope:roju_scope = {
 				kill_character = {
 					hidden = yes
@@ -496,12 +510,18 @@ tenpo_events.4 = {
 		}
 		custom_tooltip = {
 			text = tenpo_events.4.tt_1
+			revoke_temporary_event_immortality = { CHARACTER = scope:roju_scope }
 			scope:roju_scope = {
 				kill_character = {
 					hidden = yes
 				}
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:roju_scope }
+		je_tenpo_crisis_cleanup = yes
 	}
 }
 
@@ -718,7 +738,7 @@ tenpo_events.6 = {
 
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	trigger = {
 		has_dlc_feature = ep2_content
@@ -841,13 +861,13 @@ tenpo_events.6 = {
 					name = modifier_opium_war_aftermath
 					days = normal_modifier_time
 					multiplier = 0.5
-				}			
+				}
 			}
 			1 = {
 				add_modifier = {
 					name = modifier_opium_war_aftermath
 					days = normal_modifier_time
-				}			
+				}
 			}
 		}
 	}
@@ -925,9 +945,10 @@ tenpo_events.7 = {
 
 	icon = "gfx/interface/icons/event_icons/event_military.dds"
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	trigger = {
+		# triggered by journal entry - je_tenpo_crisis [on_monthly_pulse]
 		has_variable = opium_war_has_happened_jap_var
 		year < 1866
 	}
@@ -964,6 +985,9 @@ tenpo_events.7 = {
 		create_character = {
 			template = JAP_takashima_shuhan
 			save_scope_as = takashima_scope
+			on_created = {
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
 	}
 
@@ -1013,6 +1037,10 @@ tenpo_events.7 = {
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:takashima_scope }
+	}
 }
 
 # For A Bowl of Rice
@@ -1039,10 +1067,11 @@ tenpo_events.8 = {
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_tenpo_crisis [on_monthly_pulse]
 		any_scope_state = {
 			is_homeland_of_country_cultures = root
 			any_scope_pop = {
-				is_in_starvation = yes 
+				is_in_starvation = yes
 			}
 		}
 	}
@@ -1056,8 +1085,8 @@ tenpo_events.8 = {
 			limit = {
 				is_homeland_of_country_cultures = root
 				any_scope_pop = {
-					is_in_starvation = yes 
-				}		
+					is_in_starvation = yes
+				}
 			}
 			save_scope_as = tenpo_unrest_state_scope
 		}

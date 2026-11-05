@@ -4,6 +4,10 @@
 
 	group = je_group_technology
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_when_inactive = {
 		has_technology_researched = rationalism
 		NOT = { has_technology_researched = realism }
@@ -20,35 +24,92 @@
 	}
 
 	immediate = {
-	}
-
-	complete = {
-		any_scope_building = {
-			is_building_type = building_art_academy
-			has_active_production_method = pm_traditional_art
-			occupancy >= 0.9
-			level >= 2
+		scope:journal_entry ?= {
+			set_variable = { name = romanticism_level_target value = 2 }
+		}
+		ordered_scope_building = {
+			limit = {
+				has_active_production_method = pm_traditional_art
+				occupancy >= 0.9
+			}
+			order_by = this.level
+			position = 0
+			scope:journal_entry ?= {
+				change_variable = { name = romanticism_level_target add = prev.level }
+			}
 		}
 	}
 
-	on_complete = {
-		trigger_event = { id = society_tech_events.302 }
-		set_variable = {
-			name = completed_romanticism_je
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			trigger_if = {
+				limit = {
+					scope:journal_entry ?= {
+						has_variable = romanticism_level_target
+					}
+				}
+				any_scope_building = {
+					is_building_type = building_art_academy
+					has_active_production_method = pm_traditional_art
+					occupancy >= 0.9
+					level >= scope:journal_entry.var:romanticism_level_target
+				}
+			}
+			trigger_else = {
+				any_scope_building = {
+					is_building_type = building_art_academy
+					has_active_production_method = pm_traditional_art
+					occupancy >= 0.9
+					level >= 2
+				}
+			}
+		}
+		effect = {
+			trigger_event = { id = society_tech_events.302 }
+			set_variable = {
+				name = completed_romanticism_je
+			}
 		}
 	}
 
-	fail = {
-		has_technology_researched = realism
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			has_technology_researched = realism
+		}
+		effect = {
+			je_romanticism_cleanup = yes
+		}
 	}
 
 	timeout = 3650
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_romanticism_cleanup = yes
+		}
+	}
 }
 
 je_realism = {
 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
 
 	group = je_group_technology
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_when_inactive = {
 		NOT = { has_variable = realism_je_done }
@@ -64,31 +125,50 @@ je_realism = {
 		}
 	}
 
-	complete = {
-		any_scope_building = {
-			filter = {
-				is_building_type = building_art_academy
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			any_scope_building = {
+				filter = {
+					is_building_type = building_art_academy
+				}
+				occupancy >= 0.9
+				has_active_production_method = pm_realist_art
+				percent = 1
 			}
-			occupancy >= 0.9
-			has_active_production_method = pm_realist_art
-			percent = 1
 		}
-	}
-
-	on_complete = {
-		trigger_event = { id = dt_society_events.2 }
-		set_variable = {
-			name = realism_je_done
+		effect = {
+			trigger_event = { id = dt_society_events.2 }
+			set_variable = {
+				name = realism_je_done
+			}
 		}
 	}
 
 	timeout = 3650
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_realism_cleanup = yes
+		}
+	}
 }
 
 je_camera = {
 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
 
 	group = je_group_technology
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_when_inactive = {
 		NOT = { has_variable = camera_je_done }
@@ -105,38 +185,64 @@ je_camera = {
 		}
 	}
 
-	complete = {
-		any_scope_building = {
-			is_building_type = building_art_academy
-			level >= 5
-			has_active_production_method = pm_photographic_art
-		}
-		any_scope_building = {
-			filter = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			any_scope_building = {
 				is_building_type = building_art_academy
+				level >= 5
+				has_active_production_method = pm_photographic_art
 			}
-			percent > 0.75
-			has_active_production_method = pm_photographic_art
-			occupancy > 0.75
+			any_scope_building = {
+				filter = {
+					is_building_type = building_art_academy
+				}
+				percent > 0.75
+				has_active_production_method = pm_photographic_art
+				occupancy > 0.75
+			}
+		}
+		effect = {
+			set_variable = camera_je_done
+			trigger_event = { id = camera_film_pm_events.1 }
 		}
 	}
 
-	on_complete = {
-		set_variable = camera_je_done
-		trigger_event = { id = camera_film_pm_events.1 }
-	}
-
-	invalid = {
-		has_technology_researched = film
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			has_technology_researched = film
+		}
+		effect = {
+			je_camera_cleanup = yes
+		}
 	}
 
 	timeout = 3650
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_camera_cleanup = yes
+		}
+	}
 }
 
 je_film = {
 	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
 
 	group = je_group_technology
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_when_inactive = {
 		NOT = { has_variable = film_je_done }
@@ -152,26 +258,41 @@ je_film = {
 		}
 	}
 
-	complete = {
-		any_scope_building = {
-			is_building_type = building_art_academy
-			level >= 5
-			has_active_production_method = pm_film_art
-		}
-		any_scope_building = {
-			filter = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			any_scope_building = {
 				is_building_type = building_art_academy
+				level >= 5
+				has_active_production_method = pm_film_art
 			}
-			percent > 0.75
-			has_active_production_method = pm_film_art
-			occupancy > 0.75
+			any_scope_building = {
+				filter = {
+					is_building_type = building_art_academy
+				}
+				percent > 0.75
+				has_active_production_method = pm_film_art
+				occupancy > 0.75
+			}
 		}
-	}
-
-	on_complete = {
-		set_variable = film_je_done
-		trigger_event = { id = camera_film_pm_events.2 }
+		effect = {
+			set_variable = film_je_done
+			trigger_event = { id = camera_film_pm_events.2 }
+		}
 	}
 
 	timeout = 3650
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_film_cleanup = yes
+		}
+	}
 }

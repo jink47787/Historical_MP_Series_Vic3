@@ -13,29 +13,36 @@
 #	}
 #
 
+can_have_favorites = {
+	has_dlc_feature = ip5_content
+	OR = {
+		has_law_or_variant = law_type:law_autocracy
+		has_law_or_variant = law_type:law_oligarchy
+		has_law_or_variant = law_type:law_landed_voting
+		has_law_or_variant = law_type:law_technocracy
+	}
+}
+
 country_has_voting_franchise = {
-	custom_tooltip = {
-		text = is_democratic_tt
-		OR = {
-			modifier:country_voting_power_base_add > 0
-			modifier:country_voting_power_from_literacy_add > 0
-			modifier:country_voting_power_wealth_threshold_add > 0
-			modifier:country_academics_voting_power_add > 0
-			modifier:country_aristocrats_voting_power_add > 0
-			modifier:country_bureaucrats_voting_power_add > 0
-			modifier:country_capitalists_voting_power_add > 0
-			modifier:country_clergymen_voting_power_add > 0
-			modifier:country_clerks_voting_power_add > 0
-			modifier:country_engineers_voting_power_add > 0
-			modifier:country_farmers_voting_power_add > 0
-			modifier:country_laborers_voting_power_add > 0
-			modifier:country_machinists_voting_power_add > 0
-			modifier:country_officers_voting_power_add > 0
-			modifier:country_peasants_voting_power_add > 0
-			modifier:country_shopkeepers_voting_power_add > 0
-			modifier:country_slaves_voting_power_add > 0
-			modifier:country_soldiers_voting_power_add > 0
-		}
+	OR = {
+		modifier:country_voting_power_base_add > 0
+		modifier:country_voting_power_from_literacy_add > 0
+		modifier:country_voting_power_wealth_threshold_add > 0
+		modifier:country_academics_voting_power_add > 0
+		modifier:country_aristocrats_voting_power_add > 0
+		modifier:country_bureaucrats_voting_power_add > 0
+		modifier:country_capitalists_voting_power_add > 0
+		modifier:country_clergymen_voting_power_add > 0
+		modifier:country_clerks_voting_power_add > 0
+		modifier:country_engineers_voting_power_add > 0
+		modifier:country_farmers_voting_power_add > 0
+		modifier:country_laborers_voting_power_add > 0
+		modifier:country_machinists_voting_power_add > 0
+		modifier:country_officers_voting_power_add > 0
+		modifier:country_peasants_voting_power_add > 0
+		modifier:country_shopkeepers_voting_power_add > 0
+		modifier:country_slaves_voting_power_add > 0
+		modifier:country_soldiers_voting_power_add > 0
 	}
 }
 
@@ -104,37 +111,7 @@ is_being_incorporated = {
 }
 
 violate_sovereignty_war_check = {
-	save_temporary_scope_as = relevant_war
-
-	scope:target_country = {
-		any_scope_theater = {
-			is_land_theater = yes
-
-			save_temporary_scope_as = target_theater
-
-			scope:relevant_war.attacker_warleader = {
-				any_scope_theater = {
-					is_land_theater = yes
-
-					check_area = {
-						mode = adjacent
-						target = scope:target_theater
-					}
-				}
-			}
-
-			scope:relevant_war.defender_warleader = {
-				any_scope_theater = {
-					is_land_theater = yes
-
-					check_area = {
-						mode = adjacent
-						target = scope:target_theater
-					}
-				}
-			}
-		}
-	}
+	connects_important_war_theaters = scope:target_country
 }
 
 
@@ -518,25 +495,25 @@ owned_central_asia_region_states = {
 }
 
 owned_great_plains_region_states = {
-	owns_entire_state_region = STATE_MONTANA
-	owns_entire_state_region = STATE_NORTH_DAKOTA
-	owns_entire_state_region = STATE_SOUTH_DAKOTA
-	owns_entire_state_region = STATE_NEBRASKA
-	owns_entire_state_region = STATE_WYOMING
-	owns_entire_state_region = STATE_COLORADO
-	owns_entire_state_region = STATE_KANSAS
-	owns_entire_state_region = STATE_NEW_MEXICO
+	owns_entire_state_region_uncontested = STATE_MONTANA
+	owns_entire_state_region_uncontested = STATE_NORTH_DAKOTA
+	owns_entire_state_region_uncontested = STATE_SOUTH_DAKOTA
+	owns_entire_state_region_uncontested = STATE_NEBRASKA
+	owns_entire_state_region_uncontested = STATE_WYOMING
+	owns_entire_state_region_uncontested = STATE_COLORADO
+	owns_entire_state_region_uncontested = STATE_KANSAS
+	owns_entire_state_region_uncontested = STATE_NEW_MEXICO
 }
 
 owned_pacific_coast_region_states = {
-	owns_entire_state_region = STATE_WASHINGTON
-	owns_entire_state_region = STATE_IDAHO
-	owns_entire_state_region = STATE_OREGON
-	owns_entire_state_region = STATE_NEVADA
-	owns_entire_state_region = STATE_UTAH
-	owns_entire_state_region = STATE_ARIZONA
-	owns_entire_state_region = STATE_CALIFORNIA
-	owns_entire_state_region = STATE_BAJA_CALIFORNIA
+	owns_entire_state_region_uncontested = STATE_WASHINGTON
+	owns_entire_state_region_uncontested = STATE_IDAHO
+	owns_entire_state_region_uncontested = STATE_OREGON
+	owns_entire_state_region_uncontested = STATE_NEVADA
+	owns_entire_state_region_uncontested = STATE_UTAH
+	owns_entire_state_region_uncontested = STATE_ARIZONA
+	owns_entire_state_region_uncontested = STATE_CALIFORNIA
+	owns_entire_state_region_uncontested = STATE_BAJA_CALIFORNIA
 }
 
 french_treaty_ports = {
@@ -1055,38 +1032,122 @@ has_hierarchic_ideology = {
 	}
 }
 
-can_reach_target_country = {
-	has_diplomatic_relevance = scope:target_country
+has_patriarchal_ideology = {
 	OR = {
-		has_strategic_adjacency = scope:target_country
-		AND = {
-			has_port_country = yes
-			navy_size >= 10
-			scope:target_country = { has_port_country = yes }
+		has_ideology = ideology:ideology_patriarchal
+		has_ideology = ideology:ideology_russian_patriarchal
+	}
+}
+
+# Can the scope country get an army into $TARGET_COUNTRY$ well enough to take and hold territory
+can_reach_target_country_to_conquer = {
+	$TARGET_COUNTRY$ = { save_temporary_scope_as = military_reach_target }
+	custom_tooltip = {
+		text = can_reach_to_conquer_tt
+		has_diplomatic_relevance = $TARGET_COUNTRY$
+		has_military_reach = {
+			target = $TARGET_COUNTRY$
+			min_reach = ai_military_reach_conquer
+			min_shippable_strength = ai_military_reach_conquer_min_shippable_strength
 		}
 	}
 }
 
-can_be_reached_by_target_country = {
-	has_diplomatic_relevance = scope:target_country
-	OR = {
-		has_strategic_adjacency = scope:target_country
-		AND = {
-			has_port_country = yes
-			scope:target_country = { has_port_country = yes }
-			scope:target_country = { navy_size >= 10 }
+# Can the scope country get an army into $TARGET_STATE$ well enough to take and hold territory
+can_reach_target_state_to_conquer = {
+	$TARGET_STATE$ = { save_temporary_scope_as = military_reach_target }
+	custom_tooltip = {
+		text = can_reach_state_to_conquer_tt
+		has_diplomatic_relevance = $TARGET_STATE$.owner
+		has_military_reach = {
+			target = $TARGET_STATE$
+			min_reach = ai_military_reach_conquer
+			min_shippable_strength = ai_military_reach_conquer_min_shippable_strength
 		}
 	}
 }
 
-can_reach_target_state = {
-	has_diplomatic_relevance = scope:target_state.owner
-	OR = {
-		has_strategic_adjacency = scope:target_state
-		AND = {
-			navy_size >= 10
-			has_port_country = yes
-			scope:target_state = { is_coastal = yes }
+# Can the scope country get an army into $TARGET_COUNTRY$ well enough to force it into subjecthood or dominate it
+can_reach_target_country_to_subjugate = {
+	$TARGET_COUNTRY$ = { save_temporary_scope_as = military_reach_target }
+	custom_tooltip = {
+		text = can_reach_to_subjugate_tt
+		has_diplomatic_relevance = $TARGET_COUNTRY$
+		has_military_reach = {
+			target = $TARGET_COUNTRY$
+			min_reach = ai_military_reach_subjugate
+			min_shippable_strength = ai_military_reach_subjugate_min_shippable_strength
+		}
+	}
+}
+
+# Can the scope country get an army into $TARGET_COUNTRY$ well enough to fight a limited war over it, such as opening its market or taking a treaty port
+can_reach_target_country_to_coerce = {
+	$TARGET_COUNTRY$ = { save_temporary_scope_as = military_reach_target }
+	custom_tooltip = {
+		text = can_reach_to_coerce_tt
+		has_diplomatic_relevance = $TARGET_COUNTRY$
+		has_military_reach = {
+			target = $TARGET_COUNTRY$
+			min_reach = ai_military_reach_coerce
+			min_shippable_strength = ai_military_reach_coerce_min_shippable_strength
+		}
+	}
+}
+
+# Can the scope country get an army into $TARGET_STATE$ well enough to fight a limited war over it, such as opening its market or taking a treaty port
+can_reach_target_state_to_coerce = {
+	$TARGET_STATE$ = { save_temporary_scope_as = military_reach_target }
+	custom_tooltip = {
+		text = can_reach_state_to_coerce_tt
+		has_diplomatic_relevance = $TARGET_STATE$.owner
+		has_military_reach = {
+			target = $TARGET_STATE$
+			min_reach = ai_military_reach_coerce
+			min_shippable_strength = ai_military_reach_coerce_min_shippable_strength
+		}
+	}
+}
+
+# Can the scope country get an army into $TARGET_COUNTRY$ well enough to send help to it or count as a meaningful friend to it
+# A power bloc leader can always protect its members
+can_reach_target_country_to_protect = {
+	$TARGET_COUNTRY$ = { save_temporary_scope_as = military_reach_target }
+	custom_tooltip = {
+		text = can_reach_to_protect_tt
+		has_diplomatic_relevance = $TARGET_COUNTRY$
+		OR = {
+			AND = {
+				is_power_bloc_leader = yes
+				is_in_same_power_bloc = $TARGET_COUNTRY$
+			}
+			has_military_reach = {
+				target = $TARGET_COUNTRY$
+				min_reach = ai_military_reach_protect
+				min_shippable_strength = ai_military_reach_protect_min_shippable_strength
+			}
+		}
+	}
+}
+
+# Can $TARGET_COUNTRY$ get an army into the scope country well enough to protect it
+can_be_reached_by_target_country_to_protect = {
+	$TARGET_COUNTRY$ = { save_temporary_scope_as = military_reach_target }
+	custom_tooltip = {
+		text = can_be_reached_to_protect_tt
+		has_diplomatic_relevance = $TARGET_COUNTRY$
+		$TARGET_COUNTRY$ = {
+			OR = {
+				AND = {
+					is_power_bloc_leader = yes
+					is_in_same_power_bloc = prev
+				}
+				has_military_reach = {
+					target = prev
+					min_reach = ai_military_reach_protect
+					min_shippable_strength = ai_military_reach_protect_min_shippable_strength
+				}
+			}
 		}
 	}
 }
@@ -1102,11 +1163,81 @@ has_radical_leftist_government = {
 	has_law_or_variant = law_type:law_council_republic
 }
 
+has_governing_communist_or_socialist_party = {
+	any_interest_group = {
+		is_in_government = yes
+		party ?= {
+			OR = {
+				is_party_type = communist_party
+				is_party_type = socialist_party
+				is_party_type = anarchist_party
+			}
+		}
+	}
+	ruler ?= {
+		interest_group ?= {
+			party ?= {
+				OR = {
+					is_party_type = communist_party
+					is_party_type = socialist_party
+					is_party_type = anarchist_party
+				}
+			}
+		}
+	}
+}
+
 has_radical_leftist_economy = {
 	OR = {
 		has_law_or_variant = law_type:law_command_economy
 		has_law_or_variant = law_type:law_cooperative_ownership
 	}
+}
+
+has_revolutionary_socialist_laws = {
+	OR = {
+		has_law_or_variant = law_type:law_factory_councils
+		has_law_or_variant = law_type:law_council_republic
+		has_law_or_variant = law_type:law_communal_administration
+		has_law_or_variant = law_type:law_revolutionary_guard
+	}
+}
+
+at_war_with_council_republic = {
+	any_enemy_in_diplo_play = {
+		has_law_or_variant = law_type:law_council_republic
+	}
+}
+
+pressing_liberation_wargoal_against_adjacent_country = {
+	any_enemy_in_diplo_play = {
+		has_strategic_adjacency = root
+		root = {
+			OR = {
+				war_participant_has_war_goal_of_type_against = { type = regime_change target = prev }
+				war_participant_has_war_goal_of_type_against = { type = liberate_country target = prev }
+				war_participant_has_war_goal_of_type_against = { type = liberate_subject target = prev }
+			}
+		}
+	}
+}
+
+is_revolutionary_council_republic = {
+	has_law_or_variant = law_type:law_council_republic
+	has_law_or_variant = law_type:law_factory_councils
+}
+
+at_war_with_revolutionary_council_republic = {
+	any_enemy_in_diplo_play = {
+		is_revolutionary_council_republic = yes
+	}
+}
+
+has_all_revolutionary_laws = {
+	has_law_or_variant = law_type:law_council_republic
+	has_law_or_variant = law_type:law_factory_councils
+	has_law_or_variant = law_type:law_communal_administration
+	has_law_or_variant = law_type:law_revolutionary_guard
 }
 
 any_insurrection_ongoing = {
@@ -1180,7 +1311,7 @@ civil_war_is_reactionary_revolution = {
 
 ig_is_socialist = {
 	OR = {
-		has_ideology = ideology:ideology_socialist
+		#has_ideology = ideology:ideology_socialist
 		leader = {
 			has_ideology = ideology:ideology_vanguardist
 		}
@@ -1191,7 +1322,7 @@ ig_is_socialist = {
 			has_ideology = ideology:ideology_anarchist
 		}
 		leader = {
-			has_ideology = ideology:ideology_communist
+			has_ideology = ideology:ideology_communist_leader
 		}
 		law_stance = {
 			law = law_type:law_council_republic
@@ -1204,7 +1335,9 @@ ig_is_liberal = {
 	OR = {
 		has_ideology = ideology:ideology_republican
 		has_ideology = ideology:ideology_liberal
+		has_ideology = ideology:ideology_universalist
 		has_ideology = ideology:ideology_liberal_modern
+		has_ideology = ideology:ideology_universalist_modern
 		leader = {
 			has_ideology = ideology:ideology_radical
 		}
@@ -1212,7 +1345,7 @@ ig_is_liberal = {
 			has_ideology = ideology:ideology_republican_leader
 		}
 		leader = {
-			has_ideology = ideology:ideology_social_democrat
+			has_ideology = ideology:ideology_state_socialist
 		}
 		AND = {
 			law_stance = {
@@ -1290,11 +1423,11 @@ civil_war_progress_low = {
 
 civil_war_progress_medium = {
 	civil_war_progress >= 0.34
-	civil_war_progress < 0.67
+	civil_war_progress <= 0.75
 }
 
 civil_war_progress_high = { # In a civil_war scope
-	civil_war_progress >= 0.67
+	civil_war_progress > 0.75
 }
 
 government_ig_supports_enaction = {
@@ -1390,7 +1523,7 @@ ig_is_dreyfusard = {
 			has_ideology = ideology:ideology_anarchist
 		}
 		leader = {
-			has_ideology = ideology:ideology_communist
+			has_ideology = ideology:ideology_communist_leader
 		}
 		leader = {
 			has_ideology = ideology:ideology_republican_leader
@@ -1408,7 +1541,7 @@ ig_is_dreyfusard = {
 			has_ideology = ideology:ideology_pacifist
 		}
 		leader = {
-			has_ideology = ideology:ideology_social_democrat
+			has_ideology = ideology:ideology_state_socialist
 		}
 		leader = {
 			has_ideology = ideology:ideology_humanitarian
@@ -1527,10 +1660,8 @@ ig_type_matches_former = { #Temporary Workaround
 
 #It is intended that some of these categories overlap.
 interest_group_has_liberal_ideology = {
-	OR = {
-		leader = {
-			has_liberal_ideology = yes
-		}
+	leader = {
+		has_liberal_ideology = yes
 	}
 }
 
@@ -1578,7 +1709,7 @@ has_progressive_ideology = {
 		OR = {
 			has_ideology = ideology:ideology_radical
 			has_ideology = ideology:ideology_feminist
-			has_ideology = ideology:ideology_social_democrat
+			has_ideology = ideology:ideology_state_socialist
 			has_ideology = ideology:ideology_humanitarian
 			has_ideology = ideology:ideology_humanitarian_royalist
 		}
@@ -1589,7 +1720,7 @@ has_socialist_ideology = {
 	custom_tooltip = {
 		text = has_socialist_ideology_tt
 		OR = {
-			has_ideology = ideology:ideology_communist
+			has_ideology = ideology:ideology_communist_leader
 			has_ideology = ideology:ideology_vanguardist
 			has_ideology = ideology:ideology_anarchist
 			has_ideology = ideology:ideology_nihilist
@@ -1712,6 +1843,14 @@ wants_to_solve_schleswig_holstein = {
 }
 
 is_oppressor_of_schleswig_holstein = {
+	s:STATE_SCHLESWIG_HOLSTEIN = {
+		any_scope_state = {
+			OR = {
+				owner = { is_subject_of = root }
+				owner = root
+			}
+		}
+	}
 	OR = {
 		top_overlord ?= {
 			NOR = {
@@ -1722,14 +1861,6 @@ is_oppressor_of_schleswig_holstein = {
 		NOR = {
 			country_has_primary_culture = cu:north_german
 			country_has_primary_culture = cu:south_german
-		}
-	}
-	s:STATE_SCHLESWIG_HOLSTEIN = {
-		any_scope_state = {
-			OR = {
-				owner = { is_subject_of = root }
-				owner = root
-			}
 		}
 	}
 }
@@ -2313,12 +2444,12 @@ spoils_of_war_complete_rom = {
 movement_is_socialist = {
 	custom_tooltip = {
 		text = movement_is_socialist_tt
-    OR = {
-        is_political_movement_type = movement_nihilist
-        is_political_movement_type = movement_socialist
-        is_political_movement_type = movement_communist
-        is_political_movement_type = movement_anarchist
-    }
+		OR = {
+			is_political_movement_type = movement_nihilist
+			is_political_movement_type = movement_socialist
+			is_political_movement_type = movement_communist
+			is_political_movement_type = movement_anarchist
+		}
 	}
 }
 
@@ -2373,6 +2504,89 @@ movement_is_conservative = {
     }
 }
 
+relevant_movement_has_people_in_state = {
+	trigger_if = {
+		limit = {
+			scope:relevant_movement = {
+				is_political_movement_type = movement_cultural_minority
+			}
+		}
+		culture_percent_state = {
+			target = scope:relevant_movement.culture
+			value >= 0.05
+		}
+	}
+	trigger_else_if = {
+		limit = {
+			scope:relevant_movement = {
+				OR = {
+					is_political_movement_type = movement_religious_minority
+					is_political_movement_type = movement_religious_majority
+				}
+			}
+		}
+		religion_percent_state = {
+			target = scope:relevant_movement.religion
+			value >= 0.05
+		}
+	}
+	trigger_else_if = {
+		limit = {
+			scope:relevant_movement = {
+				is_political_movement_type = movement_cultural_majority
+			}
+		}
+		primary_cultures_percent_state = {
+			target_country = owner
+			value >= 0.05
+		}
+	}
+	trigger_else_if = {
+		limit = {
+			scope:relevant_movement = {
+				OR = {
+					is_political_movement_type = movement_india_pan_national
+					is_political_movement_type = movement_hindu_nationalist
+					is_political_movement_type = movement_muslim_nationalist
+				}
+			}
+		}
+		state_is_homeland_of_indian_cultures = yes
+	}
+	trigger_else_if = {
+		limit = {
+			scope:relevant_movement = {
+				is_political_movement_type = movement_german_national
+			}
+		}
+		state_is_homeland_of_german_cultures = yes
+	}
+	trigger_else_if = {
+		limit = {
+			scope:relevant_movement = {
+				is_political_movement_type = movement_italian_national
+			}
+		}
+		state_is_homeland_of_italian_cultures = yes
+	}
+	trigger_else_if = {
+		limit = {
+			scope:relevant_movement = {
+				is_political_movement_type = movement_yugoslav_national
+			}
+		}
+		state_is_homeland_of_yugoslav_cultures = yes
+	}
+	trigger_else_if = {
+		limit = {
+			scope:relevant_movement = {
+				is_political_movement_type = movement_dominican_national
+			}
+		}
+		state_region = s:STATE_SANTO_DOMINGO
+	}
+}
+
 serbia_throne_campaign_state_check = {
 	OR = {
 		has_modifier = serbia_auth_fund_campaigned_state_a_mod
@@ -2398,6 +2612,42 @@ character_is_emperor_of_japan = {
 	has_trait = special_character_japanese_emperor
 }
 
+character_is_tsar_of_russia = {
+	is_ruler_of_own_country = yes
+	owner ?= {
+		c:RUS ?= this
+		OR = {
+			has_law = law_type:law_monarchy
+			has_law = law_type:law_social_monarchy
+		}
+	}
+}
+
+character_is_captain_nemo = {
+	has_template = nemo_prince
+}
+
 country_meiji_reform_emperor_restored = {
 	has_variable = japan_emperor_restored
+}
+
+state_has_decree_variant = {
+	OR = {
+		has_decree = $DECREE$
+		has_decree = $DECREE$_tsarpoints
+	}
+}
+
+neighboring_country_has_insurrectionary_movement_trigger = {
+	owner ?= {
+		any_neighbouring_state = {
+			owner ?= {
+				NOT = { THIS = ROOT.owner }
+				any_political_movement = {
+					is_political_movement_type = $TYPE$
+					is_insurrectionary = yes
+				}
+			}
+		}
+	}
 }

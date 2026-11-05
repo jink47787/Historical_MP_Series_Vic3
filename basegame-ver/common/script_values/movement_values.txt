@@ -34,3 +34,306 @@ average_italian_fervor = {
     add = cu:south_italian.culture_current_fervor
     divide = 2
 }
+
+movement_radicalism_lack_of_suffrage = {
+    value = 0
+    if = {
+        limit = {
+            has_global_variable = global_democracy_index
+            owner ?= {
+                has_technology_researched = egalitarianism
+                country_has_voting_franchise = no
+            }
+        }
+        add = {
+            desc = "LACK_OF_SUFFRAGE"
+            value = global_var:global_democracy_index
+            multiply = {
+                value = owner.modifier:state_expected_sol_from_literacy
+                multiply = 0.10
+                add = 0.5
+            }
+            if = {
+                limit = {
+                    owner ?= {
+                        has_law_or_variant = law_type:law_elected_bureaucrats
+                    }
+                }
+                divide = 20
+            }
+            else = {
+                divide = 15
+            }
+            min = 0
+            max = 0.4
+        }
+    }
+}
+
+movement_radicalism_suppressed_after_civil_war = {
+    value = 0
+    if = {
+        limit = {
+            this.days_since_movement_defeated <= very_long_modifier_time
+        }
+        add = { # (x-y)/y - ([1, 7300]-7300)/7300
+            desc = "movement_suppressed_after_civil_war"
+            value = this.days_since_movement_defeated
+            subtract = very_long_modifier_time
+            divide = {
+                value = very_long_modifier_time
+            }
+        }
+    }
+}
+
+movement_radicalism_schools_funding = {
+    value = 0
+    owner ?= {
+        if = {
+            limit = { has_institution = institution_schools }
+
+            add = {
+                value = 2
+                subtract = "institution_investment_level(institution_schools)"
+                multiply = 0.05
+                desc = "INSTITUTION_FUNDING_LEVEL_schools"
+            }
+        }
+        else = {
+            add = {
+                value = 0.1
+                desc = "NO_INSTITUTION_schools"
+            }
+        }
+    }
+}
+
+movement_radicalism_ruler_not_primary_culture = {
+    value = 0
+    if = {
+        limit = {
+            owner.ruler ?= {
+                NOT = { culture = { is_primary_culture_of = root.owner } }
+            }
+        }
+
+        add = {
+            value = 0.1
+            desc = "RULER_NOT_PRIMARY_CULTURE"
+        }
+    }
+}
+
+movement_radicalism_poor_papal_relations = {
+    value = 0
+    if = {
+        limit = {
+            exists = c:PAP
+            c:PAP ?= {
+                country_has_state_religion = rel:catholic
+                has_law_or_variant = law_type:law_theocracy
+            }
+            "owner.relations(c:PAP)" < 0
+        }
+        add = {
+            desc = "POOR_RELATIONS_WITH_PAPACY"
+            value = "owner.relations(c:PAP)"
+            divide = 100
+            multiply = -0.25
+        }
+    }
+}
+
+movement_radicalism_simultaneous_insurrections = {
+    value = 0
+    if = {
+        limit = {
+            owner ?= {
+                any_political_movement = {
+                    NOT = { this = root } # Insurrectionary movements should not make themselves more insurrectionary
+                    is_insurrectionary = yes
+                }
+            }
+        }
+        add = {
+            desc = "SIMULTANEOUS_INSURRECTIONARY_MOVEMENTS"
+            owner ?= {
+                every_political_movement = {
+                    limit = {
+                        NOT = { this = root } # Insurrectionary movements should not make themselves more insurrectionary
+                        is_insurrectionary = yes
+                    }
+                    if = {
+                        limit = {
+                            exists = this.political_movement_identity_support
+                        }
+                        add = { # Identity support can get a bit high
+                            value = this.political_movement_identity_support
+                            multiply = 0.5
+                        }
+                    }
+                    else = {
+                        add = this.political_movement_support
+                    }
+                }
+            }
+            min = 0.05
+            max = 0.25
+        }
+    }
+}
+
+movement_radicalism_neighboring_religious_revolution = {
+    value = 0
+    if = {
+        limit = {
+            owner ?= {
+                any_neighbouring_state = {
+                    owner ?= {
+                        NOT = { THIS = ROOT.owner }
+                        any_political_movement = {
+                            religion ?= ROOT.religion
+                            is_insurrectionary = yes
+                        }
+                    }
+                }
+            }
+        }
+        add = {
+            desc = "NEIGHBOURING_COUNTRY_WITH_RELIGIOUS_REVOLUTION"
+            value = 0.15
+        }
+    }
+}
+
+movement_radicalism_india_subject = {
+    value = 0
+    if = {
+        limit = {
+            owner ?= {
+                is_subject = yes
+            }
+        }
+        add = {
+            desc = "INDIA_SUBJECT"
+            if = {
+                limit = {
+                    owner ?= {
+                        OR = {
+                            is_subject_type = subject_type_colony
+                            is_subject_type = subject_type_chartered_company
+                        }
+                    }
+                }
+                value = 0.15
+            }
+            if = {
+                limit = {
+                    owner ?= {
+                        is_subject_type = subject_type_dominion
+                    }
+                }
+                value = 0.05
+            }
+        }
+    }
+}
+
+movement_radicalism_india_liberty_desire = {
+    value = 0
+    if = {
+        limit = {
+            owner ?= {
+                is_subject = yes
+            }
+        }
+        add = {
+            desc = "LIBERTY_DESIRE"
+            value = owner.liberty_desire
+            divide = 500
+        }
+    }
+}
+
+movement_radicalism_acw_countdown = {
+    value = 0
+    if = {
+        limit = {
+            owner ?= { has_journal_entry = je_acw_countdown }
+        }
+
+        add = {
+            value = 0.2
+            desc = "je_acw_countdown"
+        }
+    }
+}
+
+movement_radicalism_ruler_is_pro_slavery = {
+    value = 0
+    if = {
+        limit = {
+            owner.ruler ?= {
+                OR = {
+                    has_ideology = ideology:ideology_jacksonian_democrat
+                    has_ideology = ideology:ideology_slaver
+                    AND = {
+                        NOR = {
+                            has_ideology = ideology:ideology_abolitionist
+                            has_ideology = ideology:ideology_utilitarian_leader
+                            has_ideology = ideology:ideology_utopian
+                        }
+                        interest_group ?= {
+                            OR = {
+                                has_ideology = ideology:ideology_pro_slavery
+                                has_ideology = ideology:ideology_pro_slavery_colonial
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        add = {
+            value = 0.1
+            desc = "RULER_IS_PRO_SLAVERY"
+        }
+    }
+}
+
+movement_radicalism_royalist_monarchy_abolished = {
+    value = 0
+    owner ?= {
+        if = {
+            limit = {
+                has_law = law_type:law_monarchy
+            }
+
+            if = {
+                limit = {
+                    OR = {
+                        is_enacting_law = law_type:law_presidential_republic
+                        is_enacting_law = law_type:law_parliamentary_republic
+                        is_enacting_law = law_type:law_corporate_state
+                        is_enacting_law = law_type:law_theocracy
+                        is_enacting_law = law_type:law_council_republic
+                    }
+                }
+
+                add = {
+                    value = 0.25
+                    desc = "MONARCHY_BEING_ABOLISHED"
+                }
+            }
+            else = {
+                add = { # Only care about legitimacy in the context of a monarchy that isn't under direct threat
+                    value = 50
+                    subtract = legitimacy
+                    multiply = 0.005
+                    desc = "concept_legitimacy"
+                }
+            }
+        }
+    }
+}

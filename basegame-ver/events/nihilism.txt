@@ -60,13 +60,12 @@ nihilism.1 = {
 							}
 						}
 					}
-					NOT = { has_global_variable = stirner_spawn }
+					NOT = { is_template_used = BAV_max_stirner }
 				}
 				create_character = {
 					template = BAV_max_stirner
 					on_created = {
 						set_variable = is_stirner_var
-						set_global_variable = stirner_spawn
 					}
 				}
 			}
@@ -128,11 +127,16 @@ nihilism.1 = {
 				has_ideology = ideology:ideology_nihilist
 			}
 			save_scope_as = nihilist_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 			set_career_length = {
 				years = 20
 				random_range = { 1.0 1.5 } # 20-30 years
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:nihilist_scope }
 	}
 
 	option = {
@@ -276,6 +280,15 @@ nihilism.2 = {
 	option = {
 		name = nihilism.2.b
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		ig:ig_intelligentsia ?= {
 			add_modifier = {
 				name = modifier_end_of_nihilism
@@ -327,63 +340,38 @@ nihilism.3 = {
 	option = {
 		name = nihilism.3.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		if = {
 			limit = {
-				OR = {
-					has_technology_researched = anarchism
-					has_technology_researched = socialism
-				}
+				nihilist_successor_socialist = yes
 			}
 			custom_tooltip = {
-				text = all_tu_nihilists_become_communist_tt
-				if = {
-					limit = {
-						has_technology_researched = socialism
-						ig:ig_trade_unions ?= {
-							any_scope_character = {
-								has_ideology = ideology:ideology_nihilist
-							}
-						}
-					}
-					ig:ig_trade_unions ?= {
-						every_scope_character = {
-							limit = {
-								has_ideology = ideology:ideology_nihilist
-							}
-							set_ideology = ideology:ideology_communist
-						}
-					}
-				}
+				text = all_nihilists_become_socialist_tt
+			}
+		}
+		else_if = {
+			limit = {
+				nihilist_successor_anarchist = yes
 			}
 			custom_tooltip = {
-				text = all_non_tu_nihilists_become_anarchist_tt
-				if = {
-					limit = {
-						has_technology_researched = anarchism
-						any_scope_character = {
-							has_ideology = ideology:ideology_nihilist
-						}
-					}
-					every_scope_character = {
-						limit = {
-							has_ideology = ideology:ideology_nihilist
-						}
-						set_ideology = ideology:ideology_anarchist
-					}
-				}
+				text = all_nihilists_become_anarchist_tt
 			}
 		}
 		else = {
 			custom_tooltip = {
 				text = all_nihilists_become_radical_tt
-				every_scope_character = {
-					limit = {
-						has_ideology = ideology:ideology_nihilist
-					}
-					set_ideology = ideology:ideology_radical
-				}
 			}
 		}
+		nihilist_leaders_successor_effect = yes
+		set_variable = nihilist_movement_dissolved
 		add_radicals = {
 			value = small_radicals
 			interest_group = ig:ig_intelligentsia
@@ -396,63 +384,41 @@ nihilism.3 = {
 	}
 	option = {
 		name = nihilism.3.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		if = {
 			limit = {
-				OR = {
-					has_technology_researched = anarchism
-					has_technology_researched = socialism
-				}
+				nihilist_successor_socialist = yes
 			}
 			custom_tooltip = {
-				text = all_tu_nihilists_become_communist_tt
-				if = {
-					limit = {
-						has_technology_researched = socialism
-						ig:ig_trade_unions ?= {
-							any_scope_character = {
-								has_ideology = ideology:ideology_nihilist
-							}
-						}
-					}
-					ig:ig_trade_unions ?= {
-						every_scope_character = {
-							limit = {
-								has_ideology = ideology:ideology_nihilist
-							}
-							set_ideology = ideology:ideology_communist
-						}
-					}
-				}
+				text = all_nihilists_become_socialist_tt
+			}
+		}
+		else_if = {
+			limit = {
+				nihilist_successor_anarchist = yes
 			}
 			custom_tooltip = {
-				text = all_non_tu_nihilists_become_anarchist_tt
-				if = {
-					limit = {
-						has_technology_researched = anarchism
-						any_scope_character = {
-							has_ideology = ideology:ideology_nihilist
-						}
-					}
-					every_scope_character = {
-						limit = {
-							has_ideology = ideology:ideology_nihilist
-						}
-						set_ideology = ideology:ideology_anarchist
-					}
-				}
+				text = all_nihilists_become_anarchist_tt
 			}
 		}
 		else = {
 			custom_tooltip = {
 				text = all_nihilists_become_radical_tt
-				every_scope_character = {
-					limit = {
-						has_ideology = ideology:ideology_nihilist
-					}
-					set_ideology = ideology:ideology_radical
-				}
 			}
 		}
+		nihilist_leaders_successor_effect = yes
+		set_variable = nihilist_movement_dissolved
+	}
+	after = {
+		je_nihilist_movement_cleanup = yes
 	}
 }
 
@@ -478,6 +444,7 @@ nihilism.4 = {  #Fathers and Sons
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
 		}
@@ -500,6 +467,7 @@ nihilism.4 = {  #Fathers and Sons
 				has_ideology = ideology:ideology_nihilist
 			}
 			save_scope_as = nihilist_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		if = {
 			limit = {
@@ -508,8 +476,16 @@ nihilism.4 = {  #Fathers and Sons
 			create_character = {
 				template = RUS_ivan_turgenev
 				save_scope_as = turgenev_scope
+				on_created = {
+					set_temporary_event_immortality = { DURATION = 3 }
+				}
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:nihilist_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:turgenev_scope }
 	}
 
 	option = {
@@ -578,6 +554,15 @@ nihilism.4 = {  #Fathers and Sons
 
 	option = {
 		name = nihilism.4.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_tsar_crown_of_perfection
+				}
+				add = 100
+			}
+		}
 		ig:ig_intelligentsia ?= {
 			add_modifier = {
 				name = modifier_fathers_and_sons_ignored
@@ -613,6 +598,7 @@ nihilism.5 = { #University Nihilists
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		has_variable = nihilism_level_one
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
@@ -640,6 +626,15 @@ nihilism.5 = { #University Nihilists
 	option = {
 		name = nihilism.5.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		ig:ig_intelligentsia ?= {
 			add_modifier = {
 				name = modifier_interference_in_academia
@@ -660,6 +655,15 @@ nihilism.5 = { #University Nihilists
 	}
 	option = {
 		name = nihilism.5.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		random_scope_state = {
 			limit = {
 				has_building = building_university
@@ -692,6 +696,7 @@ nihilism.6 = { #Noblewoman feels snubbed by nihilist students
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		has_variable = nihilism_level_one
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
@@ -722,6 +727,15 @@ nihilism.6 = { #Noblewoman feels snubbed by nihilist students
 	}
 	option = {
 		name = nihilism.6.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_tsar_crown_of_perfection
+				}
+				add = 100
+			}
+		}
 		ig:ig_landowners ?= {
 			add_modifier = {
 				name = modifier_respect_unenforced_neg
@@ -757,6 +771,7 @@ nihilism.7 = { #Turmoil at universities
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		has_variable = nihilism_level_one
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
@@ -806,10 +821,15 @@ nihilism.7 = { #Turmoil at universities
 				has_ideology = ideology:ideology_nihilist
 			}
 			save_scope_as = nihilist_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		set_variable = {
 			name = nihilism_level_two
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:nihilist_scope }
 	}
 
 	option = {
@@ -835,6 +855,15 @@ nihilism.7 = { #Turmoil at universities
 	}
 	option = {
 		name = nihilism.7.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_tsar_crown_of_perfection
+				}
+				add = 100
+			}
+		}
 		scope:nihilist_scope = {
 			add_modifier = {
 				name = modifier_emboldened_nihilist_agitator
@@ -876,6 +905,7 @@ nihilism.8 = { #Outrageous act of protest, Devout demand repressions
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		has_variable = nihilism_level_one
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
@@ -894,6 +924,15 @@ nihilism.8 = { #Outrageous act of protest, Devout demand repressions
 	option = {
 		name = nihilism.8.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		ig:ig_devout ?= {
 			add_modifier = {
 				name = modifier_respect_enforced_pos
@@ -912,6 +951,15 @@ nihilism.8 = { #Outrageous act of protest, Devout demand repressions
 	}
 	option = {
 		name = nihilism.8.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		ig:ig_devout ?= {
 			add_modifier = {
 				name = modifier_respect_unenforced_neg
@@ -947,6 +995,7 @@ nihilism.9 = { #Nihilists commit arson on government buildings
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		has_variable = nihilism_level_two
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
@@ -978,6 +1027,15 @@ nihilism.9 = { #Nihilists commit arson on government buildings
 	option = {
 		name = nihilism.9.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:kissed_by_fire_state = {
 			random_scope_building = {
 				limit = {
@@ -1009,6 +1067,15 @@ nihilism.9 = { #Nihilists commit arson on government buildings
 	}
 	option = {
 		name = nihilism.9.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:kissed_by_fire_state = {
 			add_radicals_in_state = {
 				strata = middle
@@ -1075,6 +1142,7 @@ nihilism.10 = { #Intellectual leader becomes a nihilist
 	duration = 3
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		has_variable = nihilism_level_two
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
@@ -1116,6 +1184,7 @@ nihilism.10 = { #Intellectual leader becomes a nihilist
 					random_range = { 1.0 1.5 } # 20-30 years
 				}
 				save_scope_as = nihilist_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 		else = {
@@ -1130,6 +1199,7 @@ nihilism.10 = { #Intellectual leader becomes a nihilist
 				create_character = {
 					template = RUS_dimitry_pisarev
 					on_created = {
+						set_temporary_event_immortality = { DURATION = 3 }
 						set_career_length = {
 							years = 20
 							random_range = { 1.0 1.5 } # 20-30 years
@@ -1152,6 +1222,7 @@ nihilism.10 = { #Intellectual leader becomes a nihilist
 				create_character = {
 					template = PRU_bruno_bauer
 					on_created = {
+						set_temporary_event_immortality = { DURATION = 3 }
 						set_career_length = {
 							years = 20
 							random_range = { 1.0 1.5 } # 20-30 years
@@ -1171,6 +1242,7 @@ nihilism.10 = { #Intellectual leader becomes a nihilist
 				create_character = {
 					template = GBR_charles_bradlaugh
 					on_created = {
+						set_temporary_event_immortality = { DURATION = 3 }
 						set_career_length = {
 							years = 20
 							random_range = { 1.0 1.5 } # 20-30 years
@@ -1185,6 +1257,7 @@ nihilism.10 = { #Intellectual leader becomes a nihilist
 					interest_group = ig_intelligentsia
 					ideology = ideology_nihilist
 					on_created = {
+						set_temporary_event_immortality = { DURATION = 3 }
 						set_career_length = {
 							years = 20
 							random_range = { 1.0 1.5 } # 20-30 years
@@ -1196,9 +1269,22 @@ nihilism.10 = { #Intellectual leader becomes a nihilist
 		}
 	}
 
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:nihilist_leader }
+	}
+
 	option = {
 		name = nihilism.10.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:nihilist_leader ?= {
 			if = {
 				limit = {
@@ -1221,6 +1307,21 @@ nihilism.10 = { #Intellectual leader becomes a nihilist
 
 	option = {
 		name = nihilism.10.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_tsar_crown_of_perfection
+				}
+				add = 100
+			}
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:nihilist_leader ?= {
 			if = {
 				limit = {
@@ -1259,6 +1360,7 @@ nihilism.11 = { #Agitator fight! Nihilist agitator argues with communists about 
 	duration = 3
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		has_variable = nihilism_level_two
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
@@ -1270,7 +1372,7 @@ nihilism.11 = { #Agitator fight! Nihilist agitator argues with communists about 
 			has_role_of_type = agitator
 			OR = {
 				has_ideology = ideology:ideology_anarchist
-				has_ideology = ideology:ideology_communist
+				has_ideology = ideology:ideology_communist_leader
 				has_ideology = ideology:ideology_vanguardist
 			}
 		}
@@ -1287,7 +1389,7 @@ nihilism.11 = { #Agitator fight! Nihilist agitator argues with communists about 
 					has_role_of_type = agitator
 					OR = {
 						has_ideology = ideology:ideology_anarchist
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_vanguardist
 					}
 				}
@@ -1299,11 +1401,12 @@ nihilism.11 = { #Agitator fight! Nihilist agitator argues with communists about 
 					has_role_of_type = agitator
 					OR = {
 						has_ideology = ideology:ideology_anarchist
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_vanguardist
 					}
 				}
 				save_scope_as = communist_scope
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 		random_scope_character = {
@@ -1312,12 +1415,27 @@ nihilism.11 = { #Agitator fight! Nihilist agitator argues with communists about 
 				has_ideology = ideology:ideology_nihilist
 			}
 			save_scope_as = nihilist_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:communist_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:nihilist_scope }
 	}
 
 	option = {
 		name = nihilism.11.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:nihilist_scope = {
 			add_modifier = {
 				name = modifier_triumphant_in_forum
@@ -1333,6 +1451,15 @@ nihilism.11 = { #Agitator fight! Nihilist agitator argues with communists about 
 	}
 	option = {
 		name = nihilism.11.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:communist_scope = {
 			add_modifier = {
 				name = modifier_triumphant_in_forum
@@ -1348,6 +1475,15 @@ nihilism.11 = { #Agitator fight! Nihilist agitator argues with communists about 
 	}
 	option = {
 		name = nihilism.11.c
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 15
+			}
+		}
 		capital = {
 			add_radicals_in_state = {
 				strata = lower
@@ -1378,6 +1514,7 @@ nihilism.12 = { #Trade Unions adopt a positive view of state atheism/total separ
 	duration = 3
 
 	trigger = {
+		# triggered by journal entry - je_nihilist_movement [on_monthly_pulse]
 		has_variable = nihilist_communist_front
 		ig:ig_intelligentsia ?= {
 			ig_approval < 0
@@ -1408,12 +1545,21 @@ nihilism.12 = { #Trade Unions adopt a positive view of state atheism/total separ
 
 	option = {
 		name = nihilism.12.a
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		trigger = {
 			scope:communist_ig = {
 				leader = {
 					OR = {
 						has_ideology = ideology:ideology_anarchist
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_vanguardist
 					}
 				}
@@ -1451,6 +1597,15 @@ nihilism.12 = { #Trade Unions adopt a positive view of state atheism/total separ
 	option = {
 		name = nihilism.12.b
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:communist_ig = {
 			add_ideology = ideology_anti_clerical
 			add_modifier = {
@@ -1499,6 +1654,7 @@ nihilism.13 = { #Instant law pass for abolishing state religion/instituting athe
 	duration = 3
 
 	trigger = {
+		# triggered by on_action - on_law_checkpoint_advance
 		has_journal_entry = je_nihilist_movement
 		OR = {
 			has_law_or_variant = law_type:law_state_religion

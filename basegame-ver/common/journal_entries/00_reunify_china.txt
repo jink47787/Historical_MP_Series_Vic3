@@ -5,6 +5,10 @@
 
 	group = je_group_foreign_affairs
 
+	activation_description = {
+		always = yes
+	}
+
 	modifiers_while_active = {
 		modifier_chinese_warlord_era
 	}
@@ -34,103 +38,109 @@
 		}
 	}
 
-	complete = {
-		trigger_if = {
-			limit = {
-				global_var:chinese_central_government ?= this
-			}
-			custom_tooltip = {
-				text = no_independent_chinese_countries_tt
-				any_country = {
-					filter = {
-						OR = {
-							any_primary_culture = {
-								has_discrimination_trait = heritage_han
-							}
-							country_has_primary_culture = cu:yi
-							country_has_primary_culture = cu:manchu
-						}
-						OR = {
-							is_in_geographic_region = geographic_region_china
-							is_in_geographic_region = geographic_region_manchuria_old
-							is_in_geographic_region = geographic_region_central_asia
-							is_in_geographic_region = geographic_region_himalayas
-						}
-					}
-					OR = {
-						THIS = ROOT
-						is_subject_of = ROOT
-					}
-					percent = 1
-				}
-			}
-		}
-		trigger_else = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			is_at_war = no
 			trigger_if = {
 				limit = {
-					global_var:chinese_central_government ?= {
-						is_country_alive = yes
+					global_var:chinese_central_government ?= this
+				}
+				custom_tooltip = {
+					text = no_independent_chinese_countries_tt
+					any_country = {
+						filter = {
+							OR = {
+								any_primary_culture = {
+									has_discrimination_trait = heritage_han
+								}
+								country_has_primary_culture = cu:yi
+								country_has_primary_culture = cu:manchu
+							}
+							OR = {
+								is_in_geographic_region = geographic_region_china
+								is_in_geographic_region = geographic_region_manchuria_old
+								is_in_geographic_region = geographic_region_central_asia
+								is_in_geographic_region = geographic_region_himalayas
+							}
+						}
+						OR = {
+							THIS = ROOT
+							is_subject_of_and_not_being_freed = ROOT
+						}
+						percent = 1
+					}
+				}
+			}
+			trigger_else = {
+				trigger_if = {
+					limit = {
+						global_var:chinese_central_government ?= {
+							is_country_alive = yes
+						}
+					}
+					custom_tooltip = {
+						text = central_government_defeated_tt
+						OR = {
+							NOT = {
+								exists = global_var:chinese_central_government
+							}
+							global_var:chinese_central_government ?= {
+								is_country_alive = no
+							}
+						}
 					}
 				}
 				custom_tooltip = {
-					text = central_government_defeated_tt
-					OR = {
-						NOT = {
-							exists = global_var:chinese_central_government
-						}
-						global_var:chinese_central_government ?= {
-							is_country_alive = no
-						}
-					}
-				}
-			}
-			custom_tooltip = {
-				text = no_independent_chinese_countries_tt
-				any_country = {
-					filter = {
-						OR = {
-							any_primary_culture = {
-								has_discrimination_trait = heritage_han
+					text = no_independent_chinese_countries_tt
+					any_country = {
+						filter = {
+							OR = {
+								any_primary_culture = {
+									has_discrimination_trait = heritage_han
+								}
+								country_has_primary_culture = cu:yi
+								country_has_primary_culture = cu:manchu
 							}
-							country_has_primary_culture = cu:yi
-							country_has_primary_culture = cu:manchu
+							OR = {
+								is_in_geographic_region = geographic_region_china
+								is_in_geographic_region = geographic_region_manchuria_old
+								is_in_geographic_region = geographic_region_central_asia
+								is_in_geographic_region = geographic_region_himalayas
+							}
 						}
 						OR = {
-							is_in_geographic_region = geographic_region_china
-							is_in_geographic_region = geographic_region_manchuria_old
-							is_in_geographic_region = geographic_region_central_asia
-							is_in_geographic_region = geographic_region_himalayas
+							THIS = ROOT
+							is_subject_of_and_not_being_freed = ROOT
 						}
+						percent = 1
 					}
-					OR = {
-						THIS = ROOT
-						is_subject_of = ROOT
-					}
-					percent = 1
 				}
 			}
-		}
-		OR = {
-			owns_entire_state_region = STATE_NANJING
-			owns_entire_state_region = STATE_BEIJING
-		}
-		trigger_if = {
-			limit = {
-				NOT = { c:TPG ?= this }
+			OR = {
+				owns_entire_state_region_uncontested = STATE_NANJING
+				owns_entire_state_region_uncontested = STATE_BEIJING
 			}
-			custom_tooltip = {
-				text = has_formed_china_tt
-				c:CHI ?= this
+			trigger_if = {
+				limit = {
+					NOT = { c:TPG ?= this }
+				}
+				custom_tooltip = {
+					text = has_formed_china_tt
+					c:CHI ?= this
+				}
+			}
+			NOT = {
+				has_law_or_variant = law_type:law_peasant_levies
 			}
 		}
-		NOT = {
-			has_law_or_variant = law_type:law_peasant_levies
+		effect = {
+			remove_global_variable = chinese_central_government
+			trigger_event = { id = warlord_china_events.101 popup = yes }
 		}
-	}
-
-	on_complete = {
-		remove_global_variable = chinese_central_government
-		trigger_event = { id = warlord_china_events.101 popup = yes }
 	}
 
 	weight = 1000

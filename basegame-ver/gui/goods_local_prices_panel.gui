@@ -50,7 +50,7 @@ types goods_local_prices_panel_types
 					tooltip = "[concept_world_market]"
 				} 
 				blockoverride "first_button_click" {
-					onclick = "[InformationPanelBar.OpenGoodsWorldMarketPanel( GoodsLocalPricesPanel.GetGoods.Self )]"
+					onclick = "[InformationPanelBar.SwitchToGoodsWorldMarketPanel( GoodsLocalPricesPanel.GetGoods.Self )]"
 				}
 				blockoverride "first_button_visibility_checked" {
 					visible = "[Not(GoodsLocalPricesPanel.GetGoods.IsLocal)]"
@@ -64,7 +64,7 @@ types goods_local_prices_panel_types
 					tooltip = "[GoodsLocalPricesPanel.GetGoods.GetMarket.GetNameNoFormatting]"
 				}
 				blockoverride "second_button_click" {
-					onclick = "[InformationPanelBar.OpenGoodsPanel(GoodsLocalPricesPanel.GetGoods.GetMarket, GoodsLocalPricesPanel.GetGoods.Self)]"
+					onclick = "[InformationPanelBar.SwitchToGoodsPanel(GoodsLocalPricesPanel.GetGoods.GetMarket, GoodsLocalPricesPanel.GetGoods.Self)]"
 				}
 				blockoverride "second_button_visibility_checked" {
 					visible = "[And(GoodsLocalPricesPanel.GetGoods.HasMarketContext,Not(GoodsLocalPricesPanel.GetGoods.IsLocal))]"
@@ -81,7 +81,7 @@ types goods_local_prices_panel_types
 					visible = "[GoodsLocalPricesPanel.GetGoods.HasStateContext]"
 				}
 				blockoverride "third_button_click" {
-					onclick = "[InformationPanelBar.OpenGoodsStatePanel(GoodsLocalPricesPanel.GetGoods.GetState, GoodsLocalPricesPanel.GetGoods.Self)]"
+					onclick = "[InformationPanelBar.SwitchToGoodsStatePanel(GoodsLocalPricesPanel.GetGoods.GetState, GoodsLocalPricesPanel.GetGoods.Self)]"
 				}				
 				
 				# states in market
@@ -103,7 +103,7 @@ types goods_local_prices_panel_types
 					tooltip = "USAGE"
 				}
 				blockoverride "fifth_button_click" {
-					onclick = "[InformationPanelBar.OpenGoodsUsagePanel(GoodsLocalPricesPanel.GetGoods.Self)]"
+					onclick = "[InformationPanelBar.SwitchToGoodsUsagePanel(GoodsLocalPricesPanel.GetGoods.Self)]"
 				}
 				blockoverride "fifth_button_visibility_checked" {
 					visible = yes
@@ -124,15 +124,33 @@ types goods_local_prices_panel_types
 					datacontext = "[GoodsLocalPricesPanel.AccessGoods]"
 
 					textbox = {
-						using = market_price_tooltip_with_graph
-						raw_text = "[concept_market_price]: @money![Goods.GetMarketPrice|1v] [Goods.GetCompareIconAgainstBasePriceNoFormatting( Goods.GetMarketPrice )]"
-						align = right|nobaseline
-						autoresize = yes
-						using = fontsize_xxl
+						visible = "[Not(Goods.IsLocal)]"
 						parentanchor = hcenter
+						autoresize = yes
+						align = right|nobaseline
 						margin_top = 20
 						margin_bottom = 20
-						visible = "[Not(Goods.IsLocal)]"
+						using = market_price_tooltip_with_graph
+						using = fontsize_xxl
+						raw_text = "[concept_market_price]: @money![Goods.GetMarketPrice|1v] [Goods.GetCompareIconAgainstBasePriceNoFormatting( Goods.GetMarketPrice )]"
+					}
+
+					goods_prestige_goods_distribution = {
+						blockoverride "prestige_goods_distribution_datacontext" {
+							datacontext = "[GoodsLocalPricesPanel.GetGoods.GetBaseGoods]"
+						}
+
+						blockoverride "prestige_goods_not_selected_visibility" {
+							visible = "[Not(Goods.IsSameGoodsAs(GoodsLocalPricesPanel.GetGoods.Self))]"
+						}
+
+						blockoverride "prestige_goods_selected_visibility" {
+							visible = "[Goods.IsSameGoodsAs(GoodsLocalPricesPanel.GetGoods.Self)]"
+						}
+
+						blockoverride "prestige_goods_onclick" {
+							onclick = "[InformationPanelBar.SwitchToGoodsLocalPricesPanel(Goods.Self)]"
+						}
 					}
 
 					flowcontainer = {
@@ -206,12 +224,12 @@ types goods_local_prices_panel_types
 						}
 
 						sort_button = {
-							align = hcenter|nobaseline
-							text = "concept_building_levels_short"
-							tooltip = "[concept_building_level]"
 							size = { 70 20 }
-
+							align = hcenter|nobaseline
+							enabled = "[Not(Goods.IsPrestigeGoods)]"
 							onclick = "[GoodsLocalPricesPanel.Sort('levels')]"
+							tooltip = "[concept_building_level]"
+							text = "concept_building_levels_short"
 						}
 					}
 
@@ -485,10 +503,11 @@ types goods_local_prices_panel_types
 										vertical_divider = {}
 
 										flowcontainer = {
-											datamodel = "[Goods.AccessBuildingsProducingThis]"
+											visible = "[Not(Goods.IsPrestigeGoods)]"
 											direction = vertical
 											maximumsize = { 70 48 }
 											scissor = yes
+											datamodel = "[Goods.AccessBuildingsProducingThis]"
 											
 											item = {
 												widget = {

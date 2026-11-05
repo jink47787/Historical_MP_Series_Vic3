@@ -25,6 +25,7 @@ autocracy.1 = {
 	immediate = {
 		ruler = {
 			save_scope_as = monarch_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		random_primary_culture = {
 			save_scope_as = primary_culture_scope
@@ -53,6 +54,15 @@ autocracy.1 = {
 
 	option = { # increase assimilation and gain same culture loyalists
 		name = autocracy.1.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		add_loyalists = {
 			culture = scope:primary_culture_scope
 			value = 0.05
@@ -65,6 +75,15 @@ autocracy.1 = {
 
 	option = { # increase conversion
 		name = autocracy.1.c
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		add_loyalists = {
 			pop_type = clergymen
 			religion = root.religion
@@ -74,6 +93,11 @@ autocracy.1 = {
 			name = religious_orthodocy_enforced_mod
 			days = very_long_modifier_time
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:monarch_scope }
+		je_autocracy_cleanup = yes
 	}
 }
 
@@ -99,6 +123,8 @@ autocracy.2 = {
 	cooldown = { days = very_long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_autocracy [on_yearly_pulse]
+		# triggered by on_action - on_yearly_events
 		NOT = {
 			has_variable = secret_societies_timer
 		}
@@ -163,6 +189,21 @@ autocracy.2 = {
 	option = { # tolerate them
 		name = autocracy.2.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					has_journal_entry = je_tp_tsar_crown_of_perfection
+				}
+				add = 100
+			}
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:secret_society_ig = {
 			add_modifier = {
 				name = tolerated_secret_societies
@@ -173,6 +214,15 @@ autocracy.2 = {
 
 	option = { # crack down on secret societies
 		name = autocracy.2.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		scope:secret_society_ig = {
 			add_modifier = {
 				name = suppressed_secret_societies
@@ -210,6 +260,8 @@ autocracy.3 = {
 	cooldown = { days = very_long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_autocracy [on_yearly_pulse]
+		# triggered by on_action - on_yearly_events
 		NOT = { has_variable = religious_serfs_timer }
 		ig:ig_devout ?= {
 			is_powerful = yes
@@ -316,13 +368,31 @@ autocracy.4 = {
 	immediate = {
 		ruler = {
 			save_scope_as = ruler_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 	}
 
 	option = {
 		name = autocracy.4.a
 		default_option = yes
-		custom_tooltip = je_king_in_parliament_complete_tt
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
+		if = {
+			limit = {
+				country_has_primary_culture = cu:russian
+			}
+			custom_tooltip = je_king_in_parliament_complete_rus_tt
+		}
+		else = {
+			custom_tooltip = je_king_in_parliament_complete_tt
+		}
 		add_loyalists = {
 			value = small_radicals
 		}
@@ -341,7 +411,15 @@ autocracy.4 = {
 				is_character_alive = yes
 			}
 		}
-		custom_tooltip = je_king_in_parliament_complete_tt
+		if = {
+			limit = {
+				country_has_primary_culture = cu:russian
+			}
+			custom_tooltip = je_king_in_parliament_complete_rus_tt
+		}
+		else = {
+			custom_tooltip = je_king_in_parliament_complete_tt
+		}
 		scope:ruler_scope = {
 			add_modifier = {
 				name = modifier_constitutional_monarch
@@ -358,5 +436,9 @@ autocracy.4 = {
 			}
 		}
 	}
-}
 
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:ruler_scope }
+		je_king_in_parliament_cleanup = yes
+	}
+}

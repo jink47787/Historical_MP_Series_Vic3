@@ -68,7 +68,7 @@ joint_front = {
 
 imperial_circle = {
 	trigger = {
-		coa_monarchy_trigger = yes
+		scope:selected_identity = identity:identity_sovereign_empire
 	}
 }
 
@@ -123,17 +123,15 @@ iran-e_bozorg = {
 
 golden_circle = {
 	trigger = {
-		scope:selected_identity = identity:identity_sovereign_empire
+		NOT = {
+			has_law_or_variant = law_type:law_slavery_banned
+		}
 		OR = {
 			c:CSA ?= this
 			AND = {
 				c:USA ?= this
 				NOT = {
-					has_law_or_variant = law_type:law_slavery_banned
-				}
-				NOR = {
 					has_journal_entry = je_acw_countdown
-					has_journal_entry = je_acw_war
 				}
 			}
 		}
@@ -247,7 +245,7 @@ dar_al_islam = {
 
 league_of_reason = {
 	trigger = {
-        scope:selected_identity = identity:identity_religious
+        scope:selected_identity = identity:identity_ideological_union
         country_has_state_religion = rel:atheist
 	}
 }
@@ -464,9 +462,9 @@ pact_of_calcutta = {
 	trigger = {
 	    scope:selected_identity = identity:identity_ideological_union
 	    OR = {
-	    	any_scope_state = { state_region = s:STATE_EAST_BENGAL }
+	    	any_scope_state = { state_region = s:STATE_WEST_BENGAL }
 	    	any_scope_ally = {
-	    		any_scope_state = { state_region = s:STATE_EAST_BENGAL }
+	    		any_scope_state = { state_region = s:STATE_WEST_BENGAL }
 	    	}
 	    }
 	}
@@ -510,7 +508,7 @@ central_powers = {
 	    	c:ITA ?= this
 	    }
 	    any_scope_ally = {
-	    	count >= 2
+	    	count >= 1
 	    	OR = {
 	    		c:TUR ?= this
 	    		c:AUS ?= this
@@ -529,7 +527,7 @@ entente = {
 		    c:PRC ?= this
 		}
 	    any_scope_ally = {
-	    	count >= 2
+	    	count >= 1
 	    	OR = {
 		    	c:GBR ?= this
 		    	c:RUS ?= this
@@ -650,7 +648,7 @@ ouchy_convention = {
 			c:NET ?= this
 			c:BEL ?= this
 			c:LUX ?= this
-			c:WAL ?= this
+			c:WLL ?= this
 			c:FLA ?= this
 		}
 	}
@@ -731,7 +729,7 @@ wall_street_pact = {
 new_orleans_league = {
 	trigger = {
 		scope:selected_identity = identity:identity_trade_league
-		c:USA != this
+		NOT = { c:USA ?= this }
 	    OR = {
 	    	any_scope_state = { state_region = s:STATE_LOUISIANA }
 	    	c:LOU ?= this
@@ -951,7 +949,13 @@ co_prosperity_sphere = {
 			scope:selected_identity = identity:identity_military_treaty_organization
 			scope:selected_identity = identity:identity_ideological_union
 		}
-		coa_fascist_trigger = yes
+		OR = {
+			coa_fascist_trigger = yes
+			AND = {
+				coa_monarchy_trigger = yes
+				country_has_voting_franchise = no
+			}
+		}
 		c:JAP ?= this
 	}
 }
@@ -965,7 +969,7 @@ continental_system = {
 		}
 		c:FRA ?= this
 		OR = {
-			ruler = {
+			ruler ?= {
 				has_ideology = ideology:ideology_bonapartist
 			}
 			has_variable = bonapartist_restoration_var
@@ -973,6 +977,37 @@ continental_system = {
 		any_rival_country = {
 			c:GBR ?= this
 		}
+	}
+}
+
+ZOLLVEREIN = {
+	trigger = {
+		scope:selected_identity = identity:identity_trade_league
+		OR = {
+			c:PRU ?= this
+			c:GER ?= this
+		}
+	}
+}
+
+BRITISH_EMPIRE = {
+	trigger = {
+		scope:selected_identity = identity:identity_sovereign_empire
+		c:GBR ?= this
+	}
+}
+
+ROSSIYSKAYA_IMPERIYA = {
+	trigger = {
+		scope:selected_identity = identity:identity_sovereign_empire
+		c:RUS ?= this
+	}
+}
+
+DEVLET_I__ALIYE = {
+	trigger = {
+		scope:selected_identity = identity:identity_sovereign_empire
+		c:TUR ?= this
 	}
 }
 
@@ -1041,7 +1076,6 @@ columbian_pact = {
 				region = sr:region_pacific_coast
 				region = sr:region_great_plains
 				region = sr:region_atlantic_coast
-				region = sr:region_atlantic_coast
 
 				region = sr:region_gran_colombia
 			}
@@ -1062,7 +1096,10 @@ rhenish_pact = {
 league_of_the_danube = {
 	trigger = {
 	    any_scope_state = {
-			is_in_geographic_region = geographic_region_danubia_old
+			OR = {
+				is_in_geographic_region = geographic_region_danubia_old
+				state_region = s:STATE_AUSTRIA
+			}
 			is_capital = yes
 	    }
 	}
@@ -1115,6 +1152,15 @@ loire_pact = {
 		    	state_region = s:STATE_ORLEANS
 		    	state_region = s:STATE_POITOU
 		    }
+	    	is_incorporated = yes
+	    }
+	}
+}
+
+rhone_league = {
+	trigger = {
+	    any_scope_state = {
+	    	state_region = s:STATE_RHONE
 	    	is_incorporated = yes
 	    }
 	}
@@ -1287,7 +1333,7 @@ moscow_alliance = {
 	trigger = {
 	    any_scope_state = {
 	    	state_region = s:STATE_MOSCOW
-	    	is_capital = yes
+	    	is_incorporated = yes
 	    }
 	}
 }
@@ -1296,7 +1342,7 @@ kremlin_pact = {
 	trigger = {
 	    any_scope_state = {
 	    	state_region = s:STATE_MOSCOW
-	    	is_capital = yes
+	    	is_incorporated = yes
 	    }
 	}
 }
@@ -1732,21 +1778,36 @@ cross_channel_alliance = {
 league_of_orleans = {
 	trigger = {
 		c:FRA ?= this
-		has_variable = orleanist_restoration_var
+		OR = {
+			ruler ?= {
+				has_ideology = ideology:ideology_orleanist
+			}
+			has_variable = orleanist_restoration_var
+		}
 	}
 }
 
 bourbon_pact = {
 	trigger = {
 		c:FRA ?= this
-		has_variable = legitimist_restoration_var
+		OR = {
+			ruler ?= {
+				has_ideology = ideology:ideology_legitimist
+			}
+			has_variable = legitimist_restoration_var
+		}
 	}
 }
 
 bonaparte_alliance = {
 	trigger = {
 		c:FRA ?= this
-		has_variable = bonapartist_restoration_var
+		OR = {
+			ruler ?= {
+				has_ideology = ideology:ideology_bonapartist
+			}
+			has_variable = bonapartist_restoration_var
+		}
 	}
 }
 

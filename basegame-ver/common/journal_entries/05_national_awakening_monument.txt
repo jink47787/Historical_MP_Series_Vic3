@@ -5,6 +5,12 @@ je_kaiserforum = {
     icon = "gfx/interface/icons/event_icons/event_portrait.dds"
 
 	group = je_group_technology
+	dlc = dlc014
+
+	activation_description = {
+		always = yes
+	}
+
     scripted_button = je_kaiserforum_kaisergelb_button
 
     is_shown_when_inactive = {
@@ -122,128 +128,138 @@ je_kaiserforum = {
         }
     }
 
-    complete = {
-        trigger_if = {
-            limit = {
-                NOT = {
-                    has_variable = accepted_kaisergelb_kaiserforum
-                }
-            }
-            custom_tooltip = {
-                text = kaiserforum_complete_tt
-                any_scope_state = {
-                    state_region = s:STATE_AUSTRIA
-                    has_building = building_kaiserforum_3
-                }
-            }
-        }
-        trigger_if = { # Imperial Yellow Kaiserforum
-            limit = {
-                has_variable = accepted_kaisergelb_kaiserforum
-            }
-            custom_tooltip = {
-                text = kaisergelb_kaiserforum_complete_tt
-                any_scope_state = {
-                    state_region = s:STATE_AUSTRIA
-                    has_building = building_kaiserforum_4
-                }
-            }
-        }
-        trigger_if = {
-            limit = {
-                AND = {
-                    has_game_rule = allow_monument_effects
+    outcome = {
+        header = je_standard_completion_header
+        effect_header = je_standard_on_completion_header
+        color = "gold_positive"
+        conclusion_desc = je_standard_completion_conclusion_desc
+        trigger = {
+            trigger_if = {
+                limit = {
                     NOT = {
                         has_variable = accepted_kaisergelb_kaiserforum
                     }
                 }
-            }
-            custom_tooltip = {
-                text = kaiserforum_populated_tt
-                any_scope_state = {
-                    state_region = s:STATE_AUSTRIA
-                    any_scope_building = {
-                        is_building_type = building_kaiserforum_3
-                        occupancy >= 0.5
+                custom_tooltip = {
+                    text = kaiserforum_complete_tt
+                    any_scope_state = {
+                        state_region = s:STATE_AUSTRIA
+                        has_building = building_kaiserforum_3
                     }
                 }
             }
-        }
-        trigger_if = {
-            limit = {
-                AND = {
-                    has_game_rule = allow_monument_effects
+            trigger_if = { # Imperial Yellow Kaiserforum
+                limit = {
                     has_variable = accepted_kaisergelb_kaiserforum
                 }
+                custom_tooltip = {
+                    text = kaisergelb_kaiserforum_complete_tt
+                    any_scope_state = {
+                        state_region = s:STATE_AUSTRIA
+                        has_building = building_kaiserforum_4
+                    }
+                }
             }
-            custom_tooltip = {
-                text = kaisergelb_kaiserforum_populated_tt
-                any_scope_state = {
-                    state_region = s:STATE_AUSTRIA
-                    any_scope_building = {
-                        is_building_type = building_kaiserforum_4
-                        occupancy >= 0.5
+            trigger_if = {
+                limit = {
+                    AND = {
+                        has_game_rule = allow_monument_effects
+                        NOT = {
+                            has_variable = accepted_kaisergelb_kaiserforum
+                        }
+                    }
+                }
+                custom_tooltip = {
+                    text = kaiserforum_populated_tt
+                    any_scope_state = {
+                        state_region = s:STATE_AUSTRIA
+                        any_scope_building = {
+                            is_building_type = building_kaiserforum_3
+                            occupancy >= 0.5
+                        }
+                    }
+                }
+            }
+            trigger_if = {
+                limit = {
+                    AND = {
+                        has_game_rule = allow_monument_effects
+                        has_variable = accepted_kaisergelb_kaiserforum
+                    }
+                }
+                custom_tooltip = {
+                    text = kaisergelb_kaiserforum_populated_tt
+                    any_scope_state = {
+                        state_region = s:STATE_AUSTRIA
+                        any_scope_building = {
+                            is_building_type = building_kaiserforum_4
+                            occupancy >= 0.5
+                        }
                     }
                 }
             }
         }
-    }
-
-    on_complete = {
-        trigger_event = { id = kaiserforum.5 popup = yes }
-    }
-
-    event_outcome_completed_effect_desc = {
-        header = kaiserforum.5.a
         effect = {
-            random_scope_state = {
-                limit = {
-                    state_region = s:STATE_AUSTRIA
+            trigger_event = { id = kaiserforum.5 popup = yes }
+        }
+        event_outcome_effect_desc = {
+            header = kaiserforum.5.a
+            effect = {
+                random_scope_state = {
+                    limit = {
+                        state_region = s:STATE_AUSTRIA
+                    }
+                    add_modifier = {
+                        name = kaiserforum_loc_efforts
+                        days = moderately_long_modifier_time
+                    }
                 }
+            }
+        }
+        event_outcome_effect_desc = {
+            header = kaiserforum.5.b
+            effect = {
                 add_modifier = {
-                    name = kaiserforum_loc_efforts
+                    name = kaiserforum_int_acclaim
                     days = moderately_long_modifier_time
                 }
             }
         }
     }
 
-    event_outcome_completed_effect_desc = {
-        header = kaiserforum.5.b
-        effect = {
-            add_modifier = {
-                name = kaiserforum_int_acclaim
-                days = moderately_long_modifier_time
-            }
-        }
-    }
-
-    invalid = {
-        OR = {
-            has_variable = rejected_kaiserforum_project
-            AND = {
-                NOT = {
-                    s:STATE_AUSTRIA = {
-                        any_scope_state = {
-                            owner = root
+    outcome = {
+        flags = { hidden invalid_outcome }
+        conclusion_desc = je_standard_failure_conclusion_desc
+        trigger = {
+            OR = {
+                has_variable = rejected_kaiserforum_project
+                AND = {
+                    NOT = {
+                        s:STATE_AUSTRIA = {
+                            any_scope_state = {
+                                owner = root
+                            }
                         }
                     }
-                }
-                NOT = {
-                    s:STATE_AUSTRIA = {
-                        any_scope_state = {
-                            owner = {
-                               is_diplomatic_play_enemy_of = root
+                    NOT = {
+                        s:STATE_AUSTRIA = {
+                            any_scope_state = {
+                                owner = {
+                                   is_diplomatic_play_enemy_of = root
+                                }
                             }
                         }
                     }
                 }
             }
         }
+        effect = {
+            je_kaiserforum_cleanup = yes
+        }
     }
 
     weight = 1000
 
-    	
+
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }

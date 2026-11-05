@@ -3,6 +3,10 @@
 
 	group = je_group_technology
 
+	activation_description = {
+		always = yes
+	}
+
 	on_monthly_pulse = {
 		effect = {
 			change_variable = {
@@ -12,25 +16,13 @@
 		}
 	}
 
-	complete = {
-		scope:journal_entry = { is_goal_complete = yes }
-		any_scope_state = {
-			is_split_state = no
-			is_incorporated = yes
-			any_scope_building = {
-				is_building_type = building_urban_center
-				level >= 20
-			}
-		}
-	}
-
-	on_complete = {
-		remove_modifier = skyscraper_survey
-		trigger_event = { id = skyscraper.1 } # site found
-	}
-
-	invalid = {
-		NOT = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = { is_goal_complete = yes }
 			any_scope_state = {
 				is_split_state = no
 				is_incorporated = yes
@@ -40,11 +32,32 @@
 				}
 			}
 		}
+		effect = {
+			remove_modifier = skyscraper_survey
+			trigger_event = { id = skyscraper.1 } # site found
+		}
 	}
 
-	on_invalid = {
-		remove_modifier = skyscraper_survey
-		remove_variable = skyscraper_var
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_scope_state = {
+					is_split_state = no
+					is_incorporated = yes
+					any_scope_building = {
+						is_building_type = building_urban_center
+						level >= 20
+					}
+				}
+			}
+		}
+		effect = {
+			remove_modifier = skyscraper_survey
+			remove_variable = skyscraper_var
+			je_skyscraper_site_cleanup = yes
+		}
 	}
 
 	current_value = {
@@ -67,32 +80,47 @@ je_skyscraper_construction = {
 
 	group = je_group_technology
 
-	complete = {
-		scope:target = {
-			any_scope_building = {
-				is_building_type = building_skyscraper
-				is_under_construction = no
+	activation_description = {
+		always = yes
+	}
+
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:target = {
+				any_scope_building = {
+					is_building_type = building_skyscraper
+					is_under_construction = no
+				}
+			}
+		}
+		effect = {
+			trigger_event = { id = skyscraper.2 }
+			remove_variable = skyscraper_var
+			scope:target = {
+				remove_modifier = skyscraper_site
 			}
 		}
 	}
 
-	fail = {
-		NOT = {
-			any_scope_state = {
-				has_modifier = skyscraper_site
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_scope_state = {
+					has_modifier = skyscraper_site
+				}
 			}
 		}
-	}
-
-	on_fail = {
-		remove_variable = skyscraper_var
-	}
-
-	on_complete = {
-		trigger_event = { id = skyscraper.2 }
-		remove_variable = skyscraper_var
-		scope:target = {
-			remove_modifier = skyscraper_site
+		effect = {
+			remove_variable = skyscraper_var
+			je_skyscraper_construction_cleanup = yes
 		}
 	}
 		

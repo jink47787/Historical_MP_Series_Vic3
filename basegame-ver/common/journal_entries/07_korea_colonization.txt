@@ -3,6 +3,11 @@
 	icon = "gfx/interface/icons/event_icons/event_map.dds"
 
 	group = je_group_historical_content
+	dlc = dlc018
+
+	activation_description = {
+		always = yes
+	}
 
 	modifiers_while_active = {
 
@@ -23,11 +28,11 @@
 		}
 		NOT = { has_law = law_type:law_no_colonial_affairs }
 		AND = {
-			owns_entire_state_region = STATE_SEOUL
-			owns_entire_state_region = STATE_BUSAN
-			owns_entire_state_region = STATE_YANGHO
-			owns_entire_state_region = STATE_SARIWON
-			owns_entire_state_region = STATE_PYONGYANG
+			owns_entire_state_region_uncontested = STATE_SEOUL
+			owns_entire_state_region_uncontested = STATE_BUSAN
+			owns_entire_state_region_uncontested = STATE_YANGHO
+			owns_entire_state_region_uncontested = STATE_SARIWON
+			owns_entire_state_region_uncontested = STATE_PYONGYANG
 		}
 	}
 
@@ -74,17 +79,6 @@
 		effect = {
 			clear_variable_list = colonize_korea_states_states
 			every_state_in_korea = {
-				limit = {
-					NAND = {
-						c:JAP ?= owner
-						is_incorporated = yes
-						turmoil < je_colonize_korea_state_turmoil_max
-						culture_percent_state = {
-							target = cu:japanese
-							value >= je_colonize_korea_state_japanese_culture_min # set in event_values
-						}
-					}
-				}
 				root = {
 					add_to_variable_list = {
 						name = colonize_korea_states_states
@@ -96,181 +90,192 @@
 	}
 
 	# Japan owns Korea directly
-	complete = {
-		institution_investment_level = {
-			institution = institution_colonial_affairs
-			value >= 3
-		}
-		bureaucracy >= 0
-		approaching_bureaucracy_shortage = no
-		OR = {
-			any_company = {
-				OR = {
-					is_company_type = company_type:company_mantetsu
-					is_company_type = company_type:company_oriental_development_company
-				}
-				company_prosperity >= 75
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			institution_investment_level = {
+				institution = institution_colonial_affairs
+				value >= 3
 			}
-			AND = { # second option to account for je_zaibatsu
+			bureaucracy >= 0
+			approaching_bureaucracy_shortage = no
+			OR = {
 				any_company = {
-	                company_is_prosperous = yes
-	                count >= 2
-	            }
-				any_scope_state = {
-					is_in_geographic_region = geographic_region_korea
-					count >= 3
-	                OR = {
-	                    state_has_building_group_levels = {
-	                        type = bg_plantations
-	                        value >= 35
-	                    }
-	                    state_has_building_group_levels = {
-	                        type = bg_mining
-	                        value >= 35
-	                    }
-	                    state_has_building_type_levels = {
-	                        target = bt:building_railway
-	                        value >= 10
-	                    }
-	                }
-				}
-			}
-		}
-		any_state_in_korea = {
-			count = all
-			custom_tooltip = {
-                text = "JE_COLONIZE_KOREA_STATES_TT"
-				c:JAP ?= owner
-				is_incorporated = yes
-				turmoil < je_colonize_korea_state_turmoil_max
-				culture_percent_state = {
-					target = cu:japanese
-					value >= je_colonize_korea_state_japanese_culture_min # set in event_values
-				}
-			}
-		}
-	}
-
-	on_complete = {
-		clear_variable_list = colonize_korea_states_states
-		trigger_event = {
-			id = korea_colonization.2
-			days = 1
-		}
-	}
-
-	event_outcome_completed_effect_desc = {
-		header = korea_colonization.2.a
-        effect = {
-	    	add_modifier = {
-				name = modifier_peninsula_control_prestige_authority
-				days = moderately_long_modifier_time
-				is_decaying = yes
-			}
-			every_scope_state = {
-				limit = {
 					OR = {
-						state_region = s:STATE_SEOUL
-						state_region = s:STATE_BUSAN
-						state_region = s:STATE_YANGHO
-						state_region = s:STATE_SARIWON
-						state_region = s:STATE_PYONGYANG
+						is_company_type = company_type:company_mantetsu
+						is_company_type = company_type:company_oriental_development_company
+					}
+					company_prosperity >= 75
+				}
+				AND = { # second option to account for je_zaibatsu
+					any_company = {
+		                company_is_prosperous = yes
+		                count >= 2
+		            }
+					any_scope_state = {
+						is_in_geographic_region = geographic_region_korea
+						count >= 3
+		                OR = {
+		                    state_has_building_group_levels = {
+		                        type = bg_plantations
+		                        value >= 35
+		                    }
+		                    state_has_building_group_levels = {
+		                        type = bg_mining
+		                        value >= 35
+		                    }
+		                    state_has_building_type_levels = {
+		                        target = bt:building_railway
+		                        value >= 10
+		                    }
+		                }
 					}
 				}
-				add_modifier = {
-					name = modifier_peninsula_control_assimilation_migration
+			}
+			any_state_in_korea = { # if any changes are made here, update je_colonize_korea_states_sgui
+				count = all
+				custom_tooltip = {
+	                text = "JE_COLONIZE_KOREA_STATES_TT"
+					c:JAP ?= owner
+					is_incorporated = yes
+					turmoil < je_colonize_korea_state_turmoil_max # set in event_values
+					culture_percent_state = {
+						target = cu:japanese
+						value >= je_colonize_korea_state_japanese_culture_min # set in event_values
+					}
+				}
+			}
+		}
+		effect = {
+			clear_variable_list = colonize_korea_states_states
+			trigger_event = {
+				id = korea_colonization.2
+				days = 1
+			}
+		}
+		event_outcome_effect_desc = {
+			header = korea_colonization.2.a
+	        effect = {
+		    	add_modifier = {
+					name = modifier_peninsula_control_prestige_authority
 					days = moderately_long_modifier_time
 					is_decaying = yes
 				}
-			}
-        }
-	}
-
-	event_outcome_completed_effect_desc = {
-		header = korea_colonization.2.b
-		effect = {
-			custom_tooltip = {
-				text = korea_colinzation_2b_executive_tt
-			}
-			custom_tooltip = {
-				text = korea_colinzation_2b_company_tt
+				every_scope_state = {
+					limit = {
+						OR = {
+							state_region = s:STATE_SEOUL
+							state_region = s:STATE_BUSAN
+							state_region = s:STATE_YANGHO
+							state_region = s:STATE_SARIWON
+							state_region = s:STATE_PYONGYANG
+						}
+					}
+					add_modifier = {
+						name = modifier_peninsula_control_assimilation_migration
+						days = moderately_long_modifier_time
+						is_decaying = yes
+					}
+				}
+	        }
+		}
+		event_outcome_effect_desc = {
+			header = korea_colonization.2.b
+			effect = {
+				custom_tooltip = {
+					text = korea_colinzation_2b_executive_tt
+				}
+				custom_tooltip = {
+					text = korea_colinzation_2b_company_tt
+				}
 			}
 		}
 	}
 
 	# Korea broke free from Japan control
-	fail = {
-		custom_tooltip = {
-			text = je_colonize_korea_fail_tt
-			OR = {
-				AND = {
-					NOT = {
-						any_scope_state = {
-							is_in_geographic_region = geographic_region_korea
-							count >= 5
-						}
-					}
-					c:KOR ?= {
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_colonize_korea_fail_tt
+				NOT = { any_state_in_korea = { owner = { has_war_with = root } } }
+				OR = {
+					AND = {
 						NOT = {
-							is_subject_of = root
+							any_scope_state = {
+								is_in_geographic_region = geographic_region_korea
+								count >= 5
+							}
+						}
+						c:KOR ?= {
+							NOT = {
+								is_subject_of_and_not_being_freed = root
+							}
 						}
 					}
-				}
-				AND = {
-					exists = c:KOR
-					c:KOR ?= {
+					AND = {
+						exists = c:KOR
+						c:KOR ?= {
+							NOT = {
+								is_subject_of_and_not_being_freed = root
+							}
+						}
+					}
+					any_state_in_korea = {
+						count = all
 						NOT = {
-							is_subject_of = root
+							owner = ROOT
 						}
-					}
-				}
-				any_state_in_korea = {
-					count = all
-					NOT = {
-						owner = ROOT
 					}
 				}
 			}
 		}
-	}
-
-	on_fail = {
-		clear_variable_list = colonize_korea_states_states
-		trigger_event = {
-			id = korea_colonization.3
-			days = 1
+		effect = {
+			clear_variable_list = colonize_korea_states_states
+			trigger_event = {
+				id = korea_colonization.3
+				days = 1
+			}
 		}
+		event_outcome_effect_desc = {
+	        header = korea_colonization.3.a
+	        effect = {
+				add_modifier = {
+					name = modifier_peninsula_control_prestige_loss
+					days = moderately_long_modifier_time
+					is_decaying = yes
+				}
+	        }
+	    }
+		event_outcome_effect_desc = {
+			header = korea_colinzation_3b_tt
+	        effect = {
+				custom_tooltip = {
+					text = korea_colinzation_3b_ig_leader_tt
+				}
+				custom_tooltip = {
+					text = korea_colinzation_3b_ig_tt
+				}
+	        }
+	    }
 	}
 
-	event_outcome_failed_effect_desc = {
-        header = korea_colonization.3.a
-        effect = {
-			add_modifier = {
-				name = modifier_peninsula_control_prestige_loss
-				days = moderately_long_modifier_time
-				is_decaying = yes
-			}
-        }
-    }
-
-	event_outcome_failed_effect_desc = {
-		header = korea_colinzation_3b_tt
-        effect = {
-			custom_tooltip = {
-				text = korea_colinzation_3b_ig_leader_tt
-			}
-			custom_tooltip = {
-				text = korea_colinzation_3b_ig_tt
-			}
-        }
-    }
-
-    invalid = {
-    	has_law = law_type:law_no_colonial_affairs
-    }
-
-	on_invalid = {
-		clear_variable_list = colonize_korea_states_states
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+	    	has_law = law_type:law_no_colonial_affairs
+		}
+		effect = {
+			clear_variable_list = colonize_korea_states_states
+			je_colonize_korea_cleanup = yes
+		}
 	}
 
 	weight = 1000

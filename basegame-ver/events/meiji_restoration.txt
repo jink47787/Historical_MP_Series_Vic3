@@ -215,6 +215,7 @@ meiji.1 = {
 				type = je_meiji_diplomacy
 			}
 		}
+		je_meiji_restoration_cleanup = yes
 	}
 }
 
@@ -338,6 +339,7 @@ meiji.2 = {
 			custom_tooltip = abolish_edo_system_available_later_tt
 			set_variable = meiji_reforms_complete_var
 		}
+		je_meiji_main_cleanup = yes
 	}
 }
 
@@ -368,6 +370,7 @@ meiji.3 = {
 			save_scope_as = samurai_ig
 			leader = {
 				save_scope_as = samurai_ig_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 		if = { # If the player manages to skip the JE we still need to set the variable or else the Meiji Restoration cant be finished
@@ -407,6 +410,7 @@ meiji.3 = {
 		scope:samurai_ig = {
 			remove_ideology = ideology_bakufu
 		}
+		revoke_temporary_event_immortality = { CHARACTER = scope:samurai_ig_leader }
 		scope:samurai_ig_leader = { # honorable sudoku
 			kill_character = yes
 		}
@@ -420,6 +424,10 @@ meiji.3 = {
 			culture = cu:japanese
 			value = 0.5
 		}
+	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:samurai_ig_leader }
+		je_meiji_army_cleanup = yes
 	}
 }
 
@@ -440,7 +448,11 @@ meiji.4 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	cooldown = { days = normal_modifier_time }
+
 	trigger = {
+		# triggered by journal entry - je_meiji_main [on_monthly_pulse]
+		# triggered by on_action - on_law_checkpoint_advance
 		NOT = {	has_modifier = western_military_consultant }
 		OR = {
 			AND = {
@@ -498,6 +510,7 @@ meiji.4 = {
 					is_busy = no
 				}
 				save_scope_as = military_consultant_general
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -547,6 +560,9 @@ meiji.4 = {
 			}
 		}
 	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:military_consultant_general }
+	}
 }
 
 # Embassy to the West
@@ -569,6 +585,8 @@ meiji.5 = {
 	cooldown = { days = normal_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_meiji_main [on_monthly_pulse]
+		# triggered by on_action - on_law_checkpoint_advance
 		NOT = { has_modifier = japan_society_tech_modifier }
 		OR = {
 			AND = {
@@ -616,6 +634,7 @@ meiji.5 = {
 				}
 				leader = {
 					save_scope_as = japan_embassy_politician
+					set_temporary_event_immortality = { DURATION = 3 }
 				}
 			}
 		}
@@ -690,6 +709,9 @@ meiji.5 = {
 			}
 		}
 	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:japan_embassy_politician }
+	}
 }
 
 # Foreign Investment
@@ -709,7 +731,11 @@ meiji.6 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	cooldown = { days = normal_modifier_time }
+
 	trigger = {
+		# triggered by journal entry - je_meiji_main [on_monthly_pulse]
+		# triggered by on_action - on_law_checkpoint_advance
 		NOT = { has_modifier = japan_production_tech_modifier }
 		OR = {
 			AND = {
@@ -761,6 +787,7 @@ meiji.6 = {
 			ig:ig_industrialists ?= {
 				leader = {
 					save_scope_as = western_investor_ig_leader
+					set_temporary_event_immortality = { DURATION = 3 }
 				}
 			}
 		}
@@ -811,6 +838,9 @@ meiji.6 = {
 			}
 		}
 	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:western_investor_ig_leader }
+	}
 }
 
 # Foreign Railway Engineers
@@ -831,8 +861,10 @@ meiji.7 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	fire_only_once = yes
+
 	trigger = {
-		NOT = { has_variable = foreign_railway_engineers_event }
+		# triggered by journal entry - je_meiji_economy [on_yearly_pulse]
 		can_research = railways
 		NOT = { has_technology_researched = railways }
 		any_country = {
@@ -845,7 +877,6 @@ meiji.7 = {
 	}
 
 	immediate = {
-		set_variable = foreign_railway_engineers_event
 		random_country = {
 			limit = {
 				country_rank = rank_value:great_power
@@ -980,7 +1011,10 @@ meiji.8 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	cooldown = { days = short_modifier_time }
+
 	trigger = {
+		# triggered by journal entry - je_meiji_economy [on_yearly_pulse]
 		has_technology_researched = railways
 		any_scope_state = {
 			has_building = building_barrack
@@ -1054,12 +1088,13 @@ meiji.9 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	fire_only_once = yes
+
 	trigger = {
-		NOT = { has_variable = samurai_sword_privileges_event }
+		# triggered by journal entry - je_meiji_army [on_yearly_pulse]
 	}
 
 	immediate = {
-		set_variable = samurai_sword_privileges_event
 	}
 
 	option = {
@@ -1131,8 +1166,10 @@ meiji.10 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	fire_only_once = yes
+
 	trigger = {
-		NOT = { has_variable = shi_gakko_event }
+		# triggered by journal entry - je_meiji_army [on_yearly_pulse]
 		exists = s:STATE_KYUSHU.region_state:JAP
 		s:STATE_KYUSHU.region_state:JAP = {
 			has_building = building_barrack
@@ -1143,12 +1180,14 @@ meiji.10 = {
 	}
 
 	immediate = {
-		set_variable = shi_gakko_event
 		s:STATE_KYUSHU.region_state:JAP = {
 			save_scope_as = kyushu_state
 		}
 		ig:ig_armed_forces ?= {
-			leader = { save_scope_as = armed_forces_leader }
+			leader = {
+				save_scope_as = armed_forces_leader
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
 	}
 
@@ -1183,6 +1222,9 @@ meiji.10 = {
 			}
 		}
 	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:armed_forces_leader }
+	}
 }
 
 #
@@ -1203,7 +1245,10 @@ meiji.11 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	cooldown = { days = normal_modifier_time }
+
 	trigger = {
+		# triggered by journal entry - je_meiji_diplomacy [on_yearly_pulse]
 		NOT = { has_variable = japan_port_incident }
 		has_law_or_variant = law_type:law_isolationism
 		any_scope_state = {
@@ -1320,12 +1365,13 @@ meiji.12 = {
 
 	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
 
+	fire_only_once = yes
+
 	trigger = {
-		NOT = { has_variable = japan_sakoku_article }
+		# triggered by journal entry - je_meiji_diplomacy [on_yearly_pulse]
 	}
 
 	immediate = {
-		set_variable = japan_sakoku_article
 	}
 
 	option = {
@@ -1426,6 +1472,7 @@ meiji.13 = {
 		}
 		ruler = {
 			save_scope_as = shogun_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		hidden_effect = {
 			set_strategy = ai_strategy_industrial_expansion
@@ -1451,6 +1498,9 @@ meiji.13 = {
 			}
 			create_political_movement = { type = movement_modernizer }
 		}
+	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:shogun_scope }
 	}
 }
 

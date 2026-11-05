@@ -52,7 +52,6 @@
 
 							widget = {
 								size = { 200 48 }
-								visible = "[ThemeWindow.IsDawnOfWonderEnabled]"
 
 								button = {
 									size = { 200 48 }
@@ -71,15 +70,16 @@
 									visible = "[Not(GetVariableSystem.Exists('theme_selector_theme_tab'))]"
 									size = { 200 48 }
 									text = "THEME"
-									onclick = "[GetVariableSystem.Toggle('theme_selector_theme_tab')]"
-									onclick = "[GetVariableSystem.Toggle('theme_selector_settings_tab')]"
+									onclick = "[GetVariableSystem.Set( 'theme_selector_theme_tab', 'true' )]"
+									onclick = "[GetVariableSystem.Clear('theme_selector_settings_tab')]"
+									onclick = "[GetVariableSystem.Clear('theme_selector_seasons_tab')]"
 									using = tab_button_sound
 								}
 							}
 
 							widget = {
 								size = { 200 48 }
-								visible = "[ThemeWindow.IsDawnOfWonderEnabled]"
+								visible = "[HasCosmeticDlcFeature('day_night_cycle')]"
 
 								button = {
 									size = { 200 48 }
@@ -98,16 +98,47 @@
 									visible = "[Not(GetVariableSystem.Exists('theme_selector_settings_tab'))]"
 									size = { 200 48 }
 									text = "DAY_AND_NIGHT_SETTINGS"
-									onclick = "[GetVariableSystem.Toggle('theme_selector_settings_tab')]"
-									onclick = "[GetVariableSystem.Toggle('theme_selector_theme_tab')]"
+									onclick = "[GetVariableSystem.Set( 'theme_selector_settings_tab', 'true' )]"
+									onclick = "[GetVariableSystem.Clear('theme_selector_theme_tab')]"
+									onclick = "[GetVariableSystem.Clear('theme_selector_seasons_tab')]"
+									using = tab_button_sound
+								}
+							}
+
+							widget = {
+								size = { 200 48 }
+								visible = "[HasCosmeticDlcFeature('ip5_seasons')]"
+
+								button = {
+									size = { 200 48 }
+									visible = "[GetVariableSystem.Exists('theme_selector_seasons_tab')]"
+									text = "SEASONS_SETTINGS"
+									default_format = "#low"
+									frame = 4
+									alwaystransparent = yes
+									texture = "gfx/interface/tabs/tab_button_vertical.dds"
+									spriteType = Corneredtiled
+									spriteborder = { 10 10 }
+									framesize = { 202 48 }
+								}
+
+								button_tab_vertical = {
+									visible = "[Not(GetVariableSystem.Exists('theme_selector_seasons_tab'))]"
+									size = { 200 48 }
+									text = "SEASONS_SETTINGS"
+									onclick = "[GetVariableSystem.Set( 'theme_selector_seasons_tab', 'true' )]"
+									onclick = "[GetVariableSystem.Clear('theme_selector_theme_tab')]"
+									onclick = "[GetVariableSystem.Clear('theme_selector_settings_tab')]"
 									using = tab_button_sound
 								}
 							}
 						}
 
 						vbox = {
-							margin = { 20 0 }
-							margin_top = 25
+							margin = { 5 0 }
+							margin_top = 45
+							layoutpolicy_horizontal = expanding
+							layoutpolicy_vertical = expanding
 
 							textbox = {
 								layoutpolicy_horizontal = expanding
@@ -115,15 +146,15 @@
 								align = center|nobaseline
 								elide = right
 								fontsize_min = 14
-								
+
 								text = "RELEVANT_DLC_HEADER"
-								
+
 								background = {
 									using = default_header_bg
 									alpha = 1
 									margin_bottom = 10
 									margin_top = 10
-									
+
 									modify_texture = {
 										texture = "gfx/interface/masks/fade_horizontal_center.dds"
 										blend_mode = alphamultiply
@@ -135,16 +166,31 @@
 								size = { 10 10 }
 							}
 
-							datamodel = "[GetDlcCollection]"
+							scrollbox = {
+								layoutpolicy_horizontal = expanding
+								layoutpolicy_vertical = expanding
 
-							item = {
-								relevant_dlc = {
-									visible = "[Dlc.IsThemeProvider]"
+								blockoverride "scrollbox_margins"
+								{
+									margin_right = 20
+								}
+
+								blockoverride "scrollbox_content"
+								{
+									vbox = {
+										layoutpolicy_horizontal = expanding
+
+										datamodel = "[GetDlcCollection]"
+
+										item = {
+											relevant_dlc = {
+												visible = "[Dlc.IsThemeProvider]"
+											}
+										}
+									}
 								}
 							}
 						}
-
-						expand = {}
 					}
 
 					scrollbox = {
@@ -165,6 +211,10 @@
 
 							settings_tab_content = {
 								visible = "[GetVariableSystem.Exists('theme_selector_settings_tab')]"
+							}
+
+							seasons_tab_content = {
+								visible = "[GetVariableSystem.Exists('theme_selector_seasons_tab')]"
 							}
 						}
 					}
@@ -451,8 +501,189 @@ types theme_selector
 	}
 
 	# Day and Night Cycle settings:
+	type seasons_tab_content = flowcontainer {
+		direction = vertical
+		layoutpolicy_horizontal = expanding
+		spacing = 5
+		margin_top = 5
+
+		flowcontainer = {
+			datacontext = "[ThemeWindow.GetSeasonsEnabled]"
+			text_single = {
+				parentanchor = vcenter
+				name = "setting_title"
+				text = "[PdxSetting.GetTitle]"
+				align = nobaseline
+				min_width = 250
+				max_width = 250
+				tooltip = "[PdxSetting.GetTooltip]"
+				using = tooltip_ws
+				margin = { 20 6 }
+				block "setting_title" {}
+			}
+
+			button_checkbox = {
+				parentanchor = vcenter
+				size = { 24 24 }
+				name = "setting_bool_cb"
+				checked = "[GetIsChecked(PdxSetting.GetSetting)]"
+				onclick = "[ThemeWindow.ToggleSeasonsEnabled]"
+				using = check_button_sound
+				block "setting_bool_cb" {}
+			}
+		}
+
+
+		flowcontainer = {
+			datacontext = "[ThemeWindow.GetSeasonsForced]"
+			text_single = {
+				name = "setting_title"
+				text = "[PdxSetting.GetTitle]"
+				align = nobaseline
+				min_width = 250
+				max_width = 250
+				tooltip = "[PdxSetting.GetTooltip]"
+				using = tooltip_ws
+				margin = { 20 6 }
+				block "setting_title" {}
+			}
+
+			flowcontainer = {
+				direction = vertical
+				spacing = 4
+				margin_top = 6
+
+				forced_season_radio = {
+					blockoverride "radio_unselected" {
+						visible = "[Not(ThemeWindow.IsForcedSeason('(int32)0'))]"
+						onclick = "[ThemeWindow.SetForcedSeason('(int32)0')]"
+					}
+					blockoverride "radio_selected" {
+						visible = "[ThemeWindow.IsForcedSeason('(int32)0')]"
+					}
+					blockoverride "radio_label" {
+						text = "FORCED_SEASON_OFF"
+					}
+				}
+
+				flowcontainer = {
+					spacing = 15
+
+					forced_season_radio = {
+						blockoverride "radio_unselected" {
+							visible = "[Not(ThemeWindow.IsForcedSeason('(int32)1'))]"
+							onclick = "[ThemeWindow.SetForcedSeason('(int32)1')]"
+						}
+						blockoverride "radio_selected" {
+							visible = "[ThemeWindow.IsForcedSeason('(int32)1')]"
+						}
+						blockoverride "radio_label" {
+							text = "FORCED_SEASON_WINTER"
+						}
+					}
+
+					forced_season_radio = {
+						blockoverride "radio_unselected" {
+							visible = "[Not(ThemeWindow.IsForcedSeason('(int32)2'))]"
+							onclick = "[ThemeWindow.SetForcedSeason('(int32)2')]"
+						}
+						blockoverride "radio_selected" {
+							visible = "[ThemeWindow.IsForcedSeason('(int32)2')]"
+						}
+						blockoverride "radio_label" {
+							text = "FORCED_SEASON_SPRING"
+						}
+					}
+				}
+
+				flowcontainer = {
+					spacing = 15
+
+					forced_season_radio = {
+						blockoverride "radio_unselected" {
+							visible = "[Not(ThemeWindow.IsForcedSeason('(int32)3'))]"
+							onclick = "[ThemeWindow.SetForcedSeason('(int32)3')]"
+						}
+						blockoverride "radio_selected" {
+							visible = "[ThemeWindow.IsForcedSeason('(int32)3')]"
+						}
+						blockoverride "radio_label" {
+							text = "FORCED_SEASON_SUMMER"
+						}
+					}
+
+					forced_season_radio = {
+						blockoverride "radio_unselected" {
+							visible = "[Not(ThemeWindow.IsForcedSeason('(int32)4'))]"
+							onclick = "[ThemeWindow.SetForcedSeason('(int32)4')]"
+						}
+						blockoverride "radio_selected" {
+							visible = "[ThemeWindow.IsForcedSeason('(int32)4')]"
+						}
+						blockoverride "radio_label" {
+							text = "FORCED_SEASON_AUTUMN"
+						}
+					}
+				}
+			}
+		}
+
+		flowcontainer = {
+			datacontext = "[ThemeWindow.GetSeasonsSeaIce]"
+			text_single = {
+				parentanchor = vcenter
+				name = "setting_title"
+				text = "[PdxSetting.GetTitle]"
+				align = nobaseline
+				min_width = 250
+				max_width = 250
+				tooltip = "[PdxSetting.GetTooltip]"
+				using = tooltip_ws
+				margin = { 20 6 }
+				block "setting_title" {}
+			}
+
+			button_checkbox = {
+				parentanchor = vcenter
+				size = { 24 24 }
+				name = "setting_bool_cb"
+				checked = "[GetIsChecked(PdxSetting.GetSetting)]"
+				onclick = "[ThemeWindow.ToggleSeasonsSeaIce]"
+				using = check_button_sound
+				block "setting_bool_cb" {}
+			}
+		}
+
+		flowcontainer = {
+			datacontext = "[ThemeWindow.GetSeasonsFoliage]"
+			text_single = {
+				parentanchor = vcenter
+				name = "setting_title"
+				text = "[PdxSetting.GetTitle]"
+				align = nobaseline
+				min_width = 250
+				max_width = 250
+				tooltip = "[PdxSetting.GetTooltip]"
+				using = tooltip_ws
+				margin = { 20 6 }
+				block "setting_title" {}
+			}
+
+			button_checkbox = {
+				parentanchor = vcenter
+				size = { 24 24 }
+				name = "setting_bool_cb"
+				checked = "[GetIsChecked(PdxSetting.GetSetting)]"
+				onclick = "[ThemeWindow.ToggleSeasonsFoliage]"
+				using = check_button_sound
+				block "setting_bool_cb" {}
+			}
+		}
+	}
+
 	type settings_tab_content = flowcontainer {
 		direction = vertical
+		layoutpolicy_horizontal = expanding
 		spacing = 5
 		margin_top = 5
 
@@ -781,6 +1012,31 @@ types theme_selector
                 }
             }
         }
+	}
+
+	type forced_season_radio = flowcontainer {
+		spacing = 10
+
+		button_radio = {
+			parentanchor = vcenter
+			size = { 24 24 }
+			using = check_button_sound
+			block "radio_unselected" {}
+		}
+
+		button_radio = {
+			parentanchor = vcenter
+			size = { 24 24 }
+			frame = 2
+			block "radio_selected" {}
+		}
+
+		text_single = {
+			parentanchor = vcenter
+			align = nobaseline
+			min_width = 80
+			block "radio_label" {}
+		}
 	}
 
 	type relevant_dlc = widget {

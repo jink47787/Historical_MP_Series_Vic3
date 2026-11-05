@@ -20,6 +20,7 @@ caudillo.1 = {
 	duration = 3
 
 	trigger = {
+		# triggered by on_action - on_monthly_pulse_country
 		# triggered by generic monthly pulse
 		ig:ig_armed_forces ?= {
 			has_ideology = ideology:ideology_caudillismo
@@ -31,7 +32,7 @@ caudillo.1 = {
 		NOT = { has_journal_entry = je_caudillo }
 	}
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	immediate = {
 		capital = {
@@ -125,6 +126,9 @@ caudillo.2 = {
 		}
 		remove_modifier = age_of_caudillos_modifier
 	}
+	after = {
+		je_caudillo_cleanup = yes
+	}
 }
 
 # The Fist Clenches
@@ -159,7 +163,12 @@ caudillo.3 = {
 		}
 		ruler = {
 			save_scope_as = general_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
+	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:general_scope }
+		je_caudillo_cleanup = yes
 	}
 	option = {
 		name = caudillo.3.a
@@ -196,6 +205,7 @@ caudillo.4 = {
 	cooldown = { days = long_modifier_time }
 
 	trigger = {
+		# triggered by journal entry - je_caudillo [on_monthly_pulse]
 		# triggered by je_caudillo
 		NOT = { has_global_variable = continuismo_start_var }
 		ruler = {
@@ -235,6 +245,7 @@ caudillo.4 = {
 		}
 		ruler = {
 			save_scope_as = ruler_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		if = {
 			limit = {
@@ -247,6 +258,7 @@ caudillo.4 = {
 			ig:ig_armed_forces ?= {
 				leader = {
 					save_scope_as = president_successor_scope
+					set_temporary_event_immortality = { DURATION = 3 }
 				}
 			}
 		}
@@ -277,6 +289,7 @@ caudillo.4 = {
 					character_is_valid_for_events = yes
 				}
 				save_scope_as = president_successor_scope
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -303,6 +316,7 @@ caudillo.4 = {
 		name = caudillo.4.b
 		custom_tooltip = {
 			text = retire_ruler
+			revoke_temporary_event_immortality = { CHARACTER = scope:ruler_scope }
 			ruler = {
 				retire_character = yes
 			}
@@ -338,6 +352,11 @@ caudillo.4 = {
 			base = 7
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:ruler_scope }
+		revoke_temporary_event_immortality = { CHARACTER = scope:president_successor_scope }
+	}
 }
 
 # Kingmaker
@@ -368,6 +387,7 @@ caudillo.5 = {
 			save_scope_as = army_scope
 			leader = {
 				save_scope_as = army_leader
+				set_temporary_event_immortality = { DURATION = 3 }
 				set_variable = caudillo_kingmaker
 			}
 		}
@@ -461,7 +481,7 @@ caudillo.5 = {
 				leader = {
 					OR = {
 						has_ideology = ideology:ideology_vanguardist
-						has_ideology = ideology:ideology_communist
+						has_ideology = ideology:ideology_communist_leader
 						has_ideology = ideology:ideology_anarchist
 					}
 				}
@@ -528,6 +548,10 @@ caudillo.5 = {
 		update_party_support = yes
 	}
 
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:army_leader }
+	}
+
 	cancellation_trigger = {
 		NOT = {
 			exists = scope:army_leader
@@ -558,6 +582,7 @@ caudillo.6 = {
 	duration = 3
 
 	trigger = {
+		# triggered by journal entry - je_caudillo [on_monthly_pulse]
 		has_journal_entry = je_caudillo
 		any_scope_character = {
 			OR = {
@@ -612,10 +637,12 @@ caudillo.6 = {
 				}
 			}
 			save_scope_as = leadership_challenge_commander
+			set_temporary_event_immortality = { DURATION = 3 }
 			this.interest_group ?= {
 				save_scope_as = leadership_challenge_ig
 				leader = {
 					save_scope_as = leadership_challenge_politician
+					set_temporary_event_immortality = { DURATION = 3 }
 				}
 			}
 		}
@@ -642,5 +669,10 @@ caudillo.6 = {
 				add_progress = { value = -100 name = je_caudillo_progress_bar }
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:leadership_challenge_commander }
+		revoke_temporary_event_immortality = { CHARACTER = scope:leadership_challenge_politician }
 	}
 }

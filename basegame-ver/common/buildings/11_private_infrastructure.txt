@@ -22,6 +22,23 @@ building_port = {
 		is_coastal = yes
 	}
 
+	ai_value = {
+		if = { # Russification
+			limit = {
+				owner ?= {
+					c:RUS ?= this
+					has_journal_entry = je_russification
+				}
+				is_in_geographic_region = geographic_region_baltic_states_old
+				any_scope_building = {
+					is_building_type = building_port
+					level < 5
+				}
+			}
+			add = 2000
+		}
+	}
+
 	ownership_type = self
 
 	background = "gfx/interface/icons/building_icons/backgrounds/building_panel_bg_monuments.dds"
@@ -53,20 +70,7 @@ building_railway = {
 					has_journal_entry = je_trans_siberian_railway
 				}
 				OR = {
-					state_region = s:STATE_MOSCOW
-					state_region = s:STATE_YAROSLAVL
-					state_region = s:STATE_NIZHNY_NOVGOROD
-					state_region = s:STATE_CHUVASHIA
-					state_region = s:STATE_KAZAN
-					state_region = s:STATE_UFA
-					state_region = s:STATE_CHELYABINSK
-					state_region = s:STATE_URAL
-					state_region = s:STATE_TOBOLSK
-					state_region = s:STATE_TOMSK
-					state_region = s:STATE_KRASNOYARSK
-					state_region = s:STATE_IRKUTSK
-					state_region = s:STATE_BURYATIA
-					state_region = s:STATE_TRANS_BAIKAL
+					is_in_geographic_region = geographic_region_trans_siberian_line
 					state_region = s:STATE_YAKUTSK
 					state_region = s:STATE_OKHOTSK
 					state_region = s:STATE_AMUR
@@ -179,14 +183,31 @@ building_railway = {
 
 		if = { # Manchurian Railway
 			limit = {
-				exists = c:RUS
-				c:RUS ?= owner
 				is_in_geographic_region = geographic_region_manchuria_old
-				any_scope_building = {
-					is_building_type = building_railway
-					levels_owned_by_country = {
-						target = c:RUS
-						value  < 1
+				OR = {
+					c:RUS ?= owner
+					owner.top_overlord ?= {
+						has_journal_entry = je_tp_tsar_heir_of_alexander
+						NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_1_complete }
+					}
+				}
+				OR = {
+					NOR = {
+						has_building = building_railway
+						any_scope_building = {
+							is_building_type = building_railway
+							is_under_construction = yes
+						}
+					}
+					AND = {
+						exists = c:RUS
+						any_scope_building = {
+							is_building_type = building_railway
+							levels_owned_by_country = {
+								target = c:RUS
+								value  < 1
+							}
+						}
 					}
 				}
 			}
@@ -206,6 +227,83 @@ building_railway = {
 				}
 			}
 			add = 10000
+		}
+
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_five_year_plan
+					je:je_five_year_plan ?= {
+						has_variable = five_year_plan_transportation_var
+					}
+					five_year_plan_transportation_goal_met = no
+				}
+			}
+			add = 2500
+		}
+
+		if = { # The Great Program - railways across European Russia
+			limit = {
+				OR = {
+					owner ?= {
+						has_journal_entry = je_tp_tsar_heir_of_alexander
+						NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_3_complete }
+					}
+					owner.top_overlord ?= {
+						has_journal_entry = je_tp_tsar_heir_of_alexander
+						NOT = { has_variable = je_tp_tsar_heir_of_alexander_button_3_complete }
+					}
+				}
+				is_in_geographic_region = geographic_region_eastern_europe
+				NOR = {
+					has_building = building_railway
+					any_scope_building = {
+						is_building_type = building_railway
+						is_under_construction = yes
+					}
+				}
+			}
+			add = 10000
+		}
+
+		if = { # Peace Through Strength - railway expansion
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_tsar_unshakable_autocracy
+					NOT = { has_variable = je_tp_tsar_unshakable_autocracy_button_3_complete }
+					NOT = {
+						country_has_building_type_levels = {
+							target = bt:building_railway
+							value > tsarpoints_railway_levels_value
+						}
+					}
+				}
+			}
+			add = 2500
+		}
+
+		if = { # Develop the Capital agenda
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_pool_develop_capital
+				}
+				is_capital = yes
+				infrastructure < 100
+			}
+			add = 5000
+		}
+
+		if = { # Favourite's model governorate agenda
+			limit = {
+				save_temporary_scope_as = tp_railway_state_scope
+				owner ?= {
+					has_journal_entry = je_tp_fav_parochial
+					has_variable = tp_fav_home_state
+					var:tp_fav_home_state ?= scope:tp_railway_state_scope
+				}
+				infrastructure < 100
+			}
+			add = 5000
 		}
 	}
 

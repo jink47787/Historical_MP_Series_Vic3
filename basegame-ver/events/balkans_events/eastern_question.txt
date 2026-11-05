@@ -22,6 +22,7 @@ eastern_question_austria.1 = {
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
 	trigger = {
+		# triggered by on_action - on_monthly_pulse_country
 		has_dlc_feature = ip3_content
 		c:AUS ?= this
 		c:TUR ?= {
@@ -51,7 +52,7 @@ eastern_question_austria.1 = {
 		}
 	}
 
-	cooldown = { days = never_fire_again_modifier_time }
+	fire_only_once = yes
 
 	immediate = {
 		random_political_lobby = {
@@ -74,24 +75,25 @@ eastern_question_austria.1 = {
 			random_lobby_member = {
 				leader = {
 					save_scope_as = lobby_politician_scope
-					set_character_immortal = yes
+					set_temporary_event_immortality = { DURATION = 3 }
 				}
 			}
 		}
-		random_diplomatically_relevant_country = {
-			limit = {
-				owns_entire_state_region = STATE_BOSNIA
-			}
-			if = {
-				limit = {
-					is_subject = yes
+		s:STATE_BOSNIA ?= {
+			random_scope_state = {
+				owner ?= {
+					if = {
+						limit = {
+							is_subject = yes
+						}
+						top_overlord = {
+							save_scope_as = bosnia_owner_scope
+						}
+					}
+					else = {
+						save_scope_as = bosnia_owner_scope
+					}
 				}
-				top_overlord = {
-					save_scope_as = bosnia_owner_scope
-				}
-			}
-			else = {
-				save_scope_as = bosnia_owner_scope
 			}
 		}
 	}
@@ -103,7 +105,7 @@ eastern_question_austria.1 = {
 			}
 			NOT = {
 				exists = scope:relevant_country
-			}	
+			}
 			scope:bosnia_owner_scope ?= {
 				is_country_alive = no
 			}
@@ -126,11 +128,6 @@ eastern_question_austria.1 = {
 		add_journal_entry = {
 			type = je_eastern_question_austria
 		}
-		hidden_effect = {
-			scope:lobby_politician_scope = {
-				set_character_immortal = no
-			}
-		}
 	}
 
 	option = {
@@ -145,11 +142,9 @@ eastern_question_austria.1 = {
 			}
 		}
 		clear_anti_lobby_vars = yes
-		hidden_effect = {
-			scope:lobby_politician_scope = {
-				set_character_immortal = no
-			}
-		}
+	}
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:lobby_politician_scope }
 	}
 }
 
@@ -365,6 +360,13 @@ eastern_question_austria.2 = {
 		}
 		clear_generated_names = yes
 	}
+	after = {
+		create_diplomatic_catalyst = {
+			type = catalyst_event_negative
+			target = c:RUS
+		}
+		je_eastern_question_austria_cleanup = yes
+	}
 }
 
 namespace = eastern_question_russia
@@ -430,7 +432,7 @@ eastern_question_russia.1 = {
 	cooldown = { days = normal_modifier_time }
 
 	immediate = {
-		random_diplomatically_relevant_country = {
+		random_country_in_balkans = {
 			limit = {
 				country_has_primary_culture = cu:bulgarian
 			}
@@ -481,11 +483,8 @@ eastern_question_russia.1 = {
 			days = long_modifier_time
 			is_decaying = yes
 		}
-		every_diplomatically_relevant_country = {
+		every_country_in_balkans = {
 			limit = {
-				OR = {
-					capital.region = sr:region_balkans
-				}
 				country_has_state_religion = rel:orthodox
 				any_primary_culture = {
 					has_discrimination_trait = heritage_south_slavic
@@ -529,5 +528,8 @@ eastern_question_russia.1 = {
 		}
 		play_as = scope:bulgaria_scope
 		clear_generated_names = yes
+	}
+	after = {
+		je_eastern_question_russia_cleanup = yes
 	}
 }

@@ -20,9 +20,17 @@ wedding.1 = {
 	duration = 3
 
 	trigger = {
-		# triggered by marriage.2
+		# triggered by seek_royal_marriage
 		exists = scope:royal_marriage_character
 		exists = scope:marriage_country
+	}
+
+	cancellation_trigger = {
+		NOR = {
+			exists = scope:royal_marriage_character
+			exists = scope:marriage_country
+			exists = scope:foreign_ruler
+		}
 	}
 
 	immediate = {
@@ -35,15 +43,15 @@ wedding.1 = {
 					is_heir_of_own_country = yes
 					is_ruler_of_own_country = yes
 				}
-				age > 16
+				age > define:NCharacters|ADULT_AGE
 				NOT = { has_variable = is_married }
 			}
-			save_scope_as = royal_marriage_character
 			set_variable = getting_married # for clothing script
 		}
 		scope:marriage_country = {
 			ruler = {
 				save_scope_as = foreign_ruler
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 		}
 	}
@@ -54,9 +62,6 @@ wedding.1 = {
 		add_modifier = { # influence mult
 			name = royal_marriage
 			days = normal_modifier_time
-		}
-		hidden_effect = {
-			remove_variable = getting_married
 		}
 	}
 
@@ -69,197 +74,16 @@ wedding.1 = {
 			}
 		}
 	}
-}
 
-# Search for a noble spouse
-wedding.2 = {
-	type = country_event
-	placement = ROOT
-
-	title = wedding.2.t
-	desc = wedding.2.d
-	flavor = wedding.2.f
-
-	gui_window = event_window_1char_tabloid
-
-	left_icon = scope:royal_marriage_character
-
-	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
-	on_opened_soundeffect = "event:/SFX/Events/misc/1Character_Banner"
-
-	icon = "gfx/interface/icons/event_icons/event_portrait.dds"
-
-	duration = 3
-
-	trigger = {
-		# triggered by marry_ruler_or_heir interaction
-	}
-
-	immediate = {
-		random_scope_character = {
-			limit = {
-				has_variable = spouse_seeker
-			}
-			save_scope_as = royal_marriage_character
+	after = {
+		scope:royal_marriage_character ?= {
 			set_variable = is_married
-			remove_variable = spouse_seeker
+			remove_variable = getting_married
 		}
-		random_country = {
-			limit = {
-				NOT = { THIS = ROOT }
-				NOT = { is_subject_type = subject_type_personal_union }
-				has_law = law_type:law_monarchy
-				religion = scope:actor.religion
-				ruler = {
-					age > 36
-					NOT = {
-						has_variable = marriage_target
-					}
-				}
-			}
-			save_scope_as = marriage_country_1
-			ruler = {
-				save_scope_as = foreign_ruler_1
-			}
+		scope:foreign_ruler ?= {
+			remove_variable = marriage_target
 		}
-		if = {
-			limit = {
-				exists = scope:marriage_country_1
-				any_country = {
-					NOT = { THIS = ROOT }
-					NOT = { is_subject_type = subject_type_personal_union }
-					NOT = { THIS = scope:marriage_country_1 }
-					has_law = law_type:law_monarchy
-					religion = scope:actor.religion
-					ruler = {
-						age > 36
-						NOT = {
-							has_variable = marriage_target
-						}
-					}
-				}
-			}
-			random_country = {
-				limit = {
-					NOT = { THIS = ROOT }
-					NOT = { is_subject_type = subject_type_personal_union }
-					NOT = { THIS = scope:marriage_country_1 }
-					has_law = law_type:law_monarchy
-					religion = scope:actor.religion
-					ruler = {
-						age > 36
-						NOT = {
-							has_variable = marriage_target
-						}
-					}
-				}
-				save_scope_as = marriage_country_2
-				ruler = {
-					save_scope_as = foreign_ruler_2
-				}
-			}
-			if = { #In order for this to be searched for, marriage country 2 must also exist.
-				limit = {
-					exists = scope:marriage_country_2
-					any_country = {
-						NOT = { THIS = ROOT }
-						NOT = { is_subject_type = subject_type_personal_union }
-						NOT = { THIS = scope:marriage_country_1 }
-						NOT = { THIS = scope:marriage_country_2 }
-						has_law = law_type:law_monarchy
-						religion = scope:actor.religion
-						ruler = {
-							age > 36
-							NOT = { has_variable = marriage_target }
-						}
-					}
-				}
-				random_country = {
-					limit = {
-						NOT = { THIS = ROOT }
-						NOT = { is_subject_type = subject_type_personal_union }
-						NOT = { THIS = scope:marriage_country_1 }
-						NOT = { THIS = scope:marriage_country_2 }
-						relations:root >= 0
-						has_law = law_type:law_monarchy
-						religion = scope:actor.religion
-						ruler = {
-							age > 36
-							NOT = {
-								has_variable = marriage_target
-							}
-						}
-					}
-					save_scope_as = marriage_country_3
-					ruler = {
-						save_scope_as = foreign_ruler_3
-					}
-				}
-			}
-		}
-	}
-
-	option = { # marry noble 1
-		name = wedding.2.a
-		default_option = yes
-		scope:marriage_country_1 = {
-			ruler = {
-				set_variable = marriage_target
-			}
-			save_scope_as = marriage_country
-			change_relations = {
-				country = ROOT
-				value = 20
-			}
-		}
-		trigger_event = {
-			id = wedding.1
-			#days = 7
-		}
-	}
-
-	option = { # marry noble 2
-		name = wedding.2.b
-		trigger = {
-			exists = scope:marriage_country_2
-		}
-		scope:marriage_country_2 = {
-			ruler = {
-				set_variable = marriage_target
-				save_scope_as = marriage_country_ruler
-			}
-			save_scope_as = marriage_country
-			change_relations = {
-				country = ROOT
-				value = 20
-			}
-		}
-		trigger_event = {
-			id = wedding.1
-			popup = yes
-		}
-	}
-
-	option = { # marry noble 3
-		name = wedding.2.c
-		trigger = {
-			exists = scope:marriage_country_3
-		}
-		scope:marriage_country_3 = {
-			ruler = {
-				set_variable = marriage_target
-				save_scope_as = marriage_country_ruler
-			}
-			save_scope_as = marriage_country
-			change_relations = {
-				country = ROOT
-				value = 20
-			}
-		}
-		trigger_event = {
-			id = wedding.1
-			popup = yes
-		}
+		revoke_temporary_event_immortality = { CHARACTER = scope:foreign_ruler }
 	}
 }
 
@@ -325,12 +149,14 @@ wedding.3 = {
 	immediate = {
 		ruler = {
 			save_scope_as = abdicating_monarch
+			set_temporary_event_immortality = { DURATION = 3 }
 			interest_group ?= {
 				save_scope_as = monarch_ig
 			}
 		}
 		heir ?= {
 			save_scope_as = heir_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		law_type:law_monarchy = {
 			save_scope_as = monarchy_law
@@ -347,6 +173,7 @@ wedding.3 = {
 		scope:heir_scope ?= {
 			set_character_as_ruler = yes
 		}
+		revoke_temporary_event_immortality = { CHARACTER = scope:abdicating_monarch }
 		scope:abdicating_monarch ?= {
 			resign_and_retire = yes
 		}
@@ -354,14 +181,29 @@ wedding.3 = {
 
 	option = { # reassure the people
 		name = wedding.3.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		add_loyalists = {
 			value = 0.01
 		}
 		scope:heir_scope ?= {
 			set_character_as_ruler = yes
 		}
+		revoke_temporary_event_immortality = { CHARACTER = scope:abdicating_monarch }
 		scope:abdicating_monarch ?= {
 			resign_and_retire = yes
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:abdicating_monarch }
+		revoke_temporary_event_immortality = { CHARACTER = scope:heir_scope }
 	}
 }

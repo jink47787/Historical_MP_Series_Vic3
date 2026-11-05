@@ -1,0 +1,308 @@
+﻿state_population_global_share = {
+	value = state_population
+	divide = {
+		value = global_population
+		min = 1
+	}
+}
+
+state_gdp_global_share = {
+	value = gdp
+	divide = {
+		value = global_gdp
+		min = 1
+	}
+}
+
+state_infamy_population_share_uncapped = {
+	value = state_population_global_share
+	multiply = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_WEIGHT
+	multiply = define:NDiplomacy|WAR_GOAL_INFAMY_WORLD_SHARE_SCALE
+}
+
+state_infamy_gdp_share_uncapped = {
+	value = state_gdp_global_share
+	multiply = define:NDiplomacy|WAR_GOAL_INFAMY_GDP_WEIGHT
+	multiply = define:NDiplomacy|WAR_GOAL_INFAMY_WORLD_SHARE_SCALE
+}
+
+state_infamy_base = {
+	value = 0
+
+	save_temporary_scope_as = infamy_target_state
+
+	add = {
+		desc = "INFAMY_STATE_POPULATION_SHARE"
+		value = state_infamy_population_share_uncapped
+		min = define:NDiplomacy|WAR_GOAL_INFAMY_STATE_BASELINE
+		if = {
+			limit = {
+				state_infamy_population_share_uncapped > define:NDiplomacy|WAR_GOAL_INFAMY_SHARE_SOFT_CAP
+			}
+			subtract = {
+				value = state_infamy_population_share_uncapped
+				subtract = define:NDiplomacy|WAR_GOAL_INFAMY_SHARE_SOFT_CAP
+				multiply = {
+					value = 1
+					subtract = define:NDiplomacy|WAR_GOAL_INFAMY_SHARE_SOFT_CAP_SLOPE
+				}
+			}
+		}
+		min = define:NDiplomacy|WAR_GOAL_INFAMY_STATE_BASELINE
+		max = define:NDiplomacy|WAR_GOAL_INFAMY_POPULATION_SHARE_MAX
+	}
+
+	add = {
+		desc = "INFAMY_STATE_GDP_SHARE"
+		value = state_infamy_gdp_share_uncapped
+		if = {
+			limit = {
+				state_infamy_gdp_share_uncapped > define:NDiplomacy|WAR_GOAL_INFAMY_SHARE_SOFT_CAP
+			}
+			subtract = {
+				value = state_infamy_gdp_share_uncapped
+				subtract = define:NDiplomacy|WAR_GOAL_INFAMY_SHARE_SOFT_CAP
+				multiply = {
+					value = 1
+					subtract = define:NDiplomacy|WAR_GOAL_INFAMY_SHARE_SOFT_CAP_SLOPE
+				}
+			}
+		}
+		min = define:NDiplomacy|WAR_GOAL_INFAMY_STATE_BASELINE
+		max = define:NDiplomacy|WAR_GOAL_INFAMY_GDP_SHARE_MAX
+	}
+
+	if = {
+		limit = {
+			is_incorporated = yes
+			is_capital = yes
+		}
+		multiply = {
+			desc = "INFAMY_STANDING_INCORPORATED_CAPITAL"
+			value = define:NDiplomacy|WAR_GOAL_INFAMY_STANDING_INCORPORATED_CAPITAL
+		}
+	}
+	else_if = {
+		limit = {
+			is_incorporated = yes
+			is_homeland_of_country_cultures = owner
+		}
+		multiply = {
+			desc = "INFAMY_STANDING_INCORPORATED_HOMELAND"
+			value = define:NDiplomacy|WAR_GOAL_INFAMY_STANDING_INCORPORATED_HOMELAND
+		}
+	}
+	else_if = {
+		limit = {
+			is_incorporated = yes
+		}
+		multiply = {
+			desc = "INFAMY_STANDING_INCORPORATED"
+			value = define:NDiplomacy|WAR_GOAL_INFAMY_STANDING_INCORPORATED
+		}
+	}
+	else = {
+		multiply = {
+			desc = "INFAMY_STANDING_UNINCORPORATED"
+			value = define:NDiplomacy|WAR_GOAL_INFAMY_STANDING_UNINCORPORATED
+		}
+	}
+}
+
+state_infamy_value = {
+	value = 0
+
+	save_temporary_scope_as = infamy_target_state
+	region = {
+		save_temporary_scope_as = infamy_target_region
+	}
+
+	add = state_infamy_base
+
+	if = {
+		limit = {
+			is_homeland_of_country_cultures = root
+		}
+		multiply = {
+			desc = "INFAMY_AGGRESSOR_HOMELAND"
+			value = 1
+			add = define:NDiplomacy|WAR_GOAL_INFAMY_HOMELAND_FACTOR
+		}
+		if = {
+			limit = {
+				root = {
+					modifier:country_homeland_infamy_reduction_bool = yes
+				}
+			}
+			multiply = {
+				desc = "INFAMY_AGGRESSOR_HOMELAND_BONUS"
+				value = 1
+				add = define:NDiplomacy|WAR_GOAL_INFAMY_HOMELAND_BONUS_FACTOR
+			}
+		}
+	}
+	else_if = {
+		limit = {
+			any_scope_culture = {
+				has_homeland = scope:infamy_target_state
+				shares_language_trait_with_any_primary_culture = root
+			}
+		}
+		multiply = {
+			desc = "INFAMY_AGGRESSOR_SHARED_LANGUAGE"
+			value = 1
+			add = define:NDiplomacy|WAR_GOAL_INFAMY_SHARED_LANGUAGE_FACTOR
+		}
+		if = {
+			limit = {
+				root = {
+					modifier:country_shared_language_infamy_reduction_bool = yes
+				}
+			}
+			multiply = {
+				desc = "INFAMY_AGGRESSOR_SHARED_LANGUAGE_BONUS"
+				value = 1
+				add = define:NDiplomacy|WAR_GOAL_INFAMY_SHARED_LANGUAGE_BONUS_FACTOR
+			}
+		}
+	}
+
+	if = {
+		limit = {
+			OR = {
+				exists = scope:infamy_assumes_claim
+				AND = {
+					has_claim_by = root
+					NOT = { exists = scope:infamy_ignores_claim }
+				}
+			}
+		}
+		multiply = {
+			desc = "INFAMY_AGGRESSOR_CLAIM"
+			value = 1
+			add = define:NDiplomacy|WAR_GOAL_INFAMY_CLAIM_FACTOR
+		}
+	}
+	else_if = {
+		limit = {
+			root = {
+				is_scripted_unification_conquest = { TARGET = scope:infamy_target_state.owner }
+			}
+		}
+		multiply = {
+			desc = "INFAMY_SCRIPTED_UNIFICATION"
+			value = 1
+			add = define:NDiplomacy|WAR_GOAL_INFAMY_SCRIPTED_UNIFICATION_FACTOR
+		}
+	}
+
+	if = {
+		limit = {
+			root = {
+				is_land_adjacent_to_state = scope:infamy_target_state
+			}
+		}
+		multiply = {
+			desc = "INFAMY_AGGRESSOR_ADJACENT"
+			value = 1
+			add = define:NDiplomacy|WAR_GOAL_INFAMY_ADJACENCY_FACTOR
+		}
+	}
+
+	if = {
+		limit = {
+			root = {
+				NOT = {
+					has_strategic_region_interest_tier = {
+						strategic_region = scope:infamy_target_region
+						value >= interest_tier_effect_infamy_cost_increase_max_tier
+					}
+				}
+			}
+		}
+		multiply = {
+			desc = "INFAMY_INTEREST_TIER"
+			value = 1
+			add = interest_tier_effect_infamy_cost_increase_high_value
+		}
+	}
+	else_if = {
+		limit = {
+			root = {
+				NOT = {
+					has_strategic_region_interest_tier = {
+						strategic_region = scope:infamy_target_region
+						value >= 3
+					}
+				}
+			}
+		}
+		multiply = {
+			desc = "INFAMY_INTEREST_TIER"
+			value = 1
+			add = interest_tier_effect_infamy_cost_increase_medium_value
+		}
+	}
+	else_if = {
+		limit = {
+			root = {
+				has_strategic_region_interest_tier = {
+					strategic_region = scope:infamy_target_region
+					value >= interest_tier_effect_infamy_cost_decrease_min_tier
+				}
+			}
+		}
+		multiply = {
+			desc = "INFAMY_INTEREST_TIER"
+			value = 1
+			add = interest_tier_effect_infamy_cost_decrease_medium_value
+		}
+	}
+
+	multiply = {
+		desc = "country_infamy_generation_against_unrecognized_mult"
+		value = 1
+
+		if = {
+			limit = {
+				root = {
+					NOR = {
+						is_country_type = unrecognized
+						is_country_type = decentralized
+					}
+				}
+				owner = {
+					OR = {
+						is_country_type = unrecognized
+						is_country_type = decentralized
+					}
+				}
+			}
+			add = root.modifier:country_infamy_generation_against_unrecognized_mult
+		}
+	}
+
+	min = {
+		desc = "INFAMY_STATE_MINIMUM_VALUE"
+		value = define:NDiplomacy|WAR_GOAL_INFAMY_MINIMUM
+	}
+}
+
+country_infamy_value = {
+	value = 0
+
+	add = {
+		desc = "INFAMY_COUNTRY_TOTAL"
+		every_scope_state = {
+			add = state_infamy_value
+		}
+	}
+}
+
+state_infamy_value_for_target_state = {
+	value = 0
+
+	scope:target_state = {
+		add = state_infamy_value
+	}
+}

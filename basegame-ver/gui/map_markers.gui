@@ -457,7 +457,53 @@ container = {
 	}
 
 	widget = {
-		size = { 30 30 }
+		size = { 40 40 }
+		parentanchor = hcenter
+
+		vfx = {
+			visible = "[State.IsBeingBombarded]"
+
+			blockoverride "size" {
+				size = { 600% 600% }
+			}
+
+			blockoverride "parent_anchor" {
+				parentanchor = center
+			}
+
+			blockoverride "camera_position" {
+				camera_position = { 0 0 -2 }
+			}
+
+			blockoverride "entity_instance" {
+				entity_instance = vfx_entity_ui_sidebar_war
+			}
+		}
+
+		icon = {
+			visible = "[And(State.IsTargetOfHoveredSeaRegion, Not(State.IsSelectedCoastalMissionTarget))]"
+			parentanchor = center
+			size = { 130% 130% }
+			texture = "gfx/interface/map_markers/round_highlight_blue.dds"
+			alwaystransparent = yes
+		}
+
+		icon = {
+			visible = "[And(State.IsBeingBombarded, Not(State.IsSelectedCoastalMissionTarget))]"
+			parentanchor = center
+			size = { 120% 120% }
+			texture = "gfx/interface/map_markers/round_highlight.dds"
+			color = "[GetDefine('NGUI','NAVAL_MISSION_HIGHLIGHT_ENEMY_COLOR')]"
+			alwaystransparent = yes
+		}
+
+		icon = {
+			visible = "[State.IsSelectedCoastalMissionTarget]"
+			parentanchor = center
+			size = { 130% 130% }
+			texture = "gfx/interface/map_markers/round_highlight_orange.dds"
+			alwaystransparent = yes
+		}
 
 		icon = {
 			visible = "[State.IsBeingHighlighted]"
@@ -475,8 +521,82 @@ container = {
 			icon = {
 				texture = "gfx/interface/icons/coastal_building_icons/coastal_building_icon.dds"
 				parentanchor = center
-				size = { 20 20 }
+				size = { 70% 70% }
 			}
+		}
+	}
+}
+
+### SUPPLY ORIGIN
+container = {
+	name = "supply_origin_marker"
+	layer = layer_map_markers
+	max_update_rate = 8
+	datacontext = "[BuildingMarker.GetBuilding]"
+	datacontext = "[BuildingMarker.GetBuilding.GetState]"
+	datacontext = "[State.GetCountry]"
+	onmousehierarchyenter = "[AccessHighlightManager.HighlightState(State.Self)]"
+	onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+	parentanchor = bottom|hcenter
+	using = clickthrough_blocker
+
+	tooltipwidget = {
+		RegularTooltip_SupplyOriginMarker = {}
+	}
+
+	widget = {
+		size = { 40 40 }
+		parentanchor = hcenter
+
+		icon = {
+			visible = "[State.IsBeingHighlighted]"
+			size = { 95% 95% }
+			parentanchor = center
+			alwaystransparent = yes
+			texture = "gfx/interface/map_markers/round_highlight.dds"
+		}
+
+		icon = {
+			size = { 85% 85% }
+			parentanchor = center
+			color = "[Country.GetMilitaryInterfaceColor]"
+			alpha = 0.9
+			texture = "gfx/interface/backgrounds/round_button_bg.dds"
+
+			modify_texture = {
+				blend_mode = add
+				alpha = 0.35
+				texture = "gfx/interface/backgrounds/white.dds"
+			}
+		}
+
+		icon = {
+			size = { 70% 70% }
+			parentanchor = center
+			texture = "gfx/interface/icons/military_icons/navy_icons/supplies_navy.dds"
+
+			icon = {
+				visible = "[Not(Building.IsNavalLogisticsCenter)]"
+				size = { 64% 64% }
+				parentanchor = bottom|right
+				position = { 3 0 }
+				alwaystransparent = yes
+				texture = "gfx/interface/icons/law_icons/law_icon_parts/soldier.dds"
+			}
+
+			icon = {
+				visible = "[Building.IsNavalLogisticsCenter]"
+				size = { 42% 42% }
+				parentanchor = bottom|right
+				alwaystransparent = yes
+				texture = "gfx/interface/icons/production_method_icons/anchorage.dds"
+			}
+		}
+
+		button = {
+			size = { 100% 100% }
+			parentanchor = center
+			onclick = "[InformationPanelBar.OpenBuildingDetailsPanel(Building.AccessSelf)]"
 		}
 	}
 }
@@ -497,8 +617,8 @@ container = {
 	alwaystransparent = no
 
 	icon = {
+		visible = "[Not(Or(ObjectsEqual(Market.GetOwner, GetPlayer.Self), Market.IsBeingHighlighted))]"
 		texture = "gfx/interface/backgrounds/round_button_bg.dds"
-		visible = "[And(Not(Or(ObjectsEqual(Market.GetOwner, GetPlayer.Self), Market.IsBeingHighlighted)), NotZero(State.GetTradeCapacity))]"
 		size = { 30 30 }
 
 		icon = {
@@ -509,14 +629,72 @@ container = {
 	}
 
 	icon = {
+		visible = "[Or(ObjectsEqual(Market.GetOwner, GetPlayer.Self), Market.IsBeingHighlighted)]"
 		texture = "gfx/interface/backgrounds/round_button_bg.dds"
-		visible = "[And(Or(ObjectsEqual(Market.GetOwner, GetPlayer.Self), Market.IsBeingHighlighted), NotZero(State.GetTradeCapacity))]"
 		size = { 45 45 }
 
 		icon = {
 			texture = "gfx/interface/icons/generic_icons/world_market.dds"
 			parentanchor = center
 			size = { 35 35 }
+		}
+	}
+}
+
+container = {
+	name = "military_world_market_hub_marker"
+	layer = layer_map_markers
+	max_update_rate = 8
+	datacontext = "[BuildingMarker.GetBuilding.GetState]"
+	datacontext = "[BuildingMarker.GetBuilding.GetState.GetCountry]"
+	datacontext = "[BuildingMarker.GetBuilding.GetState.GetMarket]"
+	parentanchor = bottom|hcenter
+	onmousehierarchyenter = "[AccessHighlightManager.HighlightMarketArea(State.Self)]"
+	onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+	tooltip = "STATE_MILITARY_WORLD_MARKET_ACCESS_DESC"
+	alwaystransparent = no
+
+	icon = {
+		visible = "[ObjectsEqual(Market.GetOwner, GetMapPerspectiveCountry.Self)]"
+		size = { 45 45 }
+		texture = "gfx/interface/backgrounds/round_button_bg.dds"
+
+		icon = {
+			visible = "[Not(Or(ObjectsEqual(Country.Self, GetMapPerspectiveCountry.Self), Country.HasAnyAllianceLikeTreatiesWith(GetMapPerspectiveCountry.Self)))]"
+			size = { 35 35 }
+			parentanchor = center
+			color = "[GetDefine('NGUI','NAVAL_MISSION_HIGHLIGHT_ENEMY_COLOR')]"
+			texture = "gfx/interface/icons/generic_icons/world_market.dds"
+		}
+
+		icon = {
+			visible = "[Or(ObjectsEqual(Country.Self, GetMapPerspectiveCountry.Self), Country.HasAnyAllianceLikeTreatiesWith(GetMapPerspectiveCountry.Self))]"
+			size = { 35 35 }
+			parentanchor = center
+			color = "[GetDefine('NGUI','NAVAL_MISSION_HIGHLIGHT_FRIENDLY_COLOR')]"
+			texture = "gfx/interface/icons/generic_icons/world_market.dds"
+		}
+	}
+
+	icon = {
+		visible = "[Not(ObjectsEqual(Market.GetOwner, GetMapPerspectiveCountry.Self))]"
+		size = { 30 30 }
+		texture = "gfx/interface/backgrounds/round_button_bg.dds"
+
+		icon = {
+			visible = "[Not(Or(ObjectsEqual(Country.Self, GetMapPerspectiveCountry.Self), Country.HasAnyAllianceLikeTreatiesWith(GetMapPerspectiveCountry.Self)))]"
+			size = { 20 20 }
+			parentanchor = center
+			color = "[GetDefine('NGUI','NAVAL_MISSION_HIGHLIGHT_ENEMY_COLOR')]"
+			texture = "gfx/interface/icons/generic_icons/world_market.dds"
+		}
+
+		icon = {
+			visible = "[Or(ObjectsEqual(Country.Self, GetMapPerspectiveCountry.Self), Country.HasAnyAllianceLikeTreatiesWith(GetMapPerspectiveCountry.Self))]"
+			size = { 20 20 }
+			parentanchor = center
+			color = "[GetDefine('NGUI','NAVAL_MISSION_HIGHLIGHT_FRIENDLY_COLOR')]"
+			texture = "gfx/interface/icons/generic_icons/world_market.dds"
 		}
 	}
 }
@@ -861,11 +1039,9 @@ container = {
 			size = { 100% 100% }
 
 			icon = {
-				visible = no
-				#todo add the below visible state instead when PRCAL-17690 is done:
-	 			#visible = "[WarGoal.IsBeingHighlighted]"
-	  			using = highlighted_square_selection
-	  		}
+				visible = "[WarGoal.IsBeingHighlighted]"
+				using = highlighted_square_selection
+			}
 		}
 
 		icon = {
@@ -1707,7 +1883,7 @@ button = {
 	container = {
 		resizeparent = yes
 		flowcontainer = {
-			visible = "[Not(Building.HasFailedHires)]"
+			visible = "[Not(Building.HasFailedToHire)]"
 			margin = { 5 5 }
 			parentanchor = vcenter
 			position = { 42 0 }
@@ -2949,6 +3125,7 @@ button = {
 					align = hcenter|nobaseline
 					using = fontsize_small
 					text = "[MilitaryFormation.GetTravelTimeLeftLabel]"
+					tooltip = "MILITARY_FORMATION_TRAVEL_TIME_LEFT_TOOLTIP"
 				}
 			}
 
@@ -3197,6 +3374,7 @@ button = {
 					align = hcenter|nobaseline
 					using = fontsize_small
 					text = "[MilitaryFormation.GetTravelTimeLeftLabel]"
+					tooltip = "MILITARY_FORMATION_TRAVEL_TIME_LEFT_TOOLTIP"
 				}
 			}
 
@@ -3225,6 +3403,23 @@ button = {
 						align = nobaseline
 						parentanchor = vcenter
 						margin_right = 5
+					}
+
+					icon = {
+						visible = "[MilitaryFormation.IsRecalledForRepairs]"
+						name = "repair_indicator"
+						parentanchor = vcenter
+						size = { 18 18 }
+						texture = "gfx/interface/icons/generic_icons/repairing.dds"
+					}
+
+					icon = {
+						visible = "[MilitaryFormation.IsDefeated]"
+						name = "defeat_indicator"
+						parentanchor = vcenter
+						size = { 18 18 }
+						texture = "gfx/interface/icons/commander_order_icons/admiral_repairing.dds"
+						tooltip = "FORMATION_FULLY_DEFEATED"
 					}
 
 					flowcontainer = {
@@ -3272,6 +3467,7 @@ button = {
 
 		flowcontainer = {
 			visible = "[And(Not(FleetFormationMarker.IsAnyFormationHighlighted), Not(MilitaryFormation.IsSelected))]"
+			margin_right = 2
 
 			flowcontainer = {
 				visible = "[Not(IsZoomLevelFar)]"
@@ -3305,6 +3501,23 @@ button = {
 					margin = { 4 2 }
 					raw_text = "@ships![Nbsp][FleetFormationMarker.GetNumShips|v]"
 				}
+			}
+
+			icon = {
+				visible = "[MilitaryFormation.IsRecalledForRepairs]"
+				name = "repair_indicator"
+				parentanchor = vcenter
+				size = { 16 16 }
+				texture = "gfx/interface/icons/generic_icons/repairing.dds"
+			}
+
+			icon = {
+				visible = "[MilitaryFormation.IsDefeated]"
+				name = "defeat_indicator"
+				parentanchor = vcenter
+				size = { 16 16 }
+				texture = "gfx/interface/icons/commander_order_icons/admiral_repairing.dds"
+				tooltip = "FORMATION_FULLY_DEFEATED"
 			}
 		}
 	}
@@ -3964,35 +4177,34 @@ container = {
 					icon = {
 						visible = "[NavalMissionMarker.IsAnyFleetOnMissionTypeRecalledForRepairs(NavalMissionType.Self)]"
 						name = "repair_indicator"
-						parentanchor = bottom|right
+						parentanchor = bottom
 						widgetanchor = center
-						position = { -6 -6 }
-						size = { 22 22 }
-						texture = "gfx/interface/icons/alert_icons/repairing.dds"
+						size = { 15 15 }
+						texture = "gfx/interface/icons/generic_icons/repairing.dds"
 						alpha = 0.9
 						alwaystransparent = yes
 
 						state = {
 							name = "big"
 							trigger_when = "[IsZoomLevelNear]"
-							position = { -6 -6 }
-							size = { 22 22 }
+							position = { 10 -5 }
+							size = { 18 18 }
 							duration = 0.2
 						}
 
 						state = {
 							name = "mid"
 							trigger_when = "[IsZoomLevelMid]"
-							position = { -7 -7 }
-							size = { 20 20 }
+							position = { 10 -5 }
+							size = { 16 16 }
 							duration = 0.2
 						}
 
 						state = {
 							name = "small"
 							trigger_when = "[IsZoomLevelFar]"
-							position = { -8 -8 }
-							size = { 19 19 }
+							position = { 10 -5 }
+							size = { 14 14 }
 							duration = 0.2
 						}
 					}
@@ -5479,6 +5691,7 @@ widget = {
 	allow_outside = yes
 
 	flowcontainer = {
+		visible = "[StateMarker.GetGoods.IsValid]"
 		parentanchor = center
 		margin = { 7 7 }
 		direction = vertical
@@ -5510,6 +5723,7 @@ widget = {
 	allow_outside = yes
 
 	flowcontainer = {
+		visible = "[StateMarker.GetGoods.IsValid]"
 		parentanchor = center
 		margin = { 7 7 }
 		direction = vertical
@@ -5540,6 +5754,7 @@ widget = {
 	allow_outside = yes
 
 	flowcontainer = {
+		visible = "[StateMarker.GetGoods.IsValid]"
 		parentanchor = center
 		margin = { 7 7 }
 		direction = vertical
@@ -5571,6 +5786,7 @@ widget = {
 	allow_outside = yes
 
 	flowcontainer = {
+		visible = "[StateMarker.GetGoods.IsValid]"
 		parentanchor = center
 		margin = { 7 7 }
 		direction = vertical

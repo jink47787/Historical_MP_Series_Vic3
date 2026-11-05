@@ -1,0 +1,221 @@
+﻿namespace = rus_prov_gov
+
+# Provisional Government is Stable
+rus_prov_gov.1 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = rus_prov_gov.1.t
+	desc = rus_prov_gov.1.d
+	flavor = rus_prov_gov.1.f
+
+	event_image = {
+		video = "unspecific_ruler_speaking_to_people"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	dlc = dlc019
+
+	trigger = {
+		# triggered by journal entry
+	}
+
+	cancellation_trigger = {
+	}
+
+	immediate = {
+		ruler = {
+			save_scope_as = russia_ruler_scope
+			set_temporary_event_immortality = { DURATION = 3 }
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:russia_ruler_scope }
+	}
+
+	option = {
+		name = rus_prov_gov.1.a
+		show_as_tooltip = {
+			if = {
+				limit = {
+					NOT = {
+						any_civil_war = {
+							is_civil_war_type = revolution
+						}
+					}
+				}
+				add_loyalists = {
+					value = 0.2
+					culture = cu:russian
+				}
+			}
+			add_modifier = {
+				name = rus_prov_gov_success_mod
+				days = long_modifier_time
+			}
+		}
+	}
+}
+
+# Provisional Government intro event
+rus_prov_gov.2 = {
+	type = country_event
+	placement = root
+
+	duration = 3
+
+	title = rus_prov_gov.2.t
+	desc = rus_prov_gov.2.d
+	flavor = rus_prov_gov.2.f
+
+	event_image = {
+		video = "ip4_abdication"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	dlc = dlc019
+
+	trigger = {
+		# triggered by journal entry
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			has_journal_entry = je_russia_provisional_government
+		}
+	}
+
+	immediate = {
+		if = {
+			limit = {
+				var:russian_revolution_leader ?= {
+					is_character_alive = yes
+				}
+			}
+			var:russian_revolution_leader = {
+				save_scope_as = russia_ruler_scope
+				set_temporary_event_immortality = { DURATION = 3 }
+				interest_group ?= {
+					if = {
+						limit = {
+							is_in_government = no
+						}
+						if = {
+							limit = {
+								exists = party
+							}
+							party ?= {
+								set_ruling_party = yes
+							}
+						}
+						else = {
+							add_ruling_interest_group = yes
+						}
+					}
+				}
+				if = {
+					limit = {
+						NOT = {
+							is_ruler_of_own_country = yes
+						}
+					}
+					set_character_as_ruler = yes
+				}
+			}
+		}
+		else = {
+			ruler ?= {
+				save_scope_as = russia_ruler_scope
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
+		}
+		active_law:lawgroup_governance_principles ?= {
+			save_scope_as = principles_law
+		}
+		active_law:lawgroup_distribution_of_power ?= {
+			save_scope_as = power_law
+		}
+		capital = {
+			save_scope_as = russia_capital
+		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:russia_ruler_scope }
+	}
+
+	option = {
+		name = rus_prov_gov.2.a
+		add_radicals = {
+			value = large_radicals
+		}
+	}
+}
+
+# Self-Governernment of the Non-Russian Nationalities
+rus_prov_gov.3 = {
+	type = country_event
+	placement = scope:rus_autonomy_nation.capital
+
+	duration = 3
+
+	fire_only_once = yes
+
+	title = rus_prov_gov.3.t
+	desc = rus_prov_gov.3.d
+	flavor = rus_prov_gov.3.f
+
+	event_image = {
+		video = "europenorthamerica_political_extremism"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	dlc = dlc019
+
+	trigger = {
+		# triggered by journal entry
+		any_subject_or_below = {
+			has_variable = russian_national_minority_state
+		}
+	}
+
+	cancellation_trigger = {
+		NOT = {
+			exists = scope:rus_autonomy_nation
+		}
+	}
+
+	immediate = {
+		save_scope_as = russia_scope
+		ordered_subject_or_below = {
+			limit = {
+				has_variable = russian_national_minority_state
+			}
+			order_by = gdp
+			position = 0
+			save_scope_as = rus_autonomy_nation
+		}
+	}
+
+	option = {
+		name = rus_prov_gov.3.a
+		every_subject_or_below = {
+			limit = {
+				has_variable = russian_national_minority_state
+			}
+			add_liberty_desire = 25
+		}
+	}
+}

@@ -3,6 +3,10 @@
 
 	group = je_group_internal_affairs
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_when_inactive = {
 		has_law_or_variant = law_type:law_dedicated_police
 	}
@@ -29,23 +33,45 @@
 		}
 	}
 
-	complete = {
-		institution_investment_level = {
-			institution = institution_police
-			value = 5
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			institution_investment_level = {
+				institution = institution_police
+				value = 5
+			}
+			capital = {
+				turmoil < 0.2
+			}
 		}
-		capital = {
-			turmoil < 0.2
+		effect = {
+			trigger_event = { id = scotland_yard.1 }
+			set_variable = has_scotland_yard_var
 		}
 	}
 
-	on_complete = {
-		trigger_event = { id = scotland_yard.1 }
-		set_variable = has_scotland_yard_var
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = { has_law_or_variant = law_type:law_dedicated_police }
+		}
+		effect = {
+			je_scotland_yard_cleanup = yes
+		}
 	}
 
-	invalid = {
-		NOT = { has_law_or_variant = law_type:law_dedicated_police }
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_scotland_yard_cleanup = yes
+		}
 	}
 
 	weight = 100
@@ -57,6 +83,10 @@ je_serial_killer = {
 	icon = "gfx/interface/icons/event_icons/event_newspaper.dds"
 
 	group = je_group_crises
+
+	activation_description = {
+		always = yes
+	}
 
 	on_yearly_pulse = {
 		effect = {
@@ -126,25 +156,31 @@ je_serial_killer = {
 		}
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = serial_killer_je_tt
-			has_variable = serial_killer_caught
-		}
-	}
-
-	on_complete = {
-		scope:target = {
-			remove_modifier = serial_killer_state_mod
-			if = {
-				limit = {
-					has_modifier = modifier_public_worried
-				}
-				remove_modifier = modifier_public_worried
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = serial_killer_je_tt
+				has_variable = serial_killer_caught
 			}
 		}
-		remove_modifier = serial_killer_active_investigation
-		remove_variable = ongoing_serial_killer_je
+		effect = {
+			scope:target = {
+				remove_modifier = serial_killer_state_mod
+				if = {
+					limit = {
+						has_modifier = modifier_public_worried
+					}
+					remove_modifier = modifier_public_worried
+				}
+			}
+			remove_modifier = serial_killer_active_investigation
+			remove_variable = ongoing_serial_killer_je
+			je_serial_killer_cleanup = yes
+		}
 	}
 
 	status_desc = {
@@ -195,28 +231,32 @@ je_serial_killer = {
 			}
 		}
 	}
-	invalid = {
-		OR = {
-			NOT = { exists = scope:target }
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = { exists = scope:target }
+				scope:target = {
+					OR = {
+						NOT = { owner = ROOT }
+						NOT = { has_modifier = serial_killer_state_mod }
+					}
+				}
+			}
+		}
+		effect = {
 			scope:target = {
-				OR = {
-					NOT = { owner = ROOT }
-					NOT = { has_modifier = serial_killer_state_mod }
+				remove_modifier = serial_killer_state_mod
+				if = {
+					limit = {
+						has_modifier = modifier_public_worried
+					}
+					remove_modifier = modifier_public_worried
 				}
 			}
+			remove_modifier = serial_killer_active_investigation
+			je_serial_killer_cleanup = yes
 		}
-	}
-
-	on_invalid = {
-		scope:target = {
-			remove_modifier = serial_killer_state_mod
-			if = {
-				limit = {
-					has_modifier = modifier_public_worried
-				}
-				remove_modifier = modifier_public_worried
-			}
-		}
-		remove_modifier = serial_killer_active_investigation
 	}
 }

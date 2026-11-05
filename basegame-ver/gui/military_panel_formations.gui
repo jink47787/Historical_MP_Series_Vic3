@@ -155,6 +155,15 @@ types MilitaryPanelCharacters {
 								texture = "gfx/interface/icons/military_icons/exiled_state_no_bg.dds"
 							}
 
+							### Formation Repairing
+							icon = {
+								visible = "[MilitaryFormation.IsDefeated]"
+								size = { 23 23 }
+								parentanchor = vcenter
+								tooltip = "FORMATION_FULLY_DEFEATED"
+								texture = "gfx/interface/icons/commander_order_icons/admiral_repairing.dds"
+							}
+
 							textbox = {
 								maximumsize = { 320 -1 }
 								minimumsize = { 320 -1 }
@@ -1017,51 +1026,21 @@ types MilitaryPanelCharacters {
 						margin_right = 10
 						spacing = 2
 
-						### SHIP TYPES - 3 or less
+						### SHIP TYPES - First 3
 						flowcontainer = {
-							visible = "[LessThan_int32(GetDataModelSize(ShipList.GetShipTemplates), '(int32)3')]"
-							datamodel = "[ShipList.GetShipTemplates]"
 							spacing = 7
-
-							item = {
-								flowcontainer = {
-									visible = "[NotZero(ShipList.GetNumShipsOfTemplate(ShipTemplate.Self))]"
-
-									compact_ship_template = {
-										size = { 110 30 }
-										
-										blockoverride "button_visibility" {
-											visible = no
-										}
-
-										blockoverride "number_minimumsize" {
-											minimumsize = { -1 30 }
-										}
-									}
-								}
-							}
-						}
-
-						### SHIP TYPES - More than 3
-						flowcontainer = {
-							visible = "[GreaterThan_int32(GetDataModelSize(ShipList.GetShipTemplates), '(int32)3')]"
 							datamodel = "[DataModelFirst(ShipList.GetShipTemplates, '(int32)3')]"
-							spacing = 7
 
 							item = {
-								flowcontainer = {
-									visible = "[NotZero(ShipList.GetNumShipsOfTemplate(ShipTemplate.Self))]"
+								compact_ship_template = {
+									size = { 110 30 }
 
-									compact_ship_template = {
-										size = { 110 30 }
-										
-										blockoverride "button_visibility" {
-											visible = no
-										}
+									blockoverride "button_visibility" {
+										visible = no
+									}
 
-										blockoverride "number_minimumsize" {
-											minimumsize = { -1 30 }
-										}
+									blockoverride "number_minimumsize" {
+										minimumsize = { -1 30 }
 									}
 								}
 							}
@@ -1097,6 +1076,22 @@ types MilitaryPanelCharacters {
 				margin_top = 2
 				blockoverride "button_size" {
 					size = { 525 40 }
+				}
+			}
+
+			flowcontainer = {
+				visible = "[GetVariableSystem.Exists(Concatenate('ships_', MilitaryFormation.GetIDString))]"
+				direction = vertical
+				parentanchor = hcenter
+
+				textbox = {
+					visible = "[And(MilitaryFormation.IsFleet, Not(MilitaryFormation.CanReceiveNewShips))]"
+					max_width = @panel_width_minus_10
+					margin = { 1 10}
+					autoresize = yes
+					multiline = yes
+					align = nobaseline
+					text = "FLEET_SHIP_CONSTRUCTION_NOT_DELIVERED_WARNING"
 				}
 			}
 

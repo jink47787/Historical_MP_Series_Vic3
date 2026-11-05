@@ -99,18 +99,51 @@ french_empire_clothes_pop_trigger = {
 	}
 }
 
+russian_clothes_trigger = {
+	exists = scope:character
+	scope:character = {
+		exists = home_country
+		OR = {
+			c:RUS ?= owner
+			owner ?= {
+				has_variable = russian_warlord_country
+			}
+		}
+	}
+}
+
+russian_clothes_pop_trigger = {
+	exists = scope:pop
+	scope:pop = {
+		OR = {
+			c:RUS ?= this
+			owner ?= {
+				has_variable = russian_warlord_country
+			}
+		}
+	}
+}
+
 russian_empire_clothes_trigger = {
 	exists = scope:character
 	scope:character = {
-		exists = c:RUS
 		exists = home_country
-		home_country = {
-			OR = {
-				AND = {
-					c:RUS = this
-					is_subject = no # preventing uniform conflicts if RUS becomes a subject of another country with puppet uniforms
+
+		OR = {
+			AND = {
+				exists = c:RUS
+				home_country = {
+					OR = {
+						AND = {
+							c:RUS = this
+							is_subject = no # preventing uniform conflicts if RUS becomes a subject of another country with puppet uniforms
+						}
+						is_subject_of = c:RUS
+					}
 				}
-				is_subject_of = c:RUS
+			}
+			owner ?= {
+				has_variable = russian_warlord_country
 			}
 		}
 	}
@@ -119,14 +152,21 @@ russian_empire_clothes_trigger = {
 russian_empire_clothes_pop_trigger = {
 	exists = scope:pop
 	scope:pop = {
-		exists = c:RUS
-		home_country = {
-			OR = {
-				AND = {
-					c:RUS = this
-					is_subject = no # preventing uniform conflicts if RUS becomes a subject of another country with puppet uniforms
+		OR = {
+			AND = {
+				exists = c:RUS
+				owner ?= {
+					OR = {
+						AND = {
+							c:RUS = this
+							is_subject = no # preventing uniform conflicts if RUS becomes a subject of another country with puppet uniforms
+						}
+						is_subject_of = c:RUS
+					}
 				}
-				is_subject_of = c:RUS
+			}
+			owner ?= {
+				has_variable = russian_warlord_country
 			}
 		}
 	}
@@ -286,6 +326,128 @@ independent_hungarian_clothes_pop_trigger = {
 				c:AUS ?= this
 				c:KUK ?= this
 			}
+		}
+	}
+}
+
+polish_early_clothes_trigger = {
+	exists = scope:character
+	scope:character ?= {
+		home_country ?= {
+			country_has_primary_culture = cu:polish
+			OR = {
+				is_subject = no
+				AND = {
+					exists = overlord
+					is_diplomatic_play_enemy_of = overlord
+				}
+			}
+			NOT = {
+				has_technology_researched = general_staff
+			}
+		}
+	}
+}
+
+polish_early_clothes_pop_trigger = {
+	exists = scope:pop
+	scope:pop ?= {
+		home_country ?= {
+			country_has_primary_culture = cu:polish
+			OR = {
+				is_subject = no
+				AND = {
+					exists = overlord
+					is_diplomatic_play_enemy_of = overlord
+				}
+			}
+			NOT = {
+				has_technology_researched = general_staff
+			}
+		}
+	}
+}
+
+polish_insurgent_clothes_trigger = {
+	exists = scope:character
+	scope:character ?= {
+		home_country ?= {
+			country_has_primary_culture = cu:polish
+			is_subject = yes
+			is_diplomatic_play_enemy_of = overlord
+		}
+	}
+}
+
+polish_insurgent_clothes_pop_trigger = {
+	exists = scope:pop
+	scope:pop ?= {
+		home_country ?= {
+			country_has_primary_culture = cu:polish
+			is_subject = yes
+			is_diplomatic_play_enemy_of = overlord
+		}
+	}
+}
+
+polish_independent_clothes_trigger = {
+	exists = scope:character
+	scope:character ?= {
+		home_country ?= {
+			country_has_primary_culture = cu:polish
+			is_subject = no
+			has_technology_researched = general_staff
+			NOT = {
+				has_technology_researched = automatic_machine_guns
+			}
+		}
+	}
+}
+
+polish_independent_clothes_pop_trigger = {
+	exists = scope:pop
+	scope:pop ?= {
+		home_country ?= {
+			country_has_primary_culture = cu:polish
+			is_subject = no
+			has_technology_researched = general_staff
+			NOT = {
+				has_technology_researched = automatic_machine_guns
+			}
+		}
+	}
+}
+
+polish_late_clothes_trigger = {
+	exists = scope:character
+	scope:character ?= {
+		home_country ?= {
+			country_has_primary_culture = cu:polish
+			OR = {
+				is_subject = no
+				AND = {
+					exists = overlord
+					is_diplomatic_play_enemy_of = overlord
+				}
+			}
+			has_technology_researched = automatic_machine_guns
+		}
+	}
+}
+
+polish_late_clothes_pop_trigger = {
+	exists = scope:pop
+	scope:pop ?= {
+		home_country ?= {
+			country_has_primary_culture = cu:polish
+			OR = {
+				is_subject = no
+				AND = {
+					exists = overlord
+					is_diplomatic_play_enemy_of = overlord
+				}
+			}
+			has_technology_researched = automatic_machine_guns
 		}
 	}
 }
@@ -1744,7 +1906,7 @@ monarchy_clothes_trigger = {
 			}
 	     	is_heir_of_own_country = yes
 		}
-     	owner = {
+     	owner ?= {
 			OR = {
      			has_law = law_type:law_monarchy
      			has_law = law_type:law_social_monarchy
@@ -1839,7 +2001,8 @@ east_asian_clothes_pop_trigger = {
 	scope:pop = {
 		NOR = {
 			culture = cu:yakut
-			culture = cu:siberian
+			culture = cu:evenki
+			culture = cu:chukchi
 		}
 		culture = {
 			OR = {
@@ -2018,7 +2181,8 @@ cold_clothes_pop_trigger = {
 			}
 			has_pop_culture = inuit
 			has_pop_culture = athabaskan
-			has_pop_culture = siberian
+			has_pop_culture = evenki
+			has_pop_culture = chukchi
 		}
 	}
 }
@@ -2049,12 +2213,14 @@ japanese_modernizer_character_trigger = {
 	OR = {
 		has_ideology = ideology:ideology_modernizer_leader
 		has_ideology = ideology:ideology_radical
-		has_ideology = ideology:ideology_social_democrat
+		has_ideology = ideology:ideology_state_socialist
 		has_socialist_ideology = yes
 		interest_group ?= {
 			OR = {
 				has_ideology = ideology:ideology_liberal
+				has_ideology = ideology:ideology_universalist
 				has_ideology = ideology:ideology_liberal_modern
+				has_ideology = ideology:ideology_universalist_modern
 				has_ideology = ideology:ideology_egalitarian
 				has_ideology = ideology:ideology_egalitarian_modern
 			}
@@ -2126,7 +2292,11 @@ indian_clothes_pop_trigger = {
 slavic_clothes_pop_trigger = {
 	scope:pop ?= {
 		culture = {
-			has_discrimination_trait_group = language_group_slavic
+			OR = {
+				has_discrimination_trait_group = language_group_slavic
+				cu:ugrian = this
+				cu:kalmyk = this
+			}
 		}
 	}
 }
@@ -2134,7 +2304,11 @@ slavic_clothes_pop_trigger = {
 slavic_clothes_trigger = {
 	scope:character ?= {
 		culture = {
-			has_discrimination_trait_group = language_group_slavic
+			OR = {
+				has_discrimination_trait_group = language_group_slavic
+				cu:ugrian = this
+				cu:kalmyk = this
+			}
 		}
 	}
 }

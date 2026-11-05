@@ -49,7 +49,7 @@ paris_commune.1 = {
 					set_interest_group_name = ig_national_guard
 					remove_ideology = ideology_loyalist
 					add_ideology = ideology_proletarian
-					remove_ideology = ideology_patriotic
+					remove_ideology = ideology_militarist
 					add_ideology = ideology_republican
 				}
 				if = {
@@ -63,10 +63,26 @@ paris_commune.1 = {
 				if = {
 					limit = {
 						NOT = {
-							has_law = law_type:law_elected_bureaucrats
+							has_law = law_type:law_factory_councils
 						}
 					}
-					activate_law = law_type:law_elected_bureaucrats
+					activate_law = law_type:law_factory_councils
+				}
+				if = {
+					limit = {
+						NOT = {
+							has_law = law_type:law_communal_administration
+						}
+					}
+					activate_law = law_type:law_communal_administration
+				}
+				if = {
+					limit = {
+						NOT = {
+							has_law = law_type:law_revolutionary_guard
+						}
+					}
+					activate_law = law_type:law_revolutionary_guard
 				}
 				if = {
 					limit = {
@@ -99,14 +115,6 @@ paris_commune.1 = {
 						}
 					}
 					activate_law = law_type:law_total_separation
-				}
-				if = {
-					limit = {
-						NOT = {
-							has_law = law_type:law_mass_conscription
-						}
-					}
-					activate_law = law_type:law_mass_conscription
 				}
 				if = {
 					limit = {
@@ -164,14 +172,6 @@ paris_commune.1 = {
 					}
 					activate_law = law_type:law_closed_borders
 				}
-				if = {
-					limit = {
-						NOT = {
-							has_law = law_type:law_factory_councils
-						}
-					}
-					activate_law = law_type:law_factory_councils
-				}
 				add_modifier = {
 					name = modifier_paris_commune_politics
 					days = normal_modifier_time
@@ -211,6 +211,7 @@ paris_commune.1 = {
 		}
 		ruler = {
 			save_scope_as = ruler_scope
+			set_temporary_event_immortality = { DURATION = 3 }
 		}
 		every_country = {
 			limit = {
@@ -228,14 +229,9 @@ paris_commune.1 = {
 	option = {
 		name = paris_commune.1.a
 		default_option = yes
-		add_journal_entry = {
-			type = je_the_paris_commune_france
-		}
+		add_contextless_journal_entry = je_paris_commune
 		c:PRC ?= {
 			hidden_effect = {
-				add_journal_entry = {
-					type = je_the_paris_commune_communards
-				}
 				add_loyalists = {
 					value = 0.9
 				}
@@ -246,7 +242,9 @@ paris_commune.1 = {
 			}
 		}
 		hidden_effect = {
-			set_global_variable = { name = paris_commune_progress_var value = 40 }
+			je:je_paris_commune ?= {
+				set_bar_progress = { value = 40 name = je_paris_commune_progress_bar }
+			}
 			set_global_variable = { name = paris_commune_progress_drift value = -1 }
 		}
 		custom_tooltip = commune_progress_start_at_40
@@ -254,14 +252,9 @@ paris_commune.1 = {
 	}
 	option = {
 		name = paris_commune.1.b
-		add_journal_entry = {
-			type = je_the_paris_commune_france
-		}
+		add_contextless_journal_entry = je_paris_commune
 		c:PRC ?= {
 			hidden_effect = {
-				add_journal_entry = {
-					type = je_the_paris_commune_communards
-				}
 				add_loyalists = {
 					value = 0.9
 				}
@@ -272,11 +265,20 @@ paris_commune.1 = {
 			}
 		}
 		hidden_effect = {
-			set_global_variable = { name = paris_commune_progress_var value = 60 }
+			je:je_paris_commune ?= {
+				set_bar_progress = { value = 60 name = je_paris_commune_progress_bar }
+			}
 			set_global_variable = { name = paris_commune_progress_drift value = 1 }
 		}
 		custom_tooltip = commune_progress_start_at_60
 		set_variable = paris_commune_prc_perspective
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:ruler_scope }
+		je:je_paris_commune ?= {
+			journal_entry_update_paris_commune_variables = yes
+		}
 	}
 }
 
@@ -331,6 +333,15 @@ paris_commune.2 = {
 	option = {
 		name = paris_commune.2.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		c:FRA ?= {
 			annex_as_civil_war = c:PRC
 		}
@@ -391,6 +402,15 @@ paris_commune.2 = {
 	}
 	option = {
 		name = paris_commune.2.b
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		c:FRA ?= {
 			annex_as_civil_war = c:PRC
 		}
@@ -439,6 +459,10 @@ paris_commune.2 = {
 				}
 			}
 		}
+	}
+
+	after = {
+		je_paris_commune_cleanup = yes
 	}
 }
 
@@ -504,7 +528,7 @@ paris_commune.3 = {
 					set_interest_group_name = ig_national_guard
 					remove_ideology = ideology_loyalist
 					add_ideology = ideology_proletarian
-					remove_ideology = ideology_patriotic
+					remove_ideology = ideology_militarist
 					add_ideology = ideology_republican
 				}
 			}
@@ -556,7 +580,7 @@ paris_commune.3 = {
 					set_interest_group_name = ig_national_guard
 					remove_ideology = ideology_loyalist
 					add_ideology = ideology_proletarian
-					remove_ideology = ideology_patriotic
+					remove_ideology = ideology_militarist
 					add_ideology = ideology_republican
 				}
 			}
@@ -587,6 +611,10 @@ paris_commune.3 = {
 			value = large_radicals
 			pop_type = laborers
 		}
+	}
+
+	after = {
+		je_paris_commune_cleanup = yes
 	}
 }
 

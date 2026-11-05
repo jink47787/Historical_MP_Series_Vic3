@@ -80,6 +80,13 @@ input_context={
 	}
 
 	input_action = {
+		name = "music_previous_track"
+		text = "SETTING_INPUT_ACTION_PREVIOUS_MUSIC_TRACK"
+		scancode = 95	# Keypad 7
+		scancode = 259	# AUDIOPREV
+	}
+
+	input_action = {
 		name = "camera_up"
 		text = "SETTING_INPUT_ACTION_CAMERA_UP"
 		scancode = 26	# W
