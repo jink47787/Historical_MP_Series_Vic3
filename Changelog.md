@@ -84,6 +84,9 @@ Thanks to Yyyman for his Italy company changes.
 - Topbar shows the market's Balance of Trade in place of Prestige, with a graph of the last 52 weeks in its tooltip; the market panel shows the market's exports, imports and balance
 - New Reserve Currency alert in the topbar, next to the vanilla alerts: green when your market is about to take it, red when you hold it and a rival is about to take it. Clicking it opens the market panel
 
+## Stability/Bug Fixes
+- Updated to Victoria 3 version 1.15. Government-built universities no longer need regional investment permission (privately built ones still do), and the India and Kulturkampf progress bars use the new two-colour look (green progress on red, with a marker)
+
 ## AI & Performance
 - AI builds more construction goods: it wants a high supply of building materials, stone, oil and rubber, prioritises steel mills, glassworks, logging camps, quarries and Builders' Yards, and upgrades construction sector methods soon after unlocking them
 - Performance: about 17% faster in early game tests (1836-1839 ran in 1:56 instead of 2:20)
