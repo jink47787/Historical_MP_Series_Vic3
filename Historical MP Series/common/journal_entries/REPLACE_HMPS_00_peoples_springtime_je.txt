@@ -7,10 +7,17 @@
 		always = yes
 	}
 
-	should_be_involved = { #HMPS change
-		OR = {
-			has_variable = failed_1848_var
-			is_involved_in_journal_entry = je_springtime_of_the_peoples
+	should_be_involved = { # HMPS: vanilla rules restored while the Political Question is paused. HMPS version: OR = { has_variable = failed_1848_var is_involved_in_journal_entry = je_springtime_of_the_peoples }
+		is_in_geographic_region = geographic_region_europe
+		has_technology_researched = egalitarianism
+		# Arbitrary exception for Congress Poland
+		trigger_if = {
+			limit = {
+				NOT = { has_global_variable = poland_je_complete }
+			}
+			NOT = {
+				c:POL ?= THIS
+			}
 		}
 	}
 
@@ -33,13 +40,13 @@
 
 	possible = {
 		any_country_in_europe = {
-			has_variable = failed_1848_var #HMPS Changed
-#			has_technology_researched = egalitarianism
+			#has_variable = failed_1848_var # HMPS version; vanilla restored while the Political Question is paused
+			has_technology_researched = egalitarianism
         }
-#		custom_tooltip = {
-#			text = peoples_springtime_forest_of_bayonets_failed_tt
-#			has_global_variable = peoples_springtime_happening
-#		}
+		custom_tooltip = {
+			text = peoples_springtime_forest_of_bayonets_failed_tt
+			has_global_variable = peoples_springtime_happening
+		}
 	}
 
 	immediate_all_involved = {
@@ -856,7 +863,7 @@ REPLACE:je_red_summer = {
 	can_revolution_inherit = no
 }
 
-# HMPS: REPLACE of the vanilla 1.15 JE without its Revolutionary Spring outcome. HMPS starts the Springtime of the Peoples through the political question JE instead (vanilla 1.15 moved the start here from on_actions; card C0384).
+# HMPS: REPLACE of the vanilla 1.15 JE. The vanilla Revolutionary Spring outcome is restored while the Political Question JE (je_napoleons_legacy) is paused, so this JE starts the Springtime of the Peoples again. HMPS adds one change: the timeout sets peoples_springtime_happened, as the Political Question's timeout did.
 REPLACE:je_forest_of_bayonets = {
 	icon = "gfx/interface/icons/event_icons/event_fire.dds"
 
@@ -1002,6 +1009,41 @@ REPLACE:je_forest_of_bayonets = {
 		}
 	}
 
+	outcome = {
+		header = je_forest_of_bayonets_fail_header
+		effect_header = je_forest_of_bayonets_on_fail_header
+		color = "red_outcome"
+		conclusion_desc = je_forest_of_bayonets_fail_conclusion_desc
+		flags = { historical }
+		trigger = {
+			custom_tooltip = {
+				text = je_forest_of_bayonets_fail_bar_tt
+				scope:journal_entry = {
+					"scripted_bar_progress(forest_of_bayonets_progress_bar)" >= forest_of_bayonets_upper_bound
+				}
+			}
+			scope:journal_entry ?= {
+				any_scope_je_involved = {
+					country_has_springtime_revolution = {
+						THRESHOLD = 0.25
+					}
+				}
+			}
+		}
+		effect = {
+			custom_tooltip = {
+				text = je_forest_of_bayonets_starts_springtime_tt
+				forest_of_bayonets_start_springtime_effect = yes
+			}
+		}
+		effect_all_involved = {
+			show_as_tooltip = {
+				trigger_event = 1848.4
+				add_modifier = { name = modifier_springtime_of_the_peoples days = 1095 }
+			}
+		}
+	}
+
 	timeout = 9125
 
 	outcome = {
@@ -1010,5 +1052,15 @@ REPLACE:je_forest_of_bayonets = {
 		color = "gold_positive"
 		flags = { timeout }
 		conclusion_desc = je_forest_of_bayonets_complete_conclusion_desc
+		effect = { # HMPS: the Springtime never came; unlock content that waits for it (the Political Question's timeout did this)
+			hidden_effect = {
+				if = {
+					limit = {
+						NOT = { has_global_variable = peoples_springtime_happening }
+					}
+					set_global_variable = peoples_springtime_happened
+				}
+			}
+		}
 	}
 }

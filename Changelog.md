@@ -66,6 +66,7 @@ Thanks to Yyyman for his Italy company changes.
 
 ## Political
 - Multiculturalism reworked and renamed Multinationalism; ideologies that strongly disapproved of it now only disapprove
+- The Political Question journal entry is paused: it no longer starts at game start and its progress hooks are off, with its definition and laws kept dormant so it can be turned back on. The Springtime of the Peoples is back to the vanilla 1.15 setup: Forest of Bayonets starts it again with the vanilla "Revolutionary Spring" outcome, and European countries with Egalitarianism get its rules after Forest of Bayonets fails. If Forest of Bayonets times out without a Springtime, the 1848 unlock still fires, so Gutter Crown and the major formables still unlock
 
 ## Flava
 #### Europe
