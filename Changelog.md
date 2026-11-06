@@ -385,3 +385,4 @@ Thanks to Yyyman for his Italy company changes.
 - Fixed the Oregon journal entry re-adding the US claim on Idaho, Oregon and Washington every month
 - Fixes to the Congo vote and the Scramble for Africa events
 - Fixed script errors in the Russian tsar events and the ACW segregation events; removed an unreachable Spanish event
+- Vanilla 1.15 follow-ups: failing the Sick Man of Europe journal entry now gives the Dead Man of Europe modifier and starts the Great Eastern Crisis journal entry (a main failure also removes the Rumelian tradition from Albanian, Bosniak and Sephardic cultures); the West America journal entry no longer blocks the Oregon Trail event; Pot Stills give +10 groceries (was +15), because vanilla added glass and copper inputs; Electric Lifts use 5 copper instead of 5 lead, at the same cost
