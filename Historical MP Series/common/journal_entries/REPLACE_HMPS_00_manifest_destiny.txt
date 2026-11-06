@@ -33,69 +33,84 @@
 		value = 60
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = hmps_manifest_destiny_complete_tt
-
-			any_state = {
-				count >= 6
-				OR = {
-					state_region = s:STATE_CALIFORNIA
-					state_region = s:STATE_NEVADA
-					state_region = s:STATE_UTAH
-					state_region = s:STATE_ARIZONA
-					state_region = s:STATE_NEW_MEXICO
-					state_region = s:STATE_TEXAS
-				}
-				owner = c:USA
-			}
-		}
-		#scope:journal_entry = { is_goal_complete = yes } #Temporarily Removed
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		trigger_event = { id = manifest_destiny.1 }
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = hmps_manifest_destiny_complete_tt
+
+				any_state = {
+					count >= 6
+					OR = {
+						state_region = s:STATE_CALIFORNIA
+						state_region = s:STATE_NEVADA
+						state_region = s:STATE_UTAH
+						state_region = s:STATE_ARIZONA
+						state_region = s:STATE_NEW_MEXICO
+						state_region = s:STATE_TEXAS
+					}
+					owner = c:USA
+				}
+			}
+			#scope:journal_entry = { is_goal_complete = yes } #Temporarily Removed
+		}
+		effect = {
+			trigger_event = { id = manifest_destiny.1 }
+		}
 	}
 
-	fail = {
-		custom_tooltip = {
-			text = hmps_manifest_destiny_fail_tt
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = hmps_manifest_destiny_fail_tt
 
-			scope:journal_entry = {
-				"scripted_bar_progress(hmps_manifest_destiny_time_limit_bar)" <= 0
+				scope:journal_entry = {
+					"scripted_bar_progress(hmps_manifest_destiny_time_limit_bar)" <= 0
+				}
+			}
+			NOT = {
+				any_state = {
+					count >= 6
+					OR = {
+						state_region = s:STATE_CALIFORNIA
+						state_region = s:STATE_NEVADA
+						state_region = s:STATE_UTAH
+						state_region = s:STATE_ARIZONA
+						state_region = s:STATE_NEW_MEXICO
+						state_region = s:STATE_TEXAS
+					}
+					owner = c:USA
+				}
 			}
 		}
-		NOT = {
-			any_state = {
-				count >= 6
-				OR = {
-					state_region = s:STATE_CALIFORNIA
-					state_region = s:STATE_NEVADA
-					state_region = s:STATE_UTAH
-					state_region = s:STATE_ARIZONA
-					state_region = s:STATE_NEW_MEXICO
-					state_region = s:STATE_TEXAS
+		effect = {
+			every_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_CALIFORNIA
+						state_region = s:STATE_NEVADA
+						state_region = s:STATE_UTAH
+						state_region = s:STATE_ARIZONA
+						state_region = s:STATE_NEW_MEXICO
+						state_region = s:STATE_TEXAS
+					}
+					owner = c:USA
 				}
-				owner = c:USA
+				set_state_type = unincorporated
+				state_region = { remove_claim = c:USA }
 			}
-		}
-	}
-	
-	on_fail = {
-		every_state = {
-			limit = {
-				OR = {
-					state_region = s:STATE_CALIFORNIA
-					state_region = s:STATE_NEVADA
-					state_region = s:STATE_UTAH
-					state_region = s:STATE_ARIZONA
-					state_region = s:STATE_NEW_MEXICO
-					state_region = s:STATE_TEXAS
-				}
-				owner = c:USA
-			}
-			set_state_type = unincorporated
-			state_region = { remove_claim = c:USA }
+			je_manifest_destiny_mexico_cleanup = yes
 		}
 	}
 
@@ -143,7 +158,6 @@
 			}
 		}
 	}
-
 	weight = 100
 		
 	should_be_pinned_by_default_uninvolved_or_context = yes
@@ -158,114 +172,123 @@ REPLACE:je_manifest_destiny_frontier_wars = {
 		hmps_usa_frontier_wars_modifier
 	}
 
-	# note that if you change this, also update the decision
-	complete = {
-		owns_entire_state_region = STATE_MONTANA
-		owns_entire_state_region = STATE_WYOMING
-		owns_entire_state_region = STATE_NORTH_DAKOTA
-		owns_entire_state_region = STATE_SOUTH_DAKOTA
-		owns_entire_state_region = STATE_NEBRASKA
-		owns_entire_state_region = STATE_KANSAS
+	activation_description = {
+		always = yes
 	}
 
-	on_complete = {
-		trigger_event = { id = manifest_destiny.2 }
-		set_global_variable = hmps_frontier_wars_done
-		hidden_effect = {
-			s:STATE_OKLAHOMA = {
-				if = {
-					limit = {
-						any_scope_state = {
-							NOT = {
-								owner = ROOT
+	# note that if you change this, also update the decision
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			owns_entire_state_region_uncontested = STATE_MONTANA
+			owns_entire_state_region_uncontested = STATE_WYOMING
+			owns_entire_state_region_uncontested = STATE_NORTH_DAKOTA
+			owns_entire_state_region_uncontested = STATE_SOUTH_DAKOTA
+			owns_entire_state_region_uncontested = STATE_NEBRASKA
+			owns_entire_state_region_uncontested = STATE_KANSAS
+		}
+		effect = {
+			trigger_event = { id = manifest_destiny.2 }
+			set_global_variable = hmps_frontier_wars_done
+			hidden_effect = {
+				s:STATE_OKLAHOMA = {
+					if = {
+						limit = {
+							any_scope_state = {
+								NOT = {
+									owner = ROOT
+								}
 							}
 						}
+						add_claim = ROOT
 					}
-					add_claim = ROOT
 				}
-			}
-			s:STATE_MONTANA = {
-				if = {
-					limit = {
-						any_scope_state = {
-							NOT = {
-								owner = ROOT
+				s:STATE_MONTANA = {
+					if = {
+						limit = {
+							any_scope_state = {
+								NOT = {
+									owner = ROOT
+								}
 							}
 						}
+						add_claim = ROOT
 					}
-					add_claim = ROOT
 				}
-			}
-			s:STATE_WYOMING = {
-				if = {
-					limit = {
-						any_scope_state = {
-							NOT = {
-								owner = ROOT
+				s:STATE_WYOMING = {
+					if = {
+						limit = {
+							any_scope_state = {
+								NOT = {
+									owner = ROOT
+								}
 							}
 						}
+						add_claim = ROOT
 					}
-					add_claim = ROOT
 				}
-			}
-			s:STATE_COLORADO = {
-				if = {
-					limit = {
-						any_scope_state = {
-							NOT = {
-								owner = ROOT
+				s:STATE_COLORADO = {
+					if = {
+						limit = {
+							any_scope_state = {
+								NOT = {
+									owner = ROOT
+								}
 							}
 						}
+						add_claim = ROOT
 					}
-					add_claim = ROOT
 				}
-			}
-			s:STATE_NORTH_DAKOTA = {
-				if = {
-					limit = {
-						any_scope_state = {
-							NOT = {
-								owner = ROOT
+				s:STATE_NORTH_DAKOTA = {
+					if = {
+						limit = {
+							any_scope_state = {
+								NOT = {
+									owner = ROOT
+								}
 							}
 						}
+						add_claim = ROOT
 					}
-					add_claim = ROOT
 				}
-			}
-			s:STATE_SOUTH_DAKOTA = {
-				if = {
-					limit = {
-						any_scope_state = {
-							NOT = {
-								owner = ROOT
+				s:STATE_SOUTH_DAKOTA = {
+					if = {
+						limit = {
+							any_scope_state = {
+								NOT = {
+									owner = ROOT
+								}
 							}
 						}
+						add_claim = ROOT
 					}
-					add_claim = ROOT
 				}
-			}
-			s:STATE_NEBRASKA = {
-				if = {
-					limit = {
-						any_scope_state = {
-							NOT = {
-								owner = ROOT
+				s:STATE_NEBRASKA = {
+					if = {
+						limit = {
+							any_scope_state = {
+								NOT = {
+									owner = ROOT
+								}
 							}
 						}
+						add_claim = ROOT
 					}
-					add_claim = ROOT
 				}
-			}
-			s:STATE_KANSAS = {
-				if = {
-					limit = {
-						any_scope_state = {
-							NOT = {
-								owner = ROOT
+				s:STATE_KANSAS = {
+					if = {
+						limit = {
+							any_scope_state = {
+								NOT = {
+									owner = ROOT
+								}
 							}
 						}
+						add_claim = ROOT
 					}
-					add_claim = ROOT
 				}
 			}
 		}

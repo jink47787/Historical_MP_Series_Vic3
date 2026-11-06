@@ -3,93 +3,125 @@
 
 	group = je_group_foreign_affairs
 
-	complete = {
-		OR = {
-			scope:target ?= {
-				has_law_or_variant = law_type:law_free_trade
+	activation_description = {
+		always = yes
+	}
+
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			OR = {
+				scope:target ?= {
+					has_law_or_variant = law_type:law_free_trade
+				}
+				has_treaty_foreign_investment_rights_with = { TARGET = scope:target }
+				any_scope_state = {
+					is_treaty_port = yes
+					state_region = {
+						any_scope_state = {
+							owner = scope:target
+						}
+					}
+				}
 			}
-			has_treaty_foreign_investment_rights_with = { TARGET = scope:target }
-			any_scope_state = {
-				is_treaty_port = yes
-				state_region = {
-					any_scope_state = {
-						owner = scope:target
+			hidden_trigger = {
+				scope:target = {
+					has_modifier = opium_wars_lost
+				}
+			}
+		}
+		effect = {
+			add_loyalists = {
+				strata = upper
+				value = 0.2
+			}
+			add_loyalists = {
+				strata = middle
+				value = 0.1
+			}
+			add_loyalists = {
+				strata = lower
+				value = 0.05
+			}
+			trigger_event = {
+				id = opium_wars.5
+				days = 5
+			}
+		}
+	}
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = opium_wars_fail_tt
+				scope:target = {
+					NOT = {
+						any_primary_culture = {
+							has_cultural_obsession = opium
+						}
 					}
 				}
 			}
 		}
-		hidden_trigger = {
-			scope:target = {
-				has_modifier = opium_wars_lost
+		effect = {
+			add_radicals = {
+				strata = upper
+				value = 0.2
 			}
+			add_radicals = {
+				strata = middle
+				value = 0.1
+			}
+			add_radicals = {
+				strata = lower
+				value = 0.05
+			}
+			custom_tooltip = {
+				text = opium_wars_fail_invalid_tt
+				remove_variable = opium_wars_aggressor
+			}
+			je_opium_wars_cleanup = yes
 		}
 	}
 
-	on_complete = {
-		add_loyalists = {
-			strata = upper
-			value = 0.2
-		}
-		add_loyalists = {
-			strata = middle
-			value = 0.1
-		}
-		add_loyalists = {
-			strata = lower
-			value = 0.05
-		}
-		trigger_event = {
-			id = opium_wars.5
-			days = 5
-		}
-	}
-
-	fail = {
-		custom_tooltip = {
-			text = opium_wars_fail_tt
-			scope:target = {
-				NOT = {
-					any_primary_culture = {
-						has_cultural_obsession = opium
-					}
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				exists = scope:target
+			}
+			NOT = { has_war_with = scope:target }
+			hidden_trigger = {
+				scope:target = {
+					has_modifier = opium_wars_lost
 				}
 			}
 		}
-	}
-
-	invalid = {
-		NOT = {
-			exists = scope:target
-		}
-	}
-
-	on_invalid = {
-		remove_variable = opium_wars_aggressor
-	}
-
-	on_fail = {
-		add_radicals = {
-			strata = upper
-			value = 0.2
-		}
-		add_radicals = {
-			strata = middle
-			value = 0.1
-		}
-		add_radicals = {
-			strata = lower
-			value = 0.05
-		}
-		custom_tooltip = {
-			text = opium_wars_fail_invalid_tt
+		effect = {
 			remove_variable = opium_wars_aggressor
+			je_opium_wars_cleanup = yes
 		}
 	}
 
-	on_timeout = {
-		custom_tooltip = {
-			text = opium_wars_fail_invalid_tt
-			remove_variable = opium_wars_aggressor
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			custom_tooltip = {
+				text = opium_wars_fail_invalid_tt
+				remove_variable = opium_wars_aggressor
+			}
+			je_opium_wars_cleanup = yes
 		}
 	}
 

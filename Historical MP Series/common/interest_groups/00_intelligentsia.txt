@@ -7,7 +7,7 @@
 	ideologies = {
 		ideology_liberal
 		ideology_anti_clerical
-		ideology_republican
+		ideology_constitutionalist
 		ideology_anti_slavery
 	}
 
@@ -34,6 +34,7 @@
 	}
 
 	on_enable = {
+		# ONLY HANDLE IG TRAITS IN THIS BLOCK
 		ig:ig_intelligentsia ?= {
 			### Specific IG traits
 			if = {
@@ -85,6 +86,8 @@
 				set_ig_trait = ig_trait:ig_trait_propagandists
 			}
 		}
+
+		# FLAVOUR AND IDEOLOGIES GO HERE
 		# Papal Intellegentsia
 		if = {
 			limit = {
@@ -126,9 +129,6 @@
 				set_ig_trait = ig_trait:ig_trait_brasilidade
 				set_ig_trait = ig_trait:ig_trait_bachareis
 				set_ig_trait = ig_trait:ig_trait_social_criticism
-
-				remove_ideology = ideology_republican
-				add_ideology = ideology_constitutionalist
 			}
 		}
 		# Philippines Intelligentsia
@@ -147,29 +147,6 @@
 			}
 			ig:ig_intelligentsia ?= {
 				set_interest_group_name = ig_civil_servants
-
-				remove_ideology = ideology_republican
-				add_ideology = ideology_constitutionalist
-			}
-		}
-		# Britain and other Constitutionalists
-		if = {
-			limit = {
-				OR = {
-					c:GBR ?= THIS
-					c:JAP ?= THIS
-					c:TUR ?= THIS
-					c:POR ?= THIS
-					c:SPA ?= THIS
-					c:AUS ?= THIS
-					any_primary_culture = { # Princely States and Nepal
-						has_discrimination_trait_group = heritage_group_south_asian
-					}
-				}
-			}
-			ig:ig_intelligentsia ?= {
-				remove_ideology = ideology_republican
-				add_ideology = ideology_constitutionalist
 			}
 		}
 		if = {
@@ -178,7 +155,7 @@
 			}
 			ig:ig_intelligentsia ?= {
 				set_interest_group_name = ig_rangakusha
-				remove_ideology = ideology_republican
+				remove_ideology = ideology_constitutionalist
 				add_ideology = ideology_rangaku
 			}
 		}
@@ -193,11 +170,41 @@
 				remove_ideology = ideology_liberal
 				add_ideology = ideology_liberal_modern
 			}
+			every_interest_group = {
+				limit = {
+					has_ideology = ideology:ideology_universalist
+				}
+				remove_ideology = ideology_universalist
+				add_ideology = ideology_universalist_modern
+			}
+		}
+		if = { # Republics - for newly-released countries. For game-start, initialisation is handled in global history
+			limit = {
+				OR = {
+					is_in_geographic_region = geographic_region_french_revolution_zone
+					AND = {
+						has_law = law_type:law_colonial_administration
+						NOT = {
+							c:BIC ?= this
+						}
+					}
+					has_law_or_variant = law_type:law_presidential_republic
+					has_law_or_variant = law_type:law_parliamentary_republic
+					has_law_or_variant = law_type:law_corporate_state
+					has_law_or_variant = law_type:law_council_republic
+					has_law_or_variant = law_type:law_theocracy
+				}
+			}
+			ig:ig_intelligentsia ?= {
+				remove_ideology = ideology_constitutionalist
+				add_ideology = ideology_republican
+			}
 		}
 		
 		# HMPS USA
-		else_if = {
+		if = {
 			limit = {
+				NOT = { has_technology_researched = feminism }
 				country_has_primary_culture = cu:yankee
 				country_has_primary_culture = cu:dixie
 			}
@@ -325,6 +332,19 @@
 		}
 
 		add = {
+			desc = "POP_BUREAUCRATS_MANAGERIAL"
+			if = {
+				limit = {
+					is_pop_type = bureaucrats
+					scope:interest_group = {
+						has_ideology = ideology:ideology_managerial
+					}
+				}
+				value = 200
+			}
+		}
+
+		add = {
 			desc = "POP_ARISTOCRATS"
 			if = {
 				limit = {
@@ -419,20 +439,6 @@
 					desc = "POP_INDIA_CIVIL_SERVICE"
 					value = 1.5
 				}
-			}
-		}
-
-		add = {
-			desc = "POP_MILITARY_BUREAUCRACY"
-			if = {
-				limit = {
-					is_pop_type = bureaucrats
-					owner = {
-						c:ALK ?= this
-						has_government_type = gov_chartered_company
-					}
-				}
-				multiply = 0.25
 			}
 		}
 
@@ -589,10 +595,10 @@
 	commander_weight = {
 		value = 1.0
 	}
-	
+
 	magnate_weight = {
 		value = 1.0
-	}	
+	}
 
 	executive_weight = {
 		value = 2.0
@@ -694,7 +700,7 @@
 	commander_leader_weight = {
 		value = 0.5
 	}
-	
+
 	# Multiplier applied to the weight for an appropriate magnate will be selected from the character pool to lead the IG
 	# root = interest group
 	magnate_leader_weight = {
@@ -708,7 +714,7 @@
 			}
 			add = 5
 		}
-	}	
+	}
 
 	# Multiplier applied to the weight for an appropriate executive will be selected from the character pool to lead the IG
 	# root = interest group

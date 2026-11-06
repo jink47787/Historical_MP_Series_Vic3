@@ -3,6 +3,10 @@ REPLACE:je_acw_countdown = { #HMPS: Removing progress bar as HMPS changes makes 
 	
 	group = je_group_usa_american_civil_war
 
+	activation_description = {
+		always = yes
+	}
+
 	immediate = {
 		#set_variable = {
 		#	name = acw_progress_var
@@ -14,70 +18,80 @@ REPLACE:je_acw_countdown = { #HMPS: Removing progress bar as HMPS changes makes 
 		} #HMPS <-
 	}
 
-	complete = {
-		OR = {
-			has_law_or_variant = law_type:law_slavery_banned
-			has_law_or_variant = law_type:law_slave_trade
-		}
-	}
-
-	on_complete = { #HMPS: Removed slavery_law_events.7 triggering when finished (unknown difference from vanilla)
-		remove_modifier = missouri_compromise
-		remove_modifier = usa_slavery_debate_modifier #HMPS ->
-		if = {
-			limit = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			OR = {
+				has_law_or_variant = law_type:law_slavery_banned
 				has_law_or_variant = law_type:law_slave_trade
 			}
-			add_modifier = {
-				name = southern_planter_victory
-				months = -1
-			}
-		} #HMPS <-
-	}
-
-	fail = {
-		OR = {
-			has_civil_war_from_movement_type = movement_type:movement_pro_slavery
-			has_civil_war_from_movement_type = movement_type:movement_anti_slavery
+		}
+		effect = { #HMPS: Removed slavery_law_events.7 triggering when finished (unknown difference from vanilla)
+			remove_modifier = missouri_compromise
+			remove_modifier = usa_slavery_debate_modifier #HMPS ->
+			if = {
+				limit = {
+					has_law_or_variant = law_type:law_slave_trade
+				}
+				add_modifier = {
+					name = southern_planter_victory
+					months = -1
+				}
+			} #HMPS <-
 		}
 	}
 
-	on_fail = {
-		remove_modifier = usa_slavery_debate_modifier
-		if = {
-			limit = {
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
 				has_civil_war_from_movement_type = movement_type:movement_pro_slavery
-			}
-			set_variable = csa_will_spawn_var
-			custom_tooltip = { #HMPS: Slight change from vanilla where this is outside of the if statement
-				text = acw_will_happen_tt
-				trigger_event = { id = acw_je_events.1 }
+				has_civil_war_from_movement_type = movement_type:movement_anti_slavery
 			}
 		}
-		if = { #HMPS ->
-			limit = {
-				any_country = {
-					is_revolutionary = yes
-					country_definition = root.country_definition
-					ig:ig_landowners = {
-						is_in_government = yes
+		effect = {
+			remove_modifier = usa_slavery_debate_modifier
+			if = {
+				limit = {
+					has_civil_war_from_movement_type = movement_type:movement_pro_slavery
+				}
+				set_variable = csa_will_spawn_var
+				custom_tooltip = { #HMPS: Slight change from vanilla where this is outside of the if statement
+					text = acw_will_happen_tt
+					trigger_event = { id = acw_je_events.1 }
+				}
+			}
+			if = { #HMPS ->
+				limit = {
+					any_country = {
+						is_revolutionary = yes
+						country_definition = root.country_definition
+						ig:ig_landowners = {
+							is_in_government = yes
+						}
 					}
 				}
+				set_variable = csa_will_spawn_var
 			}
-			set_variable = csa_will_spawn_var
-		}
-		if = {
-			limit = {
-				any_country = {
-					is_revolutionary = yes
-					country_definition = root.country_definition
+			if = {
+				limit = {
+					any_country = {
+						is_revolutionary = yes
+						country_definition = root.country_definition
+					}
 				}
-			}
-			custom_tooltip = {
-				text = acw_will_happen_tt
-				trigger_event = { id = acw_je_events.1 }
-			}
-		} #HMPS <-
+				custom_tooltip = {
+					text = acw_will_happen_tt
+					trigger_event = { id = acw_je_events.1 }
+				}
+			} #HMPS <-
+		}
 	}
 
 	on_monthly_pulse = {
@@ -181,6 +195,10 @@ REPLACE:je_acw_reconstruction = {
 	
 	group = je_group_usa_american_civil_war
 
+	activation_description = {
+		always = yes
+	}
+
 	scripted_button = hmps_decreased_discrimination_against_afro_americans
 	scripted_button = hmps_instate_sharecropping
 	scripted_button = hmps_end_reconstruction_early
@@ -217,22 +235,37 @@ REPLACE:je_acw_reconstruction = {
 		}
 	}
 
-	complete = {
-		OR = {
-			scope:journal_entry = {
-				is_goal_complete = yes
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			OR = {
+				scope:journal_entry = {
+					is_goal_complete = yes
+				}
+				has_variable = hmps_ended_reconstruction_early
 			}
-			has_variable = hmps_ended_reconstruction_early
+		}
+		effect = {
+			trigger_event = { id = acw_je_events.3 }
+			hidden_effect = { # sanity check just in case something somehow falls through the cracks
+				every_scope_state = {
+					limit = { has_modifier = unreconstructed_state }
+					remove_modifier = unreconstructed_state
+				}
+			}
 		}
 	}
 
-	on_complete = {
-		trigger_event = { id = acw_je_events.3 }
-		hidden_effect = { # sanity check just in case something somehow falls through the cracks
-			every_scope_state = {
-				limit = { has_modifier = unreconstructed_state }
-				remove_modifier = unreconstructed_state
-			}
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			trigger_event = { id = acw_je_events.3 }
 		}
 	}
 
@@ -249,16 +282,16 @@ REPLACE:je_acw_reconstruction = {
 	timeout = 6570 #HMPS: Increased time by 50% to get Dixie
 
 	should_be_pinned_by_default_uninvolved_or_context = yes
-
-	on_timeout = {
-		trigger_event = { id = acw_je_events.3 }
-	}
 }
 
 REPLACE:je_acw_reincorporate = {
 	icon = "gfx/interface/icons/event_icons/event_protest.dds"
 	
 	group = je_group_usa_american_civil_war
+
+	activation_description = {
+		always = yes
+	}
 
 	immediate = {
 		every_scope_state = {
@@ -274,36 +307,185 @@ REPLACE:je_acw_reincorporate = {
 		}
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = "ACW_REINCORPORATE_TT"
-
-			any_scope_state = {
-				filter = {
-					is_in_geographic_region = geographic_region_hmps_csa
-				}
-				count >= 15
-				is_incorporated = yes
-				loyalist_fraction = {
-					value >= acw_reincorporate_dixie_loyalist_min
-					culture = cu:dixie
+	map_color = {
+		if = {
+			limit = {
+				owner = {
+					has_journal_entry = je_acw_reincorporate
+					NOT = { is_target_in_variable_list = { name = acw_dixie_states target = root } }
 				}
 			}
+			value = "reconstruction_unionist_blue"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				AND = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			value = "reconstruction_completed_green"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				OR = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			value = "reconstruction_partial_yellow"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				NOR = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			value = "reconstruction_not_completed_red"
 		}
 	}
 
-	on_complete = {
-		clear_variable_list = acw_dixie_states
-		custom_tooltip = {
-			text = gain_dixie_culture
-			set_variable = acw_gain_dixie
-		}
-		custom_tooltip = {
-			text = reconstruction_progress
-			change_variable = {
-				name = reconstruction_var
-				add = 1
+	map_tooltip = {
+		if = {
+			limit = {
+				owner = {
+					has_journal_entry = je_acw_reincorporate
+					NOT = { is_target_in_variable_list = { name = acw_dixie_states target = root } }
+				}
 			}
+			custom_tooltip_no_bullet = "je_acw_reincorporate_state_unionist"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				AND = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "je_acw_reincorporate_state_completed"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				OR = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "je_acw_reincorporate_state_partial"
+		}
+		else_if = {
+			limit = {
+				owner = {
+					is_target_in_variable_list = { name = acw_dixie_states target = root }
+				}
+				NOR = {
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min # defined in event_values
+						culture = cu:dixie
+					}
+				}
+			}
+			custom_tooltip_no_bullet = "je_acw_reincorporate_state_not_completed"
+		}
+	}
+
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = "ACW_REINCORPORATE_TT"
+
+				any_scope_state = {
+					filter = {
+						is_in_geographic_region = geographic_region_hmps_csa
+					}
+					count >= 15
+					is_incorporated = yes
+					loyalist_fraction = {
+						value >= acw_reincorporate_dixie_loyalist_min
+						culture = cu:dixie
+					}
+				}
+			}
+		}
+		effect = {
+			clear_variable_list = acw_dixie_states
+			custom_tooltip = {
+				text = gain_dixie_culture
+				set_variable = acw_gain_dixie
+			}
+			custom_tooltip = {
+				text = reconstruction_progress
+				change_variable = {
+					name = reconstruction_var
+					add = 1
+				}
+			}
+			je_acw_reincorporate_cleanup = yes
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:dixie
+					}
+				}
+			}
+		}
+		effect = {
+			clear_variable_list = acw_dixie_states
+			je_acw_reincorporate_cleanup = yes
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			clear_variable_list = acw_dixie_states
+			je_acw_reincorporate_cleanup = yes
 		}
 	}
 
@@ -340,26 +522,7 @@ REPLACE:je_acw_reincorporate = {
 		}
 	}
 
-	invalid = {
-		NOT = {
-			any_scope_state = {
-				state_region = {
-					is_homeland = cu:dixie
-				}
-			}
-		}
-	}
-
-	on_invalid = {
-		clear_variable_list = acw_dixie_states
-	}
-
 	timeout = 6570 #HMPS: Increased time by 50% to get Dixie
-
-	on_timeout = {
-		clear_variable_list = acw_dixie_states
-	}
-	
 	should_be_pinned_by_default_uninvolved_or_context = yes
 }
 
@@ -368,30 +531,66 @@ REPLACE:je_acw_equality = {
 
 	group = je_group_historical_content
 
+	activation_description = {
+		always = yes
+	}
 	is_shown_in_lobby = {
 		c:USA = THIS
 	}
 
-	complete = {
-		c:USA = {
-			loyalist_fraction = {
-				value >= 0.1
-				culture = cu:afro_american
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			c:USA = {
+				loyalist_fraction = {
+					value >= 0.1
+					culture = cu:afro_american
+				}
 			}
+		}
+		effect = {
+			custom_tooltip = {
+				text = acw_afro_american_culture_hmps
+				set_variable = acw_gain_african_american
+			}
+			custom_tooltip = {
+				text = reconstruction_progress
+				change_variable = {
+					name = reconstruction_var
+					add = 1
+				}
+			}
+			je_acw_equality_cleanup = yes
 		}
 	}
 
-	on_complete = {
-		custom_tooltip = {
-			text = acw_afro_american_culture_hmps
-			set_variable = acw_gain_african_american
-		}
-		custom_tooltip = {
-			text = reconstruction_progress
-			change_variable = {
-				name = reconstruction_var
-				add = 1
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				any_scope_state = {
+					state_region = {
+						is_homeland = cu:afro_american
+					}
+				}
 			}
+		}
+		effect = {
+			je_acw_equality_cleanup = yes
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			je_acw_equality_cleanup = yes
 		}
 	}
 
@@ -407,15 +606,4 @@ REPLACE:je_acw_equality = {
 	timeout = 6570 #Increased time by 50% to get Afro-Americans at a higher acceptance after reconstruction
 
 	should_be_pinned_by_default_uninvolved_or_context = yes
-
-
-	invalid = {
-		NOT = {
-			any_scope_state = {
-				state_region = {
-					is_homeland = cu:afro_american
-				}
-			}
-		}
-	}
 }

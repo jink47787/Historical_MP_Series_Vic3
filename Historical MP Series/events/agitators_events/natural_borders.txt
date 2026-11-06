@@ -42,7 +42,10 @@ natural_borders.1 = {
 					}
 				}
 			}
-			leader = { save_scope_as = borders_leader }
+			leader = {
+				save_scope_as = borders_leader
+				set_temporary_event_immortality = { DURATION = 3 }
+			}
 		}
 		s:STATE_SAVOY = {
 			random_scope_state = {
@@ -172,6 +175,10 @@ natural_borders.1 = {
 			}
 		}
 	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:borders_leader }
+	}
 }
 
 # reward event
@@ -260,6 +267,10 @@ natural_borders.2 = {
 		add_primary_culture = cu:occitan
 		add_primary_culture = cu:francoprovencal
 	}
+
+	after = {
+		je_french_natural_borders_cleanup = yes
+	}
 }
 
 # France annexes Savoy
@@ -287,8 +298,6 @@ natural_borders.3 = {
 
 	duration = 3
 
-	dlc = dlc004
-
 	event_image = {
 		video = "unspecific_signed_contract"
 	}
@@ -314,6 +323,7 @@ natural_borders.3 = {
 			save_scope_as = savoy_country
 			ruler = {
 				save_scope_as = savoy_ruler
+				set_temporary_event_immortality = { DURATION = 3 }
 			}
 			random_scope_state = {
 				limit = {
@@ -342,6 +352,15 @@ natural_borders.3 = {
 	option = { # incorporate Savoy into France
 		name = natural_borders.3.a
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_wants_radicals = yes
+				}
+				add = 10
+			}
+		}
 		if = {
 			limit = {
 				is_owed_obligation_by = scope:savoy_country
@@ -364,17 +383,65 @@ natural_borders.3 = {
 				}
 			}
 		}
-		scope:savoy_state = {
-			set_state_owner = ROOT
-			set_state_type = incorporated
-		}
 		if = {
 			limit = {
 				exists = scope:nice_state
 			}
-			scope:nice_state = {
-				set_state_owner = ROOT
+			custom_tooltip = {
+				text = treaty_of_turin_nice_tt
+				create_treaty = {
+					name = treaty_name_treaty_of_turin
+					first_country = ROOT
+					second_country = scope:savoy_country
+					is_draft = no
+					binding_period = { years = 20 }
+
+					articles_to_create = {
+						{
+							article = state_transfer
+							source_country = scope:savoy_country
+							target_country = ROOT
+							inputs = {
+								{ state = scope:savoy_state }
+							}
+						}
+						{
+							article = state_transfer
+							source_country = scope:savoy_country
+							target_country = ROOT
+							inputs = {
+								{ state = scope:nice_state }
+							}
+						}
+					}
+				}
 			}
+		}
+		else = {
+			custom_tooltip = {
+				text = treaty_of_turin_tt
+				create_treaty = {
+					name = treaty_name_treaty_of_turin
+					first_country = ROOT
+					second_country = scope:savoy_country
+					is_draft = no
+					binding_period = { years = 20 }
+
+					articles_to_create = {
+						{
+							article = state_transfer
+							source_country = scope:savoy_country
+							target_country = ROOT
+							inputs = {
+								{ state = scope:savoy_state }
+							}
+						}
+					}
+				}
+			}
+		}
+		scope:savoy_state = {
+			set_state_type = incorporated
 		}
 		s:STATE_SAVOY = {
 			remove_homeland = cu:north_italian
@@ -390,6 +457,15 @@ natural_borders.3 = {
 	option = { # conduct a plebiscite
 		name = natural_borders.3.b
 		default_option = yes
+		ai_chance = {
+			base = 1
+			modifier = {
+				trigger = {
+					ai_avoids_radicals = yes
+				}
+				add = 10
+			}
+		}
 		if = {
 			limit = {
 				is_owed_obligation_by = scope:savoy_country
@@ -412,8 +488,64 @@ natural_borders.3 = {
 				}
 			}
 		}
+		if = {
+			limit = {
+				exists = scope:nice_state
+			}
+			custom_tooltip = {
+				text = treaty_of_turin_nice_tt
+				create_treaty = {
+					name = treaty_name_treaty_of_turin
+					first_country = ROOT
+					second_country = scope:savoy_country
+					is_draft = no
+					binding_period = { years = 20 }
+
+					articles_to_create = {
+						{
+							article = state_transfer
+							source_country = scope:savoy_country
+							target_country = ROOT
+							inputs = {
+								{ state = scope:savoy_state }
+							}
+						}
+						{
+							article = state_transfer
+							source_country = scope:savoy_country
+							target_country = ROOT
+							inputs = {
+								{ state = scope:nice_state }
+							}
+						}
+					}
+				}
+			}
+		}
+		else = {
+			custom_tooltip = {
+				text = treaty_of_turin_tt
+				create_treaty = {
+					name = treaty_name_treaty_of_turin
+					first_country = ROOT
+					second_country = scope:savoy_country
+					is_draft = no
+					binding_period = { years = 20 }
+
+					articles_to_create = {
+						{
+							article = state_transfer
+							source_country = scope:savoy_country
+							target_country = ROOT
+							inputs = {
+								{ state = scope:savoy_state }
+							}
+						}
+					}
+				}
+			}
+		}
 		scope:savoy_state = {
-			set_state_owner = ROOT
 			set_state_type = unincorporated
 			add_loyalists_in_state = {
 				culture = cu:french
@@ -422,14 +554,6 @@ natural_borders.3 = {
 			add_loyalists_in_state = {
 				culture = cu:francoprovencal
 				value = very_large_radicals
-			}
-		}
-		if = {
-			limit = {
-				exists = scope:nice_state
-			}
-			scope:nice_state = {
-				set_state_owner = ROOT
 			}
 		}
 		s:STATE_SAVOY = {
@@ -454,6 +578,10 @@ natural_borders.3 = {
 				value = -20
 			}
 		}
+	}
+
+	after = {
+		revoke_temporary_event_immortality = { CHARACTER = scope:savoy_ruler }
 	}
 }
 
@@ -626,8 +754,6 @@ rhine_confederation.1 = {
 	flavor = rhine_confederation.1.f
 
 	duration = 3
-
-	dlc = dlc004
 
 	event_image = {
 		video = "unspecific_signed_contract"

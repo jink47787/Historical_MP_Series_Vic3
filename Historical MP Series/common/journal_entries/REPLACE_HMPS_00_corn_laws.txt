@@ -3,6 +3,10 @@
 
 	group = je_group_internal_affairs
 
+	activation_description = {
+		always = yes
+	}
+
 	is_shown_when_inactive = {
 		NOT = { has_variable = corn_laws_abolished }
 		ig:ig_landowners ?= {
@@ -30,40 +34,52 @@
 		}
 	}
 
-	complete = {
-		has_law_or_variant = law_type:law_free_trade
-	}
-
-	on_complete = {
-		set_variable = corn_laws_abolished
-		trigger_event = { id = corn_laws.1 }
-		show_as_tooltip = {
-			if = {
-				limit = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			has_law_or_variant = law_type:law_free_trade
+		}
+		effect = {
+			set_variable = corn_laws_abolished
+			trigger_event = { id = corn_laws.1 }
+			show_as_tooltip = {
+				if = {
+					limit = {
+						ig:ig_landowners ?= {
+							is_in_government = yes
+							leader = {
+								NOT = { has_ideology = ideology:ideology_market_liberal }
+							}
+						}
+					}
 					ig:ig_landowners ?= {
-						is_in_government = yes
-						leader = {
-							NOT = { has_ideology = ideology:ideology_market_liberal }
+						add_modifier = {
+							name = repealed_corn_laws
+							days = long_modifier_time
 						}
 					}
 				}
-				ig:ig_landowners ?= {
-					add_modifier = {
-						name = repealed_corn_laws
-						days = long_modifier_time
-					}
+				add_loyalists = {
+					value = 0.1
+					pop_type = laborers
 				}
-			}
-			add_loyalists = {
-				value = 0.1
-				pop_type = laborers
 			}
 		}
 	}
 
-	invalid = {
-		ig:ig_landowners ?= {
-			ig_counts_as_marginal = yes
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			ig:ig_landowners ?= {
+				ig_counts_as_marginal = yes
+			}
+		}
+		effect = {
+			je_corn_laws_cleanup = yes
 		}
 	}
 

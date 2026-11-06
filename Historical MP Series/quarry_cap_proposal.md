@@ -724,7 +724,7 @@ Total: 16401 current -> 21300 proposed.
 | KURSK | 0 | 20 | Chalk, plain |
 | TVER | 0 | 15 | Till plain |
 | CHERSON | 0 | 25 | Steppe; shelly limestone |
-| GALICH | 0 | 15 | Plain |
+| VOLOGDA | 0 | 15 | Plain |
 | MINSK | 0 | 10 | Till plain |
 | ROSTOV | 0 | 25 | Donbas fringe, sandstone |
 | PERM | 40 | 40 | Urals limestone, gypsum |

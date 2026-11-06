@@ -109,111 +109,124 @@ REPLACE_OR_CREATE:je_napoleons_legacy = { #The Political Question
 		value = 40
 	}
 
-	invalid = { #Removed it looking for global variables to invalidate to limit chances of it accidentally invalidating
-		game_date >= 1856.1.1
-	}
-	
-	on_invalid = {
-	}
-
-	timeout = 7300
-	
-	on_timeout = {
-		set_global_variable = peoples_springtime_happened
-	}
-
-	complete = {
-		scope:journal_entry = {
-			is_goal_complete = yes
-		}
-	}
-
-	on_complete = {
-		if = {
-			limit = {
-				NOT = { has_global_variable = peoples_springtime_happening }
-			}
-			set_global_variable = peoples_springtime_happening
-			set_global_variable = {
-				name = peoples_springtime_recent
-				days = 730 # Two Years, this variable is what determins how long until, the game will set the "peoples_springtime_happened" global_variable which is used in things like the HMPS italian candidate check as well as some other things
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			scope:journal_entry = {
+				is_goal_complete = yes
 			}
 		}
-	}
-
-	on_complete_all_involved = { #Springtime hitting
-		set_variable = failed_1848_var
-		add_journal_entry = {
-			type = je_springtime_of_the_peoples
-		}
-		ordered_interest_group = {
-			limit = {
-				ig_counts_as_marginal = no
-				can_have_radical_leader = yes
-			}
-			order_by = ig_clout
-			position = 0
-			check_range_bounds = no
-			leader = {
-				set_ideology = ideology:ideology_radical
-				add_modifier = {
-					name = 1848_popular_radical
-					days = normal_modifier_time
-					is_decaying = yes
+		effect = {
+			if = {
+				limit = {
+					NOT = { has_global_variable = peoples_springtime_happening }
+				}
+				set_global_variable = peoples_springtime_happening
+				set_global_variable = {
+					name = peoples_springtime_recent
+					days = 730 # Two Years, this variable is what determins how long until, the game will set the "peoples_springtime_happened" global_variable which is used in things like the HMPS italian candidate check as well as some other things
 				}
 			}
 		}
-		custom_tooltip = je_napoleons_legacy_t1
-		if = {
-			limit = {
-				c:FRA ?= this
+		effect_all_involved = { #Springtime hitting
+			set_variable = failed_1848_var
+			add_journal_entry = {
+				type = je_springtime_of_the_peoples
 			}
-			show_as_tooltip = {
-				add_radicals = {
-					value = medium_radicals #0.05
+			ordered_interest_group = {
+				limit = {
+					ig_counts_as_marginal = no
+					can_have_radical_leader = yes
 				}
-			}
-			hidden_effect = {
-				every_country = {
-					limit = {
-						has_modifier = modifier_napoleon_announce
+				order_by = ig_clout
+				position = 0
+				check_range_bounds = no
+				leader = {
+					set_ideology = ideology:ideology_radical
+					add_modifier = {
+						name = 1848_popular_radical
+						days = normal_modifier_time
+						is_decaying = yes
 					}
-					remove_modifier = modifier_napoleon_announce
 				}
-				every_scope_state = {
-					limit = {
-						is_incorporated = yes
-					}
-					add_radicals_in_state = {
+			}
+			custom_tooltip = je_napoleons_legacy_t1
+			if = {
+				limit = {
+					c:FRA ?= this
+				}
+				show_as_tooltip = {
+					add_radicals = {
 						value = medium_radicals #0.05
 					}
 				}
-			}
-		}
-		else = {
-			show_as_tooltip = {
-				add_radicals = {
-					value = large_radicals #0.1
+				hidden_effect = {
+					every_country = {
+						limit = {
+							has_modifier = modifier_napoleon_announce
+						}
+						remove_modifier = modifier_napoleon_announce
+					}
+					every_scope_state = {
+						limit = {
+							is_incorporated = yes
+						}
+						add_radicals_in_state = {
+							value = medium_radicals #0.05
+						}
+					}
 				}
 			}
-			hidden_effect = {
-				every_country = {
-					limit = {
-						has_modifier = modifier_napoleon_announce
+			else = {
+				show_as_tooltip = {
+					add_radicals = {
+						value = large_radicals #0.1
 					}
-					remove_modifier = modifier_napoleon_announce
 				}
-				every_scope_state = {
-					limit = {
-						is_incorporated = yes
+				hidden_effect = {
+					every_country = {
+						limit = {
+							has_modifier = modifier_napoleon_announce
+						}
+						remove_modifier = modifier_napoleon_announce
 					}
-					add_radicals_in_state = {
-						value = very_large_radicals #0.1
+					every_scope_state = {
+						limit = {
+							is_incorporated = yes
+						}
+						add_radicals_in_state = {
+							value = very_large_radicals #0.1
+						}
 					}
 				}
 			}
 		}
 	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = { #Removed it looking for global variables to invalidate to limit chances of it accidentally invalidating
+			game_date >= 1856.1.1
+		}
+		effect = {
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			set_global_variable = peoples_springtime_happened
+		}
+	}
+
+	timeout = 7300
 
 	on_weekly_pulse = {
 		effect = {

@@ -3,6 +3,11 @@ REPLACE:je_the_algerian_departements = {
 	icon = "gfx/interface/icons/event_icons/waving_flag.dds"
 
 	group = je_group_france_expansion
+	dlc = dlc004
+
+	activation_description = {
+		always = yes
+	}
 
 	immediate = {
 		random_scope_state = {
@@ -46,74 +51,65 @@ REPLACE:je_the_algerian_departements = {
 			}
 		}
 	}
-	complete = {
-		custom_tooltip = { #HMPS: Removes incorporation requrements and increases turmoil limit from 0.1
-			text = je_the_algerian_departements_tt_1
-			any_scope_state = {
-				state_region = s:STATE_ALGIERS
-				turmoil < 0.26
-				is_split_state = no
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = { #HMPS: Removes incorporation requrements and increases turmoil limit from 0.1
+				text = je_the_algerian_departements_tt_1
+				any_scope_state = {
+					state_region = s:STATE_ALGIERS
+					turmoil < 0.26
+					is_split_state = no
+				}
+				any_scope_state = {
+					state_region = s:STATE_ORAN
+					turmoil < 0.26
+					is_split_state = no
+				}
+				any_scope_state = {
+					state_region = s:STATE_CONSTANTINE
+					turmoil < 0.26
+					is_split_state = no
+				}
 			}
-			any_scope_state = {
-				state_region = s:STATE_ORAN
-				turmoil < 0.26
-				is_split_state = no
-			}
-			any_scope_state = {
-				state_region = s:STATE_CONSTANTINE
-				turmoil < 0.26
-				is_split_state = no
-			}
+			#HMPS: Removed other completion triggers as they are basically impossible to do in HMPS
 		}
-		#HMPS: Removed other completion triggers as they are basically impossible to do in HMPS
+		effect = { #HMPS: Gives Algeria french homelands on completion
+			s:STATE_ALGIERS = { #HMPS: ->
+				add_homeland = cu:french
+			}
+			s:STATE_ORAN = {
+				add_homeland = cu:french
+			}
+			s:STATE_CONSTANTINE = {
+				add_homeland = cu:french
+			} #HMPS: <-
+			trigger_event = algeria_events.4
+		}
 	}
 
-	on_complete = { #HMPS: Gives Algeria french homelands on completion
-		s:STATE_ALGIERS = { #HMPS: ->
-			add_homeland = cu:french
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = { has_or_is_contesting_state_in_state_region = STATE_ORAN }
+			NOT = { has_or_is_contesting_state_in_state_region = STATE_ALGIERS }
+			NOT = { has_or_is_contesting_state_in_state_region = STATE_CONSTANTINE }
 		}
-		s:STATE_ORAN = {
-			add_homeland = cu:french
+		effect = {
+			trigger_event = algeria_events.3
 		}
-		s:STATE_CONSTANTINE = {
-			add_homeland = cu:french
-		} #HMPS: <-
-		trigger_event = algeria_events.4
-	}
-
-	fail = {
-		NOT = { has_state_in_state_region = STATE_ORAN }
-		NOT = { has_state_in_state_region = STATE_ALGIERS }
-		NOT = { has_state_in_state_region = STATE_CONSTANTINE }
-	}
-
-	on_fail = {
-		trigger_event = algeria_events.3
 	}
 
 	on_monthly_pulse = {
 		random_events = {
 			90 = 0
 			10 = algeria_events.6
-		}
-		effect = {
-			every_scope_state = { # In case the states are lost as a result of a secession or the like
-				limit = {
-					OR = {
-						state_region = s:STATE_ORAN
-						state_region = s:STATE_ALGIERS
-						state_region = s:STATE_CONSTANTINE
-					}
-					is_incorporated = no
-					NOT = {
-						has_modifier = crushed_algerian_resistance
-					}
-				}
-				add_modifier = {
-					name = crushed_algerian_resistance
-					days = very_long_modifier_time
-				}
-			}
 		}
 	}
 

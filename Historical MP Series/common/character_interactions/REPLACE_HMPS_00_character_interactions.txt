@@ -30,6 +30,10 @@ REPLACE:invite_exile = {
 	# required for AI to evaluate if interaction is possible on characters in exile pool
 	ai_considers_exiles = yes
 
+	actor_capacity = {
+		empty_agitator_slots >= 1
+	}
+
 	possible = {
 		#HMPS - can't invite previously exiled chars
 		custom_tooltip = {
@@ -37,8 +41,6 @@ REPLACE:invite_exile = {
 			scope:actor ?= { NOT = { is_target_in_variable_list = { name = exiled_agis target = prev } } }
 		}
 		#end HMPS
-		
-		scope:actor ?= { empty_agitator_slots >= 1 }
 		# Devout exiles must have country religion
 		trigger_if = {
 			limit = {
@@ -96,7 +98,7 @@ REPLACE:invite_exile = {
 			}
 			if = {
 				limit = {
-					has_variable = nightingale_var
+					has_template = GBR_florence_nightingale
 				}
 				scope:actor ?= {
 					trigger_event = { id = historical_agitators.23 days = 3 }
@@ -204,6 +206,41 @@ REPLACE:invite_exile = {
 		}
 		if = {
 			limit = {
+				OR = {
+					AND = {
+						scope:actor ?= {
+							divided_monarchists_ai_backs_orleanist = yes
+						}
+						has_ideology = ideology:ideology_orleanist
+					}
+					AND = {
+						scope:actor ?= {
+							divided_monarchists_ai_backs_legitimist = yes
+						}
+						has_ideology = ideology:ideology_legitimist
+					}
+					AND = {
+						scope:actor ?= {
+							divided_monarchists_ai_backs_bonapartist = yes
+						}
+						has_ideology = ideology:ideology_bonapartist
+					}
+					AND = {
+						scope:actor ?= {
+							ai_wants_radicals = yes
+						}
+						OR = {
+							has_ideology = ideology:ideology_republican_leader
+							has_ideology = ideology:ideology_radical
+							has_ideology = ideology:ideology_positivist
+						}
+					}
+				}
+			}
+			add = 150
+		}
+		if = {
+			limit = {
 				scope:actor ?= {
 					country_rank < rank_value:major_power
 				}
@@ -223,6 +260,7 @@ REPLACE:exile_character = {
 			has_law_or_variant = law_type:law_single_party_state
 			has_law_or_variant = law_type:law_secret_police
 			has_law_or_variant = law_type:law_outlawed_dissent
+			divided_monarchists_ai_active = yes
 		}
 	}
 
@@ -352,7 +390,7 @@ REPLACE:exile_character = {
 				custom_tooltip = {
 					text = house_tokugawa_not_tt
 					NOT = {
-						has_variable = house_tokugawa
+						var:dynasty_var ?= flag:house_tokugawa
 					}
 				}
 			}
@@ -368,7 +406,7 @@ REPLACE:exile_character = {
 				custom_tooltip = {
 					text = house_yamato_not_tt
 					NOT = {
-						has_variable = house_yamato
+						var:dynasty_var ?= flag:house_yamato
 					}
 				}
 			}
@@ -404,6 +442,12 @@ REPLACE:exile_character = {
 				set_variable = exile_golpista_var
 				character_execute_immediate_coup = yes
 			}
+		}
+		else_if = {
+			limit = {
+				rlit_pushkin_needed_for_golden_age = yes
+			}
+			rlit_pushkin_force_duel_effect = yes
 		}
 		else = {
 			if = {
@@ -719,6 +763,91 @@ REPLACE:exile_character = {
 				}
 				multiply = 0.25
 			}
+		}
+
+		if = {
+			limit = {
+				owner ?= {
+					has_journal_entry = je_tp_tsar_unshakable_autocracy
+					NOT = { has_variable = je_tp_tsar_unshakable_autocracy_button_1_complete }
+				}
+				has_role_of_type = agitator
+				OR = {
+					has_socialist_ideology = yes
+					has_progressive_ideology = yes
+					has_liberal_ideology = yes
+				}
+			}
+			add = 15
+		}
+		if = {
+			limit = {
+				save_temporary_scope_as = tp_exile_candidate_scope
+				owner ?= {
+					has_journal_entry = je_tp_fav_bootlicker
+					OR = {
+						var:tp_bootlicker_rival_1 ?= scope:tp_exile_candidate_scope
+						var:tp_bootlicker_rival_2 ?= scope:tp_exile_candidate_scope
+						var:tp_bootlicker_rival_3 ?= scope:tp_exile_candidate_scope
+					}
+				}
+			}
+			add = 25
+		}
+		if = {
+			limit = {
+				character_is_rival_french_house = yes
+			}
+			add = 50
+		}
+		if = {
+			limit = {
+				character_is_rival_french_house = yes
+				is_interest_group_leader = yes
+				interest_group ?= {
+					any_scope_character = {
+						has_role_of_type = politician
+						is_interest_group_leader = no
+						character_matches_divided_monarchists_ai_path = yes
+					}
+				}
+			}
+			add = 25
+		}
+		if = {
+			limit = {
+				owner ?= {
+					divided_monarchists_ai_backs_monarchist = yes
+				}
+				has_role_of_type = agitator
+				OR = {
+					has_ideology = ideology:ideology_republican_leader
+					has_ideology = ideology:ideology_radical
+					has_ideology = ideology:ideology_positivist
+				}
+			}
+			add = 25
+		}
+		if = {
+			limit = {
+				owner ?= {
+					ai_wants_radicals = yes
+				}
+				character_is_french_house = yes
+			}
+			add = 50
+		}
+		if = {
+			limit = {
+				has_template = RUS_alexander_pushkin
+			}
+			multiply = 0
+		}
+		if = {
+			limit = {
+				character_matches_divided_monarchists_ai_path = yes
+			}
+			multiply = 0
 		}
 	}
 }

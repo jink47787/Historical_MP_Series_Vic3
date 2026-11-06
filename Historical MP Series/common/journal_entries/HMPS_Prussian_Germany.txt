@@ -3,19 +3,90 @@
 	
 	group = je_group_historical_content
 
-	complete = {
-		hidden_trigger = {
-			NOT = {
-				has_variable = time_delay
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			hidden_trigger = {
+				NOT = {
+					has_variable = time_delay
+				}
+			}
+			OR = {
+				owns_entire_state_region = STATE_ALSACE_LORRAINE
+				AND = {
+					owns_entire_state_region = STATE_AUSTRIA
+					owns_entire_state_region = STATE_STYRIA
+					owns_entire_state_region = STATE_TYROL
+				}
 			}
 		}
-		OR = {
-			owns_entire_state_region = STATE_ALSACE_LORRAINE
-			AND = {
-				owns_entire_state_region = STATE_AUSTRIA
-				owns_entire_state_region = STATE_STYRIA
-				owns_entire_state_region = STATE_TYROL
+		effect = {
+			add_primary_culture = cu:south_german
+			ruler = {
+				add_trait = special_character_german_unifier_ruler
 			}
+			#custom_tooltip = {
+			#	text = je_prussian_germany.t
+			#	every_scope_state = {
+			#		limit = {
+			#			NOT = { state_region = s:STATE_ALSACE_LORRAINE }
+			#			state_region = {
+			#				OR = {
+			#					is_homeland = cu:north_german
+			#					is_homeland = cu:south_german
+			#				}
+			#			}
+			#		}
+			#		add_modifier = {
+			#			name = german_baby_boom
+			#			months = 300
+			#			is_decaying = yes
+			#		}
+			#	}
+			#}
+			add_loyalists = {
+				culture = cu:south_german
+				value = 0.4
+			}
+			add_loyalists = {
+				culture = cu:north_german
+				value = 0.05
+			}
+			every_scope_state = {
+				limit = {
+					owner = ROOT
+					has_variable = south_germany
+				}
+				set_state_type = incorporated
+			}
+			every_scope_state = {
+				limit = {
+					has_variable = south_germany
+				}
+				remove_variable = south_germany
+			}
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = { c:GER = ROOT }
+			NOT = { has_law_or_variant = law_type:law_ethnostate } 
+		}
+	}
+
+	outcome = {
+		header = JOURNAL_ENTRY_TIMEOUT
+		effect_header = JOURNAL_ENTRY_ON_TIMEOUT
+		flags = { timeout }
+		conclusion_desc = JOURNAL_ENTRY_TIMEOUT_CONCLUSION_DESC
+		effect = {
+			add_primary_culture = cu:south_german
 		}
 	}
 	
@@ -35,63 +106,7 @@
 	}
 	
 	timeout = 7300
-	
-	on_timeout = {
-		add_primary_culture = cu:south_german
-	}
-	
-	invalid = {
-		NOT = { c:GER = ROOT }
-		NOT = { has_law_or_variant = law_type:law_ethnostate } 
-	}
-	
-	on_complete = {
-		add_primary_culture = cu:south_german
-		ruler = {
-			add_trait = special_character_german_unifier_ruler
-		}
-		#custom_tooltip = {
-		#	text = je_prussian_germany.t
-		#	every_scope_state = {
-		#		limit = {
-		#			NOT = { state_region = s:STATE_ALSACE_LORRAINE }
-		#			state_region = {
-		#				OR = {
-		#					is_homeland = cu:north_german
-		#					is_homeland = cu:south_german
-		#				}
-		#			}
-		#		}
-		#		add_modifier = {
-		#			name = german_baby_boom
-		#			months = 300
-		#			is_decaying = yes
-		#		}
-		#	}
-		#}
-		add_loyalists = {
-			culture = cu:south_german
-			value = 0.4
-		}
-		add_loyalists = {
-			culture = cu:north_german
-			value = 0.05
-		}
-		every_scope_state = {
-			limit = {
-				owner = ROOT
-				has_variable = south_germany
-			}
-			set_state_type = incorporated
-		}
-		every_scope_state = {
-			limit = {
-				has_variable = south_germany
-			}
-			remove_variable = south_germany
-		}
-	}
-	
+
 	weight = 10000
 	should_be_pinned_by_default_uninvolved_or_context = yes
 	can_revolution_inherit = yes
@@ -142,91 +157,101 @@ je_kulturkampf = {
 		}
 	}
 	
-	complete = {
-		custom_tooltip = {
-			text = je_kulturkampf_complete
-			scope:journal_entry = {
-                "scripted_bar_progress(kulturkampf_core_progress_bar)" >= 200
-            }
-		}
-	}
-	
-	on_complete = {
-		if = {
-			limit = {
- 				any_interest_group = {
-					has_modifier = modifier_kulturkampf_chauvinist
-				}
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_kulturkampf_complete
+				scope:journal_entry = {
+	                "scripted_bar_progress(kulturkampf_core_progress_bar)" >= 200
+	            }
 			}
-			every_interest_group = {
+		}
+		effect = {
+			if = {
 				limit = {
-					has_modifier = modifier_kulturkampf_chauvinist
+	 				any_interest_group = {
+						has_modifier = modifier_kulturkampf_chauvinist
+					}
 				}
-				remove_modifier = modifier_kulturkampf_chauvinist
-			}
-		}
-		custom_tooltip = {
-			text = kulturkampf_loc_fix
-			ig:ig_devout = { 
-				set_interest_group_name = ig_evangelical_church
-			}
-		}
-		if = {
-			limit = {
-				NOT = { has_law_or_variant = law_type:law_total_separation }
-			}
-			activate_law = law_type:law_total_separation
-		}
-		every_scope_state = {
-			limit = {
-				OR = {
-					state_region = s:STATE_WEST_PRUSSIA
-					state_region = s:STATE_EAST_PRUSSIA
-					state_region = s:STATE_POSEN
+				every_interest_group = {
+					limit = {
+						has_modifier = modifier_kulturkampf_chauvinist
+					}
+					remove_modifier = modifier_kulturkampf_chauvinist
 				}
 			}
-			add_modifier = {
-				name = eastern_settlement
-				years = 20
-			}
-		}
-	}
-	
-	fail = {
-		custom_tooltip = {
-			text = je_kulturkampf_fail
-			scope:journal_entry = {
-                "scripted_bar_progress(kulturkampf_core_progress_bar)" <= 0
-            }
-		}
-	}
-	
-	on_fail = {
-		if = {
-			limit = {
- 				any_interest_group = {
-					has_modifier = modifier_kulturkampf_chauvinist
+			custom_tooltip = {
+				text = kulturkampf_loc_fix
+				ig:ig_devout = { 
+					set_interest_group_name = ig_evangelical_church
 				}
 			}
-			every_interest_group = {
+			if = {
 				limit = {
-					has_modifier = modifier_kulturkampf_chauvinist
+					NOT = { has_law_or_variant = law_type:law_total_separation }
 				}
-				remove_modifier = modifier_kulturkampf_chauvinist
+				activate_law = law_type:law_total_separation
 			}
-		}
-		custom_tooltip = {
-			text = kulturkampf_loc_fix
-			ig:ig_devout = { 
-				set_interest_group_name = ig_evangelical_church
+			every_scope_state = {
+				limit = {
+					OR = {
+						state_region = s:STATE_WEST_PRUSSIA
+						state_region = s:STATE_EAST_PRUSSIA
+						state_region = s:STATE_POSEN
+					}
+				}
+				add_modifier = {
+					name = eastern_settlement
+					years = 20
+				}
 			}
-		}
-		ig:ig_devout = {
-			add_ideology = ideology_christian_democrat
-			remove_ideology = ideology_moralist
 		}
 	}
-	
+
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_kulturkampf_fail
+				scope:journal_entry = {
+	                "scripted_bar_progress(kulturkampf_core_progress_bar)" <= 0
+	            }
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+	 				any_interest_group = {
+						has_modifier = modifier_kulturkampf_chauvinist
+					}
+				}
+				every_interest_group = {
+					limit = {
+						has_modifier = modifier_kulturkampf_chauvinist
+					}
+					remove_modifier = modifier_kulturkampf_chauvinist
+				}
+			}
+			custom_tooltip = {
+				text = kulturkampf_loc_fix
+				ig:ig_devout = { 
+					set_interest_group_name = ig_evangelical_church
+				}
+			}
+			ig:ig_devout = {
+				add_ideology = ideology_christian_democrat
+				remove_ideology = ideology_moralist
+			}
+		}
+	}
+
 	weight = 10000
 	should_be_pinned_by_default_uninvolved_or_context = yes
 	can_revolution_inherit = yes

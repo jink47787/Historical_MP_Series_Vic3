@@ -57,80 +57,91 @@ je_specie_famine = {
 	}
 
 	# Passed: payments in force, and either 26 weeks of imports in reserve (the bars' max) or 26 straight weeks of surplus. No reward
-	complete = {
-		custom_tooltip = {
-			text = je_specie_famine_resumed_tt
-			NOT = { has_variable = sf_suspended }
-		}
-		OR = {
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
 			custom_tooltip = {
-				text = je_specie_famine_target_tt
-				sf_reserve_weeks >= 26
+				text = je_specie_famine_resumed_tt
+				NOT = { has_variable = sf_suspended }
 			}
-			custom_tooltip = {
-				text = je_specie_famine_surplus_tt
-				has_variable = sf_surplus_weeks
-				var:sf_surplus_weeks >= 26
+			OR = {
+				custom_tooltip = {
+					text = je_specie_famine_target_tt
+					sf_reserve_weeks >= 26
+				}
+				custom_tooltip = {
+					text = je_specie_famine_surplus_tt
+					has_variable = sf_surplus_weeks
+					var:sf_surplus_weeks >= 26
+				}
+			}
+		}
+		effect = {
+			custom_tooltip = je_specie_famine_complete_tt
+			hidden_effect = {
+				set_variable = { name = sf_outcome_passed days = 30 }
+				trigger_event = {
+					id = specie_famine.5
+					popup = yes
+				}
+				sf_leader_end_cleanup = yes
 			}
 		}
 	}
 
-	on_complete = {
-		custom_tooltip = je_specie_famine_complete_tt
-		hidden_effect = {
-			set_variable = { name = sf_outcome_passed days = 30 }
-			trigger_event = {
-				id = specie_famine.5
-				popup = yes
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				custom_tooltip = {
+					text = je_specie_famine_empty_tt
+					has_variable = sf_reserves
+					var:sf_reserves <= 0
+				}
+				custom_tooltip = {
+					text = je_specie_famine_left_market_tt
+					NOT = { sf_is_market_leader = yes }
+				}
 			}
-			sf_leader_end_cleanup = yes
+		}
+		effect = {
+			sf_apply_failure = yes
+			add_modifier = {
+				name = sf_credit_collapse_prestige
+				days = 912
+				is_decaying = yes
+			}
+			# Only an empty reserve takes the market down with the leader; a leader that joined another market suffers alone
+			if = {
+				limit = { sf_is_market_leader = yes }
+				custom_tooltip = je_specie_famine_fail_market_tt
+				hidden_effect = {
+					set_variable = { name = sf_outcome_failed days = 30 }
+				}
+			}
+			custom_tooltip = je_specie_famine_contagion_tt
+			hidden_effect = {
+				set_global_variable = {
+					name = sf_contagion_source
+					value = root
+					days = 60
+				}
+				trigger_event = {
+					id = specie_famine.3
+					popup = yes
+				}
+				sf_leader_end_cleanup = yes
+			}
 		}
 	}
 
 	# Failed: the reserves ran out, or the leader joined another market
-	fail = {
-		OR = {
-			custom_tooltip = {
-				text = je_specie_famine_empty_tt
-				has_variable = sf_reserves
-				var:sf_reserves <= 0
-			}
-			custom_tooltip = {
-				text = je_specie_famine_left_market_tt
-				NOT = { sf_is_market_leader = yes }
-			}
-		}
-	}
-
-	on_fail = {
-		sf_apply_failure = yes
-		add_modifier = {
-			name = sf_credit_collapse_prestige
-			days = 912
-			is_decaying = yes
-		}
-		# Only an empty reserve takes the market down with the leader; a leader that joined another market suffers alone
-		if = {
-			limit = { sf_is_market_leader = yes }
-			custom_tooltip = je_specie_famine_fail_market_tt
-			hidden_effect = {
-				set_variable = { name = sf_outcome_failed days = 30 }
-			}
-		}
-		custom_tooltip = je_specie_famine_contagion_tt
-		hidden_effect = {
-			set_global_variable = {
-				name = sf_contagion_source
-				value = root
-				days = 60
-			}
-			trigger_event = {
-				id = specie_famine.3
-				popup = yes
-			}
-			sf_leader_end_cleanup = yes
-		}
-	}
 
 	on_weekly_pulse = {
 		effect = {
@@ -181,67 +192,81 @@ je_specie_famine_member = {
 		}
 	}
 
-	complete = {
-		custom_tooltip = {
-			text = je_specie_famine_member_complete_tt
-			var:sf_leader ?= { has_variable = sf_outcome_passed }
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_specie_famine_member_complete_tt
+				var:sf_leader ?= { has_variable = sf_outcome_passed }
+			}
+		}
+		effect = {
+			custom_tooltip = je_specie_famine_complete_tt
+			hidden_effect = {
+				if = {
+					limit = { is_player = yes }
+					trigger_event = {
+						id = specie_famine.5
+						popup = yes
+					}
+				}
+				sf_end_cleanup = yes
+			}
 		}
 	}
 
-	on_complete = {
-		custom_tooltip = je_specie_famine_complete_tt
-		hidden_effect = {
-			if = {
-				limit = { is_player = yes }
-				trigger_event = {
-					id = specie_famine.5
-					popup = yes
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			custom_tooltip = {
+				text = je_specie_famine_member_fail_tt
+				var:sf_leader ?= { has_variable = sf_outcome_failed }
+				market.owner ?= var:sf_leader
+			}
+		}
+		effect = {
+			sf_apply_failure = yes
+			hidden_effect = {
+				if = {
+					limit = { is_player = yes }
+					trigger_event = {
+						id = specie_famine.4
+						popup = yes
+					}
+				}
+				sf_end_cleanup = yes
+			}
+		}
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			OR = {
+				NOT = { has_variable = sf_leader }
+				NOT = { market.owner ?= var:sf_leader }
+				var:sf_leader ?= {
+					NOT = { has_variable = sf_active }
+					NOT = { has_variable = sf_outcome_failed }
+					NOT = { has_variable = sf_outcome_passed }
 				}
 			}
-			sf_end_cleanup = yes
 		}
-	}
-
-	fail = {
-		custom_tooltip = {
-			text = je_specie_famine_member_fail_tt
-			var:sf_leader ?= { has_variable = sf_outcome_failed }
-			market.owner ?= var:sf_leader
-		}
-	}
-
-	on_fail = {
-		sf_apply_failure = yes
-		hidden_effect = {
-			if = {
-				limit = { is_player = yes }
-				trigger_event = {
-					id = specie_famine.4
-					popup = yes
-				}
+		effect = {
+			hidden_effect = {
+				sf_end_cleanup = yes
 			}
-			sf_end_cleanup = yes
 		}
 	}
 
 	# Left the market, or the leader's crisis ended without taking the market with it (the leader was annexed, or joined another market)
-	invalid = {
-		OR = {
-			NOT = { has_variable = sf_leader }
-			NOT = { market.owner ?= var:sf_leader }
-			var:sf_leader ?= {
-				NOT = { has_variable = sf_active }
-				NOT = { has_variable = sf_outcome_failed }
-				NOT = { has_variable = sf_outcome_passed }
-			}
-		}
-	}
-
-	on_invalid = {
-		hidden_effect = {
-			sf_end_cleanup = yes
-		}
-	}
 
 	# The leader's weekly update also sets this bar (sf_sync_reserve_bars); this covers a member that joined this week
 	on_weekly_pulse = {

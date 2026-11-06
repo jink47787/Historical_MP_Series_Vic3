@@ -36,11 +36,17 @@
 	on_created = {}
 
 	disband_trigger = {
-		scope:political_movement ?= {
-			religion = {
-				NOT = { is_state_religion = root }
+		OR = {
+			scope:political_movement ?= {
+				religion = {
+					NOT = { is_state_religion = root }
+				}
 			}
+			has_council_republic_law = yes
 		}
+	}
+	on_disbanded = {
+		fold_movement_into_anti_communist_movement_effect = yes
 	}
 
 	religion_selection_trigger = {
@@ -373,40 +379,12 @@
 		if = {
 			limit = {
 				religion = rel:catholic
-				exists = c:PAP
-				c:PAP ?= {
-					country_has_state_religion = rel:catholic
-					has_law_or_variant = law_type:law_theocracy
-				}
-				"owner.relations(c:PAP)" < 0
 			}
-			add = {
-				desc = "POOR_RELATIONS_WITH_PAPACY"
-				value = "owner.relations(c:PAP)"
-				divide = 100
-				multiply = -0.25
-			}
+			add = movement_radicalism_poor_papal_relations
 		}
 
-		if = {
-			limit = {
-				owner = {
-					any_neighbouring_state = {
-						owner = {
-							NOT = { THIS = ROOT.owner }
-							any_political_movement = {
-								religion ?= ROOT.religion
-								is_insurrectionary = yes
-							}
-						}
-					}
-				}
-			}
-			add = {
-				desc = "NEIGHBOURING_COUNTRY_WITH_RELIGIOUS_REVOLUTION"
-				value = 0.15
-			}
-		}
+		add = movement_radicalism_neighboring_religious_revolution
+		add = movement_radicalism_suppressed_after_civil_war
 	}
 }
 
@@ -737,19 +715,19 @@ movement_religious_minority = {
 			}
 			if = {
 				limit = {
-					owner = { cultural_acceptance_base = { target = culture value <= acceptance_status_1 } }
+					owner = { cultural_acceptance_base = { target = root.culture value <= acceptance_status_1 } }
 				}
 				multiply = 0.1
 			}
 			else_if = {
 				limit = {
-					owner = { cultural_acceptance_base = { target = culture value <= acceptance_status_2 } }
+					owner = { cultural_acceptance_base = { target = root.culture value <= acceptance_status_2 } }
 				}
 				multiply = 0.25
 			}
 			else_if = {
 				limit = {
-					owner = { cultural_acceptance_base = { target = culture value <= acceptance_status_3 } }
+					owner = { cultural_acceptance_base = { target = root.culture value <= acceptance_status_3 } }
 				}
 				multiply = 0.5
 			}
@@ -885,5 +863,7 @@ movement_religious_minority = {
 				max = 0.25
 			}
 		}
+
+		add = movement_radicalism_suppressed_after_civil_war
 	}
 }

@@ -2,6 +2,11 @@
 	icon = "gfx/interface/icons/event_icons/bicorne_hat.dds"
 
 	group = je_group_france_divided_monarchists
+	dlc = dlc004
+
+	activation_description = {
+		always = yes
+	}
 
 	is_shown_in_lobby = {
 		has_dlc_feature = voice_of_the_people_content #France DLC
@@ -14,9 +19,7 @@
 
 	immediate = {
 		fra_set_divided_monarchist_variables = yes
-		fra_weekly_pulse_legitimist_progress = yes #Calculates how much the Legitimists will get next month. Updates weekly, but is not added until the monthly.
-		fra_weekly_pulse_orleanist_progress = yes  #Calculates how much the Orleanists will get next month. Updates weekly, but is not added until the monthly.
-		fra_weekly_pulse_bonapartist_progress = yes  #Calculates how much the Bonapartists will get next month. Updates weekly, but is not added until the monthly.
+		divided_monarchists_ai_roll = yes
 		random_law = {
 			limit = { type = law_type:law_monarchy }
 			save_scope_as = monarchy_scope
@@ -27,18 +30,24 @@
 	scripted_progress_bar = divided_monarchists_legitimist_progress_bar
 	scripted_progress_bar = divided_monarchists_bonapartist_progress_bar
 
-	complete = {
-		country_has_monarchy_law = yes
-		custom_tooltip = {
-			text = je_divided_monarchists_02_tt
-			has_variable = one_true_french_dynasty #Can only ever complete upon finishing the Cement the Rightful Dynasty journal entry.
+	outcome = {
+		header = je_standard_completion_header
+		effect_header = je_standard_on_completion_header
+		color = "gold_positive"
+		conclusion_desc = je_standard_completion_conclusion_desc
+		trigger = {
+			country_has_monarchy_law = yes
+			custom_tooltip = {
+				text = je_divided_monarchists_02_tt
+				has_variable = one_true_french_dynasty #Can only ever complete upon finishing the Cement the Rightful Dynasty journal entry.
+			}
 		}
-	}
-
-	on_complete = {
-		custom_tooltip = {
-			text = je_divided_monarchists_03_tt
-			fra_clear_divided_monarchist_variables = yes #Removes all variables used for math in this JE, to save memory and performance.
+		effect = {
+			custom_tooltip = {
+				text = je_divided_monarchists_03_tt
+				fra_clear_divided_monarchist_variables = yes #Removes all variables used for math in this JE, to save memory and performance.
+			}
+			je_divided_monarchists_cleanup = yes
 		}
 	}
 
@@ -114,18 +123,6 @@
 		events = {
 			french_pretenders.5
 		}
-		effect = {
-			if = {
-				limit = {
-					NOT = {
-						has_variable = fra_divided_monarchists_freeze #This variable stops iteration, and is granted by reaching 480 with one dynasty. It's reset when this JE is completed, or when je_cement_the_rightful_dynasty fails.
-					}
-				}
-				fra_weekly_pulse_legitimist_progress = yes #Calculates how much the Legitimists will get next month. Updates weekly, but is not added until the monthly.
-				fra_weekly_pulse_orleanist_progress = yes  #Calculates how much the Orleanists will get next month. Updates weekly, but is not added until the monthly.
-				fra_weekly_pulse_bonapartist_progress = yes  #Calculates how much the Bonapartists will get next month. Updates weekly, but is not added until the monthly.
-			}
-		}
 	}
 
 	on_monthly_pulse = {
@@ -142,6 +139,11 @@
 					}
 					NOT = {
 						has_variable = fra_divided_monarchists_freeze
+					}
+					NOT = {
+						any_civil_war = {
+							is_civil_war_type = revolution
+						}
 					}
 				}
 				if = { #Fires the event to enthrone the pretender - 1 if contextualised as coup, 10 if contextualised as reinforcement.
@@ -214,41 +216,50 @@
 		}
 	}
 
-	fail = {
-		country_has_springtime_revolution = {
-			THRESHOLD = 0.25
-		}
-		capital = { #HMPS: ->
-			turmoil >= 0.25
-		} # <-
-	}
-
-	on_fail = {
-		trigger_event = { id = french_pretenders.6 popup = yes }
-		if = {
-			limit = {
-				has_variable = fra_divided_monarchists_freeze
+	outcome = {
+		header = je_standard_failure_header
+		effect_header = je_standard_on_failure_header
+		color = "blue_negative"
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			country_has_springtime_revolution = {
+				THRESHOLD = 0.25
 			}
-			remove_variable = fra_divided_monarchists_freeze #Clears the freeze variable so that progress can be made if this JE is somehow activated again.
+			capital = { #HMPS: ->
+				turmoil >= 0.25
+			} # <-
 		}
-		fra_clear_divided_monarchist_variables = yes #Removes all variables used for math in this JE, to save memory and performance.
-	}
-
-	invalid = {
-		NOT = {
-			#Previous "Stamp Out Monarchism" requirement is deprecated - this can now come back from the dead properly upon restoring the monarchy.
-			country_has_monarchy_law = yes
-		}
-	}
-
-	on_invalid = {
-		if = {
-			limit = {
-				has_variable = fra_divided_monarchists_freeze
+		effect = {
+			trigger_event = { id = french_pretenders.6 popup = yes }
+			if = {
+				limit = {
+					has_variable = fra_divided_monarchists_freeze
+				}
+				remove_variable = fra_divided_monarchists_freeze #Clears the freeze variable so that progress can be made if this JE is somehow activated again.
 			}
-			remove_variable = fra_divided_monarchists_freeze #Clears the freeze variable so that progress can be made if this JE is somehow activated again.
+			fra_clear_divided_monarchist_variables = yes #Removes all variables used for math in this JE, to save memory and performance.
 		}
-		fra_clear_divided_monarchist_variables = yes #It should not be possible for this JE to somehow be deleted without these variables being cleared.
+	}
+
+	outcome = {
+		flags = { hidden invalid_outcome }
+		conclusion_desc = je_standard_failure_conclusion_desc
+		trigger = {
+			NOT = {
+				#Previous "Stamp Out Monarchism" requirement is deprecated - this can now come back from the dead properly upon restoring the monarchy.
+				country_has_monarchy_law = yes
+			}
+		}
+		effect = {
+			if = {
+				limit = {
+					has_variable = fra_divided_monarchists_freeze
+				}
+				remove_variable = fra_divided_monarchists_freeze #Clears the freeze variable so that progress can be made if this JE is somehow activated again.
+			}
+			fra_clear_divided_monarchist_variables = yes #It should not be possible for this JE to somehow be deleted without these variables being cleared.
+			je_divided_monarchists_cleanup = yes
+		}
 	}
 
 	weight = 100
