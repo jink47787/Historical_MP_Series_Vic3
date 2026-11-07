@@ -1,4 +1,5 @@
-﻿types sway_country_types
+﻿#HMPS - sway_offer_type_selection_list visibility changed at line 38, to hide sway options unless you are a primary participant
+types sway_country_types
 {
 	type sway_country_panel = default_block_window {
 		name = "sway_country_panel"
@@ -22,9 +23,9 @@
 				visible = "[SwayCountryPanel.IsShowingSwayOfferTypes]"
 			}
 		}
-		
 
-		blockoverride "scrollarea_content" {	
+
+		blockoverride "scrollarea_content" {
 			flowcontainer = {
 				direction = vertical
 				using = default_list_position
@@ -36,33 +37,33 @@
 					#visible = "[And(SwayCountryPanel.IsShowingSwayOfferTypes, DiplomaticPlay.IsPrimaryParticipant(GetPlayer))]" ## Hiding sway options if the player is uncommited. This is to prevent players from getting free maneuvers. 
 					visible = "[And(SwayCountryPanel.IsShowingSwayOfferTypes, Or(DiplomaticPlay.IsPrimaryParticipant(GetPlayer), Not(SwayCountryPanel.GetCountry.IsPlayer)))]" ## Hiding sway options unless you are a primary participant OR if the primary participant is an AI. This is to prevent players from getting free maneuvers. 
 					datamodel = "[SwayCountryPanel.AccessSwayOfferTypes]"
-				
+
 					item = {
 						sway_offer_type_item = {}
 					}
 				}
-				
+
 				dynamicgridbox = {
 					name = "wargoal_type_selection_list"
 					visible = "[SwayCountryPanel.IsShowingSwayOfferWarGoalTypes]"
 					datamodel = "[SwayCountryPanel.AccessSwayOfferWarGoalTypes]"
-				
+
 					item = {
 						sway_offer_wargoal_type_item = {}
 					}
 				}
-				
+
 				dynamicgridbox = {
 					name = "offer_wargoal_selection_list"
 					visible = "[SwayCountryPanel.IsShowingSwayOffers]"
 					datamodel = "[SwayCountryPanel.AccessShownSwayOffers]"
-					
+
 					item = {
 						container = {
 							sway_offer_item = {
 								visible = "[SwayOffer.RequiresAnyInput]"
 								onclick = "[RightClickMenuManager.ToggleSwayOfferArticleTypeInput(SwayOffer.Self, PdxGuiWidget.AccessSelf, 'article_input_right_click_menu_right')]"
-					
+
 								blockoverride "maneuvers_and_infamy" {}
 
 								blockoverride "acceptance_icon" {
@@ -81,8 +82,14 @@
 							}
 
 							sway_offer_item = {
-								visible = "[And( Not( SwayOffer.RequiresAnyInput ), Or( DiplomaticPlay.IsPrimaryParticipant(GetPlayer), DiplomaticPlay.IsUndecidedParticipant(GetPlayer) ) )]"
+								visible = "[And( Not( SwayOffer.RequiresAnyInput ), And(Or( DiplomaticPlay.IsPrimaryParticipant(GetPlayer), DiplomaticPlay.IsUndecidedParticipant(GetPlayer) ), Not( GetPlayer.HasAnyAllianceLikeTreatiesWith(SwayCountryPanel.GetOtherCountry.Self) ) ) )]"
 								onclick = "[Execute( SwayCountryPanel.AccessDiplomaticPlay.CreateSway( GetPlayer.Self, SwayCountryPanel.GetCountry, SwayOffer.Self ))]"
+								onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+							}
+
+							sway_offer_item = {
+								visible = "[And( Not( SwayOffer.RequiresAnyInput ), And(Or( DiplomaticPlay.IsPrimaryParticipant(GetPlayer), DiplomaticPlay.IsUndecidedParticipant(GetPlayer) ), GetPlayer.HasAnyAllianceLikeTreatiesWith(SwayCountryPanel.GetOtherCountry.Self) ) )]"
+								onclick = "[PopupManager.AskConfirmation( SwayCountryPanel.AccessDiplomaticPlay.CreateSway( GetPlayer.Self, SwayCountryPanel.GetCountry, SwayOffer.Self ))]"
 								onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
 							}
 
@@ -112,12 +119,23 @@
 					visible = "[DiplomaticPlay.IsInitiator(SwayCountryPanel.GetCountry)]"
 
 					direct_support_button = {
-						visible = "[DiplomaticPlay.IsUndecidedParticipant(GetPlayer)]"
+						visible = "[And(DiplomaticPlay.IsUndecidedParticipant(GetPlayer), Not(GetPlayer.HasAnyAllianceLikeTreatiesWith(DiplomaticPlay.GetInitiator)))]"
 
 						blockoverride "button_properties" {
 							enabled = "[DiplomaticPlay.CanSupportInitiator(GetPlayer)]"
 							tooltip = "SUPPORT_INITIATOR_DIPLOMATIC_PLAY_TOOLTIP"
 							onclick = "[Execute(DiplomaticPlay.SupportInitiator(GetPlayer))]"
+							onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+						}
+					}
+
+					direct_support_button = {
+						visible = "[And(DiplomaticPlay.IsUndecidedParticipant(GetPlayer), GetPlayer.HasAnyAllianceLikeTreatiesWith(DiplomaticPlay.GetInitiator))]"
+
+						blockoverride "button_properties" {
+							enabled = "[DiplomaticPlay.CanSupportInitiator(GetPlayer)]"
+							tooltip = "SUPPORT_INITIATOR_DIPLOMATIC_PLAY_TOOLTIP"
+							onclick = "[PopupManager.AskConfirmation(DiplomaticPlay.SupportInitiator(GetPlayer))]"
 							onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
 						}
 					}
@@ -139,7 +157,7 @@
 					visible = "[DiplomaticPlay.IsTarget(SwayCountryPanel.GetCountry)]"
 
 					direct_support_button = {
-						visible = "[DiplomaticPlay.IsUndecidedParticipant(GetPlayer)]"
+						visible = "[And(DiplomaticPlay.IsUndecidedParticipant(GetPlayer), Not(GetPlayer.HasAnyAllianceLikeTreatiesWith(DiplomaticPlay.GetInitiator)))]"
 
 						blockoverride "button_properties" {
 							enabled = "[DiplomaticPlay.CanSupportTarget(GetPlayer)]"
@@ -150,12 +168,23 @@
 					}
 
 					direct_support_button = {
+						visible = "[And(DiplomaticPlay.IsUndecidedParticipant(GetPlayer), GetPlayer.HasAnyAllianceLikeTreatiesWith(DiplomaticPlay.GetInitiator))]"
+
+						blockoverride "button_properties" {
+							enabled = "[DiplomaticPlay.CanSupportTarget(GetPlayer)]"
+							tooltip = "SUPPORT_TARGET_DIPLOMATIC_PLAY_TOOLTIP"
+							onclick = "[PopupManager.AskConfirmation(DiplomaticPlay.SupportTarget(GetPlayer))]"
+							onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
+						}
+					}
+
+					direct_support_button = {
 						visible = "[DiplomaticPlay.IsBacker(GetPlayer)]"
 
 						blockoverride "button_properties" {
-							enabled = "[DiplomaticPlay.CanSupportInitiator(GetPlayer)]"
-							tooltip = "SUPPORT_INITIATOR_DIPLOMATIC_PLAY_TOOLTIP"
-							onclick = "[PopupManager.AskConfirmation(DiplomaticPlay.SupportInitiator(GetPlayer))]"
+							enabled = "[DiplomaticPlay.CanSupportTarget(GetPlayer)]"
+							tooltip = "SUPPORT_TARGET_DIPLOMATIC_PLAY_TOOLTIP"
+							onclick = "[PopupManager.AskConfirmation(DiplomaticPlay.SupportTarget(GetPlayer))]"
 							onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
 						}
 					}
@@ -171,7 +200,7 @@
 		block "button_properties" {
 			onclick = "[InformationPanelBar.OpenDiplomaticPlayPanel( DiplomaticPlay.AccessSelf )]"
 		}
-		
+
 		flowcontainer = {
 			parentanchor = vcenter
 			margin_left = 15
@@ -182,7 +211,7 @@
 				size = { 40 40 }
 				texture = "gfx/interface/icons/diplo_play_icons/stance_supports.dds"
 			}
-		
+
 			textbox = {
 				parentanchor = vcenter
 				align = nobaseline
@@ -198,7 +227,7 @@
 
 	type sway_offer_item = button {
 		enabled = "[IsValid( SwayCountryPanel.AccessDiplomaticPlay.CreateSway( GetPlayer.Self, SwayCountryPanel.GetCountry, SwayOffer.Self ))]"
-		
+
 		block "war_goal_tooltip" {
 			tooltip = "SWAY_OFFER_TOOLTIP"
 		}
@@ -310,9 +339,9 @@
 			}
 		}
 	}
-	
+
 	type sway_offer_type_item = button {
-		onclick = "[SwayCountryPanel.SetSwayOfferType(SwayOfferType.Self)]"		
+		onclick = "[SwayCountryPanel.SetSwayOfferType(SwayOfferType.Self)]"
 		using = default_button
 
 		container = {
@@ -321,7 +350,7 @@
 			datacontext = "[SwayOfferType]"
 			resizeparent = yes
 			minimumsize = { 550 60 }
-			
+
 			icon = {
 				parentanchor = vcenter
 				position = { 10 0 }
@@ -340,7 +369,7 @@
 				align = nobaseline
 				text = "SWAY_OFFER_TYPE"
 			}
-			
+
 			textbox = {
 				visible = "[SwayCountryPanel.IsReverseSway]"
 				parentanchor = vcenter
@@ -351,13 +380,13 @@
 				multiline = yes
 				align = nobaseline
 				text = "REVERSE_SWAY_OFFER_TYPE"
-			}			
-			
+			}
+
 			diplo_play_sway_approval = {
 				blockoverride "visible_approval_icon" {
 					visible = "[And(DiplomaticPlay.HasAtLeastOneDesiredSwayOfType( GetPlayer.Self, Country.Self, SwayOfferType.Self ), SwayCountryPanel.IsReverseSway)]"
 				}
-				
+
 				parentanchor = right|vcenter
 				position = { -10 0 }
 				tooltip = "SWAY_PANEL_CAN_REVERSE_SWAY_TOOLTIP"
@@ -367,12 +396,12 @@
 				blockoverride "visible_approval_icon" {
 					visible = "[And(DiplomaticPlay.HasAtLeastOneDesiredSwayOfType( GetPlayer.Self, Country.Self, SwayOfferType.Self ), Not(SwayCountryPanel.IsReverseSway))]"
 				}
-				
+
 				parentanchor = right|vcenter
 				position = { -10 0 }
 				tooltip = "SWAY_PANEL_CAN_SWAY_TOOLTIP"
 			}
-			
+
 			diplo_play_sway_disapproval = {
 				blockoverride "visible_disapproval_icon" {
 					visible = "[And(Not(DiplomaticPlay.HasAtLeastOneDesiredSwayOfType( GetPlayer.Self, Country.Self, SwayOfferType.Self )), SwayCountryPanel.IsReverseSway)]"
@@ -393,8 +422,8 @@
 				tooltip = "SWAY_PANEL_CANNOT_SWAY_TOOLTIP"
 			}
 		}
-	}	
-	
+	}
+
 	type sway_offer_wargoal_type_item = button {
 		onclick = "[SwayCountryPanel.SetSwayOfferWarGoalType(WarGoalType.Self)]"
 		tooltip = "[WarGoalType.GetDesc]"
@@ -407,14 +436,14 @@
 
 			resizeparent = yes
 			minimumsize = { 550 60 }
-			
+
 			icon = {
 				position = { 10 0 }
 				size = { 50 50 }
 				texture = "[WarGoalType.GetTexture]"
 				parentanchor = left|vcenter
 				widgetanchor = left|vcenter
-			}	
+			}
 
 			textbox = {
 				position = { 70 0 }
@@ -427,10 +456,10 @@
 				multiline = yes
 				align = nobaseline
 			}
-			
+
 			textbox = {
 				position = { 70 0 }
-				visible = "[SwayCountryPanel.IsReverseSway]"					
+				visible = "[SwayCountryPanel.IsReverseSway]"
 				using = fontsize_large
 				parentanchor = left|vcenter
 				text = "REVERSE_SWAY_OFFER_WARGOAL_TYPE"
@@ -444,7 +473,7 @@
 				blockoverride "visible_approval_icon" {
 					visible = "[And(DiplomaticPlay.HasAtLeastOneDesiredSwayWargoalOfType( GetPlayer.Self, Country.Self, WarGoalType.Self ), SwayCountryPanel.IsReverseSway)]"
 				}
-				
+
 				parentanchor = right|vcenter
 				position = { -10 0 }
 				tooltip = "SWAY_PANEL_CAN_REVERSE_SWAY_TOOLTIP_WARGOAL"
@@ -454,12 +483,12 @@
 				blockoverride "visible_approval_icon" {
 					visible = "[And(DiplomaticPlay.HasAtLeastOneDesiredSwayWargoalOfType( GetPlayer.Self, Country.Self, WarGoalType.Self ), Not(SwayCountryPanel.IsReverseSway))]"
 				}
-				
+
 				parentanchor = right|vcenter
 				position = { -10 0 }
 				tooltip = "SWAY_PANEL_CAN_SWAY_TOOLTIP_WARGOAL"
 			}
-			
+
 			diplo_play_sway_disapproval = {
 				blockoverride "visible_disapproval_icon" {
 					visible = "[And(Not(DiplomaticPlay.HasAtLeastOneDesiredSwayWargoalOfType( GetPlayer.Self, Country.Self, WarGoalType.Self )), SwayCountryPanel.IsReverseSway)]"
