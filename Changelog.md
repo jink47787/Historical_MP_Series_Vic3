@@ -328,6 +328,9 @@ Thanks to Yyyman for his Italy company changes.
 ## Population
 - When any pops assimilate or convert, at least 20 do at a time (was 1)
 
+## Tech
+- Tech events that give research progress now default to the research option if the player does not choose in time; where an event has several research options, all of them are the default
+
 ## Economic
 - Builders' Yards employ 5,000 workers per level: Standardisation methods 500 shopkeepers and 2,000 laborers, each production line 1,250 workers (machinists and engineers replace some laborers at higher tiers)
 - Yard Tramways cut 1,500 laborers and use 5 coal; Mechanical Handling cuts 2,000 laborers and uses 5 tools and 3 electricity
