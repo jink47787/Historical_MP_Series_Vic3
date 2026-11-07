@@ -48,7 +48,7 @@ Thanks to Yyyman for his Italy company changes.
 #### Stone & Building Materials
 - Two new goods: Stone and Building Materials. Building Materials are now the main input of the construction sector, and every urban building uses a small amount as upkeep
 - New Quarries produce Stone. How many a state can build depends on its geology; 12 famous stone districts (e.g. Carrara Marble, Welsh Slate, Aswan Granite) boost quarries, and Silica Sands states boost glassworks and quarries
-- New Builders' Yards turn wood, hardwood, stone, coal and steel into Building Materials, with Timber, Masonry, Standardisation and Handling methods that improve with tech
+- New Builders' Yards turn wood, hardwood, stone, coal and steel into Building Materials, with Timber, Masonry and Automation methods that improve with tech
 - Construction sector reworked into three groups: Foundations (Timber Footings, Brick Footings, Concrete Foundations, Piles and Caissons), Fittings (Bare Finish, Fitted Interiors, Electric Lifts) and Site Machinery (Manual Labour, Steam Plant, Motorised Plant). Better foundations and fittings add construction points; site machinery only saves labour. Construction now pays normal industry wages and employs far more workers, so it is a much bigger cost to the government
 - Steel mills, glassworks and railways now use Stone; subsistence farms, orchards, pastures, rice farms and fishing villages produce a little Building Materials
 #### Hardwood
@@ -332,9 +332,10 @@ Thanks to Yyyman for his Italy company changes.
 - Tech events that give research progress now default to the research option if the player does not choose in time; where an event has several research options, all of them are the default
 
 ## Economic
-- Builders' Yards employ 5,000 workers per level: Standardisation methods 500 shopkeepers and 2,000 laborers, each production line 1,250 workers (machinists and engineers replace some laborers at higher tiers)
-- Yard Tramways cut 1,500 laborers and use 5 coal; Mechanical Handling cuts 2,000 laborers and uses 5 tools and 3 electricity
-- Brick Clamps use 10 stone and 5 wood; Hoffmann Kilns use 17.5 stone and 5 coal
+- Builders' Yards employ 5,000 workers per level: every Timber method includes 500 shopkeepers and 2,000 laborers, each production line 1,250 workers (machinists and engineers replace some laborers at higher tiers)
+- Timber Yard uses 20 wood for 30 building materials; Laminated Timber uses 5 oil for 70 building materials
+- Automation methods cut laborers: Water-tube Boiler (5 tools, 5 coal) cuts 1,500, Rotary Valve Engine (5 tools, 10 coal) cuts 2,000, and Assembly Lines (4 tools, 1 copper, 1 oil, 9 electricity, 2 rubber) cut 2,500 and need electricity. Automation is banned under the Industry Banned law, like vanilla
+- Brick Clamps need Shaft Mining and use 10 stone and 5 wood; Hoffmann Kilns use 15 stone and 5 coal for 40 building materials
 - Quarry Jaw Crushers use no coal
 - Construction methods employ 5,000 workers per level, keeping each method's worker mix: Timber Footings 5,000 laborers; Brick Footings 500 bureaucrats, 500 clerks, 750 machinists and 3,250 laborers; Concrete Foundations and Piles and Caissons 500 bureaucrats, 500 clerks, 750 machinists, 750 engineers and 2,500 laborers; Electric Lifts add 750 engineers
 - Steam Plant (Steam Donkey, era 3) uses 5 coal and cuts 1,750 laborers; Motorised Plant uses 5 oil and cuts 2,500 laborers
