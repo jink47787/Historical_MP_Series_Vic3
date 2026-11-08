@@ -47,7 +47,7 @@ Thanks to Yyyman for his Italy company changes.
 ## Economic
 #### Stone & Building Materials
 - Two new goods: Stone and Building Materials. Building Materials are now the main input of the construction sector, and every urban building uses a small amount as upkeep
-- New Quarries produce Stone. How many a state can build depends on its geology; 12 famous stone districts (e.g. Carrara Marble, Welsh Slate, Aswan Granite) boost quarries, and Silica Sands states boost glassworks and quarries
+- New Quarries produce Stone and follow the mine layout: Steam Automation (Hand Cranked Crane, Steam Donkey) replaces the crushers, and haulage is Road Carts or Rail only, like mines. How many a state can build depends on its geology; 12 famous stone districts (e.g. Carrara Marble, Welsh Slate, Aswan Granite) boost quarries, and Silica Sands states boost glassworks and quarries
 - New Builders' Yards turn wood, hardwood, stone, coal and steel into Building Materials, with Timber, Masonry and Automation methods that improve with tech
 - Construction sector reworked into three groups: Foundations (Timber Footings, Brick Footings, Concrete Foundations, Piles and Caissons), Fittings (Bare Finish, Fitted Interiors, Electric Lifts) and Site Machinery (Manual Labour, Steam Plant, Motorised Plant). Better foundations and fittings add construction points; site machinery only saves labour. Construction now pays normal industry wages and employs far more workers, so it is a much bigger cost to the government
 - Steel mills, glassworks and railways now use Stone; subsistence farms, orchards, pastures, rice farms and fishing villages produce a little Building Materials
@@ -336,7 +336,9 @@ Thanks to Yyyman for his Italy company changes.
 - Timber Yard uses 20 wood for 30 building materials; Laminated Timber uses 5 oil for 70 building materials
 - Automation methods cut laborers: Water-tube Boiler (5 tools, 5 coal) cuts 1,500, Rotary Valve Engine (5 tools, 10 coal) cuts 2,000, and Assembly Lines (4 tools, 1 copper, 1 oil, 9 electricity, 2 rubber) cut 2,500 and need electricity. Automation is banned under the Industry Banned law, like vanilla
 - Brick Clamps need Shaft Mining and use 10 stone and 5 wood; Hoffmann Kilns use 15 stone and 5 coal for 40 building materials
-- Quarry Jaw Crushers use no coal
+- Quarry Steam Automation (Hand Cranked Crane, Steam Donkey) uses 4 coal and cuts 1,000 laborers; top-tier quarries produce 215 stone
+- Nitroglycerin quarry method produces 25 stone and has vanilla mine mortality (0.3 laborers, 0.2 machinists, 0.1 engineers)
+- Steam Cutters employ 3,500 laborers and 1,000 machinists with no engineers, like the mine pump; quarry extraction methods no longer cause laborer mortality
 - Construction methods employ 5,000 workers per level, keeping each method's worker mix: Timber Footings 5,000 laborers; Brick Footings 500 bureaucrats, 500 clerks, 750 machinists and 3,250 laborers; Concrete Foundations and Piles and Caissons 500 bureaucrats, 500 clerks, 750 machinists, 750 engineers and 2,500 laborers; Electric Lifts add 750 engineers
 - Steam Plant (Steam Donkey, era 3) uses 5 coal and cuts 1,750 laborers; Motorised Plant uses 5 oil and cuts 2,500 laborers
 - The market capital sells 10 Building Materials
