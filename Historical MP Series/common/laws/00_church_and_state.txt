@@ -30,7 +30,7 @@ law_state_religion = {
 		}
 	}
 	
-	on_activate = {
+	on_enact = {
 		if = {
 			limit = {
 				country_has_state_religion = rel:atheist
@@ -92,58 +92,6 @@ law_state_religion = {
 			limit = { ai_has_enact_weight_modifier_journal_entries = yes }
 			add = 750
 		}
-
-		# For Japanese religion Journal Entries
-		if = {
-			limit = {
-				OR = {
-					has_journal_entry = je_elevate_buddhism
-					AND = {
-						# If Shinbutsu Bunri is active and the Taikyo Proclamation has been made
-						has_journal_entry = je_shinbutsu_bunri
-						country_has_state_religion = rel:shinto
-					}
-				}
-			}
-			add = 1000
-		}
-	}
-
-	ai_impose_chance = {
-		value = 0
-
-		if = {
-			limit = {
-				has_law = law_type:law_state_religion
-				power_bloc ?= { has_identity = identity:identity_religious }
-				religion = scope:target_country.religion
-			}
-
-			add = base_impose_law_weight
-
-			# Very important for religious blocs
-			if = {
-				limit = { scope:target_country = { has_law_or_variant = law_type:law_freedom_of_conscience } }
-				multiply = 2
-			}
-			else = {
-				multiply = 5
-			}
-		}
-
-		if = {
-			limit = {
-				scope:target_country = {
-					c:BIC ?= this
-					OR = {
-						has_journal_entry = je_british_dictate_plantations
-						has_journal_entry = je_british_dictate_military
-						has_journal_entry = je_british_dictate_universities
-					}
-				}
-			}
-			multiply = 0
-		}
 	}
 }
 
@@ -169,10 +117,11 @@ law_freedom_of_conscience = {
 		law_theocracy
 	}
 	
-	on_activate = {
+	on_enact = {
+		recalculate_pop_ig_support = yes
 		if = {
 			limit = {
-				country_has_state_religion = rel:atheist
+				has_law_or_variant = law_type:law_state_atheism
 			}
 			set_state_religion = root.country_definition.religion
 		}
@@ -182,7 +131,9 @@ law_freedom_of_conscience = {
 			}
 			remove_modifier = antireligious_policies
 		}
-		recalculate_pop_ig_support = yes
+	}
+	
+	on_activate = {
 		if = {
 			limit = {
 				OR = {
@@ -244,17 +195,7 @@ law_freedom_of_conscience = {
 				has_law_or_variant = law_type:law_state_religion
 			}
 			add = 1000
-		}
-
-		# For Japanese religion Journal Entries
-		# If Shinbutsu Bunri is active, but the Taikyo Proclamation has not been made
-		if = {
-			limit = {
-				has_journal_entry = je_shinbutsu_bunri
-				country_has_state_religion = rel:mahayana
-			}
-			add = 1000
-		}
+		}				
 	}
 }
 
@@ -283,10 +224,11 @@ law_total_separation = {
 		}
 	}
 	
-	on_activate = {
+	on_enact = {
+		recalculate_pop_ig_support = yes
 		if = {
 			limit = {
-				country_has_state_religion = rel:atheist
+				has_law_or_variant = law_type:law_state_atheism
 			}
 			set_state_religion = root.country_definition.religion
 		}
@@ -296,7 +238,9 @@ law_total_separation = {
 			}
 			remove_modifier = antireligious_policies
 		}
-		recalculate_pop_ig_support = yes
+	}
+	
+	on_activate = {
 		if = {
 			limit = {
 				OR = {
@@ -479,6 +423,8 @@ law_state_atheism = {
 	}
 
 	can_enact = {
+		NOT = { c:BIC ?= this }
+		NOT = { c:BHT ?= this }
 		ig:ig_devout ?= {
 			is_in_government = no
 		}
@@ -589,7 +535,8 @@ law_millet_system = {
 		ROOT = c:TUR
 	}
 	
-	on_activate = {
+	on_enact = {
+		recalculate_pop_ig_support = yes
 		if = {
 			limit = {
 				country_has_state_religion = rel:atheist
@@ -602,17 +549,6 @@ law_millet_system = {
 			}
 			remove_modifier = antireligious_policies
 		}
-		if = {
-			limit = {
-				NOR = {
-					c:TUR ?= this
-					country_has_state_religion = rel:sunni
-				}
-			}
-			deactivate_law = law_type:law_millet_system
-			activate_law = law_type:law_state_religion
-		}
-		recalculate_pop_ig_support = yes
 	}
 	
 	modifier = {
@@ -662,7 +598,16 @@ law_millet_system = {
 	}	
 	
 	can_impose = {
-		always = no
+		OR = {
+			AND = {
+				is_in_same_power_bloc = scope:target_country
+				AND = {
+					modifier:country_can_impose_same_lawgroup_church_and_state_in_power_bloc_bool = yes
+					has_law = scope:law
+				}
+			}
+			can_impose_law_default = yes
+		}
 	}
 	
 	ai_will_do = {
@@ -709,7 +654,7 @@ law_codified_mecelle = {
 		law_theocracy
 	}
 	
-	on_activate = {
+	on_enact = {
 		recalculate_pop_ig_support = yes
 		if = {
 			limit = {
@@ -723,6 +668,9 @@ law_codified_mecelle = {
 			}
 			remove_modifier = antireligious_policies
 		}
+	}
+	
+	on_activate = {
 		if = {
 			limit = {
 				OR = {
