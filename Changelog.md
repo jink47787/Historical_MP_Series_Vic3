@@ -66,12 +66,14 @@ Thanks to Yyyman for his Italy company changes.
 
 ## Political
 - Multiculturalism reworked and renamed Multinationalism; ideologies that strongly disapproved of it now only disapprove
+- The Boost War Support decision is turned off for now: vanilla 1.15 changed war support to run from 0 to 100, so the decision could never be taken. When it returns, it will be usable below 25 war support and give +50
 - The Political Question journal entry is paused: it no longer starts at game start and its progress hooks are off, with its definition and laws kept dormant so it can be turned back on. The Springtime of the Peoples is back to the vanilla 1.15 setup: Forest of Bayonets starts it again with the vanilla "Revolutionary Spring" outcome, and European countries with Egalitarianism get its rules after Forest of Bayonets fails. If Forest of Bayonets times out without a Springtime, the 1848 unlock still fires, so Gutter Crown and the major formables still unlock
 
 ## Flava
 #### Europe
 - French Baby Bust: France can now end it faster by becoming a Confessional State, with two new amendments (Publicly Funded Religious Schools and Publicly Funded Religious Hospitals)
 - German unification: Austria can no longer back a German candidate while it is a great power, and the Austria-Hungary dual monarchy now requires Germany to exist
+- The Decembrist Sympathizers journal entry for Russia is paused: it no longer starts at game start and can't trigger for now, with its content kept so it can be turned back on
 #### East Asia
 - New Sakhalin events: Russia can assert its claim against Japanese encroachment, and Japan can answer by settling Karafuto or abandoning it
 #### The Americas
@@ -323,7 +325,6 @@ Thanks to Yyyman for his Italy company changes.
 - No Labor Movement law: laborer political strength multiplier is 0.75 (was 0.5)
 - Promote National Values decree is no longer available under the Multinationalism law
 - Religious minority movements gain radicalism from poor relations with a theocratic Papacy, as majority movements already did
-- Russia's upgraded Promote Social Mobility decree gives +0.35 education access (was +0.15); its +60% pop qualifications and 125 authority cost are unchanged
 
 ## Population
 - When any pops assimilate or convert, at least 20 do at a time (was 1)
@@ -333,7 +334,7 @@ Thanks to Yyyman for his Italy company changes.
 
 ## Economic
 - Builders' Yards employ 5,000 workers per level: every Timber method includes 500 shopkeepers and 2,000 laborers, each production line 1,250 workers (machinists and engineers replace some laborers at higher tiers)
-- Timber Yard uses 20 wood for 30 building materials; Laminated Timber uses 5 oil for 70 building materials
+- Timber Yard uses 20 wood for 30 building materials; Laminated Timber uses 5 oil for 75 building materials
 - Automation methods cut laborers: Water-tube Boiler (5 tools, 5 coal) cuts 1,500, Rotary Valve Engine (5 tools, 10 coal) cuts 2,000, and Assembly Lines (4 tools, 1 copper, 1 oil, 9 electricity, 2 rubber) cut 2,500 and need electricity. Automation is banned under the Industry Banned law, like vanilla
 - Brick Clamps need Shaft Mining and use 10 stone and 5 wood; Hoffmann Kilns use 15 stone and 5 coal for 40 building materials
 - Quarry Steam Automation (Hand Cranked Crane, Steam Donkey) uses 4 coal and cuts 1,000 laborers; top-tier quarries produce 215 stone
@@ -352,6 +353,7 @@ Thanks to Yyyman for his Italy company changes.
 - Specie Famines and Inflationary Periods can't start before 1 January 1837; a player-led market can roll for a Specie Famine in any month its balance-of-trade deficit is at least 4% of GDP
 - Atacama Desert no longer has the -10% construction efficiency malus
 - Reserve Currency holder gets +10% trade advantage for imports and -10% for exports, at every tier
+- Artillery Foundry and Basic Port take less input to offset building materials upkeep: Bronze Cannons use 10 hardwood (was 15), Bronze Smoothbores 15 (was 20), and Basic Port clippers 4 (was 6)
 
 ## Diplomacy
 - Regional investment rights tooltip clarified: the investor can build only in the chosen state but can buy privatized buildings anywhere in the country
@@ -396,5 +398,6 @@ Thanks to Yyyman for his Italy company changes.
 - Fixed the Oregon journal entry re-adding the US claim on Idaho, Oregon and Washington every month
 - Fixes to the Congo vote and the Scramble for Africa events
 - Fixed script errors in the Russian tsar events and the ACW segregation events; removed an unreachable Spanish event
-- Vanilla 1.15 follow-ups: failing the Sick Man of Europe journal entry now gives the Dead Man of Europe modifier and starts the Great Eastern Crisis journal entry (a main failure also removes the Rumelian tradition from Albanian, Bosniak and Sephardic cultures); the West America journal entry no longer blocks the Oregon Trail event; Pot Stills give +10 groceries (was +15), because vanilla added glass and copper inputs; Electric Lifts use 5 copper instead of 5 lead, at the same cost
+- Vanilla 1.15 follow-ups: failing the Sick Man of Europe journal entry now gives the Dead Man of Europe modifier and starts the Great Eastern Crisis journal entry (a main failure also removes the Rumelian tradition from Albanian, Bosniak and Sephardic cultures); the West America journal entry no longer blocks the Oregon Trail event; Pot Stills give +10 groceries (was +15), because vanilla added glass and copper inputs; Electric Lifts no longer use electricity and now take 10 glass, 5 hardwood, 5 lead, 5 steel, 5 copper and 5 engines, at the same cost
 - Vanilla 1.15 drift sync: about 70 small differences from vanilla in laws, amendments, interest groups, journal entries, events, decrees, formable nations, characters, scripted effects and modifiers were brought up to date where vanilla changed them after HMPS last did; anything HMPS may have kept on purpose stays as it was
+- The De Facto Capitulation event works again on 1.15: war support now runs from 0 to 100, so its check is at 0 (was -100) and its war support option adds 25 (was 50)
