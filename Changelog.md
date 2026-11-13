@@ -367,6 +367,7 @@ Thanks to Yyyman for his Italy company changes.
 
 ## Military
 - Forts that are not naval forts no longer add blockade resistance
+- Military Airships (event now fires on Military Aviation, era 5, instead of Zeppelins, era 4), the War Hero fighter general and Montenegro's "Rifles" option give +10% army offense instead of flat offense (was +30, +30 and +10); Rifles also gives +10% defense (was +10 flat)
 
 ## Flava
 - Initiate Manifest Destiny also claims Colorado, so the USA can still take it if Mexico colonizes it first; Repudiate Manifest Destiny removes that claim. Texas no longer starts with a claim on New Mexico
