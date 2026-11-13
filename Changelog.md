@@ -372,6 +372,7 @@ Thanks to Yyyman for his Italy company changes.
 - Peru and Bolivia start with level 2 trade centers in Lima, Cajamarca, Ica and La Paz; Bolivia also starts with them in Potosí and Antofagasta, and South Peru in Arequipa and Tarapacá
 - Russian Alaska can no longer colonize California from Fort Ross: the Fort Ross state starts with a "Fort Ross Trading Post" modifier (-100% colony growth speed) that ends when the Fort Ross sale event transfers the post
 - Russian-American Company starts with a one-line infantry battalion in Alaska, in an army called "Sitka Garrison"
+- Russia's Great Reformer "Army Modernization" requirement now also accepts Partial Conscription, alongside Volunteer Only and Mass Conscription
 - Peru-Bolivian Confederation: Bolivia no longer annexes North and South Peru on day 1; they start as its puppets, as in vanilla. Bolivia must keep legitimacy over 50 and hold its subjects for 5 years to complete it (was 10 years)
 - The Fall of Salaverry event is now sent only to AI South American countries; players no longer get it (was sent to players too)
 - Sepoy Mutiny: the Company's war goals use the vanilla "annex Punjab" goal
