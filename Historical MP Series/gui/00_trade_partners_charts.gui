@@ -1,13 +1,143 @@
 ﻿types market_panel {
+    # One legend row of a chart. Its blocks are filled by the chart that uses it.
+    type hmps_chart_legend_row = widget {
+        size = { 119 28 }
+        block "tooltip" {}
+
+        block "pie_item_goto_button" {}
+
+        hbox = {
+            block "hbox_margin" {
+                margin = { 6 0 }
+            }
+
+            icon = {
+                texture = "/gfx/interface/piechart/piechart_legend.dds"
+                size = { 18 18 }
+                block "color" {}
+            }
+
+            textbox = {
+                layoutpolicy_horizontal = preferred
+                autoresize = yes
+                align = left|nobaseline
+                block "rightside1_info" {}
+                block "rightside1_info_margin" {
+                    margin_right = 5
+                }
+            }
+            textbox = {
+                layoutpolicy_horizontal = preferred
+                autoresize = yes
+                align = right|nobaseline
+                block "rightside2_info" {}
+                margin_right = 3
+            }
+        }
+    }
+
+    # compact_chart with an arrow beside the title that swaps the four-row legend for a scrolling list of every entry.
+    # Each use sets "expand_onclick", "expand_collapsed" and "expand_expanded" on its own variable,
+    # "show_more_button_visibility" for the arrow, and optionally "expand_row_visible" to hide empty rows in the list.
+    type hmps_expandable_chart = compact_chart {
+        blockoverride "title" {
+            widget = {
+                size = { 249 23 }
+
+                textbox = {
+                    size = { 100% 100% }
+                    align = hcenter|nobaseline
+                    default_format = "#title"
+                    block "heading" {}
+                }
+
+                container = {
+                    parentanchor = left|vcenter
+                    block "show_more_button_visibility" {}
+
+                    button = {
+                        using = expand_arrow
+                        size = { 20 20 }
+                        block "expand_collapsed" {}
+                        block "expand_onclick" {}
+                    }
+                    button = {
+                        using = expand_arrow_expanded
+                        size = { 20 20 }
+                        block "expand_expanded" {
+                            visible = no
+                        }
+                        block "expand_onclick" {}
+                    }
+                }
+            }
+        }
+
+        blockoverride "labels" {
+            fixedgridbox = {
+                block "expand_collapsed" {}
+                parentanchor = vcenter
+                addrow = 28
+                minimumsize = { -1 69 }
+                addcolumn = 119
+                maxverticalslots = 4
+                block "datamodel" {}
+
+                item = {
+                    hmps_chart_legend_row = {}
+                }
+            }
+
+            scrollarea = {
+                block "expand_expanded" {
+                    visible = no
+                }
+                autoresizescrollarea = yes
+                maximumsize = { -1 280 }
+                scrollbarpolicy_horizontal = always_off
+
+                scrollbar_vertical = {
+                    using = vertical_scrollbar
+                }
+
+                scrollwidget = {
+                    flowcontainer = {
+                        direction = vertical
+                        ignoreinvisible = yes
+                        block "datamodel" {}
+
+                        item = {
+                            hmps_chart_legend_row = {
+                                block "expand_row_visible" {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     type trade_partners_charts = flowcontainer {
         spacing = 10
-        compact_chart = {
+        hmps_expandable_chart = {
             blockoverride "datamodel" {
                 datamodel = "[Market.GetOwner.MakeScope.GetList('trade_partners_export_partners')]"
             }
 
             blockoverride "show_more_button_visibility" {
-                visible = "[GreaterThan_int32(GetDataModelSize(Market.GetOwner.MakeScope.GetList('trade_partners_export_partners')), '(int32)3')]"
+                visible = "[GreaterThan_int32(GetDataModelSize(Market.GetOwner.MakeScope.GetList('trade_partners_export_partners')), '(int32)4')]"
+            }
+
+            blockoverride "expand_onclick" {
+                onclick = "[GetVariableSystem.Toggle('hmps_expand_export_partners')]"
+            }
+
+            blockoverride "expand_collapsed" {
+                visible = "[Not(GetVariableSystem.Exists('hmps_expand_export_partners'))]"
+            }
+
+            blockoverride "expand_expanded" {
+                visible = "[GetVariableSystem.Exists('hmps_expand_export_partners')]"
             }
 
             blockoverride "heading" {
@@ -51,13 +181,25 @@
             }
         }
 
-        compact_chart = {
+        hmps_expandable_chart = {
             blockoverride "datamodel" {
                 datamodel = "[Market.GetOwner.MakeScope.GetList('trade_partners_import_partners')]"
             }
 
             blockoverride "show_more_button_visibility" {
-                visible = "[GreaterThan_int32(GetDataModelSize(Market.GetOwner.MakeScope.GetList('trade_partners_import_partners')), '(int32)3')]"
+                visible = "[GreaterThan_int32(GetDataModelSize(Market.GetOwner.MakeScope.GetList('trade_partners_import_partners')), '(int32)4')]"
+            }
+
+            blockoverride "expand_onclick" {
+                onclick = "[GetVariableSystem.Toggle('hmps_expand_import_partners')]"
+            }
+
+            blockoverride "expand_collapsed" {
+                visible = "[Not(GetVariableSystem.Exists('hmps_expand_import_partners'))]"
+            }
+
+            blockoverride "expand_expanded" {
+                visible = "[GetVariableSystem.Exists('hmps_expand_import_partners')]"
             }
 
             blockoverride "heading" {

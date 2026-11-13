@@ -153,18 +153,40 @@ types market_panel
 					parentanchor = hcenter
 					visible = "[InformationPanel.IsTabSelected('world_market_trade')]"
 
-					textbox = {
-						datacontext = "[GetMetaPlayer.GetPlayedOrObservedCountry]"
-						visible = "[GreaterThan_int32(Market.GetCountryTradeCapacity(Country.Self), '(int32)0')]"
-						text = "MARKET_COUNTRY_TRADE_CAPACITY"
-						tooltip = "[Market.GetCountryTradeCapacityDesc(Country.Self)]"
-						margin = { 10 10 }
-						margin_bottom = 5
-						autoresize = yes
-						align = nobaseline
+					# HMPS: market trade capacity, copied from vanilla 1.15 market_panel.gui (old per-country version used removed functions)
+					container = {
+						minimumsize = { @panel_width -1 }
 						parentanchor = hcenter
-						maximumsize = { @panel_width -1 }
-						multiline = yes
+						tooltip = "[MarketPanel.GetMarket.GetTradeCapacityDesc]"
+
+						background = {
+							using = entry_bg
+						}
+
+						flowcontainer = {
+							parentanchor = center
+							spacing = 7
+							margin = { 10 10 }
+
+							textbox = {
+								parentanchor = vcenter
+								max_width = 250
+								autoresize = yes
+								align = nobaseline
+								using = elide_fontsize_min
+								text = "MARKET_PANEL_TRADE_CAPACITY"
+							}
+
+							textbox = {
+								parentanchor = vcenter
+								max_width = 250
+								autoresize = yes
+								align = nobaseline
+								using = elide_fontsize_min
+								using = fontsize_large
+								text = "MARKET_TRADE_CAPACITY"
+							}
+						}
 					}
 					# HMPS Balance of Trade (hmps_balance_of_trade_update_effect, common/scripted_effects/HMPS_scripted_effects.txt). Read from the shown market's owner (every member holds the same values), not the player, so foreign markets show their own figures
 					textbox = {
@@ -312,13 +334,29 @@ types market_panel
 						margin_top = 10
 						parentanchor = hcenter
 
-						compact_chart = {
+						hmps_expandable_chart = {
 							blockoverride "datamodel" {
 								datamodel = "[Market.AccessMarketGoodsSortedOnExports( MarketPanel.GetFilters )]"
 							}
 
 							blockoverride "show_more_button_visibility" {
-								visible = "[GreaterThan_int32(GetDataModelSize(Market.AccessMarketGoods( MarketPanel.GetFilters )), '(int32)3')]"
+								visible = "[GreaterThan_int32(GetDataModelSize(Market.AccessMarketGoods( MarketPanel.GetFilters )), '(int32)4')]"
+							}
+
+							blockoverride "expand_onclick" {
+								onclick = "[GetVariableSystem.Toggle('hmps_expand_exports')]"
+							}
+
+							blockoverride "expand_collapsed" {
+								visible = "[Not(GetVariableSystem.Exists('hmps_expand_exports'))]"
+							}
+
+							blockoverride "expand_expanded" {
+								visible = "[GetVariableSystem.Exists('hmps_expand_exports')]"
+							}
+
+							blockoverride "expand_row_visible" {
+								visible = "[GreaterThan_CFixedPoint(Market.GetExportedAmount(Goods.Self), '(CFixedPoint)0')]"
 							}
 
 							blockoverride "heading" {
@@ -362,13 +400,29 @@ types market_panel
 							}
 						}
 
-						compact_chart = {
+						hmps_expandable_chart = {
 							blockoverride "datamodel" {
 								datamodel = "[Market.AccessMarketGoodsSortedOnImports( MarketPanel.GetFilters )]"
 							}
 
 							blockoverride "show_more_button_visibility" {
-								visible = "[GreaterThan_int32(GetDataModelSize(Market.AccessMarketGoods( MarketPanel.GetFilters )), '(int32)3')]"
+								visible = "[GreaterThan_int32(GetDataModelSize(Market.AccessMarketGoods( MarketPanel.GetFilters )), '(int32)4')]"
+							}
+
+							blockoverride "expand_onclick" {
+								onclick = "[GetVariableSystem.Toggle('hmps_expand_imports')]"
+							}
+
+							blockoverride "expand_collapsed" {
+								visible = "[Not(GetVariableSystem.Exists('hmps_expand_imports'))]"
+							}
+
+							blockoverride "expand_expanded" {
+								visible = "[GetVariableSystem.Exists('hmps_expand_imports')]"
+							}
+
+							blockoverride "expand_row_visible" {
+								visible = "[GreaterThan_CFixedPoint(Market.GetImportedAmount(Goods.Self), '(CFixedPoint)0')]"
 							}
 
 							blockoverride "heading" {
