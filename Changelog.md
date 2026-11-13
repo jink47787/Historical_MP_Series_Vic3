@@ -49,10 +49,10 @@ Thanks to Yyyman for his Italy company changes.
 - Two new goods: Stone and Building Materials. Building Materials are now the main input of the construction sector, and every urban building uses a small amount as upkeep
 - New Quarries produce Stone and follow the mine layout: Steam Automation (Hand Cranked Crane, Steam Donkey) replaces the crushers, and haulage is Road Carts or Rail only, like mines. How many a state can build depends on its geology; 12 famous stone districts (e.g. Carrara Marble, Welsh Slate, Aswan Granite) boost quarries, and Silica Sands states boost glassworks and quarries
 - New Builders' Yards turn wood, hardwood, stone, coal and steel into Building Materials, with Timber, Masonry and Automation methods that improve with tech
-- Construction sector reworked into three groups: Foundations (Timber Footings, Brick Footings, Concrete Foundations, Piles and Caissons), Fittings (Bare Finish, Fitted Interiors, Electric Lifts) and Site Machinery (Manual Labour, Steam Plant, Motorised Plant). Better foundations and fittings add construction points; site machinery only saves labour. Construction now pays normal industry wages and employs far more workers, so it is a much bigger cost to the government
+- Construction sector reworked into three groups: Foundations (Timber Footings, Brick Footings, Concrete Foundations, Piles and Caissons), Fittings (Bare Finish, Fitted Interiors, Electric Lifts) and Site Machinery (Manual Labour, Steam Plant, Motorised Plant). Better foundations add construction points; Windows and Pipes adds +0.5% construction sector throughput per level and Electric Lifts +1% per level; site machinery only saves labour. Reinforced Concrete (was +15%) and Pneumatic Tools (was +10%) no longer add construction throughput. Construction now pays normal industry wages and employs far more workers, so it is a much bigger cost to the government. Foundations now use Building Materials and wood at every era, Fittings no longer use hardwood, and each era costs about 20% more per construction point than vanilla; the newest Foundations and Fittings are always the cheapest per point
 - Steel mills, glassworks and railways now use Stone; subsistence farms, orchards, pastures, rice farms and fishing villages produce a little Building Materials
 #### Hardwood
-- Hardwood is back as its own resource: Hardwood Forestry can be built in 208 states, and hardwood is used by Builders' Yards and Fitted Interiors
+- Hardwood is back as its own resource: Hardwood Forestry can be built in 208 states, and hardwood is used by Builders' Yards
 #### Trade
 - New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -100% at 20%) and the other side gains 2.5% per 1% (up to +50%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
 #### Reserve Currency
@@ -341,10 +341,11 @@ Thanks to Yyyman for his Italy company changes.
 - Quarry Steam Automation (Hand Cranked Crane, Steam Donkey) uses 4 coal and cuts 1,000 laborers; top-tier quarries produce 215 stone
 - Nitroglycerin quarry method produces 25 stone and has vanilla mine mortality (0.3 laborers, 0.2 machinists, 0.1 engineers)
 - Steam Cutters employ 3,500 laborers and 1,000 machinists with no engineers, like the mine pump; quarry extraction methods no longer cause laborer mortality
-- Construction methods employ 5,000 workers per level, keeping each method's worker mix: Timber Footings 5,000 laborers; Brick Footings 500 bureaucrats, 500 clerks, 750 machinists and 3,250 laborers; Concrete Foundations and Piles and Caissons 500 bureaucrats, 500 clerks, 750 machinists, 750 engineers and 2,500 laborers; Electric Lifts add 750 engineers
+- Construction methods employ 5,000 workers per level, keeping each method's worker mix: Timber Footings 5,000 laborers; Brick Footings 500 bureaucrats, 500 clerks, 750 machinists and 3,250 laborers; Concrete Foundations and Piles and Caissons 500 bureaucrats, 500 clerks, 750 machinists, 750 engineers and 2,500 laborers
 - Steam Plant (Steam Donkey, era 3) uses 5 coal and cuts 1,750 laborers; Motorised Plant uses 5 oil and cuts 2,500 laborers
 - The market capital sells 10 Building Materials
 - New Stone and Brick Consortium company for Builders' Yards and Quarries
+- The power bloc construction company can also build Builders' Yards
 - Assembly line PMs (furniture, tooling, motor, arms, munition) use 1 more oil and 1 less rubber per worker than before
 - Guano Harvestry employs 250 shopkeepers and 750 laborers per level (was 75 and 500), output unchanged; laid-off workers from a depleted deposit no longer become radicals
 - Chincha Islands state trait is in Ica, where the guano deposit is, and gives +20% guano mine throughput (was +20% sulfur mine throughput, in Lima)
