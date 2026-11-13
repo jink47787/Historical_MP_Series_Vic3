@@ -6868,13 +6868,53 @@ types military_formation_panel_types
 			using = dark_area
 		}
 
-		textbox = {
+		flowcontainer = {
 			parentanchor = hcenter
-			autoresize = yes
-			align = nobaseline
-			maximumsize = { @panel_width -1 }
-			multiline = yes
-			text = "[MilitaryFormation.GetFormationStatusDesc]"
+			spacing = 5
+
+			icon = {
+				visible = "[And(MilitaryFormation.IsDefeated, Not(MilitaryFormation.GetCurrentHQ.IsValid))]"
+				size = { 30 30 }
+				parentanchor = vcenter
+				texture = "gfx/interface/icons/commander_order_icons/admiral_repairing.dds"
+			}
+
+			icon = {
+				visible = "[Or(And(MilitaryFormation.IsDefeated, MilitaryFormation.GetCurrentHQ.IsValid), And(Not(MilitaryFormation.IsDefeated), MilitaryFormation.IsRecalledForRepairs))]"
+				size = { 30 30 }
+				parentanchor = vcenter
+				texture = "gfx/interface/icons/generic_icons/repairing.dds"
+			}
+
+			icon = {
+				visible = "[And(And(Not(MilitaryFormation.IsDefeated), Not(MilitaryFormation.IsRecalledForRepairs)), And(And(MilitaryFormation.HasInvasion, MilitaryFormation.GetInvasion.IsNavalInvasion), Not(Or(MilitaryFormation.IsBeingTransported, MilitaryFormation.IsAwaitingTransport))))]"
+				size = { 30 30 }
+				parentanchor = vcenter
+				texture = "gfx/interface/icons/formation_order_icons/naval_invasion.dds"
+			}
+
+			icon = {
+				visible = "[Or(Or(MilitaryFormation.IsBeingTransported, MilitaryFormation.IsAwaitingTransport), And(Not(MilitaryFormation.HasInvasion), And(Not(MilitaryFormation.IsDefeated), And(Not(MilitaryFormation.IsRecalledForRepairs), MilitaryFormation.IsAboutToTransportArmies))))]"
+				size = { 30 30 }
+				parentanchor = vcenter
+				texture = "gfx/interface/icons/formation_order_icons/embark_onto_fleet.dds"
+			}
+
+			icon = {
+				visible = "[And(Not(MilitaryFormation.IsDefeated), And(Not(MilitaryFormation.IsRecalledForRepairs), And(Not(MilitaryFormation.HasInvasion), And(Not(MilitaryFormation.IsAboutToTransportArmies), MilitaryFormation.HasNavalMission))))]"
+				size = { 30 30 }
+				parentanchor = vcenter
+				texture = "[MilitaryFormation.GetNavalMission.GetType.GetIcon]"
+			}
+
+			textbox = {
+				maximumsize = { 505 -1 }
+				parentanchor = vcenter
+				autoresize = yes
+				align = nobaseline
+				multiline = yes
+				text = "[MilitaryFormation.GetFormationStatusDesc]"
+			}
 		}
 
 		textbox = {
@@ -6898,11 +6938,18 @@ types military_formation_panel_types
 			blockoverride "size" {
 				size = { 530 60 }
 			}
+
 			blockoverride "button_size" {
 				size = { 95% 75% }
 			}
+
 			blockoverride "mobilization_icon_size" {
 				size = { 55 55 }
+			}
+
+			blockoverride "text_margin" {
+				margin_left = 33
+				margin_right = 8
 			}
 		}
 
@@ -6923,6 +6970,11 @@ types military_formation_panel_types
 
 				blockoverride "mobilization_icon_size" {
 					size = { 55 55 }
+				}
+
+				blockoverride "text_margin" {
+					margin_left = 34
+					margin_right = 8
 				}
 			}
 
@@ -7183,6 +7235,21 @@ types military_formation_panel_types
 				direction = vertical
 				spacing = 5
 
+				button_checkbox_label = {
+					visible = "[And(MilitaryFormation.IsFleet, MilitaryFormation.GetCountry.IsLocalPlayer)]"
+					onclick = "[Execute( MilitaryFormation.ToggleReplaceLostShips )]"
+					enabled = "[IsValid( MilitaryFormation.ToggleReplaceLostShips )]"
+					tooltip = "AUTO_REPLACE_LOST_SHIPS_TOOLTIP"
+
+					blockoverride "checkbox" {
+						checked = "[MilitaryFormation.ReplacesLostShips]"
+					}
+
+					blockoverride "text" {
+						text = "AUTO_REPLACE_LOST_SHIPS_LABEL"
+					}
+				}
+
 				textbox = {
 					autoresize = yes
 					align = nobaseline
@@ -7407,12 +7474,16 @@ types military_formation_panel_types
 			}
 
 			textbox = {
+				size = { 100% 100% }
+				elide = right
+				fontsize_min = 12
+				align = hcenter|nobaseline
 				text = "RAISE_ALL_CONSCRIPTS"
-				align = center|nobaseline
-				parentanchor = center
-				autoresize = yes
 
-				block "text_position" {}
+				block "text_margin" {
+					margin_left = 32
+					margin_right = 8
+				}
 
 				block "fontsize" {
 					using = fontsize_large
@@ -7434,12 +7505,16 @@ types military_formation_panel_types
 			}
 
 			textbox = {
+				size = { 100% 100% }
+				elide = right
+				fontsize_min = 12
+				align = hcenter|nobaseline
 				text = "RAISE_ALL_CONSCRIPTS"
-				align = center|nobaseline
-				parentanchor = center
-				autoresize = yes
 
-				block "text_position" {}
+				block "text_margin" {
+					margin_left = 32
+					margin_right = 8
+				}
 
 				block "fontsize" {
 					using = fontsize_large
@@ -7492,12 +7567,16 @@ types military_formation_panel_types
 			}
 
 			textbox = {
-				parentanchor = center
+				size = { 100% 100% }
+				elide = right
+				fontsize_min = 12
+				align = hcenter|nobaseline
 				text = "MOBILIZE_ARMY"
-				autoresize = yes
-				align = nobaseline
 
-				block "text_position" {}
+				block "text_margin" {
+					margin_left = 32
+					margin_right = 8
+				}
 
 				block "fontsize" {
 					using = fontsize_large
@@ -7506,12 +7585,7 @@ types military_formation_panel_types
 		}
 
 		### IS MOBILIZING
-		is_mobilizing_progressbar = {
-
-			blockoverride "text_position" {
-				position = { 8 0 }
-			}
-		}
+		is_mobilizing_progressbar = {}
 
 		### IS MOBILIZED
 		widget = {
@@ -7529,16 +7603,16 @@ types military_formation_panel_types
 			}
 
 			textbox = {
-				parentanchor = center
-				text = "MILITARY_FORMATION_IS_FULLY_MOBILIZED"
-				autoresize = yes
-				align = nobaseline
-				fontsize_min = 12
+				size = { 100% 100% }
 				elide = right
-				max_width = 140
-				position = { 10 -1 }
+				fontsize_min = 12
+				align = hcenter|nobaseline
+				text = "MILITARY_FORMATION_IS_FULLY_MOBILIZED"
 
-				block "text_position" {}
+				block "text_margin" {
+					margin_left = 32
+					margin_right = 8
+				}
 
 				block "fontsize" {
 					using = fontsize_large
@@ -8032,12 +8106,16 @@ types mobilization
 
 		block "textbox" {
 			textbox = {
-				parentanchor = center
+				size = { 100% 100% }
+				elide = right
+				fontsize_min = 12
+				align = hcenter|nobaseline
 				text = "MILITARY_FORMATION_IS_MOBILIZING"
-				autoresize = yes
-				align = nobaseline
 
-				block "text_position" {}
+				block "text_margin" {
+					margin_left = 32
+					margin_right = 8
+				}
 
 				block "fontsize" {
 					using = fontsize_large

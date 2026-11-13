@@ -197,7 +197,33 @@ types sea_region_panel_types
 					state = {
 						name = _show
 						on_start = "[SeaRegionPanel.GetMapModeList.SelectByKey('mm_trade')]"
-					}		
+					}
+
+					vbox = {
+						visible = "[Not(IsDataModelEmpty(SeaRegionPanel.AccessWorldMarketHubs))]"
+						layoutpolicy_horizontal = expanding
+						spacing = 5
+
+						default_header = {
+							blockoverride "size" {
+								size = { @panel_width_plus_14 38 }
+							}
+
+							blockoverride "text" {
+								text = "SEA_REGION_WORLD_MARKET_HUBS_HEADER"
+							}
+						}
+
+						vbox = {
+							layoutpolicy_horizontal = expanding
+							spacing = 2
+							datamodel = "[SeaRegionPanel.AccessWorldMarketHubs]"
+
+							item = {
+								sea_region_world_market_hub = {}
+							}
+						}
+					}
 
 					textbox = {
 						margin_top = 100
@@ -211,14 +237,28 @@ types sea_region_panel_types
 					}
 
 					vbox = {
+						visible = "[Not(IsDataModelEmpty(SeaRegionPanel.AccessCountriesWithShippingLanes))]"
 						layoutpolicy_horizontal = expanding
+						spacing = 5
 
-						spacing = 10
+						default_header = {
+							blockoverride "size" {
+								size = { @panel_width_plus_14 38 }
+							}
 
-						datamodel = "[SeaRegionPanel.AccessCountriesWithShippingLanes]"
+							blockoverride "text" {
+								text = "SHIPPING_LANES_HEADER"
+							}
+						}
 
-						item = {
-							country_shipping_lanes = {}
+						vbox = {
+							layoutpolicy_horizontal = expanding
+							spacing = 10
+							datamodel = "[SeaRegionPanel.AccessCountriesWithShippingLanes]"
+
+							item = {
+								country_shipping_lanes = {}
+							}
 						}
 					}
 
@@ -887,6 +927,84 @@ types sea_region_panel_types
 		}
 	}
 
+	type sea_region_world_market_hub = button {
+		size = { @panel_width_minus_20 44 }
+		enabled = "[State.HasWorldMarketHubTrade]"
+		onclick = "[InformationPanelBar.OpenMarketPanelForWorldMarketHub(State.Self)]"
+		onmousehierarchyenter = "[AccessHighlightManager.HighlightMarketArea(State.Self)]"
+		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+		using = default_button
+
+		tooltipwidget = {
+			RegularTooltip_WorldMarketHub = {
+				datacontext = "[State.GetCountry]"
+			}
+		}
+
+		background = {
+			using = fade_right_entry_fancy_header_colored
+			color = "[State.GetMarket.GetOwner.GetMapColor]"
+		}
+
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			margin = { 15 5 }
+			spacing = 10
+
+			textbox = {
+				layoutpolicy_horizontal = expanding
+				elide = right
+				align = nobaseline
+				autoresize = yes
+				using = fontsize_large
+				text = "[State.GetOwner.GetFlagTextIcon] [State.GetWorldMarketHubNameNoFormatting]"
+			}
+
+			hbox = {
+				spacing = 5
+
+				icon = {
+					size = { 30 30 }
+					texture = "gfx/interface/icons/state_status_icons/trade_capacity.dds"
+				}
+
+				textbox = {
+					align = nobaseline
+					autoresize = yes
+					text = "[State.GetWorldMarketHubTradeCapacityBalance|+=]"
+				}
+			}
+
+			vertical_divider = {
+				blockoverride "size" {
+					layoutpolicy_vertical = expanding
+					size = { 2 0 }
+				}
+			}
+
+			hbox = {
+				spacing = 5
+
+				icon = {
+					size = { 30 30 }
+					texture = "gfx/interface/icons/state_status_icons/world_market_access.dds"
+				}
+
+				textbox = {
+					align = nobaseline
+					autoresize = yes
+					text = "[State.GetWorldMarketAccessFormatted]"
+				}
+			}
+		}
+
+		icon = {
+			visible = "[State.IsMarketAreaBeingHighlighted]"
+			using = highlighted_active_square_selection
+		}
+	}
+
 	type origin_state_port = vbox {
 		visible = "[Not(IsDataModelEmpty(State.AccessShippingLanesFromThisState(SeaRegionPanel.GetProvince.Self)))]"
 
@@ -940,6 +1058,32 @@ types sea_region_panel_types
 
 				tooltip = "ORIGIN_STATE_NUMBER_OF_SHIPPING_LANES_TOOLTIP"
 				text = "ORIGIN_STATE_NUMBER_OF_SHIPPING_LANES"
+			}
+
+			button_icon_round_action = {
+				visible = "[SeaRegionPanel.IsWorldMarketHubConnectedHere(State.Self)]"
+				enabled = "[State.HasWorldMarketHubTrade]"
+				onclick = "[InformationPanelBar.OpenMarketPanelForWorldMarketHub(State.Self)]"
+				onmousehierarchyenter = "[AccessHighlightManager.HighlightMarketArea(State.Self)]"
+				onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+
+				blockoverride "size" {
+					size = { 30 30 }
+				}
+
+				blockoverride "icon_size" {
+					size = { 75% 75% }
+				}
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/generic_icons/world_market.dds"
+				}
+
+				tooltipwidget = {
+					RegularTooltip_WorldMarketHub = {
+						datacontext = "[State.GetCountry]"
+					}
+				}
 			}
 
 			expand = {}
@@ -1035,8 +1179,8 @@ types sea_region_panel_types
 
 				item = {
 					widget = {
-						tooltip = "MILITARY_FORMATION_SUPPLY_TOOLTIP"
 						size = { 510 35 }
+						tooltip = "SEA_REGION_MILITARY_FORMATION_SUPPLY_TOOLTIP"
 
 						divider_clean = {
 							size = { 510 1 }
@@ -1056,12 +1200,12 @@ types sea_region_panel_types
 							}
 
 							textbox = {
-								layoutstretchfactor_horizontal = 7
 								layoutpolicy_horizontal = expanding
-								align = left|nobaseline
+								layoutstretchfactor_horizontal = 7
 								elide = right
 								fontsize_min = 12
-								text = "[MilitaryFormation.GetName]"
+								align = nobaseline
+								text = "[MilitaryFormation.GetNameNoIcon]"
 							}
 
 							widget = {
@@ -1085,12 +1229,12 @@ types sea_region_panel_types
 							}
 
 							textbox = {
-								layoutstretchfactor_horizontal = 4
 								layoutpolicy_horizontal = expanding
-								align = right|nobaseline
+								layoutstretchfactor_horizontal = 10
 								elide = right
 								fontsize_min = 12
-								text = "[MilitaryFormation.GetDistanceToHomePortFormatted]"
+								align = right|nobaseline
+								text = "SEA_REGION_MILITARY_FORMATION_SUPPLY_DISTANCE"
 							}
 						}
 					}
@@ -1153,22 +1297,22 @@ types sea_region_panel_types
 							}
 
 							textbox = {
-								layoutstretchfactor_horizontal = 3.5
 								layoutpolicy_horizontal = expanding
+								layoutstretchfactor_horizontal = 3.5
+								elide = right
 								alpha = "[TransparentIfTrue(EqualTo_CFixedPoint(ShippingLane.GetEffectivenessRaw,'(CFixedPoint)1'))]"
 								align = right|nobaseline
-								elide = right
-								text = "[ShippingLane.GetEffectivenessFormatted]"
+								text = "SEA_REGION_SHIPPING_LANE_EFFECTIVENESS"
 							}
 
 							textbox = {
-								layoutstretchfactor_horizontal = 4
 								layoutpolicy_horizontal = expanding
-								align = right|nobaseline
+								layoutstretchfactor_horizontal = 4
 								elide = right
 								fontsize_min = 12
-								text = "[ShippingLane.GetMerchantMarineDemandFormatted]"
 								alpha = "[TransparentIfZero(ShippingLane.GetMerchantMarineDemandRaw)]"
+								align = right|nobaseline
+								text = "SEA_REGION_SHIPPING_LANE_MERCHANT_MARINE_DEMAND"
 							}
 						}
 					}
@@ -1230,22 +1374,22 @@ types sea_region_panel_types
 							}
 
 							textbox = {
-								layoutstretchfactor_horizontal = 3.5
 								layoutpolicy_horizontal = expanding
+								layoutstretchfactor_horizontal = 3.5
+								elide = right
 								alpha = "[TransparentIfTrue(EqualTo_CFixedPoint(ShippingLane.GetEffectivenessRaw,'(CFixedPoint)1'))]"
 								align = right|nobaseline
-								elide = right
-								text = "[ShippingLane.GetEffectivenessFormatted]"
+								text = "SEA_REGION_SHIPPING_LANE_EFFECTIVENESS"
 							}
 
 							textbox = {
-								layoutstretchfactor_horizontal = 4
 								layoutpolicy_horizontal = expanding
-								align = right|nobaseline
+								layoutstretchfactor_horizontal = 4
 								elide = right
 								fontsize_min = 12
-								text = "[ShippingLane.GetMerchantMarineDemandFormatted]"
 								alpha = "[TransparentIfZero(ShippingLane.GetMerchantMarineDemandRaw)]"
+								align = right|nobaseline
+								text = "SEA_REGION_SHIPPING_LANE_MERCHANT_MARINE_DEMAND"
 							}
 						}
 					}

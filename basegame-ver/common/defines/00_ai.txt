@@ -117,6 +117,9 @@
 	MOBILIZATION_OPTION_MONEY_COST_FACTOR = 20 				# When checking whether the AI should activate a mobilization option, the monetary cost of activation is multiplied by this and compared against AI value to determine if it's worth it
 	MOBILIZATION_OPTION_NUM_ACTIVE_OPTIONS_DIVISOR = 0.25	# Divide the value of each non-activated mobilization option by ( 1 + number of already active options * this )
 	MOBILIZATION_OPTION_GOODS_SHORTAGE_MULT = 0.0			# Multiply value of mobilization option by this if there is a goods shortage of any of its input goods
+	MOBILIZATION_OPTIONS_MIN_EXTRA_EXPENSE_RATIO = 0.1		# In the least significant war, mobilization options may increase the AI's army goods expense by at most this share; insignificant wars allow none
+	MOBILIZATION_OPTIONS_MAX_EXTRA_EXPENSE_RATIO = 1.0		# In wars that require full mobilization or are existential, mobilization options may increase the AI's army goods expense by at most this share
+	MOBILIZATION_OPTIONS_EXPENSE_HYSTERESIS = 0.1			# The AI only activates mobilization options while their expense stays this share below its limit, so options near the limit are not toggled back and forth
 
 	MOBILIZATION_BASE_DESIRED_RATIO_TO_ENEMY = 0.5   		# AI wants to have a total amount of mobilized army power that is equal to enemy mobilized army power * this
 	MOBILIZATION_MAIN_ATTACKER_ADDED_RATIO = 1.0  			# Add this to desired ratio for the main attacker in the war
@@ -138,6 +141,8 @@
 	MOBILIZATION_MIN_MOBILIZATION_INCORPORATED_OCCUPATION = 0.5   #  AI will always mobilize at least this amount of forces if their incorporated states are occupied (overrides the multiplier for unincorporated occupation)
 	MOBILIZATION_MIN_MOBILIZATION_LOCAL_FRONTS = 0.25       # AI will always mobilize at least this amount of forces if they have any local fronts
 	MOBILIZATION_MIN_MOBILIZATION_CONTAINMENT_WAR = 1.0   # AI will always mobilize at least this amount of forces if fighting in a containment war
+	MOBILIZATION_MIN_MOBILIZATION_MAX_ENEMY_RATIO = 4.0   # The minimum mobilization levels above are capped at the level that gives this many times the enemy's strength
+	MOBILIZATION_MIN_MOBILIZATION_MAX_FLOOR = 0.1   # The enemy-based cap on the minimum mobilization level is never lower than this
 
 	CONSCRIPTION_INSUFFICIENT_FORCES_FACTOR = 1 					# For each 1% of mobilization the AI isn't able to meet, raise a base of 1% * this conscripts
 	CONSCRIPTION_RELATIVE_CONSCRIPTED_COMBAT_POWER_DIVISOR = 1		# Conscripted forces fraction of combat power is multiplied by this, then the result of CONSCRIPTION_INSUFFICIENT_FORCES_FACTOR is divided by (1 + the result)
@@ -771,6 +776,7 @@
 	SUBSIDIZE_SHARE_OF_SUPPLY_FACTOR = 2000		# How highly is subsidization of a building valued if it provides 100% of the sell orders for a good in the market
 	SUBSIDIZE_FAVORED_GOODS_MULT = 1.5 			# Share of supply factor is multiplied by this for a good that the AI wants a high supply of
 	SUBSIDIZE_DISFAVORED_GOODS_MULT = 0.75 		# Share of supply factor is multiplied by this for a good that the AI disfavors
+	SUBSIDIZE_REMOVE_PROFIT_MARGIN_BUFFER = 0.05	# AI removes subsidies once a building's profit exceeds the margin at which it would lower wages by this fraction of its revenue
 
 	# Below data is used to calculate how much weight the AI places on different things it can spend its authority on
 	AUTHORITY_SPENDING_RANDOM_FACTOR = 0.5 # The higher this is, the more random new AI authority spending will be
@@ -966,6 +972,8 @@
 	PRODUCTION_METHOD_DEFICIT_FACTOR = 1.5 # Per pound of deficit the produced goods would generate (multiplies a negative value)
 	PRODUCTION_METHOD_PRODUCED_VALUE_FACTOR = 0.25 # Per pound of produced goods in base value
 	PRODUCTION_METHOD_EMPLOYMENT_CHANGE_FACTOR = 2.0 # The total score of a PM will be multiplied or divided by 1 + ( this * the proportion of labor that is added or saved by the change )
+	PRODUCTION_METHOD_EMPLOYMENT_CHANGE_NO_AVAILABLE_LABOR_MULT = 3.0 # PRODUCTION_METHOD_EMPLOYMENT_CHANGE_FACTOR is multiplied by this in states where no working adults are unemployed or peasants
+	PRODUCTION_METHOD_EMPLOYMENT_CHANGE_ABUNDANT_LABOR_FRACTION = 0.1 # At or above this fraction of unemployed and peasant working adults in a state, PRODUCTION_METHOD_EMPLOYMENT_CHANGE_NO_AVAILABLE_LABOR_MULT no longer applies; it scales linearly below it
 	PRODUCTION_METHOD_REDUCE_OUTPUT_PENALTY_FACTOR = 10 # Multiply method score by this if we're reducing the building's output penalties
 	PRODUCTION_METHOD_REDUCE_OUTPUT_PENALTY_NO_WORLD_MARKET_ACCESS_FACTOR = 10000 # Replaces PRODUCTION_METHOD_REDUCE_OUTPUT_PENALTY_FACTOR if the state in question lacks world market access
 	PRODUCTION_METHOD_INCREASE_OUTPUT_PENALTY_FACTOR = 0.01 # Multiply method score by this if we're increasing the building's output penalties
@@ -979,8 +987,8 @@
 	PRODUCTION_METHOD_STICKINESS_UPGRADE = 0.95 # Score of non-current method is multiplied by this when it produces more goods base value in total
 	PRODUCTION_METHOD_STICKINESS_DOWNGRADE = 0.75 # Score of non-current method is multiplied by this when it produces less (or equal) goods base value in total
 	PRODUCTION_METHOD_CHANCE_TO_CHANGE = 0.1 # Chance that the AI will consider changing a production method when evaluating methods
-	PRODUCTION_METHOD_LOW_POP_THRESHOLD = 50000 # If a state's population is less than this, use the scoring factor below for low-pop PMs
-	PRODUCTION_METHOD_LOW_POP_FACTOR = 100000 # If a state's population is less than PRODUCTION_METHOD_LOW_POP_THRESHOLD, add this score for low-pop PMs
+	PRODUCTION_METHOD_LOW_POP_THRESHOLD = 50000 # If a state's population is at or below this, PMs with scoring_override = low_pop_method meet their condition
+	PRODUCTION_METHOD_SCORING_OVERRIDE_FACTOR = 1000000000 # Added to PMs whose scoring_override condition is met, so the AI always picks them, while PMs whose condition is not met are never picked
 
 	# At this amount or above of Nationalization Desire (set in ai strategies & building type), the AI will want to nationalize production buildings
 	NATIONALIZATION_DESIRE_NATIONALIZE_THRESHOLD = 1.0
