@@ -60,7 +60,7 @@ Thanks to Yyyman for his Italy company changes.
 #### Guano
 - Guano works like gold: deposits are discovered over time and run out, and Guano Harvestries are placed automatically on known deposits instead of being built. In 1836 only Peru's coast is known
 #### Infrastructure
-- Added minor canals (unlocked by Urbanization) that raise state infrastructure and provide transportation, available in 65 states; 24 historical canals already exist in 1836
+- Added minor canals (unlocked by Urbanization) that raise state infrastructure and provide transportation, available in 65 states; 24 historical canals already exist in 1836 and start on Pound Locks, the best canal method of that era
 #### Railroad Bubble
 - Railroad Bubble reworked: it starts when a major power expands its railways quickly, grows with railway building and expensive transportation, and boosts railway throughput and construction while it lasts. Choices at the start (embrace or regulate), at the peak (let it run, cool the market, prop it up or let the banks carry it) and at the crash (rebuild or relief works). The crash cuts wages and adds radicals. New "The Railway King" event
 
