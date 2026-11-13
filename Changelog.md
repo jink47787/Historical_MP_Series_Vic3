@@ -85,7 +85,7 @@ Thanks to Yyyman for his Italy company changes.
 
 ## UI
 - Topbar shows the market's Balance of Trade in place of Prestige, with a graph of the last 52 weeks in its tooltip; the market panel shows the market's exports, imports and balance
-- New Reserve Currency alert in the topbar, next to the vanilla alerts: green when your market is about to take it, red when you hold it and a rival is about to take it. Clicking it opens the market panel
+- New Reserve Currency alerts in the topbar, next to the vanilla alerts: green when your market is about to take it or it is vacant and yours qualifies, red when you hold it and a rival is about to take it or your surplus is about to lose it. Each shows the days left, and clicking it opens the market panel
 - New Specie Famine (red) and Inflationary Period (yellow) alerts in the topbar, shown to every market: they appear while the market's trade balance lets one start, and hide during its cooldown. Clicking either opens the market panel
 
 ## Stability/Bug Fixes
