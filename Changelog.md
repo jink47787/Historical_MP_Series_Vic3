@@ -356,6 +356,7 @@ Thanks to Yyyman for his Italy company changes.
 - Atacama Desert no longer has the -10% construction efficiency malus
 - Reserve Currency holder gets +25% trade advantage (the same as Free Trade) at every tier, in place of +10% for imports and -10% for exports
 - Inflationary Period: Money Supply Constricted no longer gives -10% wages, and adds +3% loan interest (was +2%)
+- The Taj Mahal's second production method was removed
 - Artillery Foundry and Basic Port take less input to offset building materials upkeep: Bronze Cannons use 10 hardwood (was 15), Bronze Smoothbores 15 (was 20), and Basic Port clippers 4 (was 6)
 
 ## Diplomacy
