@@ -358,6 +358,7 @@ Thanks to Yyyman for his Italy company changes.
 - Inflationary Period: Money Supply Constricted no longer gives -10% wages, and adds +3% loan interest (was +2%)
 - The Taj Mahal's second production method was removed
 - Artillery Foundry and Basic Port take less input to offset building materials upkeep: Bronze Cannons use 10 hardwood (was 15), Bronze Smoothbores 15 (was 20), and Basic Port clippers 4 (was 6)
+- Construction Fittings: Bare Finish gives no construction points; its 0.5 moves into the Foundations methods (Timber 2.0, Brick and Lime 5.0, Concrete 8.0, Piles and Caissons 11.0). Windows and Pipes gives 2.0 points and Electric Lifts 4.0, so each era's best combination keeps the same total. Construction sector throughput shows one decimal place, so the 0.5% Fittings steps are visible
 
 ## Diplomacy
 - Regional investment rights tooltip clarified: the investor can build only in the chosen state but can buy privatized buildings anywhere in the country
