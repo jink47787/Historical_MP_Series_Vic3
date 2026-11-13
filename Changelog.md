@@ -70,6 +70,7 @@ Thanks to Yyyman for his Italy company changes.
 - Multiculturalism reworked and renamed Multinationalism; ideologies that strongly disapproved of it now only disapprove
 - The Boost War Support decision is turned off for now: vanilla 1.15 changed war support to run from 0 to 100, so the decision could never be taken. When it returns, it will be usable below 25 war support and give +50
 - The Political Question journal entry is paused: it no longer starts at game start and its progress hooks are off, with its definition and laws kept dormant so it can be turned back on. The Springtime of the Peoples is back to the vanilla 1.15 setup: Forest of Bayonets starts it again with the vanilla "Revolutionary Spring" outcome, and European countries with Egalitarianism get its rules after Forest of Bayonets fails. If Forest of Bayonets times out without a Springtime, the 1848 unlock still fires, so Gutter Crown and the major formables still unlock
+- Protectorate Political Penalty is back for players: player protectorates get -2 approval on every interest group and +10% radicals and loyalists from standard-of-living changes. It is added monthly while a player country is a protectorate and removed when it stops being one; AI protectorates are exempt
 
 ## Flava
 #### Europe
