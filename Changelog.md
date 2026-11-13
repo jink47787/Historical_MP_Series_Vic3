@@ -323,9 +323,6 @@ Thanks to Yyyman for his Italy company changes.
 - Stamp Out Theocracy is no longer cancelled by enacting Council Republic
 - Removed the old extra acceptance modifier from embracing Ottomanism
 - Age of Caudillos: when the armed forces side with the Liberals, the journal entry progress goes down by 100
-- No Labor Movement law: laborer political strength multiplier is 0.75 (was 0.5)
-- Promote National Values decree is no longer available under the Multinationalism law
-- Religious minority movements gain radicalism from poor relations with a theocratic Papacy, as majority movements already did
 
 ## Population
 - When any pops assimilate or convert, at least 20 do at a time (was 1)
@@ -376,7 +373,6 @@ Thanks to Yyyman for his Italy company changes.
 - Russia's Great Reformer "Army Modernization" requirement now also accepts Partial Conscription, alongside Volunteer Only and Mass Conscription
 - Peru-Bolivian Confederation: Bolivia no longer annexes North and South Peru on day 1; they start as its puppets, as in vanilla. Bolivia must keep legitimacy over 50 and hold its subjects for 5 years to complete it (was 10 years)
 - The Fall of Salaverry event is now sent only to AI South American countries; players no longer get it (was sent to players too)
-- Sepoy Mutiny: the Company's war goals use the vanilla "annex Punjab" goal
 
 ## Map
 - Guano deposits: in 1836 only Peru's coast is known (Ica 30 known + 20 hidden, Cajamarca 10 + 10, Lima 10, Tarapacá 10 + 10). Everything else starts hidden: Antofagasta, Baja California, Namaqualand, Haiti, Santo Domingo, Bahamas, West Indies, Puerto Rico, West Micronesia and Nauru 10 each; East Micronesia 15; Oman 5; Hawaiian Islands 10; Tahiti 10; Western Australia 10; Jamaica 5; Honduras 5; Queensland 5; Cape Colony 5; Patagonia 5. Total 275 levels. Worked deposits run out at 75% of the vanilla gold-field rate
