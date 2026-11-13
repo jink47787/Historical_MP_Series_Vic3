@@ -380,6 +380,7 @@ Thanks to Yyyman for his Italy company changes.
 - Peru-Bolivian Confederation: Bolivia no longer annexes North and South Peru on day 1; they start as its puppets, as in vanilla. Bolivia must keep legitimacy over 50 and hold its subjects for 5 years to complete it (was 10 years)
 - The Fall of Salaverry event is now sent only to AI South American countries; players no longer get it (was sent to players too)
 - The Spanish Lake (Spain's Our American Empire journal entry reward) gives +20% income from subjects and -5% subject liberty desire, on top of vanilla's +20% prestige and +20% authority
+- The Indochina Campaign journal entry's two starting events (Indochinese and Imperialist starts) have a 10-year cooldown (was 5 years)
 
 ## Map
 - Guano deposits: in 1836 only Peru's coast is known (Ica 30 known + 20 hidden, Cajamarca 10 + 10, Lima 10, Tarapacá 10 + 10). Everything else starts hidden: Antofagasta, Baja California, Namaqualand, Haiti, Santo Domingo, Bahamas, West Indies, Puerto Rico, West Micronesia and Nauru 10 each; East Micronesia 15; Oman 5; Hawaiian Islands 10; Tahiti 10; Western Australia 10; Jamaica 5; Honduras 5; Queensland 5; Cape Colony 5; Patagonia 5. Total 275 levels. Worked deposits run out at 75% of the vanilla gold-field rate
