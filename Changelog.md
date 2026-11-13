@@ -56,7 +56,7 @@ Thanks to Yyyman for his Italy company changes.
 #### Trade
 - New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -100% at 20%) and the other side gains 2.5% per 1% (up to +50%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
 #### Reserve Currency
-- New Reserve Currency: one market at a time holds it. A rival takes it over once its leader has been the biggest importer for 12 months in a row, and a vacant Reserve Currency goes the same way. The holder gets a trade advantage bonus on its imports and a penalty on its exports
+- New Reserve Currency: one market at a time holds it. Only a Great Power whose market runs a Balance of Trade deficit can take it: a rival takes it over once its market has out-imported the holder's for 6 months in a row, and a vacant Reserve Currency goes to the top importer among them the same way. A holder whose market goes 6 months in a row without a deficit loses it, and it stays vacant until someone qualifies. A holder that stops being a Great Power loses it at once. The holder gets +25% trade advantage
 #### Guano
 - Guano works like gold: deposits are discovered over time and run out, and Guano Harvestries are placed automatically on known deposits instead of being built. In 1836 only Peru's coast is known
 #### Infrastructure
@@ -352,7 +352,7 @@ Thanks to Yyyman for his Italy company changes.
 - Suez Canal Company only needs a level 5 trade center or port somewhere and no longer gives tax income when prosperous
 - Specie Famines and Inflationary Periods can't start before 1 January 1837; a player-led market can roll for a Specie Famine in any month its balance-of-trade deficit is at least 4% of GDP
 - Atacama Desert no longer has the -10% construction efficiency malus
-- Reserve Currency holder gets +10% trade advantage for imports and -10% for exports, at every tier
+- Reserve Currency holder gets +25% trade advantage (the same as Free Trade) at every tier, in place of +10% for imports and -10% for exports
 - Artillery Foundry and Basic Port take less input to offset building materials upkeep: Bronze Cannons use 10 hardwood (was 15), Bronze Smoothbores 15 (was 20), and Basic Port clippers 4 (was 6)
 
 ## Diplomacy

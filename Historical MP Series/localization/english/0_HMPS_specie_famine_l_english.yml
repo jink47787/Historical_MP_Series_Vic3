@@ -10,32 +10,33 @@
  concept_reserve_currency_desc:0 "The [concept_reserve_currency] is the money the world keeps its reserves in. Only one country holds it at a time.\n\n$RC_RULES$[AddLocalizationIf(GetPlayer.IsValid,'concept_reserve_currency_desc_added')]"
  concept_reserve_currency_desc_added:0 "[AddLocalizationIf(GetGlobalVariable('reserve_currency_holder').IsSet,'RC_CURRENT_HOLDER_LINE')]"
 
- RC_RULES:0 "$RC_TIER_EFFECTS$\n\n#bold Taking it:#! a recognized country that leads its own [concept_market] takes over once, for #v 12 months#! in a row, its [concept_market] has imported more than the holder’s.\n#bold Losing it:#! if the holder is annexed, becomes unrecognized, defaults on its loans or stops leading its own [concept_market], the recognized [concept_market] leader with the most imports takes over at once. A holder that defaulted can’t win it back for #v 5 years#!."
+ RC_RULES:0 "$RC_TIER_EFFECTS$\n\n#bold Taking it:#! a Great Power that leads its own [concept_market] and runs a [concept_balance_of_trade] deficit takes over once, for #v 6 months#! in a row, its [concept_market] has imported more than the holder’s.\n#bold Losing it:#! the holder loses it after #v 6 months#! in a row without a deficit. It then stays vacant until one such Great Power has led the others in imports for #v 6 months#! in a row. If the holder is annexed, stops being a Great Power, defaults on its loans or stops leading its own [concept_market], the top importer among such Great Powers takes over at once. A holder that defaulted can’t win it back for #v 5 years#!."
  RC_CURRENT_HOLDER_LINE:0 "\n\nHeld by: #v [GetGlobalVariable('reserve_currency_holder').GetCountry.GetName]#!"
 
  ### Reserve Currency: tiers and challengers (no scope needed; rc_tier reads the holder)
  RC_TIER_EFFECTS:0 "[AddLocalizationIf(LessThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('rc_tier'),'(CFixedPoint)1.5'),'RC_TIER_1_EFFECTS')][AddLocalizationIf(And(GreaterThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('rc_tier'),'(CFixedPoint)1.5'),LessThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('rc_tier'),'(CFixedPoint)2.5')),'RC_TIER_2_EFFECTS')][AddLocalizationIf(GreaterThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('rc_tier'),'(CFixedPoint)2.5'),'RC_TIER_3_EFFECTS')]"
- RC_TIER_1_EFFECTS:0 "#bold Every country in the holder’s [concept_market]:#!\n• #P +2.5%#! wages\n#bold The holder:#!\n• #P +125#! [concept_prestige]\n• #P -1%#! loan interest\n• #P +10%#! [concept_trade_advantage] for imports\n• #N -10%#! [concept_trade_advantage] for exports"
- RC_TIER_2_EFFECTS:0 "#bold Every country in the holder’s [concept_market]:#!\n• #P +5%#! wages\n#bold The holder:#!\n• #P +250#! [concept_prestige]\n• #P -2%#! loan interest\n• #P +10%#! [concept_trade_advantage] for imports\n• #N -10%#! [concept_trade_advantage] for exports\n• immune to [concept_specie_famine]"
- RC_TIER_3_EFFECTS:0 "#bold Every country in the holder’s [concept_market]:#!\n• #P +10%#! wages\n#bold The holder:#!\n• #P +500#! [concept_prestige]\n• #P -4%#! loan interest\n• #P +10%#! [concept_trade_advantage] for imports\n• #N -10%#! [concept_trade_advantage] for exports\n• immune to [concept_specie_famine]"
+ RC_TIER_1_EFFECTS:0 "#bold Every country in the holder’s [concept_market]:#!\n• #P +2.5%#! wages\n#bold The holder:#!\n• #P +125#! [concept_prestige]\n• #P -1%#! loan interest\n• #P +25%#! [concept_trade_advantage]"
+ RC_TIER_2_EFFECTS:0 "#bold Every country in the holder’s [concept_market]:#!\n• #P +5%#! wages\n#bold The holder:#!\n• #P +250#! [concept_prestige]\n• #P -2%#! loan interest\n• #P +25%#! [concept_trade_advantage]\n• immune to [concept_specie_famine]"
+ RC_TIER_3_EFFECTS:0 "#bold Every country in the holder’s [concept_market]:#!\n• #P +10%#! wages\n#bold The holder:#!\n• #P +500#! [concept_prestige]\n• #P -4%#! loan interest\n• #P +25%#! [concept_trade_advantage]\n• immune to [concept_specie_famine]"
  RC_CHALLENGER:0 "[AddLocalizationIf(GetGlobalVariable('rc_top_challenger').IsSet,'RC_CHALLENGER_LINE')][AddLocalizationIf(Not(GetGlobalVariable('rc_top_challenger').IsSet),'RC_NO_CHALLENGER_LINE')]"
- RC_CHALLENGER_LINE:0 "Challenger: #v [GetGlobalVariable('rc_top_challenger').GetCountry.GetName]#! has imported more than the holder for #v [GetGlobalVariable('rc_top_challenger').GetCountry.MakeScope.Var('rc_challenge_months').GetValue|0]#!/12 months in a row"
- RC_NO_CHALLENGER_LINE:0 "No country imports more than the holder."
+ RC_CHALLENGER_LINE:0 "Challenger: #v [GetGlobalVariable('rc_top_challenger').GetCountry.GetName]#! imports more than the holder and takes it in [GetVarTimeRemaining( GetGlobalVariable('rc_top_challenger').GetCountry.MakeScope, 'rc_takeover_days' )|v] day(s)"
+ RC_NO_CHALLENGER_LINE:0 "No Great Power with a deficit imports more than the holder."
+ RC_HOLDER_SURPLUS_LINE:0 "\n#N No deficit:#! the holder loses it in [GetVarTimeRemaining( GetGlobalVariable('reserve_currency_holder').GetCountry.MakeScope, 'rc_surplus_days' )|v] day(s) unless its deficit returns"
  RC_VACANT_CANDIDATE:0 "[AddLocalizationIf(GetGlobalVariable('rc_vacant_candidate').IsSet,'RC_VACANT_CANDIDATE_LINE')][AddLocalizationIf(Not(GetGlobalVariable('rc_vacant_candidate').IsSet),'RC_NO_VACANT_CANDIDATE_LINE')]"
- RC_VACANT_CANDIDATE_LINE:0 "Candidate: #v [GetGlobalVariable('rc_vacant_candidate').GetCountry.GetName]#! has led in imports for #v [GetGlobalVariable('rc_vacant_months').GetValue|0]#!/12 months in a row"
- RC_NO_VACANT_CANDIDATE_LINE:0 "No country can hold it."
+ RC_VACANT_CANDIDATE_LINE:0 "Candidate: #v [GetGlobalVariable('rc_vacant_candidate').GetCountry.GetName]#! leads in imports and takes it in [GetVarTimeRemaining( GetGlobalVariable('rc_vacant_candidate').GetCountry.MakeScope, 'rc_takeover_days' )|v] day(s)"
+ RC_NO_VACANT_CANDIDATE_LINE:0 "No Great Power runs a deficit, so none can take it."
 
  ### Reserve Currency: top importers, ranked monthly by rc_rank_top_importers and listed by rc_top_importers_sgui (THIS = each market's leader)
- RC_TOP_IMPORTERS:0 "Our [concept_market] imports @money![GetPlayer.MakeScope.ScriptValue('rc_market_imports')|D] a week.\n#bold Top importers#! (markets whose leader could hold it, ranked monthly):\n[GetScriptedGui('rc_top_importers_sgui').ExecuteTooltip(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+ RC_TOP_IMPORTERS:0 "Our [concept_market] imports @money![GetPlayer.GetMarket.GetOwner.MakeScope.ScriptValue('rc_market_imports')|D] a week.\n#bold Top importers#! (the holder and Great Powers with a deficit, ranked monthly):\n[GetScriptedGui('rc_top_importers_sgui').ExecuteTooltip(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
  RC_IMPORTER_HOLDER:0 "#v [THIS.GetCountry.GetName]#!: @money![THIS.GetCountry.MakeScope.ScriptValue('rc_market_imports')|D] a week (holder)"
- RC_IMPORTER_CHALLENGER:0 "#v [THIS.GetCountry.GetName]#!: @money![THIS.GetCountry.MakeScope.ScriptValue('rc_market_imports')|D] a week, ahead of the holder for #v [THIS.GetCountry.MakeScope.Var('rc_challenge_months').GetValue|0]#!/12 months"
+ RC_IMPORTER_CHALLENGER:0 "#v [THIS.GetCountry.GetName]#!: @money![THIS.GetCountry.MakeScope.ScriptValue('rc_market_imports')|D] a week, takes it from the holder in [GetVarTimeRemaining( THIS.GetCountry.MakeScope, 'rc_takeover_days' )|v] day(s)"
  RC_IMPORTER:0 "#v [THIS.GetCountry.GetName]#!: @money![THIS.GetCountry.MakeScope.ScriptValue('rc_market_imports')|D] a week"
- RC_IMPORTERS_EMPTY:0 "None yet"
+ RC_IMPORTERS_EMPTY:0 "None"
 
  ### Market panel, trade tab (gui/00_trade_partners_market_panel.gui)
  HMPS_RC_MARKET_PANEL:0 "[concept_reserve_currency]: #v [GetGlobalVariable('reserve_currency_holder').GetCountry.GetName]#![AddLocalizationIf(ObjectsEqual(GetGlobalVariable('reserve_currency_holder').GetCountry.Self,GetPlayer.Self),'RC_YOU')]"
  RC_YOU:0 " (you)"
- HMPS_RC_MARKET_PANEL_TT:0 "#header [concept_reserve_currency]#!\nHeld by #v [GetGlobalVariable('reserve_currency_holder').GetCountry.GetName]#!, whose [concept_market] imports @money![GetGlobalVariable('reserve_currency_holder').GetCountry.MakeScope.ScriptValue('rc_market_imports')|D] a week.\n$RC_CHALLENGER$\n$HMPS_LONG_DELIMITER$\n$RC_TOP_IMPORTERS$\n$HMPS_LONG_DELIMITER$\n$RC_RULES$"
+ HMPS_RC_MARKET_PANEL_TT:0 "#header [concept_reserve_currency]#!\nHeld by #v [GetGlobalVariable('reserve_currency_holder').GetCountry.GetName]#!, whose [concept_market] imports @money![GetGlobalVariable('reserve_currency_holder').GetCountry.MakeScope.ScriptValue('rc_market_imports')|D] a week.[AddLocalizationIf(GetGlobalVariable('reserve_currency_holder').GetCountry.MakeScope.Var('rc_surplus_months').IsSet,'RC_HOLDER_SURPLUS_LINE')]\n$RC_CHALLENGER$\n$HMPS_LONG_DELIMITER$\n$RC_TOP_IMPORTERS$\n$HMPS_LONG_DELIMITER$\n$RC_RULES$"
  HMPS_RC_MARKET_PANEL_VACANT:0 "[concept_reserve_currency]: #v vacant#!"
  HMPS_RC_MARKET_PANEL_VACANT_TT:0 "#header [concept_reserve_currency]#!\nNo country holds it.\n$RC_VACANT_CANDIDATE$\n$HMPS_LONG_DELIMITER$\n$RC_TOP_IMPORTERS$\n$HMPS_LONG_DELIMITER$\n$RC_RULES$"
 
@@ -170,7 +171,7 @@
  rc_holder_2_desc:0 "$RC_HOLDER_DESC$"
  rc_holder_3:0 "Reserve Currency (International Exchange Standards)"
  rc_holder_3_desc:0 "$RC_HOLDER_DESC$"
- RC_HOLDER_DESC:0 "Bankers, merchants and governments the world over keep their reserves in our money, the [concept_reserve_currency], and settle their trade in it. Our credit is cheap and our name carries weight, and our strong money makes imports cheap and our exports dear. Rivals may try to take this from us. Our prestige and cheaper credit double when we research Mutual Funds, and again with International Exchange Standards."
+ RC_HOLDER_DESC:0 "Bankers, merchants and governments the world over keep their reserves in our money, the [concept_reserve_currency], and settle their trade in it. Our credit is cheap and our name carries weight, and our strong money gives our merchants a trade advantage. Rivals may try to take this from us. Our prestige and cheaper credit double when we research Mutual Funds, and again with International Exchange Standards."
 
  ### Events: Specie Famine
  specie_famine.1.t:0 "A Famine of Specie"
@@ -222,7 +223,7 @@
  reserve_currency.1.f:0 "In the exchanges, the posted rates are now quoted in a new currency."
  reserve_currency.1.a:0 "Noted."
  reserve_currency.2.t:0 "No Reserve Currency"
- reserve_currency.2.d:0 "No country can hold the [concept_reserve_currency]. The world’s bankers are keeping their reserves in gold until a new leader emerges: the recognized [concept_market] leader with the most imports, once it has led for 12 months in a row."
- reserve_currency.2.d_lost:0 "Our money is no longer the world’s reserve, and no country can take our place. The bankers are keeping their reserves in gold until a new leader emerges."
+ reserve_currency.2.d:0 "No country holds the [concept_reserve_currency]. The world’s bankers are keeping their reserves in gold until a new leader emerges: the Great Power with the most imports among those running a [concept_balance_of_trade] deficit, once it has led for 6 months in a row."
+ reserve_currency.2.d_lost:0 "Our money is no longer the world’s reserve, and no country has taken our place. The bankers are keeping their reserves in gold until a new leader emerges."
  reserve_currency.2.f:0 "Gold, the bankers say, has never defaulted."
  reserve_currency.2.a:0 "Noted."

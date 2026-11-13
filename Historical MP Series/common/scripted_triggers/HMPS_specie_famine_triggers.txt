@@ -53,11 +53,43 @@ sf_has_heavy_war_casualties = {
 	}
 }
 
-# Country scope. Could hold the Reserve Currency: alive, recognized, leads its own market, not bankrupt and not barred after losing it to bankruptcy
+# Country scope. Can keep the Reserve Currency: alive, a Great Power, leads its own market, not bankrupt and not barred after losing it to bankruptcy.
+# The holder also loses it after 6 months without a deficit (rc_surplus_months in rc_monthly_update)
 rc_can_hold = {
 	is_country_alive = yes
 	rc_is_recognized = yes
+	country_rank >= rank_value:great_power
 	sf_is_market_leader = yes
 	in_default = no
 	NOT = { has_variable = rc_barred }
+}
+
+# Country scope. Its market runs a balance of trade deficit (hmps_bot_balance is the whole market's, see HMPS_specie_famine_values.txt)
+rc_has_deficit = {
+	has_variable = hmps_bot_balance
+	var:hmps_bot_balance < 0
+}
+
+# Country scope. Its market does not run a deficit. Not the opposite of rc_has_deficit: a country with no figure yet is neither
+rc_has_no_deficit = {
+	has_variable = hmps_bot_balance
+	var:hmps_bot_balance >= 0
+}
+
+# Country scope. Can take the Reserve Currency (challenge the holder, or claim it while vacant): could hold it
+# (so a Great Power), and its market runs a deficit
+rc_can_take = {
+	rc_can_hold = yes
+	rc_has_deficit = yes
+}
+
+# Country scope. Listed among the top importers (rc_rank_top_importers): the holder and every country that can take it
+rc_is_listed = {
+	OR = {
+		rc_can_take = yes
+		AND = {
+			has_global_variable = reserve_currency_holder
+			this = global_var:reserve_currency_holder
+		}
+	}
 }
