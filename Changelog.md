@@ -74,7 +74,7 @@ Thanks to Yyyman for his Italy company changes.
 
 ## Flava
 #### Europe
-- French Baby Bust: France can now end it faster by becoming a Confessional State, with two new amendments (Publicly Funded Religious Schools and Publicly Funded Religious Hospitals)
+- French Baby Bust: it now completes only when the progress bar is full and France is a Confessional State (State Religion, Charitable Health System and Religious Schools). The extra yearly progress from taxes also needs the Confessional State
 - German unification: Austria can no longer back a German candidate while it is a great power, and the Austria-Hungary dual monarchy now requires Germany to exist
 - The Decembrist Sympathizers journal entry for Russia is paused: it no longer starts at game start and can't trigger for now, with its content kept so it can be turned back on
 #### East Asia
