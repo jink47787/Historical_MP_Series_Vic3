@@ -362,6 +362,7 @@ Thanks to Yyyman for his Italy company changes.
 ## Diplomacy
 - Regional investment rights tooltip clarified: the investor can build only in the chosen state but can buy privatized buildings anywhere in the country
 - Revanchism fixes, including state transfers
+- Subjects no longer pass infamy to their overlord while in a diplomatic play or war against it (e.g. independence), and infamy gained during a rebellion is never passed on later
 
 ## Military
 - Forts that are not naval forts no longer add blockade resistance
