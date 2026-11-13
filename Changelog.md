@@ -392,6 +392,7 @@ Thanks to Yyyman for his Italy company changes.
 - Removed Pará's four isolated Brazilian fort enclaves in Amazonas. Each province now belongs to the native nation around it: Rio Branco to ORN, two Rio Negro and central provinces to TKN, and the Tabatinga area to AMZ. Pará keeps its river block toward Barra (Manaus)
 - Starting quarries are spread across each market's quarrying districts instead of piling onto the first-listed states (each market's total unchanged except the Netherlands); Wales starts with 2 levels as Britain's slate district, and Madras and Saxony each gain a starting quarry; the Netherlands has exactly 1 quarry level in Gelre (was 2), so Dutch stone starts at +15% instead of -50%; Greece (Attica, Pentelic marble) and the Papal States (Lazio, Tivoli travertine) each start with 1 quarry, so their builders' yards fire clamp brick instead of standing idle
 
+- Oil Rush and Limited Oil Rush state modifiers now use vanilla values: migration pull +100% / +50%, oil rig throughput +20% / +10%, oil rig jobs +50% / +25%; Oil Rush also gives -1 standard of living and +20% mortality in oil rigs
 ## UI
 - Technology Research Speed tooltip shows one decimal place (e.g. +2.5% instead of +2%)
 - Trade partner lists show the value of trade instead of the quantity
