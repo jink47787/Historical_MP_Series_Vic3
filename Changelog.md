@@ -64,7 +64,7 @@ Thanks to Yyyman for his Italy company changes.
 #### Railroad Bubble
 - Railroad Bubble reworked: it starts when a major power expands its railways quickly, grows with railway building and expensive transportation, and boosts railway throughput and construction while it lasts. Choices at the start (embrace or regulate), at the peak (let it run, cool the market, prop it up or let the banks carry it) and at the crash (rebuild or relief works). The crash cuts wages and adds radicals. New "The Railway King" event
 #### Companies
-- 151 territory-bound companies can now also be founded by an overlord when the territory belongs to one of its subjects (or their subjects), not only by the owner. 27 of them with resource-only buildings can also own trade centers
+- 151 territory-bound companies can now also be founded by an overlord when the territory belongs to one of its subjects (or their subjects) and needs buildings of level 3, not only by the owner. 27 of them with resource-only buildings can also own trade centers
 
 ## Political
 - Multiculturalism reworked and renamed Multinationalism; ideologies that strongly disapproved of it now only disapprove
