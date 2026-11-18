@@ -387,10 +387,12 @@ Thanks to Yyyman for his Italy company changes.
 - Added Malaria to eight Amazon states: Guayana, Guaviare, Pastaza, Santa Cruz, Pará, Amazonas, Acre and Mato Grosso
 - Pacific islands have severe malaria again: Micronesia, Solomon Islands, Nauru, Fiji, Vanuatu, New Caledonia, Bougainville, Tahiti and Tonga
 - York Factory now starts owned by the Hudson's Bay Company instead of the Innu and Cree; in exchange, a neighbouring province goes from the Hudson's Bay Company to the Innu and Cree
+- Hudson's Bay Company no longer holds Red River or the inland Lake Winnipeg province in Manitoba; they go to the Iron Confederacy and the Council of Three Fires. The company keeps its two Hudson Bay coast posts
 - Spain's mineral resources redistributed between its states
 - Ingria no longer has a cold water port
 - Cuba has hardwood
 - Removed Pará's four isolated Brazilian fort enclaves in Amazonas. Each province now belongs to the native nation around it: Rio Branco to ORN, two Rio Negro and central provinces to TKN, and the Tabatinga area to AMZ. Pará keeps its river block toward Barra (Manaus)
+- Brazil's isolated fort in Mato Grosso (Forte Príncipe da Beira area) goes to the Amazonian natives (AMZ)
 - Starting quarries are spread across each market's quarrying districts instead of piling onto the first-listed states (each market's total unchanged except the Netherlands); Wales starts with 2 levels as Britain's slate district, and Madras and Saxony each gain a starting quarry; the Netherlands has exactly 1 quarry level in Gelre (was 2), so Dutch stone starts at +15% instead of -50%; Greece (Attica, Pentelic marble) and the Papal States (Lazio, Tivoli travertine) each start with 1 quarry, so their builders' yards fire clamp brick instead of standing idle
 
 - Oil Rush and Limited Oil Rush state modifiers now use vanilla values: migration pull +100% / +50%, oil rig throughput +20% / +10%, oil rig jobs +50% / +25%; Oil Rush also gives -1 standard of living and +20% mortality in oil rigs
