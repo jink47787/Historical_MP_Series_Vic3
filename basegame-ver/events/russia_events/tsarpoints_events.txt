@@ -517,6 +517,7 @@ tsarpoints_events.7 = {
 		}
 		custom_tooltip = {
 			text = tsarpoints_events.7.tt_1
+			set_variable = ecumenical_question_var
 		}
 
 		ai_chance = {
@@ -584,24 +585,24 @@ tsarpoints_events.7 = {
 					}
 				}
 			}
-		}
-		custom_tooltip = {
-			text = tsarpoints_events.7.tt_4
-		}
-		every_country = {
-			limit = {
-				country_has_primary_culture = cu:greek
-				OR = {
-					is_subject = no
-					is_subject_of = root
-				}
-				NOT = {
-					c:BYZ ?= this
-				}
+			custom_tooltip = {
+				text = tsarpoints_events.7.tt_4
 			}
-			trigger_event = {
-				id = tsarpoints_events.8
-				popup = yes
+			every_country = {
+				limit = {
+					country_has_primary_culture = cu:greek
+					OR = {
+						is_subject = no
+						is_subject_of = root
+					}
+					NOT = {
+						c:BYZ ?= this
+					}
+				}
+				trigger_event = {
+					id = tsarpoints_events.8
+					popup = yes
+				}
 			}
 		}
 		ruler = {
@@ -660,6 +661,10 @@ tsarpoints_events.7 = {
 			}
 		}
 		custom_tooltip = {
+			text = tsarpoints_events.7.tt_5
+			set_variable = byz_tag_switch_var
+		}
+		custom_tooltip = {
 			text = tsarpoints_events.7.tt_3
 		}
 		if = {
@@ -675,34 +680,30 @@ tsarpoints_events.7 = {
 					}
 				}
 			}
-		}
-		custom_tooltip = {
-			text = tsarpoints_events.7.tt_4
-		}
-		every_country = {
-			limit = {
-				country_has_primary_culture = cu:greek
-				OR = {
-					is_subject = no
-					is_subject_of = root
-				}
-				NOT = {
-					c:BYZ ?= this
-				}
+			custom_tooltip = {
+				text = tsarpoints_events.7.tt_4
 			}
-			trigger_event = {
-				id = tsarpoints_events.8
-				popup = yes
+			every_country = {
+				limit = {
+					country_has_primary_culture = cu:greek
+					OR = {
+						is_subject = no
+						is_subject_of = root
+					}
+					NOT = {
+						c:BYZ ?= this
+					}
+				}
+				trigger_event = {
+					id = tsarpoints_events.8
+					popup = yes
+				}
 			}
 		}
 		ruler = {
 			add_modifier = {
 				name = modifier_the_restorer
 			}
-		}
-		custom_tooltip = {
-			text = tsarpoints_events.7.tt_5
-			set_variable = byz_tag_switch_var
 		}
 
 		ai_chance = {
@@ -744,6 +745,7 @@ tsarpoints_events.8 = {
 	dlc = dlc019
 
 	trigger = {
+		exists = c:BYZ
 	}
 
 	immediate = {
@@ -765,19 +767,48 @@ tsarpoints_events.8 = {
 		c:BYZ ?= {
 			post_notification = je_tp_greek_joined
 		}
-		c:BYZ = {
+		c:BYZ ?= {
 			annex = scope:greek_target_country_scope
 		}
 
 		ai_chance = {
-			base = 30
+			base = 0
 			modifier = {
 				trigger = {
 					c:RUS ?= {
-						relations:root < relations_threshold:neutral
+						relations:root > relations_threshold:hostile
+						OR = {
+							root.overlord ?= this
+							is_in_same_power_bloc = root
+							relations:root >= relations_threshold:amicable
+						}
 					}
 				}
-				add = -15
+				add = 100
+			}
+			modifier = {
+				trigger = {
+					c:RUS ?= {
+						relations:root > relations_threshold:hostile
+					}
+				}
+				add = 5
+			}
+			modifier = {
+				trigger = {
+					c:RUS ?= {
+						relations:root >= relations_threshold:cold
+					}
+				}
+				add = 5
+			}
+			modifier = {
+				trigger = {
+					c:RUS ?= {
+						relations:root >= relations_threshold:poor
+					}
+				}
+				add = 20
 			}
 			modifier = {
 				trigger = {
@@ -786,20 +817,6 @@ tsarpoints_events.8 = {
 					}
 				}
 				add = 30
-			}
-			modifier = {
-				trigger = {
-					c:RUS ?= {
-						relations:root >= relations_threshold:friendly
-					}
-				}
-				add = 40
-			}
-			modifier = {
-				trigger = {
-					c:RUS ?= this.power_bloc_leader
-				}
-				add = 200
 			}
 		}
 	}
@@ -824,14 +841,30 @@ tsarpoints_events.8 = {
 		}
 
 		ai_chance = {
-			base = 70
+			base = 100
 			modifier = {
 				trigger = {
 					c:RUS ?= {
-						relations:root < relations_threshold:neutral
+						relations:root > relations_threshold:hostile
 					}
 				}
-				add = 25
+				add = -5
+			}
+			modifier = {
+				trigger = {
+					c:RUS ?= {
+						relations:root >= relations_threshold:cold
+					}
+				}
+				add = -5
+			}
+			modifier = {
+				trigger = {
+					c:RUS ?= {
+						relations:root >= relations_threshold:poor
+					}
+				}
+				add = -20
 			}
 			modifier = {
 				trigger = {
@@ -839,19 +872,18 @@ tsarpoints_events.8 = {
 						relations:root >= relations_threshold:cordial
 					}
 				}
-				add = -25
+				add = -30
 			}
 			modifier = {
 				trigger = {
 					c:RUS ?= {
-						relations:root >= relations_threshold:friendly
+						relations:root > relations_threshold:hostile
+						OR = {
+							root.overlord ?= this
+							is_in_same_power_bloc = root
+							relations:root >= relations_threshold:amicable
+						}
 					}
-				}
-				add = -25
-			}
-			modifier = {
-				trigger = {
-					c:RUS ?= this.power_bloc_leader
 				}
 				factor = 0
 			}
@@ -1336,10 +1368,7 @@ tsarpoints_events.12 = {
 			text = tsarpoints_upgrade_promote_social_mobility_tt
 			set_variable = tsarpoints_upgraded_promote_social_mobility
 			hidden_effect = {
-				replace_decree = {
-					from = decree_promote_social_mobility
-					to = decree_promote_social_mobility_tsarpoints
-				}
+				tsarpoints_replace_decree = { FROM = decree_promote_social_mobility TO = decree_promote_social_mobility_tsarpoints }
 			}
 		}
 
@@ -1358,10 +1387,7 @@ tsarpoints_events.12 = {
 			text = tsarpoints_upgrade_promote_national_values_tt
 			set_variable = tsarpoints_upgraded_promote_national_values
 			hidden_effect = {
-				replace_decree = {
-					from = decree_promote_national_values
-					to = decree_promote_national_values_tsarpoints
-				}
+				tsarpoints_replace_decree = { FROM = decree_promote_national_values TO = decree_promote_national_values_tsarpoints }
 			}
 		}
 
@@ -1414,10 +1440,7 @@ tsarpoints_events.12 = {
 			text = tsarpoints_upgrade_encourage_manufacturing_industry_tt
 			set_variable = tsarpoints_upgraded_encourage_manufacturing_industry
 			hidden_effect = {
-				replace_decree = {
-					from = decree_encourage_manufacturing_industry
-					to = decree_encourage_manufacturing_industry_tsarpoints
-				}
+				tsarpoints_replace_decree = { FROM = decree_encourage_manufacturing_industry TO = decree_encourage_manufacturing_industry_tsarpoints }
 			}
 		}
 
@@ -1436,10 +1459,7 @@ tsarpoints_events.12 = {
 			text = tsarpoints_upgrade_encourage_agricultural_industry_tt
 			set_variable = tsarpoints_upgraded_encourage_agricultural_industry
 			hidden_effect = {
-				replace_decree = {
-					from = decree_encourage_agricultural_industry
-					to = decree_encourage_agricultural_industry_tsarpoints
-				}
+				tsarpoints_replace_decree = { FROM = decree_encourage_agricultural_industry TO = decree_encourage_agricultural_industry_tsarpoints }
 			}
 		}
 
@@ -1458,10 +1478,7 @@ tsarpoints_events.12 = {
 			text = tsarpoints_upgrade_encourage_resource_industry_tt
 			set_variable = tsarpoints_upgraded_encourage_resource_industry
 			hidden_effect = {
-				replace_decree = {
-					from = decree_encourage_resource_industry
-					to = decree_encourage_resource_industry_tsarpoints
-				}
+				tsarpoints_replace_decree = { FROM = decree_encourage_resource_industry TO = decree_encourage_resource_industry_tsarpoints }
 			}
 		}
 
@@ -1486,10 +1503,7 @@ tsarpoints_events.12 = {
 			text = tsarpoints_upgrade_greener_grass_campaign_tt
 			set_variable = tsarpoints_upgraded_greener_grass_campaign
 			hidden_effect = {
-				replace_decree = {
-					from = decree_greener_grass_campaign
-					to = decree_greener_grass_campaign_tsarpoints
-				}
+				tsarpoints_replace_decree = { FROM = decree_greener_grass_campaign TO = decree_greener_grass_campaign_tsarpoints }
 			}
 		}
 
@@ -1514,10 +1528,7 @@ tsarpoints_events.12 = {
 			text = tsarpoints_upgrade_enlistment_efforts_tt
 			set_variable = tsarpoints_upgraded_enlistment_efforts
 			hidden_effect = {
-				replace_decree = {
-					from = decree_enlistment_efforts
-					to = decree_enlistment_efforts_tsarpoints
-				}
+				tsarpoints_replace_decree = { FROM = decree_enlistment_efforts TO = decree_enlistment_efforts_tsarpoints }
 			}
 		}
 
@@ -1788,7 +1799,7 @@ tsarpoints_events.15 = {
 	}
 
 	immediate = {
-		
+
 	}
 
 	option = {
@@ -1876,6 +1887,140 @@ tsarpoints_events.15 = {
 	after = {
 		hidden_effect = {
 			je_tsarpoints_increment_ukaz_no = yes
+		}
+	}
+}
+
+# Ecumenical Question
+tsarpoints_events.16 = {
+	type = country_event
+	placement = scope:constantinople_state_scope
+
+	icon = "gfx/interface/icons/event_icons/event_imperial_eagle.dds"
+
+	event_image = {
+		video = "ip3_official_reading_dictate"
+	}
+
+	dlc = dlc019
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	title = tsarpoints_events.16.t
+	desc = tsarpoints_events.16.d
+	flavor = tsarpoints_events.16.f
+
+	duration = 3
+
+	dlc = dlc019
+
+	fire_only_once = yes
+
+	trigger = {
+		has_dlc_feature = ip5_content
+		c:RUS ?= this
+	}
+
+	immediate = {
+		random_scope_state = {
+			limit = {
+				state_region = s:STATE_EASTERN_THRACE
+			}
+			save_scope_as = constantinople_state_scope
+		}
+	}
+
+	option = {
+		name = tsarpoints_events.16.a
+		default_option = yes
+		if = {
+			limit = {
+				has_journal_entry = je_tsarpoints_master
+			}
+			je_tsarpoints_add_med = yes
+		}
+		add_modifier = {
+			name = modifier_synodal_supremacy
+		}
+		ig:ig_devout ?= {
+			add_modifier = {
+				name = modifier_synodal_triumph
+				days = long_modifier_time
+			}
+		}
+		add_radicals = {
+			culture = cu:greek
+			value = medium_radicals
+		}
+		every_country = {
+			limit = {
+				country_has_state_religion = rel:orthodox
+				country_has_primary_culture = cu:greek
+				NOT = {
+					root = this
+				}
+			}
+			change_relations = {
+				country = root
+				value = -20
+			}
+		}
+		every_country = {
+			limit = {
+				country_has_state_religion = rel:orthodox
+				NOR = {
+					root = this
+					country_has_primary_culture = cu:greek
+				}
+			}
+			change_relations = {
+				country = root
+				value = 10
+			}
+		}
+
+		ai_chance = {
+			base = 70
+		}
+	}
+
+	option = {
+		name = tsarpoints_events.16.b
+		add_loyalists = {
+			culture = cu:greek
+			value = medium_radicals
+		}
+		add_modifier = {
+			name = modifier_ecumenical_primacy
+		}
+		every_country = {
+			limit = {
+				country_has_state_religion = rel:orthodox
+				country_has_primary_culture = cu:greek
+				NOT = {
+					root = this
+				}
+			}
+			change_relations = {
+				country = root
+				value = 20
+			}
+		}
+		every_country = {
+			limit = {
+				country_has_state_religion = rel:orthodox
+				NOR = {
+					root = this
+					country_has_primary_culture = cu:greek
+				}
+			}
+			change_relations = {
+				country = root
+				value = -10
+			}
+		}
+
+		ai_chance = {
+			base = 30
 		}
 	}
 }

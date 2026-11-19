@@ -46,13 +46,14 @@
 	}	
 	
 	ai_will_do = {
-		 # If this trigger is true, then the AI will potentially select this company as the next company it will try to form. It will do this even if it does not meet the conditions to form the company, and will actively try to construct buildings etc to meet the further requirements to form the company.
+		 # If this trigger is true, then the AI will potentially select this company as the next company it will try to form. If the company type has ai_construction_targets, it will do this even if it does not meet the conditions to form the company, and will actively try to construct buildings etc to meet the further requirements to form the company.
 		 # To check this trigger, the company must be considered at least 'attainable'
 		 # If this trigger is not present, the AI never try to found this company
 	}
 	
 	# While the AI is trying to form a company (that has passed the ai_will_do, potential and attainable triggers) it will have increased weight for certain building types in certain states, which buildings, which states (determined through a trigger) and up to which level are all specified here
 	# Note that scripting this with an empty state trigger will do nothing, as it would otherwise result in indiscrimate construction in all states!
+	# If a company type has no ai_construction_targets, the AI only selects it when it can be formed immediately, as nothing would help the AI meet the requirements. Such companies can use ai_will_do = { always = yes } instead of repeating their possible trigger
 	ai_construction_targets = {
 		building_iron_mine = {
 			level = 5

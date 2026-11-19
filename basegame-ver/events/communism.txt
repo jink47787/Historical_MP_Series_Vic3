@@ -1034,24 +1034,6 @@ communism.10 = {
 	}
 	option = {
 		name = communism.10.b
-		trigger = {
-			custom_description = {
-				text = communism_10_b_option_trigger
-				any_interest_group = {
-					is_in_government = yes
-					OR = {
-						is_interest_group_type = ig_trade_unions
-						leader = {
-							has_socialist_ideology = yes
-						}
-					}
-				}
-			}
-		}
-		highlighted_option = yes
-		show_as_unavailable = {
-			always = yes
-		}
 		capital = {
 			add_radicals_in_state = {
 				value = small_radicals
@@ -1059,8 +1041,8 @@ communism.10 = {
 			}
 		}
 		custom_tooltip = {
-			text = communism_var_tick_05_tt
-			set_variable = { name = communism_progress_var_add value = 0.5 }
+			text = communism_var_tick_025_tt
+			set_variable = { name = communism_progress_var_add value = 0.25 }
 		}
 		ai_chance = {
 			base = 100
@@ -1074,32 +1056,28 @@ communism.10 = {
 	}
 
 	after = {
-		if = {
-			limit = {
-				has_technology_researched = socialism
-				country_has_laws_in_need_of_critical_modernization = no
-				NOT = {
-					any_political_movement = {
-						is_political_movement_type = movement_socialist
-					}
+		show_as_tooltip = {
+			if = {
+				limit = {
+					has_technology_researched = socialism
+					country_has_laws_in_need_of_critical_modernization = no
 				}
+				create_political_movement = { type = movement_socialist }
+				custom_tooltip = communist_agitator_tt
 			}
-			create_political_movement = { type = movement_socialist }
-		}
-		else_if = {
-			limit = {
-				has_technology_researched = anarchism
-				country_has_laws_in_need_of_critical_modernization = no
-				NOT = {
-					any_political_movement = {
-						OR = {
+			else_if = {
+				limit = {
+					has_technology_researched = anarchism
+					country_has_laws_in_need_of_critical_modernization = no
+					NOT = {
+						any_political_movement = {
 							is_political_movement_type = movement_socialist
-							is_political_movement_type = movement_anarchist
 						}
 					}
 				}
+				create_political_movement = { type = movement_anarchist }
+				custom_tooltip = anarchist_agitator_tt
 			}
-			create_political_movement = { type = movement_anarchist }
 		}
 	}
 }
@@ -1276,5 +1254,78 @@ communism.13 = {
 
 	immediate = {
 		add_journal_entry = { type = je_five_year_plan }
+	}
+}
+
+communism.14 = {
+	type = country_event
+	placement = root
+	title = communism.14.t
+	desc = communism.14.d
+	flavor = communism.14.f
+
+	duration = 3
+
+	event_image = {
+		video = "votp_agitator_speaking"
+	}
+
+	on_created_soundeffect = "event:/SFX/UI/Alerts/event_appear"
+
+	icon = "gfx/interface/icons/event_icons/event_revolutionary_flag.dds"
+
+	trigger = {
+	}
+
+	immediate = {
+		ordered_scope_culture = {
+			limit = {
+				NOT = {
+					is_primary_culture_of = root
+				}
+			}
+			order_by = {
+				root = {
+					value = "culture_percent_country(prev)"
+				}
+			}
+			position = 0
+			check_range_bounds = no
+			save_scope_as = swr_first_new_primary_culture
+		}
+		ordered_scope_culture = {
+			limit = {
+				NOT = {
+					is_primary_culture_of = root
+				}
+			}
+			order_by = {
+				root = {
+					value = "culture_percent_country(prev)"
+				}
+			}
+			position = 1
+			check_range_bounds = no
+			save_scope_as = swr_second_new_primary_culture
+		}
+	}
+
+	option = {
+		name = communism.14.a
+		default_option = yes
+		custom_tooltip_no_bullet = socialist_world_republic_formed_tt
+		set_variable = sozialistische_weltrepublik_var
+		if = {
+			limit = {
+				exists = scope:swr_first_new_primary_culture
+			}
+			add_primary_culture = scope:swr_first_new_primary_culture
+		}
+		if = {
+			limit = {
+				exists = scope:swr_second_new_primary_culture
+			}
+			add_primary_culture = scope:swr_second_new_primary_culture
+		}
 	}
 }

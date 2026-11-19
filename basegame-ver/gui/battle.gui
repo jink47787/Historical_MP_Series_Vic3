@@ -550,6 +550,83 @@ types battle_panel_types
 		}
 	}
 
+	### BATTLE LOW WAR SUPPORT PARTICIPANT
+	type battle_low_war_support_participant = flowcontainer {
+		direction = vertical
+		minimumsize = { @panel_width_plus_14_half -1 }
+		parentanchor = hcenter
+		spacing = 10
+
+		default_header_2texts_clean = {
+			block "header_anchor" {
+				parentanchor = left
+			}
+
+			blockoverride "size" {
+				size = { @[panel_width_plus_14_half - 2] 38 }
+			}
+
+			blockoverride "text1" {
+				maximumsize = { @[panel_width_plus_14_half - 75] 38 }
+				elide = right
+				text = "[BattleParticipant.GetCountry.GetName]"
+			}
+
+			blockoverride "text2" {
+				datacontext = "[BattleParticipant.AccessWarParticipant]"
+				tooltip = "WAR_PANEL_PARTICIPANT_TOOLTIP"
+				raw_text = "#[WarParticipant.GetWar.GetWarSupportColored(WarParticipant.GetCountry)] [BattleParticipant.GetWarSupport|0]%#!"
+			}
+
+			blockoverride "text_size" {}
+
+			blockoverride "text2_text_size" {
+				using = fontsize_large
+			}
+		}
+
+		flowcontainer = {
+			direction = vertical
+			parentanchor = hcenter
+			spacing = 10
+			datamodel = "[BattleParticipant.AccessLowWarSupportModifier.GetEntries]"
+
+			item = {
+				flowcontainer = {
+					direction = vertical
+					tooltip = "BATTLE_LOW_WAR_SUPPORT_MODIFIER_TOOLTIP"
+
+					textbox = {
+						minimumsize = { @battle_side_width -1 }
+						maximumsize = { @battle_side_width -1 }
+						parentanchor = hcenter
+						autoresize = yes
+						multiline = yes
+						align = nobaseline
+						text = "[BattleParticipant.GetCountry.GetFlagTextIcon] [ModifierEntry.GetName]"
+					}
+
+					textbox = {
+						minimumsize = { @battle_side_width -1 }
+						maximumsize = { @battle_side_width -1 }
+						parentanchor = hcenter
+						autoresize = yes
+						multiline = yes
+						align = right|nobaseline
+						using = fontsize_large
+						text = "[ModifierEntry.GetFormattedValue]"
+					}
+
+					widget = { size = { 5 5 }}
+
+					divider_clean = {
+						block "last_row_divider_visibility" {}
+					}
+				}
+			}
+		}
+	}
+
 	### BATTLE SIDE CONTENT
 	type battle_side_content = flowcontainer {
 		minimumsize = { @panel_width_plus_14_half -1 }
@@ -758,13 +835,14 @@ types battle_panel_types
 					layoutpolicy_horizontal = expanding
 					layoutpolicy_vertical = expanding
 					spacing = 5
+					using = tooltip_ne
 					tooltip = "[BattleSide.GetNumUnitsAtStartOfBattleDesc]"
-					using = tooltip_above
 
 					textbox = {
 						layoutpolicy_horizontal = expanding
 						size = { 0 20 }
 						align = nobaseline
+						using = elide_fontsize_min
 						text = "START_OF_BATTLE"
 					}
 
@@ -839,6 +917,7 @@ types battle_panel_types
 						layoutpolicy_horizontal = expanding
 						size = { 0 20 }
 						align = nobaseline
+						using = elide_fontsize_min
 						text = "CURRENT"
 					}
 
@@ -903,6 +982,7 @@ types battle_panel_types
 						layoutpolicy_horizontal = expanding
 						size = { 0 20 }
 						align = nobaseline
+						using = elide_fontsize_min
 						text = "END_OF_BATTLE"
 					}
 
@@ -1660,7 +1740,9 @@ types battle_panel_types
 							}
 
 							widget = { size = { 5 5 }}
-							divider_clean = {}
+							divider_clean = {
+								visible = "[Or(NotEqualTo_int32(Subtract_int32(GetDataModelSize(Battle.AccessAttackerModifier.GetEntries), '(int32)1'), PdxGuiWidget.AccessParent.GetIndexInDataModel), IsDataModelEmpty(Battle.AccessAttackerLowWarSupportParticipants))]"
+							}
 						}
 					}
 				}
@@ -1672,41 +1754,9 @@ types battle_panel_types
 					datamodel = "[Battle.AccessAttackerLowWarSupportParticipants]"
 
 					item = {
-						flowcontainer = {
-							direction = vertical
-							parentanchor = hcenter
-							spacing = 10
-							datamodel = "[BattleParticipant.AccessLowWarSupportModifier.GetEntries]"
-
-							item = {
-								flowcontainer = {
-									direction = vertical
-									tooltip = "BATTLE_LOW_WAR_SUPPORT_MODIFIER_TOOLTIP"
-
-									textbox = {
-										minimumsize = { @battle_side_width -1 }
-										maximumsize = { @battle_side_width -1 }
-										parentanchor = hcenter
-										autoresize = yes
-										multiline = yes
-										align = nobaseline
-										text = "[AddTextIf(Not(BattleParticipant.IsWarLeader), Concatenate(BattleParticipant.GetCountry.GetFlagTextIcon, ' '))][ModifierEntry.GetName]"
-									}
-
-									textbox = {
-										minimumsize = { @battle_side_width -1 }
-										maximumsize = { @battle_side_width -1 }
-										parentanchor = hcenter
-										autoresize = yes
-										multiline = yes
-										align = right|nobaseline
-										using = fontsize_large
-										text = "[ModifierEntry.GetFormattedValue]"
-									}
-
-									widget = { size = { 5 5 }}
-									divider_clean = {}
-								}
+						battle_low_war_support_participant = {
+							blockoverride "last_row_divider_visibility" {
+								visible = "[Or(NotEqualTo_int32(Subtract_int32(GetDataModelSize(BattleParticipant.AccessLowWarSupportModifier.GetEntries), '(int32)1'), PdxGuiWidget.AccessParent.GetIndexInDataModel), EqualTo_int32(Subtract_int32(GetDataModelSize(Battle.AccessAttackerLowWarSupportParticipants), '(int32)1'), PdxGuiWidget.AccessParent.AccessParent.AccessParent.GetIndexInDataModel))]"
 							}
 						}
 					}
@@ -1775,7 +1825,9 @@ types battle_panel_types
 							}
 
 							widget = { size = { 5 5 }}
-							divider_clean = {}
+							divider_clean = {
+								visible = "[Or(NotEqualTo_int32(Subtract_int32(GetDataModelSize(Battle.AccessDefenderModifier.GetEntries), '(int32)1'), PdxGuiWidget.AccessParent.GetIndexInDataModel), IsDataModelEmpty(Battle.AccessDefenderLowWarSupportParticipants))]"
+							}
 						}
 					}
 				}
@@ -1787,41 +1839,12 @@ types battle_panel_types
 					datamodel = "[Battle.AccessDefenderLowWarSupportParticipants]"
 
 					item = {
-						flowcontainer = {
-							direction = vertical
-							parentanchor = hcenter
-							spacing = 10
-							datamodel = "[BattleParticipant.AccessLowWarSupportModifier.GetEntries]"
-
-							item = {
-								flowcontainer = {
-									direction = vertical
-									tooltip = "BATTLE_LOW_WAR_SUPPORT_MODIFIER_TOOLTIP"
-
-									textbox = {
-										minimumsize = { @battle_side_width -1 }
-										maximumsize = { @battle_side_width -1 }
-										parentanchor = hcenter
-										autoresize = yes
-										multiline = yes
-										align = nobaseline
-										text = "[AddTextIf(Not(BattleParticipant.IsWarLeader), Concatenate(BattleParticipant.GetCountry.GetFlagTextIcon, ' '))][ModifierEntry.GetName]"
-									}
-
-									textbox = {
-										minimumsize = { @battle_side_width -1 }
-										maximumsize = { @battle_side_width -1 }
-										parentanchor = hcenter
-										autoresize = yes
-										multiline = yes
-										align = right|nobaseline
-										using = fontsize_large
-										text = "[ModifierEntry.GetFormattedValue]"
-									}
-
-									widget = { size = { 5 5 }}
-									divider_clean = {}
-								}
+						battle_low_war_support_participant = {
+							blockoverride "header_anchor" {
+								parentanchor = right
+							}
+							blockoverride "last_row_divider_visibility" {
+								visible = "[Or(NotEqualTo_int32(Subtract_int32(GetDataModelSize(BattleParticipant.AccessLowWarSupportModifier.GetEntries), '(int32)1'), PdxGuiWidget.AccessParent.GetIndexInDataModel), EqualTo_int32(Subtract_int32(GetDataModelSize(Battle.AccessDefenderLowWarSupportParticipants), '(int32)1'), PdxGuiWidget.AccessParent.AccessParent.AccessParent.GetIndexInDataModel))]"
 							}
 						}
 					}

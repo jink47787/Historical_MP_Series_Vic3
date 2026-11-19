@@ -474,11 +474,12 @@
 						movement_is_socialist = yes
 					}
 					add = {
-						value = this.political_movement_radicalism
+						value = this.political_movement_support
 						multiply = {
-							value = this.political_movement_support
-							multiply = 5
+							value = this.political_movement_radicalism
+							min = 0.05
 						}
+						multiply = 20
 					}
 				}
 			}
@@ -498,10 +499,13 @@
 						limit = {
 							has_socialist_ideology = yes
 						}
-						add = this.popularity
-						divide = 100
+						add = { # Our thanks to FloweringHope for pointing this out
+							value = this.popularity
+							divide = 100
+						}
 					}
 				}
+				max = 1
 			}
 		}
 		progress_condition = {
@@ -535,22 +539,129 @@
 		}
 		progress_condition = {
 			limit = {
-				exists = owner.var:communism_progress_from_laws
-			}
-			progress_condition = {
-				limit = {
-					owner.var:communism_progress_from_laws = 0
-				}
-				add = {
-					desc = "communism_progress_from_no_laws_tt"
-					value = 0.25
-				}
-				else ={
-					add = {
-						desc = "communism_progress_from_laws_tt"
-						value = owner.var:communism_progress_from_laws
+				owner = {
+					ig:ig_trade_unions ?= {
+						ig_approval <= define:NPolitics|APPROVAL_THRESHOLD_UNHAPPY
 					}
 				}
+			}
+			add = {
+				desc = "communism_progress_from_work_to_rule_tt"
+				value = 0.25
+			}
+		}
+		progress_condition = {
+			limit = {
+				owner = {
+					institution_investment_level = {
+						institution = institution_police
+						value > 0
+					}
+				}
+			}
+			add = {
+				desc = "INSTITUTION_FUNDING_LEVEL_police"
+				owner = {
+					add = institution:institution_police.investment
+				}
+				if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_local_police
+						}
+					}
+					multiply = -0.1
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_dedicated_police
+						}
+					}
+					multiply = -0.2
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_militarized_police
+						}
+					}
+					multiply = -0.4
+				}
+			}
+		}
+		progress_condition = {
+			limit = {
+				owner = {
+					institution_investment_level = {
+						institution = institution_home_affairs
+						value > 0
+					}
+				}
+			}
+			add = {
+				desc = "INSTITUTION_FUNDING_LEVEL_home_affairs"
+				owner = {
+					add = institution:institution_home_affairs.investment
+				}
+				if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_guaranteed_liberties
+						}
+					}
+					multiply = -0.1
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_national_guard
+						}
+					}
+					multiply = -0.2
+				}
+				else_if = {
+					limit = {
+						owner = {
+							OR = {
+								has_law = law_type:law_shinsengumi
+								has_law = law_type:law_okhrana
+								has_law = law_type:law_third_section
+							}
+						}
+					}
+					multiply = -0.3
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_secret_police
+						}
+					}
+					multiply = -0.4
+				}
+			}
+		}
+		progress_condition = {
+			limit = {
+				owner = {
+					has_law_or_variant = law_type:law_no_police
+				}
+			}
+			add = {
+				desc = "law_no_police"
+				value = 0.3
+			}
+		}
+		progress_condition = {
+			limit = {
+				owner = {
+					has_law_or_variant = law_type:law_no_home_affairs
+				}
+			}
+			add = {
+				desc = "law_no_home_affairs"
+				value = 0.3
 			}
 		}
 		progress_condition = {
@@ -683,14 +794,104 @@
 		}
 		progress_condition = {
 			limit = {
-				exists = owner.var:populism_progress_from_laws
-				NOT = {
-					owner.var:populism_progress_from_laws = 0
+				owner = {
+					institution_investment_level = {
+						institution = institution_police
+						value > 0
+					}
 				}
 			}
 			add = {
-				desc = "populism_progress_from_laws_tt"
-				value = owner.var:populism_progress_from_laws
+				desc = "INSTITUTION_FUNDING_LEVEL_police"
+				owner = {
+					add = institution:institution_police.investment
+				}
+				if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_local_police
+						}
+					}
+					multiply = -0.1
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_dedicated_police
+						}
+					}
+					multiply = -0.3
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_militarized_police
+						}
+					}
+					multiply = -0.5
+				}
+			}
+		}
+		progress_condition = {
+			limit = {
+				owner = {
+					institution_investment_level = {
+						institution = institution_home_affairs
+						value > 0
+					}
+				}
+			}
+			add = {
+				desc = "INSTITUTION_FUNDING_LEVEL_home_affairs"
+				owner = {
+					add = institution:institution_home_affairs.investment
+				}
+				if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_guaranteed_liberties
+						}
+					}
+					multiply = -0.1
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_national_guard
+						}
+					}
+					multiply = -0.3
+				}
+				else_if = {
+					limit = {
+						owner = {
+							has_law_or_variant = law_type:law_secret_police
+						}
+					}
+					multiply = -0.5
+				}
+			}
+		}
+		progress_condition = {
+			limit = {
+				owner = {
+					has_law_or_variant = law_type:law_no_police
+				}
+			}
+			add = {
+				desc = "law_no_police"
+				value = 0.3
+			}
+		}
+		progress_condition = {
+			limit = {
+				owner = {
+					has_law_or_variant = law_type:law_no_home_affairs
+				}
+			}
+			add = {
+				desc = "law_no_home_affairs"
+				value = 0.3
 			}
 		}
 		progress_condition = {

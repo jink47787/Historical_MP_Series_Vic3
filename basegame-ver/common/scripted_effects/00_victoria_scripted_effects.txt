@@ -2500,147 +2500,21 @@ fra_handle_republic_monarch_assignment = { #Used specifically in the case of a R
 
 ### Vargas
 
-calculate_populism_progress = {
-	# From Laws
-	set_variable = { name = populism_progress_from_laws value = 0 }
-	# Cops
-	set_variable = { name = temp_policing_var_contribution value = institution:institution_police.investment }
-	if = {
-		limit = {
-			has_law_or_variant = law_type:law_no_police
-		}
-		change_variable = { name = temp_policing_var_contribution add = 0.3 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_local_police
-		}
-		change_variable = { name = temp_policing_var_contribution multiply = -0.1 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_dedicated_police
-		}
-		change_variable = { name = temp_policing_var_contribution multiply = -0.3 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_militarized_police
-		}
-		change_variable = { name = temp_policing_var_contribution multiply = -0.5 }
-	}
-
-	# Internal Affairs
-	set_variable = { name = temp_ha_var_contribution value = institution:institution_home_affairs.investment }
-	if = {
-		limit = {
-			has_law_or_variant = law_type:law_no_home_affairs
-		}
-		change_variable = { name = temp_ha_var_contribution add = 0.3 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_guaranteed_liberties
-		}
-		change_variable = { name = temp_ha_var_contribution multiply = -0.1 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_national_guard
-		}
-		change_variable = { name = temp_ha_var_contribution multiply = -0.3 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_secret_police
-		}
-		change_variable = { name = temp_ha_var_contribution multiply = -0.5 }
-	}
-	change_variable = { name = populism_progress_from_laws add = var:temp_policing_var_contribution }
-	change_variable = { name = populism_progress_from_laws add = var:temp_ha_var_contribution }
-	remove_variable = temp_policing_var_contribution
-	remove_variable = temp_ha_var_contribution
-}
-
 set_populism_vars = {
-	set_variable = { name = populism_progress_from_laws value = 0 }
 	set_variable = { name = populism_progress_var_add value = 0 }
 }
 
 clear_populism_vars = {
-	remove_variable = populism_progress_from_laws
 	remove_variable = populism_progress_var_add
 }
 
 ### Communism
 
-calculate_communism_progress = {
-	# From Laws
-	set_variable = { name = communism_progress_from_laws value = 0 }
-	# Cops
-	set_variable = { name = temp_policing_var_contribution value = institution:institution_police.investment }
-	if = {
-		limit = {
-			has_law_or_variant = law_type:law_local_police
-		}
-		change_variable = { name = temp_policing_var_contribution multiply = -0.1 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_dedicated_police
-		}
-		change_variable = { name = temp_policing_var_contribution multiply = -0.3 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_militarized_police
-		}
-		change_variable = { name = temp_policing_var_contribution multiply = -0.5 }
-	}
-
-	# Internal Affairs
-	set_variable = { name = temp_ha_var_contribution value = institution:institution_home_affairs.investment }
-	if = {
-		limit = {
-			has_law_or_variant = law_type:law_guaranteed_liberties
-		}
-		change_variable = { name = temp_ha_var_contribution multiply = -0.1 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_national_guard
-		}
-		change_variable = { name = temp_ha_var_contribution multiply = -0.3 }
-	}
-	else_if = {
-		limit = {
-			has_law_or_variant = law_type:law_secret_police
-		}
-		change_variable = { name = temp_ha_var_contribution multiply = -0.5 }
-	}
-	if = {
-		limit = {
-			has_variable = temp_policing_var_contribution
-		}
-		change_variable = { name = communism_progress_from_laws add = var:temp_policing_var_contribution }
-		remove_variable = temp_policing_var_contribution
-	}
-	if = {
-		limit = {
-			has_variable = temp_ha_var_contribution
-		}
-		change_variable = { name = communism_progress_from_laws add = var:temp_ha_var_contribution }
-		remove_variable = temp_ha_var_contribution
-	}
-}
-
 set_communism_vars = {
-	set_variable = { name = communism_progress_from_laws value = 0 }
 	set_variable = { name = communism_progress_var_add value = 0 }
 }
 
 clear_communism_vars = {
-	remove_variable = communism_progress_from_laws
 	remove_variable = communism_progress_var_add
 }
 
@@ -3340,6 +3214,32 @@ handle_revolutionary_sps = {
 			}
 			add_ruling_interest_group = yes
 		}
+	}
+}
+
+set_sps_dominant_party_effect = {
+	scope:sps_$PARTY$_party = {
+		save_scope_as = sps_dominant_party
+	}
+	custom_tooltip = sps_dominant_party_tt
+	set_variable = {
+		name = sps_dominant_party_ig_var
+		value = scope:sps_$PARTY$_ig
+	}
+	currently_enacting_law = {
+		add_amendment = {
+			type = amendment_$PARTY$_party_dominance
+			sponsor = scope:sps_$PARTY$_ig
+			cooldown = 120
+		}
+	}
+	every_interest_group = {
+		limit = {
+			NOT = {
+				this.party ?= scope:sps_dominant_party
+			}
+		}
+		improve_stance = -1
 	}
 }
 

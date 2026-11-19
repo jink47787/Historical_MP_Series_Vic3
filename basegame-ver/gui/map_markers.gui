@@ -273,6 +273,7 @@ widget = {
 		onmousehierarchyenter = "[GetVariableSystem.Set(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID), 'true')]"
 		onmousehierarchyleave = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
 		allow_outside = yes
+		tooltip_enabled = "[Not(RightClickMenuManager.IsSelectNavalMissionTypeForSeaNodeOpen)]"
 		tooltip = "SEA_NODE_MOVEMENT_MARKER_TOOLTIP"
 
 		movement_marker_hover_vfx = {
@@ -287,38 +288,36 @@ widget = {
 			size = { 250% 250% }
 			alpha = 0.8
 			onclick = "[InformationPanelBar.OpenSeaRegionPanelTab(SeaNodeMovementMarker.GetSeaNode.Self, 'navy')]"
-			onrightclick = "[Execute( SeaNodeMovementMarker.GetSeaNode.AddSeaRegionToSelectedFleetMissions )]"
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
 			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
 			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
-			rightclicksound = "event:/SFX/UI/Military/naval_mission_settings_confirm"
 			parentanchor = center
 			position = { 0 0 }
 			texture ="gfx/interface/map_markers/round_highlight_green.dds"
 		}
 
-		### Green circle highlight with no existing naval mission
+		### Orange circle highlight with existing naval mission and valid sea region removal
 		button = {
-			visible = "[SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithoutConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER'))]"
+			visible = "[Or(SeaNodeMovementMarker.GetSeaNode.WouldRemoveSeaRegionFromSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldCancelSelectedFleetMissions)]"
 			size = { 250% 250% }
 			alpha = 0.8
 			onclick = "[InformationPanelBar.OpenSeaRegionPanelTab(SeaNodeMovementMarker.GetSeaNode.Self, 'navy')]"
-			onrightclick = "[Execute( SeaNodeMovementMarker.GetSeaNode.AssignSelectedFleetsToNewMissionInRegion(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')) )]"
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
 			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
 			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
-			rightclicksound = "event:/SFX/UI/Military/formation_actions_deploy_to_sea_node"
 			parentanchor = center
 			position = { 0 0 }
-			texture ="gfx/interface/map_markers/round_highlight_green.dds"
+			texture ="gfx/interface/map_markers/round_highlight_orange.dds"
 		}
 
-		### Green circle highlight with existing naval mission and invalid sea region addition
+		### Green circle highlight when a new naval mission can be selected
 		button = {
-			visible = "[SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER'))]"
+			visible = "[SeaNodeMovementMarker.GetSeaNode.WouldSelectNewMissionForSelectedFleets]"
 			size = { 250% 250% }
 			alpha = 0.8
 			onclick = "[InformationPanelBar.OpenSeaRegionPanelTab(SeaNodeMovementMarker.GetSeaNode.Self, 'navy')]"
-			onrightclick = "[PopupManager.AskConfirmationWithSound( SeaNodeMovementMarker.GetSeaNode.AssignSelectedFleetsToNewMissionInRegion(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')), 'event:/SFX/UI/Military/formation_actions_deploy_to_sea_node' )]"
-			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
+			onrightclick = "[CloseAllTooltips]"
 			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
 			rightclicksound = "event:/SFX/UI/Global/select"
 			parentanchor = center
@@ -6065,120 +6064,133 @@ types map_marker_types
 	}
 
 	type movement_marker_knob = container {
-		### no supply - right click adds sea region to current mission(s)
+		### fleet selected - golden dot on every sea node that has no mission action of its own
 		movement_marker_knob_button = {
-			visible = "[And(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions)]"
+			visible = "[And(SeaNodeMovementMarker.HasCheckedMilitaryPanelFleets, And(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), Not(Or(Or(SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldRemoveSeaRegionFromSelectedFleetMissions), Or(SeaNodeMovementMarker.GetSeaNode.WouldCancelSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldSelectNewMissionForSelectedFleets)))))]"
 
 			block "no_supply_size" {
 				size = { 15 15 }
 			}
+		}
 
-			onrightclick = "[Execute( SeaNodeMovementMarker.GetSeaNode.AddSeaRegionToSelectedFleetMissions )]"
+		movement_marker_knob_button = {
+			visible = "[And(SeaNodeMovementMarker.HasCheckedMilitaryPanelFleets, And(SeaNodeMovementMarker.HasActiveSupplyNetwork, Not(Or(Or(SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldRemoveSeaRegionFromSelectedFleetMissions), Or(SeaNodeMovementMarker.GetSeaNode.WouldCancelSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldSelectNewMissionForSelectedFleets)))))]"
+
+			block "has_supply_size" {
+				size = { 18 18 }
+			}
+		}
+
+		### no supply - right click adds sea region to current mission(s)
+		movement_marker_knob_button = {
+			visible = "[And(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions)]"
+
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
 			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
 			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
-			rightclicksound = "event:/SFX/UI/Military/naval_mission_settings_confirm"
 			texture = "gfx/interface/map_markers/sea_node.dds"
 			alpha = 0.5
+
+			block "no_supply_size" {
+				size = { 15 15 }
+			}
 		}
 
 		### has supply - right click adds sea region to current mission(s)
 		movement_marker_knob_button = {
 			visible = "[And(SeaNodeMovementMarker.HasActiveSupplyNetwork, SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions)]"
 
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
+			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
+			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
+			texture = "gfx/interface/map_markers/sea_node_have_supply.dds"
+
 			block "has_supply_size" {
 				size = { 18 18 }
 			}
-
-			onrightclick = "[Execute( SeaNodeMovementMarker.GetSeaNode.AddSeaRegionToSelectedFleetMissions )]"
-			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
-			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
-			rightclicksound = "event:/SFX/UI/Military/naval_mission_settings_confirm"
-			texture = "gfx/interface/map_markers/sea_node_have_supply.dds"
 		}
 
-		### no supply - right click assigns a new mission without confirmation
+		### no supply - right click removes sea region from current mission(s)
 		movement_marker_knob_button = {
-			visible = "[And(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithoutConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')))]"
+			visible = "[And(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), Or(SeaNodeMovementMarker.GetSeaNode.WouldRemoveSeaRegionFromSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldCancelSelectedFleetMissions))]"
+
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
+			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
+			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
+			texture = "gfx/interface/map_markers/sea_node.dds"
+			alpha = 0.5
 
 			block "no_supply_size" {
 				size = { 15 15 }
 			}
-
-			onrightclick = "[Execute( SeaNodeMovementMarker.GetSeaNode.AssignSelectedFleetsToNewMissionInRegion(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')) )]"
-			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
-			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
-			rightclicksound = "event:/SFX/UI/Military/formation_actions_deploy_to_sea_node"
-			texture = "gfx/interface/map_markers/sea_node.dds"
-			alpha = 0.5
 		}
 
-		### has supply - right click assigns a new mission without confirmation
+		### has supply - right click removes sea region from current mission(s)
 		movement_marker_knob_button = {
-			visible = "[And(SeaNodeMovementMarker.HasActiveSupplyNetwork, SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithoutConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')))]"
+			visible = "[And(SeaNodeMovementMarker.HasActiveSupplyNetwork, Or(SeaNodeMovementMarker.GetSeaNode.WouldRemoveSeaRegionFromSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldCancelSelectedFleetMissions))]"
+
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
+			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
+			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
+			texture = "gfx/interface/map_markers/sea_node_have_supply.dds"
 
 			block "has_supply_size" {
 				size = { 18 18 }
 			}
-
-			onrightclick = "[Execute( SeaNodeMovementMarker.GetSeaNode.AssignSelectedFleetsToNewMissionInRegion(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')) )]"
-			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
-			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
-			rightclicksound = "event:/SFX/UI/Military/formation_actions_deploy_to_sea_node"
-			texture = "gfx/interface/map_markers/sea_node_have_supply.dds"
 		}
 
-		### no supply - right click assigns a new mission with confirmation
+		### no supply - right click opens the new mission menu
 		movement_marker_knob_button = {
-			visible = "[And(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')))]"
+			visible = "[And(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), SeaNodeMovementMarker.GetSeaNode.WouldSelectNewMissionForSelectedFleets)]"
+
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
+			onrightclick = "[CloseAllTooltips]"
+			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
+			rightclicksound = "event:/SFX/UI/Global/select"
+			texture = "gfx/interface/map_markers/sea_node.dds"
+			alpha = 0.5
 
 			block "no_supply_size" {
 				size = { 15 15 }
 			}
-
-			onrightclick = "[PopupManager.AskConfirmationWithSound( SeaNodeMovementMarker.GetSeaNode.AssignSelectedFleetsToNewMissionInRegion(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')), 'event:/SFX/UI/Military/formation_actions_deploy_to_sea_node' )]"
-			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
-			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
-			rightclicksound = "event:/SFX/UI/Global/select"
-			texture = "gfx/interface/map_markers/sea_node.dds"
-			alpha = 0.5
 		}
 
-		### has supply - right click assigns a new mission with confirmation
+		### has supply - right click opens the new mission menu
 		movement_marker_knob_button = {
-			visible = "[And(SeaNodeMovementMarker.HasActiveSupplyNetwork, SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')))]"
+			visible = "[And(SeaNodeMovementMarker.HasActiveSupplyNetwork, SeaNodeMovementMarker.GetSeaNode.WouldSelectNewMissionForSelectedFleets)]"
+
+			onrightclick = "[SeaNodeMovementMarker.GetSeaNode.OnSelectedFleetsRightClick(PdxGuiWidget.AccessSelf)]"
+			onrightclick = "[CloseAllTooltips]"
+			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
+			rightclicksound = "event:/SFX/UI/Global/select"
+			texture = "gfx/interface/map_markers/sea_node_have_supply.dds"
 
 			block "has_supply_size" {
 				size = { 18 18 }
 			}
-
-			onrightclick = "[PopupManager.AskConfirmationWithSound( SeaNodeMovementMarker.GetSeaNode.AssignSelectedFleetsToNewMissionInRegion(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')), 'event:/SFX/UI/Military/formation_actions_deploy_to_sea_node' )]"
-			onrightclick = "[PdxGuiWidget.AccessParent.AccessParent.FindChild('onrightclick_vfx').TriggerAnimation('show')]"
-			onrightclick = "[GetVariableSystem.Clear(Concatenate('sea_node_movement_marker_highlight', SeaNodeMovementMarker.GetSeaNode.GetID))]"
-			rightclicksound = "event:/SFX/UI/Global/select"
-			texture = "gfx/interface/map_markers/sea_node_have_supply.dds"
 		}
 
 		### no supply - without right-click
 		movement_marker_knob_button = {
-			visible = "[And3(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), Not(SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions), Not(Or(SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithoutConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')), SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')))))]"
+			visible = "[And3(Not(SeaNodeMovementMarker.HasActiveSupplyNetwork), Not(SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions), Not(Or3(SeaNodeMovementMarker.GetSeaNode.WouldRemoveSeaRegionFromSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldCancelSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldSelectNewMissionForSelectedFleets)))]"
+
+			alpha = 0.5
+			texture = "gfx/interface/map_markers/sea_node.dds"
 
 			block "no_supply_size" {
 				size = { 15 15 }
 			}
-
-			texture = "gfx/interface/map_markers/sea_node.dds"
-			alpha = 0.5
 		}
 
 		### has supply - without right-click
 		movement_marker_knob_button = {
-			visible = "[And3(SeaNodeMovementMarker.HasActiveSupplyNetwork, Not(SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions), Not(Or(SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithoutConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')), SeaNodeMovementMarker.GetSeaNode.WouldAssignSelectedFleetsToNewMissionWithConfirmation(GetDefine('NMilitary','NAVAL_MISSION_TYPE_PROJECT_POWER')))))]"
+			visible = "[And3(SeaNodeMovementMarker.HasActiveSupplyNetwork, Not(SeaNodeMovementMarker.GetSeaNode.WouldAddSeaRegionToSelectedFleetMissions), Not(Or3(SeaNodeMovementMarker.GetSeaNode.WouldRemoveSeaRegionFromSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldCancelSelectedFleetMissions, SeaNodeMovementMarker.GetSeaNode.WouldSelectNewMissionForSelectedFleets)))]"
+
+			texture = "gfx/interface/map_markers/sea_node_have_supply.dds"
 
 			block "has_supply_size" {
 				size = { 18 18 }
 			}
-
-			texture = "gfx/interface/map_markers/sea_node_have_supply.dds"
 		}
 	}
 
