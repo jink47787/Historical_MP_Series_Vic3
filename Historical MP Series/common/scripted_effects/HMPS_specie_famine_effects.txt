@@ -398,7 +398,7 @@ ip_apply_to_members = {
 # Global variables: reserve_currency_holder (the holder; unset while vacant), rc_previous_holder (for the change notice),
 # rc_top_challenger (for loc), rc_vacant_candidate and rc_vacant_months (while vacant). Each challenger counts its own rc_challenge_months.
 # The holder counts rc_surplus_months, its months in a row without a deficit.
-# Taking it (a challenge, a vacant status, or a handover) needs rc_can_take: a Great Power whose market runs a deficit.
+# Taking it (a challenge, a vacant status, or a handover) needs rc_can_take: a Great Power with Mutual Funds whose market runs a deficit.
 # Keeping it needs rc_can_hold, which also needs Great Power rank
 
 # No scope needed. Applies the tiered modifiers: rc_market_N to every country in the holder's market, rc_holder_N to the holder.
@@ -419,7 +419,6 @@ rc_refresh_modifiers = {
 			}
 			remove_modifier = rc_market_1
 			remove_modifier = rc_market_2
-			remove_modifier = rc_market_3
 			if = {
 				limit = { rc_desired_market_tier = 1 }
 				add_modifier = { name = rc_market_1 }
@@ -427,10 +426,6 @@ rc_refresh_modifiers = {
 			else_if = {
 				limit = { rc_desired_market_tier = 2 }
 				add_modifier = { name = rc_market_2 }
-			}
-			else_if = {
-				limit = { rc_desired_market_tier = 3 }
-				add_modifier = { name = rc_market_3 }
 			}
 			if = {
 				limit = { rc_desired_market_tier > 0 }
@@ -446,7 +441,6 @@ rc_refresh_modifiers = {
 			}
 			remove_modifier = rc_holder_1
 			remove_modifier = rc_holder_2
-			remove_modifier = rc_holder_3
 			if = {
 				limit = { rc_desired_holder_tier = 1 }
 				add_modifier = { name = rc_holder_1 }
@@ -454,10 +448,6 @@ rc_refresh_modifiers = {
 			else_if = {
 				limit = { rc_desired_holder_tier = 2 }
 				add_modifier = { name = rc_holder_2 }
-			}
-			else_if = {
-				limit = { rc_desired_holder_tier = 3 }
-				add_modifier = { name = rc_holder_3 }
 			}
 			if = {
 				limit = { rc_desired_holder_tier > 0 }
@@ -645,15 +635,9 @@ rc_notify_vacant = {
 }
 
 # No scope needed, from on_game_started_after_lobby, or the first monthly update of a save that predates the Reserve Currency.
-# Britain starts with it whatever its balance of trade (it only needs rc_can_hold, and then has the usual 6 months
-# to show a deficit); if it can't hold it (not a Great Power, say), the status starts vacant
+# The status starts vacant: nobody can hold it before Mutual Funds (rc_can_hold)
 rc_initialize = {
 	set_global_variable = rc_initialized
-	if = {
-		limit = { c:GBR ?= { rc_can_hold = yes } }
-		c:GBR = { save_scope_as = rc_new_holder }
-		rc_set_holder = yes
-	}
 }
 
 # No scope needed, from on_monthly_pulse (HMPS_reserve_currency_monthly)
