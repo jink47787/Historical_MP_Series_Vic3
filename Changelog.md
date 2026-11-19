@@ -30,6 +30,7 @@ All mods / mod ideas used linked below:
 - Join War mod: https://steamcommunity.com/sharedfiles/filedetails/?id=3015811655
 - Add Wargoals During Wars: https://steamcommunity.com/sharedfiles/filedetails/?id=3390504397
 - Building Preference Rebalance (AI oil and rubber priority ideas): https://steamcommunity.com/sharedfiles/filedetails/?id=3726359241
+- Construction Queue: Multi-Select & Drag: https://steamcommunity.com/sharedfiles/filedetails/?id=3837831783
 Thanks to Gelre for his UI, Performance & Flava work.
 Thanks to Henry, Orange, and Eilmer as HMPS junior devs. 
 Thanks to Yyyman for his Italy company changes.

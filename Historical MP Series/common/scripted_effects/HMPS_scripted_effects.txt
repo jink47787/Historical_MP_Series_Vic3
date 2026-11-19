@@ -1420,3 +1420,93 @@ mahdist_setup_effect = { # HMPS: Mahdist state setup
 	change_institution_investment_level = { institution = institution_army_model investment = 1 }
 	add_modifier = { name = mahdist_happy_igs months = 240 }
 }
+
+# HMPS: construction queue tools (freethebrain, Workshop 3837831783); global observer removed for MP
+v3qt_clear_job = {
+    remove_variable = v3qt_refreshing
+    remove_variable = v3qt_jump
+    remove_variable = v3qt_mapped
+    remove_variable = v3qt_submitted
+    remove_variable = v3qt_remaining
+    remove_variable = v3qt_total
+    remove_variable = v3qt_from
+    remove_variable = v3qt_to
+    remove_variable = v3qt_width
+    remove_variable = v3qt_distance
+    remove_variable = v3qt_new_first
+}
+
+# Selection revisions and movement jobs share one monotonic generation.
+# A GUI callback captured before a newer selection or move cannot affect it.
+v3qt_advance_generation = {
+    if = {
+        limit = { NOT = { has_variable = v3qt_generation } }
+        set_variable = { name = v3qt_generation value = 0 }
+    }
+    change_variable = { name = v3qt_generation add = 1 }
+}
+
+v3qt_clear_selection = {
+    v3qt_clear_job = yes
+    remove_variable = v3qt_previous_first
+    remove_variable = v3qt_previous_last
+    clear_variable_list = v3qt_buildings
+    remove_variable = v3qt_first
+    remove_variable = v3qt_last
+    remove_variable = v3qt_anchor
+    remove_variable = v3qt_size
+    # Revoke queued idle callbacks after any genuine cancellation too.
+    v3qt_advance_generation = yes
+}
+
+# Repeatedly moving the occupant of the same source slot to the same
+# destination slot rotates a contiguous interval. Move whichever side
+# is shorter. A one-position up/down step takes exactly one command.
+v3qt_plan_rotation = {
+    set_variable = { name = v3qt_width value = var:v3qt_last }
+    change_variable = { name = v3qt_width subtract = var:v3qt_first }
+    change_variable = { name = v3qt_width add = 1 }
+    if = {
+        limit = { var:v3qt_new_first < var:v3qt_first var:v3qt_new_first >= 1 }
+        set_variable = { name = v3qt_distance value = var:v3qt_first }
+        change_variable = { name = v3qt_distance subtract = var:v3qt_new_first }
+        if = {
+            limit = { var:v3qt_width <= var:v3qt_distance }
+            set_variable = { name = v3qt_remaining value = var:v3qt_width }
+            set_variable = { name = v3qt_from value = var:v3qt_last }
+            set_variable = { name = v3qt_to value = var:v3qt_new_first }
+        }
+        else = {
+            set_variable = { name = v3qt_remaining value = var:v3qt_distance }
+            set_variable = { name = v3qt_from value = var:v3qt_new_first }
+            set_variable = { name = v3qt_to value = var:v3qt_last }
+        }
+    }
+    else_if = {
+        limit = { var:v3qt_new_first > var:v3qt_first }
+        set_variable = { name = v3qt_distance value = var:v3qt_new_first }
+        change_variable = { name = v3qt_distance subtract = var:v3qt_first }
+        set_variable = { name = v3qt_to value = var:v3qt_last }
+        change_variable = { name = v3qt_to add = var:v3qt_distance }
+        if = {
+            limit = { var:v3qt_to > var:v3qt_size }
+            v3qt_clear_job = yes
+        }
+        else_if = {
+            limit = { var:v3qt_width <= var:v3qt_distance }
+            set_variable = { name = v3qt_remaining value = var:v3qt_width }
+            set_variable = { name = v3qt_from value = var:v3qt_first }
+        }
+        else = {
+            set_variable = { name = v3qt_remaining value = var:v3qt_distance }
+            set_variable = { name = v3qt_from value = var:v3qt_to }
+            set_variable = { name = v3qt_to value = var:v3qt_first }
+        }
+    }
+    else = { v3qt_clear_job = yes }
+    if = {
+        limit = { has_variable = v3qt_remaining }
+        v3qt_advance_generation = yes
+        set_variable = { name = v3qt_total value = var:v3qt_remaining }
+    }
+}

@@ -1,0 +1,1294 @@
+﻿# HMPS: based on "Construction Queue: Multi-Select & Drag" by freethebrain (Workshop 3837831783, v0.5.3)
+# HMPS: MP enabled; Qt* macros live in data_binding/trade_partners_gui_macros.txt
+# COPY-PASTED FOR NOW
+@panel_width_minus_10 = 530			# used to be 450
+@panel_width = 540  				# used to be 460
+@panel_width_half = 270				# used to be 230
+@panel_width_plus_10 = 550  		# used to be 470
+@panel_width_plus_14 = 554			# used to be 474
+@panel_width_plus_14_half = 277		# used to be 237
+@panel_width_plus_20 = 560			# used to be 480
+@panel_width_plus_30 = 570			# used to be 490
+@panel_width_plus_70 = 610			# used to be 530
+
+@queue_item_width = 540
+@queue_item_height = 40
+
+types construction_queue {
+	type v3qt_help_tooltip = TooltipWidgetType {
+	    blockoverride "text" {
+	        text = "V3QT_QUEUE_HELP"
+	    }
+	    blockoverride "tooltip_margins" {
+	        margin = { 18 15 }
+	        margin_right = 46
+	    }
+	    blockoverride "tooltip_content_free_floating" {
+	        close_button = {
+	            name = "v3qt_help_dismiss_button"
+	            size = { 28 28 }
+	            parentanchor = top|right
+	            widgetanchor = top|right
+	            position = { -10 10 }
+	            enabled = "[Not(GetVariableSystem.Exists('v3qt_help_dismiss_requested'))]"
+	            blockoverride "tooltip" {}
+	            onclick = "[GetVariableSystem.Set('v3qt_help_dismiss_requested', 'yes')]"
+	            onclick = "[GetVariableSystem.Set('v3qt_help_compact', 'yes')]"
+	            onclick = "[PdxGuiTriggerAllAnimations('v3qt_help_tooltip_dismiss')]"
+	        }
+	    }
+	    state = {
+	        name = _show
+	        alpha = 1
+	        scale = 1
+	        duration = 0
+	    }
+	    state = {
+	        name = v3qt_help_tooltip_dismiss
+	        alpha = 0
+	        scale = 0.92
+	        duration = 0.16
+	        using = Animation_Curve_Default
+	    }
+	}
+
+	type v3qr_grip_dot = icon {
+		texture = "gfx/interface/backgrounds/white.dds"
+		color = { 0.81 0.73 0.56 1 }
+		size = { 3 3 }
+		alwaystransparent = yes
+	}
+
+	type v3qr_insertion_line = icon {
+		texture = "gfx/interface/backgrounds/white.dds"
+		color = { 0.45 0.86 0.94 1 }
+		size = { 100% 3 }
+		alwaystransparent = yes
+	}
+
+	type v3qt_native_government_row = construction_queue_item {
+        draggable_behavior = {
+            draggable_id = "construction_queue_element"
+            drag_widget = {
+                widget = {
+                    size = { 1 1 }
+                    construction_queue_item = {
+                        position = "[GuiCurrentDrag.CurrentPosition]"
+                        widgetanchor = center
+                    }
+                }
+            }
+        }
+        drop_target = {
+            accept_draggable_id = "construction_queue_element"
+            on_receive_drop = "[Execute( GetDraggedDatacontext( 'ConstructionQueueElement' ).MoveToIndex( ConstructionQueueElement.GetIndex ) )]"
+        }
+    }
+
+	type v3qt_government_row = construction_queue_item {
+		blockoverride "v3qt_rank" {
+		    button = {
+		        name = "v3qt_rank_selector"
+		        size = { 32 38 }
+		        enabled = "[And(QtGovView(Country, ConstructionPanel), And(ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer, Not(QtBusy(Country, ConstructionPanel))))]"
+		        click_modifiers = {
+		            ondefault = "[PdxGuiWidget.TriggerAnimation('v3qt_pick')]"
+		            onshift = "[PdxGuiWidget.TriggerAnimation(Select_CString(QtLive(Country, ConstructionPanel), 'v3qt_extend', 'v3qt_pick'))]"
+		        }
+				state = {
+					name = v3qt_pick
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetVariableSystem.Set('v3qt_snapshot', ToString_int32(QtQueueSize(AccessPlayer)))]"
+					on_start = "[GetVariableSystem.Set('v3qt_page', ToString_int32(QtPage(ConstructionPanel)))]"
+					on_start = "[GetScriptedGui('v3qt_select_idle').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('row', MakeScopeValue(IntToFixedPoint(ConstructionQueueElement.GetQueueNumber))).AddScope('size', MakeScopeValue(IntToFixedPoint(QtQueueSize(AccessPlayer)))).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+					on_start = "[PdxGuiTriggerAllAnimations('v3qt_capture_slot')]"
+					on_start = "[PdxGuiTriggerAllAnimations('v3qt_register_building')]"
+					on_start = "[GetVariableSystem.Set('v3qt_session', 'yes')]"
+				}
+				state = {
+					name = v3qt_extend
+					on_start = "[GetScriptedGui('v3qt_extend_idle').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('row', MakeScopeValue(IntToFixedPoint(ConstructionQueueElement.GetQueueNumber))).AddScope('size', MakeScopeValue(IntToFixedPoint(QtQueueSize(AccessPlayer)))).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+				}
+		        textbox = {
+		            parentanchor = center
+		            autoresize = yes
+		            alwaystransparent = yes
+		            raw_text = "##[ConstructionQueueElement.GetQueueNumber]"
+		        }
+		    }
+		}
+		background = {
+		    visible = "[QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber)]"
+		    texture = "gfx/interface/backgrounds/white.dds"
+		    color = { 0.20 0.63 0.65 0.42 }
+		}
+		blockoverride "v3qr_grip" {
+			widget = {
+				using = visible_if_cqe_player_government
+				size = { 12 40 }
+				alwaystransparent = yes
+				v3qr_grip_dot = { position = { 2 13 } }
+				v3qr_grip_dot = { position = { 7 13 } }
+				v3qr_grip_dot = { position = { 2 18 } }
+				v3qr_grip_dot = { position = { 7 18 } }
+				v3qr_grip_dot = { position = { 2 23 } }
+				v3qr_grip_dot = { position = { 7 23 } }
+			}
+		}
+
+		state = {
+			name = v3qt_drag_pick
+			on_start = "[GetVariableSystem.Clear('v3qt_hover')]"
+			on_start = "[GetVariableSystem.Set('v3qt_drag_mode', 'single')]"
+			on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+			on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+			on_start = "[GetVariableSystem.Set('v3qt_snapshot', ToString_int32(QtQueueSize(AccessPlayer)))]"
+			on_start = "[GetVariableSystem.Set('v3qt_page', ToString_int32(QtPage(ConstructionPanel)))]"
+			on_start = "[GetScriptedGui('v3qt_select_idle').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('row', MakeScopeValue(IntToFixedPoint(ConstructionQueueElement.GetQueueNumber))).AddScope('size', MakeScopeValue(IntToFixedPoint(QtQueueSize(AccessPlayer)))).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+			on_start = "[PdxGuiTriggerAllAnimations('v3qt_capture_slot')]"
+			on_start = "[PdxGuiTriggerAllAnimations('v3qt_register_building')]"
+			on_start = "[GetVariableSystem.Set('v3qt_session', 'yes')]"
+		}
+		state = {
+			name = v3qt_drag_keep
+			on_start = "[GetVariableSystem.Clear('v3qt_hover')]"
+			on_start = "[GetVariableSystem.Set('v3qt_drag_mode', 'selection')]"
+		}
+		state = {
+			name = v3qt_drag_native
+			on_start = "[GetVariableSystem.Clear('v3qt_hover')]"
+			on_start = "[GetVariableSystem.Set('v3qt_drag_mode', 'single')]"
+		}
+		draggable_behavior = {
+			draggable_id = "v3qt_construction_queue_element"
+			on_drag_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(And(QtGovView(Country, ConstructionPanel), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer), Not(QtBusy(Country, ConstructionPanel))), Select_CString(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), 'v3qt_drag_keep', 'v3qt_drag_pick'), 'v3qt_drag_native'))]"
+			on_drag_end = "[GetVariableSystem.Clear('v3qt_hover')]"
+			drag_widget = {
+				widget = {
+					size = { 1 1 }
+					alwaystransparent = yes
+				}
+			}
+		}
+
+		state = {
+			name = _drop_target_drag_enter
+			on_start = "[GetVariableSystem.Set('v3qt_drag_first', ToString_int32(QtDragEdge('v3qt_first')))]"
+			on_start = "[GetVariableSystem.Set('v3qt_drag_last', ToString_int32(QtDragEdge('v3qt_last')))]"
+			on_start = "[GetVariableSystem.Set('v3qt_edge', Select_CString(LessThan_int32(ConstructionQueueElement.GetQueueNumber, QtDragEdge('v3qt_first')), 'before', Select_CString(GreaterThan_int32(ConstructionQueueElement.GetQueueNumber, QtDragEdge('v3qt_last')), 'after', 'none')))]"
+			on_start = "[GetVariableSystem.Set('v3qt_landing_first', ToString_int32(Select_int32(LessThan_int32(ConstructionQueueElement.GetQueueNumber, QtDragEdge('v3qt_first')), ConstructionQueueElement.GetQueueNumber, Select_int32(GreaterThan_int32(ConstructionQueueElement.GetQueueNumber, QtDragEdge('v3qt_last')), Subtract_int32(ConstructionQueueElement.GetQueueNumber, Subtract_int32(QtDragEdge('v3qt_last'), QtDragEdge('v3qt_first'))), QtDragEdge('v3qt_first')))))]"
+			on_start = "[GetVariableSystem.Set('v3qt_landing_last', ToString_int32(Add_int32(Select_int32(LessThan_int32(ConstructionQueueElement.GetQueueNumber, QtDragEdge('v3qt_first')), ConstructionQueueElement.GetQueueNumber, Select_int32(GreaterThan_int32(ConstructionQueueElement.GetQueueNumber, QtDragEdge('v3qt_last')), Subtract_int32(ConstructionQueueElement.GetQueueNumber, Subtract_int32(QtDragEdge('v3qt_last'), QtDragEdge('v3qt_first'))), QtDragEdge('v3qt_first'))), Subtract_int32(QtDragEdge('v3qt_last'), QtDragEdge('v3qt_first')))))]"
+			on_start = "[GetVariableSystem.Set('v3qt_hover', ToString_int32(ConstructionQueueElement.GetQueueNumber))]"
+		}
+		state = {
+			name = _drop_target_drag_exit
+			on_start = "[GetVariableSystem.SetIf('v3qt_hover', '', GetVariableSystem.HasValue('v3qt_hover', ToString_int32(ConstructionQueueElement.GetQueueNumber)))]"
+		}
+		state = {
+			name = _drop_target_drag_end
+			on_start = "[GetVariableSystem.Clear('v3qt_hover')]"
+		}
+
+		v3qr_insertion_line = {
+			name = "v3qr_before"
+			visible = "[And(GetVariableSystem.HasValue('v3qt_hover', ToString_int32(ConstructionQueueElement.GetQueueNumber)), GetVariableSystem.HasValue('v3qt_edge', 'before'))]"
+			parentanchor = top|left
+			widgetanchor = top|left
+		}
+		v3qr_insertion_line = {
+			name = "v3qr_after"
+			visible = "[And(GetVariableSystem.HasValue('v3qt_hover', ToString_int32(ConstructionQueueElement.GetQueueNumber)), GetVariableSystem.HasValue('v3qt_edge', 'after'))]"
+			parentanchor = bottom|left
+			widgetanchor = bottom|left
+		}
+
+		drop_target = {
+			accept_draggable_id = "v3qt_construction_queue_element"
+			on_receive_drop = "[GetScriptedGui('v3qt_drop').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('source', MakeScopeValue(IntToFixedPoint(GetDraggedDatacontext('ConstructionQueueElement').GetQueueNumber))).AddScope('target', MakeScopeValue(IntToFixedPoint(ConstructionQueueElement.GetQueueNumber))).AddScope('size', MakeScopeValue(IntToFixedPoint(QtQueueSize(AccessPlayer)))).End)]"
+		}
+	}
+
+	type construction_queue = flowcontainer {
+		state = {
+		    name = v3qt_expire
+		    trigger_when = "[And(GetVariableSystem.Exists('v3qt_session'), Not(And(QtGovView(Country, ConstructionPanel), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(QtPage(ConstructionPanel))), GetVariableSystem.HasValue('v3qt_snapshot', ToString_int32(QtQueueSize(AccessPlayer)))))))]"
+		    on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+		    on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+		}
+		state = {
+		    name = _show
+		    on_start = "[GetVariableSystem.Clear('v3qt_hover')]"
+		    on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+		    on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+		    on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+		}
+		state = {
+		    name = _hide
+		    on_start = "[GetVariableSystem.Clear('v3qt_hover')]"
+		    on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+		    on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+		    on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+		}
+		using = default_list_position
+		direction = vertical
+		minimumsize = { @panel_width -1 }
+		margin_bottom = 10
+
+		flowcontainer = {
+			parentanchor = hcenter
+			direction = vertical
+
+			background = {
+				using = dark_area
+			}
+
+			background = {
+				using = fade_right_entry_header_colored
+				color = "[GetDefine('NGUI','BUILDING_OWNERSHIP_COLOR_PLAYER_POPS')]"
+				margin_left = 2
+				margin_right = 2
+				margin_bottom = -1
+			}
+
+			background = {
+				using = fade_right_entry_header_colored
+				color = "[GetDefine('NGUI','BUILDING_OWNERSHIP_COLOR_PLAYER_POPS')]"
+				margin_left = 2
+				margin_right = 2
+				margin_bottom = -1
+				mirror = horizontal
+			}
+
+			divider_clean = {}
+
+			widget = {
+				size = { @panel_width_plus_14 50 }
+
+				textbox = {
+					parentanchor = vcenter
+					margin = { 10 10 }
+					align = nobaseline
+					autoresize = yes
+					max_width = 265
+					using = elide_fontsize_min
+					using = investment_pool_tooltip_with_graph
+					text = "CURRENT_INVESTMENT_POOL"
+				}
+
+				textbox = {
+					parentanchor = vcenter|right
+					margin = { 10 10 }
+					align = nobaseline
+					autoresize = yes
+					max_width = 265
+					using = elide_fontsize_min
+					tooltip = "[GetPlayer.GetPreviousAutonomousInvestmentsDesc]"
+					text = "PREVIOUS_INVESTMENTS"
+				}
+			}
+
+			divider_decorative = {}
+
+			textbox = {
+				visible = "[GetPlayer.ShowInvestmentPoolPredictedNextBuilding]"
+				parentanchor = hcenter
+				minimumsize = { @panel_width_plus_14 -1 }
+				maximumsize = { @panel_width_plus_14 -1 }
+				margin = { 10 10 }
+				autoresize = yes
+				multiline = yes
+				align = hcenter|nobaseline
+				text = "NEXT_PRIVATE_CONSTRUCTION"
+
+				background = {
+					using = dark_area
+					margin_top = 2
+				}
+			}
+
+			divider_clean = {}
+		}
+
+		default_header_2texts = {
+			blockoverride "left" {
+				flowcontainer = {
+					parentanchor = left|vcenter
+					position = { 12 0 }
+					spacing = 8
+					textbox = {
+						text = "CONSTRUCTION_QUEUE"
+						autoresize = yes
+						max_width = 330
+						elide = right
+						default_format = "#title"
+						using = fontsize_large
+						align = left|nobaseline
+						parentanchor = vcenter
+					}
+					widget = {
+						name = "v3qt_queue_help"
+						size = { 24 24 }
+						parentanchor = vcenter
+						using = tooltip_ne
+						tooltip = "V3QT_QUEUE_HELP"
+						state = {
+						    name = _show
+						    on_start = "[GetVariableSystem.Clear('v3qt_help_dismiss_requested')]"
+						}
+						state = {
+						    name = _hide
+						    on_start = "[GetVariableSystem.Clear('v3qt_help_dismiss_requested')]"
+						}
+						state = {
+						    name = v3qt_help_finish_dismiss
+						    trigger_when = "[GetVariableSystem.Exists('v3qt_help_dismiss_requested')]"
+						    duration = 0.20
+						    on_finish = "[GetVariableSystem.Clear('v3qt_help_dismiss_requested')]"
+						    on_finish = "[CloseAllTooltips]"
+						    on_finish = "[PdxGuiTriggerAllAnimations('v3qt_help_header_glow')]"
+						}
+						icon = {
+						    name = "v3qt_help_header_highlight"
+						    texture = "gfx/interface/tutorial/tutorial_highlight_start_glow.dds"
+						    size = { 52 52 }
+						    parentanchor = center
+						    alwaystransparent = yes
+						    alpha = 0
+						    state = {
+						        name = _show
+						        alpha = 0
+						        scale = 0.85
+						        duration = 0
+						    }
+						    state = {
+						        name = v3qt_help_header_glow
+						        alpha = 0.9
+						        scale = 1.1
+						        duration = 0.16
+						        next = v3qt_help_header_glow_out
+						        using = Animation_Curve_Default
+						    }
+						    state = {
+						        name = v3qt_help_header_glow_out
+						        alpha = 0
+						        scale = 1.25
+						        duration = 0.55
+						        using = Animation_Curve_Default
+						    }
+						}
+						textbox = {
+							parentanchor = center
+							autoresize = yes
+							raw_text = "?"
+							default_format = "#title"
+							alwaystransparent = yes
+						}
+					}
+				}
+			}
+			blockoverride "text2" {
+				block "text" {
+					visible = "[And(Country.HasConstructionQueued, Not(Country.IsConstructionPaused))]"
+					text = "QUEUE_CONSTRUCTION_POINTS_SUMMARY"
+					tooltip = "QUEUE_CONSTRUCTION_POINTS_SUMMARY_TOOLTIP"
+				}
+			}
+		}
+
+		## FILTERS
+
+		flowcontainer = {
+			direction = vertical
+
+			section_header_button = {
+				blockoverride "left_text" {
+					text = "FILTERS"
+					fontsize_min = 12
+					elide = right
+				}
+
+				blockoverride "right_text" {
+					section_header_right_text = {
+						text = "CONSTRUCTION_QUEUE_FILTER_SUMMARY"
+					}
+				}
+
+				blockoverride "onclick" {
+					onclick = "[GetVariableSystem.Toggle( 'construction_queue_filters' )]"
+				}
+
+				blockoverride "onclick_showmore" {
+					visible = "[Not(GetVariableSystem.Exists( 'construction_queue_filters' ))]"
+				}
+
+				blockoverride "onclick_showless" {
+					visible = "[GetVariableSystem.Exists( 'construction_queue_filters' )]"
+				}
+			}
+
+			flowcontainer = {
+				visible = "[GetVariableSystem.Exists( 'construction_queue_filters' )]"
+				minimumsize = { @panel_width_plus_14 -1 }
+				parentanchor = hcenter
+				spacing = 10
+				margin_bottom = 10
+
+				background = {
+					using = dark_area
+				}
+
+				flowcontainer = {
+					direction = vertical
+
+					textbox = {
+						multiline = yes
+						size = { 95 60 }
+						text = "LOCATION"
+						align = right|nobaseline
+						margin_right = 10
+						margin_left = 10
+						fontsize_min = 14
+						elide = right
+					}
+
+					textbox = {
+						size = { 95 60 }
+						text = "CONSTRUCTION_QUEUE_FILTER_FUNDING"
+						align = right|nobaseline
+						margin_right = 10
+						margin_left = 10
+						fontsize_min = 14
+						elide = right
+					}
+				}
+
+				vertical_divider = {}
+
+				flowcontainer = {
+					direction = vertical
+					margin_top = 10
+					spacing = 20
+					margin_left = 10
+
+					flowcontainer = {
+						spacing = 5
+
+						filter_button = {
+							visible = "[ConstructionPanel.IsFiltered('is_domestic')]"
+							size = { 132 40 }
+
+							tooltip = "LOCATION_FILTER_ALL"
+							using = tooltip_above
+
+							blockoverride "text" {
+								text = "ALL"
+							}
+
+							blockoverride "onclick" {
+								onclick = "[ConstructionPanel.SetFilterMode('is_domestic', 'off')]"
+							}
+						}
+
+						filter_background_selected = {
+							visible = "[Not(ConstructionPanel.IsFiltered('is_domestic'))]"
+							size = { 132 40 }
+
+							blockoverride "text" {
+								text = "ALL"
+							}
+						}
+
+						filter_button = {
+							visible = "[Not(ConstructionPanel.IsFilterYes('is_domestic'))]"
+							size = { 132 40 }
+
+							tooltip = "LOCATION_FILTER_DOMESTIC"
+							using = tooltip_above
+
+							blockoverride "text" {
+								text = "DOMESTIC"
+							}
+
+							blockoverride "onclick" {
+								onclick = "[ConstructionPanel.SetFilterMode('is_domestic', 'yes')]"
+							}
+						}
+
+						filter_background_selected = {
+							visible = "[ConstructionPanel.IsFilterYes('is_domestic')]"
+							size = { 132 40 }
+
+							blockoverride "text" {
+								text = "DOMESTIC"
+							}
+						}
+
+						filter_button = {
+							visible = "[Not(ConstructionPanel.IsFilterNo('is_domestic'))]"
+							size = { 132 40 }
+
+							tooltip = "LOCATION_FILTER_ABROAD"
+							using = tooltip_above
+
+							blockoverride "text" {
+								text = "ABROAD"
+							}
+
+							blockoverride "onclick" {
+								onclick = "[ConstructionPanel.SetFilterMode('is_domestic', 'no')]"
+							}
+						}
+
+						filter_background_selected = {
+							visible = "[ConstructionPanel.IsFilterNo('is_domestic')]"
+
+							size = { 132 40 }
+
+							blockoverride "text" {
+								text = "ABROAD"
+							}
+						}
+					}
+
+					flowcontainer = {
+						spacing = 5
+
+						filter_button = {
+
+							blockoverride "text" {
+								text = "CONSTRUCTION_QUEUE_FILTER_FUNDING_NATIONAL"
+							}
+
+							tooltip = "CONSTRUCTION_QUEUE_FILTER_FUNDING_NATIONAL_TT"
+
+							visible = "[Not(ConstructionPanel.IsShowingGovernmentConstructions)]"
+
+							blockoverride "onclick" {
+								onclick = "[ConstructionPanel.ShowGovernmentConstructions]"
+							}
+						}
+
+						filter_background_selected = {
+							visible = "[ConstructionPanel.IsShowingGovernmentConstructions]"
+
+							blockoverride "text" {
+								text = "CONSTRUCTION_QUEUE_FILTER_FUNDING_NATIONAL"
+							}
+
+							tooltip = "CONSTRUCTION_QUEUE_FILTER_FUNDING_NATIONAL_TT"
+						}
+
+						filter_button = {
+
+							blockoverride "text" {
+								text = "CONSTRUCTION_QUEUE_FILTER_FUNDING_PRIVATE"
+							}
+
+							tooltip = "CONSTRUCTION_QUEUE_FILTER_FUNDING_PRIVATE_TT"
+
+							visible = "[Not(ConstructionPanel.IsShowingPrivateConstructions)]"
+
+							blockoverride "onclick" {
+								onclick = "[ConstructionPanel.ShowPrivateConstructions]"
+							}
+						}
+
+						filter_background_selected = {
+							visible = "[ConstructionPanel.IsShowingPrivateConstructions]"
+
+							blockoverride "text" {
+								text = "CONSTRUCTION_QUEUE_FILTER_FUNDING_PRIVATE"
+							}
+
+							tooltip = "CONSTRUCTION_QUEUE_FILTER_FUNDING_PRIVATE_TT"
+						}
+					}
+				}
+			}
+
+			widget = {
+				visible = "[GetVariableSystem.Exists( 'construction_queue_filters' )]"
+				size = { 5 5 }
+			}
+		}
+
+		# PRIVATE CONSTRUCTION QUEUE
+
+		fixedgridbox = {
+			visible = "[And(ConstructionPanel.IsShowingPrivateConstructions, Not(IsDataModelEmpty(Country.AccessPagedPrivateConstructionQueue(ConstructionPanel.AccessCurrentPrivateConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry), ConstructionPanel.GetFilter))))]"
+			addcolumn = @queue_item_width
+			addrow = @queue_item_height
+			parentanchor = hcenter
+			datamodel = "[Country.AccessPagedPrivateConstructionQueue(ConstructionPanel.AccessCurrentPrivateConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry), ConstructionPanel.GetFilter)]"
+
+			item = {
+				construction_queue_item = {}
+			}
+		}
+
+		widget = {
+		    name = "v3qt_progress_timer"
+		    size = { 1 1 }
+		    alwaystransparent = yes
+		    state = {
+		        name = v3qt_watch_progress
+		        trigger_when = "[And(QtBusy(Country, ConstructionPanel), Not(GetVariableSystem.HasValue('v3qt_timer', Concatenate3(QtTicket('v3qt_generation', 'v3qt_remaining'), ':', GetVariableSystem.Get('v3qt_refresh_row')))))]"
+		        on_start = "[PdxGuiWidget.TriggerAnimation('v3qt_restart_watchdog')]"
+		    }
+		    state = {
+			name = v3qt_cursor_advanced
+			on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(QtBusy(Country, ConstructionPanel), Not(GetVariableSystem.HasValue('v3qt_timer', Concatenate3(QtTicket('v3qt_generation', 'v3qt_remaining'), ':', GetVariableSystem.Get('v3qt_refresh_row'))))), 'v3qt_restart_watchdog', 'v3qt_idle'))]"
+		}
+		    state = {
+			name = v3qt_restart_watchdog
+			on_start = "[PdxGuiWidget.InterruptThenTriggerAnimation('v3qt_expire_stalled_move', 'v3qt_rearm_watchdog')]"
+		}
+		    state = {
+			name = v3qt_rearm_watchdog
+			on_start = "[GetVariableSystem.Set('v3qt_timer', Concatenate3(QtTicket('v3qt_generation', 'v3qt_remaining'), ':', GetVariableSystem.Get('v3qt_refresh_row')))]"
+			on_start = "[PdxGuiWidget.TriggerAnimation('v3qt_expire_stalled_move')]"
+		}
+		    state = {
+		        name = v3qt_expire_stalled_move
+		        duration = 5 # HMPS: was 3; MP latency headroom
+		        alpha = 0
+		        on_finish = "[PdxGuiWidget.TriggerAnimation(Select_CString(QtBusy(Country, ConstructionPanel), Select_CString(GetVariableSystem.HasValue('v3qt_timer', Concatenate3(QtTicket('v3qt_generation', 'v3qt_remaining'), ':', GetVariableSystem.Get('v3qt_refresh_row'))), 'v3qt_abort', 'v3qt_rearm_watchdog'), 'v3qt_idle'))]"
+		    }
+		    state = { name = v3qt_idle position = { 0 0 } }
+		    state = {
+			name = v3qt_abort
+			on_start = "[GetScriptedGui('v3qt_abort_if_stalled').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('job', QtScopeVal('v3qt_generation')).AddScope('expected', QtScopeVal('v3qt_remaining')).End)]"
+		}
+		}
+
+		widget = {
+		    name = "v3qt_queue_edge_worker"
+		    size = { 1 1 }
+		    alwaystransparent = yes
+		    fixedgridbox = {
+		        addcolumn = 1
+		        addrow = 1
+		        size = { 1 1 }
+		        alwaystransparent = yes
+		        datamodel = "[DataModelSubSpan(AccessPlayer.AccessGovernmentConstructionQueue, '(int32)0', Select_int32(And(QtMoving(Country, ConstructionPanel), QtSet('v3qt_jump')), QtQueueSize(AccessPlayer), '(int32)0'))]"
+		        item = {
+		            widget = {
+		                size = { 1 1 }
+		                alwaystransparent = yes
+						state = {
+						    name = v3qt_read_destination
+						    trigger_when = "[And(And(QtMoving(Country, ConstructionPanel), QtSet('v3qt_jump')), And(Not(QtSet('v3qt_mapped')), And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_to')), Or(EqualTo_int32(QtDiff('v3qt_total', 'v3qt_remaining'), '(int32)0'), QtHasSlot(Select_int32(EqualTo_int32(QtDiff('v3qt_total', 'v3qt_remaining'), '(int32)0'), QtVar('v3qt_to'), QtStep(Subtract_int32(QtDiff('v3qt_total', 'v3qt_remaining'), '(int32)1'))))))))]"
+						    on_start = "[GetScriptedGui('v3qt_map_target').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('index', MakeScopeValue(IntToFixedPoint(ConstructionQueueElement.GetIndex))).AddScope('position', MakeScopeValue(IntToFixedPoint(ConstructionQueueElement.GetQueueNumber))).AddScope('expected', QtScopeVal('v3qt_remaining')).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+						}
+						state = {
+						    name = v3qt_odd_ready
+						    trigger_when = "[And(And(And(QtMoving(Country, ConstructionPanel), QtSet('v3qt_jump')), And(QtSet('v3qt_mapped'), Not(QtSent('v3qt_generation', 'v3qt_remaining')))), And(IsOdd_int32(QtVar('v3qt_remaining')), And(ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer, And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_from')), And(QtHasSlot(QtStep(QtDiff('v3qt_total', 'v3qt_remaining'))), IsValid(ConstructionQueueElement.MoveToIndex(QtVar('v3qt_mapped'))))))))]"
+						    on_start = "[PdxGuiWidget.TriggerAnimation('v3qt_dispatch')]"
+						}
+						state = {
+						    name = v3qt_even_ready
+						    trigger_when = "[And(And(And(QtMoving(Country, ConstructionPanel), QtSet('v3qt_jump')), And(QtSet('v3qt_mapped'), Not(QtSent('v3qt_generation', 'v3qt_remaining')))), And(IsEven_int32(QtVar('v3qt_remaining')), And(ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer, And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_from')), And(QtHasSlot(QtStep(QtDiff('v3qt_total', 'v3qt_remaining'))), IsValid(ConstructionQueueElement.MoveToIndex(QtVar('v3qt_mapped'))))))))]"
+						    on_start = "[PdxGuiWidget.TriggerAnimation('v3qt_dispatch')]"
+						}
+						state = {
+							name = v3qt_dispatch
+							on_start = "[GetVariableSystem.Set('v3qt_expected', ConstructionQueueElement.GetBuilding.GetIDString)]"
+							on_start = "[GetVariableSystem.Set('v3qt_sent', QtTicket('v3qt_generation', 'v3qt_remaining'))]"
+							on_start = "[Execute(ConstructionQueueElement.MoveToIndex(QtVar('v3qt_mapped')))]"
+							on_start = "[GetScriptedGui('v3qt_submitted').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('expected', QtScopeVal('v3qt_remaining')).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+						}
+						state = {
+						        name = v3qt_ack_odd
+						        trigger_when = "[And(And(And(QtMoving(Country, ConstructionPanel), QtSet('v3qt_jump')), And(QtSent('v3qt_generation', 'v3qt_remaining'), And(EqualTo_int32(QtVar('v3qt_submitted'), QtVar('v3qt_remaining')), And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_to')), GetVariableSystem.HasValue('v3qt_expected', ConstructionQueueElement.GetBuilding.GetIDString))))), IsOdd_int32(QtVar('v3qt_remaining')))]"
+						        on_start = "[GetScriptedGui('v3qt_acknowledge').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('expected', QtScopeVal('v3qt_remaining')).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+						    }
+						state = {
+						        name = v3qt_ack_even
+						        trigger_when = "[And(And(And(QtMoving(Country, ConstructionPanel), QtSet('v3qt_jump')), And(QtSent('v3qt_generation', 'v3qt_remaining'), And(EqualTo_int32(QtVar('v3qt_submitted'), QtVar('v3qt_remaining')), And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_to')), GetVariableSystem.HasValue('v3qt_expected', ConstructionQueueElement.GetBuilding.GetIDString))))), IsEven_int32(QtVar('v3qt_remaining')))]"
+						        on_start = "[GetScriptedGui('v3qt_acknowledge').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('expected', QtScopeVal('v3qt_remaining')).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+						    }
+		            }
+		        }
+		    }
+		}
+
+		state = {
+		    name = v3qt_begin_refresh
+		    trigger_when = "[And(QtSettling(Country, ConstructionPanel), Not(GetVariableSystem.Exists('v3qt_refresh_row')))]"
+		    on_start = "[GetVariableSystem.Set('v3qt_refresh_row', ToString_int32(Add_int32('(int32)1', Multiply_int32(Subtract_int32(QtPage(ConstructionPanel), '(int32)1'), QtPageLen(ConstructionPanel)))))]"
+		}
+		state = {
+		    name = v3qt_commit_refresh
+		    trigger_when = "[And(QtSettling(Country, ConstructionPanel), GetVariableSystem.HasValue('v3qt_refresh_row', ToString_int32(Add_int32(Min_int32(QtQueueSize(AccessPlayer), Multiply_int32(QtPage(ConstructionPanel), QtPageLen(ConstructionPanel))), '(int32)1'))))]"
+		    on_start = "[GetVariableSystem.Toggle('v3qt_bank_b')]"
+		    on_start = "[GetScriptedGui('v3qt_finish_refresh').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+		    on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+		    on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+		}
+
+		# GOVERNMENT CONSTRUCTION QUEUE
+
+		fixedgridbox = {
+			visible = "[And(ConstructionPanel.IsShowingGovernmentConstructions, Not(IsDataModelEmpty(Country.AccessPagedGovernmentConstructionQueue(QtPage(ConstructionPanel), ConstructionPanel.GetFilter))))]"
+			addcolumn = @queue_item_width
+			addrow = @queue_item_height
+			parentanchor = hcenter
+			datamodel = "[Country.AccessPagedGovernmentConstructionQueue(QtPage(ConstructionPanel), ConstructionPanel.GetFilter)]"
+
+			item = {
+				widget = {
+				    size = { @queue_item_width @queue_item_height }
+				    state = {
+				    name = v3qt_read_destination
+				    trigger_when = "[And(And(QtMoving(Country, ConstructionPanel), Not(QtSet('v3qt_jump'))), And(Not(QtSet('v3qt_mapped')), And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_to')), QtHasSlot(Select_int32(EqualTo_int32(QtDiff('v3qt_total', 'v3qt_remaining'), '(int32)0'), QtVar('v3qt_to'), QtStep(Subtract_int32(QtDiff('v3qt_total', 'v3qt_remaining'), '(int32)1')))))))]"
+				    on_start = "[GetScriptedGui('v3qt_map_target').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('index', MakeScopeValue(IntToFixedPoint(ConstructionQueueElement.GetIndex))).AddScope('position', MakeScopeValue(IntToFixedPoint(ConstructionQueueElement.GetQueueNumber))).AddScope('expected', QtScopeVal('v3qt_remaining')).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+				}
+				state = {
+				    name = v3qt_odd_ready
+				    trigger_when = "[And(And(And(QtMoving(Country, ConstructionPanel), Not(QtSet('v3qt_jump'))), And(QtSet('v3qt_mapped'), Not(QtSent('v3qt_generation', 'v3qt_remaining')))), And(IsOdd_int32(QtVar('v3qt_remaining')), And(ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer, And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_from')), And(QtHasSlot(QtStep(QtDiff('v3qt_total', 'v3qt_remaining'))), IsValid(ConstructionQueueElement.MoveToIndex(QtVar('v3qt_mapped'))))))))]"
+				    on_start = "[PdxGuiWidget.TriggerAnimation('v3qt_dispatch')]"
+				}
+				state = {
+				    name = v3qt_even_ready
+				    trigger_when = "[And(And(And(QtMoving(Country, ConstructionPanel), Not(QtSet('v3qt_jump'))), And(QtSet('v3qt_mapped'), Not(QtSent('v3qt_generation', 'v3qt_remaining')))), And(IsEven_int32(QtVar('v3qt_remaining')), And(ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer, And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_from')), And(QtHasSlot(QtStep(QtDiff('v3qt_total', 'v3qt_remaining'))), IsValid(ConstructionQueueElement.MoveToIndex(QtVar('v3qt_mapped'))))))))]"
+				    on_start = "[PdxGuiWidget.TriggerAnimation('v3qt_dispatch')]"
+				}
+				state = {
+					name = v3qt_dispatch
+					on_start = "[GetVariableSystem.Set('v3qt_expected', ConstructionQueueElement.GetBuilding.GetIDString)]"
+					on_start = "[GetVariableSystem.Set('v3qt_sent', QtTicket('v3qt_generation', 'v3qt_remaining'))]"
+					on_start = "[Execute(ConstructionQueueElement.MoveToIndex(QtVar('v3qt_mapped')))]"
+					on_start = "[GetScriptedGui('v3qt_submitted').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('expected', QtScopeVal('v3qt_remaining')).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+				}
+				state = {
+				        name = v3qt_ack_odd
+				        trigger_when = "[And(And(And(QtMoving(Country, ConstructionPanel), Not(QtSet('v3qt_jump'))), And(QtSent('v3qt_generation', 'v3qt_remaining'), And(EqualTo_int32(QtVar('v3qt_submitted'), QtVar('v3qt_remaining')), And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_to')), GetVariableSystem.HasValue('v3qt_expected', ConstructionQueueElement.GetBuilding.GetIDString))))), IsOdd_int32(QtVar('v3qt_remaining')))]"
+				        on_start = "[GetScriptedGui('v3qt_acknowledge').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('expected', QtScopeVal('v3qt_remaining')).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+				    }
+				state = {
+				        name = v3qt_ack_even
+				        trigger_when = "[And(And(And(QtMoving(Country, ConstructionPanel), Not(QtSet('v3qt_jump'))), And(QtSent('v3qt_generation', 'v3qt_remaining'), And(EqualTo_int32(QtVar('v3qt_submitted'), QtVar('v3qt_remaining')), And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_to')), GetVariableSystem.HasValue('v3qt_expected', ConstructionQueueElement.GetBuilding.GetIDString))))), IsEven_int32(QtVar('v3qt_remaining')))]"
+				        on_start = "[GetScriptedGui('v3qt_acknowledge').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('expected', QtScopeVal('v3qt_remaining')).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+				    }
+				    state = {
+				    name = v3qt_record_reordered_row
+				    trigger_when = "[And(QtSettling(Country, ConstructionPanel), And(GetVariableSystem.HasValue('v3qt_refresh_row', ToString_int32(ConstructionQueueElement.GetQueueNumber)), QtHasSlot(Select_int32(QtInSel(ConstructionQueueElement.GetQueueNumber), Add_int32(QtVar('v3qt_previous_first'), Subtract_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_first'))), Select_int32(And(GreaterThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, Min_int32(QtVar('v3qt_previous_first'), QtVar('v3qt_first'))), LessThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, Max_int32(QtVar('v3qt_previous_last'), QtVar('v3qt_last')))), Select_int32(LessThan_int32(QtVar('v3qt_first'), QtVar('v3qt_previous_first')), Subtract_int32(ConstructionQueueElement.GetQueueNumber, Add_int32('(int32)1', QtDiff('v3qt_last', 'v3qt_first'))), Add_int32(ConstructionQueueElement.GetQueueNumber, Add_int32('(int32)1', QtDiff('v3qt_last', 'v3qt_first')))), ConstructionQueueElement.GetQueueNumber)))))]"
+				    on_start = "[GetVariableSystem.Set(Concatenate(Select_CString(GetVariableSystem.Exists('v3qt_bank_b'), 'v3qt_slot_a_', 'v3qt_slot_b_'), ToString_int32(ConstructionQueueElement.GetQueueNumber)), ConstructionQueueElement.GetBuilding.GetIDString)]"
+				    on_start = "[GetVariableSystem.Set('v3qt_refresh_row', ToString_int32(Add_int32(ConstructionQueueElement.GetQueueNumber, '(int32)1')))]"
+				    on_start = "[PdxGuiTriggerAllAnimations('v3qt_cursor_advanced')]"
+				}
+				    state = {
+					name = v3qt_capture_slot
+					on_start = "[GetVariableSystem.Set(QtSlotKey(ConstructionQueueElement.GetQueueNumber), ConstructionQueueElement.GetBuilding.GetIDString)]"
+				}
+				    state = {
+					name = v3qt_register_building
+					on_start = "[GetScriptedGui('v3qt_watch_building').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('building', ConstructionQueueElement.GetBuilding.MakeScope).End)]"
+				}
+				    state = {
+				        name = v3qt_slot_changed
+				        trigger_when = "[And(QtLive(Country, ConstructionPanel), And(EqualTo_int32(QtVar('v3qt_remaining'), '(int32)0'), And(Not(GetVariableSystem.Exists('v3qt_sent')), And(GreaterThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, Add_int32('(int32)1', Multiply_int32(Subtract_int32(QtPage(ConstructionPanel), '(int32)1'), QtPageLen(ConstructionPanel)))), And(LessThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, Min_int32(QtQueueSize(AccessPlayer), Multiply_int32(QtPage(ConstructionPanel), QtPageLen(ConstructionPanel)))), Not(QtHasSlot(ConstructionQueueElement.GetQueueNumber)))))))]"
+				        on_start = "[GetScriptedGui('v3qt_invalidate_idle').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('job', QtScopeVal('v3qt_generation')).End)]"
+				    }
+				    v3qt_native_government_row = {
+				        visible = "[Not(And(QtGovView(Country, ConstructionPanel), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer))]"
+				        enabled = "[And(Not(And(QtGovView(Country, ConstructionPanel), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer)), Not(QtBusy(Country, ConstructionPanel)))]"
+				    }
+				    v3qt_government_row = {
+				        visible = "[And(QtGovView(Country, ConstructionPanel), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer)]"
+				        enabled = "[And(And(QtGovView(Country, ConstructionPanel), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer), Not(QtBusy(Country, ConstructionPanel)))]"
+				    }
+					flowcontainer = {
+					    name = "v3qt_landing_footprint"
+					    parentanchor = top|left
+					    widgetanchor = top|left
+					    direction = vertical
+					    spacing = 0
+					    ignoreinvisible = yes
+					    alwaystransparent = yes
+					    visible = "[And(QtLive(Country, ConstructionPanel), And(Not(QtBusy(Country, ConstructionPanel)), And(And(GetVariableSystem.Exists('v3qt_hover'), Not(GetVariableSystem.HasValue('v3qt_hover', ''))), And(GetVariableSystem.HasValue('v3qt_drag_first', ToString_int32(QtVar('v3qt_first'))), GetVariableSystem.HasValue('v3qt_drag_last', ToString_int32(QtVar('v3qt_last')))))))]"
+					    datamodel = "[DataModelSubSpan(AccessPlayer.AccessGovernmentConstructionQueue, Max_int32('(int32)0', Subtract_int32(QtVar('v3qt_first'), '(int32)1')), Select_int32(And(QtLive(Country, ConstructionPanel), And(Not(QtBusy(Country, ConstructionPanel)), And(And(GetVariableSystem.Exists('v3qt_hover'), Not(GetVariableSystem.HasValue('v3qt_hover', ''))), And(GetVariableSystem.HasValue('v3qt_drag_first', ToString_int32(QtVar('v3qt_first'))), GetVariableSystem.HasValue('v3qt_drag_last', ToString_int32(QtVar('v3qt_last'))))))), Add_int32(QtDiff('v3qt_last', 'v3qt_first'), '(int32)1'), '(int32)0'))]"
+					    item = {
+					        widget = {
+					            visible = "[GetVariableSystem.HasValue('v3qt_landing_first', ToString_int32(Subtract_int32(Add_int32(Add_int32('(int32)1', Multiply_int32(Subtract_int32(QtPage(ConstructionPanel), '(int32)1'), QtPageLen(ConstructionPanel))), PdxGuiWidget.AccessParent.AccessParent.GetIndexInDataModel), PdxGuiWidget.GetIndexInDataModel)))]"
+					            size = { @queue_item_width @queue_item_height }
+					            alwaystransparent = yes
+					            background = {
+					                texture = "gfx/interface/backgrounds/white.dds"
+					                color = { 0.09 0.22 0.24 1 }
+					            }
+					            icon = {
+					                size = { 4 100% }
+					                texture = "gfx/interface/backgrounds/white.dds"
+					                color = { 0.45 0.86 0.94 1 }
+					                alwaystransparent = yes
+					            }
+					            icon = {
+					                position = { 14 0 }
+					                parentanchor = left|vcenter
+					                size = { 30 30 }
+					                texture = "[ConstructionQueueElement.GetBuilding.GetIcon]"
+					                alwaystransparent = yes
+					            }
+					            textbox = {
+					                position = { 54 0 }
+					                parentanchor = left|vcenter
+					                autoresize = yes
+					                max_width = 372
+					                elide = right
+					                align = left|nobaseline
+					                text = "CONSTRUCTION_QUEUE_BUILDING_IN_STATE"
+					                alwaystransparent = yes
+					            }
+					            textbox = {
+					                visible = "[EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_first'))]"
+					                position = { -10 0 }
+					                parentanchor = right|vcenter
+					                align = right|nobaseline
+					                autoresize = yes
+					                text = "[SelectLocalization(EqualTo_int32(QtVar('v3qt_first'), QtVar('v3qt_last')), 'V3QT_LANDING_RANK', 'V3QT_LANDING_RANKS')]"
+					                alwaystransparent = yes
+					            }
+					            v3qr_insertion_line = {
+					                parentanchor = top|left
+					                visible = "[EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_first'))]"
+					            }
+					            v3qr_insertion_line = {
+					                parentanchor = bottom|left
+					                visible = "[EqualTo_int32(ConstructionQueueElement.GetQueueNumber, QtVar('v3qt_last'))]"
+					            }
+					        }
+					    }
+					}
+				}
+			}
+		}
+
+		widget = {
+		    name = "v3qt_queue_help_footer"
+		    visible = "[And(QtGovView(Country, ConstructionPanel), Or(Not(GetVariableSystem.Exists('v3qt_help_compact')), GetVariableSystem.Exists('v3qt_help_dismiss_requested')))]"
+		    size = { 270 48 }
+		    parentanchor = hcenter
+		    margin_top = 12
+		    margin_bottom = 6
+		    using = tooltip_ne
+		    tooltipwidget = {
+		        v3qt_help_tooltip = {}
+		    }
+		    widget = {
+		        size = { 42 42 }
+		        parentanchor = left|vcenter
+		        alwaystransparent = yes
+		        background = {
+		            texture = "gfx/interface/buttons/round_button_small_bg.dds"
+		        }
+		        icon = {
+		            size = { 100% 100% }
+		            texture = "gfx/interface/buttons/round_button_small_frame.dds"
+		            alwaystransparent = yes
+		        }
+		        textbox = {
+		            parentanchor = center
+		            autoresize = yes
+		            raw_text = "?"
+		            using = fontsize_mega
+		            default_format = "#title"
+		            alwaystransparent = yes
+		        }
+		    }
+		    textbox = {
+		        position = { 52 0 }
+		        parentanchor = left|vcenter
+		        autoresize = yes
+		        text = "V3QT_QUEUE_HELP_LABEL"
+		        using = fontsize_large
+		        default_format = "#title"
+		        alwaystransparent = yes
+		    }
+		}
+
+		empty_state = {
+			blockoverride "visible" {
+				visible = "[Not(Country.HasConstructionQueued)]"
+			}
+			blockoverride "text" {
+				text = "CONSTRUCTION_QUEUE_IS_EMPTY"
+			}
+		}
+	}
+
+	type construction_queue_item = widget {
+		size = { @queue_item_width @queue_item_height }
+		datacontext = "[ConstructionQueueElement.GetBuilding]"
+		alwaystransparent = no
+
+		# Map Highlight
+		onmousehierarchyenter = "[AccessHighlightManager.HighlightState(ConstructionQueueElement.GetState)]"
+		onmousehierarchyleave = "[AccessHighlightManager.RemoveHighlight]"
+
+		# Show more UI elements
+		onmousehierarchyenter = "[PdxGuiWidget.FindChild('building_goto').InterruptThenTriggerAnimation('hide_building_goto','show_building_goto')]"
+		onmousehierarchyleave = "[PdxGuiWidget.FindChild('building_goto').InterruptThenTriggerAnimation('show_building_goto','hide_building_goto')]"
+
+		# player government construction
+		background = {
+			using = visible_if_cqe_player_government
+			using = fade_right_entry_header_colored
+			color = "[GetDefine('NGUI','BUILDING_OWNERSHIP_COLOR_PLAYER_GOVERNMENT')]"
+		}
+
+		# player private construction
+		background = {
+			visible = "[And( ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer, ConstructionQueueElement.IsPrivatelyFundedConstruction)]"
+			using = fade_right_entry_header_colored
+			color = "[GetDefine('NGUI','BUILDING_OWNERSHIP_COLOR_PLAYER_POPS')]"
+		}
+
+		# foreign bg
+		background = {
+			visible = "[Not(ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer)]"
+			using = fade_right_entry_header_colored
+			color = "[GetDefine('NGUI','BUILDING_OWNERSHIP_COLOR_OTHER_COUNTRIES_GOVERNMENT')]"
+		}
+
+		hbox = {
+			layoutpolicy_horizontal = expanding
+			layoutpolicy_vertical = expanding
+			spacing = 5
+
+			block "v3qr_grip" {}
+
+			block "v3qt_rank" {
+				textbox = {
+					name = "place_in_queue"
+					autoresize = yes
+					align = right|nobaseline
+					raw_text = "##[ConstructionQueueElement.GetQueueNumber]"
+					min_width = 25
+				}
+			}
+
+			construction_queue_goto_building = {
+				name = "constructed_building"
+				datacontext = "[ConstructionQueueElement.AccessBuilding]"
+				tooltip = "GO_TO_BUTTON_BUILDING"
+			}
+
+			margin_widget = {
+				name = "progress_and_name"
+				layoutpolicy_horizontal = expanding
+				layoutpolicy_vertical = expanding
+				margin = { 0 8 }
+
+				margin_widget = {
+					size = { 100% 100% }
+					margin_right = 4 #the default progressbar leaks out to the right by 4 pixels...
+
+					default_progressbar_horizontal = {
+						datacontext = "[ConstructionQueueElement.GetBuilding]"
+						size = { 100% 100% }
+						tooltip = "[ConstructionQueueElement.GetTooltip]"
+
+						blockoverride "values" {
+							value = "[ConstructionQueueElement.CalcPercentComplete]"
+							min = 0
+							max = 1
+						}
+
+						construction_queue_item_texts = {
+							visible = "[GreaterThanOrEqualTo_CFixedPoint(ConstructionQueueElement.GetBuilding.GetState.GetConstructionEfficiencyForBuildingType(ConstructionQueueElement.GetBuilding.GetBuildingType), '(CFixedPoint)0')]"
+						}
+
+						construction_queue_item_texts = {
+							visible = "[LessThan_CFixedPoint(ConstructionQueueElement.GetBuilding.GetState.GetConstructionEfficiencyForBuildingType(ConstructionQueueElement.GetBuilding.GetBuildingType), '(CFixedPoint)0')]"
+							blockoverride "default_format" {
+								default_format = "#n"
+							}
+						}
+					}
+
+					background = {
+						visible = "[GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0')]"
+						using = paper_bg
+						margin_right = -4
+					}
+				}
+
+				flowcontainer = {
+					position = { 8 0 }
+					parentanchor = vcenter
+					spacing = 8
+
+					textbox = {
+						autoresize = yes
+						align = left|nobaseline
+						parentanchor = vcenter
+						max_width = 200
+						elide = right
+						fontsize_min = 14
+						text = "CONSTRUCTION_QUEUE_BUILDING_IN_STATE"
+					}
+
+					button_icon_goto = {
+						parentanchor = vcenter
+						alpha = 0
+						name = building_goto
+						size = { 25 25 }
+						onclick = "[InformationPanelBar.OpenBuildingDetailsPanel(ConstructionQueueElement.AccessBuilding)]"
+						tooltip = "GO_TO_BUTTON_BUILDING"
+
+						state = {
+							name = show_building_goto
+							delay = 0.15
+							alpha = 1
+							duration = 0.15
+							using = Animation_Curve_Default
+						}
+
+						state = {
+							name = hide_building_goto
+							alpha = 0
+							duration = 0
+							using = Animation_Curve_Default
+						}
+					}
+				}
+
+				textbox = {
+					visible = "[Not(ConstructionQueueElement.IsValidConstruction)]"
+					position = { -8 0 }
+					autoresize = yes
+					align = right|nobaseline
+					parentanchor = vcenter|right
+					raw_text = "@red_cross!"
+					tooltip = "[ConstructionQueueElement.GetTooltip]"
+				}
+			}
+
+			### PRIVATE CONSTRUCTION
+			widget = {
+				name = "private_construction_parent"
+				using = visible_if_cqe_private
+				size = { 35 35 }
+
+				# The investor building does exist
+				construction_queue_goto_building = {
+					name = "private_investor_building_actual"
+					visible = "[ConstructionQueueElement.GetInvestorBuilding.IsValid]"
+					datacontext = "[ConstructionQueueElement.GetInvestorBuilding]"
+					using = tooltip_es
+
+					tooltipwidget = {
+						FancyTooltip_Building = {
+							blockoverride "text_before" {
+								text =  "CONSTRUCTION_QUEUE_PRIVATE_INVESTMENT_TT"
+								margin_bottom = 15
+							}
+						}
+					}
+				}
+
+				# The investor building will be created when construction finishes
+				icon = {
+					datacontext = "[ConstructionQueueElement.GetInvestorBuildingType]"
+					datacontext = "[ConstructionQueueElement.GetInvestorState]"
+					size = { 35 35 }
+					visible = "[Not(ConstructionQueueElement.GetInvestorBuilding.IsValid)]"
+					texture = "[BuildingType.GetIcon]"
+					using = tooltip_es
+					tooltip = CONSTRUCTION_QUEUE_PRIVATE_INVESTMENT_VIRTUAL_BUILDING_TT
+				}
+
+				# Private Investment Icon
+				icon = {
+					texture = "gfx/interface/icons/generic_icons/privately_owned_building_icon.dds"
+					size = { 25 25 }
+					parentanchor = bottom|right
+					position = { 5 5 }
+					alwaystransparent = yes
+				}
+			}
+
+			### FOREIGN GOVERNMENT CONSTRUCTION
+			icon = {
+				name = "foreign_government_construction"
+				texture = "gfx/interface/icons/generic_icons/government_building_icon.dds"
+				size = { 35 35 }
+				using = visible_if_cqe_foreign_government
+				tooltip = CONSTRUCTION_QUEUE_FOREIGN_GOVERNMENT_CONSTRUCTION_TT
+			}
+
+			### PLAYER GOVERNMENT CONSTRUCTION
+			button_icon_round_action = {
+				name = "queue_move_up"
+				using = visible_if_cqe_player_government
+				size = { 30 30 }
+				tooltip = "[SelectLocalization(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first'))), 'V3QT_UP', 'V3QT_SINGLE_UP')]"
+				enabled = "[Or(And(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first'))), GreaterThan_int32(QtVar('v3qt_first'), '(int32)1')),And(Not(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first')))), IsValid(ConstructionQueueElement.MoveUp)))]" # Assumption is that it needs to be able to be moved up in order to be moved to the top also
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/generic_icons/up_up.dds"
+				}
+
+				blockoverride "icon_size" {
+					size = { 75% 75% }
+				}
+
+				click_modifiers = {
+					ondefault = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first'))), 'v3qt_group_step', 'v3qt_single_step'))]"
+					onalt = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first'))), 'v3qt_group_edge', 'v3qt_single_edge'))]"
+				}
+				state = {
+					name = v3qt_single_step
+					on_start = "[Execute( ConstructionQueueElement.MoveUp )]"
+					on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				}
+				state = {
+					name = v3qt_single_edge
+					on_start = "[Execute( ConstructionQueueElement.MoveToTop )]"
+					on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				}
+				state = {
+					name = v3qt_group_step
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetScriptedGui('v3qt_move').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('destination', MakeScopeValue(IntToFixedPoint(Select_int32(GreaterThan_int32(QtVar('v3qt_first'), Add_int32('(int32)1', Multiply_int32(Subtract_int32(QtPage(ConstructionPanel), '(int32)1'), QtPageLen(ConstructionPanel)))), Subtract_int32(QtVar('v3qt_first'), '(int32)1'), QtVar('v3qt_first'))))).AddScope('size', MakeScopeValue(IntToFixedPoint(QtQueueSize(AccessPlayer)))).End)]"
+				}
+				state = {
+					name = v3qt_group_edge
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetScriptedGui('v3qt_jump').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('destination', MakeScopeValue(IntToFixedPoint('(int32)1'))).AddScope('size', MakeScopeValue(IntToFixedPoint(QtQueueSize(AccessPlayer)))).AddScope('crosspage', MakeScopeValue(IntToFixedPoint(Select_int32(GreaterThan_int32(Add_int32('(int32)1', Multiply_int32(Subtract_int32(QtPage(ConstructionPanel), '(int32)1'), QtPageLen(ConstructionPanel))), '(int32)1'), '(int32)1', '(int32)0')))).End)]"
+				}
+			}
+
+			button_icon_round_action = {
+				name = "queue_move_down"
+				using = visible_if_cqe_player_government
+				size = { 30 30 }
+				tooltip = "[SelectLocalization(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first'))), 'V3QT_DOWN', 'V3QT_SINGLE_DOWN')]"
+				enabled = "[Or(And(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first'))), LessThan_int32(QtVar('v3qt_last'), QtQueueSize(AccessPlayer))),And(Not(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first')))), IsValid(ConstructionQueueElement.MoveDown)))]" # Assumption is that it needs to be able to be moved down in order to be moved to the bottom also
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/generic_icons/down_down.dds"
+				}
+
+				blockoverride "icon_size" {
+					size = { 75% 75% }
+				}
+
+				click_modifiers = {
+					ondefault = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first'))), 'v3qt_group_step', 'v3qt_single_step'))]"
+					onalt = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(QtSelected(Country, ConstructionPanel, ConstructionQueueElement.GetQueueNumber), GreaterThan_int32(QtVar('v3qt_last'), QtVar('v3qt_first'))), 'v3qt_group_edge', 'v3qt_single_edge'))]"
+				}
+				state = {
+					name = v3qt_single_step
+					on_start = "[Execute( ConstructionQueueElement.MoveDown )]"
+					on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				}
+				state = {
+					name = v3qt_single_edge
+					on_start = "[Execute( ConstructionQueueElement.MoveToBottom )]"
+					on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				}
+				state = {
+					name = v3qt_group_step
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetScriptedGui('v3qt_move').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('destination', MakeScopeValue(IntToFixedPoint(Select_int32(LessThan_int32(QtVar('v3qt_last'), Min_int32(QtQueueSize(AccessPlayer), Multiply_int32(QtPage(ConstructionPanel), QtPageLen(ConstructionPanel)))), Add_int32(QtVar('v3qt_first'), '(int32)1'), QtVar('v3qt_first'))))).AddScope('size', MakeScopeValue(IntToFixedPoint(QtQueueSize(AccessPlayer)))).End)]"
+				}
+				state = {
+					name = v3qt_group_edge
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetScriptedGui('v3qt_jump').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('destination', MakeScopeValue(IntToFixedPoint(Subtract_int32(QtQueueSize(AccessPlayer), QtDiff('v3qt_last', 'v3qt_first'))))).AddScope('size', MakeScopeValue(IntToFixedPoint(QtQueueSize(AccessPlayer)))).AddScope('crosspage', MakeScopeValue(IntToFixedPoint(Select_int32(LessThan_int32(Min_int32(QtQueueSize(AccessPlayer), Multiply_int32(QtPage(ConstructionPanel), QtPageLen(ConstructionPanel))), QtQueueSize(AccessPlayer)), '(int32)1', '(int32)0')))).End)]"
+				}
+			}
+
+			button_icon_cancel = {
+				name = "cancel_construction"
+				using = visible_if_cqe_player_government
+				size = { 30 30 }
+				tooltip = "CANCEL_CONSTRUCTION"
+				enabled = "[IsValid( ConstructionQueueElement.CancelConstruction )]"
+				onclick = "[GetVariableSystem.Clear('v3qt_session')]"
+				onclick = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				onclick = "[Execute( ConstructionQueueElement.CancelConstruction )]"
+			}
+		}
+	}
+
+	type construction_queue_goto_building = button {
+		onclick = "[InformationPanelBar.OpenBuildingDetailsPanel(Building.AccessSelf)]"
+		onrightclick = "[RightClickMenuManager.ShowForBuilding(Building.AccessSelf)]"
+		size = { 35 35 }
+		texture = "[Building.GetIcon]"
+		using = tooltip_above
+	}
+}
+
+template visible_if_cqe_player_government
+{
+	visible = "[And( ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer, Not(ConstructionQueueElement.IsPrivatelyFundedConstruction))]"
+}
+
+template visible_if_cqe_foreign_government
+{
+	visible = "[And( Not(ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer), Not(ConstructionQueueElement.IsPrivatelyFundedConstruction))]"
+}
+
+template visible_if_cqe_private
+{
+	visible = "[ConstructionQueueElement.IsPrivatelyFundedConstruction]"
+}
+
+
+types construction_queue {
+	type construction_queue_item_texts = widget {
+		size = { 100% 100% }
+		textbox = {
+			visible = "[GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0')]"
+			parentanchor = right|vcenter
+			align = right|nobaseline
+			position = { -70 0 }
+			autoresize = yes
+			text = "CONSTRUCTION_QUEUE_ELEMENT_ALLOCATION"
+			block "default_format" {}
+		}
+
+		textbox = {
+			visible = "[And(ConstructionQueueElement.IsValidConstruction, Not(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0')))]"
+			parentanchor = right|vcenter
+			align = right|nobaseline
+			position = { -8 0 }
+			max_width = 70
+			autoresize = yes
+			elide = right
+			fontsize_min = 12
+			text = "QUEUED"
+			alpha = "[TransparentIfFalse(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0'))]"
+			block "default_format" {}
+		}
+
+		textbox = {
+			position = { -8 0 }
+			visible = "[ConstructionQueueElement.IsCurrentlyUnderConstruction]"
+			text = "CONSTRUCTION_WEEKS_LEFT_SHORT"
+			parentanchor = right|vcenter
+			autoresize = yes
+			align = right|nobaseline
+			alpha = "[TransparentIfFalse(GreaterThan_CFixedPoint(ConstructionQueueElement.GetConstructionSpeed, '(CFixedPoint)0'))]"
+			block "default_format" {}
+		}
+	}
+}
+

@@ -173,3 +173,337 @@ rc_top_importers_sgui = {
 		}
 	}
 }
+
+# HMPS: construction queue tools (freethebrain, Workshop 3837831783); global observer removed for MP
+# The screen supplies one-based, unfiltered government queue positions.
+# The identifiers below are temporary country variables used only by the UI.
+v3qt_select = {
+    scope = country
+    saved_scopes = { row size }
+    effect = {
+        v3qt_clear_selection = yes
+        set_variable = { name = v3qt_anchor value = scope:row }
+        set_variable = { name = v3qt_first value = scope:row }
+        set_variable = { name = v3qt_last value = scope:row }
+        set_variable = { name = v3qt_size value = scope:size }
+    }
+}
+
+v3qt_extend = {
+    scope = country
+    saved_scopes = { row size }
+    effect = {
+        if = {
+            limit = { has_variable = v3qt_anchor var:v3qt_size = scope:size }
+            if = {
+                limit = { scope:row < var:v3qt_anchor }
+                set_variable = { name = v3qt_first value = scope:row }
+                set_variable = { name = v3qt_last value = var:v3qt_anchor }
+            }
+            else = {
+                set_variable = { name = v3qt_first value = var:v3qt_anchor }
+                set_variable = { name = v3qt_last value = scope:row }
+            }
+        }
+        # A completion can invalidate the anchor between the physical Shift
+        # click and this command. Leave the range cleared until a fresh pick.
+        else = { v3qt_clear_selection = yes }
+    }
+}
+
+v3qt_clear = {
+    scope = country
+    effect = {
+        if = {
+            limit = { has_variable = v3qt_anchor }
+            v3qt_clear_selection = yes
+        }
+    }
+}
+
+# These entry points are used by GUI idle interactions. Their conditions are
+# checked when the command executes, not only when the GUI queued it.
+# Keep unconditional clear separate for explicit cancellation and context loss.
+v3qt_select_idle = {
+    scope = country
+    saved_scopes = { row size job }
+    effect = {
+        if = {
+            limit = {
+                NOT = { has_variable = v3qt_remaining }
+                NOT = { has_variable = v3qt_refreshing }
+                OR = {
+                    AND = { NOT = { has_variable = v3qt_generation } scope:job = 0 }
+                    AND = { has_variable = v3qt_generation var:v3qt_generation = scope:job }
+                }
+            }
+            v3qt_clear_selection = yes
+            set_variable = { name = v3qt_anchor value = scope:row }
+            set_variable = { name = v3qt_first value = scope:row }
+            set_variable = { name = v3qt_last value = scope:row }
+            set_variable = { name = v3qt_size value = scope:size }
+        }
+    }
+}
+
+v3qt_extend_idle = {
+    scope = country
+    saved_scopes = { row size job }
+    effect = {
+        if = {
+            limit = {
+                NOT = { has_variable = v3qt_remaining }
+                NOT = { has_variable = v3qt_refreshing }
+                has_variable = v3qt_generation
+                var:v3qt_generation = scope:job
+            }
+            if = {
+                limit = { has_variable = v3qt_anchor var:v3qt_size = scope:size }
+                if = {
+                    limit = { scope:row < var:v3qt_anchor }
+                    set_variable = { name = v3qt_first value = scope:row }
+                    set_variable = { name = v3qt_last value = var:v3qt_anchor }
+                }
+                else = {
+                    set_variable = { name = v3qt_first value = var:v3qt_anchor }
+                    set_variable = { name = v3qt_last value = scope:row }
+                }
+                v3qt_advance_generation = yes
+            }
+            else = { v3qt_clear_selection = yes }
+        }
+    }
+}
+
+v3qt_invalidate_idle = {
+    scope = country
+    saved_scopes = { job }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_anchor
+                has_variable = v3qt_generation
+                var:v3qt_generation = scope:job
+                NOT = { has_variable = v3qt_remaining }
+                NOT = { has_variable = v3qt_refreshing }
+            }
+            v3qt_clear_selection = yes
+        }
+    }
+}
+
+# GUI snapshot banks are committed only after every displayed row agrees.
+# Keep idle callbacks locked out until that barrier has completed.
+v3qt_finish_refresh = {
+    scope = country
+    saved_scopes = { job }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_refreshing
+                has_variable = v3qt_generation
+                var:v3qt_generation = scope:job
+                NOT = { has_variable = v3qt_remaining }
+            }
+            remove_variable = v3qt_refreshing
+        }
+    }
+}
+
+v3qt_watch_building = {
+    scope = country
+    saved_scopes = { building }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_anchor
+                exists = scope:building
+                NOT = { is_target_in_variable_list = { name = v3qt_buildings target = scope:building } }
+            }
+            add_to_variable_list = { name = v3qt_buildings target = scope:building }
+        }
+    }
+}
+
+# The GUI timer checks the page cursor before issuing this command. Recheck
+# the attempt and step here as the command can arrive after another action.
+v3qt_abort_if_stalled = {
+    scope = country
+    saved_scopes = { job expected }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_anchor
+                has_variable = v3qt_generation
+                var:v3qt_generation = scope:job
+                OR = {
+                    AND = { has_variable = v3qt_remaining var:v3qt_remaining = scope:expected }
+                    AND = {
+                        scope:expected = 0
+                        NOT = { has_variable = v3qt_remaining }
+                        has_variable = v3qt_previous_first
+                    }
+                }
+            }
+            v3qt_clear_selection = yes
+        }
+    }
+}
+
+v3qt_move = {
+    scope = country
+    saved_scopes = { destination size }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_anchor
+                var:v3qt_size = scope:size
+                NOT = { has_variable = v3qt_remaining }
+                NOT = { has_variable = v3qt_refreshing }
+            }
+            set_variable = { name = v3qt_new_first value = scope:destination }
+            v3qt_plan_rotation = yes
+        }
+    }
+}
+
+# Whole-queue Alt arrows reuse the normal page move when the edge is visible.
+# Across pages, moving the block's last member repeatedly to the top, or its
+# first member repeatedly to the bottom, preserves its internal order.
+v3qt_jump = {
+    scope = country
+    saved_scopes = { destination size crosspage }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_anchor
+                var:v3qt_size = scope:size
+                NOT = { has_variable = v3qt_remaining }
+                NOT = { has_variable = v3qt_refreshing }
+            }
+            set_variable = { name = v3qt_new_first value = scope:destination }
+            v3qt_plan_rotation = yes
+            if = {
+                limit = { scope:crosspage = 1 has_variable = v3qt_remaining }
+                set_variable = { name = v3qt_jump value = 1 }
+                if = {
+                    limit = { var:v3qt_new_first < var:v3qt_first }
+                    set_variable = { name = v3qt_from value = var:v3qt_last }
+                    set_variable = { name = v3qt_to value = 1 }
+                }
+                else = {
+                    set_variable = { name = v3qt_from value = var:v3qt_first }
+                    set_variable = { name = v3qt_to value = var:v3qt_size }
+                }
+                set_variable = { name = v3qt_remaining value = var:v3qt_width }
+                set_variable = { name = v3qt_total value = var:v3qt_width }
+            }
+        }
+    }
+}
+
+v3qt_drop = {
+    scope = country
+    saved_scopes = { source target size }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_anchor
+                var:v3qt_size = scope:size
+                NOT = { has_variable = v3qt_remaining }
+                NOT = { has_variable = v3qt_refreshing }
+            }
+            if = {
+                limit = { OR = { scope:source < var:v3qt_first scope:source > var:v3qt_last } }
+                set_variable = { name = v3qt_first value = scope:source }
+                set_variable = { name = v3qt_last value = scope:source }
+                set_variable = { name = v3qt_anchor value = scope:source }
+            }
+            if = {
+                limit = { scope:target < var:v3qt_first }
+                set_variable = { name = v3qt_new_first value = scope:target }
+                v3qt_plan_rotation = yes
+            }
+            else_if = {
+                limit = { scope:target > var:v3qt_last }
+                set_variable = { name = v3qt_new_first value = scope:target }
+                change_variable = { name = v3qt_new_first subtract = var:v3qt_last }
+                change_variable = { name = v3qt_new_first add = var:v3qt_first }
+                v3qt_plan_rotation = yes
+            }
+        }
+    }
+}
+
+v3qt_map_target = {
+    scope = country
+    saved_scopes = { index position expected job }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_remaining
+                var:v3qt_generation = scope:job
+                var:v3qt_remaining = scope:expected
+                NOT = { has_variable = v3qt_mapped }
+                scope:position = var:v3qt_to
+            }
+            set_variable = { name = v3qt_mapped value = scope:index }
+        }
+    }
+}
+
+# Enqueued after the native move. This also gives moves between two levels
+# of the same building a simulation-side fence before their acknowledgement.
+v3qt_submitted = {
+    scope = country
+    saved_scopes = { expected job }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_remaining
+                var:v3qt_remaining = scope:expected
+                var:v3qt_generation = scope:job
+            }
+            set_variable = { name = v3qt_submitted value = scope:expected }
+        }
+    }
+}
+
+v3qt_acknowledge = {
+    scope = country
+    saved_scopes = { expected job }
+    effect = {
+        if = {
+            limit = {
+                has_variable = v3qt_remaining
+                var:v3qt_remaining = scope:expected
+                var:v3qt_generation = scope:job
+                has_variable = v3qt_submitted
+                var:v3qt_submitted = scope:expected
+            }
+            change_variable = { name = v3qt_remaining subtract = 1 }
+            remove_variable = v3qt_mapped
+            remove_variable = v3qt_submitted
+            if = {
+                limit = { var:v3qt_remaining = 0 has_variable = v3qt_jump }
+                # The view stays on its original page. Its temporary selection
+                # ends once every selected project has reached the queue edge.
+                v3qt_clear_selection = yes
+            }
+            else_if = {
+                limit = { var:v3qt_remaining = 0 }
+                # Preserve the old bounds until all GUI rows can validate the
+                # reordered page. The next successful move overwrites them.
+                set_variable = { name = v3qt_previous_first value = var:v3qt_first }
+                set_variable = { name = v3qt_previous_last value = var:v3qt_last }
+                change_variable = { name = v3qt_anchor add = var:v3qt_new_first }
+                change_variable = { name = v3qt_anchor subtract = var:v3qt_first }
+                change_variable = { name = v3qt_last add = var:v3qt_new_first }
+                change_variable = { name = v3qt_last subtract = var:v3qt_first }
+                set_variable = { name = v3qt_first value = var:v3qt_new_first }
+                v3qt_clear_job = yes
+                set_variable = { name = v3qt_refreshing value = 1 }
+            }
+        }
+    }
+}

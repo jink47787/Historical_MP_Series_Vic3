@@ -27,3 +27,105 @@ macro = {
 	definition = "TradePartnersGetRankValue(Owner, Prefix, Index)"
 	replace_with = "Owner.MakeScope.Var(Concatenate(Prefix, ToString_int32(Index))).GetValue"
 }
+
+# HMPS: construction queue tools (freethebrain)
+macro = {
+	description = "Player country variable QtName as int32, 0 if unset"
+	definition = "QtVar(QtName)"
+	replace_with = "FixedPointToInt(GetPlayer.MakeScope.Var(QtName).GetValueWithDefault('(CFixedPoint)0'))"
+}
+macro = {
+	description = "Player country variable QtName exists"
+	definition = "QtSet(QtName)"
+	replace_with = "GetPlayer.MakeScope.Var(QtName).IsSet"
+}
+macro = {
+	description = "Player variable QtFirstName minus QtSecondName"
+	definition = "QtDiff(QtFirstName, QtSecondName)"
+	replace_with = "Subtract_int32(QtVar(QtFirstName), QtVar(QtSecondName))"
+}
+macro = {
+	description = "Position QtOffset steps from v3qt_from toward v3qt_to"
+	definition = "QtStep(QtOffset)"
+	replace_with = "Select_int32(GreaterThan_int32(QtVar('v3qt_from'), QtVar('v3qt_to')), Subtract_int32(QtVar('v3qt_from'), QtOffset), Add_int32(QtVar('v3qt_from'), QtOffset))"
+}
+macro = {
+	description = "Player country variable QtName as a scripted GUI scope value"
+	definition = "QtScopeVal(QtName)"
+	replace_with = "MakeScopeValue(IntToFixedPoint(QtVar(QtName)))"
+}
+macro = {
+	description = "Two player variables joined as 'first:second'"
+	definition = "QtTicket(QtFirstName, QtSecondName)"
+	replace_with = "Concatenate3(ToString_int32(QtVar(QtFirstName)), ':', ToString_int32(QtVar(QtSecondName)))"
+}
+macro = {
+	description = "The step ticketed by QtFirstName:QtSecondName was already sent"
+	definition = "QtSent(QtFirstName, QtSecondName)"
+	replace_with = "GetVariableSystem.HasValue('v3qt_sent', QtTicket(QtFirstName, QtSecondName))"
+}
+macro = {
+	description = "Current government construction queue page"
+	definition = "QtPage(QtPanel)"
+	replace_with = "QtPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry)"
+}
+macro = {
+	description = "Entries per government queue page"
+	definition = "QtPageLen(QtPanel)"
+	replace_with = "GetDataModelSize(AccessPlayer.AccessPagedGovernmentConstructionQueue('(int32)1', QtPanel.GetFilter))"
+}
+macro = {
+	description = "Number of entries in the government construction queue"
+	definition = "QtQueueSize(QtPlayer)"
+	replace_with = "GetDataModelSize(QtPlayer.AccessGovernmentConstructionQueue)"
+}
+macro = {
+	description = "Local player is viewing the unfiltered government queue"
+	definition = "QtGovView(QtCountry, QtPanel)"
+	replace_with = "And(QtCountry.IsLocalPlayer, And(QtPanel.IsShowingGovernmentConstructions, Not(QtPanel.IsFiltered('is_domestic'))))"
+}
+macro = {
+	description = "A selection is active on this page and the queue size still matches it"
+	definition = "QtLive(QtCountry, QtPanel)"
+	replace_with = "And(GetVariableSystem.Exists('v3qt_session'), And(QtGovView(QtCountry, QtPanel), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(QtPage(QtPanel))), And(QtSet('v3qt_anchor'), EqualTo_int32(QtQueueSize(AccessPlayer), QtVar('v3qt_size'))))))"
+}
+macro = {
+	description = "Queue position QtRow lies inside the selection"
+	definition = "QtInSel(QtRow)"
+	replace_with = "And(GreaterThanOrEqualTo_int32(QtRow, QtVar('v3qt_first')), LessThanOrEqualTo_int32(QtRow, QtVar('v3qt_last')))"
+}
+macro = {
+	description = "Live selection contains queue position QtRow"
+	definition = "QtSelected(QtCountry, QtPanel, QtRow)"
+	replace_with = "And(QtLive(QtCountry, QtPanel), QtInSel(QtRow))"
+}
+macro = {
+	description = "A block move still has steps left"
+	definition = "QtMoving(QtCountry, QtPanel)"
+	replace_with = "And(QtLive(QtCountry, QtPanel), GreaterThan_int32(QtVar('v3qt_remaining'), '(int32)0'))"
+}
+macro = {
+	description = "The last step was sent and the queue has not caught up yet"
+	definition = "QtSettling(QtCountry, QtPanel)"
+	replace_with = "And(QtLive(QtCountry, QtPanel), And(EqualTo_int32(QtVar('v3qt_remaining'), '(int32)0'), GetVariableSystem.Exists('v3qt_sent')))"
+}
+macro = {
+	description = "A move or refresh is in progress"
+	definition = "QtBusy(QtCountry, QtPanel)"
+	replace_with = "Or(QtMoving(QtCountry, QtPanel), Or(QtSettling(QtCountry, QtPanel), QtSet('v3qt_refreshing')))"
+}
+macro = {
+	description = "Selection edge QtName while dragging the selection, else the dragged row"
+	definition = "QtDragEdge(QtName)"
+	replace_with = "Select_int32(GetVariableSystem.HasValue('v3qt_drag_mode', 'selection'), QtVar(QtName), GetDraggedDatacontext('ConstructionQueueElement').GetQueueNumber)"
+}
+macro = {
+	description = "Name of the current refresh-bank slot for queue position QtIdx"
+	definition = "QtSlotKey(QtIdx)"
+	replace_with = "Concatenate(Select_CString(GetVariableSystem.Exists('v3qt_bank_b'), 'v3qt_slot_b_', 'v3qt_slot_a_'), ToString_int32(QtIdx))"
+}
+macro = {
+	description = "Refresh-bank slot QtIdx holds this row's building"
+	definition = "QtHasSlot(QtIdx)"
+	replace_with = "GetVariableSystem.HasValue(QtSlotKey(QtIdx), ConstructionQueueElement.GetBuilding.GetIDString)"
+}
