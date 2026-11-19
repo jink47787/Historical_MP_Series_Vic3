@@ -5,7 +5,7 @@
 
  ### Concepts
  concept_specie_famine:0 "Specie Famine"
- concept_specie_famine_desc:0 "A [concept_specie_famine] is a run on a [concept_market]’s foreign reserves: the gold and silver that pay for its imports. It can strike a player who leads a [concept_market] while that [concept_market] runs a [concept_balance_of_trade] deficit of at least #v 4%#! of [concept_gdp]. The monthly chance grows with the deficit, from #v 1 in 120#! at 4% to #v 1 in 6#! at 12% or more, and is #N ten times#! higher for #v 2 months#! after another [concept_market]’s famine ends in collapse. A [concept_market] can only suffer one at a time, and not within #v 5 years#! of the last.\n\nThe reserves start at #v 10 weeks#! of the [concept_market]’s imports, and every week the [concept_market]’s [concept_balance_of_trade] drains or refills them. Every country in the [concept_market] shares the crisis and its modifiers, but only the leader can act: raise the Bank Rate, pay from the treasury, or, in a war that has cost it 100,000 casualties, suspend convertibility.\n\n#bold Passes#! with #v 26 weeks#! of imports in reserve, or #v 26 weeks#! of surplus in a row, with specie payments in force. There is no reward.\n#bold Fails#! if the reserves run out: trade halts, imports collapse, the upper and middle strata radicalize and credit stays dear for #v 30 months#!, across the whole [concept_market]. A leader that joins another [concept_market] also fails, but suffers alone.\n\nOnce the holder of the [concept_reserve_currency] has researched #v Mutual Funds#!, it can no longer suffer one."
+ concept_specie_famine_desc:0 "A [concept_specie_famine] is a run on a [concept_market]’s foreign reserves: the gold and silver that pay for its imports. It can strike a player who leads a [concept_market] while that [concept_market] runs a [concept_balance_of_trade] deficit of at least #v 4%#! of [concept_gdp]. The monthly chance grows with the deficit, from #v 1 in 120#! at 4% to #v 1 in 6#! at 12% or more, and is #N ten times#! higher for #v 2 months#! after another [concept_market]’s famine ends in collapse. A [concept_market] can only suffer one at a time, and not within #v 5 years#! of the last.[AddLocalizationIf(GetPlayer.IsValid,'SF_IF_PRE_1837')]\n\nThe reserves start at #v 10 weeks#! of the [concept_market]’s imports, and every week the [concept_market]’s [concept_balance_of_trade] drains or refills them. Every country in the [concept_market] shares the crisis and its modifiers, but only the leader can act: raise the Bank Rate, pay from the treasury, or, in a war that has cost it 100,000 casualties, suspend convertibility.\n\n#bold Passes#! with #v 26 weeks#! of imports in reserve, or #v 26 weeks#! of surplus in a row, with specie payments in force. There is no reward.\n#bold Fails#! if the reserves run out: trade halts, imports collapse, the upper and middle strata radicalize and credit stays dear for #v 30 months#!, across the whole [concept_market]. A leader that joins another [concept_market] also fails, but suffers alone.\n\nOnce the holder of the [concept_reserve_currency] has researched #v Mutual Funds#!, it can no longer suffer one."
  concept_reserve_currency:0 "Reserve Currency"
  concept_reserve_currency_desc:0 "The [concept_reserve_currency] is the money the world keeps its reserves in. Only one country holds it at a time.\n\n$RC_RULES$[AddLocalizationIf(GetPlayer.IsValid,'concept_reserve_currency_desc_added')]"
  concept_reserve_currency_desc_added:0 "[AddLocalizationIf(GetGlobalVariable('reserve_currency_holder').IsSet,'RC_CURRENT_HOLDER_LINE')]"
@@ -40,11 +40,21 @@
  HMPS_RC_MARKET_PANEL_VACANT:0 "[concept_reserve_currency]: #v vacant#!"
  HMPS_RC_MARKET_PANEL_VACANT_TT:0 "#header [concept_reserve_currency]#!\nNo country holds it.\n$RC_VACANT_CANDIDATE$\n$HMPS_LONG_DELIMITER$\n$RC_TOP_IMPORTERS$\n$HMPS_LONG_DELIMITER$\n$RC_RULES$"
 
+ # HMPS: 1837 start date, shown only before it (sf_crises_active)
+ SF_IF_PRE_1837:0 "[AddLocalizationIf(LessThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('sf_crises_active'),'(CFixedPoint)0.5'),'SF_NOT_BEFORE_1837')]"
+ SF_NOT_BEFORE_1837:0 " Not before #v 1837#!."
+ SF_IF_PRE_1837_PAREN:0 "[AddLocalizationIf(LessThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('sf_crises_active'),'(CFixedPoint)0.5'),'SF_NOT_BEFORE_1837_PAREN')]"
+ SF_NOT_BEFORE_1837_PAREN:0 " (not before #v 1837#!)"
+
  # Balance of Trade warning, read from the shown market's owner
- HMPS_SF_RISK:0 "#N Specie Famine Possible!#!"
- HMPS_SF_RISK_TT:0 "#header [concept_specie_famine]#!\nThis [concept_market] runs a [concept_balance_of_trade] deficit of at least #v 4%#! of [concept_gdp], so a player-led [concept_market] risks a [concept_specie_famine]. The greater your deficit, the more the risk. The holder of the [concept_reserve_currency] is immune once it has researched #v Mutual Funds#!."
- HMPS_IP_RISK:0 "#yellow Inflationary Period Possible#!"
- HMPS_IP_RISK_TT:0 "#header Inflationary Period#!\nThis [concept_market] runs a [concept_balance_of_trade] surplus of at least #v 4%#! of [concept_gdp], so its leader risks an Inflationary Period, at most once every #v 6 months#! and never during a [concept_specie_famine]. The greater your surplus, the more the risk."
+ HMPS_SF_RISK:0 "[AddLocalizationIf(LessThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('sf_crises_active'),'(CFixedPoint)0.5'),'HMPS_SF_RISK_EARLY')][AddLocalizationIf(GreaterThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('sf_crises_active'),'(CFixedPoint)0.5'),'HMPS_SF_RISK_ACTIVE')]"
+ HMPS_SF_RISK_ACTIVE:0 "#N Specie Famine Possible!#!"
+ HMPS_SF_RISK_EARLY:0 "#grey Specie Famine Possible from 1837#!"
+ HMPS_SF_RISK_TT:0 "#header [concept_specie_famine]#!\nThis [concept_market] runs a [concept_balance_of_trade] deficit of at least #v 4%#! of [concept_gdp], so a player-led [concept_market] risks a [concept_specie_famine]. The greater your deficit, the more the risk.$SF_IF_PRE_1837$ The holder of the [concept_reserve_currency] is immune."
+ HMPS_IP_RISK:0 "[AddLocalizationIf(LessThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('sf_crises_active'),'(CFixedPoint)0.5'),'HMPS_IP_RISK_EARLY')][AddLocalizationIf(GreaterThan_CFixedPoint(GetPlayer.MakeScope.ScriptValue('sf_crises_active'),'(CFixedPoint)0.5'),'HMPS_IP_RISK_ACTIVE')]"
+ HMPS_IP_RISK_ACTIVE:0 "#yellow Inflationary Period Possible#!"
+ HMPS_IP_RISK_EARLY:0 "#grey Inflationary Period Possible from 1837#!"
+ HMPS_IP_RISK_TT:0 "#header Inflationary Period#!\nThis [concept_market] runs a [concept_balance_of_trade] surplus of at least #v 4%#! of [concept_gdp], so its leader risks an Inflationary Period, at most once every #v 6 months#! and never during a [concept_specie_famine]. The greater your surplus, the more the risk.$SF_IF_PRE_1837$"
 
 
  ### Specie Famine: figures (GetPlayer is the leader or a member; the values read the leader's reserves for both)
