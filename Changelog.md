@@ -55,9 +55,12 @@ Thanks to Yyyman for his Italy company changes.
 #### Hardwood
 - Hardwood is back as its own resource: Hardwood Forestry can be built in 208 states, and hardwood is used by Builders' Yards
 #### Trade
-- New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -100% at 20%) and the other side gains 2.5% per 1% (up to +50%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
+- New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -50% at 10%) and the other side gains 2.5% per 1% (up to +25%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
 #### Reserve Currency
 - New Reserve Currency: only one country holds it, and only the top Great Power can, once it has researched Mutual Funds and leads its own market, so it starts vacant. It takes it after its market runs a Balance of Trade deficit above 1% of GDP for 180 days in a row, and loses it after 90 days out of first place or without that deficit. A default loses it at once and bars the country for 2 years. The holder gets +15% wages, +250 prestige, -1.5% loan interest and +15% trade advantage, doubled with International Exchange Standards, and can't suffer a Specie Famine
+#### Specie Famine & Inflationary Period
+- New Specie Famine: from 1837, a player-led market with a Balance of Trade deficit of 4% of GDP or more can suffer a run on its gold and silver reserves, more likely the bigger the deficit. Only the market leader can act: raise the Bank Rate, pay from the treasury, or suspend convertibility during a costly war. If the reserves run out, trade halts and the whole market suffers for 30 months
+- New Inflationary Period: from 1837, a market with a surplus of 4% of GDP or more can have one. Its leader chooses for the whole market for 24 months: allow inflation (-15% wages) or constrict the money supply (+25% import advantage, -25% export advantage, -10% throughput and dearer loans)
 #### Guano
 - Guano works like gold: deposits are discovered over time and run out, and Guano Harvestries are placed automatically on known deposits instead of being built. In 1836 only Peru's coast is known
 #### Infrastructure
@@ -353,9 +356,7 @@ Thanks to Yyyman for his Italy company changes.
 - Synthetic oil plants can no longer be built by private investors
 - Railroad Bubble: Relief Works gives +3% wages for 12 months, "Regulate the exchanges" needs 75 legitimacy, and the Railway King appears in half of all bubbles
 - Suez Canal Company only needs a level 5 trade center or port somewhere and no longer gives tax income when prosperous
-- Specie Famines and Inflationary Periods can't start before 1 January 1837; a player-led market can roll for a Specie Famine in any month its balance-of-trade deficit is at least 4% of GDP
 - Atacama Desert no longer has the -10% construction efficiency malus
-- Inflationary Period: Money Supply Constricted no longer gives -10% wages, and adds +3% loan interest (was +2%)
 - The Taj Mahal's second production method was removed
 - Artillery Foundry and Basic Port take less input to offset building materials upkeep: Bronze Cannons use 10 hardwood (was 15), Bronze Smoothbores 15 (was 20), and Basic Port clippers 4 (was 6)
 - Construction Fittings: Bare Finish gives no construction points; its 0.5 moves into the Foundations methods (Timber 2.0, Brick and Lime 5.0, Concrete 8.0, Piles and Caissons 11.0). Windows and Pipes gives 2.0 points and Electric Lifts 4.0, so each era's best combination keeps the same total. Construction sector throughput shows one decimal place, so the 0.5% Fittings steps are visible
