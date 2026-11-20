@@ -57,7 +57,7 @@ Thanks to Yyyman for his Italy company changes.
 #### Trade
 - New Balance of Trade mechanic: a market's exports minus imports is measured as a share of its GDP. Past 1% of GDP either way, the side that is ahead loses 5% trade advantage per 1% (up to -100% at 20%) and the other side gains 2.5% per 1% (up to +50%). A surplus lowers export advantage and raises import advantage; a deficit does the reverse. Updated weekly, and every country in the market gets the same effect
 #### Reserve Currency
-- New Reserve Currency: one market at a time holds it. Only a Great Power whose market runs a Balance of Trade deficit can take it: a rival takes it over once its market has out-imported the holder's for 6 months in a row, and a vacant Reserve Currency goes to the top importer among them the same way. A holder whose market goes 6 months in a row without a deficit loses it, and it stays vacant until someone qualifies. A holder that stops being a Great Power loses it at once. The holder gets +25% trade advantage
+- New Reserve Currency: only one country holds it, and only the top Great Power can, once it has researched Mutual Funds and leads its own market, so it starts vacant. It takes it after its market runs a Balance of Trade deficit above 1% of GDP for 180 days in a row, and loses it after 90 days out of first place or without that deficit. A default loses it at once and bars the country for 2 years. The holder gets +15% wages, +250 prestige, -1.5% loan interest and +15% trade advantage, doubled with International Exchange Standards, and can't suffer a Specie Famine
 #### Guano
 - Guano works like gold: deposits are discovered over time and run out, and Guano Harvestries are placed automatically on known deposits instead of being built. In 1836 only Peru's coast is known
 #### Infrastructure
@@ -89,7 +89,7 @@ Thanks to Yyyman for his Italy company changes.
 
 ## UI
 - Topbar shows the market's Balance of Trade in place of Prestige, with a graph of the last 52 weeks in its tooltip; the market panel shows the market's exports, imports and balance
-- New Reserve Currency alerts in the topbar, next to the vanilla alerts: green when your market is about to take it or it is vacant and yours qualifies, red when you hold it and a rival is about to take it or your surplus is about to lose it. Each shows the days left, and clicking it opens the market panel
+- New Reserve Currency alerts in the topbar, next to the vanilla alerts: green when your market is about to take it, red when you hold it and are about to lose it from falling out of first place or losing your deficit. Each shows the days left, and clicking it opens the market panel
 - New Specie Famine (red) and Inflationary Period (yellow) alerts in the topbar, shown to every market: they appear while the market's trade balance lets one start, and hide during its cooldown. Clicking either opens the market panel
 
 ## Stability/Bug Fixes
@@ -355,7 +355,6 @@ Thanks to Yyyman for his Italy company changes.
 - Suez Canal Company only needs a level 5 trade center or port somewhere and no longer gives tax income when prosperous
 - Specie Famines and Inflationary Periods can't start before 1 January 1837; a player-led market can roll for a Specie Famine in any month its balance-of-trade deficit is at least 4% of GDP
 - Atacama Desert no longer has the -10% construction efficiency malus
-- Reserve Currency holder gets +25% trade advantage (the same as Free Trade) at every tier, in place of +10% for imports and -10% for exports
 - Inflationary Period: Money Supply Constricted no longer gives -10% wages, and adds +3% loan interest (was +2%)
 - The Taj Mahal's second production method was removed
 - Artillery Foundry and Basic Port take less input to offset building materials upkeep: Bronze Cannons use 10 hardwood (was 15), Bronze Smoothbores 15 (was 20), and Basic Port clippers 4 (was 6)
@@ -406,6 +405,6 @@ Thanks to Yyyman for his Italy company changes.
 - Ledger Markets list: Imports column comes before Exports, number columns are centered, and "Net exports" is renamed "Balance" so the header is no longer cut off
 - Ledger Markets list: clicking the Imports, Exports or Balance header sorts by that column (first click largest first, second click smallest first); the sorted order refreshes weekly
 - The market panel's "Specie Famine Possible!" warning no longer shows for the Reserve Currency holder once it has researched Mutual Funds, as it is immune to Specie Famines
-- Reserve Currency tooltips (market panel and alert) list the top 5 importing markets that could hold it, ranked monthly, with the holder's and challengers' months marked, plus your market's weekly imports. The market panel says "(you)" when you hold it
+- The market panel shows who holds the Reserve Currency, with its rules in the tooltip, and says "(you)" when you hold it
 
 ## Stability/Bug Fixes

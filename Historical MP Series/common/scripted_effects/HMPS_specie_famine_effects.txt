@@ -395,204 +395,48 @@ ip_apply_to_members = {
 }
 
 ### Reserve Currency
-# Global variables: reserve_currency_holder (the holder; unset while vacant), rc_previous_holder (for the change notice),
-# rc_top_challenger (for loc), rc_vacant_candidate and rc_vacant_months (while vacant). Each challenger counts its own rc_challenge_months.
-# The holder counts rc_surplus_months, its months in a row without a deficit.
-# Taking it (a challenge, a vacant status, or a handover) needs rc_can_take: a Great Power with Mutual Funds whose market runs a deficit.
-# Keeping it needs rc_can_hold, which also needs Great Power rank
+# Global variables: reserve_currency_holder (unset while vacant) and rc_previous_holder (for the change notice).
+# Countdowns are timed variables shown with GetVarTimeRemaining, each with a flag that outlasts it, so the weekly check sees it run out:
+# rc_gaining / rc_gain_days (180 days), rc_not_first / rc_not_first_days (90 days), rc_no_deficit / rc_no_deficit_days (90 days)
 
-# No scope needed. Applies the tiered modifiers: rc_market_N to every country in the holder's market, rc_holder_N to the holder.
-# rc_market_tier_applied / rc_holder_tier_applied remember the tier given, so modifiers only change when the tier or the market does
+# No scope needed. Gives the holder rc_holder_N for its tier and takes it from everyone else
 rc_refresh_modifiers = {
 	every_country = {
 		limit = {
-			OR = {
-				has_variable = rc_market_tier_applied
-				has_variable = rc_holder_tier_applied
-				rc_desired_market_tier > 0
-				rc_desired_holder_tier > 0
-			}
+			NOT = { rc_desired_holder_tier = rc_holder_tier_applied_value }
 		}
+		remove_modifier = rc_holder_1
+		remove_modifier = rc_holder_2
 		if = {
-			limit = {
-				NOT = { rc_desired_market_tier = rc_market_tier_applied_value }
-			}
-			remove_modifier = rc_market_1
-			remove_modifier = rc_market_2
-			if = {
-				limit = { rc_desired_market_tier = 1 }
-				add_modifier = { name = rc_market_1 }
-			}
-			else_if = {
-				limit = { rc_desired_market_tier = 2 }
-				add_modifier = { name = rc_market_2 }
-			}
-			if = {
-				limit = { rc_desired_market_tier > 0 }
-				set_variable = { name = rc_market_tier_applied value = rc_desired_market_tier }
-			}
-			else = {
-				remove_variable = rc_market_tier_applied
-			}
-		}
-		if = {
-			limit = {
-				NOT = { rc_desired_holder_tier = rc_holder_tier_applied_value }
-			}
-			remove_modifier = rc_holder_1
-			remove_modifier = rc_holder_2
-			if = {
-				limit = { rc_desired_holder_tier = 1 }
-				add_modifier = { name = rc_holder_1 }
-			}
-			else_if = {
-				limit = { rc_desired_holder_tier = 2 }
-				add_modifier = { name = rc_holder_2 }
-			}
-			if = {
-				limit = { rc_desired_holder_tier > 0 }
-				set_variable = { name = rc_holder_tier_applied value = rc_desired_holder_tier }
-			}
-			else = {
-				remove_variable = rc_holder_tier_applied
-			}
-		}
-	}
-}
-
-# No scope needed. Ends every challenge, when the holder changes or the status falls vacant
-# (the reserve_currency_*_alert types in common/alert_types/HMPS_alert_types.txt read these variables)
-rc_clear_challenges = {
-	remove_global_variable = rc_top_challenger
-	every_country = {
-		limit = { has_variable = rc_challenge_months }
-		remove_variable = rc_challenge_months
-	}
-}
-
-# No scope needed. Ends the holder's count of months without a deficit, when the holder changes or the status falls vacant
-rc_clear_surplus_count = {
-	every_country = {
-		limit = {
-			OR = {
-				has_variable = rc_surplus_months
-				has_variable = rc_surplus_days
-			}
-		}
-		remove_variable = rc_surplus_months
-		remove_variable = rc_surplus_days
-	}
-}
-
-# No scope needed. scope:rc_new_holder takes over the Reserve Currency
-rc_set_holder = {
-	set_global_variable = { name = reserve_currency_holder value = scope:rc_new_holder }
-	rc_clear_surplus_count = yes
-	remove_global_variable = rc_vacant_candidate
-	remove_global_variable = rc_vacant_months
-	rc_clear_challenges = yes
-	rc_refresh_modifiers = yes
-}
-
-# No scope needed, monthly from rc_monthly_update. Lists the 5 markets with the most imports among the holder's and those
-# whose leaders can take the Reserve Currency (rc_is_listed), best first, in the global list rc_top_importers for the tooltips (rc_top_importers_sgui)
-rc_rank_top_importers = {
-	if = {
-		limit = { has_global_variable_list = rc_top_importers }
-		clear_global_variable_list = rc_top_importers
-	}
-	ordered_country = {
-		limit = { rc_is_listed = yes }
-		order_by = rc_market_imports
-		position = 0
-		check_range_bounds = no
-		add_to_global_variable_list = { name = rc_top_importers target = this }
-	}
-	if = { # HMPS: skip if fewer listed
-		limit = { any_country = { rc_is_listed = yes count >= 2 } }
-		ordered_country = {
-			limit = { rc_is_listed = yes }
-			order_by = rc_market_imports
-			position = 1
-			check_range_bounds = no
-			add_to_global_variable_list = { name = rc_top_importers target = this }
-		}
-	}
-	if = { # HMPS: skip if fewer listed
-		limit = { any_country = { rc_is_listed = yes count >= 3 } }
-		ordered_country = {
-			limit = { rc_is_listed = yes }
-			order_by = rc_market_imports
-			position = 2
-			check_range_bounds = no
-			add_to_global_variable_list = { name = rc_top_importers target = this }
-		}
-	}
-	if = { # HMPS: skip if fewer listed
-		limit = { any_country = { rc_is_listed = yes count >= 4 } }
-		ordered_country = {
-			limit = { rc_is_listed = yes }
-			order_by = rc_market_imports
-			position = 3
-			check_range_bounds = no
-			add_to_global_variable_list = { name = rc_top_importers target = this }
-		}
-	}
-	if = { # HMPS: skip if fewer listed
-		limit = { any_country = { rc_is_listed = yes count >= 5 } }
-		ordered_country = {
-			limit = { rc_is_listed = yes }
-			order_by = rc_market_imports
-			position = 4
-			check_range_bounds = no
-			add_to_global_variable_list = { name = rc_top_importers target = this }
-		}
-	}
-}
-
-# No scope needed, monthly from rc_monthly_update. Keeps rc_takeover_days, a timed variable on every country that is counting
-# towards taking the Reserve Currency; its remaining days are the "day(s)" figure in the alerts and the top importers list
-# (GetVarTimeRemaining). Reset every month from the months counter, so the figure counts down daily and never drifts far
-rc_refresh_countdowns = {
-	every_country = {
-		limit = {
-			OR = {
-				has_variable = rc_challenge_months
-				has_variable = rc_takeover_days
-				global_var:rc_vacant_candidate ?= this
-			}
-		}
-		if = {
-			limit = { has_variable = rc_challenge_months }
-			set_variable = { name = rc_takeover_days value = 1 days = rc_challenge_days_left }
+			limit = { rc_desired_holder_tier = 1 }
+			add_modifier = { name = rc_holder_1 }
 		}
 		else_if = {
-			limit = {
-				global_var:rc_vacant_candidate ?= this
-				has_global_variable = rc_vacant_months
-			}
-			set_variable = { name = rc_takeover_days value = 1 days = rc_vacant_days_left }
-		}
-		else = {
-			remove_variable = rc_takeover_days
-		}
-	}
-	# The same for the holder's months without a deficit: rc_surplus_days counts down to the day it loses the Reserve Currency
-	every_country = {
-		limit = {
-			OR = {
-				has_variable = rc_surplus_months
-				has_variable = rc_surplus_days
-			}
+			limit = { rc_desired_holder_tier = 2 }
+			add_modifier = { name = rc_holder_2 }
 		}
 		if = {
-			limit = { has_variable = rc_surplus_months }
-			set_variable = { name = rc_surplus_days value = 1 days = rc_surplus_days_left }
+			limit = { rc_desired_holder_tier > 0 }
+			set_variable = { name = rc_holder_tier_applied value = rc_desired_holder_tier }
 		}
 		else = {
-			remove_variable = rc_surplus_days
+			remove_variable = rc_holder_tier_applied
 		}
 	}
+}
+
+# Country scope. Ends its countdown to taking the Reserve Currency
+rc_clear_gain_timer = {
+	remove_variable = rc_gaining
+	remove_variable = rc_gain_days
+}
+
+# Country scope. Ends its countdowns to losing the Reserve Currency
+rc_clear_loss_timers = {
+	remove_variable = rc_not_first
+	remove_variable = rc_not_first_days
+	remove_variable = rc_no_deficit
+	remove_variable = rc_no_deficit_days
 }
 
 # No scope needed. Tells every player who holds the Reserve Currency now: popup reserve_currency.1 for the new and previous holder, a notification for the rest
@@ -634,186 +478,158 @@ rc_notify_vacant = {
 	}
 }
 
-# No scope needed, from on_game_started_after_lobby, or the first monthly update of a save that predates the Reserve Currency.
-# The status starts vacant: nobody can hold it before Mutual Funds (rc_can_hold)
-rc_initialize = {
-	set_global_variable = rc_initialized
+# No scope needed. scope:rc_new_holder takes over the Reserve Currency
+rc_set_holder = {
+	set_global_variable = { name = reserve_currency_holder value = scope:rc_new_holder }
+	every_country = {
+		limit = {
+			OR = {
+				has_variable = rc_gaining
+				has_variable = rc_not_first
+				has_variable = rc_no_deficit
+			}
+		}
+		rc_clear_gain_timer = yes
+		rc_clear_loss_timers = yes
+	}
+	rc_refresh_modifiers = yes
 }
 
-# No scope needed, from on_monthly_pulse (HMPS_reserve_currency_monthly)
-rc_monthly_update = {
-	if = {
-		limit = { NOT = { has_global_variable = rc_initialized } }
-		rc_initialize = yes
-	}
-	# Lost: the holder was annexed, stopped being a Great Power, went bankrupt or stopped leading its own market.
-	# The Great Power with the most imports among those whose markets run a deficit takes over (rc_can_take), else it falls vacant;
-	# a bankrupt holder can't win it back for 5 years
-	if = {
-		limit = {
-			has_global_variable = reserve_currency_holder
-			NOT = { global_var:reserve_currency_holder ?= { rc_can_hold = yes } }
+# No scope needed. The holder loses the Reserve Currency and it falls vacant
+rc_remove_holder = {
+	remove_global_variable = rc_previous_holder
+	global_var:reserve_currency_holder ?= {
+		rc_clear_loss_timers = yes
+		if = {
+			limit = { is_country_alive = yes }
+			set_global_variable = { name = rc_previous_holder value = this }
 		}
+	}
+	remove_global_variable = reserve_currency_holder
+	rc_refresh_modifiers = yes
+	rc_notify_vacant = yes
+}
+
+# No scope needed, weekly from HMPS_utility_je after the Balance of Trade update (common/journal_entries/z_HMPS_utility.txt)
+rc_weekly_update = {
+	# The holder: loses it at once if it can't hold it (a default also bars it for 2 years),
+	# else after 90 days not #1 or 90 days without a deficit over 1% of GDP
+	if = {
+		limit = { has_global_variable = reserve_currency_holder }
+		if = {
+			limit = {
+				NOT = { global_var:reserve_currency_holder ?= { rc_can_hold = yes } }
+			}
+			global_var:reserve_currency_holder ?= {
+				if = {
+					limit = {
+						is_country_alive = yes
+						in_default = yes
+					}
+					set_variable = { name = rc_barred days = 730 }
+				}
+			}
+			rc_remove_holder = yes
+		}
+		else = {
+			global_var:reserve_currency_holder = {
+				if = {
+					limit = { global_country_ranking = 1 }
+					remove_variable = rc_not_first
+					remove_variable = rc_not_first_days
+				}
+				else_if = {
+					limit = {
+						NOT = { has_variable = rc_not_first }
+					}
+					set_variable = rc_not_first
+					set_variable = { name = rc_not_first_days value = 1 days = 90 }
+				}
+				if = {
+					limit = { rc_has_deficit = yes }
+					remove_variable = rc_no_deficit
+					remove_variable = rc_no_deficit_days
+				}
+				else_if = {
+					limit = {
+						rc_has_no_deficit = yes
+						NOT = { has_variable = rc_no_deficit }
+					}
+					set_variable = rc_no_deficit
+					set_variable = { name = rc_no_deficit_days value = 1 days = 90 }
+				}
+			}
+			if = {
+				limit = {
+					global_var:reserve_currency_holder = {
+						OR = {
+							AND = {
+								has_variable = rc_not_first
+								NOT = { has_variable = rc_not_first_days }
+							}
+							AND = {
+								has_variable = rc_no_deficit
+								NOT = { has_variable = rc_no_deficit_days }
+							}
+						}
+					}
+				}
+				rc_remove_holder = yes
+			}
+		}
+	}
+	# The #1 country takes it after 180 days in a row of rc_can_take
+	every_country = {
+		limit = {
+			OR = {
+				has_variable = rc_gaining
+				global_country_ranking = 1
+			}
+		}
+		if = {
+			limit = {
+				rc_can_take = yes
+				NOT = { global_var:reserve_currency_holder ?= this }
+			}
+			if = {
+				limit = {
+					NOT = { has_variable = rc_gaining }
+				}
+				set_variable = rc_gaining
+				set_variable = { name = rc_gain_days value = 1 days = 180 }
+			}
+			else_if = {
+				limit = {
+					NOT = { has_variable = rc_gain_days }
+				}
+				save_scope_as = rc_new_holder
+			}
+		}
+		else = {
+			rc_clear_gain_timer = yes
+		}
+	}
+	if = {
+		limit = { exists = scope:rc_new_holder }
 		remove_global_variable = rc_previous_holder
 		global_var:reserve_currency_holder ?= {
-			if = {
-				limit = {
-					is_country_alive = yes
-					in_default = yes
-				}
-				set_variable = { name = rc_barred days = 1825 }
-			}
-			if = {
-				limit = { is_country_alive = yes }
-				set_global_variable = { name = rc_previous_holder value = this }
-			}
+			set_global_variable = { name = rc_previous_holder value = this }
 		}
-		remove_global_variable = reserve_currency_holder
-		if = {
-			limit = { any_country = { rc_can_take = yes } }
-			ordered_country = {
-				limit = { rc_can_take = yes }
-				order_by = rc_market_imports
-				save_scope_as = rc_new_holder
-			}
-			rc_set_holder = yes
-			rc_notify_new_holder = yes
-		}
-		else = {
-			rc_clear_challenges = yes
-			rc_clear_surplus_count = yes
-			rc_notify_vacant = yes
-		}
+		rc_set_holder = yes
+		rc_notify_new_holder = yes
 	}
-	# Challenged: a Great Power whose market runs a deficit and out-imports the holder's for 6 months straight.
-	# No deficit: a holder whose market goes 6 months straight without one loses it, and it falls vacant
-	else_if = {
-		limit = { has_global_variable = reserve_currency_holder }
-		global_var:reserve_currency_holder = {
-			save_scope_as = rc_holder_scope
-			if = {
-				limit = { rc_has_no_deficit = yes }
-				if = {
-					limit = { has_variable = rc_surplus_months }
-					change_variable = { name = rc_surplus_months add = 1 }
-				}
-				else = {
-					set_variable = { name = rc_surplus_months value = 1 }
-				}
-			}
-			else_if = {
-				limit = { has_variable = rc_surplus_months }
-				remove_variable = rc_surplus_months
+	rc_refresh_modifiers = yes # HMPS: tier follows tech
+	# HMPS: market panel shows "Vacant" only once the #1 country has Mutual Funds
+	if = {
+		limit = {
+			any_country = {
+				global_country_ranking = 1
+				has_technology_researched = mutual_funds
 			}
 		}
-		every_country = {
-			limit = {
-				OR = {
-					has_variable = rc_challenge_months
-					rc_can_take = yes
-				}
-			}
-			if = {
-				limit = {
-					rc_can_take = yes
-					NOT = { this = scope:rc_holder_scope }
-					rc_market_imports > scope:rc_holder_scope.rc_market_imports
-				}
-				if = {
-					limit = { has_variable = rc_challenge_months }
-					change_variable = { name = rc_challenge_months add = 1 }
-				}
-				else = {
-					set_variable = { name = rc_challenge_months value = 1 }
-				}
-			}
-			else_if = {
-				limit = { has_variable = rc_challenge_months }
-				remove_variable = rc_challenge_months
-			}
-		}
-		if = {
-			limit = {
-				any_country = {
-					has_variable = rc_challenge_months
-					var:rc_challenge_months >= 6
-				}
-			}
-			ordered_country = {
-				limit = {
-					has_variable = rc_challenge_months
-					var:rc_challenge_months >= 6
-				}
-				order_by = rc_market_imports
-				save_scope_as = rc_new_holder
-			}
-			set_global_variable = { name = rc_previous_holder value = scope:rc_holder_scope }
-			rc_set_holder = yes
-			rc_notify_new_holder = yes
-		}
-		# a challenger at 6 months comes first; otherwise the status falls vacant
-		else_if = {
-			limit = {
-				scope:rc_holder_scope = {
-					has_variable = rc_surplus_months
-					var:rc_surplus_months >= 6
-				}
-			}
-			set_global_variable = { name = rc_previous_holder value = scope:rc_holder_scope }
-			remove_global_variable = reserve_currency_holder
-			rc_clear_challenges = yes
-			rc_clear_surplus_count = yes
-			rc_notify_vacant = yes
-		}
-		else_if = {
-			limit = { any_country = { has_variable = rc_challenge_months } }
-			ordered_country = {
-				limit = { has_variable = rc_challenge_months }
-				order_by = rc_challenge_months_value
-				save_scope_as = rc_top_challenger_scope
-			}
-			set_global_variable = { name = rc_top_challenger value = scope:rc_top_challenger_scope }
-		}
-		else = {
-			remove_global_variable = rc_top_challenger
-		}
+		set_global_variable = rc_top_has_mutual_funds
 	}
-	# Vacant: the Great Power with the most imports among those whose markets run a deficit (rc_can_take) takes it
-	# once it has led for 6 months straight
 	else = {
-		if = {
-			limit = { any_country = { rc_can_take = yes } }
-			ordered_country = {
-				limit = { rc_can_take = yes }
-				order_by = rc_market_imports
-				save_scope_as = rc_vacant_top
-			}
-		}
-		if = {
-			limit = { exists = scope:rc_vacant_top }
-			if = {
-				limit = { global_var:rc_vacant_candidate ?= scope:rc_vacant_top }
-				change_global_variable = { name = rc_vacant_months add = 1 }
-			}
-			else = {
-				set_global_variable = { name = rc_vacant_candidate value = scope:rc_vacant_top }
-				set_global_variable = { name = rc_vacant_months value = 1 }
-			}
-			if = {
-				limit = { global_var:rc_vacant_months >= 6 }
-				scope:rc_vacant_top = { save_scope_as = rc_new_holder }
-				remove_global_variable = rc_previous_holder
-				rc_set_holder = yes
-				rc_notify_new_holder = yes
-			}
-		}
-		else = {
-			remove_global_variable = rc_vacant_candidate
-			remove_global_variable = rc_vacant_months
-		}
+		remove_global_variable = rc_top_has_mutual_funds
 	}
-	# Every month: tiers follow the holder's technology and countries joining or leaving its market
-	rc_refresh_modifiers = yes
-	rc_rank_top_importers = yes
-	rc_refresh_countdowns = yes
 }

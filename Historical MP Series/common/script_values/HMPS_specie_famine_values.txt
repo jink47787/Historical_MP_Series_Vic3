@@ -309,16 +309,6 @@ ip_inflation_chance = {
 }
 
 ### Reserve Currency
-# Country scope (a market leader): the market's weekly imports, summed over every member
-# (hmps_balance_of_trade_world_totals_effect keeps this sum on the market owner)
-rc_market_imports = {
-	value = 0
-	if = {
-		limit = { has_variable = hmps_bot_market_imports_weekly }
-		add = var:hmps_bot_market_imports_weekly
-	}
-}
-
 # No scope needed: the current holder's tier. 1 with Mutual Funds (every holder has it), 2 with International Exchange Standards (0 when vacant)
 rc_tier = {
 	value = 0
@@ -334,15 +324,12 @@ rc_tier = {
 	}
 }
 
-# Country scope: the Reserve Currency tier this country's market should get (0 outside the holder's market)
-rc_desired_market_tier = {
-	value = 0
+# Country scope: the tier this country would get if it took it now
+rc_tier_if_we_take = {
+	value = 1
 	if = {
-		limit = {
-			has_global_variable = reserve_currency_holder
-			market.owner ?= global_var:reserve_currency_holder
-		}
-		value = rc_tier
+		limit = { has_technology_researched = international_exchange_standards }
+		value = 2
 	}
 }
 
@@ -358,69 +345,11 @@ rc_desired_holder_tier = {
 	}
 }
 
-# Country scope: the tiers rc_refresh_modifiers last gave this country (0 = none)
-rc_market_tier_applied_value = {
-	value = 0
-	if = {
-		limit = { has_variable = rc_market_tier_applied }
-		value = var:rc_market_tier_applied
-	}
-}
-
+# Country scope: the tier rc_refresh_modifiers last gave this country (0 = none)
 rc_holder_tier_applied_value = {
 	value = 0
 	if = {
 		limit = { has_variable = rc_holder_tier_applied }
 		value = var:rc_holder_tier_applied
-	}
-}
-
-# Country scope: days until this challenger takes the Reserve Currency, for rc_refresh_countdowns. 30 a month still to go,
-# plus 2 so the timer never runs out before the monthly check (the last month ends on 1 to 4 days)
-rc_challenge_days_left = {
-	value = 6
-	subtract = rc_challenge_months_value
-	multiply = 30
-	add = 2
-	min = 2
-}
-
-# No scope needed: the same while the status is vacant, from rc_vacant_months
-rc_vacant_days_left = {
-	value = 6
-	if = {
-		limit = { has_global_variable = rc_vacant_months }
-		subtract = global_var:rc_vacant_months
-	}
-	multiply = 30
-	add = 2
-	min = 2
-}
-
-# Country scope (the holder): months in a row its market has gone without a deficit (6 loses the Reserve Currency)
-rc_surplus_months_value = {
-	value = 0
-	if = {
-		limit = { has_variable = rc_surplus_months }
-		value = var:rc_surplus_months
-	}
-}
-
-# Country scope (the holder): days until it loses the Reserve Currency for want of a deficit, for rc_refresh_countdowns
-# (as rc_challenge_days_left)
-rc_surplus_days_left = {
-	value = 6
-	subtract = rc_surplus_months_value
-	multiply = 30
-	add = 2
-	min = 2
-}
-
-# Country scope: months in a row this country has out-imported the holder (6 takes over)
-rc_challenge_months_value = {
-	value = 0
-	if = {
-		limit = { has_variable = rc_challenge_months }
-		value = var:rc_challenge_months
 	}
 }
