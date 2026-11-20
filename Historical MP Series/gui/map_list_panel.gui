@@ -1117,6 +1117,44 @@ types map_list_panel_types {
 			item = {
 				container = {
 					min_width = @panel_width
+widget = { size = { 0 0 } alwaystransparent = yes
+state = {
+name = vqbs_marker_probe
+on_start = "[GetVariableSystem.SetIf('vqbs_map_available', 'yes', And(And(And(GetVariableSystem.HasValue('vqbs_map_state', MapListOption.AccessBuildingData.AccessBuilding.AccessState.GetIDString), GetVariableSystem.HasValue('vqbs_map_type', MapListOption.AccessBuildingData.AccessBuilding.GetBuildingType.GetKey)), MapListOption.CanClick), IsValid(MapListOption.AccessBuildingData.AccessBuilding.QueueConstruction)))]"
+}
+state = {
+name = vqbs_marker_request
+on_start = "[PdxGuiWidget.TriggerAnimation(Select_CString(And(GetVariableSystem.HasValue('vqbs_map_request', 'yes'), And(And(And(GetVariableSystem.HasValue('vqbs_map_state', MapListOption.AccessBuildingData.AccessBuilding.AccessState.GetIDString), GetVariableSystem.HasValue('vqbs_map_type', MapListOption.AccessBuildingData.AccessBuilding.GetBuildingType.GetKey)), MapListOption.CanClick), IsValid(MapListOption.AccessBuildingData.AccessBuilding.QueueConstruction))), 'vqbs_marker_submit', 'vqbs_marker_skip'))]"
+}
+state = {
+name = vqbs_marker_submit
+on_start = "[GetVariableSystem.Clear('vqbs_map_request')]"
+on_start = "[GetVariableSystem.Set('vqbs_alt', GetVariableSystem.Get('vqbs_map_alt'))]"
+on_start = "[GetVariableSystem.Set('vqbs_overlap', Select_CString(And(GetVariableSystem.Exists('vqbs_phase'), Not(And(And(GetVariableSystem.HasValue('vqbs_phase', 'wait'), GetVariableSystem.HasValue('vqbs_single_settled', 'yes')), GetVariableSystem.HasValue('vqbs_old_size', ToString_int32(Subtract_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), '(int32)1')))))), 'yes', 'no'))]"
+on_start = "[GetVariableSystem.Set('vqbs_watch_slot', Select_CString(GetVariableSystem.HasValue('vqbs_watch_slot', 'a'), 'b', 'a'))]"
+on_start = "[GetVariableSystem.Clear('vqbs_phase')]"
+on_start = "[GetVariableSystem.Clear('vqbs_batch')]"
+on_start = "[GetVariableSystem.Clear('vqbs_single_settled')]"
+on_start = "[GetVariableSystem.Clear('vqbs_five_settled')]"
+on_start = "[GetVariableSystem.Clear('vqbs_old_head')]"
+on_start = "[GetVariableSystem.Clear('vqbs_old_tail')]"
+on_start = "[PdxGuiTriggerAllAnimations('vqbs_capture_before')]"
+on_start = "[GetVariableSystem.Set('vqbs_old_size', ToString_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue)))]"
+on_start = "[GetVariableSystem.Set('vqbs_old_levels', ToString_int32(MapListOption.AccessBuildingData.AccessBuilding.GetExpansionLevelsInQueue))]"
+on_start = "[GetVariableSystem.Set('vqbs_old_built', ToString_int32(MapListOption.AccessBuildingData.AccessBuilding.GetExpansionLevel))]"
+on_start = "[GetVariableSystem.Set('vqbs_old_max', ToString_int32(MapListOption.AccessBuildingData.AccessBuilding.GetState.GetMaxPotentialFor(MapListOption.AccessBuildingData.AccessBuilding.Self)))]"
+on_start = "[GetVariableSystem.Set('vqbs_capacity', ToString_int32(Max_int32('(int32)0', Subtract_int32(MapListOption.AccessBuildingData.AccessBuilding.GetState.GetMaxPotentialFor(MapListOption.AccessBuildingData.AccessBuilding.Self), Add_int32(MapListOption.AccessBuildingData.AccessBuilding.GetExpansionLevel, MapListOption.AccessBuildingData.AccessBuilding.GetExpansionLevelsInQueue)))))]"
+on_start = "[GetVariableSystem.Set('vqbs_target_state', MapListOption.AccessBuildingData.AccessBuilding.AccessState.GetIDString)]"
+on_start = "[GetVariableSystem.Set('vqbs_target_type', MapListOption.AccessBuildingData.AccessBuilding.GetBuildingType.GetKey)]"
+on_start = "[GetVariableSystem.SetIf('vqbs_phase', 'wait', And(And(And(GetVariableSystem.HasValue('vqbs_alt', 'yes'), MapListOption.CanClick), GreaterThan_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), '(int32)0')), Not(GetVariableSystem.HasValue('vqbs_overlap', 'yes'))))]"
+on_start = "[GetVariableSystem.Clear('vqbs_alt')]"
+on_start = "[MapListOption.OnClick]"
+}
+state = {
+name = vqbs_marker_skip
+duration = 0.01
+}
+}
 
 					construction_interaction_item_condensed = {
 						visible = "[Not(GetVariableSystem.Exists('construction_list_toggle_full_or_condensed'))]"
@@ -1131,6 +1169,38 @@ types map_list_panel_types {
 	}
 
 	type construction_interaction_item_condensed = map_list_panel_item_interaction {
+		blockoverride "interaction" {
+					enabled = "[MapListOption.CanClick]"
+					# HMPS: queue tools Alt-click to front (freethebrain)
+					pressed_modifiers = {
+onalt = "[GetVariableSystem.Set('vqbs_alt', 'yes')]"
+ondefault = "[GetVariableSystem.Clear('vqbs_alt')]"
+}
+onmousehierarchyleave = "[GetVariableSystem.Clear('vqbs_alt')]"
+onclick = "[GetVariableSystem.Set('vqbs_overlap', Select_CString(And(GetVariableSystem.Exists('vqbs_phase'), Not(And(And(GetVariableSystem.HasValue('vqbs_phase', 'wait'), GetVariableSystem.HasValue('vqbs_single_settled', 'yes')), GetVariableSystem.HasValue('vqbs_old_size', ToString_int32(Subtract_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), '(int32)1')))))), 'yes', 'no'))]"
+onclick = "[GetVariableSystem.Set('vqbs_watch_slot', Select_CString(GetVariableSystem.HasValue('vqbs_watch_slot', 'a'), 'b', 'a'))]"
+onclick = "[GetVariableSystem.Clear('vqbs_phase')]"
+onclick = "[GetVariableSystem.Clear('vqbs_batch')]"
+onclick = "[GetVariableSystem.Clear('vqbs_single_settled')]"
+onclick = "[GetVariableSystem.Clear('vqbs_five_settled')]"
+onclick = "[GetVariableSystem.Clear('vqbs_old_head')]"
+onclick = "[GetVariableSystem.Clear('vqbs_old_tail')]"
+onclick = "[PdxGuiTriggerAllAnimations('vqbs_capture_before')]"
+onclick = "[GetVariableSystem.Set('vqbs_old_size', ToString_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue)))]"
+onclick = "[GetVariableSystem.Set('vqbs_old_levels', ToString_int32(MapListOption.AccessBuildingData.AccessBuilding.GetExpansionLevelsInQueue))]"
+onclick = "[GetVariableSystem.Set('vqbs_old_built', ToString_int32(MapListOption.AccessBuildingData.AccessBuilding.GetExpansionLevel))]"
+onclick = "[GetVariableSystem.Set('vqbs_old_max', ToString_int32(MapListOption.AccessBuildingData.AccessBuilding.GetState.GetMaxPotentialFor(MapListOption.AccessBuildingData.AccessBuilding.Self)))]"
+onclick = "[GetVariableSystem.Set('vqbs_capacity', ToString_int32(Max_int32('(int32)0', Subtract_int32(MapListOption.AccessBuildingData.AccessBuilding.GetState.GetMaxPotentialFor(MapListOption.AccessBuildingData.AccessBuilding.Self), Add_int32(MapListOption.AccessBuildingData.AccessBuilding.GetExpansionLevel, MapListOption.AccessBuildingData.AccessBuilding.GetExpansionLevelsInQueue)))))]"
+onclick = "[GetVariableSystem.Set('vqbs_target_state', MapListOption.AccessBuildingData.AccessBuilding.AccessState.GetIDString)]"
+onclick = "[GetVariableSystem.Set('vqbs_target_type', MapListOption.AccessBuildingData.AccessBuilding.GetBuildingType.GetKey)]"
+onclick = "[GetVariableSystem.SetIf('vqbs_phase', 'wait', And(And(And(GetVariableSystem.HasValue('vqbs_alt', 'yes'), MapListOption.CanClick), GreaterThan_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), '(int32)0')), Not(GetVariableSystem.HasValue('vqbs_overlap', 'yes'))))]"
+onclick = "[GetVariableSystem.Clear('vqbs_alt')]"
+onclick = "[MapListOption.OnClick]"
+					onrightclick = "[MapListOption.OnRightClick]"
+					onmousehierarchyenter = "[MapListOption.OnMouseEnter]"
+					onmousehierarchyleave = "[MapListOption.OnMouseLeave]"
+		}
+
 		# this is very expensive for big countries like China
 		max_update_rate = 32
 
