@@ -995,6 +995,11 @@ on_start = "[GetVariableSystem.Set('v3mc_successor', Concatenate3(ConstructionQu
 			item = {
 				widget = {
 				    size = { @queue_item_width @queue_item_height }
+				    # HMPS: step states run only during a move or multi-cancel
+				    widget = {
+				        size = { 0 0 }
+				        alwaystransparent = yes
+				        visible = "[Or(GetVariableSystem.Exists('v3qt_session'), GetVariableSystem.Exists('v3mc_phase'))]"
 				    state = {
 				    name = v3qt_read_destination
 				    trigger_when = "[And(And(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0')), Not(GetPlayer.MakeScope.Var('v3qt_jump').IsSet)), And(Not(GetPlayer.MakeScope.Var('v3qt_mapped').IsSet), And(EqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_to').GetValueWithDefault('(CFixedPoint)0'))), GetVariableSystem.HasValue(Concatenate(Select_CString(GetVariableSystem.Exists('v3qt_bank_b'), 'v3qt_slot_b_', 'v3qt_slot_a_'), ToString_int32(Select_int32(EqualTo_int32(Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_total').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0'))), '(int32)0'), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_to').GetValueWithDefault('(CFixedPoint)0')), Select_int32(GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_from').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_to').GetValueWithDefault('(CFixedPoint)0'))), Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_from').GetValueWithDefault('(CFixedPoint)0')), Subtract_int32(Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_total').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0'))), '(int32)1')), Add_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_from').GetValueWithDefault('(CFixedPoint)0')), Subtract_int32(Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_total').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0'))), '(int32)1')))))), ConstructionQueueElement.GetBuilding.GetIDString))))]"
@@ -1035,21 +1040,9 @@ on_start = "[GetVariableSystem.Set('v3mc_successor', Concatenate3(ConstructionQu
 				    on_start = "[PdxGuiTriggerAllAnimations('v3qt_cursor_advanced')]"
 				}
 				    state = {
-					name = v3qt_capture_slot
-					on_start = "[GetVariableSystem.Set(Concatenate(Select_CString(GetVariableSystem.Exists('v3qt_bank_b'), 'v3qt_slot_b_', 'v3qt_slot_a_'), ToString_int32(ConstructionQueueElement.GetQueueNumber)), ConstructionQueueElement.GetBuilding.GetIDString)]"
-				}
-				    state = {
-					name = v3qt_register_building
-					on_start = "[GetScriptedGui('v3qt_watch_building').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('building', ConstructionQueueElement.GetBuilding.MakeScope).End)]"
-				}
-				    state = {
 				        name = v3qt_slot_changed
 				        trigger_when = "[And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0'), And(Not(GetVariableSystem.Exists('v3qt_sent')), And(GreaterThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, Add_int32('(int32)1', Multiply_int32(Subtract_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry), '(int32)1'), GetDataModelSize(AccessPlayer.AccessPagedGovernmentConstructionQueue('(int32)1', ConstructionPanel.GetFilter))))), And(LessThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, Min_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), Multiply_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry), GetDataModelSize(AccessPlayer.AccessPagedGovernmentConstructionQueue('(int32)1', ConstructionPanel.GetFilter))))), Not(GetVariableSystem.HasValue(Concatenate(Select_CString(GetVariableSystem.Exists('v3qt_bank_b'), 'v3qt_slot_b_', 'v3qt_slot_a_'), ToString_int32(ConstructionQueueElement.GetQueueNumber)), ConstructionQueueElement.GetBuilding.GetIDString)))))))]"
 				        on_start = "[GetScriptedGui('v3qt_invalidate_idle').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('job', MakeScopeValue(IntToFixedPoint(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_generation').GetValueWithDefault('(CFixedPoint)0'))))).End)]"
-				    }
-				    v3qt_native_government_row = {
-				        visible = "[Not(And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer))]"
-				        enabled = "[And(Not(And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer)), Not(Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0')), Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0'), GetVariableSystem.Exists('v3qt_sent'))), GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet))))]"
 				    }
 state = {
 name = v3mc_capture_next
@@ -1082,6 +1075,19 @@ trigger_when = "[And(GetVariableSystem.HasValue('v3mc_phase', 'ack'), And(And(An
 on_start = "[GetVariableSystem.Set('v3mc_cursor', ToString_int32(Subtract_int32(ConstructionQueueElement.GetQueueNumber, '(int32)1')))]"
 on_start = "[GetVariableSystem.Set('v3mc_phase', GetVariableSystem.Get('v3mc_after_ack'))]"
 }
+				    }
+				    state = {
+					name = v3qt_capture_slot
+					on_start = "[GetVariableSystem.Set(Concatenate(Select_CString(GetVariableSystem.Exists('v3qt_bank_b'), 'v3qt_slot_b_', 'v3qt_slot_a_'), ToString_int32(ConstructionQueueElement.GetQueueNumber)), ConstructionQueueElement.GetBuilding.GetIDString)]"
+				}
+				    state = {
+					name = v3qt_register_building
+					on_start = "[GetScriptedGui('v3qt_watch_building').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('building', ConstructionQueueElement.GetBuilding.MakeScope).End)]"
+				}
+				    v3qt_native_government_row = {
+				        visible = "[Not(And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer))]"
+				        enabled = "[And(Not(And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer)), Not(Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0')), Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0'), GetVariableSystem.Exists('v3qt_sent'))), GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet))))]"
+				    }
 				    v3qt_government_row = {
 				        visible = "[And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer)]"
 				        enabled = "[And(And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), ConstructionQueueElement.GetInvestorCountry.IsLocalPlayer), Not(Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0')), Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0'), GetVariableSystem.Exists('v3qt_sent'))), GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet))))]"
@@ -1094,7 +1100,8 @@ on_start = "[GetVariableSystem.Set('v3mc_phase', GetVariableSystem.Get('v3mc_aft
     spacing = 0
     ignoreinvisible = yes
     alwaystransparent = yes
-    visible = "[And(And(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(Not(Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0')), Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0'), GetVariableSystem.Exists('v3qt_sent'))), GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet))), And(And(GetVariableSystem.Exists('v3qt_hover'), Not(GetVariableSystem.HasValue('v3qt_hover', ''))), And(GetVariableSystem.HasValue('v3qt_drag_first', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0')))), GetVariableSystem.HasValue('v3qt_drag_last', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')))))))), LessThanOrEqualTo_int32(GetDataModelSize(AccessPlayer.AccessPagedGovernmentConstructionQueue('(int32)1', ConstructionPanel.GetFilter)), '(int32)12')), And(GetVariableSystem.HasValue('v3qd_page_ok', 'yes'), GetVariableSystem.HasValue('v3qd_token', GetVariableSystem.Get('v3qt_hover'))))]"
+    # HMPS: datamodel keeps full check
+    visible = "[GetVariableSystem.Exists('v3qt_session')]"
     # The gate has no building callbacks and instantiates no children on idle
     # or invalid selection. Separating it keeps every binding shallow/short.
     datamodel = "[DataModelFirst(AccessPlayer.AccessGovernmentConstructionQueue, Select_int32(And(And(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(Not(Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0')), Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0'), GetVariableSystem.Exists('v3qt_sent'))), GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet))), And(And(GetVariableSystem.Exists('v3qt_hover'), Not(GetVariableSystem.HasValue('v3qt_hover', ''))), And(GetVariableSystem.HasValue('v3qt_drag_first', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0')))), GetVariableSystem.HasValue('v3qt_drag_last', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')))))))), LessThanOrEqualTo_int32(GetDataModelSize(AccessPlayer.AccessPagedGovernmentConstructionQueue('(int32)1', ConstructionPanel.GetFilter)), '(int32)12')), And(GetVariableSystem.HasValue('v3qd_page_ok', 'yes'), GetVariableSystem.HasValue('v3qd_token', GetVariableSystem.Get('v3qt_hover')))), Min_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), '(int32)1'), '(int32)0'))]"
@@ -1180,7 +1187,8 @@ flowcontainer = {
     direction = vertical
     spacing = 0
     alwaystransparent = yes
-    visible = "[And(GetVariableSystem.HasValue('v3qd_hold', 'yes'), And(And(And(And(GetVariableSystem.Exists('v3qt_session'), Country.IsLocalPlayer), And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(And(GetVariableSystem.HasValue('v3qd_owner', AccessPlayer.GetIDString), GetVariableSystem.HasValue('v3qd_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry)))), And(GetVariableSystem.HasValue('v3qd_size', ToString_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, Or(GetVariableSystem.HasValue('v3qd_generation', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_generation').GetValueWithDefault('(CFixedPoint)0')))), And(GetVariableSystem.HasValue('v3qd_accepted_generation', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_generation').GetValueWithDefault('(CFixedPoint)0')))), Or(GetPlayer.MakeScope.Var('v3qt_remaining').IsSet, Or(GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet, GetVariableSystem.Exists('v3qt_sent'))))))))), Or(GetVariableSystem.HasValue(Concatenate('v3qd_viewrole_', ToString_int32(PdxGuiWidget.AccessParent.GetIndexInDataModel)), 'selected'), GetVariableSystem.HasValue(Concatenate('v3qd_viewrole_', ToString_int32(PdxGuiWidget.AccessParent.GetIndexInDataModel)), 'shifted'))))]"
+    # HMPS: datamodel keeps full check
+    visible = "[GetVariableSystem.HasValue('v3qd_hold', 'yes')]"
     datamodel = "[DataModelFirst(GetLegitimacyLevels, Select_int32(And(GetVariableSystem.HasValue('v3qd_hold', 'yes'), And(And(And(And(GetVariableSystem.Exists('v3qt_session'), Country.IsLocalPlayer), And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(And(GetVariableSystem.HasValue('v3qd_owner', AccessPlayer.GetIDString), GetVariableSystem.HasValue('v3qd_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry)))), And(GetVariableSystem.HasValue('v3qd_size', ToString_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, Or(GetVariableSystem.HasValue('v3qd_generation', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_generation').GetValueWithDefault('(CFixedPoint)0')))), And(GetVariableSystem.HasValue('v3qd_accepted_generation', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_generation').GetValueWithDefault('(CFixedPoint)0')))), Or(GetPlayer.MakeScope.Var('v3qt_remaining').IsSet, Or(GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet, GetVariableSystem.Exists('v3qt_sent'))))))))), Or(GetVariableSystem.HasValue(Concatenate('v3qd_viewrole_', ToString_int32(PdxGuiWidget.AccessParent.GetIndexInDataModel)), 'selected'), GetVariableSystem.HasValue(Concatenate('v3qd_viewrole_', ToString_int32(PdxGuiWidget.AccessParent.GetIndexInDataModel)), 'shifted')))), '(int32)1', '(int32)0'))]"
     item = {
         widget = {
@@ -1247,7 +1255,8 @@ flowcontainer = {
 					    spacing = 0
 					    ignoreinvisible = yes
 					    alwaystransparent = yes
-					    visible = "[And(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(Not(Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0')), Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0'), GetVariableSystem.Exists('v3qt_sent'))), GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet))), And(And(GetVariableSystem.Exists('v3qt_hover'), Not(GetVariableSystem.HasValue('v3qt_hover', ''))), And(GetVariableSystem.HasValue('v3qt_drag_first', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0')))), GetVariableSystem.HasValue('v3qt_drag_last', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')))))))), GetVariableSystem.HasValue('v3qd_large_page', 'yes'))]"
+					    # HMPS: datamodel keeps full check
+					    visible = "[GetVariableSystem.Exists('v3qt_session')]"
 					    datamodel = "[DataModelSubSpan(AccessPlayer.AccessGovernmentConstructionQueue, Max_int32('(int32)0', Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0')), '(int32)1')), Select_int32(And(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(Not(Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0')), Or(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(EqualTo_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_remaining').GetValueWithDefault('(CFixedPoint)0')), '(int32)0'), GetVariableSystem.Exists('v3qt_sent'))), GetPlayer.MakeScope.Var('v3qt_refreshing').IsSet))), And(And(GetVariableSystem.Exists('v3qt_hover'), Not(GetVariableSystem.HasValue('v3qt_hover', ''))), And(GetVariableSystem.HasValue('v3qt_drag_first', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0')))), GetVariableSystem.HasValue('v3qt_drag_last', ToString_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')))))))), GetVariableSystem.HasValue('v3qd_large_page', 'yes')), Add_int32(Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), '(int32)1'), '(int32)0'))]"
 					    item = {
 					        widget = {
@@ -1562,6 +1571,47 @@ widget = {
 name = "v3mc_move_up_slot"
 using = visible_if_cqe_player_government
 size = { 30 30 }
+			# HMPS: idle copy, cheap checks
+			button_icon_round_action = {
+				name = "queue_move_up"
+				visible = "[Not(GetVariableSystem.Exists('v3qt_session'))]"
+				size = { 30 30 }
+				tooltip = "V3QT_SINGLE_UP"
+				enabled = "[IsValid( ConstructionQueueElement.MoveUp )]"
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/generic_icons/up_up.dds"
+				}
+
+				blockoverride "icon_size" {
+					size = { 75% 75% }
+				}
+
+				click_modifiers = {
+					ondefault = "[PdxGuiWidget.TriggerAnimation('v3qt_single_step')]"
+					onalt = "[PdxGuiWidget.TriggerAnimation('v3qt_single_edge')]"
+				}
+				state = {
+					name = v3qt_single_step
+					on_start = "[Execute( ConstructionQueueElement.MoveUp )]"
+					on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				}
+				state = {
+					name = v3qt_single_edge
+					on_start = "[Execute( ConstructionQueueElement.MoveToTop )]"
+					on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				}
+			}
+			# HMPS: selection version only
+			widget = {
+				size = { 30 30 }
+				visible = "[GetVariableSystem.Exists('v3qt_session')]"
 			button_icon_round_action = {
 				name = "queue_move_up"
 				visible = "[Or(Not(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), And(GreaterThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), LessThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0'))))))), And(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), And(GreaterThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), LessThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')))))), EqualTo_int32(ConstructionQueueElement.GetQueueNumber, Add_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0')), Divide_int32(Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), '(int32)2')))))]"
@@ -1608,12 +1658,54 @@ size = { 30 30 }
 					on_start = "[GetScriptedGui('v3qt_jump').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('destination', MakeScopeValue(IntToFixedPoint('(int32)1'))).AddScope('size', MakeScopeValue(IntToFixedPoint(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue)))).AddScope('crosspage', MakeScopeValue(IntToFixedPoint(Select_int32(GreaterThan_int32(Add_int32('(int32)1', Multiply_int32(Subtract_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry), '(int32)1'), GetDataModelSize(AccessPlayer.AccessPagedGovernmentConstructionQueue('(int32)1', ConstructionPanel.GetFilter)))), '(int32)1'), '(int32)1', '(int32)0')))).End)]"
 				}
 			}
+			}
 }
 
 widget = {
 name = "v3mc_move_down_slot"
 using = visible_if_cqe_player_government
 size = { 30 30 }
+			# HMPS: idle copy, cheap checks
+			button_icon_round_action = {
+				name = "queue_move_down"
+				visible = "[Not(GetVariableSystem.Exists('v3qt_session'))]"
+				size = { 30 30 }
+				tooltip = "V3QT_SINGLE_DOWN"
+				enabled = "[IsValid( ConstructionQueueElement.MoveDown )]"
+
+				blockoverride "icon" {
+					texture = "gfx/interface/icons/generic_icons/down_down.dds"
+				}
+
+				blockoverride "icon_size" {
+					size = { 75% 75% }
+				}
+
+				click_modifiers = {
+					ondefault = "[PdxGuiWidget.TriggerAnimation('v3qt_single_step')]"
+					onalt = "[PdxGuiWidget.TriggerAnimation('v3qt_single_edge')]"
+				}
+				state = {
+					name = v3qt_single_step
+					on_start = "[Execute( ConstructionQueueElement.MoveDown )]"
+					on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				}
+				state = {
+					name = v3qt_single_edge
+					on_start = "[Execute( ConstructionQueueElement.MoveToBottom )]"
+					on_start = "[GetVariableSystem.Clear('v3qt_session')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_sent')]"
+					on_start = "[GetVariableSystem.Clear('v3qt_refresh_row')]"
+					on_start = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				}
+			}
+			# HMPS: selection version only
+			widget = {
+				size = { 30 30 }
+				visible = "[GetVariableSystem.Exists('v3qt_session')]"
 			button_icon_round_action = {
 				name = "queue_move_down"
 				visible = "[Or(Not(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), And(GreaterThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), LessThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0'))))))), And(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), And(GreaterThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), LessThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')))))), EqualTo_int32(ConstructionQueueElement.GetQueueNumber, Add_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0')), Divide_int32(Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), '(int32)2')))))]"
@@ -1660,11 +1752,27 @@ size = { 30 30 }
 					on_start = "[GetScriptedGui('v3qt_jump').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).AddScope('destination', MakeScopeValue(IntToFixedPoint(Subtract_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), Subtract_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))))))).AddScope('size', MakeScopeValue(IntToFixedPoint(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue)))).AddScope('crosspage', MakeScopeValue(IntToFixedPoint(Select_int32(LessThan_int32(Min_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), Multiply_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry), GetDataModelSize(AccessPlayer.AccessPagedGovernmentConstructionQueue('(int32)1', ConstructionPanel.GetFilter)))), GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue)), '(int32)1', '(int32)0')))).End)]"
 				}
 			}
+			}
 }
 
 widget = {
 using = visible_if_cqe_player_government
 size = { 30 30 }
+			# HMPS: idle copy, cheap checks
+			button_icon_cancel = {
+				name = "cancel_construction"
+				visible = "[Not(GetVariableSystem.Exists('v3qt_session'))]"
+				size = { 30 30 }
+				tooltip = "CANCEL_CONSTRUCTION"
+				enabled = "[And(Not(GetVariableSystem.Exists('v3mc_phase')), IsValid(ConstructionQueueElement.CancelConstruction))]"
+				onclick = "[GetVariableSystem.Clear('v3qt_session')]"
+				onclick = "[GetScriptedGui('v3qt_clear').Execute(GuiScope.SetRoot(GetPlayer.MakeScope).End)]"
+				onclick = "[Execute( ConstructionQueueElement.CancelConstruction )]"
+			}
+			# HMPS: selection versions only
+			widget = {
+				size = { 30 30 }
+				visible = "[GetVariableSystem.Exists('v3qt_session')]"
 			button_icon_cancel = {
 				name = "cancel_construction"
 				visible = "[Not(And(And(GetVariableSystem.Exists('v3qt_session'), And(And(Country.IsLocalPlayer, And(ConstructionPanel.IsShowingGovernmentConstructions, Not(ConstructionPanel.IsFiltered('is_domestic')))), And(GetVariableSystem.HasValue('v3qt_page', ToString_int32(ConstructionPanel.AccessCurrentGovernmentConstructionQueuePage(GetMetaPlayer.GetPlayedOrObservedCountry))), And(GetPlayer.MakeScope.Var('v3qt_anchor').IsSet, EqualTo_int32(GetDataModelSize(AccessPlayer.AccessGovernmentConstructionQueue), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_size').GetValueWithDefault('(CFixedPoint)0'))))))), And(GreaterThan_int32(FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')), FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), And(GreaterThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_first').GetValueWithDefault('(CFixedPoint)0'))), LessThanOrEqualTo_int32(ConstructionQueueElement.GetQueueNumber, FixedPointToInt(GetPlayer.MakeScope.Var('v3qt_last').GetValueWithDefault('(CFixedPoint)0')))))))]"
@@ -1697,6 +1805,7 @@ on_start = "[GetVariableSystem.Set('v3mc_phase', 'scan')]"
         }
         state = { name = v3mc_noop }
     }
+			}
 }
 		}
 	}
