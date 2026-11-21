@@ -10,6 +10,124 @@ on_building_expanded = {
 	}
 }
 
+#HMPS: Chinese JE inheritance. Breakaways from a country holding the Chinese debuff JEs get them,
+# starting at that country's progress (hmps_china_inherit_jes_effect in HMPS_scripted_effects.txt).
+# Fragile Unity (je_warlord_china) only goes to a revolution that wins against a holder, or to the Heavenly Kingdom once China is gone
+on_revolution_start = {
+	on_actions = {
+		HMPS_china_inherit_revolution
+	}
+}
+
+on_secession_start = {
+	on_actions = {
+		HMPS_china_inherit_breakaway
+	}
+}
+
+on_country_released_as_independent = {
+	on_actions = {
+		HMPS_china_inherit_breakaway
+	}
+}
+
+on_monthly_pulse_country = {
+	on_actions = {
+		HMPS_china_inherit_new_tag
+	}
+}
+
+on_civil_war_won = {
+	on_actions = {
+		HMPS_china_fu_civil_war_won
+	}
+}
+
+# Root = Country, scope:target = Uprising country. Revolution tags inherit whatever their culture
+HMPS_china_inherit_revolution = {
+	effect = {
+		if = {
+			limit = { exists = scope:target }
+			save_scope_as = hmps_china_origin
+			scope:target = { save_scope_as = hmps_china_heir }
+			hmps_china_inherit_jes_effect = { ANY_CULTURE = yes }
+			# Fragile Unity only comes with a win: mark the revolution, so HMPS_china_fu_civil_war_won can add it if it wins
+			if = {
+				limit = { has_journal_entry = je_warlord_china }
+				scope:target = { set_variable = hmps_china_fu_pending }
+			}
+		}
+	}
+}
+
+# Root = winning country. A revolution that beat a Fragile Unity holder should inherit the JE with all the parent's variables
+# (can_revolution_inherit in REPLACE_HMPS_00_warlord_china.txt); this adds the JE if it didn't
+HMPS_china_fu_civil_war_won = {
+	effect = {
+		if = {
+			limit = {
+				has_variable = hmps_china_fu_pending
+				NOT = { AND = { c:TPG ?= THIS exists = c:CHI } } # a Heavenly Kingdom still waiting for its own win keeps waiting (HMPS_china_inherit_new_tag)
+			}
+			hmps_china_fu_grant_effect = { PRESET_MONARCHY = no }
+		}
+	}
+}
+
+# Root = Country, scope:target = Uprising or released country. Needs Han or Manchu as a primary culture
+HMPS_china_inherit_breakaway = {
+	effect = {
+		if = {
+			limit = { exists = scope:target }
+			save_scope_as = hmps_china_origin
+			scope:target = { save_scope_as = hmps_china_heir }
+			hmps_china_inherit_jes_effect = { ANY_CULTURE = no }
+		}
+	}
+}
+
+# Root = Country. Tags made directly by an event (the warlord split in warlord_china_events.100, the Taiping in heavenly_kingdom_events)
+# fire none of the hooks above, so they are caught once on their first monthly pulse and inherit from China
+HMPS_china_inherit_new_tag = {
+	effect = {
+		if = {
+			limit = {
+				NOT = { has_variable = hmps_china_inherit_checked }
+				OR = {
+					has_variable = warlord_state
+					c:TPG ?= THIS
+				}
+				exists = c:CHI
+				NOT = { c:CHI ?= THIS }
+			}
+			c:CHI = { save_scope_as = hmps_china_origin }
+			save_scope_as = hmps_china_heir
+			hmps_china_inherit_jes_effect = { ANY_CULTURE = no }
+			if = {
+				limit = { c:TPG ?= THIS }
+				hmps_china_fu_snapshot_effect = yes
+			}
+		}
+		# Heavenly Kingdom: Fragile Unity only once it has won, i.e. China no longer exists. Until then it keeps a monthly copy
+		# of China's progress, and stops waiting if China no longer holds Fragile Unity
+		if = {
+			limit = {
+				c:TPG ?= THIS
+				has_variable = hmps_china_fu_pending
+			}
+			if = {
+				limit = { exists = c:CHI }
+				c:CHI = { save_scope_as = hmps_china_origin }
+				save_scope_as = hmps_china_heir
+				hmps_china_fu_snapshot_effect = yes
+			}
+			else = {
+				hmps_china_fu_grant_effect = { PRESET_MONARCHY = yes }
+			}
+		}
+	}
+}
+
 CEN_rail_road_expansion = {
 	effect = {
 		# when a railroad finishes expanding, increase railroad variable
@@ -22,7 +140,8 @@ CEN_rail_road_expansion = {
 					limit = {
 						has_journal_entry = je_chinese_industry
 					}
-					change_global_variable = {
+					hmps_china_ensure_var = { VAR = chinese_rail_expansion } #HMPS: counted per country (was global), so each breakaway tracks its own railways
+					change_variable = {
 						name = chinese_rail_expansion
 						add = 1
 					}
@@ -106,15 +225,16 @@ CHI_setup = {
 				years = -1
 			}
 			
-			set_global_variable = {
+			#HMPS: country variables (were global), so breakaways can start at China's value and track their own
+			set_variable = {
 				name = china_army_reform
 				value = 0
 			}
-			set_global_variable = {
+			set_variable = {
 				name = china_army_reform_tick
 				value = 0
 			}
-			set_global_variable = {
+			set_variable = {
 				name = chinese_rail_expansion
 				value = 0
 			}

@@ -1510,3 +1510,166 @@ v3qt_plan_rotation = {
         set_variable = { name = v3qt_total value = var:v3qt_remaining }
     }
 }
+
+#HMPS: Chinese JE inheritance (hooks in common/on_actions/CEN_code_on_actions.txt).
+# Copies the Chinese debuff JEs (Army Reforms, Ineffectual Mining, Growth of Subsistence, Balance of the Middle Kingdom)
+# from scope:hmps_china_origin to scope:hmps_china_heir, for each JE the origin still has active.
+# The heir starts at the origin's progress, then tracks its own.
+# ANY_CULTURE = yes for revolution tags; otherwise the heir needs Han or Manchu as a primary culture.
+# Fragile Unity (je_warlord_china) isn't copied here: only a revolution that wins or the Heavenly Kingdom once China is gone gets it (hmps_china_fu_* below)
+hmps_china_inherit_jes_effect = {
+	scope:hmps_china_heir = {
+		set_variable = hmps_china_inherit_checked # stops HMPS_china_inherit_new_tag from copying a second time
+		if = {
+			limit = {
+				OR = {
+					always = $ANY_CULTURE$
+					country_has_primary_culture = cu:han
+					country_has_primary_culture = cu:manchu
+				}
+			}
+			### Army Reforms (ends for every holder once China shatters, so it isn't passed on after that)
+			if = {
+				limit = {
+					scope:hmps_china_origin = { has_journal_entry = je_army_reform_china }
+					NOT = { has_global_variable = china_shatters }
+				}
+				scope:hmps_china_origin = {
+					hmps_china_ensure_var = { VAR = china_army_reform }
+					hmps_china_ensure_var = { VAR = china_army_reform_tick }
+				}
+				set_variable = { name = china_army_reform value = scope:hmps_china_origin.var:china_army_reform }
+				set_variable = { name = china_army_reform_tick value = scope:hmps_china_origin.var:china_army_reform_tick }
+				# the JE's completion removes these country modifiers, so they come with it
+				if = {
+					limit = {
+						scope:hmps_china_origin = { has_modifier = modifier_banner_system }
+						NOT = { has_modifier = modifier_banner_system }
+					}
+					add_modifier = { name = modifier_banner_system is_decaying = no years = -1 }
+				}
+				if = {
+					limit = {
+						scope:hmps_china_origin = { has_modifier = modifier_green_standard_army }
+						NOT = { has_modifier = modifier_green_standard_army }
+					}
+					add_modifier = { name = modifier_green_standard_army is_decaying = no years = -1 }
+				}
+				if = {
+					limit = { NOT = { has_journal_entry = je_army_reform_china } }
+					add_journal_entry = { type = je_army_reform_china }
+				}
+			}
+			### Ineffectual Mining (its monthly pulse adds the Ineffectual Mining modifier)
+			if = {
+				limit = { scope:hmps_china_origin = { has_journal_entry = je_chinese_industry } }
+				scope:hmps_china_origin = { hmps_china_ensure_var = { VAR = chinese_rail_expansion } }
+				set_variable = { name = chinese_rail_expansion value = scope:hmps_china_origin.var:chinese_rail_expansion }
+				if = {
+					limit = { NOT = { has_journal_entry = je_chinese_industry } }
+					add_journal_entry = { type = je_chinese_industry }
+				}
+			}
+			### Growth of Subsistence (a scripted progress bar: the value is stored here and applied by the JE's first monthly pulse)
+			if = {
+				limit = { scope:hmps_china_origin = { has_journal_entry = je_chinese_agriculture } }
+				scope:hmps_china_origin = {
+					je:je_chinese_agriculture = {
+						set_global_variable = {
+							name = hmps_china_inherit_agri
+							value = "scripted_bar_progress(chinese_agriculture_progress_bar)"
+						}
+					}
+				}
+				set_variable = { name = hmps_china_agri_start value = global_var:hmps_china_inherit_agri }
+				remove_global_variable = hmps_china_inherit_agri
+				if = {
+					limit = { NOT = { has_journal_entry = je_chinese_agriculture } }
+					add_journal_entry = { type = je_chinese_agriculture }
+				}
+			}
+			### Balance of the Middle Kingdom (no progress)
+			if = {
+				limit = {
+					scope:hmps_china_origin = { has_journal_entry = je_hmps_china_government_based_nerf }
+					NOT = { has_journal_entry = je_hmps_china_government_based_nerf }
+				}
+				add_journal_entry = { type = je_hmps_china_government_based_nerf }
+			}
+		}
+	}
+}
+
+#HMPS: sets country variable $VAR$ if it is missing: from the old global of the same name (saves from before the China JEs moved to country variables), else 0
+hmps_china_ensure_var = {
+	if = {
+		limit = { NOT = { has_variable = $VAR$ } }
+		if = {
+			limit = { has_global_variable = $VAR$ }
+			set_variable = { name = $VAR$ value = global_var:$VAR$ }
+		}
+		else = {
+			set_variable = { name = $VAR$ value = 0 }
+		}
+	}
+}
+
+#HMPS: copies flag variable $FLAG$ from scope:hmps_china_origin to the current country (used by hmps_china_fu_snapshot_effect)
+hmps_china_copy_flag = {
+	if = {
+		limit = { scope:hmps_china_origin = { has_variable = $FLAG$ } }
+		set_variable = $FLAG$
+	}
+}
+
+#HMPS: Fragile Unity for the Heavenly Kingdom (called monthly from HMPS_china_inherit_new_tag in CEN_code_on_actions.txt).
+# While scope:hmps_china_origin holds Fragile Unity, copies its progress and one-time flags to scope:hmps_china_heir and marks the heir
+# as waiting for the JE (hmps_china_fu_pending, given by hmps_china_fu_grant_effect). Once the origin no longer holds it, the heir stops waiting
+hmps_china_fu_snapshot_effect = {
+	scope:hmps_china_heir = {
+		if = {
+			limit = {
+				scope:hmps_china_origin = {
+					has_journal_entry = je_warlord_china
+					has_variable = china_warlord_explosion
+				}
+			}
+			set_variable = hmps_china_fu_pending
+			set_variable = { name = china_warlord_explosion value = scope:hmps_china_origin.var:china_warlord_explosion }
+			hmps_china_copy_flag = { FLAG = china_warlord_explosion_subject }
+			hmps_china_copy_flag = { FLAG = china_warlord_explosion_loans }
+			hmps_china_copy_flag = { FLAG = china_warlord_explosion_recognized }
+			hmps_china_copy_flag = { FLAG = china_warlord_explosion_revolution }
+			hmps_china_copy_flag = { FLAG = china_abolished_monarchy }
+			hmps_china_copy_flag = { FLAG = china_warlord_abolished_monarchy }
+			hmps_china_copy_flag = { FLAG = won_boxer_rebellion }
+		}
+		else_if = {
+			limit = { has_variable = hmps_china_fu_pending }
+			remove_variable = hmps_china_fu_pending
+			je_warlord_china_cleanup = yes
+		}
+	}
+}
+
+#HMPS: gives Fragile Unity to a country waiting for it (hmps_china_fu_pending): a revolution that beat a holder, or the Heavenly Kingdom once China is gone.
+# Its progress and flags are already on the country (a winning revolution gets all the defeated parent's variables; the Heavenly Kingdom from
+# hmps_china_fu_snapshot_effect). PRESET_MONARCHY = yes (Heavenly Kingdom): if it isn't a monarchy it never had one to abolish, so that penalty
+# counts as taken and it doesn't lose a point or fire the Fall of the Qing event (boxer_rebellion_events.4, fire_only_once) in its first week
+hmps_china_fu_grant_effect = {
+	remove_variable = hmps_china_fu_pending
+	if = {
+		limit = {
+			has_variable = china_warlord_explosion
+			NOT = { has_journal_entry = je_warlord_china }
+		}
+		if = {
+			limit = {
+				always = $PRESET_MONARCHY$
+				NOT = { country_has_monarchy_law = yes }
+			}
+			set_variable = china_abolished_monarchy
+		}
+		add_journal_entry = { type = je_warlord_china }
+	}
+}

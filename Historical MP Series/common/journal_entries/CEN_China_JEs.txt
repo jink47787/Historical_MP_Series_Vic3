@@ -12,20 +12,20 @@
 	}
 
 	immediate = {
-		c:CHI ?= {
-			every_scope_state = {
-				limit = {
-					OR = {
-						state_region = s:STATE_OUTER_MANCHURIA
-						state_region = s:STATE_SOUTHERN_MANCHURIA
-						state_region = s:STATE_NORTHERN_MANCHURIA
-						state_region = s:STATE_SHENGJING
-					}
+		#HMPS: the holder's own Manchurian states (was always China's), so a breakaway inheriting this JE doesn't re-apply it to China
+		every_scope_state = {
+			limit = {
+				OR = {
+					state_region = s:STATE_OUTER_MANCHURIA
+					state_region = s:STATE_SOUTHERN_MANCHURIA
+					state_region = s:STATE_NORTHERN_MANCHURIA
+					state_region = s:STATE_SHENGJING
 				}
-				add_modifier = {
-					name = eight_banners
-					days = -1
-				}
+				NOT = { has_modifier = eight_banners }
+			}
+			add_modifier = {
+				name = eight_banners
+				days = -1
 			}
 		}
 	}
@@ -65,6 +65,11 @@
 			every_state = {
 				limit = {
 	                has_modifier = eight_banners
+					#HMPS: only this country's states and states of countries without Army Reforms, so other holders keep theirs
+					OR = {
+						owner = ROOT
+						owner = { NOT = { has_journal_entry = je_army_reform_china } }
+					}
 	            }
 				remove_modifier = eight_banners
 			}
@@ -80,7 +85,7 @@
 	}
 
 	current_value = {
-		value = global_var:china_army_reform
+		value = var:china_army_reform #HMPS: per country (was global_var), so each breakaway tracks its own
 	}
 
 	goal_add_value = {
@@ -89,18 +94,20 @@
 	
 	progressbar = yes
 
+	#HMPS: progress is a country variable (was global), so each breakaway tracks its own; hmps_china_ensure_var picks up the old global in saves from before this change
 	on_weekly_pulse = {
 		effect = {
-			change_global_variable = {
+			hmps_china_ensure_var = { VAR = china_army_reform_tick }
+			set_variable = {
 				name = china_army_reform
-				multiply = 0
+				value = 0
 			}
 			### European Training
 			if = {
 				limit = {
 					has_global_variable = boxer_je_happened
 				}
-				change_global_variable = {
+				change_variable = {
 					name = china_army_reform
 					add = 15
 				}
@@ -109,7 +116,7 @@
 				limit = {
 					has_global_variable = taiping_revolution_happened
 				}
-				change_global_variable = {
+				change_variable = {
 					name = china_army_reform
 					add = 15
 				}
@@ -121,7 +128,7 @@
 				limit = {
 					has_technology_researched =  law_enforcement
 				}
-				change_global_variable = {
+				change_variable = {
 					name = china_army_reform
 					add = 10
 				}
@@ -132,7 +139,7 @@
 				limit = {
 					has_technology_researched = army_reserves
 				}
-				change_global_variable = {
+				change_variable = {
 					name = china_army_reform
 					add = 20
 				}
@@ -141,7 +148,7 @@
 				limit = {
 					has_technology_researched = logistics
 				}
-				change_global_variable = {
+				change_variable = {
 					name = china_army_reform
 					add = 20
 				}
@@ -150,7 +157,7 @@
 				limit = {
 					has_technology_researched = enlistment_offices
 				}
-				change_global_variable = {
+				change_variable = {
 					name = china_army_reform
 					add = 20
 				}
@@ -159,7 +166,7 @@
 				limit = {
 					has_technology_researched = military_statistics
 				}
-				change_global_variable = {
+				change_variable = {
 					name = china_army_reform
 					add = 20
 				}
@@ -168,15 +175,15 @@
 				limit = {
 					has_technology_researched = wargaming
 				}
-				change_global_variable = {
+				change_variable = {
 					name = china_army_reform
 					add = 20
 				}
 			}
 			# No Peasant Levies = Army Reform progress
-			change_global_variable = {
+			change_variable = {
 				name = china_army_reform
-				add = global_var:china_army_reform_tick
+				add = var:china_army_reform_tick
 			}
 		}
 	}
@@ -188,7 +195,8 @@
 				limit = {
 					NOT = { has_law_or_variant = law_type:law_peasant_levies }
 				}
-				change_global_variable = {
+				hmps_china_ensure_var = { VAR = china_army_reform_tick }
+				change_variable = {
 					name = china_army_reform_tick
 					add = 1
 				}
@@ -232,10 +240,11 @@ je_chinese_industry = {
 	on_monthly_pulse = {
 		effect = {
 			### Scaling by Railroads
+			hmps_china_ensure_var = { VAR = chinese_rail_expansion } #HMPS: per country (was global), so each breakaway tracks its own railways
 			
 			set_variable = {
 				name = railroad_effect
-				value = global_var:chinese_rail_expansion
+				value = var:chinese_rail_expansion
 			}
 			
 			change_variable = {
@@ -258,7 +267,7 @@ je_chinese_industry = {
 	}
 
 	current_value = {
-		value = global_var:chinese_rail_expansion
+		value = var:chinese_rail_expansion #HMPS: per country (was global_var)
 	}
 
 	goal_add_value = {
@@ -290,9 +299,8 @@ je_chinese_agriculture = {
 		set_variable = { name = legitimist_progress_from_farms value = 0 }
 		
 		# initial assigning adjustments of the modifier for viewing
-		every_state = {
+		every_scope_state = { #HMPS: the holder's own states (was China's), so a breakaway inheriting this JE gets them too
 			limit = {
-				c:CHI ?= owner
 				OR = {
 					state_region = { is_homeland = cu:han }
 					state_region = { is_homeland = cu:manchu }
@@ -324,6 +332,11 @@ je_chinese_agriculture = {
 			every_state = {
 				limit = {
 					has_modifier = modifier_agricultural_econ_agri_debuff
+					#HMPS: only this country's states and states of countries without this JE, so other holders keep theirs
+					OR = {
+						owner = ROOT
+						owner = { NOT = { has_journal_entry = je_chinese_agriculture } }
+					}
 				}
 				remove_modifier = modifier_agricultural_econ_agri_debuff
 			}
@@ -332,6 +345,18 @@ je_chinese_agriculture = {
 
 	on_monthly_pulse = {
 		effect = {
+			#HMPS: a breakaway that inherited this JE starts at its origin's progress (hmps_china_inherit_jes_effect stores it), then tracks its own
+			if = {
+				limit = { has_variable = hmps_china_agri_start }
+				scope:journal_entry = {
+					set_bar_progress = {
+						value = ROOT.var:hmps_china_agri_start
+						name = chinese_agriculture_progress_bar
+					}
+				}
+				remove_variable = hmps_china_agri_start
+			}
+
 			# From Buildings
 			set_variable = { name = legitimist_progress_from_farms value = 0 }
 			every_scope_building = {
