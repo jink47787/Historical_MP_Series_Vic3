@@ -704,123 +704,177 @@ hmps_balance_of_trade_world_totals_effect = {
 }
 
 hmps_balance_of_trade_update_effect = {
-	# Graph history: before this week's balance replaces it, last week's moves into the market owner's history
 	if = {
-		limit = {
-			market.owner = root
-			has_variable = hmps_bot_hist_51
-			has_variable = hmps_bot_balance
-		}
-		hmps_bot_history_shift_effect = yes
-	}
-
-	# The market's sums, from hmps_balance_of_trade_world_totals_effect
-	set_variable = {
-		name = hmps_bot_exports_weekly
-		value = market.owner.var:hmps_bot_market_exports_weekly
-	}
-	set_variable = {
-		name = hmps_bot_exports
-		value = {
-			value = var:hmps_bot_exports_weekly
-			multiply = 52
-			multiply = global_var:hmps_bot_world_ratio
-		}
-	}
-	set_variable = {
-		name = hmps_bot_imports_weekly
-		value = market.owner.var:hmps_bot_market_imports_weekly
-	}
-	set_variable = {
-		name = hmps_bot_imports
-		value = {
-			value = var:hmps_bot_imports_weekly
-			multiply = 52
-		}
-	}
-	set_variable = {
-		name = hmps_bot_balance
-		value = {
-			value = var:hmps_bot_exports
-			subtract = var:hmps_bot_imports
-		}
-	}
-	set_variable = {
-		name = hmps_bot_gdp
-		value = market.owner.var:hmps_bot_market_gdp
-	}
-	if = {
-		limit = { var:hmps_bot_gdp > 0 }
-		set_variable = {
-			name = hmps_bot_share
-			value = {
-				value = var:hmps_bot_balance
-				divide = var:hmps_bot_gdp
+		limit = { market.owner ?= { has_variable = hmps_bot_market_gdp } }
+		# Graph history: before this week's balance replaces it, last week's moves into the market owner's history
+		if = {
+			limit = {
+				market.owner = root
+				has_variable = hmps_bot_hist_51
+				has_variable = hmps_bot_balance
 			}
+			hmps_bot_history_shift_effect = yes
+		}
+
+		# The market's sums, from hmps_balance_of_trade_world_totals_effect
+		set_variable = {
+			name = hmps_bot_exports_weekly
+			value = market.owner.var:hmps_bot_market_exports_weekly
+		}
+		set_variable = {
+			name = hmps_bot_exports
+			value = {
+				value = var:hmps_bot_exports_weekly
+				multiply = 52
+				multiply = global_var:hmps_bot_world_ratio
+			}
+		}
+		set_variable = {
+			name = hmps_bot_imports_weekly
+			value = market.owner.var:hmps_bot_market_imports_weekly
+		}
+		set_variable = {
+			name = hmps_bot_imports
+			value = {
+				value = var:hmps_bot_imports_weekly
+				multiply = 52
+			}
+		}
+		set_variable = {
+			name = hmps_bot_balance
+			value = {
+				value = var:hmps_bot_exports
+				subtract = var:hmps_bot_imports
+			}
+		}
+		set_variable = {
+			name = hmps_bot_gdp
+			value = market.owner.var:hmps_bot_market_gdp
+		}
+		if = {
+			limit = { var:hmps_bot_gdp > 0 }
+			set_variable = {
+				name = hmps_bot_share
+				value = {
+					value = var:hmps_bot_balance
+					divide = var:hmps_bot_gdp
+				}
+			}
+		}
+		else = {
+			set_variable = { name = hmps_bot_share value = 0 }
+		}
+
+		# Penalty in percentage points: 5 per 1% of GDP (500 per 1.0 share), max 50
+		set_variable = { name = hmps_bot_penalty value = 0 }
+		if = {
+			limit = { var:hmps_bot_share > 0.01 }
+			set_variable = {
+				name = hmps_bot_penalty
+				value = {
+					value = var:hmps_bot_share
+					multiply = 500
+					max = 50
+				}
+			}
+		}
+		else_if = {
+			limit = { var:hmps_bot_share < -0.01 }
+			set_variable = {
+				name = hmps_bot_penalty
+				value = {
+					value = var:hmps_bot_share
+					multiply = -500
+					max = 50
+				}
+			}
+		}
+
+		# Buff on the other side: half the penalty (max 25)
+		set_variable = {
+			name = hmps_bot_buff
+			value = {
+				value = var:hmps_bot_penalty
+				divide = 2
+			}
+		}
+
+		# The modifier is only swapped when the penalty changed (re-adding it makes the game recalculate the country's modifiers).
+		# hmps_bot_applied_penalty is the penalty in place: positive for a surplus, negative for a deficit, 0 for none
+		set_variable = { name = hmps_bot_signed_penalty value = 0 }
+		if = {
+			limit = { var:hmps_bot_share > 0.01 }
+			set_variable = { name = hmps_bot_signed_penalty value = var:hmps_bot_penalty }
+		}
+		else_if = {
+			limit = { var:hmps_bot_share < -0.01 }
+			set_variable = {
+				name = hmps_bot_signed_penalty
+				value = {
+					value = var:hmps_bot_penalty
+					multiply = -1
+				}
+			}
+		}
+		if = {
+			limit = {
+				OR = {
+					NOT = { has_variable = hmps_bot_applied_penalty }
+					var:hmps_bot_applied_penalty != var:hmps_bot_signed_penalty
+				}
+			}
+			if = {
+				limit = { has_modifier = hmps_trade_surplus_penalty }
+				remove_modifier = hmps_trade_surplus_penalty
+			}
+			if = {
+				limit = { has_modifier = hmps_trade_deficit_penalty }
+				remove_modifier = hmps_trade_deficit_penalty
+			}
+			if = {
+				limit = { var:hmps_bot_share > 0.01 }
+				add_modifier = {
+					name = hmps_trade_surplus_penalty
+					multiplier = var:hmps_bot_penalty
+				}
+			}
+			else_if = {
+				limit = { var:hmps_bot_share < -0.01 }
+				add_modifier = {
+					name = hmps_trade_deficit_penalty
+					multiplier = var:hmps_bot_penalty
+				}
+			}
+			set_variable = { name = hmps_bot_applied_penalty value = var:hmps_bot_signed_penalty }
+		}
+		remove_variable = hmps_bot_signed_penalty
+
+		# Graph history (hmps_bot_history_shift_effect) is kept only on the market owner: start it empty when a country becomes
+		# one, and drop it when it stops being one so an old history is never shown later
+		if = {
+			limit = { market.owner = root }
+			if = {
+				limit = { NOT = { has_variable = hmps_bot_hist_51 } }
+				hmps_bot_history_start_effect = yes
+			}
+			hmps_bot_history_scale_effect = yes
+		}
+		else_if = {
+			limit = { has_variable = hmps_bot_hist_51 }
+			hmps_bot_history_clear_effect = yes
 		}
 	}
 	else = {
+		set_variable = { name = hmps_bot_exports_weekly value = 0 }
+		set_variable = { name = hmps_bot_exports value = 0 }
+		set_variable = { name = hmps_bot_imports_weekly value = 0 }
+		set_variable = { name = hmps_bot_imports value = 0 }
+		set_variable = { name = hmps_bot_balance value = 0 }
+		set_variable = { name = hmps_bot_gdp value = 0 }
 		set_variable = { name = hmps_bot_share value = 0 }
-	}
-
-	# Penalty in percentage points: 5 per 1% of GDP (500 per 1.0 share), max 50
-	set_variable = { name = hmps_bot_penalty value = 0 }
-	if = {
-		limit = { var:hmps_bot_share > 0.01 }
-		set_variable = {
-			name = hmps_bot_penalty
-			value = {
-				value = var:hmps_bot_share
-				multiply = 500
-				max = 50
-			}
-		}
-	}
-	else_if = {
-		limit = { var:hmps_bot_share < -0.01 }
-		set_variable = {
-			name = hmps_bot_penalty
-			value = {
-				value = var:hmps_bot_share
-				multiply = -500
-				max = 50
-			}
-		}
-	}
-
-	# Buff on the other side: half the penalty (max 25)
-	set_variable = {
-		name = hmps_bot_buff
-		value = {
-			value = var:hmps_bot_penalty
-			divide = 2
-		}
-	}
-
-	# The modifier is only swapped when the penalty changed (re-adding it makes the game recalculate the country's modifiers).
-	# hmps_bot_applied_penalty is the penalty in place: positive for a surplus, negative for a deficit, 0 for none
-	set_variable = { name = hmps_bot_signed_penalty value = 0 }
-	if = {
-		limit = { var:hmps_bot_share > 0.01 }
-		set_variable = { name = hmps_bot_signed_penalty value = var:hmps_bot_penalty }
-	}
-	else_if = {
-		limit = { var:hmps_bot_share < -0.01 }
-		set_variable = {
-			name = hmps_bot_signed_penalty
-			value = {
-				value = var:hmps_bot_penalty
-				multiply = -1
-			}
-		}
-	}
-	if = {
-		limit = {
-			OR = {
-				NOT = { has_variable = hmps_bot_applied_penalty }
-				var:hmps_bot_applied_penalty != var:hmps_bot_signed_penalty
-			}
-		}
+		set_variable = { name = hmps_bot_penalty value = 0 }
+		set_variable = { name = hmps_bot_buff value = 0 }
+		set_variable = { name = hmps_bot_applied_penalty value = 0 }
 		if = {
 			limit = { has_modifier = hmps_trade_surplus_penalty }
 			remove_modifier = hmps_trade_surplus_penalty
@@ -830,36 +884,9 @@ hmps_balance_of_trade_update_effect = {
 			remove_modifier = hmps_trade_deficit_penalty
 		}
 		if = {
-			limit = { var:hmps_bot_share > 0.01 }
-			add_modifier = {
-				name = hmps_trade_surplus_penalty
-				multiplier = var:hmps_bot_penalty
-			}
+			limit = { has_variable = hmps_bot_hist_51 }
+			hmps_bot_history_clear_effect = yes
 		}
-		else_if = {
-			limit = { var:hmps_bot_share < -0.01 }
-			add_modifier = {
-				name = hmps_trade_deficit_penalty
-				multiplier = var:hmps_bot_penalty
-			}
-		}
-		set_variable = { name = hmps_bot_applied_penalty value = var:hmps_bot_signed_penalty }
-	}
-	remove_variable = hmps_bot_signed_penalty
-
-	# Graph history (hmps_bot_history_shift_effect) is kept only on the market owner: start it empty when a country becomes
-	# one, and drop it when it stops being one so an old history is never shown later
-	if = {
-		limit = { market.owner = root }
-		if = {
-			limit = { NOT = { has_variable = hmps_bot_hist_51 } }
-			hmps_bot_history_start_effect = yes
-		}
-		hmps_bot_history_scale_effect = yes
-	}
-	else_if = {
-		limit = { has_variable = hmps_bot_hist_51 }
-		hmps_bot_history_clear_effect = yes
 	}
 }
 
