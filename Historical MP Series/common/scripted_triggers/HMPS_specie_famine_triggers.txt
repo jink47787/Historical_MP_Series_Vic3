@@ -30,16 +30,45 @@ sf_can_start_famine = {
 	NOT = { rc_immune_to_specie_famine = yes }
 }
 
-# Country scope. Can an Inflationary Period event fire here this month? Market leaders only, 6 months apart, never during a Specie Famine, not before 1837
+# Country scope. A deficit (or surplus) of 4% of GDP or more for 30 days in a row (sf_bot_streak_update) makes the roll possible;
+# before that it is impending. The alerts and the monthly roll read these
+sf_famine_possible = {
+	sf_can_start_famine = yes
+	sf_famine_chance > 0
+	has_variable = sf_deficit_streak
+	NOT = { has_variable = sf_deficit_streak_days }
+}
+
+sf_famine_impending = {
+	sf_can_start_famine = yes
+	sf_famine_chance > 0
+	has_variable = sf_deficit_streak_days
+}
+
+# Country scope. Can an Inflationary Period event fire here this month? Market leaders only, 6 months apart,
+# never during a Specie Famine or within 30 days of one ending (ip_famine_block, sf_end_cleanup), not before 1837
 ip_can_fire = {
 	game_date >= 1837.1.1
 	sf_is_market_leader = yes
 	has_variable = hmps_bot_share
 	var:hmps_bot_share >= 0.04
 	NOT = { has_variable = ip_cooldown }
-	# not while its market is in a Specie Famine
 	NOT = { has_journal_entry = je_specie_famine }
 	NOT = { has_journal_entry = je_specie_famine_member }
+	NOT = { has_variable = ip_famine_block }
+}
+
+ip_inflation_possible = {
+	ip_can_fire = yes
+	ip_inflation_chance > 0
+	has_variable = ip_surplus_streak
+	NOT = { has_variable = ip_surplus_streak_days }
+}
+
+ip_inflation_impending = {
+	ip_can_fire = yes
+	ip_inflation_chance > 0
+	has_variable = ip_surplus_streak_days
 }
 
 # Country scope (the market leader). Suspend Convertibility: at war, and this country has suffered at least 100,000 casualties in that war

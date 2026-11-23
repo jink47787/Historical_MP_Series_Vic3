@@ -240,6 +240,7 @@ sf_end_cleanup = {
 	sf_add_bank_rate_aftermath = yes
 	sf_remove_crisis_modifiers = yes
 	remove_variable = sf_leader
+	set_variable = { name = ip_famine_block days = 30 }
 }
 
 # Country scope (the leader). Also clears the leader's figures and starts the 5-year cooldown
@@ -336,6 +337,35 @@ sf_leader_weekly_update = {
 	sf_sync_reserve_bars = yes
 }
 
+# Country scope, weekly from hmps_bot.1 (events/00_HMPS_utility.txt) after the Balance of Trade update.
+# Each streak flag lasts while the market stays at 4% of GDP or more; its _days timer runs out 30 days after it began
+sf_bot_streak_update = {
+	if = {
+		limit = { var:hmps_bot_share <= -0.04 }
+		if = {
+			limit = { NOT = { has_variable = sf_deficit_streak } }
+			set_variable = sf_deficit_streak
+			set_variable = { name = sf_deficit_streak_days value = 1 days = 30 }
+		}
+	}
+	else = {
+		remove_variable = sf_deficit_streak
+		remove_variable = sf_deficit_streak_days
+	}
+	if = {
+		limit = { var:hmps_bot_share >= 0.04 }
+		if = {
+			limit = { NOT = { has_variable = ip_surplus_streak } }
+			set_variable = ip_surplus_streak
+			set_variable = { name = ip_surplus_streak_days value = 1 days = 30 }
+		}
+	}
+	else = {
+		remove_variable = ip_surplus_streak
+		remove_variable = ip_surplus_streak_days
+	}
+}
+
 # Country scope, monthly from on_monthly_pulse_country (HMPS_specie_famine_monthly). hmps_bot_share is updated weekly by HMPS_utility_je.
 # Rolls the Specie Famine and Inflationary Period for market leaders.
 # hmps_bot_share is the whole market's balance of trade / market GDP
@@ -346,20 +376,14 @@ sf_monthly_check = {
 			has_variable = hmps_bot_share
 		}
 		if = {
-			limit = {
-				sf_can_start_famine = yes
-				sf_famine_chance > 0
-			}
+			limit = { sf_famine_possible = yes }
 			random = {
 				chance = sf_famine_chance
 				add_journal_entry = { type = je_specie_famine }
 			}
 		}
 		if = {
-			limit = {
-				ip_can_fire = yes
-				ip_inflation_chance > 0
-			}
+			limit = { ip_inflation_possible = yes }
 			random = {
 				chance = ip_inflation_chance
 				set_variable = { name = ip_cooldown days = 180 }
