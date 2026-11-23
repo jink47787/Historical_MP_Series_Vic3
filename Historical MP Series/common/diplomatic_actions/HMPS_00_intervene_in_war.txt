@@ -137,49 +137,28 @@
 		custom_tooltip = {
 			text = intervene_in_war.tt
 		
-			#THIS joins the TARGET's war
-			every_diplomatic_play = {
-				limit = {
-					is_war = yes
-					any_scope_play_involved = { this = scope:target_country }
-					NOT = { any_scope_play_involved = { this = scope:actor } }
-				}
-				if = {
+			#THIS joins every war the TARGET leads (vanilla join_war, as used by enforce_military_access)
+			scope:target_country = {
+				every_scope_war = {
 					limit = {
-						initiator_is = scope:target_country
+						is_warleader = scope:target_country
+						NOT = { is_war_participant = scope:actor }
 					}
-					add_initiator_backers = {
-						scope:actor
-					}
-				}
-				else_if = {
-					limit = {
-						target_is = scope:target_country
-					}
-					add_target_backers = {
-						scope:actor
+					join_war = {
+						target = scope:actor
+						side = scope:target_country
 					}
 				}
 			}
 		}
 		
-		set_variable = {
-			name = deccer
-			days = 7
-		}
-		
-		scope:target_country = {
-			set_variable = {
-				name = target
-				days = 7
-			}
-		}
+		#Saved scopes are passed on to the enemy_joined_war notification events
+		save_scope_as = deccer_scope
+		scope:target_country = { save_scope_as = target_scope }
 		
 		every_country = {
 			limit = {
-				any_cobelligerent_in_war = {
-					has_variable = target
-				}
+				any_cobelligerent_in_war = { this = scope:target_country }
 				NOT = { this = ROOT }
 			}
 			trigger_event = {
@@ -189,9 +168,7 @@
 		}
 		every_country = {
 			limit = {
-				any_enemy_in_war = {
-					has_variable = target
-				}
+				any_enemy_in_war = { this = scope:target_country }
 			}
 			trigger_event = {
 				id = enemy_joined_war.2
