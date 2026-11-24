@@ -1700,3 +1700,94 @@ hmps_china_fu_grant_effect = {
 		add_journal_entry = { type = je_warlord_china }
 	}
 }
+
+# Peru-Bolivia failure: fold every surviving Peruvian piece into one Peru. Survivor: ROOT if it is a piece, else a player piece, else PEU > NPU > SPU > IQU
+hmps_peru_bolivia_reunify_peru = {
+	if = {
+		limit = { hmps_is_peru_piece = yes }
+		save_scope_as = hmps_peru_unifier
+	}
+	else_if = {
+		limit = {
+			any_country = {
+				hmps_is_peru_piece = yes
+				is_player = yes
+			}
+		}
+		random_country = {
+			limit = {
+				hmps_is_peru_piece = yes
+				is_player = yes
+			}
+			save_scope_as = hmps_peru_unifier
+		}
+	}
+	else_if = {
+		limit = { exists = c:PEU }
+		c:PEU = { save_scope_as = hmps_peru_unifier }
+	}
+	else_if = {
+		limit = { exists = c:NPU }
+		c:NPU = { save_scope_as = hmps_peru_unifier }
+	}
+	else_if = {
+		limit = { exists = c:SPU }
+		c:SPU = { save_scope_as = hmps_peru_unifier }
+	}
+	else_if = {
+		limit = { exists = c:IQU }
+		c:IQU = { save_scope_as = hmps_peru_unifier }
+	}
+	if = {
+		limit = { exists = scope:hmps_peru_unifier }
+		scope:hmps_peru_unifier = {
+			if = {
+				limit = { is_subject_of = c:BOL }
+				make_independent = yes
+			}
+			# HMPS: players are never annexed
+			if = {
+				limit = {
+					c:PEU ?= {
+						NOT = { this = scope:hmps_peru_unifier }
+						is_player = no
+					}
+				}
+				annex_with_incorporation = c:PEU
+			}
+			if = {
+				limit = {
+					c:NPU ?= {
+						NOT = { this = scope:hmps_peru_unifier }
+						is_player = no
+					}
+				}
+				annex_with_incorporation = c:NPU
+			}
+			if = {
+				limit = {
+					c:SPU ?= {
+						NOT = { this = scope:hmps_peru_unifier }
+						is_player = no
+					}
+				}
+				annex_with_incorporation = c:SPU
+			}
+			if = {
+				limit = {
+					c:IQU ?= {
+						NOT = { this = scope:hmps_peru_unifier }
+						is_player = no
+					}
+				}
+				annex_with_incorporation = c:IQU
+			}
+			if = {
+				limit = {
+					NOT = { exists = c:PEU }
+				}
+				change_tag = PEU
+			}
+		}
+	}
+}
