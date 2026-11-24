@@ -55,12 +55,16 @@ sf_famine_impending = {
 
 # Country scope. Can an Inflationary Period event fire here this month? Market leaders only, 6 months apart,
 # never during a Specie Famine or within 30 days of one ending (ip_famine_block, sf_end_cleanup), not before 1837
-ip_can_fire = {
+ip_can_fire_but_for_famine = {
 	game_date >= 1837.1.1
 	sf_is_market_leader = yes
 	has_variable = hmps_bot_share
 	var:hmps_bot_share >= 0.04
 	NOT = { has_variable = ip_cooldown }
+}
+
+ip_can_fire = {
+	ip_can_fire_but_for_famine = yes
 	NOT = { has_journal_entry = je_specie_famine }
 	NOT = { has_journal_entry = je_specie_famine_member }
 	NOT = { has_variable = ip_famine_block }
@@ -75,6 +79,22 @@ ip_inflation_possible = {
 
 ip_inflation_impending = {
 	ip_can_fire = yes
+	ip_inflation_chance > 0
+	has_variable = ip_surplus_streak_days
+}
+
+# The same while the market's own Specie Famine blocks it, so the alerts can say why
+ip_inflation_possible_but_for_famine = {
+	has_journal_entry = je_specie_famine
+	ip_can_fire_but_for_famine = yes
+	ip_inflation_chance > 0
+	has_variable = ip_surplus_streak
+	NOT = { has_variable = ip_surplus_streak_days }
+}
+
+ip_inflation_impending_but_for_famine = {
+	has_journal_entry = je_specie_famine
+	ip_can_fire_but_for_famine = yes
 	ip_inflation_chance > 0
 	has_variable = ip_surplus_streak_days
 }
