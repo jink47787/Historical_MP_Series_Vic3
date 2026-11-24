@@ -874,7 +874,7 @@ REPLACE:je_red_summer = {
 	can_revolution_inherit = no
 }
 
-# HMPS: REPLACE of the vanilla 1.15 JE. The vanilla Revolutionary Spring outcome is restored while the Political Question JE (je_napoleons_legacy) is paused, so this JE starts the Springtime of the Peoples again. HMPS adds one change: the timeout sets peoples_springtime_happened, as the Political Question's timeout did.
+# HMPS: REPLACE of the vanilla 1.15 JE. The vanilla Revolutionary Spring outcome is restored while the Political Question JE (je_napoleons_legacy) is paused, so this JE starts the Springtime of the Peoples again. HMPS adds two changes: the timeout sets peoples_springtime_happened, as the Political Question's timeout did; and a human player enacting Census or Universal Suffrage past the Introduction phase starts the Revolutionary Spring at once.
 REPLACE:je_forest_of_bayonets = {
 	icon = "gfx/interface/icons/event_icons/event_fire.dds"
 
@@ -1035,21 +1035,41 @@ REPLACE:je_forest_of_bayonets = {
 		conclusion_desc = je_forest_of_bayonets_fail_conclusion_desc
 		flags = { historical }
 		trigger = {
-			custom_tooltip = {
-				text = je_forest_of_bayonets_fail_bar_tt
-				scope:journal_entry = {
-					"scripted_bar_progress(forest_of_bayonets_progress_bar)" >= forest_of_bayonets_upper_bound
+			OR = {
+				AND = {
+					custom_tooltip = {
+						text = je_forest_of_bayonets_fail_bar_tt
+						scope:journal_entry = {
+							"scripted_bar_progress(forest_of_bayonets_progress_bar)" >= forest_of_bayonets_upper_bound
+						}
+					}
+					scope:journal_entry ?= {
+						any_scope_je_involved = {
+							country_has_springtime_revolution = {
+								THRESHOLD = 0.25
+							}
+						}
+					}
 				}
-			}
-			scope:journal_entry ?= {
-				any_scope_je_involved = {
-					country_has_springtime_revolution = {
-						THRESHOLD = 0.25
+				custom_tooltip = {
+					text = je_forest_of_bayonets_player_suffrage_tt
+					scope:journal_entry ?= {
+						any_scope_je_involved = {
+							forest_of_bayonets_player_suffrage_trigger = yes
+						}
 					}
 				}
 			}
 		}
 		effect = {
+			hidden_effect = { # HMPS: names the player as the spark; the vanilla effect overrides this if France or a revolution qualifies
+				random_scope_je_involved = {
+					limit = {
+						forest_of_bayonets_player_suffrage_trigger = yes
+					}
+					save_scope_as = revolutionary_country
+				}
+			}
 			custom_tooltip = {
 				text = je_forest_of_bayonets_starts_springtime_tt
 				forest_of_bayonets_start_springtime_effect = yes
